@@ -1,0 +1,73 @@
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial_101_GettingStarted", "Tutorial_101_GettingStarted\Tutorial_101_GettingStarted.vcproj", "{C43CE8B6-29CC-4428-9443-154E490CEDD3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial_102_AddingRigidBodies", "Tutorial_102_AddingRigidBodies\Tutorial_102_AddingRigidBodies.vcproj", "{39610606-C719-4727-A296-A13E8AC230A0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial_103_AddingJoints", "Tutorial_103_AddingJoints\Tutorial_103_AddingJoints.vcproj", "{60EE1506-DAD2-4559-84BB-30CF8A2B7BA6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial_104_RayCastAndConvexCast", "Tutorial_104_RayCastAndConvexCast\Tutorial_104_RayCastAndConvexCast.vcproj", "{BD16FA8E-7287-474D-8443-635DE91434A9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial_106_MeshCollision", "Tutorial_106_MeshCollision\Tutorial_106_MeshCollision.vcproj", "{881CAEE3-86BF-4327-B65E-845589471D82}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial_107_HeightFieldCollision", "Tutorial_107_HeightFieldCollision\Tutorial_107_HeightFieldCollision.vcproj", "{3EC02293-3258-4B39-9E64-CC2956E77969}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial_105_BasicMaterials", "Tutorial_105_BasicMaterials\Tutorial_105_BasicMaterials.vcproj", "{9B4CAFC6-1F6E-4A8C-9528-71F57C7D1A0D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial_201_AbvanceMaterial", "Tutorial_201_AbvanceMaterial\Tutorial_201_AbvanceMaterial.vcproj", "{07C666CC-4C8F-4EED-B016-2BFE08142C6C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial_202_PlayerController", "Tutorial_202_PlayerController\Tutorial_202_PlayerController.vcproj", "{A9E6C97B-478A-453B-80FC-79D048F3A4C0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial_203_RayCastConvexCastCar", "Tutorial_203_RayCastConvexCastCar\Tutorial_203_RayCastConvexCastCar.vcproj", "{5801AE38-0F7F-46F6-96C0-F37739BA5C75}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C43CE8B6-29CC-4428-9443-154E490CEDD3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C43CE8B6-29CC-4428-9443-154E490CEDD3}.Debug|Win32.Build.0 = Debug|Win32
+		{C43CE8B6-29CC-4428-9443-154E490CEDD3}.Release|Win32.ActiveCfg = Release|Win32
+		{C43CE8B6-29CC-4428-9443-154E490CEDD3}.Release|Win32.Build.0 = Release|Win32
+		{39610606-C719-4727-A296-A13E8AC230A0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{39610606-C719-4727-A296-A13E8AC230A0}.Debug|Win32.Build.0 = Debug|Win32
+		{39610606-C719-4727-A296-A13E8AC230A0}.Release|Win32.ActiveCfg = Release|Win32
+		{39610606-C719-4727-A296-A13E8AC230A0}.Release|Win32.Build.0 = Release|Win32
+		{60EE1506-DAD2-4559-84BB-30CF8A2B7BA6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{60EE1506-DAD2-4559-84BB-30CF8A2B7BA6}.Debug|Win32.Build.0 = Debug|Win32
+		{60EE1506-DAD2-4559-84BB-30CF8A2B7BA6}.Release|Win32.ActiveCfg = Release|Win32
+		{60EE1506-DAD2-4559-84BB-30CF8A2B7BA6}.Release|Win32.Build.0 = Release|Win32
+		{BD16FA8E-7287-474D-8443-635DE91434A9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BD16FA8E-7287-474D-8443-635DE91434A9}.Debug|Win32.Build.0 = Debug|Win32
+		{BD16FA8E-7287-474D-8443-635DE91434A9}.Release|Win32.ActiveCfg = Release|Win32
+		{BD16FA8E-7287-474D-8443-635DE91434A9}.Release|Win32.Build.0 = Release|Win32
+		{881CAEE3-86BF-4327-B65E-845589471D82}.Debug|Win32.ActiveCfg = Debug|Win32
+		{881CAEE3-86BF-4327-B65E-845589471D82}.Debug|Win32.Build.0 = Debug|Win32
+		{881CAEE3-86BF-4327-B65E-845589471D82}.Release|Win32.ActiveCfg = Release|Win32
+		{881CAEE3-86BF-4327-B65E-845589471D82}.Release|Win32.Build.0 = Release|Win32
+		{3EC02293-3258-4B39-9E64-CC2956E77969}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3EC02293-3258-4B39-9E64-CC2956E77969}.Debug|Win32.Build.0 = Debug|Win32
+		{3EC02293-3258-4B39-9E64-CC2956E77969}.Release|Win32.ActiveCfg = Release|Win32
+		{3EC02293-3258-4B39-9E64-CC2956E77969}.Release|Win32.Build.0 = Release|Win32
+		{9B4CAFC6-1F6E-4A8C-9528-71F57C7D1A0D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9B4CAFC6-1F6E-4A8C-9528-71F57C7D1A0D}.Debug|Win32.Build.0 = Debug|Win32
+		{9B4CAFC6-1F6E-4A8C-9528-71F57C7D1A0D}.Release|Win32.ActiveCfg = Release|Win32
+		{9B4CAFC6-1F6E-4A8C-9528-71F57C7D1A0D}.Release|Win32.Build.0 = Release|Win32
+		{07C666CC-4C8F-4EED-B016-2BFE08142C6C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{07C666CC-4C8F-4EED-B016-2BFE08142C6C}.Debug|Win32.Build.0 = Debug|Win32
+		{07C666CC-4C8F-4EED-B016-2BFE08142C6C}.Release|Win32.ActiveCfg = Release|Win32
+		{07C666CC-4C8F-4EED-B016-2BFE08142C6C}.Release|Win32.Build.0 = Release|Win32
+		{A9E6C97B-478A-453B-80FC-79D048F3A4C0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A9E6C97B-478A-453B-80FC-79D048F3A4C0}.Debug|Win32.Build.0 = Debug|Win32
+		{A9E6C97B-478A-453B-80FC-79D048F3A4C0}.Release|Win32.ActiveCfg = Release|Win32
+		{A9E6C97B-478A-453B-80FC-79D048F3A4C0}.Release|Win32.Build.0 = Release|Win32
+		{5801AE38-0F7F-46F6-96C0-F37739BA5C75}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5801AE38-0F7F-46F6-96C0-F37739BA5C75}.Debug|Win32.Build.0 = Debug|Win32
+		{5801AE38-0F7F-46F6-96C0-F37739BA5C75}.Release|Win32.ActiveCfg = Release|Win32
+		{5801AE38-0F7F-46F6-96C0-F37739BA5C75}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
