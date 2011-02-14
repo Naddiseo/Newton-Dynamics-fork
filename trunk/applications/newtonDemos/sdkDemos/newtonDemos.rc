@@ -1,0 +1,190 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "windows.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_NEWTONDEMOS         ICON                    "NewtonDemos.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDC_NEWTONDEMOS MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "Load Scene",                  ID_FILE_LOADSCENE
+        MENUITEM "Save Scene",                  ID_FILE_SAVESCENE
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       IDM_EXIT
+    END
+    POPUP "Demos"
+    BEGIN
+        MENUITEM "demos...",                    ID_DEMOS_DEMOS
+    END
+    POPUP "Options"
+    BEGIN
+        MENUITEM "Autosleep disable",           ID_OPTIONS_AUTOSLEEPDISABLE
+        MENUITEM "Show debug display",          ID_OPTION_SHOWDEBUGDISPLAY
+        MENUITEM "Hide physics profiler ",      ID_OPTIONS_HIDEPHYSICSPROFILER
+        MENUITEM "Hide frame rate info bar",    ID_OPTIONS_HIDEFRAMERATEINFOBAR
+        MENUITEM "Use simd instructions",       ID_OPTIONS_USESIMDINSTRUCTIONS
+        MENUITEM "Update physics in main thread", ID_OPTIONS_PHYSICSUPDATEINMAINTHREAD
+        MENUITEM "Select number of micro threads", ID_OPTIONS_SELECTNUMBEROFPHYSICSTHREADS
+        MENUITEM "Solve full islands on single thread", ID_OPTIONS_SOLVEISLANDONONETHREAD
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About ...",                  IDM_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDC_NEWTONDEMOS ACCELERATORS 
+BEGIN
+    "?",            IDM_ABOUT,              ASCII,  ALT
+    "/",            IDM_ABOUT,              ASCII,  ALT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 22, 17, 151, 91
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CAPTION | WS_SYSMENU
+CAPTION "About"
+FONT 8, "System", 0, 0, 0x0
+BEGIN
+    ICON            IDI_NEWTONDEMOS,IDC_MYICON,7,14,16,16
+    LTEXT           "NewtonDemos SDK demos",IDC_STATIC,45,11,74,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2010",IDC_STATIC,46,37,68,8
+    DEFPUSHBUTTON   "OK",IDOK,46,59,30,11,WS_GROUP
+    LTEXT           "Version 2.25",IDC_STATIC,46,25,71,8
+END
+
+IDD_THREAD_COUNT_SELECTOR DIALOGEX 0, 0, 155, 94
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select number of physics threads"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,14,67,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,86,68,50,14
+    CONTROL         "",IDC_THREAD_COUNT,"msctls_trackbar32",TBS_AUTOTICKS | TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,18,39,117,15
+    LTEXT           "Thread count = 1",IDC_THREAD_COUNT_TEXT,23,25,104,11
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        RIGHTMARGIN, 149
+        BOTTOMMARGIN, 70
+    END
+
+    IDD_THREAD_COUNT_SELECTOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 148
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 87
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_APP_TITLE           "NewtonDemos 2.00"
+    IDC_NEWTONDEMOS         "NEWTONDEMOS"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

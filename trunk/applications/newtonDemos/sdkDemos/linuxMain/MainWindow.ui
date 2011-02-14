@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Newton SDK demos</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuDemo_Options">
+    <property name="title">
+     <string>Demos </string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <addaction name="actionShow_debug_display"/>
+    <addaction name="actionHide_physics_profiler"/>
+    <addaction name="actionHide_Framerate_info_bar"/>
+    <addaction name="actionUse_Simd_instructions"/>
+    <addaction name="actionUpdate_physics_in_mani_thread"/>
+    <addaction name="actionSelect_number_of_physics_threads"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuDemo_Options"/>
+   <addaction name="menuOptions"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionShow_debug_display">
+   <property name="text">
+    <string>Show debug display</string>
+   </property>
+  </action>
+  <action name="actionHide_physics_profiler">
+   <property name="text">
+    <string>Hide physics profiler</string>
+   </property>
+  </action>
+  <action name="actionHide_Framerate_info_bar">
+   <property name="text">
+    <string>Hide Framerate info bar</string>
+   </property>
+  </action>
+  <action name="actionUse_Simd_instructions">
+   <property name="text">
+    <string>Use Simd instructions</string>
+   </property>
+  </action>
+  <action name="actionUpdate_physics_in_mani_thread">
+   <property name="text">
+    <string>Update physics in main thread</string>
+   </property>
+  </action>
+  <action name="actionSelect_number_of_physics_threads">
+   <property name="text">
+    <string>Select number of physics threads</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
