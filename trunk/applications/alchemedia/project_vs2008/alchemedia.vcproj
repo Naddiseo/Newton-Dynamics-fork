@@ -140,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="qtmaind.lib QtCore4.lib QtGui4.lib QtOpenGL4.lib opengl32.lib glu32.lib"
+				AdditionalDependencies="qtmain.lib QtCore4.lib QtGui4.lib QtOpenGL4.lib opengl32.lib glu32.lib"
 				OutputFile="../$(PlatformName)/$(ProjectName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../../../packages/thirdParty/Qt/4.7.1/lib"
