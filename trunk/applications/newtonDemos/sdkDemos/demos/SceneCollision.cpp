@@ -181,6 +181,7 @@ class ComplexScene: public DemoEntity
 			const VisualProxy& proxy = node->GetInfo();
 			proxy.m_mesh->Release();
 		}
+		//m_pieces.RemoveAll();
 	}
 
 	void Render(dFloat timeStep) const
@@ -211,15 +212,15 @@ class ComplexScene: public DemoEntity
 
 	void AddCollisionTreeMesh (DemoEntityManager* const scene, NewtonCollision* const sceneCollision)
 	{
-	/*
-
-		NewtonCollision* collision;
-		NewtonSceneProxy* sceneProxy;
+//		NewtonCollision* collision;
+//		NewtonSceneProxy* sceneProxy;
 		
 		// open the level data
 		char fullPathName[2048];
-		GetWorkingFileName (name, fullPathName);
+		GetWorkingFileName ("playground.xml", fullPathName);
 
+		scene->LoadScene (fullPathName);
+/*
 		OGLLoaderContext context;
 		dMatrix matrix (dYawMatrix (-3.14159265f * 0.5f));
 
@@ -303,10 +304,10 @@ class ComplexScene: public DemoEntity
 		dMatrix rotMat (dRollMatrix (0.5f * 3.141592f));
 
 		NewtonWorld* const world = scene->GetNewton();
-		NewtonCollision* collision2 = NewtonCreateCylinder (world, 2.0f, 0.5f, 0, &rotMat[0][0]);
+		NewtonCollision* collision2 = NewtonCreateCylinder (world, 0.5f, 0.2f, 0, &rotMat[0][0]);
 		DemoMesh* const geometry2 = new DemoMesh("cylinder_1", collision2, "smilli.tga", "smilli.tga", "smilli.tga");
 
-		NewtonCollision* collision1 = NewtonCreateBox (world, 4.0f, 0.5, 4.0f, 0, NULL);
+		NewtonCollision* collision1 = NewtonCreateBox (world, 0.75f, 0.2f, 0.75f, 0, NULL);
 		DemoMesh* const geometry1 = new DemoMesh("box_1", collision1, "frowny.tga", "frowny.tga", "frowny.tga");
 
 		dMatrix matrix (GetIdentityMatrix());
@@ -316,11 +317,12 @@ class ComplexScene: public DemoEntity
 					DemoMesh* mesh;
 					NewtonCollision* collision;
 					
-					matrix.m_posit.m_y = 5.0f + y * 4.0f ; 
-					matrix.m_posit.m_x = x * 6.0f - 20.0f; 
-					matrix.m_posit.m_z = z * 6.0f - 24.0f;  
+					matrix.m_posit.m_y = 4.0f + y * 1.0f ; 
+					matrix.m_posit.m_x = x * 1.5f - 8.0f; 
+					matrix.m_posit.m_z = z * 1.5f - 6.0f;  
 					
 					if (rand () & 0x010) {
+					//if (0) {
 						mesh = geometry1;
 						collision = collision1;
 					} else {
@@ -329,7 +331,6 @@ class ComplexScene: public DemoEntity
 					}
 
 					NewtonSceneProxy* const sceneProxy = NewtonSceneCollisionCreateProxy (sceneCollision, collision, &matrix[0][0]);
-
 					VisualProxy& shape = m_pieces.Append()->GetInfo();
 					shape.m_sceneProxi = sceneProxy;
 					shape.m_mesh = mesh;
@@ -360,6 +361,7 @@ void SceneCollision (DemoEntityManager* const scene)
 {
 	// suspend simulation before making changes to the physics world
 	scene->StopsExecution ();
+
 
 	NewtonWorld* world = scene->GetNewton();
 
@@ -444,7 +446,7 @@ void SceneCollision (DemoEntityManager* const scene)
 	NewtonReleaseCollision (world, sceneCollision);
 
 	// place camera into position
-	dVector origin (-50.0f, 50.0f, -50.0f, 0.0f);
+	dVector origin (-15.0f, 15.0f, -15.0f, 0.0f);
 	scene->GetCamera()->m_upVector = dVector (0.0f, 1.0f, 0.0f);
 	scene->GetCamera()->m_origin = origin;
 	scene->GetCamera()->m_pointOfInterest = origin + dVector (1.0f, -0.5f, 1.0f);

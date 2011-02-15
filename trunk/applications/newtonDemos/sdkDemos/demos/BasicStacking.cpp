@@ -10,6 +10,7 @@
 */
 
 #include <toolbox_stdafx.h>
+#include "SkyBox.h"
 #include "../DemoEntityManager.h"
 #include "../DemoCamera.h"
 #include "../PhysicsUtils.h"
@@ -266,6 +267,10 @@ void BasicBoxStacks (DemoEntityManager* const scene)
 {
 	// suspend simulation before making changes to the physics world
 	scene->StopsExecution ();
+
+	// load the skybox
+	scene->Append(new SkyBox());
+
 
 	// load the scene from and alchemedia file format
 	char fileName[2048];

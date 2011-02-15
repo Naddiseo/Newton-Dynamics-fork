@@ -10,6 +10,7 @@
 */
 
 #include <toolbox_stdafx.h>
+#include "SkyBox.h"
 #include "../DemoMesh.h"
 #include "../DemoEntityManager.h"
 #include "../DemoCamera.h"
@@ -448,6 +449,10 @@ static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 {
 	// suspend simulation before making changes to the physics world
 	scene->StopsExecution ();
+
+	// load the skybox
+	scene->Append(new SkyBox());
+
 
 	// load the scene from and alchemedia file format
 	char fileName[2048];

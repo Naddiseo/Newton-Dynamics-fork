@@ -20,9 +20,9 @@ void *operator new (size_t size)
 	void* ptr;
 	ptr = malloc (size);
 
-//unsigned xxx = unsigned (ptr);
-//xxx &= 0xffff;
-//	_ASSERTE (xxx != 0x0c30);
+unsigned xxx = unsigned (ptr);
+xxx &= 0xffff;
+	_ASSERTE (xxx != 0x6FF0);
 //	dTrace (("%d %x\n", xxxx, ptr))
 	return ptr; 
 }                                          
@@ -227,8 +227,6 @@ void DemoEntityManager::SaveScene (const char* const name)
 
 void DemoEntityManager::LoadVisualScene(dScene* const scene, EntityDictionary& dictionary)
 {
-	// load the skybox
-	Append(new SkyBox());
 
 	// load all meshes into a Mesh cache for reuse
 	dTree<DemoMesh*, dScene::dTreeNode*> meshDictionary;
