@@ -68,7 +68,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="_$(ProjectName).pyd"
+				OutputFile="../$(PlatformName)/_$(ProjectName).pyd "
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(PYTHON_HOME)\libs&quot;"
 				GenerateDebugInformation="true"
@@ -97,7 +97,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy &quot;../import_scene_alchemedia.py&quot; &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;xcopy &quot;../export_scene_alchemedia.py&quot; &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;&#x0D;&#x0A;xcopy $(ProjectName).py  &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;xcopy _$(ProjectName).pyd  &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;&#x0D;&#x0A;xcopy $(ProjectName).py  &quot;../*.*&quot;  /F /Y&#x0D;&#x0A;xcopy _$(ProjectName).pyd  &quot;../*.*&quot;  /F /Y&#x0D;&#x0A;&#x0D;&#x0A;"
+				CommandLine="xcopy &quot;../../import_scene_alchemedia.py&quot; &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;xcopy &quot;../../export_scene_alchemedia.py&quot; &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;&#x0D;&#x0A;xcopy ../../$(ProjectName).py  &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;xcopy $(TargetPath)  &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;&#x0D;&#x0A;xcopy $../../(ProjectName).py  &quot;../../*.*&quot;  /F /Y&#x0D;&#x0A;xcopy $(TargetPath)  &quot;../../*.*&quot;  /F /Y&#x0D;&#x0A;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -149,7 +149,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="_$(ProjectName).pyd"
+				OutputFile="../$(PlatformName)/_$(ProjectName).pyd "
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(PYTHON_HOME)\libs&quot;"
 				GenerateDebugInformation="true"
@@ -178,7 +178,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy &quot;../import_scene_alchemedia.py&quot; &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;xcopy &quot;../export_scene_alchemedia.py&quot; &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;&#x0D;&#x0A;xcopy $(ProjectName).py  &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;xcopy _$(ProjectName).pyd  &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;&#x0D;&#x0A;xcopy $(ProjectName).py  &quot;../*.*&quot;  /F /Y&#x0D;&#x0A;xcopy _$(ProjectName).pyd  &quot;../*.*&quot;  /F /Y&#x0D;&#x0A;&#x0D;&#x0A;"
+				CommandLine="xcopy &quot;../../import_scene_alchemedia.py&quot; &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;xcopy &quot;../../export_scene_alchemedia.py&quot; &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;&#x0D;&#x0A;xcopy ../../$(ProjectName).py  &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;xcopy $(TargetPath)  &quot;$(BLENDER_HOME)/.blender/scripts/*.*&quot;  /F /Y&#x0D;&#x0A;&#x0D;&#x0A;xcopy $../../(ProjectName).py  &quot;../../*.*&quot;  /F /Y&#x0D;&#x0A;xcopy $(TargetPath)  &quot;../../*.*&quot;  /F /Y&#x0D;&#x0A;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
