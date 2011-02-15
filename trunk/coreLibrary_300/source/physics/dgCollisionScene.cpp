@@ -75,7 +75,7 @@ dgCollisionScene::dgNode::~dgNode ()
 		delete (m_left);
 	}
 	if (m_right) {
-		delete (m_left);
+		delete (m_right);
 	}
 }
 
@@ -415,8 +415,6 @@ _ASSERTE (0);
 
 void dgCollisionScene::CalcAABB (const dgMatrix& matrix, dgVector& p0, dgVector& p1) const
 {
-_ASSERTE (0);
-/*
 	dgVector origin (matrix.TransformVector(m_boxOrigin));
 	dgVector size (m_boxSize.m_x * dgAbsf(matrix[0][0]) + m_boxSize.m_y * dgAbsf(matrix[1][0]) + m_boxSize.m_z * dgAbsf(matrix[2][0]) + DG_MAX_COLLISION_PADDING,  
 				   m_boxSize.m_x * dgAbsf(matrix[0][1]) + m_boxSize.m_y * dgAbsf(matrix[1][1]) + m_boxSize.m_z * dgAbsf(matrix[2][1]) + DG_MAX_COLLISION_PADDING,  
@@ -443,7 +441,6 @@ _ASSERTE (0);
 	_ASSERTE ((err0 % err0) < err);
 	_ASSERTE ((err1 % err1) < err);
 #endif
-*/
 }
 
 void dgCollisionScene::CalcAABBSimd(const dgMatrix &matrix,	dgVector &p0, dgVector &p1) const
@@ -532,61 +529,6 @@ bool dgCollisionScene::OOBBTest (const dgMatrix& matrix, const dgCollisionConvex
 	return true;
 }
 
-
-
-/*
-void dgCollisionScene::BuildAABB(dgList<dgProxy>::dgListNode** const array, dgInt32 boxCount, dgVector& p0, dgVector& p1) const
-{
-	dgVector minP ( dgFloat32 (1.0e15f),  dgFloat32 (1.0e15f),  dgFloat32 (1.0e15f), dgFloat32 (0.0f)); 
-	dgVector maxP (-dgFloat32 (1.0e15f), -dgFloat32 (1.0e15f), -dgFloat32 (1.0e15f), dgFloat32 (0.0f)); 
-	for (dgInt32 i = 0; i < boxCount; i ++) {
-		const dgProxy& proxy = array[i]->GetInfo();
-		minP.m_x = GetMin (proxy.m_boxP0.m_x, minP.m_x); 
-		minP.m_y = GetMin (proxy.m_boxP0.m_y, minP.m_y); 
-		minP.m_z = GetMin (proxy.m_boxP0.m_z, minP.m_z); 
-
-		maxP.m_x = GetMax (proxy.m_boxP1.m_x, maxP.m_x); 
-		maxP.m_y = GetMax (proxy.m_boxP1.m_y, maxP.m_y); 
-		maxP.m_z = GetMax (proxy.m_boxP1.m_z, maxP.m_z); 
-	}
-
-	p0 = minP;
-	p1 = maxP;
-}
-
-
-dgInt32 dgCollisionScene::GetAxis (dgList<dgProxy>::dgListNode** const array, dgInt32 boxCount) const
-{
-	dgInt32 axis;
-	dgFloat32 maxVal;
-	dgVector median (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-	dgVector varian (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-	for (dgInt32 i = 0; i < boxCount; i ++) {
-		const dgProxy& proxy = array[i]->GetInfo();
-
-		median += proxy.m_boxP0;
-		median += proxy.m_boxP1;
-		varian += proxy.m_boxP0.CompProduct(proxy.m_boxP0);
-		varian += proxy.m_boxP1.CompProduct(proxy.m_boxP1);
-	}
-
-	boxCount *= 2;
-	varian.m_x = boxCount * varian.m_x - median.m_x * median.m_x;
-	varian.m_y = boxCount * varian.m_y - median.m_y * median.m_y;
-	varian.m_z = boxCount * varian.m_z - median.m_z * median.m_z;
-
-	axis = 0;
-	maxVal = varian[0];
-	for (int i = 1; i < 3; i ++) {
-		if (varian[i] > maxVal) {
-			axis = i;
-			maxVal = varian[i];
-		}
-	}
-
-	return axis;
-}
-*/
 
 
 dgFloat32 dgCollisionScene::RayCastSimd (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
