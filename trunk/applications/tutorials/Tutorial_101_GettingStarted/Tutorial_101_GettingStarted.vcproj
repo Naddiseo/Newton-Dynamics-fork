@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="Tutorial_101_GettingStarted"
 	ProjectGUID="{C43CE8B6-29CC-4428-9443-154E490CEDD3}"
+	RootNamespace="Tutorial_101_GettingStarted"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -64,7 +65,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="GLu32.LIB opengl32.lib SDL.lib SDLmain.lib SDL_mixer.lib"
-				OutputFile="$(IntDir)/$(ProjectName).exe"
+				OutputFile="../bin/$(PlatformName)/$(ProjectName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;../SDL/SDL-1.2.13/lib&quot;;&quot;../SDL/SDL-1.2.13/lib/StartupD&quot;;../SDL/SDL_Mixer/lib"
 				GenerateDebugInformation="true"
@@ -94,7 +95,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy $(TargetPath) &quot;../bin/$(PlatformName)/*.*&quot; /F /Y  "
+				CommandLine=""
 			/>
 		</Configuration>
 		<Configuration
@@ -143,7 +144,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="GLu32.LIB opengl32.lib SDL.lib SDLmain.lib SDL_mixer.lib"
-				OutputFile="$(IntDir)/$(ProjectName).exe"
+				OutputFile="../bin/$(PlatformName)/$(ProjectName).exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;../SDL/SDL-1.2.13/lib&quot;;&quot;../SDL/SDL-1.2.13/lib/StartupD&quot;;../SDL/SDL_Mixer/lib"
 				GenerateDebugInformation="true"
@@ -174,7 +175,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy $(TargetPath) &quot;../bin/$(PlatformName)/*.*&quot; /F /Y  "
+				CommandLine=""
 			/>
 		</Configuration>
 	</Configurations>
