@@ -86,8 +86,13 @@ NewtonBody* CreateRigidBody (NewtonWorld* world, Entity* ent, NewtonCollision* c
 	dVector inertia;
 	NewtonBody* body;
 
+	// we need to set physics properties to this body
+	dMatrix matrix (ent->m_curRotation, ent->m_curPosition);
+	//NewtonBodySetMatrix (body, &matrix[0][0]);
+
+
 	// Now with the collision Shape we can crate a rigid body
-	body = NewtonCreateBody (world, collision);
+	body = NewtonCreateBody (world, collision, &matrix[0][0]);
 
 	// bodies can have a destructor. 
 	// this is a function callback that can be used to destroy any local data stored 
@@ -97,9 +102,6 @@ NewtonBody* CreateRigidBody (NewtonWorld* world, Entity* ent, NewtonCollision* c
 	// save the entity as the user data for this body
 	NewtonBodySetUserData (body, ent);
 
-	// we need to set physics properties to this body
-	dMatrix matrix (ent->m_curRotation, ent->m_curPosition);
-	NewtonBodySetMatrix (body, &matrix[0][0]);
 
 	// we need to set the proper center of mass and inertia matrix for this body
 	// the inertia matrix calculated by this function does not include the mass.

@@ -15,7 +15,6 @@
 #include "TutorialCode.h"
 #include "CollectInputAndUpdateCamera.h"
 
-
 #define CAMERA_SPEED	4.0f
 
 static dFloat gYawAngle = 0.0f * 3.1416 / 180.0f;

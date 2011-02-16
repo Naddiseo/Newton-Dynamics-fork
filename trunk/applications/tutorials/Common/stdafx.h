@@ -32,7 +32,7 @@
 
 #include <Newton.h>
 #include <JointLibrary.h>
-#include <NewtonDebuggerServer.h>
+//#include <NewtonDebuggerServer.h>
 
 #pragma warning (disable: 4100) //unreferenced formal parameter
 #pragma warning (disable: 4996) //open': This function or variable may be unsafe.

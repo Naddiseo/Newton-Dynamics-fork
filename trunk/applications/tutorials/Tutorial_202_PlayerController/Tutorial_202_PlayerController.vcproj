@@ -17,15 +17,15 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="x32\$(ConfigurationName)"
-			IntermediateDirectory="x32\$(ConfigurationName)"
+			OutputDirectory="../$(PlatformName)/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="../$(PlatformName)/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="xcopy &quot;$(NEWTON_HOME)/sdk/x32/lib_vs9_md/dJointLibrary_d.dll&quot; &quot;../bin/x32/*.*&quot; /F /Y  "
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -43,6 +43,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="./;../Common;&quot;../SDL/SDL-1.2.13/include&quot;;../SDL/SDL_Mixer/include;&quot;$(NEWTON_HOME)/sdk&quot;;&quot;$(NEWTON_HOME)/sdk/dMath&quot;;&quot;$(NEWTON_HOME)/sdk/dCustomJoints&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_NEWTON_USE_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -62,10 +63,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="GLu32.LIB opengl32.lib SDL.lib SDLmain.lib SDL_mixer.lib newton.lib dMath_d.lib dJointLibrary_d.lib"
-				OutputFile="x32\$(ConfigurationName)/$(ProjectName).exe"
+				AdditionalDependencies="GLu32.LIB opengl32.lib SDL.lib SDLmain.lib SDL_mixer.lib"
+				OutputFile="$(IntDir)/$(ProjectName).exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;../SDL/SDL-1.2.13/lib&quot;;&quot;../SDL/SDL-1.2.13/lib/StartupD&quot;;../SDL/SDL_Mixer/lib;&quot;$(NEWTON_HOME)/sdk/x32/dll_vs9&quot;;&quot;$(NEWTON_HOME)/sdk/x32/lib_vs9_mt&quot;"
+				AdditionalLibraryDirectories="&quot;../SDL/SDL-1.2.13/lib&quot;;&quot;../SDL/SDL-1.2.13/lib/StartupD&quot;;../SDL/SDL_Mixer/lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/Tutorial_101_GettingStarted.pdb"
 				SubSystem="1"
@@ -93,20 +94,20 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy &quot;x32/$(ConfigurationName)/$(ProjectName).exe&quot; &quot;../bin/x32/*.*&quot; /F /Y  "
+				CommandLine="xcopy $(TargetPath) &quot;../bin/$(PlatformName)/*.*&quot; /F /Y  "
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="x32\$(ConfigurationName)"
-			IntermediateDirectory="x32\$(ConfigurationName)"
+			OutputDirectory="../$(PlatformName)/$(ProjectName)/$(ConfigurationName)"
+			IntermediateDirectory="../$(PlatformName)/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="xcopy &quot;$(NEWTON_HOME)/sdk/x32/lib_vs9_md/dJointLibrary.dll&quot; &quot;../bin/x32/*.*&quot; /F /Y  "
+				CommandLine=""
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -123,6 +124,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="./;../Common;&quot;../SDL/SDL-1.2.13/include&quot;;../SDL/SDL_Mixer/include;&quot;$(NEWTON_HOME)/sdk&quot;;&quot;$(NEWTON_HOME)/sdk/dMath&quot;;&quot;$(NEWTON_HOME)/sdk/dCustomJoints&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_NEWTON_USE_LIB"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
 				WarningLevel="4"
@@ -140,10 +142,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="GLu32.LIB opengl32.lib SDL.lib SDLmain.lib SDL_mixer.lib newton.lib dMath.lib dJointLibrary.lib"
-				OutputFile="x32\$(ConfigurationName)/$(ProjectName).exe"
+				AdditionalDependencies="GLu32.LIB opengl32.lib SDL.lib SDLmain.lib SDL_mixer.lib"
+				OutputFile="$(IntDir)/$(ProjectName).exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;../SDL/SDL-1.2.13/lib&quot;;&quot;../SDL/SDL-1.2.13/lib/StartupD&quot;;../SDL/SDL_Mixer/lib;&quot;$(NEWTON_HOME)/sdk/x32/dll_vs9&quot;;&quot;$(NEWTON_HOME)/sdk/x32/lib_vs9_mt&quot;"
+				AdditionalLibraryDirectories="&quot;../SDL/SDL-1.2.13/lib&quot;;&quot;../SDL/SDL-1.2.13/lib/StartupD&quot;;../SDL/SDL_Mixer/lib"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -172,7 +174,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="xcopy &quot;x32/$(ConfigurationName)/$(ProjectName).exe&quot; &quot;../bin/x32/*.*&quot; /F /Y  "
+				CommandLine="xcopy $(TargetPath) &quot;../bin/$(PlatformName)/*.*&quot; /F /Y  "
 			/>
 		</Configuration>
 	</Configurations>
