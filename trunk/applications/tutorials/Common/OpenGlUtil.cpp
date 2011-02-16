@@ -196,7 +196,7 @@ void SWAP_FLOAT32_ARRAY (void *array, int count)
 
 
 
-GLuint LoadTexture(const char *filename)
+GLuint LoadTexture(const char* const filename)
 {
 	#pragma pack(1)
 	struct TGAHEADER
@@ -347,9 +347,9 @@ void GetWorkingFileName (const char* name, char* outPathName)
 	char path[256]; 
 	GetModuleFileNameA(NULL, path, 256);
 
-	char* ptr = strstr (path, "bin");
+	char* const ptr = strstr (path, "tutorials");
 	ptr [0] = 0;
-	sprintf (outPathName, "%sbin/%s", path, name);
+	sprintf (outPathName, "%stutorials/bin/%s", path, name);
 }
 
 

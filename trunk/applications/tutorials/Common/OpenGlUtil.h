@@ -93,8 +93,8 @@ void Print (const dVector& color, dFloat x, dFloat y, const char *fmt, ... );
 
 
 unsigned GetTimeInMicrosenconds();
-GLuint LoadTexture(const char *filename);
-void GetWorkingFileName (const char* name, char* outPathName);
+GLuint LoadTexture(const char* const filename);
+void GetWorkingFileName (const char* const name, char* const outPathName);
 void SetCamera (const dVector& eyePoint, const dVector& target);
 
 
