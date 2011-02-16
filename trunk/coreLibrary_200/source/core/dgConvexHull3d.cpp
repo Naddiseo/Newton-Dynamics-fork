@@ -316,7 +316,7 @@ dgInt32 dgConvexHull3d::InitVertexArray(dgBigVector* const convexPoints, dgBigVe
 		return count;
 	}
 
-	dgAABBPointTree3d* tree = BuildTree (NULL, points, count, 0, (dgInt8**) &memoryPool, maxMemSize);
+	dgAABBPointTree3d* const tree = BuildTree (NULL, points, count, 0, (dgInt8**) &memoryPool, maxMemSize);
 
 	dgBigVector boxSize (tree->m_box[1] - tree->m_box[0]);	
 	m_diag = dgFloat32 (sqrt (boxSize % boxSize));
