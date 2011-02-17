@@ -10,8 +10,9 @@
 */
 
 #include <toolbox_stdafx.h>
+#include <QtOpenGL/QGLWidget>
+
 #include "OpenGlUtil.h"
-#include "glContext.h"
 #include "dRuntimeProfiler.h"
 #include "dHeightResolutionTimer.h"
 
@@ -40,8 +41,10 @@ unsigned dRuntimeProfiler::GetTimeInMicrosecunds()
 	return unsigned (dHeightResolutionTimer::GetTimeInMicrosenconds());
 }
 
-void dRuntimeProfiler::DrawLabel (dFloat x, dFloat y, const char* label, const GLContext& context)
+void dRuntimeProfiler::DrawLabel (dFloat x, dFloat y, const char* label, QPainter& context)
 {
+	_ASSERTE (0);
+/*
 	int witdh;
 	int height;
 	GLint viewport[4]; 
@@ -52,6 +55,7 @@ void dRuntimeProfiler::DrawLabel (dFloat x, dFloat y, const char* label, const G
 
 	dVector color (1.0f, 1.0f, 1.0f, 0.0f);
 	context.Print (color, x, height - y, label);
+*/
 }
 
 
@@ -85,7 +89,7 @@ void dRuntimeProfiler::DrawTrack (dFloat x0, dFloat y0, const dVector& color, in
 }
 
 
-void dRuntimeProfiler::Render (NewtonWorld* nWorld, int mask, const GLContext& context)
+void dRuntimeProfiler::Render (NewtonWorld* nWorld, int mask, QPainter& context)
 {
 	int i;
 	GLViewPort viewport;
@@ -208,7 +212,7 @@ void dRuntimeProfiler::Render (NewtonWorld* nWorld, int mask, const GLContext& c
 }
 
 
-void dRuntimeProfiler::ReanderThreadPerformace (NewtonWorld* nWorld, const GLContext& context)
+void dRuntimeProfiler::ReanderThreadPerformace (NewtonWorld* nWorld, QPainter& context)
 {
 	int threadCount = NewtonGetThreadsCount(nWorld);
 	if (threadCount > 0) {

@@ -20,7 +20,7 @@ struct NewtonWorld;
 
 #define CHART_HIEGHT 120
 
-class GLContext;
+class QPainter;
 
 class dRuntimeProfiler
 {
@@ -28,11 +28,11 @@ class dRuntimeProfiler
 	dRuntimeProfiler(int origin_x, int origin_y);
 	~dRuntimeProfiler(void);
 
-	void Render (NewtonWorld* nWorld, int mask, const GLContext& context);
-	void DrawLabel (dFloat x, dFloat y, const char* label, const GLContext& context);
+	void Render (NewtonWorld* nWorld, int mask, QPainter& context);
+	void DrawLabel (dFloat x, dFloat y, const char* label, QPainter& context);
 	void DrawTrack (dFloat x, dFloat y, const dVector& color, int start, unsigned* track);
 
-	void ReanderThreadPerformace (NewtonWorld* nWorld, const GLContext& context);
+	void ReanderThreadPerformace (NewtonWorld* nWorld, QPainter& context);
 
 
 

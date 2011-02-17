@@ -10,47 +10,20 @@
 #include "dRuntimeProfiler.h"
 #include "OpenGlUtil.h"
 
-static dInt32 g_memory;
+
+
 
 #define MAX_PHYSICS_LOOPS 1
 #define MAX_PHYSICS_FPS	  120.0f
 
-void *operator new (size_t size) 
-{ 
-	void* ptr;
-	ptr = malloc (size);
-
-//	unsigned xxx = unsigned (ptr);
-//	xxx &= 0xffff;
-//	_ASSERTE (xxx != 0x6FF0);
-//	dTrace (("%d %x\n", xxxx, ptr))
-	return ptr; 
-}                                          
-
-void operator delete (void *ptr) 
-{ 
-	free (ptr); 
-}
-
-// memory allocation for Newton
-void* PhysicsAlloc (int sizeInBytes)
-{
-	g_memory += sizeInBytes;
-	return malloc (sizeInBytes);
-}
-
-// memory de-allocation for Newton
-void PhysicsFree (void *ptr, int sizeInBytes)
-{
-	g_memory -= sizeInBytes;
-	free (ptr);
-}
 
 
-DemoEntityManager::DemoEntityManager(void)
-	:dList <DemoEntity*>() 
+
+
+DemoEntityManager::DemoEntityManager(QWidget* const parent)
+	:QGLWidget (QGLFormat(QGL::SampleBuffers), parent)
+	,dList <DemoEntity*>() 
 	,dSimulationThread()
-	,m_glContext() 
 	,m_camera(NULL)
 	,m_world(NULL)
 	,m_physicsUpdate(true) 
@@ -58,21 +31,19 @@ DemoEntityManager::DemoEntityManager(void)
 	,m_microsecunds (0)
 	,m_timer()
 	,m_profiler (620 * 0 / 8 + 45, 40)
+	,m_font()
 {
 	// Create the main Camera
 	m_camera = new DemoCamera();
-
-	// Set the memory allocation function before creation the newton world
-	// this is the only function that can be called before the creation of the newton world.
-	// it should be called once, and the the call is optional 
-	NewtonSetMemorySystem (PhysicsAlloc, PhysicsFree);
 
 	// initialized the physics world for the new scene
 	Cleanup ();
 
 	// Start rendering after the system is set properly
 	ContinueExecution();
-	
+
+	doubleBuffer(); 
+	setAutoFillBackground(false);
 }
 
 DemoEntityManager::~DemoEntityManager(void)
@@ -91,6 +62,46 @@ DemoEntityManager::~DemoEntityManager(void)
 
 	// Start rendering after the system is set properly
 	ContinueExecution();
+
+}
+
+//	GLContext& GetGL() {return m_glContext;}
+NewtonWorld* DemoEntityManager::GetNewton() const 
+{
+	return m_world;
+}
+
+DemoCamera* DemoEntityManager::GetCamera() const 
+{
+	return m_camera;
+}
+
+void DemoEntityManager::initializeGL()
+{
+	QGLWidget::initializeGL();
+
+
+	m_camera->SetProjectionMode(width(), height());
+}
+
+
+void DemoEntityManager::resizeGL(int w, int h)
+{
+	QGLWidget::resizeGL(w, h);
+	m_camera->SetProjectionMode(width(), height());
+}
+
+void DemoEntityManager::Print (QPainter& painter, Qt::GlobalColor color, int x, int y, const char *fmt, ... ) const
+{
+	va_list argptr;
+	char string[2048];
+
+	va_start (argptr, fmt);
+	vsprintf (string, fmt, argptr);
+	va_end( argptr );
+
+	painter.setPen(Qt::black);
+	painter.drawText(x, y, tr(string));
 }
 
 
@@ -102,7 +113,7 @@ void DemoEntityManager::Cleanup ()
 	// destroy all remaining visual objects
 	//	demo.CleanUp();
 	while (GetFirst()) {
-		DemoEntity* entity = GetFirst()->GetInfo();
+		DemoEntity* const entity = GetFirst()->GetInfo();
 		entity->Release();
 		Remove(GetFirst());
 	}
@@ -118,6 +129,8 @@ void DemoEntityManager::Cleanup ()
 	_ASSERTE (NewtonGetMemoryUsed () == 0);
 
 
+	newtonDemos* const mainWindow = (newtonDemos*) parent();
+
 	// create the newton world
 	m_world = NewtonCreate();
 
@@ -126,17 +139,17 @@ void DemoEntityManager::Cleanup ()
 	NewtonSetSolverModel (m_world, 1);
 
 	// Set the number of internal micro threads
-	NewtonSetThreadsCount (m_world, threadCount);
+	NewtonSetThreadsCount (m_world, mainWindow->m_threadCount);
 
 	// use the standard x87 floating point model  
-	if (usesSimdInstructions) {
+	if (mainWindow->m_usesSimdInstructions) {
 		NewtonSetPlatformArchitecture (m_world, 3);  //best hardware (SSE at this time)
 	} else {
 		NewtonSetPlatformArchitecture (m_world, 0);  //x87 mode
 	}
 
 	// set the parallel solve on single island or or off
-	NewtonSetMultiThreadSolverOnSingleIsland (m_world, solveIslandOnSingleThread ? 1 : 0);
+	NewtonSetMultiThreadSolverOnSingleIsland (m_world, mainWindow->m_solveIslandOnSingleThread ? 1 : 0);
 
 	// set a fix world size
 	dVector minSize (-500.0f, -500.0f, -500.0f);
@@ -210,6 +223,8 @@ void DemoEntityManager::LoadScene (const char* const fileName)
 
 void DemoEntityManager::SaveScene (const char* const name)
 {
+	_ASSERTE (0);
+/*
 	// stops simulation
 	StopsExecution (); 
 
@@ -222,12 +237,12 @@ void DemoEntityManager::SaveScene (const char* const name)
 
 	// resume the simulation
 	ContinueExecution();
+*/
 }
 
 
 void DemoEntityManager::LoadVisualScene(dScene* const scene, EntityDictionary& dictionary)
 {
-
 	// load all meshes into a Mesh cache for reuse
 	dTree<DemoMesh*, dScene::dTreeNode*> meshDictionary;
 	for (dScene::dTreeNode* node = scene->GetFirstNode (); node; node = scene->GetNextNode (node)) {
@@ -240,13 +255,13 @@ void DemoEntityManager::LoadVisualScene(dScene* const scene, EntityDictionary& d
 
 
 	// create an entity for every root node in the mesh
-	dScene::dTreeNode* root = scene->GetRootNode();
+	dScene::dTreeNode* const root = scene->GetRootNode();
 	for (void* child = scene->GetFirstChild(root); child; child = scene->GetNextChild (root, child)) {
 		dScene::dTreeNode* node = scene->GetNodeFromLink(child);
 		dNodeInfo* info = scene->GetInfoFromNode(node);
 		if (info->GetTypeId() == dSceneNodeInfo::GetRttiType()) {
 			// Load this model and add it to the Scene
-			DemoEntity* entityRoot = new DemoEntity (*this, scene, node, meshDictionary, dictionary);
+			DemoEntity* const entityRoot = new DemoEntity (*this, scene, node, meshDictionary, dictionary);
 			Append(entityRoot);
 		}
 	}
@@ -254,7 +269,7 @@ void DemoEntityManager::LoadVisualScene(dScene* const scene, EntityDictionary& d
 	// release all meshes before exiting
 	dTree<DemoMesh*, dScene::dTreeNode*>::Iterator iter (meshDictionary);
 	for (iter.Begin(); iter; iter++) {
-		DemoMesh* mesh = iter.GetNode()->GetInfo();
+		DemoMesh* const mesh = iter.GetNode()->GetInfo();
 		mesh->Release();
 	}
 }
@@ -269,7 +284,7 @@ void DemoEntityManager::SetAutoSleepState (bool state)
 }
 
 
-void DemoEntityManager::IntepopaterMatrix ()
+void DemoEntityManager::InterpolateMatrices ()
 {
 	unsigned64 timeStep = m_timer.GetTimeInMicrosenconds () - m_microsecunds;		
 	dFloat step = (dFloat (timeStep) * MAX_PHYSICS_FPS) / 1.0e6f;
@@ -284,112 +299,6 @@ void DemoEntityManager::IntepopaterMatrix ()
 	}
 }
 
-void DemoEntityManager::Render ()
-{
-	if (!m_asycronousUpdate) {
-		UpdatePhysics();
-	}
-
-	IntepopaterMatrix ();
-
-	// Our shading model--Goraud (smooth). 
-	glShadeModel (GL_SMOOTH);
-
-	// Culling. 
-	glCullFace (GL_BACK);
-	glFrontFace (GL_CCW);
-	glEnable (GL_CULL_FACE);
-
-	//	glEnable(GL_DITHER);
-
-	// z buffer test
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc (GL_LEQUAL);
-
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-	glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
-
-	glClearColor (0.5f, 0.5f, 0.5f, 0.0f );
-	//	glClear( GL_COLOR_BUFFER_BIT );
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	// set default lightning
-	glDisable(GL_BLEND);
-	glEnable (GL_LIGHTING);
-	dFloat cubeColor[] = { 1.0f, 1.0f, 1.0f, 1.0 };
-	glMaterialfv(GL_FRONT, GL_SPECULAR, cubeColor);
-	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, cubeColor);
-	glMaterialf(GL_FRONT, GL_SHININESS, 50.0);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-
-	// set just one directional light
-	GLfloat lightColor[] = { 1.0f, 1.0f, 1.0f, 0.0 };
-	GLfloat lightAmbientColor[] = { 0.7f, 0.7f, 0.7f, 0.0 };
-	GLfloat lightPosition[] = { 500.0f, 200.0f, 500.0f, 0.0 };
-
-	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbientColor);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
-	glEnable(GL_LIGHT0);
-
-
-	// update Camera
-	GetCamera()->Update();
-
-	// render all entities
-	dFloat timestep = m_timer.GetElapsedSeconds();
-	for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
-		DemoEntity* entity = node->GetInfo();
-		glPushMatrix();	
-		entity->Render(timestep);
-		glPopMatrix();
-	}
-
-
-	if (debugDisplayState) {
-		DebugRenderDebugInfo ();
-		DebugRenderWorldCollision (GetNewton());
-	}
-
-	if (showPhysicProfiler) {
-		int profileFlags = 0;
-		for (int i = 0; i < int (sizeof (m_showProfiler) / sizeof (m_showProfiler[0])); i ++) {
-			profileFlags |=  m_showProfiler[i] ? (1 << i) : 0;
-		}
-
-		//profileFlags = 1;
-		if (profileFlags) {
-			m_profiler.Render (m_world, profileFlags, m_glContext);
-		}
-	}
-
-	if (1) {
-		m_profiler.ReanderThreadPerformace (m_world, m_glContext);
-	}
-
-	if (showFrameRateInfo) {
-		dVector color (1.0, 1.0f, 1.0f);
-		dFloat fps = 1.0f / timestep;
-		m_glContext.Print (color, 4,  4, "FPS %6.2f", fps);
-		m_glContext.Print (color, 4, 20, "Physics time ms %6.3f", m_physicsTime * 1000.0f);
-		m_glContext.Print (color, 4, 36, "Body count %d",  NewtonWorldGetBodyCount(m_world));
-		if (m_asycronousUpdate) {
-			m_glContext.Print (color, 4, 52, "physics running asynchronous");
-		}
-	}
-
-
-	// draw everything and swap the display buffer
-	glFlush();
-//	glFinish();
-	SwapBuffers (m_glContext.GetHDC());
-}
 
 
 void DemoEntityManager::UpdatePhysics()
@@ -427,4 +336,125 @@ void DemoEntityManager::UpdatePhysics()
 	}
 }
 
+
+
+void DemoEntityManager::paintEvent(QPaintEvent* ev)
+{
+	newtonDemos* const mainWindow = (newtonDemos*) parent();
+
+	if (!m_asycronousUpdate) {
+		UpdatePhysics();
+	}
+
+	makeCurrent();
+	InterpolateMatrices ();
+
+	// Our shading model--Goraud (smooth). 
+	glShadeModel (GL_SMOOTH);
+
+	// Culling. 
+	glCullFace (GL_BACK);
+	glFrontFace (GL_CCW);
+	glEnable (GL_CULL_FACE);
+
+	//	glEnable(GL_DITHER);
+
+	// z buffer test
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc (GL_LEQUAL);
+
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+	glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
+
+	glClearColor (0.5f, 0.5f, 0.5f, 0.0f );
+	//glClear( GL_COLOR_BUFFER_BIT );
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	//glMatrixMode(GL_MODELVIEW);
+	//glLoadIdentity();
+	m_camera->SetProjectionMode(width(), height());
+
+	// set default lightning
+	glDisable(GL_BLEND);
+	glEnable (GL_LIGHTING);
+	dFloat cubeColor[] = { 1.0f, 1.0f, 1.0f, 1.0 };
+	glMaterialfv(GL_FRONT, GL_SPECULAR, cubeColor);
+	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, cubeColor);
+	glMaterialf(GL_FRONT, GL_SHININESS, 50.0);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	// set just one directional light
+	GLfloat lightColor[] = { 1.0f, 1.0f, 1.0f, 0.0 };
+	GLfloat lightAmbientColor[] = { 0.7f, 0.7f, 0.7f, 0.0 };
+	GLfloat lightPosition[] = { 500.0f, 200.0f, 500.0f, 0.0 };
+
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbientColor);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightColor);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, lightColor);
+	glEnable(GL_LIGHT0);
+
+	// update Camera
+	m_camera->Update();
+
+	// render all entities
+	dFloat timestep = m_timer.GetElapsedSeconds();	
+	for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
+		DemoEntity* entity = node->GetInfo();
+		glPushMatrix();	
+		entity->Render(timestep);
+		glPopMatrix();
+	}
+
+
+	if (mainWindow->m_debugDisplayState) {
+		DebugRenderDebugInfo ();
+		DebugRenderWorldCollision (GetNewton());
+	}
+
+	// do all 2d drawing
+	glShadeModel(GL_FLAT);
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_LIGHTING);
+
+	QPainter painter(this);
+	//QFontMetrics metrics = QFontMetrics(m_font);
+	//int border = qMax(4, metrics.leading());
+	//painter.setRenderHint(QPainter::Antialiasing);
+	//renderText (4, 4, "This is a test", m_font);
+	if (mainWindow->m_showPhysicProfiler) {
+		int profileFlags = 0;
+		for (int i = 0; i < int (sizeof (m_showProfiler) / sizeof (m_showProfiler[0])); i ++) {
+			profileFlags |=  m_showProfiler[i] ? (1 << i) : 0;
+		}
+
+		//profileFlags = 1;
+		if (profileFlags) {
+			//m_profiler.Render (m_world, profileFlags, m_glContext);
+		}
+	}
+
+	if (mainWindow->m_showThreadProfiler) {
+		//m_profiler.ReanderThreadPerformace (m_world, m_glContext);
+	}
+
+	if (mainWindow->m_showStatistics) {
+		dFloat fps = 1.0f / timestep;
+		//m_glContext.Print (color, 4,  4, "FPS %6.2f", fps);
+		Print (painter, Qt::black, 14, 14, "FPS %6.2f", fps);
+
+		Print (painter, Qt::black, 14, 30, "Physics time ms %6.3f", m_physicsTime * 1000.0f);
+		Print (painter, Qt::black, 14, 46, "Body count %d",  NewtonWorldGetBodyCount(m_world));
+		if (m_asycronousUpdate) {
+			Print (painter, Qt::black, 14, 62, "physics running asynchronous");
+		}
+	}
+	painter.end();
+
+	// draw everything and swap the display buffer
+	//glFlush();
+	//glFinish();
+	//swapBuffers();
+}
 

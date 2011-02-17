@@ -45,8 +45,8 @@
 				InlineFunctionExpansion="0"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="../sdkDemos;../sdkDemos/toolBox;../sdkDemos/windowsMain;../../../packages;../../../packages/dMath;../../../packages/dScene;../../../packages/dContainers;../../../packages/dCustomJoints;../../../packages/thirdParty/tinyxml;../../../packages/thirdParty/glew/include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_NEWTON_USE_LIB"
+				AdditionalIncludeDirectories="../sdkDemos;../sdkDemos/toolBox;../sdkDemos/windowsMain;../../../packages;../../../packages/dMath;../../../packages/dScene;../../../packages/dContainers;../../../packages/dCustomJoints;../../../packages/thirdParty/tinyxml;../../../packages/thirdParty/glew/include;../../../packages/thirdParty/Qt/4.7.1/include;../../../packages/thirdParty/Qt/4.7.1/include/QtGui;../../../packages/thirdParty/Qt/4.7.1/include/QtCore;../../../packages/thirdParty/Qt/4.7.1/include/QtOpenGL"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_NEWTON_USE_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -67,13 +67,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glu32.lib opengl32.lib"
+				AdditionalDependencies="qtmaind.lib QtCored4.lib QtGuid4.lib QtOpenGLd4.lib opengl32.lib glu32.lib"
 				OutputFile="../$(PlatformName)/$(InputName)_d.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories=""
+				AdditionalLibraryDirectories="../../../packages/thirdParty/Qt/4.7.1/lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/NewtonDemos.pdb"
-				SubSystem="2"
+				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				TargetMachine="1"
@@ -98,7 +98,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine=""
+				CommandLine="xcopy &quot;../../../packages/thirdParty/Qt/4.7.1/bin/*.dll&quot; &quot;../$(PlatformName)/*.*&quot;  /F /Y"
 			/>
 		</Configuration>
 		<Configuration
@@ -129,8 +129,8 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="../sdkDemos;../sdkDemos/toolBox;../sdkDemos/windowsMain;../../../packages;../../../packages/dMath;../../../packages/dScene;../../../packages/dContainers;../../../packages/dCustomJoints;../../../packages/thirdParty/tinyxml;../../../packages/thirdParty/glew/include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_NEWTON_USE_LIB"
+				AdditionalIncludeDirectories="../sdkDemos;../sdkDemos/toolBox;../sdkDemos/windowsMain;../../../packages;../../../packages/dMath;../../../packages/dScene;../../../packages/dContainers;../../../packages/dCustomJoints;../../../packages/thirdParty/tinyxml;../../../packages/thirdParty/glew/include;../../../packages/thirdParty/Qt/4.7.1/include;../../../packages/thirdParty/Qt/4.7.1/include/QtGui;../../../packages/thirdParty/Qt/4.7.1/include/QtCore;../../../packages/thirdParty/Qt/4.7.1/include/QtOpenGL"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_NEWTON_USE_LIB"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="toolbox_stdafx.h"
@@ -149,12 +149,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glu32.lib opengl32.lib"
+				AdditionalDependencies="qtmain.lib QtCore4.lib QtGui4.lib QtOpenGL4.lib opengl32.lib glu32.lib"
 				OutputFile="../$(PlatformName)/$(InputName).exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories=""
+				AdditionalLibraryDirectories="../../../packages/thirdParty/Qt/4.7.1/lib"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
@@ -181,27 +181,13 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine=""
+				CommandLine="xcopy &quot;../../../packages/thirdParty/Qt/4.7.1/bin/*.dll&quot; &quot;../$(PlatformName)/*.*&quot;  /F /Y"
 			/>
 		</Configuration>
 	</Configurations>
 	<References>
 	</References>
 	<Files>
-		<Filter
-			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
-			<File
-				RelativePath="..\sdkDemos\newtonDemos.ico"
-				>
-			</File>
-			<File
-				RelativePath="..\sdkDemos\newtonDemos.rc"
-				>
-			</File>
-		</Filter>
 		<Filter
 			Name="toobox"
 			>
@@ -235,14 +221,6 @@
 			</File>
 			<File
 				RelativePath="..\sdkDemos\toolBox\dSimulationThread.h"
-				>
-			</File>
-			<File
-				RelativePath="..\sdkDemos\toolBox\glContext.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\sdkDemos\toolBox\glContext.h"
 				>
 			</File>
 			<File
@@ -367,12 +345,38 @@
 			>
 		</File>
 		<File
-			RelativePath="..\sdkDemos\windowsMain\NewtonDemos.cpp"
+			RelativePath="..\sdkDemos\moc_NewtonDemos.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\sdkDemos\windowsMain\NewtonDemos.h"
+			RelativePath="..\sdkDemos\NewtonDemos.cpp"
 			>
+		</File>
+		<File
+			RelativePath="..\sdkDemos\NewtonDemos.h"
+			>
+			<FileConfiguration
+				Name="debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="moc $(InputName).h"
+					CommandLine="..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../sdkDemos/$(InputName).h -o ../sdkDemos/moc_$(InputName).cpp  -ftoolbox_stdafx.h -f$(InputName).h&#x0D;&#x0A;"
+					AdditionalDependencies="$(InputName).h"
+					Outputs="../sdkDemos/moc_$(InputName).cpp"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="moc $(InputName).h"
+					CommandLine="..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../sdkDemos/$(InputName).h -o ../sdkDemos/moc_$(InputName).cpp  -ftoolbox_stdafx.h -f$(InputName).h&#x0D;&#x0A;"
+					AdditionalDependencies="$(InputName).h"
+					Outputs="../sdkDemos/moc_$(InputName).cpp"
+				/>
+			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\sdkDemos\PhysicsUtils.cpp"
@@ -384,14 +388,6 @@
 		</File>
 		<File
 			RelativePath="..\sdkDemos\resource.h"
-			>
-		</File>
-		<File
-			RelativePath="..\sdkDemos\sdkDemos.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\sdkDemos\sdkDemos.h"
 			>
 		</File>
 	</Files>

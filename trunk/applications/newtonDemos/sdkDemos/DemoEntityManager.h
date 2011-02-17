@@ -12,30 +12,33 @@
 #ifndef __DEMO_ENTITY_MANAGER_H__
 #define __DEMO_ENTITY_MANAGER_H__
 
-#include "glContext.h"
 #include "dRuntimeProfiler.h"
 #include "dSimulationThread.h"
 #include "dHeightResolutionTimer.h"
 
+#include <QtOpenGL/QGLWidget>
+#include <QtGui/QFont>
+
+
 class DemoEntity;
 class DemoCamera;
 
-class DemoEntityManager: public dList <DemoEntity*>, public dSimulationThread
+class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public dSimulationThread
 {
-public:
+	public:
 	class EntityDictionary: public dTree<DemoEntity*, dScene::dTreeNode*>
 	{
 	};
 
 
-	DemoEntityManager(void);
+	DemoEntityManager(QWidget* const parent);
 	~DemoEntityManager(void);
 
-	GLContext& GetGL() {return m_glContext;}
-	NewtonWorld* GetNewton() const {return m_world;}
-	DemoCamera* GetCamera() const {return m_camera;}
+//	GLContext& GetGL() {return m_glContext;}
+	NewtonWorld* GetNewton() const;
+	DemoCamera* GetCamera() const;
 
-	void Render ();
+
 	void UpdatePhysics();
 
 	void Cleanup ();
@@ -46,10 +49,17 @@ public:
 	void SetAutoSleepState (bool state);
 
 	private:
-	void IntepopaterMatrix ();
+	void InterpolateMatrices ();
 	void LoadVisualScene(dScene* const scene, EntityDictionary& dictionary);
-	
-	GLContext m_glContext;
+
+
+	void initializeGL();
+	void resizeGL(int w, int h);
+	void paintEvent(QPaintEvent* ev);
+
+	void Print (QPainter& painter, Qt::GlobalColor color, int x, int y, const char *fmt, ... ) const;
+
+		//GLContext m_glContext;
 	DemoCamera* m_camera;
 	NewtonWorld* m_world;
 
@@ -59,9 +69,11 @@ public:
 	// some utility functionality
 	unsigned64 m_microsecunds;
 	dHeightResolutionTimer m_timer;
+
 	int m_showProfiler[8]; 
 	dRuntimeProfiler m_profiler;
-	
+
+	QFont m_font;
 };
 
 

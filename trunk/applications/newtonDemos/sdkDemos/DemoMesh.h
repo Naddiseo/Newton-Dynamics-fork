@@ -14,10 +14,6 @@
 #define _D_MESH_H_
 
 
-#include "glContext.h"
-
-
-
 
 class DemoMesh;
 class DemoSubMesh
