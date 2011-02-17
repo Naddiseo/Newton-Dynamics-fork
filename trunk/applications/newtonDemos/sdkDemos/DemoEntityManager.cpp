@@ -20,9 +20,9 @@ void *operator new (size_t size)
 	void* ptr;
 	ptr = malloc (size);
 
-unsigned xxx = unsigned (ptr);
-xxx &= 0xffff;
-	_ASSERTE (xxx != 0x6FF0);
+//	unsigned xxx = unsigned (ptr);
+//	xxx &= 0xffff;
+//	_ASSERTE (xxx != 0x6FF0);
 //	dTrace (("%d %x\n", xxxx, ptr))
 	return ptr; 
 }                                          
