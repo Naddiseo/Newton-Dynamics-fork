@@ -251,8 +251,8 @@ void alchemedia::InitGui ()
 	resize(1024, 768);
 	setWindowTitle (QApplication::translate("Alchemedia", "Newton Alchemedia Editor", 0, QApplication::UnicodeUTF8));
 
-	QAction* const mainAction = new QAction(this);
-	mainAction->setObjectName(QString::fromUtf8("maniAction"));
+//	QAction* const mainAction = new QAction(this);
+//	mainAction->setObjectName(QString::fromUtf8("mainAction"));
 
 	// create all menu and toolbars	
 	CreateMenus();
