@@ -66,10 +66,6 @@ typedef long long unsigned64;
 	#include <unistd.h>
 	#include <time.h>
 	#include <GL/glew.h>
-	//#include <wx/wx.h>
-	//#include <wx/dcclient.h>
-	//#include <wx/glcanvas.h>
-	//#include <wx/event.h>
 #endif
 
 #ifdef _MAC_VER
@@ -78,12 +74,47 @@ typedef long long unsigned64;
 	#include <OpenGL/gl.h>
 	#include <OpenGL/glu.h>
 //	#include <GLEW/glew.h>
-	#include <wx/wx.h>
-	#include <wx/dcclient.h>
-	#include <wx/glcanvas.h>
-	#include <wx/event.h>
 #endif
-	
+
+
+#ifdef _MSC_VER
+	#pragma warning (disable: 4100) //unreferenced formal parameter
+	#pragma warning (disable: 4505) //unreferenced local function has been removed
+	#pragma warning (disable: 4201) //nonstandard extension used : nameless struct/union
+	#pragma warning (disable: 4127) //conditional expression is constant
+
+	#if (_MSC_VER >= 1400)
+		#pragma warning (disable: 4996) // for 2005 users declared deprecated
+	#endif
+#endif
+
+
+#include <QtGui/QApplication>
+#include <QtGui/QMainWindow>
+#include <QtGui/QAction>
+#include <QtGui/QMenu>
+#include <QtGui/QMenuBar>
+#include <QtCore/QVariant>
+#include <QtOpenGL/QGLWidget>
+#include <QtGui/QFont>
+#include <QAbstractEventDispatcher>
+
+//#include <QtGui/QSplitter>
+//#include <QtGui/QStatusBar>
+//#include <QtGui/QFileDialog>
+//#include <QtGui/QButtonGroup>
+//#include <QtGui/QHeaderView>
+//#include <QtGui/QToolBar>
+//#include <QtGui/QWidget>
+//#include <QtGui/QIcon>
+//#include <QtGui/QPixmap>
+//#include <QtGui/QBitmap>
+//#include <QtGui/QTextEdit>
+//#include <QtGui/QResizeEvent>
+//#include <QtGui/QHBoxLayout>
+//#include <QtOpenGL/QGLWidget>
+//#include <QtCore/QList>
+
 
 
 #include <Newton.h>
@@ -137,17 +168,6 @@ typedef long long unsigned64;
 #endif
 
 
-#ifdef _MSC_VER
-	#pragma warning (disable: 4100) //unreferenced formal parameter
-	#pragma warning (disable: 4505) //unreferenced local function has been removed
-	#pragma warning (disable: 4201) //nonstandard extension used : nameless struct/union
-	#pragma warning (disable: 4127) //conditional expression is constant
-
-	#if (_MSC_VER >= 1400)
-		#pragma warning (disable: 4996) // for 2005 users declared deprecated
-	#endif
-
-#endif
 
 #ifndef _MSC_VER
 	#ifndef stricmp

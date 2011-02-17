@@ -10,8 +10,6 @@
 */
 
 #include <toolbox_stdafx.h>
-#include <QtOpenGL/QGLWidget>
-
 #include "OpenGlUtil.h"
 #include "dRuntimeProfiler.h"
 #include "dHeightResolutionTimer.h"

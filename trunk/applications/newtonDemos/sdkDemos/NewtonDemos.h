@@ -12,29 +12,6 @@
 #ifndef __NEWTON_DEMOS_H__
 
 
-#include <QtGui/QApplication>
-#include <QtGui/QMainWindow>
-#include <QtGui/QAction>
-#include <QtGui/QMenu>
-#include <QtGui/QMenuBar>
-#include <QtCore/QVariant>
-#include <QAbstractEventDispatcher>
-
-//#include <QtGui/QSplitter>
-//#include <QtGui/QStatusBar>
-//#include <QtGui/QFileDialog>
-//#include <QtGui/QButtonGroup>
-//#include <QtGui/QHeaderView>
-//#include <QtGui/QToolBar>
-//#include <QtGui/QWidget>
-//#include <QtGui/QIcon>
-//#include <QtGui/QPixmap>
-//#include <QtGui/QBitmap>
-//#include <QtGui/QTextEdit>
-//#include <QtGui/QResizeEvent>
-//#include <QtGui/QHBoxLayout>
-//#include <QtOpenGL/QGLWidget>
-//#include <QtCore/QList>
 
 
 

@@ -386,10 +386,6 @@
 			RelativePath="..\sdkDemos\PhysicsUtils.h"
 			>
 		</File>
-		<File
-			RelativePath="..\sdkDemos\resource.h"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

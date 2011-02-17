@@ -16,8 +16,6 @@
 #include "dSimulationThread.h"
 #include "dHeightResolutionTimer.h"
 
-#include <QtOpenGL/QGLWidget>
-#include <QtGui/QFont>
 
 
 class DemoEntity;
