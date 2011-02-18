@@ -347,6 +347,28 @@
 		<File
 			RelativePath="..\..\sdkDemos\NewtonDemos.h"
 			>
+			<FileConfiguration
+				Name="debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="moc $(InputName).h"
+					CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../sdkDemos/$(InputName).h -o ../../sdkDemos/moc_$(InputName).cpp  -ftoolbox_stdafx.h -f$(InputName).h"
+					AdditionalDependencies="$(InputName).h"
+					Outputs="../../sdkDemos/moc_$(InputName).cpp"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="moc $(InputName).h"
+					CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../sdkDemos/$(InputName).h -o ../../sdkDemos/moc_$(InputName).cpp  -ftoolbox_stdafx.h -f$(InputName).h"
+					AdditionalDependencies="$(InputName).h"
+					Outputs="../../sdkDemos/moc_$(InputName).cpp"
+				/>
+			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\..\sdkDemos\PhysicsUtils.cpp"
