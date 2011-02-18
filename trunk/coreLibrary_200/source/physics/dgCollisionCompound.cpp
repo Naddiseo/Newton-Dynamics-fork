@@ -1387,6 +1387,8 @@ void dgCollisionCompound::ImproveNodeFitness (dgNodeBase* const node) const
 				parent->m_origin = (parent->m_p1 + parent->m_p0).Scale(dgFloat32 (0.5f));
 			}
 		}
+	} else {
+		// in the future I can handle this but it is too much work for little payoff
 	}
 }
 

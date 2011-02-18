@@ -95,8 +95,16 @@ dgCollisionCompound::OOBBTestData::OOBBTestData (const dgMatrix& matrix, const d
 	}
 }
 
+dgCollisionCompound::dgNodeBase::dgNodeBase () 
+{
+	m_id = -1;
+	m_shape = NULL; 
+	m_left = NULL; 
+	m_right = NULL;
+}
 
-dgCollisionCompound::dgNodeBase::dgNodeBase (dgCollisionConvex* shape, dgInt32 id)
+
+dgCollisionCompound::dgNodeBase::dgNodeBase (dgCollisionConvex* const shape, dgInt32 id)
 {
 	m_id = id;
 	m_left = NULL;
@@ -110,12 +118,12 @@ dgCollisionCompound::dgNodeBase::dgNodeBase (dgCollisionConvex* shape, dgInt32 i
 	m_p1.m_w = 0.0f;
 	m_size = (m_p1 - m_p0).Scale (dgFloat32 (0.5f));
 	m_origin = (m_p1 + m_p0).Scale (dgFloat32 (0.5f));
-//	m_volume = m_size.m_x * m_size.m_y * m_size.m_z;
+
 	dgVector size1(m_size.m_y, m_size.m_z, m_size.m_x, dgFloat32 (0.0f));
 	m_area = m_size % size1;
 }
 
-dgCollisionCompound::dgNodeBase::dgNodeBase (dgNodeBase* left, dgNodeBase* right, dgInt32 id)
+dgCollisionCompound::dgNodeBase::dgNodeBase (dgNodeBase* const left, dgNodeBase* const right, dgInt32 id)
 {
 	m_id = id;
 	m_left = left;
@@ -135,7 +143,6 @@ dgCollisionCompound::dgNodeBase::dgNodeBase (dgNodeBase* left, dgNodeBase* right
 
 	m_size = (m_p1 - m_p0).Scale (dgFloat32 (0.5f));
 	m_origin = (m_p1 + m_p0).Scale (dgFloat32 (0.5f));
-//	m_volume = m_size.m_x * m_size.m_y * m_size.m_z;
 
 	dgVector size1(m_size.m_y, m_size.m_z, m_size.m_x, dgFloat32 (0.0f));
 	m_area = m_size % size1;
@@ -1239,11 +1246,10 @@ dgFloat32 dgCollisionCompound::CalculateSurfaceArea (dgNodeBase* const node0, dg
 }
 
 
-void dgCollisionCompound::ImproveNodeFitness (dgNodeBase* node) const
+void dgCollisionCompound::ImproveNodeFitness (dgNodeBase* const node) const
 {
 	_ASSERTE (node->m_left);
 	_ASSERTE (node->m_right);
-
 
 	if (node->m_parent)	{
 		if (node->m_parent->m_left == node) {
@@ -1281,8 +1287,8 @@ void dgCollisionCompound::ImproveNodeFitness (dgNodeBase* node) const
 				parent->m_p0 = cost1P0;
 				parent->m_p1 = cost1P1;		
 				parent->m_area = cost1;
-				parent->m_size = (parent->m_p1 - parent->m_p0).Scale(dgFloat32 (0.0f));
-				parent->m_origin = (parent->m_p1 + parent->m_p0).Scale(dgFloat32 (0.0f));
+				parent->m_size = (parent->m_p1 - parent->m_p0).Scale(dgFloat32 (0.5f));
+				parent->m_origin = (parent->m_p1 + parent->m_p0).Scale(dgFloat32 (0.5f));
 
 			} else if ((cost2 <= cost0) && (cost2 <= cost1)) {
 				dgNodeBase* const parent = node->m_parent;
@@ -1309,8 +1315,8 @@ void dgCollisionCompound::ImproveNodeFitness (dgNodeBase* node) const
 				parent->m_p0 = cost2P0;
 				parent->m_p1 = cost2P1;		
 				parent->m_area = cost2;
-				parent->m_size = (parent->m_p1 - parent->m_p0).Scale(dgFloat32 (0.0f));
-				parent->m_origin = (parent->m_p1 + parent->m_p0).Scale(dgFloat32 (0.0f));
+				parent->m_size = (parent->m_p1 - parent->m_p0).Scale(dgFloat32 (0.5f));
+				parent->m_origin = (parent->m_p1 + parent->m_p0).Scale(dgFloat32 (0.5f));
 			}
 		} else {
 			dgFloat32 cost0 = node->m_area;
@@ -1349,8 +1355,8 @@ void dgCollisionCompound::ImproveNodeFitness (dgNodeBase* node) const
 				parent->m_p0 = cost1P0;
 				parent->m_p1 = cost1P1;		
 				parent->m_area = cost1;
-				parent->m_size = (parent->m_p1 - parent->m_p0).Scale(dgFloat32 (0.0f));
-				parent->m_origin = (parent->m_p1 + parent->m_p0).Scale(dgFloat32 (0.0f));
+				parent->m_size = (parent->m_p1 - parent->m_p0).Scale(dgFloat32 (0.5f));
+				parent->m_origin = (parent->m_p1 + parent->m_p0).Scale(dgFloat32 (0.5f));
 
 			} else if ((cost2 <= cost0) && (cost2 <= cost1)) {
 				dgNodeBase* const parent = node->m_parent;
@@ -1377,10 +1383,12 @@ void dgCollisionCompound::ImproveNodeFitness (dgNodeBase* node) const
 				parent->m_p0 = cost2P0;
 				parent->m_p1 = cost2P1;		
 				parent->m_area = cost2;
-				parent->m_size = (parent->m_p1 - parent->m_p0).Scale(dgFloat32 (0.0f));
-				parent->m_origin = (parent->m_p1 + parent->m_p0).Scale(dgFloat32 (0.0f));
+				parent->m_size = (parent->m_p1 - parent->m_p0).Scale(dgFloat32 (0.5f));
+				parent->m_origin = (parent->m_p1 + parent->m_p0).Scale(dgFloat32 (0.5f));
 			}
 		}
+	} else {
+		// in the future I can handle this but it is too much work for little payoff
 	}
 }
 
@@ -1460,9 +1468,6 @@ dgInt32 dgCollisionCompound::CalculateContacts (dgCollidingPairCollector::dgPair
 
 dgInt32 dgCollisionCompound::CalculateContactsToSingle (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi, dgInt32 useSimd) const
 {
-_ASSERTE(0);
-return 0;
-/*
 	dgVector p0;
 	dgVector p1;
 	dgContactPoint* const contacts = pair->m_contactBuffer;
@@ -1551,16 +1556,11 @@ return 0;
 	}
 
 	return contactCount;
-*/
 }
 
 
 dgInt32 dgCollisionCompound::CalculateContactsToCompound (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi, dgInt32 useSimd) const
 {
-
-_ASSERTE(0);
-return 0;
-/*
 	dgContactPoint* const contacts = pair->m_contactBuffer;
 	const dgNodeBase* stackPool[4 * DG_COMPOUND_STACK_DEPTH][2];
 
@@ -1700,15 +1700,11 @@ return 0;
 	}
 
 	return contactCount;
-*/
 }
 
 
 dgInt32 dgCollisionCompound::CalculateContactsToCollisionTree (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi, dgInt32 useSimd) const
 {
-_ASSERTE(0);
-return 0;
-/*
 	dgContactPoint* const contacts = pair->m_contactBuffer;
 	dgTree<const dgNodeBase*, const dgNodeBase*> filter(m_allocator);
 
@@ -1939,15 +1935,11 @@ return 0;
 	}
 	
 	return contactCount;
-*/
 }
 
 
 dgInt32 dgCollisionCompound::CalculateContactsToHightField (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi, dgInt32 useSimd) const
 {
-_ASSERTE(0);
-return 0;
-/*
 	dgNodeBase nodeProxi;
 	dgContactPoint* const contacts = pair->m_contactBuffer;
 	const dgNodeBase* stackPool[DG_COMPOUND_STACK_DEPTH];
@@ -2024,15 +2016,11 @@ return 0;
 	}
 
 	return contactCount;
-*/
 }
 
 
 dgInt32 dgCollisionCompound::CalculateContactsBruteForce (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi, dgInt32 useSimd) const
 {
-_ASSERTE(0);
-return 0;
-/*
 	dgContactPoint* const contacts = pair->m_contactBuffer;
 	const dgNodeBase* stackPool[DG_COMPOUND_STACK_DEPTH];
 
@@ -2099,7 +2087,6 @@ return 0;
 	}
 
 	return contactCount;
-*/
 }
 
 

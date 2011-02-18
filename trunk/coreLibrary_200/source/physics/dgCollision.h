@@ -302,7 +302,6 @@ class dgCollision//: public dgRef
 	void SetSignature (dgInt32 signature);
 	virtual dgInt32 CalculateSignature () const = 0;
 	
-int xxxx;
 
 	dgMatrix m_offset;
 	dgMemoryAllocator* m_allocator;
