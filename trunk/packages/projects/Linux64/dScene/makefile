@@ -25,6 +25,8 @@ SDK_MATH = ../../../dMath
 SDK_CONTAINERS = ../../../dContainers
 SDK_XML = ../../../thirdParty/tinyxml
 
+NEWTON_SDK = ../../../Linux64
+
 
 LIB_SRCS = \
 	$(SRC_PATH)/dBoneNodeInfo.cpp \
@@ -71,7 +73,7 @@ COMPILER = gcc
 
 # Linux options	 gcc 4.2.2
 CPU_FLAGS = -O2 -msse  -msse2 -ffloat-store -ffast-math -freciprocal-math -funsafe-math-optimizations -fsingle-precision-constant 
-FLAGS = -c -Wall -Wno-strict-aliasing -D_LINUX_VER  $(CPU_FLAGS) -I ../ -I$(INCLUDED_PATH) -I$(SDK_MATH) -I$(SDK_CONTAINERS) -I$(SDK_XML) 
+FLAGS = -c -Wall -Wno-strict-aliasing -D_LINUX_VER  $(CPU_FLAGS) -I$(NEWTON_SDK) -I$(INCLUDED_PATH) -I$(SDK_MATH) -I$(SDK_CONTAINERS) -I$(SDK_XML) 
  
 
 

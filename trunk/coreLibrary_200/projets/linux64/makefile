@@ -147,7 +147,7 @@ libNewton.a : $(DG_OBJ_FILES)
 	cp ../../source/newton/Newton.h ../../../packages/Linux64/Newton.h
 	gcc -shared -Wl,-soname,libNewton.so $? -o libNewton.so 
 	cp libNewton.so ../../../packages/Linux64/libNewton.so
-	sudo cp libNewton.so /usr/lib
+#	sudo cp libNewton.so /usr/lib
 
  
 

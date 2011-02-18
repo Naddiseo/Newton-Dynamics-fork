@@ -142,18 +142,21 @@ FLAGS = $(SDK_FLAGS) $(SDK_INCLUDE_PATH)
 	$(COMPILER) $(FLAGS) -o $@ $<	
 
 # main target
-NewtonDemos : $(SDK_OBJS) 
+NewtonDemos : buildLibraries $(SDK_OBJS) 
+	gcc $? $(NEWTON_LIB) $(LIBS) $(THIRD_PARTY_LIBRARIES)  -o $@.elf	
+
+buildLibraries: 
 	make -C $(NEWTON_CORE)
 	make -C $(SDK_XML)
 	make -C $(SDK_MATH)
 	make -C $(SDK_SCENE)
 	make -C $(SDK_JOINTS)
 	make -C $(SDK_CONTAINERS)
-	gcc $? $(NEWTON_LIB) $(LIBS) $(THIRD_PARTY_LIBRARIES)  -o $@.elf	
 
 
 # clean all objects target
 clean :
+	make clean -C $(NEWTON_CORE)
 	make clean -C $(SDK_XML)
 	make clean -C $(SDK_MATH)
 	make clean -C $(SDK_SCENE)
