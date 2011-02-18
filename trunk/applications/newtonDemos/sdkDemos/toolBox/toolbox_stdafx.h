@@ -94,9 +94,9 @@ typedef long long unsigned64;
 #include <QtGui/QAction>
 #include <QtGui/QMenu>
 #include <QtGui/QMenuBar>
-#include <QtCore/QVariant>
-#include <QtOpenGL/QGLWidget>
 #include <QtGui/QFont>
+#include <QtOpenGL/QGLWidget>
+#include <QtCore/QVariant>
 #include <QtCore/QAbstractEventDispatcher>
 
 //#include <QtGui/QSplitter>

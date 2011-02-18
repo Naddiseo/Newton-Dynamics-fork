@@ -18,10 +18,11 @@
 # ******************************************************
 LIB_NAME = libdJointLibrary.a
 
-INCLUDED_PATH = .
-SRC_PATH = .
-SDK_MATH = ../dMath
-SDK_CONTAINERS = ../dContainers
+INCLUDED_PATH = ../../../dCustomJoints
+SRC_PATH = ../../../dCustomJoints
+
+SDK_MATH = ../../../dMath
+SDK_CONTAINERS = ../../../dContainers
 
 
 LIB_SRCS = \

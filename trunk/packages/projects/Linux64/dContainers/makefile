@@ -18,8 +18,8 @@
 # ******************************************************
 LIB_NAME = libdContainers.a
 
-INCLUDED_PATH = .
-SRC_PATH = .
+INCLUDED_PATH = ../../../dContainers
+SRC_PATH = ../../../dContainers
 
 LIB_SRCS = \
 	$(SRC_PATH)/dTree.cpp \

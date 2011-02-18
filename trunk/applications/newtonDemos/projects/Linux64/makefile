@@ -38,6 +38,7 @@ PLATFORM = Linux64
 SDK_MAIN = ../../sdkDemos
 SDK_DEMOS = ../../sdkDems/demos
 SDK_TOOLBOX = ../../sdkDemos/toolBox
+NEWTON_CORE = ../../../../coreLibrary_200/projets/linux64
 SDK_NEWTON = ../../../../packages/$(PLATFORM)
 SDK_MATH = ../../../../packages/projects/$(PLATFORM)/dMath
 SDK_SCENE = ../../../../packages/projects/$(PLATFORM)/dScene
@@ -142,6 +143,7 @@ FLAGS = $(SDK_FLAGS) $(SDK_INCLUDE_PATH)
 
 # main target
 NewtonDemos : $(SDK_OBJS) 
+	make -C $(NEWTON_CORE)
 	make -C $(SDK_XML)
 	make -C $(SDK_MATH)
 	make -C $(SDK_SCENE)
