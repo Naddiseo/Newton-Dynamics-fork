@@ -33,18 +33,17 @@ SDK_FLAGS = -O0 -c -Wall -D_LINUX_VER -g -pg
 #SDK_FLAGS = -m32 -O3 -c -Wall -Werror -D_LINUX_VER -g 
 #SDK_FLAGS = -m32 -O3 -c -Wall -D_LINUX_VER -g 
 
+PLATFORM = Linux64
 
-
-SDK_MAIN = sdkDemos
-SDK_DEMOS = sdkDemos/demos
-SDK_TOOLBOX = sdkDemos/toolBox
-SDK_LINUX_MAIN = sdkDemos/linuxMain
-SDK_NEWTON = ../../../../packages/Linux64
-SDK_MATH = ../../../../packages/dMath
-SDK_SCENE = ../../../../packages/dScene
-SDK_JOINTS = ../../../../packages/dCustomJoints
-SDK_CONTAINERS = ../../../../packages/dContainers
-SDK_XML = ../../../../packages/thirdParty/tinyxml
+SDK_MAIN = ../../sdkDemos
+SDK_DEMOS = ../../sdkDems/demos
+SDK_TOOLBOX = ../../sdkDemos/toolBox
+SDK_NEWTON = ../../../../packages/$(PLATFORM)
+SDK_MATH = ../../../../packages/projects/$(PLATFORM)/dMath
+SDK_SCENE = ../../../../packages/projects/$(PLATFORM)/dScene
+SDK_JOINTS = ../../../../packages/projects/$(PLATFORM)/dCustomJoints
+SDK_CONTAINERS = ../../../../packages/projects/$(PLATFORM)/dContainers
+SDK_XML = ../../../../packages/projects/$(PLATFORM)/thirdParty/tinyxml
 QT_HEADERS = /usr/include/qt4
 
 
@@ -73,7 +72,7 @@ SDK_INCLUDE_PATH = -I $(SDK_MAIN) \
 
 
 SDK_MAIN_SRC = \
-		$(SDK_LINUX_MAIN)/NewtonDemos.cpp  
+		$(SDK_MAIN)/NewtonDemos.cpp  
 #		$(SDK_MAIN)/DemoCamera.cpp \
 #		$(SDK_MAIN)/DemoEntity.cpp \
 #		$(SDK_MAIN)/DemoMesh.cpp \

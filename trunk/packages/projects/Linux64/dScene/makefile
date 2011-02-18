@@ -18,11 +18,12 @@
 # ******************************************************
 LIB_NAME = libdScene.a
 
-INCLUDED_PATH = .
-SRC_PATH = .
-SDK_MATH = ../dMath
-SDK_CONTAINERS = ../dContainers
-SDK_XML = ../thirdParty/tinyxml
+INCLUDED_PATH = ../../../dScene
+SRC_PATH = ../../../dScene
+
+SDK_MATH = ../../../dMath
+SDK_CONTAINERS = ../../../dContainers
+SDK_XML = ../../../thirdParty/tinyxml
 
 
 LIB_SRCS = \

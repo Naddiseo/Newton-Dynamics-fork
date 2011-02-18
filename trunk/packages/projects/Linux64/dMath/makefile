@@ -18,8 +18,8 @@
 # ******************************************************
 LIB_NAME = libdMath.a
 
-INCLUDED_PATH = .
-SRC_PATH = .
+INCLUDED_PATH = ../../../dMath
+SRC_PATH =  ../../../dMath
 
 LIB_SRCS = \
 	$(SRC_PATH)/dMathDefines.cpp \

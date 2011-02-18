@@ -241,7 +241,7 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 			//	}
 			//}
 			//DeleteMenu(hMenu, 0, MF_BYPOSITION);
-			for (int i = 0; i < sizeof (demosSelection) / sizeof demosSelection[0]; i ++) {
+			for (int i = 0; i < int (sizeof (demosSelection) / sizeof demosSelection[0]); i ++) {
 				//AppendMenu(hMenu, MF_STRING, IDM_DEMOS + i, demosSelection[i].m_name);
 
 				//char actionName[256];
@@ -400,7 +400,7 @@ void newtonDemos::OnRunDemo()
 {
 	m_doVisualUpdates = false;
 	QAction* const action = (QAction*)sender();
-	int index = (INT) action->data().toInt();
+	int index = (int) action->data().toInt();
 	LoadDemo (index);
 	m_doVisualUpdates = true;
 }

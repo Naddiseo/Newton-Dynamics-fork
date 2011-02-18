@@ -18,8 +18,8 @@
 # ******************************************************
 LIB_NAME = libTinyXML.a
 
-INCLUDED_PATH = .
-SRC_PATH = .
+INCLUDED_PATH = ../../../../thirdParty/tinyxml
+SRC_PATH = ../../../../thirdParty/tinyxml
 
 LIB_SRCS = \
 	$(SRC_PATH)/tinystr.cpp \
