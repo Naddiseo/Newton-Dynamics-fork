@@ -17,14 +17,13 @@
 # dg low level library
 #
 # ******************************************************
-DG_INCLUDED_PATH = dg
+DG_INCLUDED_PATH = ../../source/core
 DG_PATH = $(DG_INCLUDED_PATH)/
 DG_SRCS = \
 	$(DG_PATH)dg.cpp \
 	$(DG_PATH)dgRef.cpp \
 	$(DG_PATH)dgCRC.cpp \
 	$(DG_PATH)dgTree.cpp \
-	$(DG_PATH)dgFile.cpp \
 	$(DG_PATH)dgNode.cpp \
 	$(DG_PATH)dgTypes.cpp \
 	$(DG_PATH)dgMatrix.cpp \
@@ -44,20 +43,21 @@ DG_SRCS = \
 	$(DG_PATH)dgPolyhedraMassProperties.cpp \
 	$(DG_PATH)dgDelaunayTetrahedralization.cpp
 	
+
 	
 # ******************************************************
 #
 # Physics engine files
 #
 # ******************************************************
-DG_INCLUDED_PHYSICS_PATH = physics
+DG_INCLUDED_PHYSICS_PATH = ../../source/physics
 DG_PHYSICS_PATH = $(DG_INCLUDED_PHYSICS_PATH)/
 DG_PHYSICS_SRCS = \
 	$(DG_PHYSICS_PATH)dgWorld.cpp \
 	$(DG_PHYSICS_PATH)dgBody.cpp \
 	$(DG_PHYSICS_PATH)dgMeshEffect.cpp \
 	$(DG_PHYSICS_PATH)dgMeshEffect2.cpp \
-	$(DG_PHYSICS_PATH)dgConvexCollision.cpp \
+	$(DG_PHYSICS_PATH)dgCollisionConvex.cpp \
 	$(DG_PHYSICS_PATH)dgBallConstraint.cpp \
 	$(DG_PHYSICS_PATH)dgBilateralConstraint.cpp \
 	$(DG_PHYSICS_PATH)dgCorkscrewConstraint.cpp \
@@ -100,7 +100,7 @@ DG_PHYSICS_SRCS = \
 # Newton engine files
 #g++ -shared -o libNewton.so libNewton.a
 # ******************************************************
-DG_INCLUDED_NEWTON_PATH = newton
+DG_INCLUDED_NEWTON_PATH = ../../source/newton
 DG_NEWTON_PATH = $(DG_INCLUDED_NEWTON_PATH)/
 DG_NEWTON_SRCS = \
 	$(DG_NEWTON_PATH)Newton.cpp \
@@ -143,10 +143,10 @@ clean :
 libNewton.a : $(DG_OBJ_FILES)
 	ar r $@ $?
 	strip -g -S -d -v libNewton.a -olibNewton.a
-	cp libNewton.a ../newtonSDK/sdk/libNewton.a
-	cp newton/Newton.h ../newtonSDK/sdk/Newton.h
+	cp libNewton.a ../../../packages/Linux32/libNewton.a
+	cp ../../source/newton/Newton.h ../../../packages/Linux32/Newton.h
 	gcc -shared -Wl,-soname,libNewton.so $? -o libNewton.so 
-	cp libNewton.so ../newtonSDK/sdk/libNewton.so
+	cp libNewton.so ../../../packages/Linux32/libNewton.so
 	sudo cp libNewton.so /usr/lib
 
  
