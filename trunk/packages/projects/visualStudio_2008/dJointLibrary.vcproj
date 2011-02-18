@@ -421,7 +421,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="newton_d.lib"
 				OutputFile="$(OutDir)\$(InputName)_d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../$(PlatformName)/releaseSingleDll"
@@ -588,7 +587,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="newton.lib"
 				OutputFile="$(OutDir)\$(InputName).dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../$(PlatformName)/releaseSingleDll"
