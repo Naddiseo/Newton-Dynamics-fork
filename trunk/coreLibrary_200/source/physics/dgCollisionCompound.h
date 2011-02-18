@@ -63,9 +63,9 @@ class dgCollisionCompound: public dgCollision
 	{
 		public:
 		DG_CLASS_ALLOCATOR(allocator)
-		dgNodeBase () {m_shape = NULL; m_left = NULL; m_right = NULL;}
-		dgNodeBase (dgCollisionConvex* m_shape, dgInt32 id);
-		dgNodeBase (dgNodeBase* left, dgNodeBase* right, dgInt32 id);
+		dgNodeBase ();
+		dgNodeBase (dgCollisionConvex* const m_shape, dgInt32 id);
+		dgNodeBase (dgNodeBase* const left, dgNodeBase* const right, dgInt32 id);
 		~dgNodeBase();
 		bool BoxTest (const OOBBTestData& data) const;
 		bool BoxTest (const OOBBTestData& data, const dgNodeBase* const otherNode) const;
@@ -152,7 +152,7 @@ class dgCollisionCompound: public dgCollision
 //	static dgInt32 CompareBox (const dgNodeBase* const boxA, const dgNodeBase* const boxB, void* const context);
 //	dgNodeBase* BuildBottomUpTree(dgInt32 count, dgNodeBase** const proxiArray);
 
-	void ImproveNodeFitness (dgNodeBase* node) const;
+	void ImproveNodeFitness (dgNodeBase* const node) const;
 	dgNodeBase* BuildTopDownTree(dgInt32 count, dgNodeBase** const proxiArray, dgInt32& id);
 	void PushNodes (dgNodeBase* const root, dgNodeBase** const proxiArray, dgInt32& index) const;
 	dgFloat32 CalculateSurfaceArea (dgNodeBase* const node0, dgNodeBase* const node1, dgVector& minBox, dgVector& maxBox) const;

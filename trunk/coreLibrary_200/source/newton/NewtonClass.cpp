@@ -23,37 +23,6 @@
 #include "NewtonClass.h"
 
 
-/*
-#ifdef _NEWTON_BUILD_DLL
-
-void* dgApi operator new (size_t size)
-{
-	_ASSERTE (0);
-	return NULL;
-	//	return dgMalloc ( (dgInt32)size);
-}
-
-void dgApi operator delete (void *ptr)
-{
-	_ASSERTE (0);
-	//	dgFree (ptr);
-}
-
-void* dgApi operator new[] (size_t size)
-{
-	_ASSERTE (0);
-	return NULL;
-	//	return dgMalloc ( (dgInt32)size);
-}
-
-void dgApi operator delete[] (void *ptr)
-{
-	_ASSERTE (0);
-	//	dgFree (ptr);
-}
-
-#endif
-*/
 
 
 
