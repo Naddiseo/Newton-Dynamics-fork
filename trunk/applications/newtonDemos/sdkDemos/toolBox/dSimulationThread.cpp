@@ -16,7 +16,7 @@
 
 
 dSimulationThread::dSimulationThread()
-	:dThread(), m_asycronousUpdate(true), m_physicsTime(0.0f)
+	:dThread(), m_asycronousUpdate(false), m_physicsTime(0.0f)
 {
 }
 

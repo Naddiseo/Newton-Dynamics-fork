@@ -53,14 +53,13 @@ void GetWorkingFileName (const char* const name, char* const outPathName)
 #ifdef _LINUX_VER
 	char id[2048];
 	char path[2048];
-	char *end;
 
 	sprintf(id, "/proc/%d/exe", getpid());
 	memset (path, 0, sizeof (path));
 	readlink(id, path, 1024);
-	end = strrchr (path, '/');
+	char* const end = strstr (path, "/applications");
 	*end = 0;
-	sprintf (outPathName, "%s/bin/%s", path, name);
+	sprintf (outPathName, "%s/applications/media/%s", path, name);
 #endif
 }
 

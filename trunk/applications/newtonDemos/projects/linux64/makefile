@@ -33,8 +33,7 @@ SDK_FLAGS = -O0 -c -Wall -D_LINUX_VER -g -pg
 #SDK_FLAGS = -m64 -O3 -c -Wall -Werror -D_LINUX_VER -g 
 #SDK_FLAGS = -m64 -O3 -c -Wall -D_LINUX_VER -g 
 
-PLATFORM = Linux64
-PLATFORM_1 = linux64
+PLATFORM = linux64
 
 # include path
 SDK_MAIN_PATH = ../../sdkDemos
@@ -64,7 +63,7 @@ SDK_INCLUDE_PATH = \
 
 
 # sub project path
-NEWTON_CORE_MAKE = ../../../../coreLibrary_200/projets/$(PLATFORM_1)
+NEWTON_CORE_MAKE = ../../../../coreLibrary_200/projets/$(PLATFORM)
 SDK_MATH_MAKE = ../../../../packages/projects/$(PLATFORM)/dMath
 SDK_SCENE_MAKE = ../../../../packages/projects/$(PLATFORM)/dScene
 SDK_JOINTS_MAKE = ../../../../packages/projects/$(PLATFORM)/dCustomJoints
