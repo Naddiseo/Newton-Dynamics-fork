@@ -21,7 +21,7 @@ LIB_NAME = libdMath.a
 INCLUDED_PATH = ../../../dMath
 SRC_PATH =  ../../../dMath
 
-NEWTON_SDK = ../../../linux64
+NEWTON_SDK = ../../../linux32
 
 LIB_SRCS = \
 	$(SRC_PATH)/dMathDefines.cpp \

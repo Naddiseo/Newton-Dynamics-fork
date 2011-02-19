@@ -16,17 +16,18 @@
 # low level library
 #
 # ******************************************************
-LIB_NAME = libdMath.a
+LIB_NAME = libTinyXML.a
 
-INCLUDED_PATH = ../../../dMath
-SRC_PATH =  ../../../dMath
+INCLUDED_PATH = ../../../../thirdParty/tinyxml
+SRC_PATH = ../../../../thirdParty/tinyxml
 
-NEWTON_SDK = ../../../linux64
+NEWTON_SDK = ../../../../linux32
 
 LIB_SRCS = \
-	$(SRC_PATH)/dMathDefines.cpp \
-	$(SRC_PATH)/dMatrix.cpp \
-	$(SRC_PATH)/dQuaternion.cpp 	
+	$(SRC_PATH)/tinystr.cpp \
+	$(SRC_PATH)/tinyxml.cpp \
+	$(SRC_PATH)/tinyxmlerror.cpp \
+	$(SRC_PATH)/tinyxmlparser.cpp 
 
 # ******************************************************
 #
@@ -39,7 +40,7 @@ DG_OBJ_FILES = $(ALL_SRC_FILES:.cpp=.o)
 COMPILER = gcc
 
 # Linux options	 gcc 4.2.2
-CPU_FLAGS = -O2 -msse  -msse2 -ffloat-store -ffast-math -freciprocal-math -funsafe-math-optimizations -fsingle-precision-constant 
+CPU_FLAGS = -fPIC -O2 -msse  -msse2 -ffloat-store -ffast-math -freciprocal-math -funsafe-math-optimizations -fsingle-precision-constant 
 FLAGS = -c -Wall -Wno-strict-aliasing -D_LINUX_VER  $(CPU_FLAGS) -I$(INCLUDED_PATH) 
 
 
@@ -54,9 +55,6 @@ libTemp.a : $(DG_OBJ_FILES)
 	strip -g -S -d -v $@  -o$@ 
 	cp $@ $(NEWTON_SDK)/$(LIB_NAME) 	
 	
-	#gcc -shared -Wl,-soname,libNewton.so $? -o libNewton.so 
-	#cp libNewton.so ../newtonSDK/sdk/libNewton.so
-	#sudo cp libNewton.so /usr/lib
 
 
 # clean all objects target

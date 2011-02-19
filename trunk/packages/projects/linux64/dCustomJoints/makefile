@@ -24,7 +24,7 @@ SRC_PATH = ../../../dCustomJoints
 SDK_MATH = ../../../dMath
 SDK_CONTAINERS = ../../../dContainers
 
-NEWTON_SDK = ../../../Linux64
+NEWTON_SDK = ../../../linux64
 
 LIB_SRCS = \
 	$(SRC_PATH)/Custom6DOF.cpp \

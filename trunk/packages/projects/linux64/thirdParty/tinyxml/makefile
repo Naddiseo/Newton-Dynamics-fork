@@ -21,7 +21,7 @@ LIB_NAME = libTinyXML.a
 INCLUDED_PATH = ../../../../thirdParty/tinyxml
 SRC_PATH = ../../../../thirdParty/tinyxml
 
-NEWTON_SDK = ../../../../Linux64
+NEWTON_SDK = ../../../../linux64
 
 LIB_SRCS = \
 	$(SRC_PATH)/tinystr.cpp \

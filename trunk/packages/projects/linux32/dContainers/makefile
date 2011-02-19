@@ -16,17 +16,23 @@
 # low level library
 #
 # ******************************************************
-LIB_NAME = libdMath.a
+LIB_NAME = libdContainers.a
 
-INCLUDED_PATH = ../../../dMath
-SRC_PATH =  ../../../dMath
+INCLUDED_PATH = ../../../dContainers
+SRC_PATH = ../../../dContainers
 
-NEWTON_SDK = ../../../linux64
+NEWTON_SDK = ../../../linux32
 
 LIB_SRCS = \
-	$(SRC_PATH)/dMathDefines.cpp \
-	$(SRC_PATH)/dMatrix.cpp \
-	$(SRC_PATH)/dQuaternion.cpp 	
+	$(SRC_PATH)/dTree.cpp \
+	$(SRC_PATH)/dThread.cpp \
+	$(SRC_PATH)/dRefCounter.cpp \
+	$(SRC_PATH)/dCRC.cpp \
+	$(SRC_PATH)/dContainersStdAfx.cpp \
+	$(SRC_PATH)/dClassInfo.cpp \
+	$(SRC_PATH)/dBaseHierarchy.cpp 
+	
+	
 
 # ******************************************************
 #

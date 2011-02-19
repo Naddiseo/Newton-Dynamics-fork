@@ -25,7 +25,7 @@ SDK_MATH = ../../../dMath
 SDK_CONTAINERS = ../../../dContainers
 SDK_XML = ../../../thirdParty/tinyxml
 
-NEWTON_SDK = ../../../linux64
+NEWTON_SDK = ../../../linux32
 
 
 LIB_SRCS = \

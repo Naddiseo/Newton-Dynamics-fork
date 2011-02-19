@@ -21,7 +21,7 @@ LIB_NAME = libdContainers.a
 INCLUDED_PATH = ../../../dContainers
 SRC_PATH = ../../../dContainers
 
-NEWTON_SDK = ../../../Linux64
+NEWTON_SDK = ../../../linux64
 
 LIB_SRCS = \
 	$(SRC_PATH)/dTree.cpp \
