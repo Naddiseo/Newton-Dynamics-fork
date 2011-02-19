@@ -94,13 +94,14 @@ SDK_MAIN_SRC = \
 		$(SDK_MAIN_PATH)/DemoEntity.cpp \
 		$(SDK_MAIN_PATH)/DemoMesh.cpp \
 		$(SDK_MAIN_PATH)/PhysicsUtils.cpp \
-		$(SDK_TOOLBOX_PATH)/DebugDisplay.cpp
-
+		$(SDK_MAIN_PATH)/moc_NewtonDemos.cpp 
 
 SDK_DEMOS_SRC = \
-#	$(SDK_DEMOS_PATH)/BasicFriction.cpp \
-#	$(SDK_DEMOS_PATH)/BasicSphereSpin.cpp \
-#	$(SDK_DEMOS_PATH)/ClosestDistance.cpp 
+		$(SDK_DEMOS_PATH)/BasicFriction.cpp \
+		$(SDK_DEMOS_PATH)/BasicSphereSpin.cpp \
+		$(SDK_DEMOS_PATH)/ClosestDistance.cpp \
+		$(SDK_DEMOS_PATH)/LoadSaveScene.cpp \ 
+		$(SDK_DEMOS_PATH)/SceneCollision.cpp  
 #	$(SDK_DEMOS_PATH)/BasicRestitution.cpp \
 #	$(SDK_DEMOS_PATH)/ArchimedesBuoyancy.cpp \
 #	$(SDK_DEMOS_PATH)/BasicCustomJoints.cpp \
@@ -128,21 +129,16 @@ SDK_DEMOS_SRC = \
 
 
 SDK_TOOLBOX_SRC = \
-#	$(SDK_TOOLBOX_PATH)/DebugDisplay.cpp \
-#	$(SDK_TOOLBOX_PATH)/DGCamera.cpp \
-#	$(SDK_TOOLBOX_PATH)/dRuntimeProfiler.cpp \
-#	$(SDK_TOOLBOX_PATH)/HeightFieldPrimitive.cpp \
-#	$(SDK_TOOLBOX_PATH)/HiResTimer.cpp  \
-#	$(SDK_TOOLBOX_PATH)/LevelPrimitive.cpp \
-#	$(SDK_TOOLBOX_PATH)/MousePick.cpp \
-#	$(SDK_TOOLBOX_PATH)/OpenGlUtil.cpp \
-#	$(SDK_TOOLBOX_PATH)/PlaneCollision.cpp \
-#	$(SDK_TOOLBOX_PATH)/RenderPrimitive.cpp \
-#	$(SDK_TOOLBOX_PATH)/ScenePrimitive.cpp \
-#	$(SDK_TOOLBOX_PATH)/SkyBox.cpp \
-#	$(SDK_TOOLBOX_PATH)/TargaToOpenGl.cpp \
-#	$(SDK_TOOLBOX_PATH)/toolbox_stdafx.cpp \
-#	$(SDK_TOOLBOX_PATH)/UserHeightFieldCollision.cpp 
+		$(SDK_TOOLBOX_PATH)/DebugDisplay.cpp \
+		$(SDK_TOOLBOX_PATH)/dHeightResolutionTimer.cpp \
+		$(SDK_TOOLBOX_PATH)/dRuntimeProfiler.cpp \
+		$(SDK_TOOLBOX_PATH)/dSimulationThread.cpp \
+		$(SDK_TOOLBOX_PATH)/OpenGlUtil.cpp \
+		$(SDK_TOOLBOX_PATH)/SkyBox.cpp \
+		$(SDK_TOOLBOX_PATH)/TargaToOpenGl.cpp \
+		$(SDK_TOOLBOX_PATH)/toolbox_stdafx.cpp 
+
+
 
 		
 SDK_SRCS = $(SDK_MAIN_SRC) $(SDK_DEMOS_SRC) $(SDK_TOOLBOX_SRC) 
