@@ -42,7 +42,8 @@ void dResetTimer()
 	#ifdef _LINUX_VER
 		timespec ts;
 		clock_gettime(CLOCK_REALTIME, &ts); // Works on Linux
-		baseCount = ts.tv_nsec / 1000;
+		//baseCount = ts.tv_nsec / 1000;
+		baseCount = unsigned64 (ts.tv_sec) * 1000000 + ts.tv_nsec / 1000;
 	#endif
 
 	#ifdef _MAC_VER
@@ -67,7 +68,9 @@ unsigned64 dGetTimeInMicrosenconds()
 	#ifdef _LINUX_VER
 		timespec ts;
 		clock_gettime(CLOCK_REALTIME, &ts); // Works on Linux
-		return unsigned64 (ts.tv_nsec / 1000) - baseCount;
+		//return unsigned64 (ts.tv_nsec / 1000) - baseCount;
+		
+		return unsigned64 (ts.tv_sec) * 1000000 + ts.tv_nsec / 1000 - baseCount;
 	#endif
 
 

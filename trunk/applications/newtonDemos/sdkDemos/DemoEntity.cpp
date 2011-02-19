@@ -7,35 +7,30 @@ dInitRtti(DemoEntity);
 #define DEMO_GRAVITY	10.0f
 
 DemoEntity::DemoEntity(DemoEntity* parent)
-	:dHierarchy<DemoEntity>(), 
-	dClassInfo(), 
-	m_matrix(GetIdentityMatrix()), 
-	m_curPosition (0.0f, 0.0f, 0.0f, 1.0f),
-	m_nextPosition (0.0f, 0.0f, 0.0f, 1.0f),
-	m_curRotation (1.0f, 0.0f, 0.0f, 0.0f),
-	m_nextRotation (1.0f, 0.0f, 0.0f, 0.0f),
-	m_lock(0), 
-	m_mesh (NULL)
+	:dClassInfo()
+	,dHierarchy<DemoEntity>()
+	,m_matrix(GetIdentityMatrix()) 
+	,m_curPosition (0.0f, 0.0f, 0.0f, 1.0f)
+	,m_nextPosition (0.0f, 0.0f, 0.0f, 1.0f)
+	,m_curRotation (1.0f, 0.0f, 0.0f, 0.0f)
+	,m_nextRotation (1.0f, 0.0f, 0.0f, 0.0f)
+	,m_lock(0) 
+	,m_mesh (NULL)
 {
 }
 
 
-DemoEntity::DemoEntity(
-	DemoEntityManager& world, 
-	const dScene* scene, 
-	dScene::dTreeNode* rootSceneNode, 
-	dTree<DemoMesh*, dScene::dTreeNode*>& meshCache, 
-	//dTree<DemoEntity*, dScene::dTreeNode*>& entityDictionary, 
-	DemoEntityManager::EntityDictionary& entityDictionary,
-	DemoEntity* parent)
-	:dHierarchy<DemoEntity>(), dClassInfo(), 
-	m_matrix(GetIdentityMatrix()), 
-	m_curPosition (0.0f, 0.0f, 0.0f, 1.0f),
-	m_nextPosition (0.0f, 0.0f, 0.0f, 1.0f),
-	m_curRotation (1.0f, 0.0f, 0.0f, 0.0f),
-	m_nextRotation (1.0f, 0.0f, 0.0f, 0.0f),
-	m_lock (0),
-	m_mesh (NULL)
+
+DemoEntity::DemoEntity(DemoEntityManager& world, const dScene* scene, dScene::dTreeNode* rootSceneNode, dTree<DemoMesh*, dScene::dTreeNode*>& 	 	meshCache, DemoEntityManager::EntityDictionary& entityDictionary, DemoEntity* parent)
+	:dClassInfo()
+	,dHierarchy<DemoEntity>() 
+	,m_matrix(GetIdentityMatrix()) 
+	,m_curPosition (0.0f, 0.0f, 0.0f, 1.0f)
+	,m_nextPosition (0.0f, 0.0f, 0.0f, 1.0f)
+	,m_curRotation (1.0f, 0.0f, 0.0f, 0.0f)
+	,m_nextRotation (1.0f, 0.0f, 0.0f, 0.0f)
+	,m_lock (0)
+	,m_mesh (NULL)
 {
 	// add this entity to the dictionary
 	entityDictionary.Insert(this, rootSceneNode);
