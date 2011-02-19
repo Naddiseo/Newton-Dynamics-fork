@@ -152,10 +152,6 @@ void DebugDrawAABB (const dVector& p0, const dVector& p1, dVector color)
 
 void DebugShowGeometryCollision (void* userData, int vertexCount, const dFloat* faceVertec, int id)
 {
-	id;
-	faceVertec;
-	userData;
-
 	int i = vertexCount - 1;
 	dVector p0 (faceVertec[i * 3 + 0], faceVertec[i * 3 + 1], faceVertec[i * 3 + 2]);
 	for (int i = 0; i < vertexCount; i ++) {
@@ -170,7 +166,6 @@ void DebugShowGeometryCollision (void* userData, int vertexCount, const dFloat* 
 
 static void DebugSubmitGeometryCollision (void* userData, int vertexCount, const dFloat* faceVertec, int id)
 {
-	id;
 	int i = vertexCount - 1;
 	dVector p0 (faceVertec[i * 3 + 0], faceVertec[i * 3 + 1], faceVertec[i * 3 + 2]);
 	dVector color(1, 1, 1, 1);

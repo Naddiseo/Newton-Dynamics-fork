@@ -38,7 +38,7 @@ PLATFORM_1 = linux64
 
 # include path
 SDK_MAIN_PATH = ../../sdkDemos
-SDK_DEMOS_PATH = ../../sdkDems/demos
+SDK_DEMOS_PATH = ../../sdkDemos/demos
 SDK_TOOLBOX_PATH = ../../sdkDemos/toolBox
 SDK_NEWTON_PATH = ../../../../packages/$(PLATFORM)
 SDK_MATH_PATH = ../../../../packages/dMath
@@ -74,7 +74,7 @@ SDK_XML_MAKE = ../../../../packages/projects/$(PLATFORM)/thirdParty/tinyxml
 
 
 
-LIBS  = -L/usr/lib -lGL -lGLU -lGLEW -lpthread -lQtCore -lQtGui 
+LIBS  = -L/usr/lib -lGL -lGLU -lGLEW -lpthread -lQtCore -lQtGui -lQtOpenGL 
 			
 
 # this use newton as shared or static library
@@ -99,8 +99,10 @@ SDK_MAIN_SRC = \
 SDK_DEMOS_SRC = \
 		$(SDK_DEMOS_PATH)/BasicFriction.cpp \
 		$(SDK_DEMOS_PATH)/BasicSphereSpin.cpp \
+		$(SDK_DEMOS_PATH)/BasicStacking.cpp \
 		$(SDK_DEMOS_PATH)/ClosestDistance.cpp \
-		$(SDK_DEMOS_PATH)/LoadSaveScene.cpp \ 
+		$(SDK_DEMOS_PATH)/LoadSaveScene.cpp \
+		$(SDK_DEMOS_PATH)/MeshCollision.cpp \
 		$(SDK_DEMOS_PATH)/SceneCollision.cpp  
 #	$(SDK_DEMOS_PATH)/BasicRestitution.cpp \
 #	$(SDK_DEMOS_PATH)/ArchimedesBuoyancy.cpp \

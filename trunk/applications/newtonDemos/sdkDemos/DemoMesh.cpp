@@ -100,8 +100,8 @@ void DemoSubMesh::AllocIndexData (int indexCount)
 
 
 DemoMesh::DemoMesh(const char* const name)
-	:dList<DemoSubMesh>()
-	,dClassInfo()
+	:dClassInfo()
+	,dList<DemoSubMesh>()
 	,m_vertexCount(0)
 	,m_uv (NULL)
 	,m_vertex(NULL)
@@ -112,8 +112,8 @@ DemoMesh::DemoMesh(const char* const name)
 }
 
 DemoMesh::DemoMesh(const dScene* const scene, dScene::dTreeNode* const meshNode)
-	:dList<DemoSubMesh>()
-	,dClassInfo()
+	:dClassInfo()
+	,dList<DemoSubMesh>()
 	,m_uv(NULL)
 	,m_vertex(NULL)
 	,m_normal(NULL)
@@ -190,7 +190,12 @@ DemoMesh::DemoMesh(const dScene* const scene, dScene::dTreeNode* const meshNode)
 
 
 DemoMesh::DemoMesh(const char* const name, const NewtonCollision* const collision, const char* const texture0, const char* const texture1, const char* const texture2)
-	:dList<DemoSubMesh>(), dClassInfo(), m_uv(NULL), m_vertex(NULL), m_normal(NULL)
+	:dClassInfo()
+	,dList<DemoSubMesh>()
+	,m_uv(NULL)
+	,m_vertex(NULL)
+	,m_normal(NULL)
+	,m_optilizedDipalyList(0)		
 {
 	// create a helper mesh from the collision collision
 	NewtonMesh* const mesh = NewtonMeshCreateFromCollision(collision);

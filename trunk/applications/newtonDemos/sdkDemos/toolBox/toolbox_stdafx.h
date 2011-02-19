@@ -211,7 +211,7 @@ void GetWorkingFileName (const char* const name, char* const outPathName);
 // little Indian/big Indian conversion
 unsigned SWAP_INT32(unsigned x);
 unsigned short SWAP_INT16(unsigned short x);
-void SWAP_FLOAT32_ARRAY (void *array, dInt32 count);
+void SWAP_FLOAT32_ARRAY (void* const array, dInt32 count);
 
 
 
