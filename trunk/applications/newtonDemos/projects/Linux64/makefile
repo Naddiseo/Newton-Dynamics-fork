@@ -34,35 +34,37 @@ SDK_FLAGS = -O0 -c -Wall -D_LINUX_VER -g -pg
 #SDK_FLAGS = -m32 -O3 -c -Wall -D_LINUX_VER -g 
 
 PLATFORM = Linux64
+PLATFORM_1 = linux64
 
 # include path
 SDK_MAIN_PATH = ../../sdkDemos
 SDK_DEMOS_PATH = ../../sdkDems/demos
 SDK_TOOLBOX_PATH = ../../sdkDemos/toolBox
 SDK_NEWTON_PATH = ../../../../packages/$(PLATFORM)
-SDK_MATH_PATH = ../../../../packages/projects/dMath
-SDK_SCENE_PATH = ../../../../packages/projects/dScene
-SDK_JOINTS_PATH = ../../../../packages/projects/dCustomJoints
-SDK_CONTAINERS_PATH = ../../../../packages/projects/dContainers
-SDK_XML_PATH = ../../../../packages/projects/thirdParty/tinyxml
+SDK_MATH_PATH = ../../../../packages/dMath
+SDK_SCENE_PATH = ../../../../packages/dScene
+SDK_JOINTS_PATH = ../../../../packages/dCustomJoints
+SDK_CONTAINERS_PATH = ../../../../packages/dContainers
+SDK_XML_PATH = ../../../../packages/thirdParty/tinyxml
 QT_HEADERS_PATH = /usr/include/qt4
 
 
 SDK_INCLUDE_PATH = \
-			-I $(SDK_MAIN_PATH) \
-			-I $(SDK_DEMOS_PATH) \
-			-I $(SDK_XML_PATH) \
-			-I $(SDK_MATH_PATH) \
-			-I $(SDK_SCENE_PATH) \
-			-I $(SDK_JOINTS_PATH) \
-			-I $(SDK_NEWTON_PATH) \
-			-I $(SDK_TOOLBOX_PATH) \
-			-I $(SDK_CONTAINERS_PATH) \
-			-I $(QT_HEADERS_PATH) 
+		-I $(SDK_MAIN_PATH) \
+		-I $(SDK_DEMOS_PATH) \
+		-I $(SDK_XML_PATH) \
+		-I $(SDK_MATH_PATH) \
+		-I $(SDK_SCENE_PATH) \
+		-I $(SDK_JOINTS_PATH) \
+		-I $(SDK_NEWTON_PATH) \
+		-I $(SDK_TOOLBOX_PATH) \
+		-I $(SDK_CONTAINERS_PATH) \
+		-I ../../../../coreLibrary_200/source/newton \
+		-I $(QT_HEADERS_PATH) 
 
 
 # sub project path
-NEWTON_CORE_MAKE = ../../../../coreLibrary_200/projets/linux64
+NEWTON_CORE_MAKE = ../../../../coreLibrary_200/projets/$(PLATFORM_1)
 SDK_MATH_MAKE = ../../../../packages/projects/$(PLATFORM)/dMath
 SDK_SCENE_MAKE = ../../../../packages/projects/$(PLATFORM)/dScene
 SDK_JOINTS_MAKE = ../../../../packages/projects/$(PLATFORM)/dCustomJoints
@@ -80,17 +82,19 @@ NEWTON_LIB = \
 	$(SDK_NEWTON_PATH)/libNewton.a \
 	$(SDK_NEWTON_PATH)/libdMath.a \
 	$(SDK_NEWTON_PATH)/libdScene.a \
+	$(SDK_NEWTON_PATH)/libTinyXML.a \
 	$(SDK_NEWTON_PATH)/libdContainers.a \
 	$(SDK_NEWTON_PATH)/libdJointLibrary.a 
 
 
 SDK_MAIN_SRC = \
-		$(SDK_MAIN_PATH)/NewtonDemos.cpp  
-#		$(SDK_MAIN_PATH)/DemoCamera.cpp \
-#		$(SDK_MAIN_PATH)/DemoEntity.cpp \
-#		$(SDK_MAIN_PATH)/DemoMesh.cpp \
-#		$(SDK_MAIN_PATH)/DemoSceneManager.cpp \
-#		$(SDK_MAIN_PATH)/PhysicsUtils.cpp \
+		$(SDK_MAIN_PATH)/NewtonDemos.cpp \
+		$(SDK_MAIN_PATH)/DemoEntityManager.cpp \
+		$(SDK_MAIN_PATH)/DemoCamera.cpp \
+		$(SDK_MAIN_PATH)/DemoEntity.cpp \
+		$(SDK_MAIN_PATH)/DemoMesh.cpp \
+		$(SDK_MAIN_PATH)/PhysicsUtils.cpp \
+		$(SDK_TOOLBOX_PATH)/DebugDisplay.cpp
 
 
 SDK_DEMOS_SRC = \
@@ -154,16 +158,15 @@ FLAGS = $(SDK_FLAGS) $(SDK_INCLUDE_PATH)
 	$(COMPILER) $(FLAGS) -o $@ $<	
 
 # main target
-NewtonDemos : buildLibraries $(SDK_OBJS) 
-	gcc $? $(NEWTON_LIB) $(LIBS) -o $@.elf	
-
-buildLibraries: 
+NewtonDemos : $(SDK_OBJS)
 	make -C $(NEWTON_CORE_MAKE)
 	make -C $(SDK_XML_MAKE)
 	make -C $(SDK_MATH_MAKE)
 	make -C $(SDK_SCENE_MAKE)
 	make -C $(SDK_JOINTS_MAKE)
 	make -C $(SDK_CONTAINERS_MAKE)
+	gcc $? $(NEWTON_LIB) $(LIBS) -o $@.elf	
+
 
 
 # clean all objects target

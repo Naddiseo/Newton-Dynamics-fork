@@ -21,6 +21,8 @@ LIB_NAME = libTinyXML.a
 INCLUDED_PATH = ../../../../thirdParty/tinyxml
 SRC_PATH = ../../../../thirdParty/tinyxml
 
+NEWTON_SDK = ../../../../Linux64
+
 LIB_SRCS = \
 	$(SRC_PATH)/tinystr.cpp \
 	$(SRC_PATH)/tinyxml.cpp \
@@ -51,7 +53,7 @@ FLAGS = -c -Wall -Wno-strict-aliasing -D_LINUX_VER  $(CPU_FLAGS) -I$(INCLUDED_PA
 libTemp.a : $(DG_OBJ_FILES)
 	ar r $@ $?
 	strip -g -S -d -v $@  -o$@ 
-	cp $@ ../../$(LIB_NAME) 	
+	cp $@ $(NEWTON_SDK)/$(LIB_NAME) 	
 	
 
 

@@ -21,6 +21,8 @@ LIB_NAME = libdMath.a
 INCLUDED_PATH = ../../../dMath
 SRC_PATH =  ../../../dMath
 
+NEWTON_SDK = ../../../Linux64
+
 LIB_SRCS = \
 	$(SRC_PATH)/dMathDefines.cpp \
 	$(SRC_PATH)/dMatrix.cpp \
@@ -50,7 +52,7 @@ FLAGS = -c -Wall -Wno-strict-aliasing -D_LINUX_VER  $(CPU_FLAGS) -I$(INCLUDED_PA
 libTemp.a : $(DG_OBJ_FILES)
 	ar r $@ $?
 	strip -g -S -d -v $@  -o$@ 
-	cp $@ ../$(LIB_NAME) 	
+	cp $@ $(NEWTON_SDK)/$(LIB_NAME) 	
 	
 	#gcc -shared -Wl,-soname,libNewton.so $? -o libNewton.so 
 	#cp libNewton.so ../newtonSDK/sdk/libNewton.so
