@@ -372,6 +372,7 @@ void newtonDemos::PhysicsFree (void *ptr, int sizeInBytes)
 void newtonDemos::OnNotUsed()
 {
 	_ASSERTE (0);
+	m_canvas->ResetTimer();
 }
 
 
@@ -394,6 +395,9 @@ void newtonDemos::LoadDemo (int index)
 	m_canvas->Cleanup();
 	demosSelection[index].m_launchDemoCallback (m_canvas);
 	m_canvas->SetAutoSleepState (m_autoSleepState);
+
+	m_canvas->ResetTimer();
+	
 }
 
 void newtonDemos::OnRunDemo()
@@ -403,6 +407,7 @@ void newtonDemos::OnRunDemo()
 	int index = (int) action->data().toInt();
 	LoadDemo (index);
 	m_doVisualUpdates = true;
+	m_canvas->ResetTimer();
 }
 
 

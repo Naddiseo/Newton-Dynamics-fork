@@ -34,9 +34,9 @@ dRuntimeProfiler::~dRuntimeProfiler(void)
 {
 }
 
-unsigned dRuntimeProfiler::GetTimeInMicrosecunds()
+unsigned dRuntimeProfiler::GetTimeInMicrosenconds()
 {
-	return unsigned (dHeightResolutionTimer::GetTimeInMicrosenconds());
+	return unsigned (dGetTimeInMicrosenconds());
 }
 
 void dRuntimeProfiler::DrawLabel (dFloat x, dFloat y, const char* label, QPainter& context)

@@ -37,6 +37,7 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 	DemoCamera* GetCamera() const;
 
 
+	void ResetTimer();
 	void UpdatePhysics();
 
 	void Cleanup ();
@@ -66,7 +67,6 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 
 	// some utility functionality
 	unsigned64 m_microsecunds;
-	dHeightResolutionTimer m_timer;
 
 	int m_showProfiler[8]; 
 	dRuntimeProfiler m_profiler;

@@ -354,7 +354,7 @@ static void CreateLevelMeshBody (NewtonWorld* const world, DemoEntity* const ent
 {
 
 	// measure the time to build a collision tree
-	unsigned64 timer0 = dHeightResolutionTimer::GetTimeInMicrosenconds();
+	unsigned64 timer0 = dGetTimeInMicrosenconds();
 
 
 	// create the collision tree geometry
@@ -406,7 +406,7 @@ static void CreateLevelMeshBody (NewtonWorld* const world, DemoEntity* const ent
 	NewtonTreeCollisionEndBuild(collision, optimization ? 1 : 0);
 
 	// measure the time to build a collision tree
-	timer0 = (dHeightResolutionTimer::GetTimeInMicrosenconds() - timer0) / 1000;
+	timer0 = (dGetTimeInMicrosenconds() - timer0) / 1000;
 
 
 	// Get the root Matrix

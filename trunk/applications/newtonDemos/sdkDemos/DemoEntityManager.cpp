@@ -29,7 +29,6 @@ DemoEntityManager::DemoEntityManager(QWidget* const parent)
 	,m_physicsUpdate(true) 
 	,m_reEntrantUpdate (false)
 	,m_microsecunds (0)
-	,m_timer()
 	,m_profiler (620 * 0 / 8 + 45, 40)
 	,m_font()
 {
@@ -157,7 +156,7 @@ void DemoEntityManager::Cleanup ()
 	NewtonSetWorldSize (m_world, &minSize[0], &maxSize[0]); 
 
 	// set the performance track function
-	NewtonSetPerformanceClock (m_world, dRuntimeProfiler::GetTimeInMicrosecunds);
+	NewtonSetPerformanceClock (m_world, dRuntimeProfiler::GetTimeInMicrosenconds);
 
 	// Set performance counters off
 	memset (m_showProfiler, 1, sizeof (m_showProfiler));
@@ -286,12 +285,13 @@ void DemoEntityManager::SetAutoSleepState (bool state)
 
 void DemoEntityManager::InterpolateMatrices ()
 {
-	unsigned64 timeStep = m_timer.GetTimeInMicrosenconds () - m_microsecunds;		
+	unsigned64 timeStep = dGetTimeInMicrosenconds () - m_microsecunds;		
 	dFloat step = (dFloat (timeStep) * MAX_PHYSICS_FPS) / 1.0e6f;
 	_ASSERTE (step >= 0.0f);
 	if (step > 1.0f) {
 		step = 1.0f;
 	}
+
 
 	for (NewtonBody* body = NewtonWorldGetFirstBody(m_world); body; body = NewtonWorldGetNextBody(m_world, body)) {
 		DemoEntity* entity = (DemoEntity*)NewtonBodyGetUserData(body);
@@ -299,6 +299,11 @@ void DemoEntityManager::InterpolateMatrices ()
 	}
 }
 
+void DemoEntityManager::ResetTimer()
+{
+	dResetTimer();
+	m_microsecunds = dGetTimeInMicrosenconds ();
+}
 
 
 void DemoEntityManager::UpdatePhysics()
@@ -307,7 +312,7 @@ void DemoEntityManager::UpdatePhysics()
 		dFloat timestepInSecunds = 1.0f / MAX_PHYSICS_FPS;
 		unsigned64 timestepMicrosecunds = unsigned64 (timestepInSecunds * 1000000.0f);
 
-		unsigned64 currentTime = m_timer.GetTimeInMicrosenconds ();
+		unsigned64 currentTime = dGetTimeInMicrosenconds ();
 		unsigned64 nextTime = currentTime - m_microsecunds;
 		int loops = 0;
 		while ((nextTime >= timestepMicrosecunds) && (loops < MAX_PHYSICS_LOOPS)) {
@@ -327,7 +332,7 @@ void DemoEntityManager::UpdatePhysics()
 		}
 
 		if (loops) {
-			m_physicsTime = dFloat (m_timer.GetTimeInMicrosenconds () - currentTime) / 1000000.0f;
+			m_physicsTime = dFloat (dGetTimeInMicrosenconds () - currentTime) / 1000000.0f;
 
 			if (m_physicsTime >= MAX_PHYSICS_LOOPS * (1.0f / MAX_PHYSICS_FPS)) {
 				m_microsecunds = currentTime;
@@ -398,7 +403,7 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 	m_camera->Update();
 
 	// render all entities
-	dFloat timestep = m_timer.GetElapsedSeconds();	
+	dFloat timestep = dGetElapsedSeconds();	
 	for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
 		DemoEntity* entity = node->GetInfo();
 		glPushMatrix();	

@@ -17,18 +17,11 @@
 
 
 
-class dHeightResolutionTimer
-{
-	public:
-	dHeightResolutionTimer(); 
-	~dHeightResolutionTimer();
-	dFloat GetElapsedSeconds();
-	static unsigned64 GetTimeInMicrosenconds();
-	
-	private:
-	unsigned64 m_prevTime;
-	unsigned64 m_totalFrames;
-};
+void dResetTimer();
+dFloat dGetElapsedSeconds();
+unsigned64 dGetTimeInMicrosenconds();
+
+
 
 #endif 
 

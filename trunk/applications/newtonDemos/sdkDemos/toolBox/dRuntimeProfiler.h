@@ -34,9 +34,7 @@ class dRuntimeProfiler
 
 	void ReanderThreadPerformace (NewtonWorld* nWorld, QPainter& context);
 
-
-
-	static unsigned GetTimeInMicrosecunds();
+	static unsigned GetTimeInMicrosenconds();
 
 	int m_oringin_x;
 	int m_oringin_y;
