@@ -35,17 +35,41 @@ SDK_FLAGS = -O0 -c -Wall -D_LINUX_VER -g -pg
 
 PLATFORM = Linux64
 
-SDK_MAIN = ../../sdkDemos
-SDK_DEMOS = ../../sdkDems/demos
-SDK_TOOLBOX = ../../sdkDemos/toolBox
-NEWTON_CORE = ../../../../coreLibrary_200/projets/linux64
-SDK_NEWTON = ../../../../packages/$(PLATFORM)
-SDK_MATH = ../../../../packages/projects/$(PLATFORM)/dMath
-SDK_SCENE = ../../../../packages/projects/$(PLATFORM)/dScene
-SDK_JOINTS = ../../../../packages/projects/$(PLATFORM)/dCustomJoints
-SDK_CONTAINERS = ../../../../packages/projects/$(PLATFORM)/dContainers
-SDK_XML = ../../../../packages/projects/$(PLATFORM)/thirdParty/tinyxml
-QT_HEADERS = /usr/include/qt4
+# include path
+SDK_MAIN_PATH = ../../sdkDemos
+SDK_DEMOS_PATH = ../../sdkDems/demos
+SDK_TOOLBOX_PATH = ../../sdkDemos/toolBox
+SDK_NEWTON_PATH = ../../../../packages/$(PLATFORM)
+SDK_MATH_PATH = ../../../../packages/projects/dMath
+SDK_SCENE_PATH = ../../../../packages/projects/dScene
+SDK_JOINTS_PATH = ../../../../packages/projects/dCustomJoints
+SDK_CONTAINERS_PATH = ../../../../packages/projects/dContainers
+SDK_XML_PATH = ../../../../packages/projects/thirdParty/tinyxml
+QT_HEADERS_PATH = /usr/include/qt4
+
+
+SDK_INCLUDE_PATH = \
+			-I $(SDK_MAIN_PATH) \
+			-I $(SDK_DEMOS_PATH) \
+			-I $(SDK_XML_PATH) \
+			-I $(SDK_MATH_PATH) \
+			-I $(SDK_SCENE_PATH) \
+			-I $(SDK_JOINTS_PATH) \
+			-I $(SDK_NEWTON_PATH) \
+			-I $(SDK_TOOLBOX_PATH) \
+			-I $(SDK_CONTAINERS_PATH) \
+			-I $(QT_HEADERS_PATH) 
+
+
+# sub project path
+NEWTON_CORE_MAKE = ../../../../coreLibrary_200/projets/linux64
+SDK_MATH_MAKE = ../../../../packages/projects/$(PLATFORM)/dMath
+SDK_SCENE_MAKE = ../../../../packages/projects/$(PLATFORM)/dScene
+SDK_JOINTS_MAKE = ../../../../packages/projects/$(PLATFORM)/dCustomJoints
+SDK_CONTAINERS_MAKE = ../../../../packages/projects/$(PLATFORM)/dContainers
+SDK_XML_MAKE = ../../../../packages/projects/$(PLATFORM)/thirdParty/tinyxml
+
+
 
 
 LIBS  = -L/usr/lib -lGL -lGLU -lGLEW -lpthread -lQtCore -lQtGui 
@@ -53,80 +77,68 @@ LIBS  = -L/usr/lib -lGL -lGLU -lGLEW -lpthread -lQtCore -lQtGui
 
 # this use newton as shared or static library
 NEWTON_LIB = \
-	$(SDK_NEWTON)/libNewton.a \
-	$(SDK_NEWTON)/libdMath.a \
-	$(SDK_NEWTON)/libdScene.a \
-	$(SDK_NEWTON)/libdContainers.a \
-	$(SDK_NEWTON)/libdJointLibrary.a 
-			 
-
-SDK_INCLUDE_PATH = -I $(SDK_MAIN) \
-		   -I $(SDK_DEMOS) \
-		   -I $(SDK_XML) \
-		   -I $(SDK_MATH) \
-		   -I $(SDK_SCENE) \
-		   -I $(SDK_JOINTS) \
-		   -I $(SDK_NEWTON) \
-		   -I $(SDK_TOOLBOX) \
-		   -I $(SDK_CONTAINERS) \
-		   -I $(QT_HEADERS) 
+	$(SDK_NEWTON_PATH)/libNewton.a \
+	$(SDK_NEWTON_PATH)/libdMath.a \
+	$(SDK_NEWTON_PATH)/libdScene.a \
+	$(SDK_NEWTON_PATH)/libdContainers.a \
+	$(SDK_NEWTON_PATH)/libdJointLibrary.a 
 
 
 SDK_MAIN_SRC = \
-		$(SDK_MAIN)/NewtonDemos.cpp  
-#		$(SDK_MAIN)/DemoCamera.cpp \
-#		$(SDK_MAIN)/DemoEntity.cpp \
-#		$(SDK_MAIN)/DemoMesh.cpp \
-#		$(SDK_MAIN)/DemoSceneManager.cpp \
-#		$(SDK_MAIN)/PhysicsUtils.cpp \
+		$(SDK_MAIN_PATH)/NewtonDemos.cpp  
+#		$(SDK_MAIN_PATH)/DemoCamera.cpp \
+#		$(SDK_MAIN_PATH)/DemoEntity.cpp \
+#		$(SDK_MAIN_PATH)/DemoMesh.cpp \
+#		$(SDK_MAIN_PATH)/DemoSceneManager.cpp \
+#		$(SDK_MAIN_PATH)/PhysicsUtils.cpp \
 
 
 SDK_DEMOS_SRC = \
-#	$(SDK_DEMOS)/BasicFriction.cpp \
-#	$(SDK_DEMOS)/BasicSphereSpin.cpp \
-#	$(SDK_DEMOS)/ClosestDistance.cpp 
-#	$(SDK_DEMOS)/BasicRestitution.cpp \
-#	$(SDK_DEMOS)/ArchimedesBuoyancy.cpp \
-#	$(SDK_DEMOS)/BasicCustomJoints.cpp \
-#	$(SDK_DEMOS)/BasicRobots.cpp \
-#	$(SDK_DEMOS)/BasicRagDoll.cpp \
-#	$(SDK_DEMOS)/BasicStacking.cpp \
-#	$(SDK_DEMOS)/CompoundCollision.cpp \
-#	$(SDK_DEMOS)/ConvexCast.cpp \
-#	$(SDK_DEMOS)/Jengas.cpp \
-#	$(SDK_DEMOS)/LegacyJoints.cpp \
-#	$(SDK_DEMOS)/MeshCollision.cpp \
-#	$(SDK_DEMOS)/PrecessingTops.cpp \
-#	$(SDK_DEMOS)/Pyramids.cpp \
-#	$(SDK_DEMOS)/RayCastCar.cpp \
-#	$(SDK_DEMOS)/ScaledCollision.cpp \
-#	$(SDK_DEMOS)/SpecialTrackJoints.cpp \
-#	$(SDK_DEMOS)/Towers.cpp \
-#	$(SDK_DEMOS)/TriggersAndForceFields.cpp \
-#	$(SDK_DEMOS)/UnstableStacks.cpp \
-#	$(SDK_DEMOS)/CharacterController.cpp \
-#	$(SDK_DEMOS)/Walls.cpp 
-#	$(SDK_DEMOS)/BuildingDestruction.cpp \
-#	$(SDK_DEMOS)/RealTimeSimpleDestruction.cpp \
-#	$(SDK_DEMOS)/PrefabSimpleDestruction.cpp \
+#	$(SDK_DEMOS_PATH)/BasicFriction.cpp \
+#	$(SDK_DEMOS_PATH)/BasicSphereSpin.cpp \
+#	$(SDK_DEMOS_PATH)/ClosestDistance.cpp 
+#	$(SDK_DEMOS_PATH)/BasicRestitution.cpp \
+#	$(SDK_DEMOS_PATH)/ArchimedesBuoyancy.cpp \
+#	$(SDK_DEMOS_PATH)/BasicCustomJoints.cpp \
+#	$(SDK_DEMOS_PATH)/BasicRobots.cpp \
+#	$(SDK_DEMOS_PATH)/BasicRagDoll.cpp \
+#	$(SDK_DEMOS_PATH)/BasicStacking.cpp \
+#	$(SDK_DEMOS_PATH)/CompoundCollision.cpp \
+#	$(SDK_DEMOS_PATH)/ConvexCast.cpp \
+#	$(SDK_DEMOS_PATH)/Jengas.cpp \
+#	$(SDK_DEMOS_PATH)/LegacyJoints.cpp \
+#	$(SDK_DEMOS_PATH)/MeshCollision.cpp \
+#	$(SDK_DEMOS_PATH)/PrecessingTops.cpp \
+#	$(SDK_DEMOS_PATH)/Pyramids.cpp \
+#	$(SDK_DEMOS_PATH)/RayCastCar.cpp \
+#	$(SDK_DEMOS_PATH)/ScaledCollision.cpp \
+#	$(SDK_DEMOS_PATH)/SpecialTrackJoints.cpp \
+#	$(SDK_DEMOS_PATH)/Towers.cpp \
+#	$(SDK_DEMOS_PATH)/TriggersAndForceFields.cpp \
+#	$(SDK_DEMOS_PATH)/UnstableStacks.cpp \
+#	$(SDK_DEMOS_PATH)/CharacterController.cpp \
+#	$(SDK_DEMOS_PATH)/Walls.cpp 
+#	$(SDK_DEMOS_PATH)/BuildingDestruction.cpp \
+#	$(SDK_DEMOS_PATH)/RealTimeSimpleDestruction.cpp \
+#	$(SDK_DEMOS_PATH)/PrefabSimpleDestruction.cpp \
 
 
 SDK_TOOLBOX_SRC = \
-#	$(SDK_TOOLBOX)/DebugDisplay.cpp \
-#	$(SDK_TOOLBOX)/DGCamera.cpp \
-#	$(SDK_TOOLBOX)/dRuntimeProfiler.cpp \
-#	$(SDK_TOOLBOX)/HeightFieldPrimitive.cpp \
-#	$(SDK_TOOLBOX)/HiResTimer.cpp  \
-#	$(SDK_TOOLBOX)/LevelPrimitive.cpp \
-#	$(SDK_TOOLBOX)/MousePick.cpp \
-#	$(SDK_TOOLBOX)/OpenGlUtil.cpp \
-#	$(SDK_TOOLBOX)/PlaneCollision.cpp \
-#	$(SDK_TOOLBOX)/RenderPrimitive.cpp \
-#	$(SDK_TOOLBOX)/ScenePrimitive.cpp \
-#	$(SDK_TOOLBOX)/SkyBox.cpp \
-#	$(SDK_TOOLBOX)/TargaToOpenGl.cpp \
-#	$(SDK_TOOLBOX)/toolbox_stdafx.cpp \
-#	$(SDK_TOOLBOX)/UserHeightFieldCollision.cpp 
+#	$(SDK_TOOLBOX_PATH)/DebugDisplay.cpp \
+#	$(SDK_TOOLBOX_PATH)/DGCamera.cpp \
+#	$(SDK_TOOLBOX_PATH)/dRuntimeProfiler.cpp \
+#	$(SDK_TOOLBOX_PATH)/HeightFieldPrimitive.cpp \
+#	$(SDK_TOOLBOX_PATH)/HiResTimer.cpp  \
+#	$(SDK_TOOLBOX_PATH)/LevelPrimitive.cpp \
+#	$(SDK_TOOLBOX_PATH)/MousePick.cpp \
+#	$(SDK_TOOLBOX_PATH)/OpenGlUtil.cpp \
+#	$(SDK_TOOLBOX_PATH)/PlaneCollision.cpp \
+#	$(SDK_TOOLBOX_PATH)/RenderPrimitive.cpp \
+#	$(SDK_TOOLBOX_PATH)/ScenePrimitive.cpp \
+#	$(SDK_TOOLBOX_PATH)/SkyBox.cpp \
+#	$(SDK_TOOLBOX_PATH)/TargaToOpenGl.cpp \
+#	$(SDK_TOOLBOX_PATH)/toolbox_stdafx.cpp \
+#	$(SDK_TOOLBOX_PATH)/UserHeightFieldCollision.cpp 
 
 		
 SDK_SRCS = $(SDK_MAIN_SRC) $(SDK_DEMOS_SRC) $(SDK_TOOLBOX_SRC) 
@@ -143,25 +155,25 @@ FLAGS = $(SDK_FLAGS) $(SDK_INCLUDE_PATH)
 
 # main target
 NewtonDemos : buildLibraries $(SDK_OBJS) 
-	gcc $? $(NEWTON_LIB) $(LIBS) $(THIRD_PARTY_LIBRARIES)  -o $@.elf	
+	gcc $? $(NEWTON_LIB) $(LIBS) -o $@.elf	
 
 buildLibraries: 
-	make -C $(NEWTON_CORE)
-	make -C $(SDK_XML)
-	make -C $(SDK_MATH)
-	make -C $(SDK_SCENE)
-	make -C $(SDK_JOINTS)
-	make -C $(SDK_CONTAINERS)
+	make -C $(NEWTON_CORE_MAKE)
+	make -C $(SDK_XML_MAKE)
+	make -C $(SDK_MATH_MAKE)
+	make -C $(SDK_SCENE_MAKE)
+	make -C $(SDK_JOINTS_MAKE)
+	make -C $(SDK_CONTAINERS_MAKE)
 
 
 # clean all objects target
 clean :
-	make clean -C $(NEWTON_CORE)
-	make clean -C $(SDK_XML)
-	make clean -C $(SDK_MATH)
-	make clean -C $(SDK_SCENE)
-	make clean -C $(SDK_JOINTS)
-	make clean -C $(SDK_CONTAINERS)
+	make clean -C $(NEWTON_CORE_MAKE)
+	make clean -C $(SDK_XML_MAKE)
+	make clean -C $(SDK_MATH_MAKE)
+	make clean -C $(SDK_SCENE_MAKE)
+	make clean -C $(SDK_JOINTS_MAKE)
+	make clean -C $(SDK_CONTAINERS_MAKE)
 	rm $(SDK_OBJS)
 	touch $(SDK_SRCS)
 	
