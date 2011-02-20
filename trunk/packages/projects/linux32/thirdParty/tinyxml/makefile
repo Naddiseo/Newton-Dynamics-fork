@@ -40,7 +40,7 @@ DG_OBJ_FILES = $(ALL_SRC_FILES:.cpp=.o)
 COMPILER = gcc
 
 # Linux options	 gcc 4.2.2
-CPU_FLAGS = -fPIC -O2 -msse  -msse2 -ffloat-store -ffast-math -freciprocal-math -funsafe-math-optimizations -fsingle-precision-constant 
+CPU_FLAGS = -fPIC -O2 -g -msse  -msse2 -ffloat-store -ffast-math -freciprocal-math -funsafe-math-optimizations -fsingle-precision-constant 
 FLAGS = -c -Wall -Wno-strict-aliasing -D_LINUX_VER  $(CPU_FLAGS) -I$(INCLUDED_PATH) 
 
 

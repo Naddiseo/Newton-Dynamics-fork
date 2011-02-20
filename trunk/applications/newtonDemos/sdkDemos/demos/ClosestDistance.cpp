@@ -136,7 +136,7 @@ void ClosestDistance (DemoEntityManager* const scene)
 	#else
 
 		dScene compoundTestMesh (world);
-		GetWorkingFileName ("bessel_1.xml", fileName);
+		GetWorkingFileName ("bessel.xml", fileName);
 
 		compoundTestMesh.Deserialize(fileName);
 

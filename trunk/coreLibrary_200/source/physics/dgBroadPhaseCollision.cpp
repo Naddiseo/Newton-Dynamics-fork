@@ -697,7 +697,9 @@ dgInt32 dgBroadPhaseCollision::ConvexCast (
 				dgVector l1 (matrix.UntransformVector(p1));
 				info[i].m_normalOnHitPoint[0] = info[i].m_normal[0];
 			
-				dgFloat32 t = info[i].m_hitBody->m_collision->RayCast (l0, l1, contact, NULL, NULL, NULL);
+				// bug fixed by thedmd
+				//dgFloat32 t = info[i].m_hitBody->m_collision->RayCast (l0, l1, contact, NULL, NULL, NULL);
+				dgFloat32 t = info[i].m_hitBody->m_collision->RayCast (l0, l1, contact, NULL, info[i].m_hitBody, NULL);
 				if (t >= dgFloat32 (0.0f) && t <= dgFloat32 (dgFloat32(1.0f))) {
 					contact.m_normal = matrix.RotateVector (contact.m_normal);
 					info[i].m_normalOnHitPoint[0] = contact.m_normal[0]; 

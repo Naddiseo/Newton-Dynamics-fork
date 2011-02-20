@@ -188,7 +188,7 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 	,m_threadProfilerState(true)
 	,m_showStatistics(true)
 	,m_doVisualUpdates(true)
-	,m_concurrentPhysicsUpdates(true)
+	,m_concurrentPhysicsUpdates(false)
 {
 	setObjectName(QString::fromUtf8("newtonMain"));
 	resize(1024, 768);

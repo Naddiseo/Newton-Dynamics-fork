@@ -120,7 +120,7 @@ COMPILER = gcc
 # Linux options	 gcc 4.2.2
 #CPU_FLAGS = -fPIC  -O0 -g 
 #CPU_FLAGS = -O2 -fsingle-precision-constant
-CPU_FLAGS = -O2 -fpic -msse -msse2 -ffloat-store -ffast-math -freciprocal-math -funsafe-math-optimizations -fsingle-precision-constant 
+CPU_FLAGS = -O2 -g -fpic -msse -msse2 -ffloat-store -ffast-math -freciprocal-math -funsafe-math-optimizations -fsingle-precision-constant 
 	
 #FLAGS = -c -Wall -Wno-strict-aliasing -D_LINUX_VER -ffloat-store -ffast-math -fsingle-precision-constant $(CPU_FLAGS) -I$(DG_INCLUDED_PATH) -I$(DG_INCLUDED_PHYSICS_PATH)
 FLAGS = -c -Wall -Wno-strict-aliasing -D_LINUX_VER  $(CPU_FLAGS) -I$(DG_INCLUDED_PATH) -I$(DG_INCLUDED_PHYSICS_PATH)
