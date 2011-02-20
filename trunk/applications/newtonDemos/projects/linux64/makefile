@@ -100,7 +100,6 @@ SDK_DEMOS_SRC = \
 		$(SDK_DEMOS_PATH)/BasicSphereSpin.cpp \
 		$(SDK_DEMOS_PATH)/BasicStacking.cpp \
 		$(SDK_DEMOS_PATH)/ClosestDistance.cpp \
-		$(SDK_DEMOS_PATH)/LoadSaveScene.cpp \
 		$(SDK_DEMOS_PATH)/MeshCollision.cpp \
 		$(SDK_DEMOS_PATH)/SceneCollision.cpp  
 #	$(SDK_DEMOS_PATH)/BasicRestitution.cpp \
