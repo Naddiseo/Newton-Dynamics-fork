@@ -171,10 +171,11 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 	,m_usesSimdInstructions(false)
 	,m_solveIslandOnSingleThread(false)
 	,m_debugDisplayState(false)
-	,m_showPhysicProfiler(false)
-	,m_showThreadProfiler(false)
+	,m_physicProfilerState(true)
+	,m_threadProfilerState(true)
 	,m_showStatistics(true)
 	,m_doVisualUpdates(true)
+	,m_concurrentPhysicsUpdates(true)
 {
 	setObjectName(QString::fromUtf8("newtonMain"));
 	resize(1024, 768);
@@ -277,43 +278,51 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 			QAction* action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Autosleep dissabled", 0, QApplication::UnicodeUTF8));
 			action->setCheckable(true);
+			action->setChecked(m_autoSleepState); 
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnAutoSleep()));
+
 
 			// file new, open, save
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Show debug display", 0, QApplication::UnicodeUTF8));
 			action->setCheckable(true);
+			action->setChecked(m_debugDisplayState); 
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
 
 			action = new QAction(this);
-			action->setText(QApplication::translate("newtonMain", "Hide physics profiler", 0, QApplication::UnicodeUTF8));
+			action->setText(QApplication::translate("newtonMain", "Show physics profiler", 0, QApplication::UnicodeUTF8));
 			action->setCheckable(true);
+			action->setChecked(m_physicProfilerState); 
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Show thread profiler", 0, QApplication::UnicodeUTF8));
 			action->setCheckable(true);
+			action->setChecked(m_threadProfilerState); 
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
 
 			action = new QAction(this);
-			action->setText(QApplication::translate("newtonMain", "Hide statistics", 0, QApplication::UnicodeUTF8));
+			action->setText(QApplication::translate("newtonMain", "Show statistics", 0, QApplication::UnicodeUTF8));
 			action->setCheckable(true);
+			action->setChecked(m_showStatistics); 
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Use simd", 0, QApplication::UnicodeUTF8));
 			action->setCheckable(true);
+			action->setChecked(m_usesSimdInstructions); 
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Run Physics in main Thread", 0, QApplication::UnicodeUTF8));
 			action->setCheckable(true);
+			action->setChecked(m_concurrentPhysicsUpdates);
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
 
@@ -325,6 +334,7 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Use parallel solve", 0, QApplication::UnicodeUTF8));
 			action->setCheckable(true);
+			action->setChecked(m_solveIslandOnSingleThread); 
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
 		}

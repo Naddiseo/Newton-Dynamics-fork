@@ -58,10 +58,11 @@ private:
 	bool m_usesSimdInstructions;
 	bool m_solveIslandOnSingleThread;
 	bool m_debugDisplayState;
-	bool m_showPhysicProfiler;
-	bool m_showThreadProfiler;
+	bool m_physicProfilerState;
+	bool m_threadProfilerState;
 	bool m_showStatistics;
 	bool m_doVisualUpdates;
+	bool m_concurrentPhysicsUpdates;
 
 	friend class DemoEntityManager;
 };

@@ -428,7 +428,7 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 	//int border = qMax(4, metrics.leading());
 	//painter.setRenderHint(QPainter::Antialiasing);
 	//renderText (4, 4, "This is a test", m_font);
-	if (mainWindow->m_showPhysicProfiler) {
+	if (mainWindow->m_physicProfilerState) {
 		int profileFlags = 0;
 		for (int i = 0; i < int (sizeof (m_showProfiler) / sizeof (m_showProfiler[0])); i ++) {
 			profileFlags |=  m_showProfiler[i] ? (1 << i) : 0;
@@ -440,7 +440,7 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 		}
 	}
 
-	if (mainWindow->m_showThreadProfiler) {
+	if (mainWindow->m_threadProfilerState) {
 		//m_profiler.ReanderThreadPerformace (m_world, m_glContext);
 	}
 
