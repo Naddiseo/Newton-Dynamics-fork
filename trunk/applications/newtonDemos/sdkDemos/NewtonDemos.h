@@ -43,9 +43,11 @@ public:
 		void OnLoad(); 
 		void OnSave(); 
 		void OnRunDemo(); 
-		void OnNotUsed(); 
+		void OnAutoSleep(); 	
+
 
 		void OnIdle(); 
+		void OnNotUsed(); 
 
 private:
 	static int m_totalMemoryUsed;

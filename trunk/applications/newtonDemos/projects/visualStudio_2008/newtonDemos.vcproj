@@ -292,10 +292,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\sdkDemos\demos\LoadSaveScene.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\sdkDemos\demos\MeshCollision.cpp"
 				>
 			</File>
@@ -353,7 +349,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="moc $(InputName).h"
-					CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../sdkDemos/$(InputName).h -o ../../sdkDemos/moc_$(InputName).cpp  -ftoolbox_stdafx.h -f$(InputName).h"
+					CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../sdkDemos/$(InputName).h -o ../../sdkDemos/moc_$(InputName).cpp  -ftoolbox_stdafx.h -f$(InputName).h&#x0D;&#x0A;"
 					AdditionalDependencies="$(InputName).h"
 					Outputs="../../sdkDemos/moc_$(InputName).cpp"
 				/>
@@ -364,7 +360,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="moc $(InputName).h"
-					CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../sdkDemos/$(InputName).h -o ../../sdkDemos/moc_$(InputName).cpp  -ftoolbox_stdafx.h -f$(InputName).h"
+					CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../sdkDemos/$(InputName).h -o ../../sdkDemos/moc_$(InputName).cpp  -ftoolbox_stdafx.h -f$(InputName).h&#x0D;&#x0A;"
 					AdditionalDependencies="$(InputName).h"
 					Outputs="../../sdkDemos/moc_$(InputName).cpp"
 				/>

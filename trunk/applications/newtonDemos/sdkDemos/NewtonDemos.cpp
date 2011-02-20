@@ -14,6 +14,7 @@
 
 
 #include <toolbox_stdafx.h>
+#include "SkyBox.h"
 #include "NewtonDemos.h"
 #include "DemoCamera.h"
 #include "DemoEntityManager.h"
@@ -73,7 +74,7 @@ static SDKDemos demosSelection[] =
 	{"Simple Box Stacks", "show simple stack of Boxes", BasicBoxStacks},
 	{"Unoptimized Mesh collision", "show simple level mesh", SimpleMeshLevelCollision},
 	{"Optimized Mesh collision", "show optimized level mesh", OptimizedMeshLevelCollision},
-	{"multi geometry collision", "show static mesh with teh avility of moving internal parts", SceneCollision},
+	{"multi geometry collision", "show static mesh with the ability of moving internal parts", SceneCollision},
 
 /*
 	{"spinning sphere", "show a very simple rotating sphere", BasicSphereSpin},
@@ -275,37 +276,44 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 			// file new, open, save
 			QAction* action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Autosleep dissabled", 0, QApplication::UnicodeUTF8));
+			action->setCheckable(true);
 			subMenu->addAction(action);
-			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
+			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnAutoSleep()));
 
 			// file new, open, save
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Show debug display", 0, QApplication::UnicodeUTF8));
+			action->setCheckable(true);
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Hide physics profiler", 0, QApplication::UnicodeUTF8));
+			action->setCheckable(true);
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Show thread profiler", 0, QApplication::UnicodeUTF8));
+			action->setCheckable(true);
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Hide statistics", 0, QApplication::UnicodeUTF8));
+			action->setCheckable(true);
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Use simd", 0, QApplication::UnicodeUTF8));
+			action->setCheckable(true);
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Run Physics in main Thread", 0, QApplication::UnicodeUTF8));
+			action->setCheckable(true);
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
 
@@ -316,6 +324,7 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Use parallel solve", 0, QApplication::UnicodeUTF8));
+			action->setCheckable(true);
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
 		}
@@ -379,13 +388,39 @@ void newtonDemos::OnNotUsed()
 void newtonDemos::OnLoad()
 {
 	m_doVisualUpdates = false;
+	m_canvas->StopsExecution ();
 
+	QString fileName (QFileDialog::getOpenFileName (this, tr("Load new Alchemedia scene"), "", tr("alchemedia (*.xml *.bin)")));
+	if (fileName != "") {
+		m_canvas->Cleanup();
+
+		// load the scene from and alchemedia file format
+		QByteArray name (fileName.toAscii());
+		m_canvas->LoadScene (name.data());
+
+		// add a sky box to the scene, make the first object
+		m_canvas->Addtop (new SkyBox());
+
+		// place camera into position
+		dVector origin (-40.0f, 10.0f, 0.0f, 0.0f);
+		m_canvas->GetCamera()->m_upVector = dVector (0.0f, 1.0f, 0.0f);
+		m_canvas->GetCamera()->m_origin = origin;
+		m_canvas->GetCamera()->m_pointOfInterest = origin + dVector (1.0f, 0.0f, 0.0f);
+
+		m_canvas->SetAutoSleepState (m_autoSleepState);
+	}
+
+	m_canvas->ResetTimer();
 	m_doVisualUpdates = true;
+	
+	m_canvas->ContinueExecution();
 }
 
 void newtonDemos::OnSave()
 {
 	m_doVisualUpdates = false;
+
+
 
 	m_doVisualUpdates = true;
 }
@@ -397,7 +432,6 @@ void newtonDemos::LoadDemo (int index)
 	m_canvas->SetAutoSleepState (m_autoSleepState);
 
 	m_canvas->ResetTimer();
-	
 }
 
 void newtonDemos::OnRunDemo()
@@ -410,6 +444,19 @@ void newtonDemos::OnRunDemo()
 	m_canvas->ResetTimer();
 }
 
+void newtonDemos::OnAutoSleep()
+{
+	m_doVisualUpdates = false;
+	m_canvas->StopsExecution ();
+
+	QAction* const action = (QAction*)sender();
+	m_autoSleepState = action->isChecked();
+	m_canvas->SetAutoSleepState (m_autoSleepState);
+
+	m_canvas->ContinueExecution();
+	m_doVisualUpdates = true;
+	m_canvas->ResetTimer();
+}
 
 
 void newtonDemos::OnIdle()

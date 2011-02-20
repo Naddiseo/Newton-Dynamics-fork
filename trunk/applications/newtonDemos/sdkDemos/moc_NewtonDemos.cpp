@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'NewtonDemos.h'
 **
-** Created: Sat Feb 19 09:32:11 2011
+** Created: Sun Feb 20 05:05:01 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -24,7 +24,7 @@ static const uint qt_meta_data_newtonDemos[] = {
        5,       // revision
        0,       // classname
        0,    0, // classinfo
-       5,   14, // methods
+       6,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -36,14 +36,16 @@ static const uint qt_meta_data_newtonDemos[] = {
       22,   12,   12,   12, 0x0a,
       31,   12,   12,   12, 0x0a,
       43,   12,   12,   12, 0x0a,
-      55,   12,   12,   12, 0x0a,
+      57,   12,   12,   12, 0x0a,
+      66,   12,   12,   12, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_newtonDemos[] = {
     "newtonDemos\0\0OnLoad()\0OnSave()\0"
-    "OnRunDemo()\0OnNotUsed()\0OnIdle()\0"
+    "OnRunDemo()\0OnAutoSleep()\0OnIdle()\0"
+    "OnNotUsed()\0"
 };
 
 const QMetaObject newtonDemos::staticMetaObject = {
@@ -78,11 +80,12 @@ int newtonDemos::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         case 0: OnLoad(); break;
         case 1: OnSave(); break;
         case 2: OnRunDemo(); break;
-        case 3: OnNotUsed(); break;
+        case 3: OnAutoSleep(); break;
         case 4: OnIdle(); break;
+        case 5: OnNotUsed(); break;
         default: ;
         }
-        _id -= 5;
+        _id -= 6;
     }
     return _id;
 }
