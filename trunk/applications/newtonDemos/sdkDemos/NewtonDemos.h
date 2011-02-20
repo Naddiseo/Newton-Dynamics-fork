@@ -44,11 +44,12 @@ public:
 		void OnAutoSleep(); 	
 		void OnShowDebugLines();
 		void OnShowStatistics();
-		void OnUseSimdInstructions(); 	
 		void OnUseParalleSolver(); 	
+		void OnShowPhysicsProfiler();
+		void OnShowThreadProfiler();
+		void OnUseSimdInstructions(); 	
 		void OnRunSymulationAsyncronous(); 	
-
-
+		void OnSelectNumberOfMicroThreads(); 	
 		
 		void OnNotUsed(); 
 

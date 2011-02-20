@@ -309,14 +309,14 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 			action->setCheckable(true);
 			action->setChecked(m_physicProfilerState); 
 			subMenu->addAction(action);
-			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
+			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnShowPhysicsProfiler()));
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Show thread profiler", 0, QApplication::UnicodeUTF8));
 			action->setCheckable(true);
 			action->setChecked(m_threadProfilerState); 
 			subMenu->addAction(action);
-			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
+			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnShowThreadProfiler()));
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Show statistics", 0, QApplication::UnicodeUTF8));
@@ -342,7 +342,7 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "select number of physics micro threads", 0, QApplication::UnicodeUTF8));
 			subMenu->addAction(action);
-			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
+			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnSelectNumberOfMicroThreads()));
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Use parallel solve", 0, QApplication::UnicodeUTF8));
@@ -548,6 +548,80 @@ void newtonDemos::OnShowDebugLines()
 
 	QAction* const action = (QAction*)sender();
 	m_debugDisplayState = action->isChecked();
+
+	END_MENU_OPTION();
+}
+
+void newtonDemos::OnShowPhysicsProfiler()
+{
+	BEGIN_MENU_OPTION();
+
+	QAction* const action = (QAction*)sender();
+	m_physicProfilerState = action->isChecked();
+
+	END_MENU_OPTION();
+}
+
+void newtonDemos::OnShowThreadProfiler()
+{
+	BEGIN_MENU_OPTION();
+
+	QAction* const action = (QAction*)sender();
+	m_threadProfilerState = action->isChecked();
+
+	END_MENU_OPTION();
+}
+
+
+
+class SelectThreadCount : public QDialog
+{
+//	Q_OBJECT
+
+	public:
+	SelectThreadCount(DemoEntityManager* const canvas)
+		:QDialog (NULL)
+	{
+		setWindowTitle (QApplication::translate("newtonMain", "Select micro threads", 0, QApplication::UnicodeUTF8));
+		resize(256, 128);
+
+		QVBoxLayout* const vbox = new QVBoxLayout(this);
+
+		QLabel* const label = new QLabel ("xxx", this);
+		m_slider = new QSlider (Qt::Horizontal, this);
+
+		int maxthreads = NewtonGetMaxThreadsCount(canvas->GetNewton());
+		int pos = NewtonGetThreadsCount(canvas->GetNewton());
+
+		label->setNum (pos);
+		m_slider->setMaximum(maxthreads);
+		m_slider->setSliderPosition (pos);
+
+		vbox->addWidget (label);
+		vbox->addWidget (m_slider);
+		connect (m_slider, SIGNAL (valueChanged(int)), label, SLOT (setNum (int)));
+
+		setLayout(vbox); 
+	}
+
+	int GetThreadCount() const 
+	{
+		return m_slider->sliderPosition();
+	}
+
+	QSlider* m_slider; 
+
+};
+
+void newtonDemos::OnSelectNumberOfMicroThreads()
+{
+	BEGIN_MENU_OPTION();
+
+	SelectThreadCount selectThreadCount (m_canvas);
+	selectThreadCount.exec();
+
+	int threadCount = selectThreadCount.GetThreadCount();
+	NewtonSetThreadsCount(m_canvas->GetNewton(), threadCount);
 
 	END_MENU_OPTION();
 }

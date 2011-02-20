@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'NewtonDemos.h'
 **
-** Created: Sun Feb 20 09:05:48 2011
+** Created: Sun Feb 20 09:27:15 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -24,7 +24,7 @@ static const uint qt_meta_data_newtonDemos[] = {
        5,       // revision
        0,       // classname
        0,    0, // classinfo
-      11,   14, // methods
+      14,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -40,9 +40,12 @@ static const uint qt_meta_data_newtonDemos[] = {
       66,   12,   12,   12, 0x0a,
       85,   12,   12,   12, 0x0a,
      104,   12,   12,   12, 0x0a,
-     128,   12,   12,   12, 0x0a,
+     125,   12,   12,   12, 0x0a,
      149,   12,   12,   12, 0x0a,
-     178,   12,   12,   12, 0x0a,
+     172,   12,   12,   12, 0x0a,
+     196,   12,   12,   12, 0x0a,
+     225,   12,   12,   12, 0x0a,
+     256,   12,   12,   12, 0x0a,
 
        0        // eod
 };
@@ -50,8 +53,11 @@ static const uint qt_meta_data_newtonDemos[] = {
 static const char qt_meta_stringdata_newtonDemos[] = {
     "newtonDemos\0\0OnIdle()\0OnLoad()\0OnSave()\0"
     "OnRunDemo()\0OnAutoSleep()\0OnShowDebugLines()\0"
-    "OnShowStatistics()\0OnUseSimdInstructions()\0"
-    "OnUseParalleSolver()\0OnRunSymulationAsyncronous()\0"
+    "OnShowStatistics()\0OnUseParalleSolver()\0"
+    "OnShowPhysicsProfiler()\0OnShowThreadProfiler()\0"
+    "OnUseSimdInstructions()\0"
+    "OnRunSymulationAsyncronous()\0"
+    "OnSelectNumberOfMicroThreads()\0"
     "OnNotUsed()\0"
 };
 
@@ -91,13 +97,16 @@ int newtonDemos::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         case 4: OnAutoSleep(); break;
         case 5: OnShowDebugLines(); break;
         case 6: OnShowStatistics(); break;
-        case 7: OnUseSimdInstructions(); break;
-        case 8: OnUseParalleSolver(); break;
-        case 9: OnRunSymulationAsyncronous(); break;
-        case 10: OnNotUsed(); break;
+        case 7: OnUseParalleSolver(); break;
+        case 8: OnShowPhysicsProfiler(); break;
+        case 9: OnShowThreadProfiler(); break;
+        case 10: OnUseSimdInstructions(); break;
+        case 11: OnRunSymulationAsyncronous(); break;
+        case 12: OnSelectNumberOfMicroThreads(); break;
+        case 13: OnNotUsed(); break;
         default: ;
         }
-        _id -= 11;
+        _id -= 14;
     }
     return _id;
 }

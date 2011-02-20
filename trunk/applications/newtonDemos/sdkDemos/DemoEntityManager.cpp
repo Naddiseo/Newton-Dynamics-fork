@@ -10,14 +10,8 @@
 #include "dRuntimeProfiler.h"
 #include "OpenGlUtil.h"
 
-
-
-
 #define MAX_PHYSICS_LOOPS 1
 #define MAX_PHYSICS_FPS	  120.0f
-
-
-
 
 
 DemoEntityManager::DemoEntityManager(QWidget* const parent)
@@ -448,12 +442,12 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 		dFloat fps = 1.0f / timestep;
 		//m_glContext.Print (color, 4,  4, "FPS %6.2f", fps);
 		Qt::GlobalColor color = Qt::white;
-		Print (painter, color, 14, 14, "FPS %6.2f", fps);
-
-		Print (painter, color, 14, 30, "Physics time ms %6.3f", m_physicsTime * 1000.0f);
-		Print (painter, color, 14, 46, "Body count %d",  NewtonWorldGetBodyCount(m_world));
+		Print (painter, color, 14, 14, "FPS: %6.2f", fps);
+		Print (painter, color, 14, 30, "Physics time (ms): %6.3f", m_physicsTime * 1000.0f);
+		Print (painter, color, 14, 46, "Body count: %d",  NewtonWorldGetBodyCount(m_world));
+		Print (painter, color, 14, 62, "number of threads: %d",  NewtonGetThreadsCount(m_world));
 		if (m_asycronousUpdate) {
-			Print (painter, color, 14, 62, "physics running asynchronous");
+			Print (painter, color, 14, 78, "physics running asynchronous");
 		}
 	}
 	painter.end();

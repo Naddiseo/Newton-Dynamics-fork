@@ -34,7 +34,7 @@ class alchemediaViewport: public QWidget
 
 	private:
 	bool m_maximized;
-	friend class alchemediaSplietHandle;
+	friend class alchemediaSpliterHandle;
 };
 
 

@@ -20,10 +20,10 @@
 #include "alchemediaCanvas.h"
 #include "alchemediaViewport.h"
 
-class alchemediaSplietHandle: public QSplitterHandle
+class alchemediaSpliterHandle: public QSplitterHandle
 {
 	public:
-	alchemediaSplietHandle(Qt::Orientation o, QSplitter *parent)
+	alchemediaSpliterHandle(Qt::Orientation o, QSplitter *parent)
 		:QSplitterHandle (o, parent)
 	{
 
@@ -102,7 +102,7 @@ void alchemediaVerticalSpliter::RestoreState()
 
 QSplitterHandle *alchemediaVerticalSpliter::createHandle()
 {
-	return new alchemediaSplietHandle (Qt::Vertical, this);
+	return new alchemediaSpliterHandle (Qt::Vertical, this);
 }
 
 
@@ -131,7 +131,7 @@ alchemediaCanvas::~alchemediaCanvas(void)
 
 QSplitterHandle *alchemediaCanvas::createHandle()
 {
-	return new alchemediaSplietHandle (Qt::Horizontal, this);
+	return new alchemediaSpliterHandle (Qt::Horizontal, this);
 }
 
 void alchemediaCanvas::MoveSpliter(int position)

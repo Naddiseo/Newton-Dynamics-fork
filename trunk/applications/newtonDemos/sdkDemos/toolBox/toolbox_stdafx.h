@@ -93,9 +93,12 @@ typedef long long unsigned64;
 #include <QtGui/QMainWindow>
 #include <QtGui/QAction>
 #include <QtGui/QMenu>
+#include <QtGui/QLabel>
+#include <QtGui/QSlider>
 #include <QtGui/QMenuBar>
 #include <QtGui/QFont>
 #include <QtGui/QFileDialog>
+#include <QtGui/QVBoxLayout>
 #include <QtOpenGL/QGLWidget>
 #include <QtCore/QVariant>
 #include <QtCore/QAbstractEventDispatcher>
@@ -112,8 +115,6 @@ typedef long long unsigned64;
 //#include <QtGui/QBitmap>
 //#include <QtGui/QTextEdit>
 //#include <QtGui/QResizeEvent>
-//#include <QtGui/QHBoxLayout>
-//#include <QtOpenGL/QGLWidget>
 //#include <QtCore/QList>
 
 
