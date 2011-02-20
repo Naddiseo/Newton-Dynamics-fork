@@ -13,9 +13,6 @@
 
 
 
-
-
-
 class DemoEntityManager;
 
 
@@ -40,13 +37,19 @@ public:
 	static void PhysicsFree (void *ptr, int sizeInBytes);
 
 	public slots:
+		void OnIdle(); 
 		void OnLoad(); 
 		void OnSave(); 
 		void OnRunDemo(); 
 		void OnAutoSleep(); 	
+		void OnShowDebugLines();
+		void OnShowStatistics();
+		void OnUseSimdInstructions(); 	
+		void OnUseParalleSolver(); 	
+		void OnRunSymulationAsyncronous(); 	
 
 
-		void OnIdle(); 
+		
 		void OnNotUsed(); 
 
 private:

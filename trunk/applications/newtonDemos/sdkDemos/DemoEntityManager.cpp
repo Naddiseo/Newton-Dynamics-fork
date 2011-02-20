@@ -99,7 +99,7 @@ void DemoEntityManager::Print (QPainter& painter, Qt::GlobalColor color, int x, 
 	vsprintf (string, fmt, argptr);
 	va_end( argptr );
 
-	painter.setPen(Qt::black);
+	painter.setPen(color);
 	painter.drawText(x, y, tr(string));
 }
 
@@ -447,12 +447,13 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 	if (mainWindow->m_showStatistics) {
 		dFloat fps = 1.0f / timestep;
 		//m_glContext.Print (color, 4,  4, "FPS %6.2f", fps);
-		Print (painter, Qt::black, 14, 14, "FPS %6.2f", fps);
+		Qt::GlobalColor color = Qt::white;
+		Print (painter, color, 14, 14, "FPS %6.2f", fps);
 
-		Print (painter, Qt::black, 14, 30, "Physics time ms %6.3f", m_physicsTime * 1000.0f);
-		Print (painter, Qt::black, 14, 46, "Body count %d",  NewtonWorldGetBodyCount(m_world));
+		Print (painter, color, 14, 30, "Physics time ms %6.3f", m_physicsTime * 1000.0f);
+		Print (painter, color, 14, 46, "Body count %d",  NewtonWorldGetBodyCount(m_world));
 		if (m_asycronousUpdate) {
-			Print (painter, Qt::black, 14, 62, "physics running asynchronous");
+			Print (painter, color, 14, 62, "physics running asynchronous");
 		}
 	}
 	painter.end();

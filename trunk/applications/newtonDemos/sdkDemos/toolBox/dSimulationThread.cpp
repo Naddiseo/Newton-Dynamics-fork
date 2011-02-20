@@ -27,7 +27,8 @@ dSimulationThread::~dSimulationThread()
 
 unsigned dSimulationThread::RunMyTask ()
 {
-m_asycronousUpdate = false;
+//m_asycronousUpdate = false;
+
 	if (m_asycronousUpdate) {
 		DemoEntityManager& me = *((DemoEntityManager*)this);
 		me.UpdatePhysics();

@@ -198,29 +198,26 @@ void DebugShowBodyCollision (const NewtonBody* body, void* userData)
 	dFloat Iyy;
 	dFloat Izz;
 
-	userData;
-
-	int sleepState = NewtonBodyGetSleepState(body);
-	if (sleepState == 1) {
-		// indicate when body is sleeping 
-		glColor3f(0.42f, 0.73f, 0.98f);
-	} else {
-		// body is active
-		glColor3f(1.0f, 1.0f, 1.0f);
-	}
-
-
-
-	NewtonBodyGetMassMatrix (body, &mass, &Ixx, &Iyy, &Izz);
+	NewtonBodyGetMassMatrix (body, &mass, &Ixx, &Iyy, &Izz);	
 	if (mass > 0.0f) {
+		int sleepState = NewtonBodyGetSleepState(body);
+		if (sleepState == 1) {
+			// indicate when body is sleeping 
+			glColor3f(0.42f, 0.73f, 0.98f);
+		} else {
+			// body is active
+			glColor3f(1.0f, 1.0f, 1.0f);
+		}
+
+
 		dMatrix matrix;
 		NewtonBodyGetMatrix(body, &matrix[0][0]);
 		NewtonCollisionForEachPolygonDo (NewtonBodyGetCollision(body), &matrix[0][0], DebugShowGeometryCollision, NULL);
 	} else {
-		NewtonCollision* collision;
 		NewtonCollisionInfoRecord info;
 
-		collision = NewtonBodyGetCollision (body);
+		glColor3f(1.0f, 1.0f, 0.0f);
+		NewtonCollision* const collision = NewtonBodyGetCollision (body);
 		NewtonCollisionGetInfo (collision, &info);
 		switch (info.m_collisionType) 
 		{

@@ -28,6 +28,19 @@
 
 
 
+
+#define BEGIN_MENU_OPTION() \
+	m_doVisualUpdates = false; \
+	m_canvas->StopsExecution (); 
+
+#define END_MENU_OPTION() \
+	m_canvas->ResetTimer(); \
+	m_canvas->ContinueExecution(); \
+	m_doVisualUpdates = true; 
+	
+
+
+
 int newtonDemos::m_totalMemoryUsed = 0;
 
 void *operator new (size_t size) 
@@ -289,7 +302,7 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 			action->setCheckable(true);
 			action->setChecked(m_debugDisplayState); 
 			subMenu->addAction(action);
-			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
+			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnShowDebugLines()));
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Show physics profiler", 0, QApplication::UnicodeUTF8));
@@ -310,21 +323,21 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 			action->setCheckable(true);
 			action->setChecked(m_showStatistics); 
 			subMenu->addAction(action);
-			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
+			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnShowStatistics()));
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Use simd", 0, QApplication::UnicodeUTF8));
 			action->setCheckable(true);
 			action->setChecked(m_usesSimdInstructions); 
 			subMenu->addAction(action);
-			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
+			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnUseSimdInstructions()));
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Run Physics in main Thread", 0, QApplication::UnicodeUTF8));
 			action->setCheckable(true);
 			action->setChecked(m_concurrentPhysicsUpdates);
 			subMenu->addAction(action);
-			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
+			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnRunSymulationAsyncronous()));
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "select number of physics micro threads", 0, QApplication::UnicodeUTF8));
@@ -336,7 +349,7 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 			action->setCheckable(true);
 			action->setChecked(m_solveIslandOnSingleThread); 
 			subMenu->addAction(action);
-			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnNotUsed()));
+			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnUseParalleSolver()));
 		}
 	}
 
@@ -363,10 +376,10 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 	connect(QAbstractEventDispatcher::instance(), SIGNAL(aboutToBlock()), this, SLOT(OnIdle())); 
 	//connect(QAbstractEventDispatcher::instance(), SIGNAL(awake ()), this, SLOT(OnIdle())); 
 
-//	m_animationTimer.setSingleShot(false);
-//	connect(&m_animationTimer, SIGNAL(timeout()), this, SLOT(OnIdle()));
-//	m_animationTimer.start(0);
 
+	//m_asycronousUpdate
+	m_canvas->ResetTimer();
+	m_canvas->m_asycronousUpdate = m_concurrentPhysicsUpdates;
 }
 
 newtonDemos::~newtonDemos()
@@ -395,10 +408,17 @@ void newtonDemos::OnNotUsed()
 }
 
 
+void newtonDemos::OnIdle()
+{
+	if (m_doVisualUpdates) {
+		m_canvas->update();
+	}
+}
+
+
 void newtonDemos::OnLoad()
 {
-	m_doVisualUpdates = false;
-	m_canvas->StopsExecution ();
+	BEGIN_MENU_OPTION();
 
 	QString fileName (QFileDialog::getOpenFileName (this, tr("Load new Alchemedia scene"), "", tr("alchemedia (*.xml *.bin)")));
 	if (fileName != "") {
@@ -420,58 +440,114 @@ void newtonDemos::OnLoad()
 		m_canvas->SetAutoSleepState (m_autoSleepState);
 	}
 
-	m_canvas->ResetTimer();
-	m_doVisualUpdates = true;
-	
-	m_canvas->ContinueExecution();
+	END_MENU_OPTION();
 }
 
 void newtonDemos::OnSave()
 {
-	m_doVisualUpdates = false;
+	BEGIN_MENU_OPTION();
 
 
 
-	m_doVisualUpdates = true;
+	END_MENU_OPTION();
 }
 
 void newtonDemos::LoadDemo (int index)
 {
+	BEGIN_MENU_OPTION();
+
 	m_canvas->Cleanup();
 	demosSelection[index].m_launchDemoCallback (m_canvas);
 	m_canvas->SetAutoSleepState (m_autoSleepState);
 
-	m_canvas->ResetTimer();
+
+	END_MENU_OPTION();
 }
 
 void newtonDemos::OnRunDemo()
 {
-	m_doVisualUpdates = false;
+	BEGIN_MENU_OPTION();
+
 	QAction* const action = (QAction*)sender();
 	int index = (int) action->data().toInt();
 	LoadDemo (index);
-	m_doVisualUpdates = true;
-	m_canvas->ResetTimer();
+
+
+	END_MENU_OPTION();
 }
 
 void newtonDemos::OnAutoSleep()
 {
-	m_doVisualUpdates = false;
-	m_canvas->StopsExecution ();
+	BEGIN_MENU_OPTION();
 
 	QAction* const action = (QAction*)sender();
 	m_autoSleepState = action->isChecked();
 	m_canvas->SetAutoSleepState (m_autoSleepState);
 
-	m_canvas->ContinueExecution();
-	m_doVisualUpdates = true;
-	m_canvas->ResetTimer();
+
+	END_MENU_OPTION();
+
+}
+
+void newtonDemos::OnUseSimdInstructions()
+{
+	BEGIN_MENU_OPTION();
+
+	QAction* const action = (QAction*)sender();
+	m_usesSimdInstructions = action->isChecked();
+
+
+	if (m_usesSimdInstructions) {
+		NewtonSetPlatformArchitecture (m_canvas->GetNewton(), 3);  //best hardware (SSE at this time)
+	} else {
+		NewtonSetPlatformArchitecture (m_canvas->GetNewton(), 0);  //x87 mode
+	}
+
+	END_MENU_OPTION();
+}
+
+void newtonDemos::OnUseParalleSolver()
+{
+	BEGIN_MENU_OPTION();
+
+	QAction* const action = (QAction*)sender();
+	m_solveIslandOnSingleThread = action->isChecked();
+
+	NewtonSetMultiThreadSolverOnSingleIsland (m_canvas->GetNewton(), m_solveIslandOnSingleThread ? 1 : 0);
+
+	END_MENU_OPTION();
 }
 
 
-void newtonDemos::OnIdle()
+void newtonDemos::OnRunSymulationAsyncronous()
 {
-	if (m_doVisualUpdates) {
-		m_canvas->update();
-	}
+	BEGIN_MENU_OPTION();
+
+	QAction* const action = (QAction*)sender();
+	m_concurrentPhysicsUpdates = action->isChecked();
+
+	m_canvas->m_asycronousUpdate = m_concurrentPhysicsUpdates;
+
+	END_MENU_OPTION();
+}
+
+void newtonDemos::OnShowStatistics()
+{
+	BEGIN_MENU_OPTION();
+
+	QAction* const action = (QAction*)sender();
+	m_showStatistics = action->isChecked();
+
+	END_MENU_OPTION();
+}
+
+
+void newtonDemos::OnShowDebugLines()
+{
+	BEGIN_MENU_OPTION();
+
+	QAction* const action = (QAction*)sender();
+	m_debugDisplayState = action->isChecked();
+
+	END_MENU_OPTION();
 }
