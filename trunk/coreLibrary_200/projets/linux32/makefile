@@ -143,12 +143,12 @@ clean :
 # libraries targets
 libNewton.a : $(DG_OBJ_FILES)
 	ar r $@ $?
-	strip -g -S -d -v libNewton.a -olibNewton.a
+#	strip -g -S -d -v libNewton.a -olibNewton.a
 	cp libNewton.a ../../../packages/$(PLATFORM)/libNewton.a
 	cp ../../source/newton/Newton.h ../../../packages/$(PLATFORM)/Newton.h
 	gcc -shared -Wl,-soname,libNewton.so $? -o libNewton.so 
 	cp libNewton.so ../../../packages/$(PLATFORM)/libNewton.so
-	sudo cp libNewton.so /usr/lib
+#	sudo cp libNewton.so /usr/lib
 
  
 
