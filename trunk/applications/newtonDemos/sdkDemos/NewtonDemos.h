@@ -36,6 +36,10 @@ public:
 	static void* PhysicsAlloc (int sizeInBytes);
 	static void PhysicsFree (void *ptr, int sizeInBytes);
 
+
+	virtual void keyPressEvent( QKeyEvent *e );
+
+
 	public slots:
 		void OnIdle(); 
 		void OnLoad(); 

@@ -30,22 +30,22 @@
 static inline void InterlockedIncrement (long* const Addend )
 {
 	#if (defined (_LINUX_VER))
-//		__sync_fetch_and_add ((int32_t*)Addend, 1 );
+		__sync_fetch_and_add ((int32_t*)Addend, 1 );
 	#endif
 
 	#if (defined (_MAC_VER))
-//		OSAtomicAdd32 (1, (int32_t*)Addend);
+		OSAtomicAdd32 (1, (int32_t*)Addend);
 	#endif
 }
 
 static inline void InterlockedDecrement(long* const Addend)
 {
 	#if (defined (_LINUX_VER))
-//		__sync_fetch_and_sub ((int32_t*)Addend, 1 );
+		__sync_fetch_and_sub ((int32_t*)Addend, 1 );
 	#endif
 
 	#if (defined (_MAC_VER))
-//		OSAtomicAdd32 (-1, (int32_t*)Addend);
+		OSAtomicAdd32 (-1, (int32_t*)Addend);
 	#endif
 }
 
@@ -53,13 +53,11 @@ static inline void InterlockedDecrement(long* const Addend)
 static inline int InterlockedExchange (long* const spin, int testValue)
 {
 	#if (defined (_LINUX_VER))
-//		return !__sync_bool_compare_and_swap((int32_t*)spin, spin, testValue);
-		return 0;
+		return __sync_bool_compare_and_swap((int32_t*)spin, spin, testValue);
 	#endif
 
 	#if (defined (_MAC_VER))
-//		return !OSAtomicCompareAndSwap32(spin, testValue, (int32_t*) spin);
-		return 0;
+		return OSAtomicCompareAndSwap32(spin, testValue, (int32_t*) spin))
 	#endif
 }
 #endif

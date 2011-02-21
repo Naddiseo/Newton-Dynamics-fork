@@ -89,18 +89,21 @@ typedef long long unsigned64;
 #endif
 
 
+// gui librari includes
 #include <QtGui/QApplication>
 #include <QtGui/QMainWindow>
-#include <QtGui/QAction>
+
+#include <QtGui/QFont>
 #include <QtGui/QMenu>
 #include <QtGui/QLabel>
 #include <QtGui/QSlider>
+#include <QtGui/QAction>
 #include <QtGui/QMenuBar>
-#include <QtGui/QFont>
+#include <QtGui/QKeyEvent>
+#include <QtCore/QVariant>
 #include <QtGui/QFileDialog>
 #include <QtGui/QVBoxLayout>
 #include <QtOpenGL/QGLWidget>
-#include <QtCore/QVariant>
 #include <QtCore/QAbstractEventDispatcher>
 
 //#include <QtGui/QSplitter>
@@ -118,16 +121,13 @@ typedef long long unsigned64;
 //#include <QtCore/QList>
 
 
-
+// SDK includes
 #include <Newton.h>
-
-// SDK include
 #include <dVector.h>
 #include <dMatrix.h>
 #include <dQuaternion.h>
 #include <dMathDefines.h>
 //#include <CustomJointLibraryStdAfx.h>
-//#include <Newton.h>
 
 #include <dCRC.h>
 #include <dHeap.h>
@@ -138,7 +138,6 @@ typedef long long unsigned64;
 #include <dClassInfo.h>
 #include <dRefCounter.h>
 #include <dBaseHierarchy.h>
-
 
 #include "dPluginStdafx.h"
 #include "dScene.h"
@@ -155,6 +154,7 @@ typedef long long unsigned64;
 #include "dCollisionSphereNodeInfo.h"
 #include "dCollisionConvexHullNodeInfo.h"
 #include "dGeometryNodeSkinModifierInfo.h"
+
 
 
 

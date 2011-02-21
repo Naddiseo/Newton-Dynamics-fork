@@ -244,18 +244,6 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 		
 		// prefab demos
 		{
-
-			//HMENU hMenu = GetMenu(mainWindow);  
-			//int count = GetMenuItemCount(hMenu);
-			//for (int i = 0; i < count; i ++) {
-			//	char name[256];
-			//	GetMenuString(hMenu, i, name, sizeof (name), MF_BYPOSITION);
-			//	if (!stricmp (name, "demos")) {
-			//		hMenu = GetSubMenu(hMenu, i);
-			//		break;
-			//	}
-			//}
-			//DeleteMenu(hMenu, 0, MF_BYPOSITION);
 			for (int i = 0; i < int (sizeof (demosSelection) / sizeof demosSelection[0]); i ++) {
 				//AppendMenu(hMenu, MF_STRING, IDM_DEMOS + i, demosSelection[i].m_name);
 
@@ -399,6 +387,30 @@ void newtonDemos::PhysicsFree (void *ptr, int sizeInBytes)
 {
 	m_totalMemoryUsed -= sizeInBytes;
 	free (ptr);
+}
+
+
+void newtonDemos::keyPressEvent (QKeyEvent *keyEvent)
+{
+	int code = keyEvent->key();
+	switch (code)
+	{
+		case Qt::Key_Escape:
+		{
+			qApp->quit();
+			break;
+		}
+
+		case Qt::Key_W:
+		case Qt::Key_S:
+		case Qt::Key_A:
+		case Qt::Key_D:
+			m_canvas->QueueCommand(code);
+			break;
+
+		default:;
+
+	}
 }
 
 void newtonDemos::OnNotUsed()

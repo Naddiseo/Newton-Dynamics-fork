@@ -25,6 +25,8 @@ DemoEntityManager::DemoEntityManager(QWidget* const parent)
 	,m_microsecunds (0)
 	,m_profiler (620 * 0 / 8 + 45, 40)
 	,m_font()
+	,m_navegationQueueLock(0)
+	,m_navegationQueueCount(0)
 {
 	// Create the main Camera
 	m_camera = new DemoCamera();
@@ -55,7 +57,6 @@ DemoEntityManager::~DemoEntityManager(void)
 
 	// Start rendering after the system is set properly
 	ContinueExecution();
-
 }
 
 //	GLContext& GetGL() {return m_glContext;}
@@ -302,6 +303,16 @@ void DemoEntityManager::ResetTimer()
 
 void DemoEntityManager::UpdatePhysics()
 {
+	// read the controls 
+	Lock (m_navegationQueueLock);
+		for (int i = 0; i < m_navegationQueueCount; i ++) {
+
+		}
+		m_navegationQueueCount = 0;
+	Unlock (m_navegationQueueLock);
+
+
+	// update the physics
 	if (m_world) {
 		dFloat timestepInSecunds = 1.0f / MAX_PHYSICS_FPS;
 		unsigned64 timestepMicrosecunds = unsigned64 (timestepInSecunds * 1000000.0f);
@@ -335,6 +346,16 @@ void DemoEntityManager::UpdatePhysics()
 	}
 }
 
+void DemoEntityManager::QueueCommand(int command)
+{
+	Lock (m_navegationQueueLock);
+	_ASSERTE (m_navegationQueueCount < int (sizeof (m_navegationQueue) / sizeof (m_navegationQueue[0])));
+	if (m_navegationQueueCount < int (sizeof (m_navegationQueue) / sizeof (m_navegationQueue[0]))) {
+		m_navegationQueue[m_navegationQueueCount] = command;
+		m_navegationQueueCount ++;
+	}
+	Unlock (m_navegationQueueLock);
+}
 
 
 void DemoEntityManager::paintEvent(QPaintEvent* ev)

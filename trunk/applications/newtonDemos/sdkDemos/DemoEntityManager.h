@@ -36,6 +36,7 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 	NewtonWorld* GetNewton() const;
 	DemoCamera* GetCamera() const;
 
+	void QueueCommand(int command);
 
 	void ResetTimer();
 	void UpdatePhysics();
@@ -44,8 +45,8 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 	void LoadScene (const char* const name);
 	void SaveScene (const char* const name);
 	dScene CreateAlchemediaFromPhysic(); 
-
 	void SetAutoSleepState (bool state);
+
 
 	private:
 	void InterpolateMatrices ();
@@ -58,7 +59,6 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 
 	void Print (QPainter& painter, Qt::GlobalColor color, int x, int y, const char *fmt, ... ) const;
 
-		//GLContext m_glContext;
 	DemoCamera* m_camera;
 	NewtonWorld* m_world;
 
@@ -68,10 +68,16 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 	// some utility functionality
 	unsigned64 m_microsecunds;
 
+
 	int m_showProfiler[8]; 
 	dRuntimeProfiler m_profiler;
 
 	QFont m_font;
+
+	int m_navegationQueueCount;
+	unsigned m_navegationQueueLock;
+	int m_navegationQueue[32];
+
 };
 
 
