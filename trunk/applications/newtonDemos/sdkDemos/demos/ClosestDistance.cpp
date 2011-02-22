@@ -184,14 +184,16 @@ void ClosestDistance (DemoEntityManager* const scene)
 	NewtonReleaseCollision(world, castShape);
 
 	// place camera into position
-	dVector origin (-15.0f, 10.0f, 80.0f, 0.0f);
-	scene->GetCamera()->m_upVector = dVector (0.0f, 1.0f, 0.0f);
-	scene->GetCamera()->m_origin = origin;
-	scene->GetCamera()->m_pointOfInterest = origin + dVector (0.0f, 0.0f, -1.0f);
+	_ASSERTE (0);
+//	dVector origin (-15.0f, 10.0f, 80.0f, 0.0f);
+//	scene->GetCamera()->m_upVector = dVector (0.0f, 1.0f, 0.0f);
+//	scene->GetCamera()->m_origin = origin;
+//	scene->GetCamera()->m_pointOfInterest = origin + dVector (0.0f, 0.0f, -1.0f);
 
 	// resume the simulation
 	scene->ContinueExecution();
 }
+
 
 
 

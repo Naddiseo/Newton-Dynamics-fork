@@ -28,6 +28,7 @@ public:
 //	virtual void SetMatrix(const dMatrix& matrix);
 
 	dMatrix GetCurrentMatrix () const;
+	dMatrix GetNextMatrix () const;
 	dMatrix CalculateGlobalMatrix (const DemoEntity* const root = NULL) const;
 	virtual void SetMatrix(DemoEntityManager& world, const dQuaternion& rotation, const dVector& position);
 

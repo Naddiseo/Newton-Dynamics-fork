@@ -444,10 +444,14 @@ void newtonDemos::OnLoad()
 		m_canvas->Addtop (new SkyBox());
 
 		// place camera into position
-		dVector origin (-40.0f, 10.0f, 0.0f, 0.0f);
-		m_canvas->GetCamera()->m_upVector = dVector (0.0f, 1.0f, 0.0f);
-		m_canvas->GetCamera()->m_origin = origin;
-		m_canvas->GetCamera()->m_pointOfInterest = origin + dVector (1.0f, 0.0f, 0.0f);
+		_ASSERTE (0);
+		dMatrix camMatrix (GetIdentityMatrix());
+		camMatrix.m_posit = dVector (-40.0f, 10.0f, 0.0f, 0.0f);
+//		dVector origin (-40.0f, 10.0f, 0.0f, 0.0f);
+//		m_canvas->GetCamera()->m_upVector = dVector (0.0f, 1.0f, 0.0f);
+//		m_canvas->GetCamera()->m_origin = origin;
+//		m_canvas->GetCamera()->m_pointOfInterest = origin + dVector (1.0f, 0.0f, 0.0f);
+//		m_canvas->GetCamera()->SetMatrix (camMatrix);
 
 		m_canvas->SetAutoSleepState (m_autoSleepState);
 	}

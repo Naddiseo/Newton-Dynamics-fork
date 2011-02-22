@@ -24,12 +24,8 @@
 
 
 DemoCamera::DemoCamera()
-	:DemoEntity (NULL), 
-	 m_origin (0.0f, 0.0f, 0.0f, 0.0f), 
-	 m_upVector(0.0f, 1.0f, 0.0f, 0.0f), 
-	 m_pointOfInterest(1.0f, 0.0f, 0.0f, 0.0f) 
+	:DemoEntity (NULL) 
 {
-//	SetMatrix (GetIdentityMatrix());
 	m_fov = 60.0f * 3.1416f / 180.0f;
 	m_frontPlane = 0.1f;
 	m_backPlane = 1000.0f;
@@ -54,15 +50,20 @@ void DemoCamera::SetProjectionMode(int width, int height)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-
-dMatrix matrix;
-GLint viewport[4]; 
-glGetIntegerv(GL_VIEWPORT, viewport); 
-glGetFloat(GL_PROJECTION_MATRIX, &matrix[0][0]);
-glGetFloat(GL_PROJECTION_MATRIX, &matrix[0][0]);
+	//dMatrix matrix;
+	//GLint viewport[4]; 
+	//glGetIntegerv(GL_VIEWPORT, viewport); 
+	//glGetFloat(GL_PROJECTION_MATRIX, &matrix[0][0]);
+	//glGetFloat(GL_PROJECTION_MATRIX, &matrix[0][0]);
 }
 
 void DemoCamera::Update()
 {
-	gluLookAt(m_origin.m_x, m_origin.m_y, m_origin.m_z, m_pointOfInterest.m_x, m_pointOfInterest.m_y, m_pointOfInterest.m_z, m_upVector.m_x, m_upVector.m_y, m_upVector.m_z);	
+	dVector pointOfInterest (m_matrix.m_posit + m_matrix.m_front);
+
+	gluLookAt(m_matrix.m_posit.m_x, m_matrix.m_posit.m_y, m_matrix.m_posit.m_z, 
+		      pointOfInterest.m_x, pointOfInterest.m_y, pointOfInterest.m_z, 
+			  m_matrix.m_up.m_x, m_matrix.m_up.m_y, m_matrix.m_up.m_z);	
 }
+
+

@@ -85,7 +85,7 @@ void DemoEntityManager::resizeGL(int w, int h)
 	m_camera->SetProjectionMode(width(), height());
 }
 
-void DemoEntityManager::Print (QPainter& painter, Qt::GlobalColor color, int x, int y, const char *fmt, ... ) const
+void DemoEntityManager::Print (QPainter& painter, int x, int y, const char *fmt, ... ) const
 {
 	va_list argptr;
 	char string[2048];
@@ -93,8 +93,7 @@ void DemoEntityManager::Print (QPainter& painter, Qt::GlobalColor color, int x, 
 	va_start (argptr, fmt);
 	vsprintf (string, fmt, argptr);
 	va_end( argptr );
-
-	painter.setPen(color);
+	
 	painter.drawText(x, y, tr(string));
 }
 
@@ -280,14 +279,18 @@ void DemoEntityManager::SetAutoSleepState (bool state)
 
 void DemoEntityManager::InterpolateMatrices ()
 {
+	// calculate the fraction of the time step for intepotions
 	unsigned64 timeStep = dGetTimeInMicrosenconds () - m_microsecunds;		
 	dFloat step = (dFloat (timeStep) * MAX_PHYSICS_FPS) / 1.0e6f;
 	_ASSERTE (step >= 0.0f);
 	if (step > 1.0f) {
 		step = 1.0f;
 	}
+	
+	// interpolate the Camera matrix;
+	m_camera->InterpolateMatrix (*this, step);
 
-
+	// interpolate the location of all entities in the world
 	for (NewtonBody* body = NewtonWorldGetFirstBody(m_world); body; body = NewtonWorldGetNextBody(m_world, body)) {
 		DemoEntity* entity = (DemoEntity*)NewtonBodyGetUserData(body);
 		entity->InterpolateMatrix (*this, step);
@@ -300,16 +303,51 @@ void DemoEntityManager::ResetTimer()
 	m_microsecunds = dGetTimeInMicrosenconds ();
 }
 
+void DemoEntityManager::UpdateCamera (float timestep)
+{
+//	GetKeyState(100);
+	Lock (m_navegationQueueLock);
+	{
+		float speed = 30.0f;
+		dMatrix targetMatrix (m_camera->GetNextMatrix());
+		for (int i = 0; i < m_navegationQueueCount; i ++) {
+
+			int code = m_navegationQueue[i];
+			switch (code)
+			{
+			case Qt::Key_W:
+				{
+					//ent->SetMatrix (*world, rot, transform.m_posit);	ent->SetMatrix (*world, rot, transform.m_posit);
+					targetMatrix.m_posit += targetMatrix.m_front.Scale(speed * timestep);
+					break;
+				}
+			case Qt::Key_S:
+				{
+					break;
+				}
+
+			case Qt::Key_A:
+				{
+					break;
+				}
+
+			case Qt::Key_D:
+				{
+					break;
+				}
+			}			
+		}
+
+		dQuaternion rot (targetMatrix);
+		m_camera->SetMatrix (*this, rot, targetMatrix.m_posit);
+		m_navegationQueueCount = 0;
+	}
+	Unlock (m_navegationQueueLock);
+}
 
 void DemoEntityManager::UpdatePhysics()
 {
 	// read the controls 
-	Lock (m_navegationQueueLock);
-		for (int i = 0; i < m_navegationQueueCount; i ++) {
-
-		}
-		m_navegationQueueCount = 0;
-	Unlock (m_navegationQueueLock);
 
 
 	// update the physics
@@ -327,6 +365,9 @@ void DemoEntityManager::UpdatePhysics()
 			if (!m_reEntrantUpdate) {
 				m_reEntrantUpdate = true;
 				if (m_physicsUpdate && m_world) {
+					// update the camera;
+					UpdateCamera (timestepInSecunds);
+					// update teh world
 					NewtonUpdate (m_world, timestepInSecunds);
 				}
 				m_reEntrantUpdate = false;
@@ -367,6 +408,7 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 	}
 
 	makeCurrent();
+
 	InterpolateMatrices ();
 
 	// Our shading model--Goraud (smooth). 
@@ -390,9 +432,6 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 	//glClear( GL_COLOR_BUFFER_BIT );
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	//glMatrixMode(GL_MODELVIEW);
-	//glLoadIdentity();
-	m_camera->SetProjectionMode(width(), height());
 
 	// set default lightning
 	glDisable(GL_BLEND);
@@ -415,6 +454,9 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 	glEnable(GL_LIGHT0);
 
 	// update Camera
+	//glMatrixMode(GL_MODELVIEW);
+	//glLoadIdentity();
+	m_camera->SetProjectionMode(width(), height());
 	m_camera->Update();
 
 	// render all entities
@@ -463,13 +505,14 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 		dFloat fps = 1.0f / timestep;
 		//m_glContext.Print (color, 4,  4, "FPS %6.2f", fps);
 		Qt::GlobalColor color = Qt::white;
-		Print (painter, color, 14, 14, "FPS: %6.2f", fps);
-		Print (painter, color, 14, 30, "Physics time (ms): %6.3f", m_physicsTime * 1000.0f);
-		Print (painter, color, 14, 46, "Body count: %d",  NewtonWorldGetBodyCount(m_world));
-		Print (painter, color, 14, 62, "number of threads: %d",  NewtonGetThreadsCount(m_world));
-		if (m_asycronousUpdate) {
-			Print (painter, color, 14, 78, "physics running asynchronous");
-		}
+		painter.setPen(color);
+		Print (painter, 14, 14, "FPS: %6.2f", fps);
+		Print (painter, 14, 30, "Physics time (ms): %6.3f", m_physicsTime * 1000.0f);
+		//Print (painter, 14, 46, "Body count: %d",  NewtonWorldGetBodyCount(m_world));
+		//Print (painter, 14, 62, "number of threads: %d",  NewtonGetThreadsCount(m_world));
+		//if (m_asycronousUpdate) {
+		//	Print (painter, 14, 78, "physics running asynchronous");
+		//}
 	}
 	painter.end();
 

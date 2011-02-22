@@ -32,17 +32,10 @@ class DemoCamera: public DemoEntity
 	void Update();
 	virtual void Render(dFloat timeStep) const;
 
-
+	private:
 	dFloat m_fov;
 	dFloat m_frontPlane;
 	dFloat m_backPlane;
-
-	dVector m_origin;
-	dVector m_upVector;
-	dVector m_pointOfInterest;
-	
-
-
 };
 
 #endif 

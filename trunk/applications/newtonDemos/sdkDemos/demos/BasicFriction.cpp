@@ -174,10 +174,17 @@ void Friction (DemoEntityManager* const scene)
 	}
 
 	// place camera into position
-	dVector origin (-70.0f, 10.0f, 0.0f, 0.0f);
-	scene->GetCamera()->m_upVector = dVector (0.0f, 1.0f, 0.0f);
-	scene->GetCamera()->m_origin = origin;
-	scene->GetCamera()->m_pointOfInterest = origin + dVector (1.0f, 0.0f, 0.0f);
+	dMatrix camMatrix (GetIdentityMatrix());
+	camMatrix.m_posit = dVector (-70.0f, 10.0f, 0.0f, 1.0f);
+
+//	dVector origin (-70.0f, 10.0f, 0.0f, 0.0f);
+//	scene->GetCamera()->m_upVector = dVector (0.0f, 1.0f, 0.0f);
+//	scene->GetCamera()->m_origin = origin;
+//	scene->GetCamera()->m_pointOfInterest = origin + dVector (1.0f, 0.0f, 0.0f);
+	// set Camera Twice to make sure the current position is set
+	dQuaternion rot (camMatrix);
+	scene->GetCamera()->SetMatrix (*scene, rot, camMatrix.m_posit);
+	scene->GetCamera()->SetMatrix (*scene, rot, camMatrix.m_posit);
 
 //	scene->SaveScene ("test1.xml");
 //	dScene CreateAlchemediaFromPhysic(); 

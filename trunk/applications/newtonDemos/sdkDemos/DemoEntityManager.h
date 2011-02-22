@@ -52,12 +52,12 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 	void InterpolateMatrices ();
 	void LoadVisualScene(dScene* const scene, EntityDictionary& dictionary);
 
-
+	void UpdateCamera( float timestep);
 	void initializeGL();
 	void resizeGL(int w, int h);
 	void paintEvent(QPaintEvent* ev);
 
-	void Print (QPainter& painter, Qt::GlobalColor color, int x, int y, const char *fmt, ... ) const;
+	void Print (QPainter& painter, int x, int y, const char *fmt, ... ) const;
 
 	DemoCamera* m_camera;
 	NewtonWorld* m_world;

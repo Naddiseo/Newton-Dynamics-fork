@@ -112,6 +112,11 @@ dMatrix DemoEntity::GetCurrentMatrix () const
 	return dMatrix (m_curRotation, m_curPosition);
 }
 
+dMatrix DemoEntity::GetNextMatrix () const
+{
+	return dMatrix (m_nextRotation, m_nextPosition);
+}
+
 dMatrix DemoEntity::CalculateGlobalMatrix (const DemoEntity* const root) const
 {
 	dMatrix matrix (GetIdentityMatrix());
