@@ -41,7 +41,6 @@
 		FF8C27611313D82800646B90 /* dGeometryNodeSkinModifierInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = FF8C27261313D82800646B90 /* dGeometryNodeSkinModifierInfo.h */; };
 		FF8C27621313D82800646B90 /* dImportPlugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF8C27271313D82800646B90 /* dImportPlugin.cpp */; };
 		FF8C27631313D82800646B90 /* dImportPlugin.h in Headers */ = {isa = PBXBuildFile; fileRef = FF8C27281313D82800646B90 /* dImportPlugin.h */; };
-		FF8C27641313D82800646B90 /* dllmain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF8C27291313D82800646B90 /* dllmain.cpp */; };
 		FF8C27651313D82800646B90 /* dMaterialNodeInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF8C272A1313D82800646B90 /* dMaterialNodeInfo.cpp */; };
 		FF8C27661313D82800646B90 /* dMaterialNodeInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = FF8C272B1313D82800646B90 /* dMaterialNodeInfo.h */; };
 		FF8C27671313D82800646B90 /* dMeshNodeInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF8C272C1313D82800646B90 /* dMeshNodeInfo.cpp */; };
@@ -105,7 +104,6 @@
 		FF8C27261313D82800646B90 /* dGeometryNodeSkinModifierInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dGeometryNodeSkinModifierInfo.h; path = ../../../dScene/dGeometryNodeSkinModifierInfo.h; sourceTree = SOURCE_ROOT; };
 		FF8C27271313D82800646B90 /* dImportPlugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dImportPlugin.cpp; path = ../../../dScene/dImportPlugin.cpp; sourceTree = SOURCE_ROOT; };
 		FF8C27281313D82800646B90 /* dImportPlugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dImportPlugin.h; path = ../../../dScene/dImportPlugin.h; sourceTree = SOURCE_ROOT; };
-		FF8C27291313D82800646B90 /* dllmain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dllmain.cpp; path = ../../../dScene/dllmain.cpp; sourceTree = SOURCE_ROOT; };
 		FF8C272A1313D82800646B90 /* dMaterialNodeInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dMaterialNodeInfo.cpp; path = ../../../dScene/dMaterialNodeInfo.cpp; sourceTree = SOURCE_ROOT; };
 		FF8C272B1313D82800646B90 /* dMaterialNodeInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dMaterialNodeInfo.h; path = ../../../dScene/dMaterialNodeInfo.h; sourceTree = SOURCE_ROOT; };
 		FF8C272C1313D82800646B90 /* dMeshNodeInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dMeshNodeInfo.cpp; path = ../../../dScene/dMeshNodeInfo.cpp; sourceTree = SOURCE_ROOT; };
@@ -197,7 +195,6 @@
 				FF8C27261313D82800646B90 /* dGeometryNodeSkinModifierInfo.h */,
 				FF8C27271313D82800646B90 /* dImportPlugin.cpp */,
 				FF8C27281313D82800646B90 /* dImportPlugin.h */,
-				FF8C27291313D82800646B90 /* dllmain.cpp */,
 				FF8C272A1313D82800646B90 /* dMaterialNodeInfo.cpp */,
 				FF8C272B1313D82800646B90 /* dMaterialNodeInfo.h */,
 				FF8C272C1313D82800646B90 /* dMeshNodeInfo.cpp */,
@@ -326,7 +323,6 @@
 				FF8C275E1313D82800646B90 /* dGeometryNodeModifierInfo.cpp in Sources */,
 				FF8C27601313D82800646B90 /* dGeometryNodeSkinModifierInfo.cpp in Sources */,
 				FF8C27621313D82800646B90 /* dImportPlugin.cpp in Sources */,
-				FF8C27641313D82800646B90 /* dllmain.cpp in Sources */,
 				FF8C27651313D82800646B90 /* dMaterialNodeInfo.cpp in Sources */,
 				FF8C27671313D82800646B90 /* dMeshNodeInfo.cpp in Sources */,
 				FF8C27691313D82800646B90 /* dNodeInfo.cpp in Sources */,

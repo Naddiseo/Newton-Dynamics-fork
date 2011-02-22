@@ -2,4 +2,8 @@
 // Prefix header for all source files of the 'tinyxml' target in the 'tinyxml' project.
 //
 
-#include <Carbon/Carbon.h>
+//#include <Carbon/Carbon.h>
+ 
+#ifdef __OBJC__
+#import <Foundation/Foundation.h>
+#endif

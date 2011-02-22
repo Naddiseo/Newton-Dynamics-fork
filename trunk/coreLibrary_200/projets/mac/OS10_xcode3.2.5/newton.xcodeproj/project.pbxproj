@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		AA747D9F0F9514B9006C5449 /* newton_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = AA747D9E0F9514B9006C5449 /* newton_Prefix.pch */; };
-		AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AACBBE490F95108600F1A2B1 /* Foundation.framework */; };
 		FF0AEC7B1310AB5D00876ACF /* dg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF0AEC391310AB5D00876ACF /* dg.cpp */; };
 		FF0AEC7C1310AB5D00876ACF /* dg.h in Headers */ = {isa = PBXBuildFile; fileRef = FF0AEC3A1310AB5D00876ACF /* dg.h */; };
 		FF0AEC7D1310AB5D00876ACF /* dgAABBPolygonSoup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF0AEC3B1310AB5D00876ACF /* dgAABBPolygonSoup.cpp */; };
@@ -164,8 +163,7 @@
 
 /* Begin PBXFileReference section */
 		AA747D9E0F9514B9006C5449 /* newton_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = newton_Prefix.pch; sourceTree = SOURCE_ROOT; };
-		AACBBE490F95108600F1A2B1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		D2AAC07E0554694100DB518D /* libnewton.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libnewton.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2AAC07E0554694100DB518D /* libnewton_d.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libnewton_d.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF0AEC391310AB5D00876ACF /* dg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dg.cpp; path = ../../../source/core/dg.cpp; sourceTree = SOURCE_ROOT; };
 		FF0AEC3A1310AB5D00876ACF /* dg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dg.h; path = ../../../source/core/dg.h; sourceTree = SOURCE_ROOT; };
 		FF0AEC3B1310AB5D00876ACF /* dgAABBPolygonSoup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dgAABBPolygonSoup.cpp; path = ../../../source/core/dgAABBPolygonSoup.cpp; sourceTree = SOURCE_ROOT; };
@@ -324,7 +322,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AACBBE4A0F95108600F1A2B1 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,7 +331,7 @@
 		034768DFFF38A50411DB9C8B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D2AAC07E0554694100DB518D /* libnewton.a */,
+				D2AAC07E0554694100DB518D /* libnewton_d.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -346,18 +343,9 @@
 				FF0AED561310B19400876ACF /* physics */,
 				FF0AEDFB1310B1DD00876ACF /* newton */,
 				32C88DFF0371C24200C91783 /* Other Sources */,
-				0867D69AFE84028FC02AAC07 /* Frameworks */,
 				034768DFFF38A50411DB9C8B /* Products */,
 			);
 			name = newton;
-			sourceTree = "<group>";
-		};
-		0867D69AFE84028FC02AAC07 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				AACBBE490F95108600F1A2B1 /* Foundation.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		08FB77AEFE84172EC02AAC07 /* core */ = {
@@ -650,7 +638,7 @@
 			);
 			name = newton;
 			productName = newton;
-			productReference = D2AAC07E0554694100DB518D /* libnewton.a */;
+			productReference = D2AAC07E0554694100DB518D /* libnewton_d.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -660,7 +648,6 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB922208733DC00010E9CD /* Build configuration list for PBXProject "newton" */;
 			compatibilityVersion = "Xcode 3.1";
-			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
@@ -776,9 +763,9 @@
 					_NEWTON_USE_LIB,
 					_SCALAR_ARITHMETIC_ONLY,
 				);
-				GCC_VERSION = 4.0;
+				GCC_VERSION = 4.2;
 				INSTALL_PATH = /usr/local/lib;
-				PRODUCT_NAME = newton;
+				PRODUCT_NAME = newton_d;
 				SDKROOT = macosx10.4;
 			};
 			name = Debug;
@@ -797,7 +784,7 @@
 					_NEWTON_USE_LIB,
 					_SCALAR_ARITHMETIC_ONLY,
 				);
-				GCC_VERSION = 4.0;
+				GCC_VERSION = 4.2;
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = newton;
 				SDKROOT = macosx10.4;

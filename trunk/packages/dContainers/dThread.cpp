@@ -38,7 +38,7 @@ static inline void InterlockedIncrement (long* const Addend )
 	#endif
 }
 
-static inline void InterlockedDecrement(long* const Addend)
+static inline void InterlockedDecrement(int* const Addend)
 {
 	#if (defined (_LINUX_VER))
 		__sync_fetch_and_sub ((int32_t*)Addend, 1 );
@@ -50,14 +50,14 @@ static inline void InterlockedDecrement(long* const Addend)
 }
 
 
-static inline int InterlockedExchange (long* const spin, int testValue)
+static inline int InterlockedExchange (int* spin, int testValue)
 {
 	#if (defined (_LINUX_VER))
-		return __sync_bool_compare_and_swap((int32_t*)spin, spin, testValue);
+		return __sync_bool_compare_and_swap((int32_t*)spin, *spin, testValue);
 	#endif
 
 	#if (defined (_MAC_VER))
-		return OSAtomicCompareAndSwap32(spin, testValue, (int32_t*) spin))
+	return OSAtomicCompareAndSwap32(*spin, testValue, (int32_t*) spin);
 	#endif
 }
 #endif
@@ -101,7 +101,7 @@ void* dThread::TaskCallback(void *param)
 
 void dThread::TerminateTask ()
 {
-	InterlockedExchange((long*) &m_terminated, 1);
+	InterlockedExchange((int*) &m_terminated, 1);
 	while (m_taskExecuting) {
 		YieldTime();
 	}
@@ -112,7 +112,7 @@ void dThread::TerminateTask ()
 
 void dThread::ContinueExecution ()
 {
-	InterlockedDecrement((long*) &m_taskSuspendedCount);
+	InterlockedDecrement((int*) &m_taskSuspendedCount);
 	_ASSERTE (!(m_taskSuspendedCount & 0x80000000));
 }
 
@@ -133,7 +133,7 @@ void dThread::ExcuteTask()
 {
 	while (!m_terminated) {
 		if (m_taskSuspendedCount) {
-			InterlockedExchange((long*) &m_taskExecuting, 0);
+			InterlockedExchange((int*) &m_taskExecuting, 0);
 			//WaitForSingleObject(m_controlKey, INFINITE);
 			while (m_taskSuspendedCount) {
 				if (m_terminated) {
@@ -142,11 +142,11 @@ void dThread::ExcuteTask()
 				YieldTime();
 			}
 		}
-		InterlockedExchange((long*) &m_taskExecuting, 1);
+		InterlockedExchange((int*) &m_taskExecuting, 1);
 		RunMyTask ();
 		YieldTime();
 	}
-	InterlockedExchange((long*) &m_taskExecuting, 0);
+	InterlockedExchange((int*) &m_taskExecuting, 0);
 }
 
 void dThread::YieldTime()
@@ -163,7 +163,7 @@ void dThread::YieldTime()
 void dThread::Lock(unsigned& lockVar)
 {
 	_ASSERTE (sizeof (unsigned) == sizeof (long));
-	while (InterlockedExchange((long*) &lockVar, 1)) {
+	while (InterlockedExchange((int*) &lockVar, 1)) {
 		YieldTime();
 	}
 }

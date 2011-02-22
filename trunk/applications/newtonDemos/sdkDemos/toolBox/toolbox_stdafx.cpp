@@ -84,8 +84,6 @@ void GetWorkingFileName (const char* const name, char* const outPathName)
 
 	void SWAP_FLOAT32_ARRAY (void* const array, dInt32 count)
 	{
-		dInt32* ptr;
-
 		dInt32* const ptr = (dInt32*) array;
 		count /= sizeof (dInt32);
 		for (dInt32 i = 0; i < count; i ++) {

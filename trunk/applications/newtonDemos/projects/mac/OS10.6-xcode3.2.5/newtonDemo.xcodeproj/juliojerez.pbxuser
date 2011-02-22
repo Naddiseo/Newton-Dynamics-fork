@@ -39,7 +39,7 @@
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
 				PBXFileTableDataSourceColumnWidthsKey = (
 					20,
-					616,
+					536,
 					60,
 					20,
 					61,
@@ -56,12 +56,14 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 320069233;
-			PBXWorkspaceStateSaveDate = 320069233;
+			PBXPerProjectTemplateStateSaveDate = 320075799;
+			PBXWorkspaceStateSaveDate = 320075799;
 		};
 		perUserProjectItems = {
-			FF8C2D461313DE6800646B90 /* PBXTextBookmark */ = FF8C2D461313DE6800646B90 /* PBXTextBookmark */;
-			FF8C2D631313DE7D00646B90 /* PBXTextBookmark */ = FF8C2D631313DE7D00646B90 /* PBXTextBookmark */;
+			FF0AADDE1313FF05005D32D5 /* PBXTextBookmark */ = FF0AADDE1313FF05005D32D5 /* PBXTextBookmark */;
+			FF0AAE13131401BC005D32D5 /* PBXTextBookmark */ = FF0AAE13131401BC005D32D5 /* PBXTextBookmark */;
+			FF0AAE14131401BC005D32D5 /* PBXTextBookmark */ = FF0AAE14131401BC005D32D5 /* PBXTextBookmark */;
+			FF0AAE15131401BC005D32D5 /* PBXTextBookmark */ = FF0AAE15131401BC005D32D5 /* PBXTextBookmark */;
 			FF8F2890131365370019E923 /* PBXTextBookmark */ = FF8F2890131365370019E923 /* PBXTextBookmark */;
 			FFF1852F131318A40077CF7A /* PBXTextBookmark */ = FFF1852F131318A40077CF7A /* PBXTextBookmark */;
 			FFF18530131318A40077CF7A /* PBXTextBookmark */ = FFF18530131318A40077CF7A /* PBXTextBookmark */;
@@ -80,25 +82,61 @@
 			FFF18509131314CD0077CF7A /* newtonDemo */,
 		);
 	};
-	FF8C2D461313DE6800646B90 /* PBXTextBookmark */ = {
+	FF0AADDE1313FF05005D32D5 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
-		fRef = FFF184EB131311250077CF7A /* toolbox_stdafx.cpp */;
-		name = "toolbox_stdafx.cpp: 20";
-		rLen = 0;
-		rLoc = 705;
-		rType = 0;
-		vrLen = 230;
-		vrLoc = 587;
+		comments = "error: stdarg.h: No such file or directory";
+		fRef = FF0AADDF1313FF05005D32D5 /* stdarg.h */;
+		rLen = 1;
+		rLoc = 3;
+		rType = 1;
 	};
-	FF8C2D631313DE7D00646B90 /* PBXTextBookmark */ = {
+	FF0AADDF1313FF05005D32D5 /* stdarg.h */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.h;
+		name = stdarg.h;
+		path = /Xcode3.1.3/SDKs/MacOSX10.4u.sdk/usr/include/stdarg.h;
+		sourceTree = "<absolute>";
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {767, 205}}";
+			sepNavSelRange = "{100, 25}";
+			sepNavVisRange = "{0, 234}";
+		};
+	};
+	FF0AAE13131401BC005D32D5 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = FFF184EB131311250077CF7A /* toolbox_stdafx.cpp */;
-		name = "toolbox_stdafx.cpp: 20";
+		name = "toolbox_stdafx.cpp: 87";
 		rLen = 0;
-		rLoc = 705;
+		rLoc = 2340;
 		rType = 0;
-		vrLen = 235;
-		vrLoc = 585;
+		vrLen = 242;
+		vrLoc = 2271;
+	};
+	FF0AAE14131401BC005D32D5 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = FFF184EB131311250077CF7A /* toolbox_stdafx.cpp */;
+		name = "toolbox_stdafx.cpp: 87";
+		rLen = 0;
+		rLoc = 2340;
+		rType = 0;
+		vrLen = 242;
+		vrLoc = 2271;
+	};
+	FF0AAE15131401BC005D32D5 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = FF0AAE16131401BC005D32D5 /* stdarg.h */;
+		name = "stdarg.h: 4";
+		rLen = 25;
+		rLoc = 100;
+		rType = 0;
+		vrLen = 234;
+		vrLoc = 0;
+	};
+	FF0AAE16131401BC005D32D5 /* stdarg.h */ = {
+		isa = PBXFileReference;
+		name = stdarg.h;
+		path = /Xcode3.1.3/SDKs/MacOSX10.4u.sdk/usr/include/stdarg.h;
+		sourceTree = "<absolute>";
 	};
 	FF8F284D13135D550019E923 /* c++config.h */ = {
 		isa = PBXFileReference;
@@ -135,6 +173,14 @@
 			sepNavVisRange = "{0, 405}";
 		};
 	};
+	FFF184D3131310FB0077CF7A /* moc_NewtonDemos.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1256, 2166}}";
+			sepNavSelRange = "{384, 0}";
+			sepNavVisRange = "{2791, 997}";
+			sepNavWindowFrame = "{{176, 160}, {1315, 716}}";
+		};
+	};
 	FFF184E2131311250077CF7A /* dRuntimeProfiler.h */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {732, 836}}";
@@ -144,9 +190,10 @@
 	};
 	FFF184EB131311250077CF7A /* toolbox_stdafx.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {767, 2052}}";
-			sepNavSelRange = "{705, 0}";
-			sepNavVisRange = "{585, 235}";
+			sepNavIntBoundsRect = "{{0, 0}, {767, 2299}}";
+			sepNavSelRange = "{2340, 0}";
+			sepNavVisRange = "{2271, 242}";
+			sepNavWindowFrame = "{{153, 181}, {1315, 716}}";
 		};
 	};
 	FFF184EC131311250077CF7A /* toolbox_stdafx.h */ = {

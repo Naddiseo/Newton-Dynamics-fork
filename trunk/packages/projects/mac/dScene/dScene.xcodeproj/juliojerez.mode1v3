@@ -271,18 +271,20 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateExpansionKey</key>
 							<array>
 								<string>0867D691FE84028FC02AAC07</string>
+								<string>08FB77ACFE841707C02AAC07</string>
 								<string>1C37FBAC04509CD000000102</string>
 								<string>1C37FABC05509CD000000102</string>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>4</integer>
-									<integer>3</integer>
+									<integer>58</integer>
+									<integer>1</integer>
+									<integer>0</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 0}, {186, 567}}</string>
+							<string>{{0, 577}, {186, 567}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -317,7 +319,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>dPluginStdafx.h</string>
+								<string>dVariable.cpp</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -325,14 +327,21 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>dPluginStdafx.h</string>
+										<string>dVariable.cpp</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>FF8C279A1313D9FF00646B90</string>
+										<string>FF0AADEE1313FF7F005D32D5</string>
 										<key>history</key>
 										<array>
-											<string>FF8C27991313D9FF00646B90</string>
+											<string>FF0AADAA1313FBC0005D32D5</string>
+											<string>FF0AADEB1313FF7F005D32D5</string>
+											<string>FF0AADEC1313FF7F005D32D5</string>
+										</array>
+										<key>prevStack</key>
+										<array>
+											<string>FF0AADAC1313FBC0005D32D5</string>
+											<string>FF0AADED1313FF7F005D32D5</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -390,9 +399,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>FF8C279B1313D9FF00646B90</string>
+				<string>FF0AADEF1313FF7F005D32D5</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>FF8C279C1313D9FF00646B90</string>
+				<string>FF0AADF01313FF7F005D32D5</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -551,25 +560,23 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>1CD0528F0623707200166675</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>dllmain.cpp</string>
+								<string></string>
 								<key>StatusBarVisibility</key>
 								<true/>
 							</dict>
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 0}, {907, 330}}</string>
+								<string>{{0, 0}, {907, 0}}</string>
 								<key>RubberWindowFrame</key>
 								<string>560 218 907 612 0 0 1680 1028 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
 							<key>Proportion</key>
-							<string>330pt</string>
+							<string>0pt</string>
 						</dict>
 						<dict>
-							<key>BecomeActive</key>
-							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
@@ -584,14 +591,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 335}, {907, 236}}</string>
+								<string>{{0, 5}, {907, 566}}</string>
 								<key>RubberWindowFrame</key>
 								<string>560 218 907 612 0 0 1680 1028 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXBuildResultsModule</string>
 							<key>Proportion</key>
-							<string>236pt</string>
+							<string>566pt</string>
 						</dict>
 					</array>
 					<key>Proportion</key>
@@ -609,7 +616,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>FF8C27801313D83C00646B90</string>
-				<string>FF8C27811313D83C00646B90</string>
+				<string>FF0AADF11313FF7F005D32D5</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>

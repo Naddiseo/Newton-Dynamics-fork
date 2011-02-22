@@ -15,7 +15,7 @@
 					20,
 					328,
 					20,
-					61.2978515625,
+					61,
 					43,
 					43,
 					20,
@@ -38,7 +38,7 @@
 					288,
 					60,
 					20,
-					61.2978515625,
+					61,
 					43,
 					43,
 				);
@@ -52,15 +52,114 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 320068205;
-			PBXWorkspaceStateSaveDate = 320068205;
+			PBXPerProjectTemplateStateSaveDate = 320076693;
+			PBXWorkspaceStateSaveDate = 320076693;
+		};
+		perUserProjectItems = {
+			FF0AAD3C1313FA5A005D32D5 /* PBXTextBookmark */ = FF0AAD3C1313FA5A005D32D5 /* PBXTextBookmark */;
+			FF0AAD3D1313FA5A005D32D5 /* PBXTextBookmark */ = FF0AAD3D1313FA5A005D32D5 /* PBXTextBookmark */;
+			FF0AAD811313FB2A005D32D5 /* PBXTextBookmark */ = FF0AAD811313FB2A005D32D5 /* PBXTextBookmark */;
+			FF0AAD831313FB2A005D32D5 /* PBXTextBookmark */ = FF0AAD831313FB2A005D32D5 /* PBXTextBookmark */;
+			FF0AAD971313FB79005D32D5 /* PBXTextBookmark */ = FF0AAD971313FB79005D32D5 /* PBXTextBookmark */;
+			FF0AADA01313FB9D005D32D5 /* PBXTextBookmark */ = FF0AADA01313FB9D005D32D5 /* PBXTextBookmark */;
 		};
 		sourceControlManager = FF8C27B61313DA7900646B90 /* Source Control */;
 		userBuildSettings = {
 		};
 	};
+	32BAE0B70371A74B00C91783 /* tinyxml_Prefix.pch */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {708, 253}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 183}";
+			sepNavWindowFrame = "{{14, 138}, {1315, 716}}";
+		};
+	};
 	D2AAC06E0554671400DB518D /* tinyxml */ = {
 		activeExec = 0;
+	};
+	FF0AAD181313F91F005D32D5 /* stdarg.h */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.h;
+		name = stdarg.h;
+		path = /Xcode3.1.3/SDKs/MacOSX10.4u.sdk/usr/include/stdarg.h;
+		sourceTree = "<absolute>";
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {519, 253}}";
+			sepNavSelRange = "{100, 25}";
+			sepNavVisRange = "{0, 234}";
+		};
+	};
+	FF0AAD3C1313FA5A005D32D5 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = FF0AAD181313F91F005D32D5 /* stdarg.h */;
+		name = "stdarg.h: 4";
+		rLen = 25;
+		rLoc = 100;
+		rType = 0;
+		vrLen = 234;
+		vrLoc = 0;
+	};
+	FF0AAD3D1313FA5A005D32D5 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = FF0AAD181313F91F005D32D5 /* stdarg.h */;
+		name = "stdarg.h: 4";
+		rLen = 25;
+		rLoc = 100;
+		rType = 0;
+		vrLen = 234;
+		vrLoc = 0;
+	};
+	FF0AAD4F1313FA9D005D32D5 /* Carbon.h */ = {
+		isa = PBXFileReference;
+		name = Carbon.h;
+		path = /Xcode3.1.3/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks/Carbon.framework/Headers/Carbon.h;
+		sourceTree = "<absolute>";
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {610, 1558}}";
+			sepNavSelRange = "{423, 32}";
+			sepNavVisRange = "{303, 231}";
+		};
+	};
+	FF0AAD811313FB2A005D32D5 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = FF0AAD4F1313FA9D005D32D5 /* Carbon.h */;
+		name = "Carbon.h: 20";
+		rLen = 32;
+		rLoc = 423;
+		rType = 0;
+		vrLen = 231;
+		vrLoc = 303;
+	};
+	FF0AAD831313FB2A005D32D5 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = FF0AAD4F1313FA9D005D32D5 /* Carbon.h */;
+		name = "Carbon.h: 20";
+		rLen = 32;
+		rLoc = 423;
+		rType = 0;
+		vrLen = 231;
+		vrLoc = 303;
+	};
+	FF0AAD971313FB79005D32D5 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 32BAE0B70371A74B00C91783 /* tinyxml_Prefix.pch */;
+		name = "tinyxml_Prefix.pch: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 183;
+		vrLoc = 0;
+	};
+	FF0AADA01313FB9D005D32D5 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 32BAE0B70371A74B00C91783 /* tinyxml_Prefix.pch */;
+		name = "tinyxml_Prefix.pch: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 183;
+		vrLoc = 0;
 	};
 	FF8C27B61313DA7900646B90 /* Source Control */ = {
 		isa = PBXSourceControlManager;
