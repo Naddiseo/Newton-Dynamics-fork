@@ -1,0 +1,249 @@
+// !$*UTF8*$!
+{
+	08FB7793FE84155DC02AAC07 /* Project object */ = {
+		activeBuildConfigurationName = Debug;
+		activeExecutable = FFF18509131314CD0077CF7A /* newtonDemo */;
+		activeTarget = 8DD76F620486A84900D96B5E /* newtonDemo */;
+		addToTargets = (
+			8DD76F620486A84900D96B5E /* newtonDemo */,
+		);
+		codeSenseManager = FFF18494131308FB0077CF7A /* Code sense */;
+		executables = (
+			FFF18509131314CD0077CF7A /* newtonDemo */,
+		);
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					576,
+					20,
+					61,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					616,
+					60,
+					20,
+					61,
+					43,
+					43,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXTargetDataSource_PrimaryAttribute,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 320069233;
+			PBXWorkspaceStateSaveDate = 320069233;
+		};
+		perUserProjectItems = {
+			FF8C2D461313DE6800646B90 /* PBXTextBookmark */ = FF8C2D461313DE6800646B90 /* PBXTextBookmark */;
+			FF8C2D631313DE7D00646B90 /* PBXTextBookmark */ = FF8C2D631313DE7D00646B90 /* PBXTextBookmark */;
+			FF8F2890131365370019E923 /* PBXTextBookmark */ = FF8F2890131365370019E923 /* PBXTextBookmark */;
+			FFF1852F131318A40077CF7A /* PBXTextBookmark */ = FFF1852F131318A40077CF7A /* PBXTextBookmark */;
+			FFF18530131318A40077CF7A /* PBXTextBookmark */ = FFF18530131318A40077CF7A /* PBXTextBookmark */;
+			FFF18531131318A40077CF7A /* PBXTextBookmark */ = FFF18531131318A40077CF7A /* PBXTextBookmark */;
+			FFF185B113131AA70077CF7A /* PBXTextBookmark */ = FFF185B113131AA70077CF7A /* PBXTextBookmark */;
+			FFF185B213131AA70077CF7A /* PBXTextBookmark */ = FFF185B213131AA70077CF7A /* PBXTextBookmark */;
+			FFF185DE13133D130077CF7A /* PBXTextBookmark */ = FFF185DE13133D130077CF7A /* PBXTextBookmark */;
+		};
+		sourceControlManager = FFF18493131308FB0077CF7A /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	8DD76F620486A84900D96B5E /* newtonDemo */ = {
+		activeExec = 0;
+		executables = (
+			FFF18509131314CD0077CF7A /* newtonDemo */,
+		);
+	};
+	FF8C2D461313DE6800646B90 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = FFF184EB131311250077CF7A /* toolbox_stdafx.cpp */;
+		name = "toolbox_stdafx.cpp: 20";
+		rLen = 0;
+		rLoc = 705;
+		rType = 0;
+		vrLen = 230;
+		vrLoc = 587;
+	};
+	FF8C2D631313DE7D00646B90 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = FFF184EB131311250077CF7A /* toolbox_stdafx.cpp */;
+		name = "toolbox_stdafx.cpp: 20";
+		rLen = 0;
+		rLoc = 705;
+		rType = 0;
+		vrLen = 235;
+		vrLoc = 585;
+	};
+	FF8F284D13135D550019E923 /* c++config.h */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.h;
+		name = "c++config.h";
+		path = "/Xcode3.1.3/SDKs/MacOSX10.5.sdk/usr/include/c++/4.0.0/i686-apple-darwin9/bits/c++config.h";
+		sourceTree = "<absolute>";
+	};
+	FF8F2890131365370019E923 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = FF8F284D13135D550019E923 /* c++config.h */;
+		name = "c++config.h: 79";
+		rLen = 60;
+		rLoc = 2919;
+		rType = 0;
+		vrLen = 194;
+		vrLoc = 2819;
+	};
+	FFF18493131308FB0077CF7A /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+		};
+	};
+	FFF18494131308FB0077CF7A /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	FFF184CB131310FB0077CF7A /* DemoCamera.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1130, 1265}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 405}";
+		};
+	};
+	FFF184E2131311250077CF7A /* dRuntimeProfiler.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {732, 836}}";
+			sepNavSelRange = "{813, 77}";
+			sepNavVisRange = "{633, 421}";
+		};
+	};
+	FFF184EB131311250077CF7A /* toolbox_stdafx.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {767, 2052}}";
+			sepNavSelRange = "{705, 0}";
+			sepNavVisRange = "{585, 235}";
+		};
+	};
+	FFF184EC131311250077CF7A /* toolbox_stdafx.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {723, 4085}}";
+			sepNavSelRange = "{3200, 22}";
+			sepNavVisRange = "{3131, 113}";
+		};
+	};
+	FFF18509131314CD0077CF7A /* newtonDemo */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 1;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = newtonDemo;
+		sourceDirectories = (
+		);
+	};
+	FFF1852F131318A40077CF7A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = FFF184CB131310FB0077CF7A /* DemoCamera.cpp */;
+		name = "DemoCamera.cpp: 17";
+		rLen = 29;
+		rLoc = 553;
+		rType = 0;
+		vrLen = 128;
+		vrLoc = 481;
+	};
+	FFF18530131318A40077CF7A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = FFF184CB131310FB0077CF7A /* DemoCamera.cpp */;
+		name = "DemoCamera.cpp: 17";
+		rLen = 29;
+		rLoc = 553;
+		rType = 0;
+		vrLen = 128;
+		vrLoc = 481;
+	};
+	FFF18531131318A40077CF7A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = FFF184EB131311250077CF7A /* toolbox_stdafx.cpp */;
+		name = "toolbox_stdafx.cpp: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 313;
+		vrLoc = 0;
+	};
+	FFF185B113131AA70077CF7A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = FFF184EC131311250077CF7A /* toolbox_stdafx.h */;
+		name = "toolbox_stdafx.h: 126";
+		rLen = 22;
+		rLoc = 3200;
+		rType = 0;
+		vrLen = 113;
+		vrLoc = 3131;
+	};
+	FFF185B213131AA70077CF7A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = FFF184EC131311250077CF7A /* toolbox_stdafx.h */;
+		name = "toolbox_stdafx.h: 126";
+		rLen = 22;
+		rLoc = 3200;
+		rType = 0;
+		vrLen = 113;
+		vrLoc = 3131;
+	};
+	FFF185C5131334DA0077CF7A /* c++config.h */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.h;
+		name = "c++config.h";
+		path = "/Xcode3.1.3/SDKs/MacOSX10.5.sdk/usr/include/c++/4.0.0/i686-apple-darwin9/bits/c++config.h";
+		sourceTree = "<absolute>";
+	};
+	FFF185DE13133D130077CF7A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = FFF185C5131334DA0077CF7A /* c++config.h */;
+		name = "c++config.h: 79";
+		rLen = 60;
+		rLoc = 2919;
+		rType = 0;
+		vrLen = 185;
+		vrLoc = 2901;
+	};
+}
