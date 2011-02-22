@@ -25,9 +25,8 @@
 #endif
 
 
-#if (defined (_LINUX_VER) || defined (_MAC_VER))
 
-static inline void InterlockedIncrement (long* const Addend )
+static inline void dInterlockedIncrement (int* const Addend )
 {
 	#if (defined (_LINUX_VER))
 		__sync_fetch_and_add ((int32_t*)Addend, 1 );
@@ -36,9 +35,13 @@ static inline void InterlockedIncrement (long* const Addend )
 	#if (defined (_MAC_VER))
 		OSAtomicAdd32 (1, (int32_t*)Addend);
 	#endif
+
+	#if (defined (_MSC_VER))
+		InterlockedIncrement((long*) Addend);
+	#endif
 }
 
-static inline void InterlockedDecrement(int* const Addend)
+static inline void dInterlockedDecrement(int* const Addend)
 {
 	#if (defined (_LINUX_VER))
 		__sync_fetch_and_sub ((int32_t*)Addend, 1 );
@@ -47,10 +50,14 @@ static inline void InterlockedDecrement(int* const Addend)
 	#if (defined (_MAC_VER))
 		OSAtomicAdd32 (-1, (int32_t*)Addend);
 	#endif
+
+	#if (defined (_MSC_VER))
+		InterlockedDecrement((long*) Addend);
+	#endif
 }
 
 
-static inline int InterlockedExchange (int* spin, int testValue)
+static inline int dInterlockedExchange (int* spin, int testValue)
 {
 	#if (defined (_LINUX_VER))
 		return __sync_bool_compare_and_swap((int32_t*)spin, *spin, testValue);
@@ -59,8 +66,16 @@ static inline int InterlockedExchange (int* spin, int testValue)
 	#if (defined (_MAC_VER))
 	return OSAtomicCompareAndSwap32(*spin, testValue, (int32_t*) spin);
 	#endif
+
+	#if (defined (_MSC_VER))
+	return InterlockedExchange ((long*) spin, testValue);
+	#endif
 }
-#endif
+
+
+
+
+
 
 
 
@@ -101,7 +116,7 @@ void* dThread::TaskCallback(void *param)
 
 void dThread::TerminateTask ()
 {
-	InterlockedExchange((int*) &m_terminated, 1);
+	dInterlockedExchange((int*) &m_terminated, 1);
 	while (m_taskExecuting) {
 		YieldTime();
 	}
@@ -112,14 +127,14 @@ void dThread::TerminateTask ()
 
 void dThread::ContinueExecution ()
 {
-	InterlockedDecrement((int*) &m_taskSuspendedCount);
+	dInterlockedDecrement((int*) &m_taskSuspendedCount);
 	_ASSERTE (!(m_taskSuspendedCount & 0x80000000));
 }
 
 
 void dThread::StopsExecution ()
 {
-	InterlockedIncrement((long*) &m_taskSuspendedCount);
+	dInterlockedIncrement((int*) &m_taskSuspendedCount);
 	_ASSERTE (!(m_taskSuspendedCount & 0x80000000));
 	while (m_taskExecuting) {
 		YieldTime();
@@ -133,7 +148,7 @@ void dThread::ExcuteTask()
 {
 	while (!m_terminated) {
 		if (m_taskSuspendedCount) {
-			InterlockedExchange((int*) &m_taskExecuting, 0);
+			dInterlockedExchange((int*) &m_taskExecuting, 0);
 			//WaitForSingleObject(m_controlKey, INFINITE);
 			while (m_taskSuspendedCount) {
 				if (m_terminated) {
@@ -142,11 +157,11 @@ void dThread::ExcuteTask()
 				YieldTime();
 			}
 		}
-		InterlockedExchange((int*) &m_taskExecuting, 1);
+		dInterlockedExchange((int*) &m_taskExecuting, 1);
 		RunMyTask ();
 		YieldTime();
 	}
-	InterlockedExchange((int*) &m_taskExecuting, 0);
+	dInterlockedExchange((int*) &m_taskExecuting, 0);
 }
 
 void dThread::YieldTime()
@@ -163,7 +178,7 @@ void dThread::YieldTime()
 void dThread::Lock(unsigned& lockVar)
 {
 	_ASSERTE (sizeof (unsigned) == sizeof (long));
-	while (InterlockedExchange((int*) &lockVar, 1)) {
+	while (dInterlockedExchange((int*) &lockVar, 1)) {
 		YieldTime();
 	}
 }
