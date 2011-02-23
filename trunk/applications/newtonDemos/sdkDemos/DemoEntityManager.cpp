@@ -525,25 +525,23 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 
 		//profileFlags = 1;
 		if (profileFlags) {
-//			m_profiler.Render (m_world, profileFlags, painter);
+			m_profiler.Render (m_world, profileFlags, painter);
 		}
 	}
 
 	if (mainWindow->m_threadProfilerState) {
-//		m_profiler.RenderThreadPerformance (m_world, painter);
+		m_profiler.RenderThreadPerformance (m_world, painter);
 	}
 
 	if (mainWindow->m_showStatistics) {
 		dFloat fps = 1.0f / timestep;
-		//m_glContext.Print (color, 4,  4, "FPS %6.2f", fps);
-		Qt::GlobalColor color = Qt::white;
-		painter.setPen(color);
+		painter.setPen(Qt::black);
 		Print (painter, 14, 14, "FPS: %6.2f", fps);
-//		Print (painter, 14, 30, "Physics time (ms): %6.3f", m_physicsTime * 1000.0f);
-//		Print (painter, 14, 46, "Body count: %d",  NewtonWorldGetBodyCount(m_world));
-//		Print (painter, 14, 62, "number of threads: %d",  NewtonGetThreadsCount(m_world));
+		Print (painter, 14, 30, "Physics time (ms): %6.3f", m_physicsTime * 1000.0f);
+		Print (painter, 14, 46, "Body count: %d",  NewtonWorldGetBodyCount(m_world));
+		Print (painter, 14, 62, "number of threads: %d",  NewtonGetThreadsCount(m_world));
 		if (m_asycronousUpdate) {
-//			Print (painter, 14, 78, "physics running asynchronous");
+			Print (painter, 14, 78, "physics running asynchronous");
 		}
 	}
 	painter.end();
