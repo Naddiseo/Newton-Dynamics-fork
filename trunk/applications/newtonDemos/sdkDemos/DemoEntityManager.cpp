@@ -305,7 +305,8 @@ void DemoEntityManager::ResetTimer()
 
 void DemoEntityManager::UpdateCamera (float timestep)
 {
-//	GetKeyState(100);
+	// somehow this does not works with QT
+	//GetKeyAsynState(100);
 	Lock (m_navegationQueueLock);
 	{
 		float speed = 30.0f;
@@ -315,23 +316,24 @@ void DemoEntityManager::UpdateCamera (float timestep)
 			int code = m_navegationQueue[i];
 			switch (code)
 			{
-			case Qt::Key_W:
+				case Qt::Key_W:
 				{
 					//ent->SetMatrix (*world, rot, transform.m_posit);	ent->SetMatrix (*world, rot, transform.m_posit);
 					targetMatrix.m_posit += targetMatrix.m_front.Scale(speed * timestep);
 					break;
 				}
-			case Qt::Key_S:
+
+				case Qt::Key_S:
 				{
 					break;
 				}
 
-			case Qt::Key_A:
+				case Qt::Key_A:
 				{
 					break;
 				}
 
-			case Qt::Key_D:
+				case Qt::Key_D:
 				{
 					break;
 				}
@@ -493,12 +495,12 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 
 		//profileFlags = 1;
 		if (profileFlags) {
-			//m_profiler.Render (m_world, profileFlags, m_glContext);
+			m_profiler.Render (m_world, profileFlags, painter);
 		}
 	}
 
 	if (mainWindow->m_threadProfilerState) {
-		//m_profiler.ReanderThreadPerformace (m_world, m_glContext);
+		m_profiler.RenderThreadPerformance (m_world, painter);
 	}
 
 	if (mainWindow->m_showStatistics) {
@@ -508,11 +510,11 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 		painter.setPen(color);
 		Print (painter, 14, 14, "FPS: %6.2f", fps);
 		Print (painter, 14, 30, "Physics time (ms): %6.3f", m_physicsTime * 1000.0f);
-		//Print (painter, 14, 46, "Body count: %d",  NewtonWorldGetBodyCount(m_world));
-		//Print (painter, 14, 62, "number of threads: %d",  NewtonGetThreadsCount(m_world));
-		//if (m_asycronousUpdate) {
-		//	Print (painter, 14, 78, "physics running asynchronous");
-		//}
+		Print (painter, 14, 46, "Body count: %d",  NewtonWorldGetBodyCount(m_world));
+		Print (painter, 14, 62, "number of threads: %d",  NewtonGetThreadsCount(m_world));
+		if (m_asycronousUpdate) {
+			Print (painter, 14, 78, "physics running asynchronous");
+		}
 	}
 	painter.end();
 

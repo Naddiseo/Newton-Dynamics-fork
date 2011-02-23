@@ -409,8 +409,8 @@ void newtonDemos::keyPressEvent (QKeyEvent *keyEvent)
 			break;
 
 		default:;
-
 	}
+	keyEvent->accept();
 }
 
 void newtonDemos::OnNotUsed()

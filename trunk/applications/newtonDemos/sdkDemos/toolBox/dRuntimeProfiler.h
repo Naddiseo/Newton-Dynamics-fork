@@ -30,9 +30,9 @@ class dRuntimeProfiler
 
 	void Render (NewtonWorld* nWorld, int mask, QPainter& context);
 	void DrawLabel (dFloat x, dFloat y, const char* label, QPainter& context);
-	void DrawTrack (dFloat x, dFloat y, const dVector& color, int start, unsigned* track);
+	void DrawTrack (dFloat x, dFloat y, int start, unsigned* track, QPainter& context);
 
-	void ReanderThreadPerformace (NewtonWorld* nWorld, QPainter& context);
+	void RenderThreadPerformance (NewtonWorld* nWorld, QPainter& context);
 
 	static unsigned GetTimeInMicrosenconds();
 
