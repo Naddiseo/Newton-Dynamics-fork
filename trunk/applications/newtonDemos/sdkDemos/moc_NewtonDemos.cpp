@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'NewtonDemos.h'
 **
-** Created: Tue Feb 22 11:43:06 2011
+** Created: Wed Feb 23 11:13:13 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -24,7 +24,7 @@ static const uint qt_meta_data_newtonDemos[] = {
        5,       // revision
        0,       // classname
        0,    0, // classinfo
-      14,   14, // methods
+      15,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -46,6 +46,7 @@ static const uint qt_meta_data_newtonDemos[] = {
      196,   12,   12,   12, 0x0a,
      225,   12,   12,   12, 0x0a,
      256,   12,   12,   12, 0x0a,
+     275,   12,   12,   12, 0x0a,
 
        0        // eod
 };
@@ -58,7 +59,7 @@ static const char qt_meta_stringdata_newtonDemos[] = {
     "OnUseSimdInstructions()\0"
     "OnRunSymulationAsyncronous()\0"
     "OnSelectNumberOfMicroThreads()\0"
-    "OnNotUsed()\0"
+    "OnSetCameraSpeed()\0OnNotUsed()\0"
 };
 
 const QMetaObject newtonDemos::staticMetaObject = {
@@ -103,10 +104,11 @@ int newtonDemos::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         case 10: OnUseSimdInstructions(); break;
         case 11: OnRunSymulationAsyncronous(); break;
         case 12: OnSelectNumberOfMicroThreads(); break;
-        case 13: OnNotUsed(); break;
+        case 13: OnSetCameraSpeed(); break;
+        case 14: OnNotUsed(); break;
         default: ;
         }
-        _id -= 14;
+        _id -= 15;
     }
     return _id;
 }

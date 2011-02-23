@@ -54,6 +54,7 @@ public:
 		void OnUseSimdInstructions(); 	
 		void OnRunSymulationAsyncronous(); 	
 		void OnSelectNumberOfMicroThreads(); 	
+		void OnSetCameraSpeed();
 		
 		void OnNotUsed(); 
 
@@ -71,6 +72,9 @@ private:
 	bool m_showStatistics;
 	bool m_doVisualUpdates;
 	bool m_concurrentPhysicsUpdates;
+
+	float m_cameraFrontSpeed;
+	float m_sidewaysSpeed;
 
 	friend class DemoEntityManager;
 };

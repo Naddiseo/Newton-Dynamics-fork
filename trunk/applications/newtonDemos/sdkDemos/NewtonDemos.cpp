@@ -189,6 +189,8 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 	,m_showStatistics(true)
 	,m_doVisualUpdates(true)
 	,m_concurrentPhysicsUpdates(false)
+	,m_cameraFrontSpeed(40.0f)
+	,m_sidewaysSpeed(40.0f)
 {
 	setObjectName(QString::fromUtf8("newtonMain"));
 	resize(1024, 768);
@@ -638,6 +640,14 @@ void newtonDemos::OnSelectNumberOfMicroThreads()
 
 	int threadCount = selectThreadCount.GetThreadCount();
 	NewtonSetThreadsCount(m_canvas->GetNewton(), threadCount);
+
+	END_MENU_OPTION();
+}
+
+
+void newtonDemos::OnSetCameraSpeed()
+{
+	BEGIN_MENU_OPTION();
 
 	END_MENU_OPTION();
 }

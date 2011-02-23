@@ -318,7 +318,10 @@ void DemoEntityManager::UpdateCamera (float timestep)
 	//GetKeyAsynState(100);
 	Lock (m_navegationQueueLock);
 	{
-		float speed = 30.0f;
+		newtonDemos* const mainWindow = (newtonDemos*) parent();
+		
+		float sideSpeed = mainWindow->m_sidewaysSpeed;
+		float linearSpeed = mainWindow->m_cameraFrontSpeed;
 		dMatrix targetMatrix (m_camera->GetNextMatrix());
 		for (int i = 0; i < m_navegationQueueCount; i ++) {
 
@@ -328,22 +331,25 @@ void DemoEntityManager::UpdateCamera (float timestep)
 				case Qt::Key_W:
 				{
 					//ent->SetMatrix (*world, rot, transform.m_posit);	ent->SetMatrix (*world, rot, transform.m_posit);
-					targetMatrix.m_posit += targetMatrix.m_front.Scale(speed * timestep);
+					targetMatrix.m_posit += targetMatrix.m_front.Scale(linearSpeed * timestep);
 					break;
 				}
 
 				case Qt::Key_S:
 				{
+					targetMatrix.m_posit -= targetMatrix.m_front.Scale(linearSpeed * timestep);
 					break;
 				}
 
 				case Qt::Key_A:
 				{
+					targetMatrix.m_posit -= targetMatrix.m_right.Scale(sideSpeed * timestep);
 					break;
 				}
 
 				case Qt::Key_D:
 				{
+					targetMatrix.m_posit += targetMatrix.m_right.Scale(sideSpeed * timestep);
 					break;
 				}
 			}			
