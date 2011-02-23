@@ -60,15 +60,15 @@ static inline void dInterlockedDecrement(int* const Addend)
 static inline int dInterlockedExchange (int* spin, int testValue)
 {
 	#if (defined (_LINUX_VER))
-		return __sync_bool_compare_and_swap((int32_t*)spin, *spin, testValue);
+		return __sync_val_compare_and_swap((int32_t*)spin, !testValue, testValue);
 	#endif
 
 	#if (defined (_MAC_VER))
-	return OSAtomicCompareAndSwap32(*spin, testValue, (int32_t*) spin);
+		return OSAtomicCompareAndSwap32(!testValue, testValue, (int32_t*) spin);
 	#endif
 
 	#if (defined (_MSC_VER))
-	return InterlockedExchange ((long*) spin, testValue);
+		return InterlockedExchange ((long*) spin, testValue);
 	#endif
 }
 

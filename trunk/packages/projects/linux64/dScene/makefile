@@ -85,7 +85,7 @@ FLAGS = -c -Wall -Wno-strict-aliasing -D_LINUX_VER  $(CPU_FLAGS) -I$(NEWTON_SDK)
 # libraries targets
 libTemp.a : $(DG_OBJ_FILES)
 	ar r $@ $?
-	strip -g -S -d -v $@  -o$@ 
+#	strip -g -S -d -v $@  -o$@ 
 	cp $@ $(NEWTON_SDK)/$(LIB_NAME) 	
 	
 

@@ -45,7 +45,7 @@ DG_OBJ_FILES = $(ALL_SRC_FILES:.cpp=.o)
 COMPILER = gcc
 
 # Linux options	 gcc 4.2.2
-CPU_FLAGS = -O0 -msse -g -msse2 -ffloat-store -ffast-math -freciprocal-math -funsafe-math-optimizations -fsingle-precision-constant
+CPU_FLAGS = -O2 -msse -g -msse2 -ffloat-store -ffast-math -freciprocal-math -funsafe-math-optimizations -fsingle-precision-constant
 FLAGS = -c -Wall -Wno-strict-aliasing -D_LINUX_VER  $(CPU_FLAGS) -I$(INCLUDED_PATH) 
 
 
@@ -57,7 +57,7 @@ FLAGS = -c -Wall -Wno-strict-aliasing -D_LINUX_VER  $(CPU_FLAGS) -I$(INCLUDED_PA
 # libraries targets
 libTemp.a : $(DG_OBJ_FILES)
 	ar r $@ $?
-	strip -g -S -d -v $@  -o$@ 
+#	strip -g -S -d -v $@  -o$@ 
 	cp $@ $(NEWTON_SDK)/$(LIB_NAME) 	
 	
 	#gcc -shared -Wl,-soname,libNewton.so $? -o libNewton.so 
