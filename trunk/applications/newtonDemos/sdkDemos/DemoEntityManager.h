@@ -46,6 +46,8 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 	dScene CreateAlchemediaFromPhysic(); 
 	void SetAutoSleepState (bool state);
 
+	void RemoveEntity (DemoEntity* const ent);
+	void RemoveEntity (dList<DemoEntity*>::dListNode* const entNode);
 
 	private:
 	void InterpolateMatrices ();

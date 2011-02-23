@@ -212,79 +212,60 @@ class ComplexScene: public DemoEntity
 
 	void AddCollisionTreeMesh (DemoEntityManager* const scene, NewtonCollision* const sceneCollision)
 	{
-//		NewtonCollision* collision;
-//		NewtonSceneProxy* sceneProxy;
-		
 		// open the level data
 		char fullPathName[2048];
 		GetWorkingFileName ("playground.xml", fullPathName);
 
 		scene->LoadScene (fullPathName);
-/*
-		OGLLoaderContext context;
-		dMatrix matrix (dYawMatrix (-3.14159265f * 0.5f));
 
-	_ASSERTE (0);
-	//	LoadCollada(fullPathName, context, matrix, 1.0f);
+		// find the visual mesh and make a collision tree
+		NewtonWorld* const world = scene->GetNewton();
+		DemoEntity* const ent = scene->GetLast()->GetInfo();
+		DemoMesh* const mesh = ent->GetMesh();
 
-		// create the collision tree geometry
-		collision = NewtonCreateTreeCollision(nWorld, 0);
-
+		NewtonCollision* const tree = NewtonCreateTreeCollision(world, 0);
 		// prepare to create collision geometry
-		NewtonTreeCollisionBeginBuild(collision);
+		NewtonTreeCollisionBeginBuild(tree);
 
-		dMatrix pallete[64];
-		UpdateMatrixPalette (GetIdentityMatrix(), pallete, sizeof (m_matrixPalete) / sizeof (dMatrix));
+		dFloat* const vertex = mesh->m_vertex;
+		for (DemoMesh::dListNode* node = mesh->GetFirst(); node; node = node->GetNext()){
+			DemoSubMesh* const subMesh = &node->GetInfo();
+			unsigned int* const indices = subMesh->m_indexes;
+			int trianglesCount = subMesh->m_indexCount;
+			for (int i = 0; i < trianglesCount; i += 3) {
 
-		// iterate the entire geometry an build the collision
-	//	for (ModelComponentList<dList<dMesh*> >::dListNode* list = m_meshList.GetFirst(); list; list = list->GetNext()) {
-		for (dList<dMeshInstance>::dListNode* node = m_meshList.GetFirst(); node; node = node->GetNext()) { 
-			dFloat* vertex;
-		
-			OGLMesh* mesh = (OGLMesh*)node->GetInfo().m_mesh;
+				dVector face[3];
+				int index = indices[i + 0] * 3;
+				face[0] = dVector (vertex[index + 0], vertex[index + 1], vertex[index + 2]);
 
-			vertex = mesh->m_vertex;
-			const dMatrix& globalMatrix = pallete[mesh->m_boneID];
-			for (dMesh::dListNode* nodes = mesh->GetFirst(); nodes; nodes = nodes->GetNext()) {
-				dSubMesh& segment = nodes->GetInfo();
-				for (int i = 0; i < segment.m_indexCount; i += 3) {
-					int index;	
-					int matID;
-					dVector face[3];
+				index = indices[i + 1] * 3;
+				face[1] = dVector (vertex[index + 0], vertex[index + 1], vertex[index + 2]);
 
-					index = segment.m_indexes[i + 0] * 3;
-					face[0] = dVector (vertex[index + 0], vertex[index + 1], vertex[index + 2]);
+				index = indices[i + 2] * 3;
+				face[2] = dVector (vertex[index + 0], vertex[index + 1], vertex[index + 2]);
 
-					index = segment.m_indexes[i + 1] * 3;
-					face[1] = dVector (vertex[index + 0], vertex[index + 1], vertex[index + 2]);
-
-					index = segment.m_indexes[i + 2] * 3;
-					face[2] = dVector (vertex[index + 0], vertex[index + 1], vertex[index + 2]);
-
-					globalMatrix.TransformTriplex (face, sizeof (dVector), face, sizeof (dVector), 3);
-
-					// stress test the collision builder
-	//				matID = matID == 2 ? 1 : 2 ;
-					matID = 0;
-					NewtonTreeCollisionAddFace(collision, 3, &face[0].m_x, sizeof (dVector), matID);
-				}
+				int matID = 0;
+				//matID = matID == 2 ? 1 : 2 ;
+				NewtonTreeCollisionAddFace(tree, 3, &face[0].m_x, sizeof (dVector), matID);
 			}
 		}
-		NewtonTreeCollisionEndBuild(collision, optimized);
+		NewtonTreeCollisionEndBuild (tree, 0);
+
+		dMatrix matrix (ent->GetCurrentMatrix());
 
 		// create a Scene proxy to contain this mesh
-		sceneProxy = NewtonSceneCollisionCreateProxy (scene, collision);
+		NewtonSceneProxy* const sceneProxy = NewtonSceneCollisionCreateProxy (sceneCollision, tree, &matrix[0][0]);
 
 		// release the collision tree (this way the application does not have to do book keeping of Newton objects
-		NewtonReleaseCollision (nWorld, collision);
+		NewtonReleaseCollision (world, tree);
 
-		// set proxy relative matrix 
-		dMatrix proxyMatrix (GetIdentityMatrix());
-		NewtonSceneProxySetMatrix (sceneProxy, &proxyMatrix[0][0]);
+		VisualProxy& shape = m_pieces.Append()->GetInfo();
+		shape.m_sceneProxi = sceneProxy;
+		shape.m_mesh = mesh;
+		mesh->AddRef();
+		shape.m_matrix = matrix;
 
-		// save the pointer to the graphic object with the body.
-	//	NewtonBodySetUserData (m_level, this);
-
+		scene->RemoveEntity (ent);
 
 	#ifdef USE_TEST_ALL_FACE_USER_RAYCAST_CALLBACK
 		// set a ray cast callback for all face ray cast 
@@ -296,7 +277,7 @@ class ComplexScene: public DemoEntity
 		dFloat parameter;
 		parameter = NewtonCollisionRayCast (collision, &p0[0], &p1[0], &normal[0], &id);
 	#endif
-		*/
+
 	}
 
 	void AddPrimitives(DemoEntityManager* const scene, NewtonCollision* const sceneCollision)
@@ -445,11 +426,10 @@ void SceneCollision (DemoEntityManager* const scene)
 	// do not forget to release the collision
 	NewtonReleaseCollision (world, sceneCollision);
 
-	// place camera into position
-//	dVector origin (-15.0f, 15.0f, -15.0f, 0.0f);
-//	scene->GetCamera()->m_upVector = dVector (0.0f, 1.0f, 0.0f);
-//	scene->GetCamera()->m_origin = origin;
-//	scene->GetCamera()->m_pointOfInterest = origin + dVector (1.0f, -0.5f, 1.0f);
+
+	// add few objects
+
+
 
 	dMatrix camMatrix (dRollMatrix(-20.0f * 3.1416f /180.0f) * dYawMatrix(-45.0f * 3.1416f /180.0f));
 	dQuaternion rot (camMatrix);

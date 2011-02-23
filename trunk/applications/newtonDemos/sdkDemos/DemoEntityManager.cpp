@@ -107,6 +107,23 @@ void DemoEntityManager::Print (QPainter& painter, int x, int y, const char *fmt,
 }
 
 
+void DemoEntityManager::RemoveEntity (dListNode* const entNode)
+{
+	DemoEntity* const entity = entNode->GetInfo();
+	entity->Release();
+	Remove(entNode);
+}
+
+void DemoEntityManager::RemoveEntity (DemoEntity* const ent)
+{
+	for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
+		if (node->GetInfo() == ent) {
+			RemoveEntity (node);
+			break;
+		}
+	}
+}
+
 void DemoEntityManager::Cleanup ()
 {
 	// suspend simulation before making changes to the physics world
@@ -115,9 +132,7 @@ void DemoEntityManager::Cleanup ()
 	// destroy all remaining visual objects
 	//	demo.CleanUp();
 	while (GetFirst()) {
-		DemoEntity* const entity = GetFirst()->GetInfo();
-		entity->Release();
-		Remove(GetFirst());
+		RemoveEntity (GetFirst());
 	}
 
 	// destroy the Newton world

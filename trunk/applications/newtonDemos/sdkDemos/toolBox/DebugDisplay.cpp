@@ -221,8 +221,8 @@ void DebugShowBodyCollision (const NewtonBody* body, void* userData)
 		NewtonCollisionGetInfo (collision, &info);
 		switch (info.m_collisionType) 
 		{
-//			case SERIALIZE_ID_TREE:
-			case SERIALIZE_ID_SCENE:
+			//case SERIALIZE_ID_TREE:
+			//case SERIALIZE_ID_SCENE:
 			case SERIALIZE_ID_USERMESH:
 			case SERIALIZE_ID_HEIGHTFIELD:
 			{
