@@ -28,6 +28,16 @@ DemoEntityManager::DemoEntityManager(QWidget* const parent)
 	,m_navegationQueueLock(0)
 	,m_navegationQueueCount(0)
 {
+	// disable OGL Vsync
+	//wglSwapIntervalEXT(0);
+	QGLFormat glFormat (format ());
+	// vsynk
+	//glFormat.setSwapInterval (1);
+	// free fps
+	glFormat.setSwapInterval (0);
+	setFormat (glFormat);
+
+
 	// Create the main Camera
 	m_camera = new DemoCamera();
 
@@ -73,7 +83,6 @@ DemoCamera* DemoEntityManager::GetCamera() const
 void DemoEntityManager::initializeGL()
 {
 	QGLWidget::initializeGL();
-
 
 	m_camera->SetProjectionMode(width(), height());
 }
@@ -495,12 +504,12 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 
 		//profileFlags = 1;
 		if (profileFlags) {
-			m_profiler.Render (m_world, profileFlags, painter);
+//			m_profiler.Render (m_world, profileFlags, painter);
 		}
 	}
 
 	if (mainWindow->m_threadProfilerState) {
-		m_profiler.RenderThreadPerformance (m_world, painter);
+//		m_profiler.RenderThreadPerformance (m_world, painter);
 	}
 
 	if (mainWindow->m_showStatistics) {
@@ -509,11 +518,11 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 		Qt::GlobalColor color = Qt::white;
 		painter.setPen(color);
 		Print (painter, 14, 14, "FPS: %6.2f", fps);
-		Print (painter, 14, 30, "Physics time (ms): %6.3f", m_physicsTime * 1000.0f);
-		Print (painter, 14, 46, "Body count: %d",  NewtonWorldGetBodyCount(m_world));
-		Print (painter, 14, 62, "number of threads: %d",  NewtonGetThreadsCount(m_world));
+//		Print (painter, 14, 30, "Physics time (ms): %6.3f", m_physicsTime * 1000.0f);
+//		Print (painter, 14, 46, "Body count: %d",  NewtonWorldGetBodyCount(m_world));
+//		Print (painter, 14, 62, "number of threads: %d",  NewtonGetThreadsCount(m_world));
 		if (m_asycronousUpdate) {
-			Print (painter, 14, 78, "physics running asynchronous");
+//			Print (painter, 14, 78, "physics running asynchronous");
 		}
 	}
 	painter.end();

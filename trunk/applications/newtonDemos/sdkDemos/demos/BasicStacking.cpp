@@ -281,11 +281,11 @@ void BasicBoxStacks (DemoEntityManager* const scene)
 	scene->LoadScene (fileName);
 
 	// place camera into position
-	_ASSERTE (0);
-//	dVector origin (-40.0f, 10.0f, 0.0f, 0.0f);
-//	scene->GetCamera()->m_upVector = dVector (0.0f, 1.0f, 0.0f);
-//	scene->GetCamera()->m_origin = origin;
-//	scene->GetCamera()->m_pointOfInterest = origin + dVector (1.0f, 0.0f, 0.0f);
+	dQuaternion rot;
+	dVector origin (-40.0f, 10.0f, 0.0f, 0.0f);
+	scene->GetCamera()->SetMatrix (*scene, rot, origin);
+	scene->GetCamera()->SetMatrix (*scene, rot, origin );
+
 
 	// resume the simulation
 	scene->ContinueExecution();

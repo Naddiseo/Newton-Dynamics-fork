@@ -474,14 +474,12 @@ static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 		}
 	}
 	
-
-
 	// place camera into position
-	_ASSERTE (0);
-//	dVector origin (0.0f, 1.0f, 0.0f, 0.0f);
-//	scene->GetCamera()->m_upVector = dVector (0.0f, 2.0f, 0.0f);
-//	scene->GetCamera()->m_origin = origin;
-//	scene->GetCamera()->m_pointOfInterest = origin + dVector (1.0f, 0.0f, 0.0f);
+	dQuaternion rot;
+	dVector posit (0.0f, 1.0f, 0.0f, 0.0f);
+	scene->GetCamera()->SetMatrix (*scene, rot, posit);
+	scene->GetCamera()->SetMatrix (*scene, rot, posit);
+
 
 	// resume the simulation
 	scene->ContinueExecution();
