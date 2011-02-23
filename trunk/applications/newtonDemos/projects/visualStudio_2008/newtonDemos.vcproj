@@ -309,6 +309,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\sdkDemos\DemoDialogHelpers.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\sdkDemos\DemoDialogHelpers.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\sdkDemos\DemoEntity.cpp"
 			>
 		</File>

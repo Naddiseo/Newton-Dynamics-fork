@@ -32,7 +32,6 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 	DemoEntityManager(QWidget* const parent);
 	~DemoEntityManager(void);
 
-//	GLContext& GetGL() {return m_glContext;}
 	NewtonWorld* GetNewton() const;
 	DemoCamera* GetCamera() const;
 

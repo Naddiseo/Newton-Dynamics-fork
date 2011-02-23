@@ -18,6 +18,7 @@
 #include "NewtonDemos.h"
 #include "DemoCamera.h"
 #include "DemoEntityManager.h"
+#include "DemoDialogHelpers.h"
 
 #define DEFAULT_SCENE	0						// friction test
 //#define DEFAULT_SCENE	1						// closest distance
@@ -340,6 +341,12 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 			action->setChecked(m_solveIslandOnSingleThread); 
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnUseParalleSolver()));
+
+			action = new QAction(this);
+			action->setText(QApplication::translate("newtonMain", "Set Camera control", 0, QApplication::UnicodeUTF8));
+			subMenu->addAction(action);
+			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnSetCameraSpeed()));
+		
 		}
 	}
 
@@ -591,46 +598,6 @@ void newtonDemos::OnShowThreadProfiler()
 }
 
 
-
-class SelectThreadCount : public QDialog
-{
-//	Q_OBJECT
-
-	public:
-	SelectThreadCount(DemoEntityManager* const canvas)
-		:QDialog (NULL)
-	{
-		setWindowTitle (QApplication::translate("newtonMain", "Select micro threads", 0, QApplication::UnicodeUTF8));
-		resize(256, 128);
-
-		QVBoxLayout* const vbox = new QVBoxLayout(this);
-
-		QLabel* const label = new QLabel ("xxx", this);
-		m_slider = new QSlider (Qt::Horizontal, this);
-
-		int maxthreads = NewtonGetMaxThreadsCount(canvas->GetNewton());
-		int pos = NewtonGetThreadsCount(canvas->GetNewton());
-
-		label->setNum (pos);
-		m_slider->setMaximum(maxthreads);
-		m_slider->setSliderPosition (pos);
-
-		vbox->addWidget (label);
-		vbox->addWidget (m_slider);
-		connect (m_slider, SIGNAL (valueChanged(int)), label, SLOT (setNum (int)));
-
-		setLayout(vbox); 
-	}
-
-	int GetThreadCount() const 
-	{
-		return m_slider->sliderPosition();
-	}
-
-	QSlider* m_slider; 
-
-};
-
 void newtonDemos::OnSelectNumberOfMicroThreads()
 {
 	BEGIN_MENU_OPTION();
@@ -644,10 +611,12 @@ void newtonDemos::OnSelectNumberOfMicroThreads()
 	END_MENU_OPTION();
 }
 
-
 void newtonDemos::OnSetCameraSpeed()
 {
 	BEGIN_MENU_OPTION();
+
+	SelecCameraControl cameraControl (m_canvas);
+	cameraControl.exec();
 
 	END_MENU_OPTION();
 }
