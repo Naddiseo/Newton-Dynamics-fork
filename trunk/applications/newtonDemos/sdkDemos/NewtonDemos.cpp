@@ -20,12 +20,12 @@
 #include "DemoEntityManager.h"
 #include "DemoDialogHelpers.h"
 
-//#define DEFAULT_SCENE	0						// friction test
+#define DEFAULT_SCENE	0						// friction test
 //#define DEFAULT_SCENE	1						// closest distance
 //#define DEFAULT_SCENE	2						// Box stacks
 //#define DEFAULT_SCENE	3						// simple level mesh collision
 //#define DEFAULT_SCENE	4						// optimized level mesh collision
-#define DEFAULT_SCENE	5						// Scene Collision
+//#define DEFAULT_SCENE	5						// Scene Collision
 
 
 
@@ -462,15 +462,8 @@ void newtonDemos::OnLoad()
 		m_canvas->Addtop (new SkyBox());
 
 		// place camera into position
-		_ASSERTE (0);
 		dMatrix camMatrix (GetIdentityMatrix());
 		camMatrix.m_posit = dVector (-40.0f, 10.0f, 0.0f, 0.0f);
-//		dVector origin (-40.0f, 10.0f, 0.0f, 0.0f);
-//		m_canvas->GetCamera()->m_upVector = dVector (0.0f, 1.0f, 0.0f);
-//		m_canvas->GetCamera()->m_origin = origin;
-//		m_canvas->GetCamera()->m_pointOfInterest = origin + dVector (1.0f, 0.0f, 0.0f);
-//		m_canvas->GetCamera()->SetMatrix (camMatrix);
-
 		m_canvas->SetAutoSleepState (m_autoSleepState);
 	}
 
