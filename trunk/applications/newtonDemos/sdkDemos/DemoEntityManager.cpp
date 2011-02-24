@@ -27,6 +27,7 @@ DemoEntityManager::DemoEntityManager(QWidget* const parent, QGLFormat& format)
 	,m_font()
 	,m_navegationQueueLock(0)
 	,m_navegationQueueCount(0)
+	,m_timerId(0)
 {
 	// Create the main Camera
 	m_camera = new DemoCamera();
@@ -39,10 +40,14 @@ DemoEntityManager::DemoEntityManager(QWidget* const parent, QGLFormat& format)
 
 	doubleBuffer(); 
 	setAutoFillBackground(false);
+	
+	m_timerId = startTimer(0);
 }
 
 DemoEntityManager::~DemoEntityManager(void)
 {
+	killTimer(m_timerId);
+
 	delete m_camera;
 
 	// suspend simulation before making changes to the physics world
@@ -420,7 +425,6 @@ void DemoEntityManager::QueueCommand(int command)
 	Unlock (m_navegationQueueLock);
 }
 
-
 void DemoEntityManager::paintEvent(QPaintEvent* ev)
 {
 	newtonDemos* const mainWindow = (newtonDemos*) parent();
@@ -535,5 +539,10 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 		}
 	}
 	painter.end();
+}
+
+void DemoEntityManager::timerEvent(QTimerEvent *)
+{
+	update();
 }
 

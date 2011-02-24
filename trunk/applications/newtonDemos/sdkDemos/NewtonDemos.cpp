@@ -439,7 +439,7 @@ void newtonDemos::OnNotUsed()
 void newtonDemos::OnIdle()
 {
 	if (m_doVisualUpdates) {
-		m_canvas->update();
+//		m_canvas->update();
 	}
 }
 
