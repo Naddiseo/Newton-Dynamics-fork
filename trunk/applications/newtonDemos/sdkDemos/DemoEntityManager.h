@@ -29,7 +29,7 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 	};
 
 
-	DemoEntityManager(QWidget* const parent);
+	DemoEntityManager(QWidget* const parent, QGLFormat& glFormat);
 	~DemoEntityManager(void);
 
 	NewtonWorld* GetNewton() const;

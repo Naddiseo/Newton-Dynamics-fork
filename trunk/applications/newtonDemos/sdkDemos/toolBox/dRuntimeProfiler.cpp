@@ -41,14 +41,6 @@ unsigned dRuntimeProfiler::GetTimeInMicrosenconds()
 
 void dRuntimeProfiler::DrawLabel (dFloat x, dFloat y, const char* label, QPainter& context)
 {
-//	int witdh;
-//	int height;
-//	GLint viewport[4]; 
-//	glGetIntegerv(GL_VIEWPORT, viewport); 
-//	witdh = viewport[2];
-//	height = viewport[3];
-//	dVector color (1.0f, 1.0f, 1.0f, 0.0f);
-//	context.Print (color, x, height - y, label);
 	QRect viewport (context.viewport());
 	context.drawText(x, viewport.height() + 1 - y, label);
 }
@@ -71,7 +63,6 @@ void dRuntimeProfiler::DrawTrack (dFloat x0, dFloat y0, int start, unsigned* tra
 	buffer[index] = track[start];
 
 
-//	glBegin(GL_LINE_STRIP);
 	QRect viewport (context.viewport());
 	int height = viewport.height();
 	dFloat xx0 = x0;
@@ -79,12 +70,10 @@ void dRuntimeProfiler::DrawTrack (dFloat x0, dFloat y0, int start, unsigned* tra
 	for (int i = 1; i < MAX_FRAMES - 1; i ++) {
 		dFloat xx1 = x0 + i * MAX_FRAMES_STEP;
 		dFloat yy1 = y0 + dFloat (buffer[i]) * 1.0e-3f * (CHART_HIEGHT / 16.666f);
-//		glVertex3f (x0 + i * MAX_FRAMES_STEP, y0 + y1, 0.0f);
 		context.drawLine(xx0, height - yy0, xx1, height - yy1);
 		xx0 = xx1;
 		yy0 = yy1;
 	}
-//	glEnd();
 }
 
 
@@ -95,23 +84,6 @@ void dRuntimeProfiler::Render (NewtonWorld* nWorld, int mask, QPainter& context)
 		m_perfomanceTracks[i][m_frameIndex] = NewtonReadPerformanceTicks (nWorld, i);
 	}
 
-//	GLViewPort viewport;
-//	glGetIntegerv(GL_VIEWPORT, &viewport.x); 
-//	glColor3f(1.0, 1.0, 1.0);
-//	glDisable (GL_LIGHTING);
-//	glDisable(GL_TEXTURE_2D);
-//	glMatrixMode(GL_PROJECTION);
-//	glPushMatrix();
-//	glLoadIdentity();
-//	gluOrtho2D(0, viewport.width, 0, viewport.height );
-//	glMatrixMode(GL_MODELVIEW);
-//	glPushMatrix();
-//	glLoadIdentity();
-//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-//	glDisable(GL_DEPTH_TEST);
-//	glDisable(GL_BLEND);
-
-
 	QRect viewport (context.viewport());
 	int height = viewport.height();
 	dFloat x0 = dFloat (m_oringin_x);
@@ -120,29 +92,19 @@ void dRuntimeProfiler::Render (NewtonWorld* nWorld, int mask, QPainter& context)
 	dFloat y1 = y0 + CHART_HIEGHT;
 
 
-//	glBegin(GL_LINES);
-//	glVertex3f (x0, y0, 0.0f);
-//	glVertex3f (x0, y1, 0.0f);
-//	glVertex3f (x0, y0, 0.0f);
-//	glVertex3f (x1, y0, 0.0f);
 	context.setPen(Qt::white);
 	context.drawLine (x0, height - y0, x1, height - y0);
 	context.drawLine (x0, height - y0, x0, height - y1);
 
 	for (int i = 1; i < 4; i ++) {
 		dFloat y = y0 + (y1 - y0) * i / 4;
-//		glVertex3f (x0 - 5, y, 0.0f);
-//		glVertex3f (x0 + 5, y, 0.0f);
 		context.drawLine (x0 - 5, height - y, x0 + 5, height - y);
 	}
 
 	for (int i = 1; i < MAX_FRAMES; i += 16) {
 		dFloat x = x0 + (x1 - x0) * i / MAX_FRAMES;
-//		glVertex3f (x , y0 - 5, 0.0f);
-//		glVertex3f (x , y0 + 5, 0.0f);
 		context.drawLine (x, height - (y0 - 5), x, height - (y0 + 5));
 	}
-//	glEnd();
 
 	// total engine time
 	if (mask & 1) {
@@ -188,7 +150,6 @@ void dRuntimeProfiler::Render (NewtonWorld* nWorld, int mask, QPainter& context)
 	}
 
 	{
-		//glColor3f(1.0, 1.0, 1.0);
 		context.setPen(Qt::white);
 		DrawLabel (x0 - 42, y0 + (y1 - y0) * 0 / 4, "0.00", context);
 
@@ -199,12 +160,6 @@ void dRuntimeProfiler::Render (NewtonWorld* nWorld, int mask, QPainter& context)
 		}
 	}
 
-//	glMatrixMode(GL_PROJECTION);
-//	glPopMatrix();
-//	glMatrixMode(GL_MODELVIEW);
-//	glPopMatrix();
-//	glEnable( GL_DEPTH_TEST );
-//	glColor3f(1.0, 1.0, 1.0);
 	m_frameIndex = (m_frameIndex + 1) % MAX_FRAMES;
 }
 
@@ -213,22 +168,6 @@ void dRuntimeProfiler::RenderThreadPerformance (NewtonWorld* nWorld, QPainter& c
 {
 	int threadCount = NewtonGetThreadsCount(nWorld);
 	if (threadCount > 0) {
-//		GLViewPort viewport;
-//		glGetIntegerv(GL_VIEWPORT, &viewport.x); 
-//		glColor3f(1.0, 1.0, 1.0);
-//		glDisable (GL_LIGHTING);
-//		glDisable(GL_TEXTURE_2D);
-//		glMatrixMode(GL_PROJECTION);
-//		glPushMatrix();
-//		glLoadIdentity();
-//		gluOrtho2D(0, viewport.width, 0, viewport.height );
-//		glMatrixMode(GL_MODELVIEW);
-//		glPushMatrix();
-//		glLoadIdentity();
-//		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-//		glDisable(GL_DEPTH_TEST);
-//		glDisable(GL_BLEND);
-
 		float x0 = float (MAX_FRAMES + 80);
 		float x1 = x0 + 256.0f;
 		float y0 = 50.0f;
@@ -245,44 +184,19 @@ void dRuntimeProfiler::RenderThreadPerformance (NewtonWorld* nWorld, QPainter& c
 		DrawLabel (x0, y0 - 20, "0.0 ms", context);
 		DrawLabel (x1, y0 - 20, "16.16 ms", context);
 
-//		glEnable(GL_BLEND);
-//		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-//		glColor3f(0.125f, 0.125f, 0.0);
-//		glBegin(GL_QUADS);
-//		glVertex3f(x0, y0 + 20.0f * threadCount - 20.0f, 0.0f);
-//		glVertex3f(x0, y0 - 20.0f, 0.0f);
-//		glVertex3f(x1, y0 - 20.0f, 0.0f);
-//		glVertex3f(x1, y0 + 20.0f * threadCount - 20.0f, 0.0f);
-//		glEnd();
-
 		QRect viewport (context.viewport());
 		int height = viewport.height();
 		QBrush brush (Qt::SolidPattern);
 		brush.setColor (QColor(255, 255, 0, 32));
 		context.fillRect(x0, height - (y0 + 20.0f * threadCount), x1 - x0, 20 * threadCount, brush);
 
-//		glColor3f(1.0f, 0.0f, 0.0);
 		brush.setColor (QColor(255, 0, 0, 128));
 		for (int i = 0; i < threadCount; i ++) {
-//			glBegin(GL_QUADS);
 			int thick = NewtonReadThreadPerformanceTicks (nWorld, i);
 			dFloat time = dFloat (thick) * (1.0e-3f * 256.0f / 16.666f);
-//			glVertex3f(x0, y0 -  5.0f, 0.0f);
-//			glVertex3f(x0, y0 - 15.0f, 0.0f);
-//			glVertex3f(x0 + time, y0 - 15.0f, 0.0f);
-//			glVertex3f(x0 + time, y0 -  5.0f, 0.0f);
 			context.fillRect(x0, height - (y0 + 15), time, 10, brush);
 			y0 += 20.0f;
-//			glEnd();
 		}
-
-
-//		glMatrixMode(GL_PROJECTION);
-//		glPopMatrix();
-//		glMatrixMode(GL_MODELVIEW);
-//		glPopMatrix();
-//		glEnable( GL_DEPTH_TEST );
-//		glColor3f(1.0, 1.0, 1.0);
 	}
 }
 

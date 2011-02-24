@@ -14,8 +14,8 @@
 #define MAX_PHYSICS_FPS	  120.0f
 
 
-DemoEntityManager::DemoEntityManager(QWidget* const parent)
-	:QGLWidget (QGLFormat(QGL::SampleBuffers), parent)
+DemoEntityManager::DemoEntityManager(QWidget* const parent, QGLFormat& format)
+	:QGLWidget (format, parent)
 	,dList <DemoEntity*>() 
 	,dSimulationThread()
 	,m_camera(NULL)
@@ -28,16 +28,6 @@ DemoEntityManager::DemoEntityManager(QWidget* const parent)
 	,m_navegationQueueLock(0)
 	,m_navegationQueueCount(0)
 {
-	// disable OGL Vsync
-	//wglSwapIntervalEXT(0);
-	QGLFormat glFormat (format ());
-	// vsynk
-	//glFormat.setSwapInterval (1);
-	// free fps
-	glFormat.setSwapInterval (0);
-	setFormat (glFormat);
-
-
 	// Create the main Camera
 	m_camera = new DemoCamera();
 
@@ -545,10 +535,5 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 		}
 	}
 	painter.end();
-
-	// draw everything and swap the display buffer
-	//glFlush();
-	//glFinish();
-	//swapBuffers();
 }
 

@@ -366,8 +366,17 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 		}
 	}
 
+
+	// disable OGL Vsync
+	//wglSwapIntervalEXT(0);
+	QGLFormat glFormat (QGL::SampleBuffers);
+	// vsynk
+	//glFormat.setSwapInterval (1);
+	// free fps
+	glFormat.setSwapInterval (0);
+
 	// create the render window
-	m_canvas = new DemoEntityManager (this);
+	m_canvas = new DemoEntityManager (this, glFormat);
 	setCentralWidget(m_canvas);
 
 	connect(QAbstractEventDispatcher::instance(), SIGNAL(aboutToBlock()), this, SLOT(OnIdle())); 
