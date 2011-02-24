@@ -83,6 +83,7 @@ dgCollisionScene::dgProxy::dgProxy (dgCollision* m_shape, const dgMatrix& matrix
 	:dgNode ()
 	,m_shape (m_shape)
 	,m_owner (owner)
+	,m_userData(NULL)
 {
 	dgVector boxP0;
 	dgVector boxP1;
@@ -142,9 +143,13 @@ dgCollisionScene::dgCollisionScene (dgWorld* const world, dgDeserialize deserial
 	deserialization (userData, &data, sizeof (data));
 	for (dgInt32 i = 0; i < data[0]; i ++) {
 		dgMatrix matrix;
+		void* data;
 		deserialization (userData, &matrix, sizeof (dgMatrix));
+		deserialization (userData, &data, sizeof (void*));
 		dgCollision* const collision = m_world->CreateFromSerialization (deserialization, userData);
-		AddProxy (collision, matrix);
+		dgList<dgProxy*>::dgListNode* const proxyNode = (dgList<dgProxy*>::dgListNode*) AddProxy (collision, matrix);
+		dgProxy* const proxy = proxyNode->GetInfo();
+		proxy->m_userData = data;
 		collision->Release();
 	}
 
@@ -175,6 +180,7 @@ void dgCollisionScene::Serialize(dgSerialize callback, void* const userData) con
 	for (dgList<dgProxy*>::dgListNode* node = m_list.GetFirst(); node; node = node->GetNext()) {
 		dgProxy* const proxy = node->GetInfo();
 		callback (userData, &proxy->m_matrix, sizeof (dgMatrix));
+		callback (userData, &proxy->m_userData, sizeof (void*));
 		m_world->Serialize (proxy->m_shape, callback, userData);
 	}
 }

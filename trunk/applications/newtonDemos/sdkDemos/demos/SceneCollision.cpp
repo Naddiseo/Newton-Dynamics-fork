@@ -185,7 +185,6 @@ class ComplexScene: public DemoEntity
 		glMultMatrix(&m_matrix[0][0]);
 
 		// Render mesh if there is one 
-//		for (dList<VisualProxy>::dListNode* node = m_pieces.GetFirst(); node; node = node->GetNext()) {
 		for (NewtonSceneProxy* proxy = NewtonSceneGetFirstProxy(m_sceneCollision); proxy; proxy = NewtonSceneGetNextProxy(m_sceneCollision, proxy)) {
 			dMatrix matrix;
 			//const VisualProxy& proxy = node->GetInfo();
@@ -317,7 +316,7 @@ class ComplexScene: public DemoEntity
 	}
 
 	NewtonCollision* m_sceneCollision;
-//	dList<VisualProxy> m_pieces; 
+
 };
 
 
@@ -383,12 +382,21 @@ void SceneCollision (DemoEntityManager* const scene)
 
 #ifdef USE_TEST_SERIALIZATION
 	{
-		FILE* file;
+		// enumerate the proxies and save the userdata before serializing
+		int index = 0;
+		dTree<DemoMesh*, int> saveData;
+		for (NewtonSceneProxy* proxy = NewtonSceneGetFirstProxy(sceneCollision); proxy; proxy = NewtonSceneGetNextProxy(sceneCollision, proxy)) {
+			saveData.Insert((DemoMesh*)NewtonSceneGetProxyUserData(proxy), index);
+			NewtonSceneSetProxyUserData(proxy, (void*)index);
+			index ++;
+		}
+		
+
 		// save the collision file
 		char fullPathName[256];
 		GetWorkingFileName ("collisiontest.bin", fullPathName);
 
-		file = fopen (fullPathName, "wb");
+		FILE* file = fopen (fullPathName, "wb");
 		SerializeFile (file, MAGIC_NUMBER, int (strlen (MAGIC_NUMBER)) + 1);
 		NewtonCollisionSerialize (world, sceneCollision, SerializeFile, file);
 		fclose (file);
@@ -402,9 +410,18 @@ void SceneCollision (DemoEntityManager* const scene)
 		sceneCollision = NewtonCreateCollisionFromSerialization (world, DeSerializeFile, file);
 		fclose (file);
 
-		NewtonCollisionInfoRecord collisionInfo;
-		NewtonCollisionGetInfo (sceneCollision, &collisionInfo);
-		NewtonCollisionGetInfo (sceneCollision, &collisionInfo);
+		// restore the user info form teh save data and set userdata on each proxy
+		for (NewtonSceneProxy* proxy = NewtonSceneGetFirstProxy(sceneCollision); proxy; proxy = NewtonSceneGetNextProxy(sceneCollision, proxy)) {
+			int index = int (NewtonSceneGetProxyUserData(proxy));
+			
+			dTree<DemoMesh*, int>::dTreeNode* const node = saveData.Find(index);
+			NewtonSceneSetProxyUserData(proxy, node->GetInfo());
+		}
+
+		// see if the data is valid
+		//NewtonCollisionInfoRecord collisionInfo;
+		//NewtonCollisionGetInfo (sceneCollision, &collisionInfo);
+		//NewtonCollisionGetInfo (sceneCollision, &collisionInfo);
 	}
 #endif
 
