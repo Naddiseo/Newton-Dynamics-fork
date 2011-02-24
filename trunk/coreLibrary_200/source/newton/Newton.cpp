@@ -3944,18 +3944,35 @@ void NewtonSceneProxyGetMatrix (NewtonSceneProxy* const proxy, dFloat* const mat
 	offset = newtonScene->GetProxyMatrix (node);
 }
 
-void* NewtonSceneGetFirstProxy (NewtonCollision* const scene)
-{
-	dgCollisionScene* const newtonScene = (dgCollisionScene*) scene;
-	return newtonScene->GetFirstProxy();
-}
-
-void* NewtonSceneGetNextProxy (NewtonCollision* const scene, void* const proxy)
+void NewtonSceneSetProxyUserData (NewtonSceneProxy* const proxy, void* userData)
 {
 	dgList<dgCollisionScene::dgProxy*>::dgListNode* const node = (dgList<dgCollisionScene::dgProxy*>::dgListNode*) proxy;
 	dgCollisionScene* const newtonScene = node->GetInfo()->m_owner;
 
-	return newtonScene->GetNextProxy(proxy);
+	newtonScene->SetProxyUserData(node, userData);
+}
+
+void* NewtonSceneGetProxyUserData (NewtonSceneProxy* const proxy)
+{
+	dgList<dgCollisionScene::dgProxy*>::dgListNode* const node = (dgList<dgCollisionScene::dgProxy*>::dgListNode*) proxy;
+	dgCollisionScene* const newtonScene = node->GetInfo()->m_owner;
+
+	return newtonScene->GetProxyUserData(node);
+}
+
+
+NewtonSceneProxy* NewtonSceneGetFirstProxy (NewtonCollision* const scene)
+{
+	dgCollisionScene* const newtonScene = (dgCollisionScene*) scene;
+	return (NewtonSceneProxy*) newtonScene->GetFirstProxy();
+}
+
+NewtonSceneProxy* NewtonSceneGetNextProxy (NewtonCollision* const scene, NewtonSceneProxy* const proxy)
+{
+	dgList<dgCollisionScene::dgProxy*>::dgListNode* const node = (dgList<dgCollisionScene::dgProxy*>::dgListNode*) proxy;
+	dgCollisionScene* const newtonScene = node->GetInfo()->m_owner;
+
+	return (NewtonSceneProxy*) newtonScene->GetNextProxy(proxy);
 }
 
 

@@ -161,27 +161,19 @@ void ScenePrimitive::DebugCallback (const NewtonBody* bodyWithTreeCollision, con
 class ComplexScene: public DemoEntity 
 {
 	public:
-	struct VisualProxy
-	{	
-		dMatrix m_matrix;
-		DemoMesh* m_mesh;
-		NewtonSceneProxy* m_sceneProxi;
-	};
-
-
-	ComplexScene ()
+	ComplexScene (NewtonCollision* const sceneCollision)
 		:DemoEntity (NULL)
+		,m_sceneCollision (sceneCollision)
 	{
 		
 	}
 
 	~ComplexScene ()
 	{
-		for (dList<VisualProxy>::dListNode* node = m_pieces.GetFirst(); node; node = node->GetNext()) {
-			const VisualProxy& proxy = node->GetInfo();
-			proxy.m_mesh->Release();
+		for (NewtonSceneProxy* proxy = NewtonSceneGetFirstProxy(m_sceneCollision); proxy; proxy = NewtonSceneGetNextProxy(m_sceneCollision, proxy)) {
+			DemoMesh* const mesh = (DemoMesh*) NewtonSceneGetProxyUserData (proxy);
+			mesh->Release();
 		}
-		//m_pieces.RemoveAll();
 	}
 
 	void Render(dFloat timeStep) const
@@ -193,24 +185,27 @@ class ComplexScene: public DemoEntity
 		glMultMatrix(&m_matrix[0][0]);
 
 		// Render mesh if there is one 
-		for (dList<VisualProxy>::dListNode* node = m_pieces.GetFirst(); node; node = node->GetNext()) {
+//		for (dList<VisualProxy>::dListNode* node = m_pieces.GetFirst(); node; node = node->GetNext()) {
+		for (NewtonSceneProxy* proxy = NewtonSceneGetFirstProxy(m_sceneCollision); proxy; proxy = NewtonSceneGetNextProxy(m_sceneCollision, proxy)) {
 			dMatrix matrix;
-			const VisualProxy& proxy = node->GetInfo();
+			//const VisualProxy& proxy = node->GetInfo();
 			
-			glPushMatrix();
+			DemoMesh* const mesh = (DemoMesh*) NewtonSceneGetProxyUserData (proxy);
 
-			NewtonSceneProxyGetMatrix(proxy.m_sceneProxi, &matrix[0][0]);
+			glPushMatrix();
+			NewtonSceneProxyGetMatrix(proxy, &matrix[0][0]);
 			glMultMatrix(&matrix[0][0]);
-			proxy.m_mesh->Render();
+			mesh->Render();
 
 			glPopMatrix();
 		}
+
 
 		// restore the matrix before leaving
 		glPopMatrix();
 	}
 
-	void AddCollisionTreeMesh (DemoEntityManager* const scene, NewtonCollision* const sceneCollision)
+	void AddCollisionTreeMesh (DemoEntityManager* const scene)
 	{
 		// open the level data
 		char fullPathName[2048];
@@ -254,16 +249,13 @@ class ComplexScene: public DemoEntity
 		dMatrix matrix (ent->GetCurrentMatrix());
 
 		// create a Scene proxy to contain this mesh
-		NewtonSceneProxy* const sceneProxy = NewtonSceneCollisionCreateProxy (sceneCollision, tree, &matrix[0][0]);
+		NewtonSceneProxy* const sceneProxy = NewtonSceneCollisionCreateProxy (m_sceneCollision, tree, &matrix[0][0]);
 
 		// release the collision tree (this way the application does not have to do book keeping of Newton objects
 		NewtonReleaseCollision (world, tree);
 
-		VisualProxy& shape = m_pieces.Append()->GetInfo();
-		shape.m_sceneProxi = sceneProxy;
-		shape.m_mesh = mesh;
+		NewtonSceneSetProxyUserData (sceneProxy, mesh);
 		mesh->AddRef();
-		shape.m_matrix = matrix;
 
 		scene->RemoveEntity (ent);
 
@@ -280,7 +272,7 @@ class ComplexScene: public DemoEntity
 
 	}
 
-	void AddPrimitives(DemoEntityManager* const scene, NewtonCollision* const sceneCollision)
+	void AddPrimitives(DemoEntityManager* const scene)
 	{
 		dMatrix rotMat (dRollMatrix (0.5f * 3.141592f));
 
@@ -311,12 +303,9 @@ class ComplexScene: public DemoEntity
 						collision = collision2;
 					}
 
-					NewtonSceneProxy* const sceneProxy = NewtonSceneCollisionCreateProxy (sceneCollision, collision, &matrix[0][0]);
-					VisualProxy& shape = m_pieces.Append()->GetInfo();
-					shape.m_sceneProxi = sceneProxy;
-					shape.m_mesh = mesh;
+					NewtonSceneProxy* const sceneProxy = NewtonSceneCollisionCreateProxy (m_sceneCollision, collision, &matrix[0][0]);
+					NewtonSceneSetProxyUserData (sceneProxy, mesh);
 					mesh->AddRef();
-					shape.m_matrix = matrix;
 				}
 			}
 		}
@@ -327,8 +316,8 @@ class ComplexScene: public DemoEntity
 		NewtonReleaseCollision (world, collision2);
 	}
 
-
-	dList<VisualProxy> m_pieces; 
+	NewtonCollision* m_sceneCollision;
+//	dList<VisualProxy> m_pieces; 
 };
 
 
@@ -349,18 +338,20 @@ void SceneCollision (DemoEntityManager* const scene)
 	// add the Sky
 	scene->Append(new SkyBox());
 
-	// create a visual scene empty mesh
-	ComplexScene* const visualMesh = new ComplexScene();
-	scene->Append (visualMesh);
 
 	// create a body and with a scene collision
-	NewtonCollision* const sceneCollision = NewtonCreateSceneCollision (scene->GetNewton(), 0);
+	NewtonCollision* sceneCollision = NewtonCreateSceneCollision (scene->GetNewton(), 0);
+
+	// create a visual scene empty mesh
+	ComplexScene* const visualMesh = new ComplexScene(sceneCollision);
+	scene->Append (visualMesh);
+
 
 	// add a collision tree to the scene
-	visualMesh->AddCollisionTreeMesh(scene, sceneCollision);
+	visualMesh->AddCollisionTreeMesh(scene);
 
 	// add some shapes
-	visualMesh->AddPrimitives(scene, sceneCollision);
+	visualMesh->AddPrimitives(scene);
 
 	// this is optional, finish the scene construction, optimize the collision scene
 	NewtonSceneCollisionOptimize (sceneCollision);
@@ -383,11 +374,12 @@ void SceneCollision (DemoEntityManager* const scene)
 
 	// set the world size
 	NewtonSetWorldSize (world, &boxP0.m_x, &boxP1.m_x); 
-/*
+
 	// set the application level callback
 #ifdef USE_STATIC_MESHES_DEBUG_COLLISION
-	NewtonStaticCollisionSetDebugCallback (collision, DebugCallback);
+	NewtonStaticCollisionSetDebugCallback (sceneCollision, DebugCallback);
 #endif
+
 
 #ifdef USE_TEST_SERIALIZATION
 	{
@@ -398,24 +390,24 @@ void SceneCollision (DemoEntityManager* const scene)
 
 		file = fopen (fullPathName, "wb");
 		SerializeFile (file, MAGIC_NUMBER, int (strlen (MAGIC_NUMBER)) + 1);
-		NewtonCollisionSerialize (nWorld, scene, SerializeFile, file);
+		NewtonCollisionSerialize (world, sceneCollision, SerializeFile, file);
 		fclose (file);
 
 		// load the collision file
-		NewtonReleaseCollision (nWorld, scene);
+		NewtonReleaseCollision (world, sceneCollision);
 
 		file = fopen (fullPathName, "rb");
 		char magicNumber[256]; 
 		DeSerializeFile (file, magicNumber, int (strlen (MAGIC_NUMBER)) + 1);
-		scene = NewtonCreateCollisionFromSerialization (nWorld, DeSerializeFile, file);
+		sceneCollision = NewtonCreateCollisionFromSerialization (world, DeSerializeFile, file);
 		fclose (file);
 
 		NewtonCollisionInfoRecord collisionInfo;
-		NewtonCollisionGetInfo (scene, &collisionInfo);
-		NewtonCollisionGetInfo (scene, &collisionInfo);
+		NewtonCollisionGetInfo (sceneCollision, &collisionInfo);
+		NewtonCollisionGetInfo (sceneCollision, &collisionInfo);
 	}
 #endif
-*/
+
 
 	// create the level body and add it to the world
 	NewtonBody* const level = NewtonCreateBody (world, sceneCollision, &matrix[0][0]);

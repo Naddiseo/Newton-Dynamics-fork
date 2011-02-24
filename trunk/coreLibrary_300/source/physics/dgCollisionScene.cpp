@@ -134,96 +134,21 @@ dgCollisionScene::dgCollisionScene (dgWorld* const world, dgDeserialize deserial
 	,m_list(world->GetAllocator())
 	,m_fitnessList(world->GetAllocator())
 {
-	_ASSERTE (0);
-/*
-	dgInt32 stack;
-	dgInt32 nodeCount;
 	dgInt32 data[4];
-	dgNode *stackPool[64];
 
 	m_world = world;
 	m_rtti |= dgCollisionScene_RTTI;
 
 	deserialization (userData, &data, sizeof (data));
-	dgStack<dgList<dgProxy>::dgListNode*> array(data[0]);
-
 	for (dgInt32 i = 0; i < data[0]; i ++) {
-		
-		dgVector p0;
-		dgVector p1;
 		dgMatrix matrix;
-		dgCollision* collision;
 		deserialization (userData, &matrix, sizeof (dgMatrix));
-		deserialization (userData, &p0, sizeof (dgVector));
-		deserialization (userData, &p1, sizeof (dgVector));
-
-		collision = m_world->CreateFromSerialization (deserialization, userData);
-
-		array[i] = (dgList<dgProxy>::dgListNode*)AddProxy (collision);
-
-		dgProxy& proxy = array[i]->GetInfo();
-		proxy.m_matrix = matrix;
-		proxy.m_boxP0 = p0;
-		proxy.m_boxP1 = p1;
-
+		dgCollision* const collision = m_world->CreateFromSerialization (deserialization, userData);
+		AddProxy (collision, matrix);
 		collision->Release();
 	}
 
-	m_rootNode = NULL;
-	deserialization (userData, &nodeCount, sizeof (dgInt32));
-
-	m_rootNode = new (m_allocator) dgNode;
-	m_rootNode->m_parent = NULL;
-
-	stack = 1;
-	stackPool[0] = m_rootNode;
-	while (stack) {
-		dgInt32 left;
-		dgInt32 right;
-
-		stack --;
-		dgNode* const node = stackPool[stack];
-
-		deserialization (userData, &node->m_p0, sizeof (dgVector));
-		deserialization (userData, &node->m_p1, sizeof (dgVector));
-		deserialization (userData, &left, sizeof (dgInt32));
-		deserialization (userData, &right, sizeof (dgInt32));
-
-		node->m_nodeIsDirty = false;
-		node->m_leftIsProxy = dgInt8 (left);
-		node->m_rightIsProxy = dgInt8 (right);
-
-		if (node->m_rightIsProxy) {
-			dgInt32 proxyIndex;
-			deserialization  (userData, &proxyIndex, sizeof (dgInt32));
-			node->m_rightProxi = array[proxyIndex];
-
-		} else {
-			dgNode* const child = new (m_allocator) dgNode;
-			child->m_parent = node;
-			node->m_rightNode = child;
-			_ASSERTE (node->m_rightIsProxy == false);
-			_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-			stackPool[stack] = node->m_rightNode;
-			stack++;
-		}
-
-		if (node->m_leftIsProxy) {
-			dgInt32 proxyIndex;
-			deserialization  (userData, &proxyIndex, sizeof (dgInt32));
-			node->m_leftProxi = array[proxyIndex];
-
-		} else {
-			dgNode* const child = new (m_allocator) dgNode;
-			child->m_parent = node;
-			node->m_leftNode = child;
-			_ASSERTE (node->m_leftIsProxy == false);
-			_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-			stackPool[stack] = node->m_leftNode;
-			stack++;
-		}
-	}
-*/
+	ImproveTotalFitness();
 }
 
 dgCollisionScene::~dgCollisionScene(void)
@@ -237,12 +162,7 @@ dgCollisionScene::~dgCollisionScene(void)
 
 void dgCollisionScene::Serialize(dgSerialize callback, void* const userData) const
 {
-	_ASSERTE (0);
-/*
-	dgInt32 index;
-	dgInt32 stack;
 	dgInt32 data[4];
-	dgNode *stackPool[64];
 
 	SerializeLow(callback, userData);
 
@@ -252,95 +172,12 @@ void dgCollisionScene::Serialize(dgSerialize callback, void* const userData) con
 	data[3] = 0;
 	callback (userData, &data, sizeof (data));
 
-	index = 0;
-	for (dgList<dgProxy>::dgListNode* node = m_list.GetFirst(); node; node = node->GetNext()) {
-		dgProxy& proxy = node->GetInfo();
-		proxy.m_boxP0.m_w = dgFloat32 (index); 
-		index ++;
-
-		callback (userData, &proxy.m_matrix, sizeof (dgMatrix));
-		callback (userData, &proxy.m_boxP0, sizeof (dgVector));
-		callback (userData, &proxy.m_boxP1, sizeof (dgVector));
-		m_world->Serialize (proxy.m_shape, callback, userData);
+	for (dgList<dgProxy*>::dgListNode* node = m_list.GetFirst(); node; node = node->GetNext()) {
+		dgProxy* const proxy = node->GetInfo();
+		callback (userData, &proxy->m_matrix, sizeof (dgMatrix));
+		m_world->Serialize (proxy->m_shape, callback, userData);
 	}
-
-#ifdef _DEBUG
-	index = 0;
-	stack = 1;
-	stackPool[0] = m_rootNode;
-	while (stack) {
-		stack --;
-		dgNode* const node = stackPool[stack];
-		index ++;
-
-		if (node->m_rightIsProxy == false) {
-			_ASSERTE (node->m_rightNode);
-			_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-			stackPool[stack] = node->m_rightNode;
-			stack++;
-		}
-	
-		if (node->m_leftIsProxy == false) {
-			_ASSERTE (node->m_leftNode);
-			_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-			stackPool[stack] = node->m_leftNode;
-			stack++;
-		}
-	}
-	_ASSERTE (index == (m_list.GetCount() - 1));
-#endif
-
-	index = m_list.GetCount() - 1;
-	callback (userData, &index, sizeof (dgInt32));
-
-	stack = 1;
-	stackPool[0] = m_rootNode;
-	while (stack) {
-		stack --;
-		const dgNode* const node = stackPool[stack];
-
-		dgInt32 left  = node->m_leftIsProxy;
-		dgInt32 right = node->m_rightIsProxy;
-		callback (userData, &node->m_p0, sizeof (dgVector));
-		callback (userData, &node->m_p1, sizeof (dgVector));
-		callback (userData, &left, sizeof (dgInt32));
-		callback (userData, &right, sizeof (dgInt32));
-
-		if (node->m_rightIsProxy) {
-			dgInt32 proxyIndex;
-			const dgProxy& sceneProxy = node->m_rightProxi->GetInfo();
-			proxyIndex = dgInt32 (sceneProxy.m_boxP0.m_w);
-			callback (userData, &proxyIndex, sizeof (dgInt32));
-		} else {
-			_ASSERTE (node->m_rightNode);
-			_ASSERTE (node->m_rightIsProxy == false);
-			_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-			stackPool[stack] = node->m_rightNode;
-			stack++;
-		}
-
-		if (node->m_leftIsProxy) {
-			dgInt32 proxyIndex;
-			const dgProxy& sceneProxy = node->m_leftProxi->GetInfo();
-			proxyIndex = dgInt32 (sceneProxy.m_boxP0.m_w);
-			callback (userData, &proxyIndex, sizeof (dgInt32));
-
-		} else {
-			_ASSERTE (node->m_leftNode);
-			_ASSERTE (node->m_leftIsProxy == false);
-			_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-			stackPool[stack] = node->m_leftNode;
-			stack++;
-		}
-	}
-*/
 }
-
-
-
-
-
-
 
 
 void dgCollisionScene::SetProxyMatrix (void* proxy, const dgMatrix& matrix)
@@ -392,6 +229,19 @@ dgMatrix dgCollisionScene::GetProxyMatrix (void* const proxy)
 {
 	dgProxy* const entry = ((dgList<dgProxy*>::dgListNode*) proxy)->GetInfo();
 	return entry->m_shape->GetOffsetMatrix().Inverse() * entry->m_matrix;
+}
+
+
+void dgCollisionScene::SetProxyUserData (void* const proxy, void* const userData)
+{
+	dgProxy* const entry = ((dgList<dgProxy*>::dgListNode*) proxy)->GetInfo();
+	entry->m_userData = userData;
+}
+
+void* dgCollisionScene::GetProxyUserData (void* const proxy) const
+{
+	dgProxy* const entry = ((dgList<dgProxy*>::dgListNode*) proxy)->GetInfo();
+	return entry->m_userData;
 }
 
 
