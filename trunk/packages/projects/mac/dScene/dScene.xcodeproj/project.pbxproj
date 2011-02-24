@@ -290,7 +290,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB920508733DBB0010E9CD /* Build configuration list for PBXProject "dScene" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 0867D691FE84028FC02AAC07 /* dScene */;
 			productRefGroup = 034768DDFF38A45A11DB9C8B /* Products */;
 			projectDirPath = "";
@@ -353,6 +360,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = dScene_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = _MAC_VER;
 				HEADER_SEARCH_PATHS = (
 					../../../../coreLibrary_200/source/newton,
 					../../../dMath,
@@ -360,8 +368,10 @@
 					../../../thirdParty/tinyxml,
 				);
 				INSTALL_PATH = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = dScene_d;
-				SDKROOT = macosx10.4;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -369,10 +379,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = dScene_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = _MAC_VER;
 				HEADER_SEARCH_PATHS = (
 					../../../../coreLibrary_200/source/newton,
 					../../../dMath,
@@ -380,7 +392,10 @@
 					../../../thirdParty/tinyxml,
 				);
 				INSTALL_PATH = /usr/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = dScene;
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};

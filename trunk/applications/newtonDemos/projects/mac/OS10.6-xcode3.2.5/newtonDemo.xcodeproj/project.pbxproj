@@ -7,11 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		FF0AAE06131400DF005D32D5 /* libdContainers.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF0AAE05131400DF005D32D5 /* libdContainers.a */; };
-		FF0AAE0913140111005D32D5 /* libdMath.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF0AAE0813140111005D32D5 /* libdMath.a */; };
-		FF0AAE0B1314012B005D32D5 /* libdScene.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF0AAE0A1314012B005D32D5 /* libdScene.a */; };
-		FF0AAE0D1314014C005D32D5 /* libtinyxml.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF0AAE0C1314014C005D32D5 /* libtinyxml.a */; };
-		FF0AAE0F13140169005D32D5 /* libnewton.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF0AAE0E13140169005D32D5 /* libnewton.a */; };
+		0974657C13142A2200DBA2C6 /* libnewton_d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF8C2D1D1313DCAD00646B90 /* libnewton_d.a */; };
+		0974657D13142A2200DBA2C6 /* libtinyxml_d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF8C2D121313DC9500646B90 /* libtinyxml_d.a */; };
+		0974657E13142A2200DBA2C6 /* libdScene_d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF8C2D071313DC7F00646B90 /* libdScene_d.a */; };
+		0974657F13142A2200DBA2C6 /* libdContainers_d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF8C2CFC1313DC6A00646B90 /* libdContainers_d.a */; };
+		0974658013142A2200DBA2C6 /* libdMath_d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF8C2CF11313DC3700646B90 /* libdMath_d.a */; };
+		09AD1AB4131433160054D1B6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 09AD1AB3131433160054D1B6 /* CoreFoundation.framework */; };
 		FF8C2D411313DE3200646B90 /* dHeightResolutionTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF8C2D3F1313DE3200646B90 /* dHeightResolutionTimer.cpp */; };
 		FF8C2D441313DE6600646B90 /* ClosestDistance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF8C2D431313DE6600646B90 /* ClosestDistance.cpp */; };
 		FF8F28B2131367150019E923 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FF8F28B1131367150019E923 /* OpenGL.framework */; };
@@ -39,6 +40,41 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		0974657213142A0400DBA2C6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FF8C2D0A1313DC9500646B90 /* tinyxml.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC06E0554671400DB518D;
+			remoteInfo = tinyxml;
+		};
+		0974657413142A0600DBA2C6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FF8C2CF41313DC6A00646B90 /* dContainers.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC06E0554671400DB518D;
+			remoteInfo = dContainers;
+		};
+		0974657613142A0800DBA2C6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FF8C2CFF1313DC7F00646B90 /* dScene.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC06E0554671400DB518D;
+			remoteInfo = dScene;
+		};
+		0974657813142A0B00DBA2C6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FF8C2CE91313DC3700646B90 /* dMath.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC06E0554671400DB518D;
+			remoteInfo = dMath;
+		};
+		0974657A13142A0D00DBA2C6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FF8C2D151313DCAD00646B90 /* newton.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC07D0554694100DB518D;
+			remoteInfo = newton;
+		};
 		FF8C2CF01313DC3700646B90 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FF8C2CE91313DC3700646B90 /* dMath.xcodeproj */;
@@ -89,6 +125,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		09AD1AB3131433160054D1B6 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		FF0AAD221313F961005D32D5 /* libnewton_d.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libnewton_d.a; path = ../../../../../coreLibrary_200/projets/mac/OS10_xcode3.2.5/build/Debug/libnewton_d.a; sourceTree = SOURCE_ROOT; };
 		FF0AAE05131400DF005D32D5 /* libdContainers.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdContainers.a; path = ../../../../../packages/projects/mac/dContainers/build/Release/libdContainers.a; sourceTree = SOURCE_ROOT; };
 		FF0AAE0813140111005D32D5 /* libdMath.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdMath.a; path = ../../../../../packages/projects/mac/dMath/build/Release/libdMath.a; sourceTree = SOURCE_ROOT; };
@@ -150,15 +187,16 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0974657C13142A2200DBA2C6 /* libnewton_d.a in Frameworks */,
+				0974657D13142A2200DBA2C6 /* libtinyxml_d.a in Frameworks */,
+				0974657E13142A2200DBA2C6 /* libdScene_d.a in Frameworks */,
+				0974657F13142A2200DBA2C6 /* libdContainers_d.a in Frameworks */,
+				0974658013142A2200DBA2C6 /* libdMath_d.a in Frameworks */,
 				FFF1849613130A3A0077CF7A /* QtCore.framework in Frameworks */,
 				FFF1849A13130A460077CF7A /* QtGui.framework in Frameworks */,
 				FFF1849E13130A660077CF7A /* QtOpenGL.framework in Frameworks */,
 				FF8F28B2131367150019E923 /* OpenGL.framework in Frameworks */,
-				FF0AAE06131400DF005D32D5 /* libdContainers.a in Frameworks */,
-				FF0AAE0913140111005D32D5 /* libdMath.a in Frameworks */,
-				FF0AAE0B1314012B005D32D5 /* libdScene.a in Frameworks */,
-				FF0AAE0D1314014C005D32D5 /* libtinyxml.a in Frameworks */,
-				FF0AAE0F13140169005D32D5 /* libnewton.a in Frameworks */,
+				09AD1AB4131433160054D1B6 /* CoreFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -208,6 +246,7 @@
 		FF8C27F71313DB5500646B90 /* frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				09AD1AB3131433160054D1B6 /* CoreFoundation.framework */,
 				FF8F28B1131367150019E923 /* OpenGL.framework */,
 				FFF1849D13130A660077CF7A /* QtOpenGL.framework */,
 				FFF1849913130A460077CF7A /* QtGui.framework */,
@@ -251,7 +290,7 @@
 		FF8C2D161313DCAD00646B90 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FF8C2D1D1313DCAD00646B90 /* libnewton.a */,
+				FF8C2D1D1313DCAD00646B90 /* libnewton_d.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -344,6 +383,11 @@
 			buildRules = (
 			);
 			dependencies = (
+				0974657313142A0400DBA2C6 /* PBXTargetDependency */,
+				0974657513142A0600DBA2C6 /* PBXTargetDependency */,
+				0974657713142A0800DBA2C6 /* PBXTargetDependency */,
+				0974657913142A0B00DBA2C6 /* PBXTargetDependency */,
+				0974657B13142A0D00DBA2C6 /* PBXTargetDependency */,
 			);
 			name = newtonDemo;
 			productInstallPath = "$(HOME)/bin";
@@ -358,7 +402,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "newtonDemo" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* newtonDemo */;
 			projectDirPath = "";
 			projectReferences = (
@@ -419,10 +470,10 @@
 			remoteRef = FF8C2D111313DC9500646B90 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		FF8C2D1D1313DCAD00646B90 /* libnewton.a */ = {
+		FF8C2D1D1313DCAD00646B90 /* libnewton_d.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libnewton.a;
+			path = libnewton_d.a;
 			remoteRef = FF8C2D1C1313DCAD00646B90 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -458,6 +509,34 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		0974657313142A0400DBA2C6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = tinyxml;
+			targetProxy = 0974657213142A0400DBA2C6 /* PBXContainerItemProxy */;
+		};
+		0974657513142A0600DBA2C6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = dContainers;
+			targetProxy = 0974657413142A0600DBA2C6 /* PBXContainerItemProxy */;
+		};
+		0974657713142A0800DBA2C6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = dScene;
+			targetProxy = 0974657613142A0800DBA2C6 /* PBXContainerItemProxy */;
+		};
+		0974657913142A0B00DBA2C6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = dMath;
+			targetProxy = 0974657813142A0B00DBA2C6 /* PBXContainerItemProxy */;
+		};
+		0974657B13142A0D00DBA2C6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = newton;
+			targetProxy = 0974657A13142A0D00DBA2C6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
 		1DEB923208733DC60010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -470,12 +549,9 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"_GLIBCXX_DEBUG=1",
-					"_GLIBCXX_DEBUG_PEDANTIC=1",
-				);
+				GCC_PREPROCESSOR_DEFINITIONS = _MAC_VER;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = 4.0;
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					../../../sdkDemos/toolBox,
 					../../../../../packages/dMath,
@@ -498,6 +574,8 @@
 					"\"$(SRCROOT)/../../../../../packages/projects/mac/tinyxml/build/Release\"",
 					"\"$(SRCROOT)/../../../../../coreLibrary_200/projets/mac/OS10_xcode3.2.5/build/Release\"",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
 					"-pipe",
 					"-g",
@@ -508,7 +586,7 @@
 					"-DQT_SHARED",
 				);
 				PRODUCT_NAME = newtonDemo;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -520,8 +598,9 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = _MAC_VER;
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = 4.2;
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = (
 					../../../sdkDemos/toolBox,
 					../../../../../packages/dMath,
@@ -544,6 +623,8 @@
 					"\"$(SRCROOT)/../../../../../packages/projects/mac/tinyxml/build/Release\"",
 					"\"$(SRCROOT)/../../../../../coreLibrary_200/projets/mac/OS10_xcode3.2.5/build/Release\"",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
 					"-pipe",
 					"-g",
@@ -554,7 +635,7 @@
 					"-DQT_SHARED",
 				);
 				PRODUCT_NAME = newtonDemo;
-				SDKROOT = macosx10.5;
+				SDKROOT = macosx;
 			};
 			name = Release;
 		};

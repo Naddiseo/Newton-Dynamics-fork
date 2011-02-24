@@ -35,6 +35,9 @@ void GetWorkingFileName (const char* const name, char* const outPathName)
 
 
 #ifdef _MAC_VER
+	strcpy(outPathName, "/Users/admin_user/Developer/NGD/svn (trunk)/applications/media/");
+	strcat(outPathName, name);
+	/*
 	CFURLRef appURL = CFBundleCopyBundleURL( CFBundleGetMainBundle() ); 
 	CFURLRef appDirURL = CFURLCreateCopyDeletingLastPathComponent( NULL, appURL); 
 	CFStringRef fileName = CFStringCreateWithCString( NULL, name, kCFStringEncodingUTF8 ); 
@@ -47,7 +50,8 @@ void GetWorkingFileName (const char* const name, char* const outPathName)
 	CFRelease( appDirURL ); 
 	CFRelease( fileName ); 
 	CFRelease( fileURL ); 
-	CFRelease( filePath ); 
+	CFRelease( filePath );
+	*/
 #endif
 
 #ifdef _LINUX_VER
