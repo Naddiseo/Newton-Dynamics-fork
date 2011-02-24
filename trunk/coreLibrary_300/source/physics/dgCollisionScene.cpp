@@ -405,13 +405,11 @@ dgFloat32 dgCollisionScene::RayCastSimd (const dgVector& localP0, const dgVector
 	stackPool[0] = m_rootNode;
 	dgFloat32 maxParam = dgFloat32 (1.2f);
 
-	int xxx = 0;
 	FastRayTest ray (localP0, localP1);
 	while (stack) {
 		stack --;
 		const dgNode* const me = stackPool[stack];
 
-		xxx ++;
 		if (ray.BoxTestSimd (me->m_minBox, me->m_maxBox)) {
 			if (!me->m_left) {
 				_ASSERTE (!me->m_right);
@@ -458,13 +456,13 @@ dgFloat32 dgCollisionScene::RayCast (const dgVector& localP0, const dgVector& lo
 	stackPool[0] = m_rootNode;
 	dgFloat32 maxParam = dgFloat32 (1.2f);
 
-int xxx = 0;
+//int xxx = 0;
 	FastRayTest ray (localP0, localP1);
 	while (stack) {
 		stack --;
 		const dgNode* const me = stackPool[stack];
 
-xxx ++;
+//xxx ++;
 		if (ray.BoxTest (me->m_minBox, me->m_maxBox)) {
 			if (!me->m_left) {
 				_ASSERTE (!me->m_right);
@@ -497,10 +495,6 @@ xxx ++;
 
 void dgCollisionScene::CollidePairSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
 {
-_ASSERTE (0);
-/*
-	dgInt32 stack;
-	dgWorld* world;
 	const dgNode *stackPool[DG_SCENE_MAX_STACK_DEPTH];
 
 	_ASSERTE (pair->m_body1->GetCollision() == this);
@@ -508,76 +502,40 @@ _ASSERTE (0);
 
 	dgVector p0;
 	dgVector p1;
-
-	world = pair->m_body1->GetWorld();
+	_ASSERTE (m_world == pair->m_body1->GetWorld());
 	dgMatrix matrix (pair->m_body0->m_matrix * pair->m_body1->m_matrix.Inverse());
-	pair->m_body0->GetCollision()->CalcAABB (matrix, p0, p1);
+	pair->m_body0->GetCollision()->CalcAABBSimd (matrix, p0, p1);
 
-	stack = 0;
-	if (m_rootNode->m_leftIsProxy) {
-		const dgProxy& sceneProxy = m_rootNode->m_leftProxi->GetInfo();
-		if (!sceneProxy.m_shape->IsType (dgCollision::dgCollisionNull_RTTI)) {
-			if (dgOverlapTestSimd (sceneProxy.m_boxP0, sceneProxy.m_boxP1, p0, p1)) {
-				world->SceneContactsSimd (sceneProxy, pair, proxi);
-			}
-		}
-	} else if (m_rootNode->m_leftNode) {
-		stackPool[stack] = m_rootNode->m_leftNode;
-		stack++;
-	}
-
-	if (m_rootNode->m_rightIsProxy) {
-		const dgProxy& sceneProxy = m_rootNode->m_rightProxi->GetInfo();
-		if (!sceneProxy.m_shape->IsType (dgCollision::dgCollisionNull_RTTI)) {
-			if (dgOverlapTestSimd (sceneProxy.m_boxP0, sceneProxy.m_boxP1, p0, p1)) {
-				world->SceneContactsSimd (sceneProxy, pair, proxi);
-			}
-		}
-	} else {
-		_ASSERTE (m_rootNode->m_rightNode);
-		stackPool[stack] = m_rootNode->m_rightNode;
-		stack++;
-	}
-
+	dgInt32 stack = 1;
+	stackPool[0] = m_rootNode;
 	while (stack) {
-
 		stack --;
 		const dgNode* const me = stackPool[stack];
-		if (dgOverlapTestSimd (me->m_p0, me->m_p1, p0, p1)) {
-			if (me->m_leftIsProxy) {
-				const dgProxy& sceneProxy = me->m_leftProxi->GetInfo();
-				if (dgOverlapTestSimd (sceneProxy.m_boxP0, sceneProxy.m_boxP1, p0, p1)) {
-					world->SceneContactsSimd (sceneProxy, pair, proxi);
-				}
-			} else {
-				_ASSERTE (me->m_leftNode);
-				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-				stackPool[stack] = me->m_leftNode;
-				stack++;
-			}
 
-			if (me->m_rightIsProxy) {
-				const dgProxy& sceneProxy = me->m_rightProxi->GetInfo();
-				if (dgOverlapTestSimd (sceneProxy.m_boxP0, sceneProxy.m_boxP1, p0, p1)) {
-					world->SceneContactsSimd (sceneProxy, pair, proxi);
-				}
+		if (dgOverlapTestSimd (me->m_minBox, me->m_maxBox, p0, p1)) {
+
+			if (!me->m_left) {
+				_ASSERTE (!me->m_right);
+				const dgProxy* const sceneProxy = (dgProxy*) me;
+				m_world->SceneContactsSimd (*sceneProxy, pair, proxi);
 			} else {
-				_ASSERTE (me->m_rightNode);
+				_ASSERTE (me->m_left);
 				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-				stackPool[stack] = me->m_rightNode;
+				stackPool[stack] = me->m_left;
+				stack++;
+
+				_ASSERTE (me->m_right);
+				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
+				stackPool[stack] = me->m_right;
 				stack++;
 			}
 		}
 	}
-*/
+
 }
 
 void dgCollisionScene::CollidePair (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
 {
-_ASSERTE (0);
-/*
-	dgInt32 stack;
-	dgWorld* world;
 	const dgNode *stackPool[DG_SCENE_MAX_STACK_DEPTH];
 
 	_ASSERTE (pair->m_body1->GetCollision() == this);
@@ -585,68 +543,35 @@ _ASSERTE (0);
 
 	dgVector p0;
 	dgVector p1;
-
-	world = pair->m_body1->GetWorld();
+	_ASSERTE (m_world == pair->m_body1->GetWorld());
 	dgMatrix matrix (pair->m_body0->m_matrix * pair->m_body1->m_matrix.Inverse());
 	pair->m_body0->GetCollision()->CalcAABB (matrix, p0, p1);
 
-	stack = 0;
-	if (m_rootNode->m_leftIsProxy) {
-		const dgProxy& sceneProxy = m_rootNode->m_leftProxi->GetInfo();
-		if (!sceneProxy.m_shape->IsType (dgCollision::dgCollisionNull_RTTI)) {
-			if (dgOverlapTest (sceneProxy.m_boxP0, sceneProxy.m_boxP1, p0, p1)) {
-					world->SceneContacts (sceneProxy, pair, proxi);
-			}
-		}
-	} else if (m_rootNode->m_leftNode) {
-		stackPool[stack] = m_rootNode->m_leftNode;
-		stack++;
-	}
-
-	if (m_rootNode->m_rightIsProxy) {
-		const dgProxy& sceneProxy = m_rootNode->m_rightProxi->GetInfo();
-		if (!sceneProxy.m_shape->IsType (dgCollision::dgCollisionNull_RTTI)) {
-			if (dgOverlapTest (sceneProxy.m_boxP0, sceneProxy.m_boxP1, p0, p1)) {
-				world->SceneContacts (sceneProxy, pair, proxi);
-			}
-		}
-	} else {
-		_ASSERTE (m_rootNode->m_rightNode);
-		stackPool[stack] = m_rootNode->m_rightNode;
-		stack++;
-	}
-
+	dgInt32 stack = 1;
+	stackPool[0] = m_rootNode;
 	while (stack) {
-
 		stack --;
 		const dgNode* const me = stackPool[stack];
-		if (dgOverlapTest (me->m_p0, me->m_p1, p0, p1)) {
-			if (me->m_leftIsProxy) {
-				const dgProxy& sceneProxy = me->m_leftProxi->GetInfo();
-				if (dgOverlapTest (sceneProxy.m_boxP0, sceneProxy.m_boxP1, p0, p1)) {
-					world->SceneContacts (sceneProxy, pair, proxi);
-				}
-			} else {
-				_ASSERTE (me->m_leftNode);
-				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-				stackPool[stack] = me->m_leftNode;
-				stack++;
-			}
 
-			if (me->m_rightIsProxy) {
-				const dgProxy& sceneProxy = me->m_rightProxi->GetInfo();
-				if (dgOverlapTest (sceneProxy.m_boxP0, sceneProxy.m_boxP1, p0, p1)) {
-					world->SceneContacts (sceneProxy, pair, proxi);
-				}
+		if (dgOverlapTest (me->m_minBox, me->m_maxBox, p0, p1)) {
+
+			if (!me->m_left) {
+				_ASSERTE (!me->m_right);
+				const dgProxy* const sceneProxy = (dgProxy*) me;
+				m_world->SceneContacts (*sceneProxy, pair, proxi);
 			} else {
-				_ASSERTE (me->m_rightNode);
+				_ASSERTE (me->m_left);
 				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-				stackPool[stack] = me->m_rightNode;
+				stackPool[stack] = me->m_left;
+				stack++;
+
+				_ASSERTE (me->m_right);
+				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
+				stackPool[stack] = me->m_right;
 				stack++;
 			}
 		}
 	}
-*/
 }
 
 
@@ -807,6 +732,8 @@ void dgCollisionScene::ImproveTotalFitness()
 		}
 		maxPasses --;
 	} while (maxPasses && (newCost < prevCost));
+
+	SetCollisionBBox (m_rootNode->m_minBox, m_rootNode->m_maxBox);
 }
 
 dgFloat32 dgCollisionScene::CalculateSurfaceArea (const dgNode* const node0, const dgNode* const node1, dgVector& minBox, dgVector& maxBox) const

@@ -18,8 +18,6 @@
 
 
 
-//#define USE_TEST_SERIALIZATION
-
 #ifdef USE_TEST_SERIALIZATION
 
 static const char* MAGIC_NUMBER = "serialize data";
@@ -203,8 +201,8 @@ class ComplexScene: public DemoEntity
 					NewtonCollision* collision;
 					
 					matrix.m_posit.m_y = 4.0f + y * 1.0f ; 
-					matrix.m_posit.m_x = x * 1.5f - 8.0f; 
-					matrix.m_posit.m_z = z * 1.5f - 6.0f;  
+					matrix.m_posit.m_x = x * 2.0f - 8.0f; 
+					matrix.m_posit.m_z = z * 2.0f - 6.0f;  
 					
 					if (rand () & 0x010) {
 					//if (0) {
@@ -263,7 +261,7 @@ void SceneCollision (DemoEntityManager* const scene)
 	visualMesh->AddCollisionTreeMesh(scene);
 
 	// add some shapes
-//	visualMesh->AddPrimitives(scene);
+	visualMesh->AddPrimitives(scene);
 
 	// this is optional, finish the scene construction, optimize the collision scene
 	NewtonSceneCollisionOptimize (sceneCollision);
@@ -323,7 +321,7 @@ void SceneCollision (DemoEntityManager* const scene)
 		sceneCollision = NewtonCreateCollisionFromSerialization (world, DeSerializeFile, file);
 		fclose (file);
 
-		// restore the user info form teh save data and set userdata on each proxy
+		// restore the user info from the save data and set userdata on each proxy
 		for (NewtonSceneProxy* proxy = NewtonSceneGetFirstProxy(sceneCollision); proxy; proxy = NewtonSceneGetNextProxy(sceneCollision, proxy)) {
 			int index = int (NewtonSceneGetProxyUserData(proxy));
 			
@@ -352,8 +350,14 @@ void SceneCollision (DemoEntityManager* const scene)
 	// add few objects
 	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (world);
 	dVector location (0.0f, 0.0f, 0.0f, 0.0f);
-	dVector size (1.0f, 1.0f, 1.0f, 0.0f);
-	AddPrimitiveArray(scene, 10.0f, location, size, 1, 1, 1.0f, _BOX_PRIMITIVE, defaultMaterialID);
+	dVector size (0.5f, 0.5f, 0.5f, 0.0f);
+	int count = 5;
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _BOX_PRIMITIVE, defaultMaterialID);
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _CYLINDER_PRIMITIVE, defaultMaterialID);
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _CONE_PRIMITIVE, defaultMaterialID);
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _CAPSULE_PRIMITIVE, defaultMaterialID);
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
 
 
 	dMatrix camMatrix (dRollMatrix(-20.0f * 3.1416f /180.0f) * dYawMatrix(-45.0f * 3.1416f /180.0f));
