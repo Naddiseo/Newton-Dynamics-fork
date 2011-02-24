@@ -380,8 +380,6 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 	setCentralWidget(m_canvas);
 
 	connect(QAbstractEventDispatcher::instance(), SIGNAL(aboutToBlock()), this, SLOT(OnIdle())); 
-	//connect(QAbstractEventDispatcher::instance(), SIGNAL(awake ()), this, SLOT(OnIdle())); 
-
 
 	//m_asycronousUpdate
 	m_canvas->ResetTimer();
