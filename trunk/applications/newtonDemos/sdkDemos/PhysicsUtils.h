@@ -13,7 +13,7 @@
 #define __PHYSICS_UTIL__
 
 
-/*
+
 enum PrimitiveType
 {
 	_BOX_PRIMITIVE,
@@ -26,7 +26,8 @@ enum PrimitiveType
 	_REGULAR_CONVEX_HULL_PRIMITIVE,
 };
 
-
+class DemoEntityManager;
+/*
 #define CAMERA_SPEED 10.0f
 
 extern dVector cameraDir;
@@ -89,3 +90,5 @@ void PhysicsApplyGravityForce (const NewtonBody* body, dFloat timestep, int thre
 
 void ShowJointContacts (const NewtonJoint* contactJoint);
 void GenericContactProcess (const NewtonJoint* contactJoint, dFloat timestep, int threadIndex);
+
+void AddPrimitiveArray (DemoEntityManager* const scene, dFloat mass, const dVector& origin, const dVector& size, int xCount, int zCount, dFloat spacing, PrimitiveType type, int materialID);

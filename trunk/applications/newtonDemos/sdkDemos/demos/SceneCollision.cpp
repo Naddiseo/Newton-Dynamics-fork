@@ -45,93 +45,6 @@ static dFloat AllRayHitCallback (dFloat interseption, dFloat* normal, int faceId
 
 
 /*
-void ScenePrimitive::AddCollisionTree(NewtonCollision* scene, const NewtonWorld* nWorld, const char* name, int optimized)
-{
-	NewtonCollision* collision;
-	NewtonSceneProxy* sceneProxy;
-	
-	// open the level data
-	char fullPathName[2048];
-	GetWorkingFileName (name, fullPathName);
-
-	OGLLoaderContext context;
-	dMatrix matrix (dYawMatrix (-3.14159265f * 0.5f));
-
-_ASSERTE (0);
-//	LoadCollada(fullPathName, context, matrix, 1.0f);
-
-	// create the collision tree geometry
-	collision = NewtonCreateTreeCollision(nWorld, 0);
-
-	// prepare to create collision geometry
-	NewtonTreeCollisionBeginBuild(collision);
-
-	dMatrix pallete[64];
-	UpdateMatrixPalette (GetIdentityMatrix(), pallete, sizeof (m_matrixPalete) / sizeof (dMatrix));
-
-	// iterate the entire geometry an build the collision
-//	for (ModelComponentList<dList<dMesh*> >::dListNode* list = m_meshList.GetFirst(); list; list = list->GetNext()) {
-	for (dList<dMeshInstance>::dListNode* node = m_meshList.GetFirst(); node; node = node->GetNext()) { 
-		dFloat* vertex;
-	
-		OGLMesh* mesh = (OGLMesh*)node->GetInfo().m_mesh;
-
-		vertex = mesh->m_vertex;
-		const dMatrix& globalMatrix = pallete[mesh->m_boneID];
-		for (dMesh::dListNode* nodes = mesh->GetFirst(); nodes; nodes = nodes->GetNext()) {
-			dSubMesh& segment = nodes->GetInfo();
-			for (int i = 0; i < segment.m_indexCount; i += 3) {
-				int index;	
-				int matID;
-				dVector face[3];
-
-				index = segment.m_indexes[i + 0] * 3;
-				face[0] = dVector (vertex[index + 0], vertex[index + 1], vertex[index + 2]);
-
-				index = segment.m_indexes[i + 1] * 3;
-				face[1] = dVector (vertex[index + 0], vertex[index + 1], vertex[index + 2]);
-
-				index = segment.m_indexes[i + 2] * 3;
-				face[2] = dVector (vertex[index + 0], vertex[index + 1], vertex[index + 2]);
-
-				globalMatrix.TransformTriplex (face, sizeof (dVector), face, sizeof (dVector), 3);
-
-				// stress test the collision builder
-//				matID = matID == 2 ? 1 : 2 ;
-				matID = 0;
-				NewtonTreeCollisionAddFace(collision, 3, &face[0].m_x, sizeof (dVector), matID);
-			}
-		}
-	}
-	NewtonTreeCollisionEndBuild(collision, optimized);
-
-	// create a Scene proxy to contain this mesh
-	sceneProxy = NewtonSceneCollisionCreateProxy (scene, collision);
-
-	// release the collision tree (this way the application does not have to do book keeping of Newton objects
-	NewtonReleaseCollision (nWorld, collision);
-
-	// set proxy relative matrix 
-	dMatrix proxyMatrix (GetIdentityMatrix());
-	NewtonSceneProxySetMatrix (sceneProxy, &proxyMatrix[0][0]);
-
-	// save the pointer to the graphic object with the body.
-//	NewtonBodySetUserData (m_level, this);
-
-
-#ifdef USE_TEST_ALL_FACE_USER_RAYCAST_CALLBACK
-	// set a ray cast callback for all face ray cast 
-	NewtonTreeCollisionSetUserRayCastCallback (collision, AllRayHitCallback);
-	dVector p0 (0,  100, 0, 0);
-	dVector p1 (0, -100, 0, 0);
-	dVector normal;
-	int id;
-	dFloat parameter;
-	parameter = NewtonCollisionRayCast (collision, &p0[0], &p1[0], &normal[0], &id);
-#endif
-
-}
-
 void ScenePrimitive::DebugCallback (const NewtonBody* bodyWithTreeCollision, const NewtonBody* body, int faceID, int vertexCount, const dFloat* vertex, int vertexstrideInBytes)
 {
 	// the application can use this function for debugging purpose by writing the 
@@ -437,7 +350,11 @@ void SceneCollision (DemoEntityManager* const scene)
 
 
 	// add few objects
-
+	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (world);
+//	AddPrimitiveArray (scene, dFloat mass, const dVector& origin, const dVector& size, int xCount, int zCount, dFloat spacing, PrimitiveType type, int materialID)
+	dVector location (0.0f, 0.0f, 0.0f, 0.0f);
+	dVector size (1.0f, 1.0f, 1.0f, 0.0f);
+	AddPrimitiveArray(scene, 10.0f, location, size, 1, 1, 1.0f, _BOX_PRIMITIVE, defaultMaterialID);
 
 
 	dMatrix camMatrix (dRollMatrix(-20.0f * 3.1416f /180.0f) * dYawMatrix(-45.0f * 3.1416f /180.0f));

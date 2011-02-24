@@ -1066,3 +1066,42 @@ void GenericContactProcess (const NewtonJoint* contactJoint, dFloat timestep, in
 }
 
 
+
+//void AddPrimitiveArray (SceneManager* system, dFloat mass, const dVector& origin, const dVector& oriSize, int xCount, int zCount, dFloat spacing, PrimitiveType type, int materialID)
+void AddPrimitiveArray (DemoEntityManager* const scene, dFloat mass, const dVector& origin, const dVector& size, int xCount, int zCount, dFloat spacing, PrimitiveType type, int materialID)
+{
+
+/*
+
+	dVector size (oriSize);
+	dMatrix matrix (GetIdentityMatrix());
+
+	// create the shape and visual mesh as a common data to be re used
+//	type = _BOX_PRIMITIVE;
+	NewtonCollision* boxCollision = CreateConvexCollision (system->m_world, GetIdentityMatrix(), size, type, materialID);
+
+	char name[256];
+	sprintf (name, "shape%d", type);
+	OGLMesh* boxMesh = new OGLMesh (name, boxCollision, "wood_0.tga", "wood_0.tga", "wood_1.tga");
+
+	for (int i = 0; i < xCount; i ++) {
+		dFloat x;
+		x = origin.m_x + (i - xCount / 2) * spacing;
+
+		for (int j = 0; j < zCount; j ++) {
+			dFloat z;
+			z = origin.m_z + (j - zCount / 2) * spacing;
+
+			matrix.m_posit.m_x = x;
+			matrix.m_posit.m_y = FindFloor (system->m_world, x, z) + 4.0f;
+			matrix.m_posit.m_z = z;
+//			CreateGenericSolid (system->m_world, system, mass, matrix, size, type, materialID);
+			CreateSimpleSolid (system->m_world, system, boxMesh, mass, matrix, boxCollision, materialID);
+		}
+	}
+
+	// do not forget to release the assets	
+	boxMesh->Release(); 
+	NewtonReleaseCollision(system->m_world, boxCollision);
+*/
+}
