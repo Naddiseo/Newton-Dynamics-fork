@@ -271,20 +271,18 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateExpansionKey</key>
 							<array>
 								<string>0867D691FE84028FC02AAC07</string>
-								<string>08FB77ACFE841707C02AAC07</string>
 								<string>1C37FBAC04509CD000000102</string>
 								<string>1C37FABC05509CD000000102</string>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>58</integer>
-									<integer>1</integer>
-									<integer>0</integer>
+									<integer>4</integer>
+									<integer>3</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 577}, {186, 567}}</string>
+							<string>{{0, 0}, {186, 567}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -331,12 +329,12 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>FF0AADEE1313FF7F005D32D5</string>
+										<string>FF99316613167C8A00D1C65B</string>
 										<key>history</key>
 										<array>
 											<string>FF0AADAA1313FBC0005D32D5</string>
 											<string>FF0AADEB1313FF7F005D32D5</string>
-											<string>FF0AADEC1313FF7F005D32D5</string>
+											<string>FF0AADEE1313FF7F005D32D5</string>
 										</array>
 										<key>prevStack</key>
 										<array>
@@ -399,9 +397,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>FF0AADEF1313FF7F005D32D5</string>
+				<string>FF99316713167C8A00D1C65B</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>FF0AADF01313FF7F005D32D5</string>
+				<string>FF99316813167C8A00D1C65B</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -616,7 +614,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>FF8C27801313D83C00646B90</string>
-				<string>FF0AADF11313FF7F005D32D5</string>
+				<string>FF99316913167C8A00D1C65B</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>

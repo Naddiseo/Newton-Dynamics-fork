@@ -49,7 +49,8 @@ void dResetTimer()
 	#ifdef _MAC_VER
 		timeval tp;
 		gettimeofday(&tp, NULL);
-		baseCount = unsigned64 (tp.tv_usec);
+		unsigned64 microsecunds =  unsigned64 (tp.tv_sec) * 1000000 + tp.tv_usec;
+		baseCount = microsecunds;
 	#endif
 }
 
@@ -77,7 +78,8 @@ unsigned64 dGetTimeInMicrosenconds()
 	#ifdef _MAC_VER
 		timeval tp;
 		gettimeofday(&tp, NULL);
-		return unsigned64 (tp.tv_usec) - baseCount;
+		unsigned64 microsecunds =  unsigned64 (tp.tv_sec) * 1000000 + tp.tv_usec;
+		return microsecunds - baseCount;
 	#endif
 }
 

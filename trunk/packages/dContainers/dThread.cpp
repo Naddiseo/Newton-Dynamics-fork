@@ -41,6 +41,7 @@ static inline void dInterlockedIncrement (int* const Addend )
 	#endif
 }
 
+
 static inline void dInterlockedDecrement(int* const Addend)
 {
 	#if (defined (_LINUX_VER))
@@ -64,7 +65,7 @@ static inline int dInterlockedExchange (int* spin, int testValue)
 	#endif
 
 	#if (defined (_MAC_VER))
-		return OSAtomicCompareAndSwap32(!testValue, testValue, (int32_t*) spin);
+		return !OSAtomicCompareAndSwap32(!testValue, testValue, (int32_t*) spin);
 	#endif
 
 	#if (defined (_MSC_VER))

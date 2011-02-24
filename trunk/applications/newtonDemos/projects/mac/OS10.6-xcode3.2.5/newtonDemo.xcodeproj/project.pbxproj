@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0974657C13142A2200DBA2C6 /* libnewton_d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF8C2D1D1313DCAD00646B90 /* libnewton_d.a */; };
-		0974657D13142A2200DBA2C6 /* libtinyxml_d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF8C2D121313DC9500646B90 /* libtinyxml_d.a */; };
+		0974657C13142A2200DBA2C6 /* libnewton.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF8C2D1D1313DCAD00646B90 /* libnewton.a */; };
+		0974657D13142A2200DBA2C6 /* libtinyxml.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF8C2D121313DC9500646B90 /* libtinyxml.a */; };
 		0974657E13142A2200DBA2C6 /* libdScene_d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF8C2D071313DC7F00646B90 /* libdScene_d.a */; };
-		0974657F13142A2200DBA2C6 /* libdContainers_d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF8C2CFC1313DC6A00646B90 /* libdContainers_d.a */; };
+		0974657F13142A2200DBA2C6 /* libdContainers.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF8C2CFC1313DC6A00646B90 /* libdContainers.a */; };
 		0974658013142A2200DBA2C6 /* libdMath_d.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FF8C2CF11313DC3700646B90 /* libdMath_d.a */; };
 		09AD1AB4131433160054D1B6 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 09AD1AB3131433160054D1B6 /* CoreFoundation.framework */; };
 		FF8C2D411313DE3200646B90 /* dHeightResolutionTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF8C2D3F1313DE3200646B90 /* dHeightResolutionTimer.cpp */; };
@@ -20,6 +20,7 @@
 		FF8F28DA131368FA0019E923 /* BasicStacking.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF8F28D6131368FA0019E923 /* BasicStacking.cpp */; };
 		FF8F28DB131368FA0019E923 /* MeshCollision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF8F28D7131368FA0019E923 /* MeshCollision.cpp */; };
 		FF8F28DC131368FA0019E923 /* SceneCollision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF8F28D8131368FA0019E923 /* SceneCollision.cpp */; };
+		FF99312C13167AEA00D1C65B /* DemoDialogHelpers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FF99312A13167AEA00D1C65B /* DemoDialogHelpers.cpp */; };
 		FFF1849613130A3A0077CF7A /* QtCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FFF1849513130A3A0077CF7A /* QtCore.framework */; };
 		FFF1849A13130A460077CF7A /* QtGui.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FFF1849913130A460077CF7A /* QtGui.framework */; };
 		FFF1849E13130A660077CF7A /* QtOpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FFF1849D13130A660077CF7A /* QtOpenGL.framework */; };
@@ -149,6 +150,8 @@
 		FF8F28D6131368FA0019E923 /* BasicStacking.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BasicStacking.cpp; path = ../../../sdkDemos/demos/BasicStacking.cpp; sourceTree = SOURCE_ROOT; };
 		FF8F28D7131368FA0019E923 /* MeshCollision.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MeshCollision.cpp; path = ../../../sdkDemos/demos/MeshCollision.cpp; sourceTree = SOURCE_ROOT; };
 		FF8F28D8131368FA0019E923 /* SceneCollision.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SceneCollision.cpp; path = ../../../sdkDemos/demos/SceneCollision.cpp; sourceTree = SOURCE_ROOT; };
+		FF99312A13167AEA00D1C65B /* DemoDialogHelpers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DemoDialogHelpers.cpp; path = ../../../sdkDemos/DemoDialogHelpers.cpp; sourceTree = SOURCE_ROOT; };
+		FF99312B13167AEA00D1C65B /* DemoDialogHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DemoDialogHelpers.h; path = ../../../sdkDemos/DemoDialogHelpers.h; sourceTree = SOURCE_ROOT; };
 		FFF1849513130A3A0077CF7A /* QtCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtCore.framework; path = /Library/Frameworks/QtCore.framework; sourceTree = "<absolute>"; };
 		FFF1849913130A460077CF7A /* QtGui.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtGui.framework; path = /Library/Frameworks/QtGui.framework; sourceTree = "<absolute>"; };
 		FFF1849D13130A660077CF7A /* QtOpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QtOpenGL.framework; path = /Library/Frameworks/QtOpenGL.framework; sourceTree = "<absolute>"; };
@@ -187,10 +190,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0974657C13142A2200DBA2C6 /* libnewton_d.a in Frameworks */,
-				0974657D13142A2200DBA2C6 /* libtinyxml_d.a in Frameworks */,
+				0974657C13142A2200DBA2C6 /* libnewton.a in Frameworks */,
+				0974657D13142A2200DBA2C6 /* libtinyxml.a in Frameworks */,
 				0974657E13142A2200DBA2C6 /* libdScene_d.a in Frameworks */,
-				0974657F13142A2200DBA2C6 /* libdContainers_d.a in Frameworks */,
+				0974657F13142A2200DBA2C6 /* libdContainers.a in Frameworks */,
 				0974658013142A2200DBA2C6 /* libdMath_d.a in Frameworks */,
 				FFF1849613130A3A0077CF7A /* QtCore.framework in Frameworks */,
 				FFF1849A13130A460077CF7A /* QtGui.framework in Frameworks */,
@@ -266,7 +269,7 @@
 		FF8C2CF51313DC6A00646B90 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FF8C2CFC1313DC6A00646B90 /* libdContainers_d.a */,
+				FF8C2CFC1313DC6A00646B90 /* libdContainers.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -282,7 +285,7 @@
 		FF8C2D0B1313DC9500646B90 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FF8C2D121313DC9500646B90 /* libtinyxml_d.a */,
+				FF8C2D121313DC9500646B90 /* libtinyxml.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -290,7 +293,7 @@
 		FF8C2D161313DCAD00646B90 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FF8C2D1D1313DCAD00646B90 /* libnewton_d.a */,
+				FF8C2D1D1313DCAD00646B90 /* libnewton.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -324,10 +327,11 @@
 			name = demos;
 			sourceTree = "<group>";
 		};
-		FFF184A113130A6F0077CF7A /* newtonDemos */ = {
+		FF9931B51316828C00D1C65B /* guiFiles */ = {
 			isa = PBXGroup;
 			children = (
-				FF8F28D4131368B90019E923 /* demos */,
+				FF99312A13167AEA00D1C65B /* DemoDialogHelpers.cpp */,
+				FF99312B13167AEA00D1C65B /* DemoDialogHelpers.h */,
 				FFF184CB131310FB0077CF7A /* DemoCamera.cpp */,
 				FFF184CC131310FB0077CF7A /* DemoCamera.h */,
 				FFF184CD131310FB0077CF7A /* DemoEntity.cpp */,
@@ -341,6 +345,15 @@
 				FFF184D5131310FB0077CF7A /* NewtonDemos.h */,
 				FFF184D6131310FB0077CF7A /* PhysicsUtils.cpp */,
 				FFF184D7131310FB0077CF7A /* PhysicsUtils.h */,
+			);
+			name = guiFiles;
+			sourceTree = "<group>";
+		};
+		FFF184A113130A6F0077CF7A /* newtonDemos */ = {
+			isa = PBXGroup;
+			children = (
+				FF9931B51316828C00D1C65B /* guiFiles */,
+				FF8F28D4131368B90019E923 /* demos */,
 				FFF184B61313103C0077CF7A /* toolBox */,
 			);
 			name = newtonDemos;
@@ -402,7 +415,6 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "newtonDemo" */;
 			compatibilityVersion = "Xcode 3.1";
-			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
@@ -449,10 +461,10 @@
 			remoteRef = FF8C2CF01313DC3700646B90 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		FF8C2CFC1313DC6A00646B90 /* libdContainers_d.a */ = {
+		FF8C2CFC1313DC6A00646B90 /* libdContainers.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libdContainers_d.a;
+			path = libdContainers.a;
 			remoteRef = FF8C2CFB1313DC6A00646B90 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -463,17 +475,17 @@
 			remoteRef = FF8C2D061313DC7F00646B90 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		FF8C2D121313DC9500646B90 /* libtinyxml_d.a */ = {
+		FF8C2D121313DC9500646B90 /* libtinyxml.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libtinyxml_d.a;
+			path = libtinyxml.a;
 			remoteRef = FF8C2D111313DC9500646B90 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		FF8C2D1D1313DCAD00646B90 /* libnewton_d.a */ = {
+		FF8C2D1D1313DCAD00646B90 /* libnewton.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libnewton_d.a;
+			path = libnewton.a;
 			remoteRef = FF8C2D1C1313DCAD00646B90 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -504,6 +516,7 @@
 				FF8F28DC131368FA0019E923 /* SceneCollision.cpp in Sources */,
 				FF8C2D411313DE3200646B90 /* dHeightResolutionTimer.cpp in Sources */,
 				FF8C2D441313DE6600646B90 /* ClosestDistance.cpp in Sources */,
+				FF99312C13167AEA00D1C65B /* DemoDialogHelpers.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -586,7 +599,7 @@
 					"-DQT_SHARED",
 				);
 				PRODUCT_NAME = newtonDemo;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.5;
 			};
 			name = Debug;
 		};
@@ -635,7 +648,7 @@
 					"-DQT_SHARED",
 				);
 				PRODUCT_NAME = newtonDemo;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.5;
 			};
 			name = Release;
 		};

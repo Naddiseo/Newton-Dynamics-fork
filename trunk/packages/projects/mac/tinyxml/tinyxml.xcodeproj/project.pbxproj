@@ -17,7 +17,7 @@
 
 /* Begin PBXFileReference section */
 		32BAE0B70371A74B00C91783 /* tinyxml_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tinyxml_Prefix.pch; sourceTree = "<group>"; };
-		D2AAC06F0554671400DB518D /* libtinyxml_d.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libtinyxml_d.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2AAC06F0554671400DB518D /* libtinyxml.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libtinyxml.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF8C27B91313DA9C00646B90 /* tinystr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinystr.cpp; path = ../../../thirdParty/tinyxml/tinystr.cpp; sourceTree = SOURCE_ROOT; };
 		FF8C27BA1313DA9C00646B90 /* tinystr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = tinystr.h; path = ../../../thirdParty/tinyxml/tinystr.h; sourceTree = SOURCE_ROOT; };
 		FF8C27BB1313DA9C00646B90 /* tinyxml.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tinyxml.cpp; path = ../../../thirdParty/tinyxml/tinyxml.cpp; sourceTree = SOURCE_ROOT; };
@@ -40,7 +40,7 @@
 		034768DDFF38A45A11DB9C8B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D2AAC06F0554671400DB518D /* libtinyxml_d.a */,
+				D2AAC06F0554671400DB518D /* libtinyxml.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -97,7 +97,7 @@
 			);
 			name = tinyxml;
 			productName = tinyxml;
-			productReference = D2AAC06F0554671400DB518D /* libtinyxml_d.a */;
+			productReference = D2AAC06F0554671400DB518D /* libtinyxml.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -107,7 +107,6 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB920508733DBB0010E9CD /* Build configuration list for PBXProject "tinyxml" */;
 			compatibilityVersion = "Xcode 3.1";
-			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
@@ -158,7 +157,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = tinyxml_d;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.5;
 			};
 			name = Debug;
 		};
@@ -177,7 +176,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = tinyxml;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.5;
 			};
 			name = Release;
 		};

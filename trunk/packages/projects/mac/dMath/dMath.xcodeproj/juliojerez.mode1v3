@@ -278,9 +278,8 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>12</integer>
-									<integer>1</integer>
-									<integer>0</integer>
+									<integer>15</integer>
+									<integer>14</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
@@ -331,10 +330,10 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>FF0AADC21313FBFC005D32D5</string>
+										<string>FF99317813167CBF00D1C65B</string>
 										<key>history</key>
 										<array>
-											<string>FF0AADC11313FBFC005D32D5</string>
+											<string>FF0AADC21313FBFC005D32D5</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -392,9 +391,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>FF0AADC31313FBFC005D32D5</string>
+				<string>FF99317913167CBF00D1C65B</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>FF0AADC41313FBFC005D32D5</string>
+				<string>FF99317A13167CBF00D1C65B</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -609,7 +608,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>FF8C265C1313D2BF00646B90</string>
-				<string>FF0AADC51313FBFC005D32D5</string>
+				<string>FF99317B13167CBF00D1C65B</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>

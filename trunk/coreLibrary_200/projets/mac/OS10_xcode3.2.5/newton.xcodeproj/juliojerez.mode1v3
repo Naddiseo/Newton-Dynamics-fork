@@ -233,6 +233,8 @@
 			<key>Layout</key>
 			<array>
 				<dict>
+					<key>BecomeActive</key>
+					<true/>
 					<key>ContentConfiguration</key>
 					<dict>
 						<key>PBXBottomSmartGroupGIDs</key>
@@ -268,6 +270,7 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateExpansionKey</key>
 							<array>
 								<string>0867D691FE84028FC02AAC07</string>
+								<string>08FB77AEFE84172EC02AAC07</string>
 								<string>034768DFFF38A50411DB9C8B</string>
 								<string>1C37FBAC04509CD000000102</string>
 								<string>1C37FABC05509CD000000102</string>
@@ -275,12 +278,13 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>8</integer>
-									<integer>7</integer>
+									<integer>61</integer>
+									<integer>1</integer>
+									<integer>0</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 0}, {186, 766}}</string>
+							<string>{{0, 541}, {186, 766}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -315,7 +319,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>newton_Prefix.pch</string>
+								<string>dgThreads.cpp</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -323,11 +327,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>newton_Prefix.pch</string>
+										<string>dgThreads.cpp</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>FF0AAD8F1313FB4B005D32D5</string>
+										<string>FF9931D01316858C00D1C65B</string>
 										<key>history</key>
 										<array>
 											<string>FF0AED411310B11300876ACF</string>
@@ -337,13 +341,14 @@
 											<string>FFA99D731312BCE7003AF598</string>
 											<string>FFA99D741312BCE7003AF598</string>
 											<string>FF0AAC951313F6E7005D32D5</string>
+											<string>FF9931C81316853900D1C65B</string>
 											<string>FF0AAD6E1313FB06005D32D5</string>
-											<string>FF0AAD8E1313FB4B005D32D5</string>
 										</array>
 										<key>prevStack</key>
 										<array>
 											<string>FF0AAC971313F6E7005D32D5</string>
 											<string>FF0AAD701313FB06005D32D5</string>
+											<string>FF9931C91316853900D1C65B</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -365,8 +370,6 @@
 							<string>406pt</string>
 						</dict>
 						<dict>
-							<key>BecomeActive</key>
-							<true/>
 							<key>ContentConfiguration</key>
 							<dict>
 								<key>PBXProjectModuleGUID</key>
@@ -403,9 +406,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>FF0AAD901313FB4B005D32D5</string>
+				<string>FF9931CB1316853900D1C65B</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>FF0AAD911313FB4B005D32D5</string>
+				<string>FF9931CC1316853900D1C65B</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -543,7 +546,7 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>FF0AAD921313FB4B005D32D5</string>
+		<string>FF9931CD1316853900D1C65B</string>
 		<string>/Users/juliojerez/Desktop/newton-dynamics/coreLibrary_200/projets/mac/OS10_xcode3.2.5/newton.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
@@ -624,7 +627,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>FF0AEC1E1310AADC00876ACF</string>
-				<string>FF0AAD2D1313FA02005D32D5</string>
+				<string>FF99316113167C6E00D1C65B</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>

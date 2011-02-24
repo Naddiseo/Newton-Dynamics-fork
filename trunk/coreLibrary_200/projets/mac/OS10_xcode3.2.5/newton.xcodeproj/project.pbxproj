@@ -163,7 +163,7 @@
 
 /* Begin PBXFileReference section */
 		AA747D9E0F9514B9006C5449 /* newton_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = newton_Prefix.pch; sourceTree = SOURCE_ROOT; };
-		D2AAC07E0554694100DB518D /* libnewton_d.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libnewton_d.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2AAC07E0554694100DB518D /* libnewton.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libnewton.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF0AEC391310AB5D00876ACF /* dg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dg.cpp; path = ../../../source/core/dg.cpp; sourceTree = SOURCE_ROOT; };
 		FF0AEC3A1310AB5D00876ACF /* dg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dg.h; path = ../../../source/core/dg.h; sourceTree = SOURCE_ROOT; };
 		FF0AEC3B1310AB5D00876ACF /* dgAABBPolygonSoup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dgAABBPolygonSoup.cpp; path = ../../../source/core/dgAABBPolygonSoup.cpp; sourceTree = SOURCE_ROOT; };
@@ -331,7 +331,7 @@
 		034768DFFF38A50411DB9C8B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D2AAC07E0554694100DB518D /* libnewton_d.a */,
+				D2AAC07E0554694100DB518D /* libnewton.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -638,7 +638,7 @@
 			);
 			name = newton;
 			productName = newton;
-			productReference = D2AAC07E0554694100DB518D /* libnewton_d.a */;
+			productReference = D2AAC07E0554694100DB518D /* libnewton.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -648,7 +648,6 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB922208733DC00010E9CD /* Build configuration list for PBXProject "newton" */;
 			compatibilityVersion = "Xcode 3.1";
-			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
@@ -768,7 +767,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PRODUCT_NAME = newton_d;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.5;
 			};
 			name = Debug;
 		};
@@ -790,7 +789,7 @@
 				INSTALL_PATH = /usr/local/lib;
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				PRODUCT_NAME = newton;
-				SDKROOT = macosx;
+				SDKROOT = macosx10.5;
 			};
 			name = Release;
 		};

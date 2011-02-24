@@ -278,9 +278,8 @@
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>19</integer>
-									<integer>1</integer>
-									<integer>0</integer>
+									<integer>22</integer>
+									<integer>21</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
@@ -319,7 +318,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>dContainers_Prefix.pch</string>
+								<string>dThread.cpp</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -327,21 +326,22 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>dContainers_Prefix.pch</string>
+										<string>dThread.cpp</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>FF0AADF91313FFD6005D32D5</string>
+										<string>FF99316F13167CAC00D1C65B</string>
 										<key>history</key>
 										<array>
-											<string>FF0AAD791313FB1E005D32D5</string>
 											<string>FF0AAD7A1313FB1E005D32D5</string>
-											<string>FF0AADB71313FBE1005D32D5</string>
+											<string>FF0AAE40131406D6005D32D5</string>
+											<string>FF0AAE42131406D6005D32D5</string>
 										</array>
 										<key>prevStack</key>
 										<array>
 											<string>FF0AAD7C1313FB1E005D32D5</string>
 											<string>FF0AAD7D1313FB1E005D32D5</string>
+											<string>FF0AAE41131406D6005D32D5</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -399,9 +399,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>FF0AADFA1313FFD6005D32D5</string>
+				<string>FF99317013167CAC00D1C65B</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>FF0AADFB1313FFD6005D32D5</string>
+				<string>FF99317113167CAC00D1C65B</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -535,6 +535,7 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
+		<string>FF99317313167CAC00D1C65B</string>
 		<string>FF8C268F1313D37800646B90</string>
 		<string>/Users/juliojerez/Desktop/newton-dynamics/packages/projects/mac/dContainers/dContainers.xcodeproj</string>
 	</array>
@@ -616,7 +617,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>FF8C268F1313D37800646B90</string>
-				<string>FF0AADFC1313FFD6005D32D5</string>
+				<string>FF99317213167CAC00D1C65B</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
