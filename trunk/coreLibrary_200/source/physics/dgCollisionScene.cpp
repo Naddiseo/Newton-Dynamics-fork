@@ -27,6 +27,7 @@
 #include "dgCollisionScene.h"
 #include "dgCollisionNull.h"
 
+#define DG_SCENE_MAX_STACK_DEPTH  128
 #define DG_SCENE_AABB_SCALE		dgFloat32 (4.0f)
 #define DG_SCENE_AABB_INV_SCALE	(dgFloat32 (1.0f) / DG_SCENE_AABB_SCALE)
 
@@ -385,84 +386,6 @@ bool dgCollisionScene::OOBBTest (const dgMatrix& matrix, const dgCollisionConvex
 	return true;
 }
 
-
-
-dgFloat32 dgCollisionScene::RayCastSimd (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
-{
-_ASSERTE (0);
-return 0;
-/*
-	dgInt32 stack;
-	dgFloat32 maxParam;
-	dgContactPoint tmpContactOut;
-	const dgNode *stackPool[64];
-
-	if (!m_rootNode) {
-		return dgFloat32 (1.2f);
-	}
-
-	
-	
-	stack = 1;
-	stackPool[0] = m_rootNode;
-	maxParam = dgFloat32 (1.2f);
-
-	FastRayTest ray (localP0, localP1);
-	while (stack) {
-		const dgNode *me;
-
-		stack --;
-		me = stackPool[stack];
-		if (ray.BoxTestSimd (me->m_p0, me->m_p1)) {
-			if (me->m_leftIsProxy) {
-				const dgProxy& proxy = me->m_leftProxi->GetInfo();
-				if (ray.BoxTestSimd (proxy.m_boxP0, proxy.m_boxP1)) {
-					dgFloat32 param;
-					dgVector l0 (proxy.m_matrix.UntransformVector (localP0));
-					dgVector l1 (proxy.m_matrix.UntransformVector (localP1));
-					param = proxy.m_shape->RayCastSimd (l0, l1, tmpContactOut, preFilter, body, userData);
-					_ASSERTE (param >= dgFloat32 (0.0f));
-					if (param < maxParam) {
-						contactOut.m_normal = proxy.m_matrix.RotateVector(tmpContactOut.m_normal);
-						maxParam = param;
-						ray.Reset (maxParam) ;
-					}
-				}
-			} else {
-				_ASSERTE (me->m_leftIsProxy == false);
-				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-				stackPool[stack] = me->m_leftNode;
-				stack++;
-			}
-
-			if (me->m_rightIsProxy) {
-				const dgProxy& proxy = me->m_rightProxi->GetInfo();
-				if (ray.BoxTestSimd (proxy.m_boxP0, proxy.m_boxP1)) {
-					dgFloat32 param;
-					dgVector l0 (proxy.m_matrix.UntransformVector (localP0));
-					dgVector l1 (proxy.m_matrix.UntransformVector (localP1));
-					param = proxy.m_shape->RayCastSimd (l0, l1, tmpContactOut, preFilter, body, userData);
-					_ASSERTE (param >= dgFloat32 (0.0f));
-					if (param < maxParam) {
-						contactOut.m_normal = proxy.m_matrix.RotateVector(tmpContactOut.m_normal);
-						maxParam = param;
-						ray.Reset (maxParam) ;
-					}
-				}
-
-			} else {
-				_ASSERTE (me->m_rightIsProxy == false);
-				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-				stackPool[stack] = me->m_rightNode;
-				stack++;
-			}
-		}
-	}
-	return maxParam;
-*/
-}
-
-
 dgVector dgCollisionScene::SupportVertex (const dgVector& dir) const
 {
 	_ASSERTE (0);
@@ -471,76 +394,105 @@ dgVector dgCollisionScene::SupportVertex (const dgVector& dir) const
 
 
 
-dgFloat32 dgCollisionScene::RayCast (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
+dgFloat32 dgCollisionScene::RayCastSimd (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
 {
-	_ASSERTE (0);
-	return 0;
-/*
-	dgInt32 stack;
-	dgFloat32 maxParam;
-	dgContactPoint tmpContactOut;
-	const dgNode *stackPool[64];
-
+	const dgNode *stackPool[DG_SCENE_MAX_STACK_DEPTH];
 	if (!m_rootNode) {
 		return dgFloat32 (1.2f);
 	}
 
-	stack = 1;
+	dgInt32 stack = 1;
 	stackPool[0] = m_rootNode;
-	maxParam = dgFloat32 (1.2f);
+	dgFloat32 maxParam = dgFloat32 (1.2f);
 
+	int xxx = 0;
 	FastRayTest ray (localP0, localP1);
 	while (stack) {
-		const dgNode *me;
 		stack --;
-		me = stackPool[stack];
-		if (ray.BoxTest (me->m_p0, me->m_p1)) {
-			if (me->m_leftIsProxy) {
-				const dgProxy& proxy = me->m_leftProxi->GetInfo();
-				if (ray.BoxTest (proxy.m_boxP0, proxy.m_boxP1)) {
-					dgFloat32 param;
-					dgVector l0 (proxy.m_matrix.UntransformVector (localP0));
-					dgVector l1 (proxy.m_matrix.UntransformVector (localP1));
-					param = proxy.m_shape->RayCast (l0, l1, tmpContactOut, preFilter, body, userData);
-					_ASSERTE (param >= dgFloat32 (0.0f));
-					if (param < maxParam) {
-						contactOut.m_normal = proxy.m_matrix.RotateVector(tmpContactOut.m_normal);
-						maxParam = param;
-						ray.Reset (maxParam);
-					}
+		const dgNode* const me = stackPool[stack];
+
+		xxx ++;
+		if (ray.BoxTestSimd (me->m_minBox, me->m_maxBox)) {
+			if (!me->m_left) {
+				_ASSERTE (!me->m_right);
+				dgContactPoint tmpContactOut;
+				const dgProxy* const proxy = (dgProxy*) me;
+				dgVector l0 (proxy->m_matrix.UntransformVector (localP0));
+				dgVector l1 (proxy->m_matrix.UntransformVector (localP1));
+				dgFloat32 param = proxy->m_shape->RayCastSimd (l0, l1, tmpContactOut, preFilter, body, userData);
+				_ASSERTE (param >= dgFloat32 (0.0f));
+				if (param < maxParam) {
+					contactOut.m_normal = proxy->m_matrix.RotateVectorSimd(tmpContactOut.m_normal);
+					maxParam = param;
+					ray.Reset (maxParam);
 				}
 			} else {
-				_ASSERTE (me->m_leftNode);
+				_ASSERTE (me->m_left);
 				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-				stackPool[stack] = me->m_leftNode;
+				stackPool[stack] = me->m_left;
 				stack++;
-			}
 
-			if (me->m_rightIsProxy) {
-				const dgProxy& proxy = me->m_rightProxi->GetInfo();
-				if (ray.BoxTest (proxy.m_boxP0, proxy.m_boxP1)) {
-					dgFloat32 param;
-					dgVector l0 (proxy.m_matrix.UntransformVector (localP0));
-					dgVector l1 (proxy.m_matrix.UntransformVector (localP1));
-					param = proxy.m_shape->RayCast (l0, l1, tmpContactOut, preFilter, body, userData);
-					_ASSERTE (param >= dgFloat32 (0.0f));
-					if (param < maxParam) {
-						contactOut.m_normal = proxy.m_matrix.RotateVector(tmpContactOut.m_normal);
-						maxParam = param;
-						ray.Reset (maxParam) ;
-					}
-				}
-
-			} else {
-				_ASSERTE (me->m_rightNode);
+				_ASSERTE (me->m_right);
 				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-				stackPool[stack] = me->m_rightNode;
+				stackPool[stack] = me->m_right;
 				stack++;
 			}
 		}
 	}
 	return maxParam;
-*/
+
+}
+
+
+
+
+dgFloat32 dgCollisionScene::RayCast (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
+{
+	const dgNode *stackPool[DG_SCENE_MAX_STACK_DEPTH];
+
+	if (!m_rootNode) {
+		return dgFloat32 (1.2f);
+	}
+
+	dgInt32 stack = 1;
+	stackPool[0] = m_rootNode;
+	dgFloat32 maxParam = dgFloat32 (1.2f);
+
+int xxx = 0;
+	FastRayTest ray (localP0, localP1);
+	while (stack) {
+		stack --;
+		const dgNode* const me = stackPool[stack];
+
+xxx ++;
+		if (ray.BoxTest (me->m_minBox, me->m_maxBox)) {
+			if (!me->m_left) {
+				_ASSERTE (!me->m_right);
+				dgContactPoint tmpContactOut;
+				const dgProxy* const proxy = (dgProxy*) me;
+				dgVector l0 (proxy->m_matrix.UntransformVector (localP0));
+				dgVector l1 (proxy->m_matrix.UntransformVector (localP1));
+				dgFloat32 param = proxy->m_shape->RayCast (l0, l1, tmpContactOut, preFilter, body, userData);
+				_ASSERTE (param >= dgFloat32 (0.0f));
+				if (param < maxParam) {
+					contactOut.m_normal = proxy->m_matrix.RotateVector(tmpContactOut.m_normal);
+					maxParam = param;
+					ray.Reset (maxParam);
+				}
+			} else {
+				_ASSERTE (me->m_left);
+				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
+				stackPool[stack] = me->m_left;
+				stack++;
+
+				_ASSERTE (me->m_right);
+				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
+				stackPool[stack] = me->m_right;
+				stack++;
+			}
+		}
+	}
+	return maxParam;
 }
 
 void dgCollisionScene::CollidePairSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
@@ -549,7 +501,7 @@ _ASSERTE (0);
 /*
 	dgInt32 stack;
 	dgWorld* world;
-	const dgNode *stackPool[64];
+	const dgNode *stackPool[DG_SCENE_MAX_STACK_DEPTH];
 
 	_ASSERTE (pair->m_body1->GetCollision() == this);
 	_ASSERTE (pair->m_body1->GetCollision()->IsType(dgCollision::dgCollisionScene_RTTI));
@@ -626,7 +578,7 @@ _ASSERTE (0);
 /*
 	dgInt32 stack;
 	dgWorld* world;
-	const dgNode *stackPool[64];
+	const dgNode *stackPool[DG_SCENE_MAX_STACK_DEPTH];
 
 	_ASSERTE (pair->m_body1->GetCollision() == this);
 	_ASSERTE (pair->m_body1->GetCollision()->IsType(dgCollision::dgCollisionScene_RTTI));

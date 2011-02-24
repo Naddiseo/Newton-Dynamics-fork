@@ -53,7 +53,7 @@ void ShowBodyContacts (const NewtonBody* body);
 void ShowJointInfo(const NewtonCustomJoint* joint);
 
 void ConvexCastPlacement (NewtonBody* body);
-dFloat FindFloor (const NewtonWorld* world, dFloat x, dFloat z);
+
 
 //void CalculateAABB (const NewtonBody* body, dVector& minP, dVector& maxP);
 void CalculateAABB (const NewtonCollision* collision, const dMatrix& matrix, dVector& minP, dVector& maxP);
@@ -66,8 +66,8 @@ void PhysicsSetTransform (const NewtonBody* body, const dFloat* matrix, int thre
 int  PhysicsIslandUpdate (const NewtonWorld* world, const void* islandHandle, int bodyCount);
 
 
-NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& offsetMatrix, const dVector& size, PrimitiveType type, int materialID);
-NewtonBody* CreateSimpleSolid (NewtonWorld* world, SceneManager* scene, OGLMesh* mesh, dFloat mass, const dMatrix& matrix, NewtonCollision* collision, int materialId);
+
+
 
 NewtonBody* CreateGenericSolid (NewtonWorld* world, SceneManager* scene, const char* meshName, dFloat mass, const dMatrix& matrix, const dVector& size, PrimitiveType type, int materialID);
 
@@ -83,6 +83,8 @@ NewtonMesh* CreateCollisionTreeDoubleFaces (NewtonWorld* world, NewtonCollision*
 
 #endif
 
+dFloat FindFloor (const NewtonWorld* world, dFloat x, dFloat z);
+
 dFloat RandomVariable(dFloat amp);
 
 void PhysicsBodyDestructor (const NewtonBody* body);
@@ -91,4 +93,6 @@ void PhysicsApplyGravityForce (const NewtonBody* body, dFloat timestep, int thre
 void ShowJointContacts (const NewtonJoint* contactJoint);
 void GenericContactProcess (const NewtonJoint* contactJoint, dFloat timestep, int threadIndex);
 
+NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& offsetMatrix, const dVector& size, PrimitiveType type, int materialID);
+NewtonBody* CreateSimpleSolid (DemoEntityManager* const scene, DemoMesh* const mesh, dFloat mass, const dMatrix& matrix, NewtonCollision* const collision, int materialId);
 void AddPrimitiveArray (DemoEntityManager* const scene, dFloat mass, const dVector& origin, const dVector& size, int xCount, int zCount, dFloat spacing, PrimitiveType type, int materialID);

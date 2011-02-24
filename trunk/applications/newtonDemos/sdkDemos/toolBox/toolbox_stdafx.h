@@ -44,7 +44,7 @@ typedef long long unsigned64;
 #include <float.h>
 #include <ctype.h>
 
-#define USE_TEST_SERIALIZATION
+//#define USE_TEST_SERIALIZATION
 //#define USE_STATIC_MESHES_DEBUG_COLLISION
 //#define USE_TEST_ALL_FACE_USER_RAYCAST_CALLBACK
 

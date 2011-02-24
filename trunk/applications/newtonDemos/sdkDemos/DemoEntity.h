@@ -36,6 +36,10 @@ public:
 
 	void InterpolateMatrix (DemoEntityManager& world, dFloat param);
 
+	static void SetTransformCallback(const NewtonBody* body, const dFloat* matrix, int threadIndex);
+	//static void PhysicsApplyGravityForce (const NewtonBody* body, dFloat timestep, int threadIndex);
+	//static void PhysicsBodyDestructor (const NewtonBody* body);
+
 	protected:
 	mutable dMatrix m_matrix;			// interpolated matrix
 	dVector m_curPosition;				// position one physics simulation step in the future
@@ -45,10 +49,6 @@ public:
 	unsigned m_lock;
 
 	DemoMesh* m_mesh;
-
-	static void SetTransformCallback(const NewtonBody* body, const dFloat* matrix, int threadIndex);
-	//static void PhysicsApplyGravityForce (const NewtonBody* body, dFloat timestep, int threadIndex);
-	//static void PhysicsBodyDestructor (const NewtonBody* body);
 
 	dAddRtti(dClassInfo);
 

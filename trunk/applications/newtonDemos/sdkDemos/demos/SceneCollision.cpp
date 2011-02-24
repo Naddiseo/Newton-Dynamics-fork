@@ -263,7 +263,7 @@ void SceneCollision (DemoEntityManager* const scene)
 	visualMesh->AddCollisionTreeMesh(scene);
 
 	// add some shapes
-	visualMesh->AddPrimitives(scene);
+//	visualMesh->AddPrimitives(scene);
 
 	// this is optional, finish the scene construction, optimize the collision scene
 	NewtonSceneCollisionOptimize (sceneCollision);
@@ -351,7 +351,6 @@ void SceneCollision (DemoEntityManager* const scene)
 
 	// add few objects
 	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (world);
-//	AddPrimitiveArray (scene, dFloat mass, const dVector& origin, const dVector& size, int xCount, int zCount, dFloat spacing, PrimitiveType type, int materialID)
 	dVector location (0.0f, 0.0f, 0.0f, 0.0f);
 	dVector size (1.0f, 1.0f, 1.0f, 0.0f);
 	AddPrimitiveArray(scene, 10.0f, location, size, 1, 1, 1.0f, _BOX_PRIMITIVE, defaultMaterialID);

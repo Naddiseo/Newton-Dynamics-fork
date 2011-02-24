@@ -10,11 +10,66 @@
 */
 
 #include <toolbox_stdafx.h>
+#include "DemoMesh.h"
+#include "DemoEntity.h"
 #include "PhysicsUtils.h"
+#include "DemoEntityManager.h"
 #include "toolBox/OpenGlUtil.h"
 #include "toolBox/DebugDisplay.h"
 
 static int showContacts;
+
+
+#ifdef USE_TEST_SERIALIZATION
+//static char* MAGIC_NUMBER = "serialize data";
+static void SerializeFile (void* serializeHandle, const void* buffer, int size)
+{
+	fwrite (buffer, size, 1, (FILE*) serializeHandle);
+}
+
+static void DeSerializeFile (void* serializeHandle, void* buffer, int size)
+{
+	fread (buffer, size, 1, (FILE*) serializeHandle);
+}
+#endif
+
+
+static dFloat RayCastPlacement (const NewtonBody* body, const dFloat* normal, int collisionID, void* userData, dFloat intersetParam)
+{
+	dFloat* paramPtr;
+	paramPtr = (dFloat*)userData;
+	if (intersetParam < paramPtr[0]) {
+		paramPtr[0] = intersetParam;
+	}
+	return paramPtr[0];
+}
+
+
+dFloat FindFloor (const NewtonWorld* world, dFloat x, dFloat z)
+{
+	dFloat parameter;
+
+	//parameter = 1.2f;
+	//float q0[] = {8.07129, -1.66341 - 1.5, 0};
+	//float q1[] = {8.04629, -3.1684  - 1.5, 0};
+	//NewtonWorldRayCast(world, q0, q1, RayCastPlacement, &parameter, NULL);
+
+
+
+	// shot a vertical ray from a high altitude and collect the intersection parameter.
+	dVector p0 (x, 1000.0f, z); 
+	dVector p1 (x, -1000.0f, z); 
+
+	parameter = 1.2f;
+	NewtonWorldRayCast (world, &p0[0], &p1[0], RayCastPlacement, &parameter, NULL);
+	//_ASSERTE (parameter < 1.0f);
+
+	// the intersection is the interpolated value
+	return 1000.0f - 2000.0f * parameter;
+	//return 0.0f;
+}
+
+
 
 #if 0
 #include "SceneManager.h"
@@ -39,27 +94,6 @@ dVector cameraEyepoint (-40.0f, 10.0f, 0.0f, 0.0f);
 static int showIslans;
 
 
-
-//#define USE_TEST_SERIALIZATION
-
-#ifdef USE_TEST_SERIALIZATION
-//static char* MAGIC_NUMBER = "serialize data";
-static void SerializeFile (void* serializeHandle, const void* buffer, int size)
-{
-	fwrite (buffer, size, 1, (FILE*) serializeHandle);
-}
-
-static void DeSerializeFile (void* serializeHandle, void* buffer, int size)
-{
-	fread (buffer, size, 1, (FILE*) serializeHandle);
-}
-#endif
-
-
-
-
-
-
 static unsigned ConvexCastCallback (const NewtonBody* body, const NewtonCollision* collision, void* userData)
 {
 	NewtonBody* me = (NewtonBody*) userData;
@@ -67,40 +101,7 @@ static unsigned ConvexCastCallback (const NewtonBody* body, const NewtonCollisio
 }
 
 
-static dFloat RayCastPlacement (const NewtonBody* body, const dFloat* normal, int collisionID, void* userData, dFloat intersetParam)
-{
-	dFloat* paramPtr;
-	paramPtr = (dFloat*)userData;
-	if (intersetParam < paramPtr[0]) {
-		paramPtr[0] = intersetParam;
-	}
-	return paramPtr[0];
-}
 
-
-dFloat FindFloor (const NewtonWorld* world, dFloat x, dFloat z)
-{
-	dFloat parameter;
-
-//parameter = 1.2f;
-//float q0[] = {8.07129, -1.66341 - 1.5, 0};
-//float q1[] = {8.04629, -3.1684  - 1.5, 0};
-//NewtonWorldRayCast(world, q0, q1, RayCastPlacement, &parameter, NULL);
-
-
-
-	// shot a vertical ray from a high altitude and collect the intersection parameter.
-	dVector p0 (x, 1000.0f, z); 
-	dVector p1 (x, -1000.0f, z); 
-
-	parameter = 1.2f;
-	NewtonWorldRayCast (world, &p0[0], &p1[0], RayCastPlacement, &parameter, NULL);
-	//_ASSERTE (parameter < 1.0f);
-
-	// the intersection is the interpolated value
-	return 1000.0f - 2000.0f * parameter;
-//return 0.0f;
-}
 
 
 void ConvexCastPlacement (NewtonBody* body)
@@ -320,254 +321,8 @@ int PhysicsIslandUpdate (const NewtonWorld* world, const void* islandHandle, int
 }
 
 
-NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& srcMatrix, const dVector& originalSize, PrimitiveType type, int materialID)
-{
-	dMatrix matrix (srcMatrix);
-	matrix.m_front = matrix.m_front.Scale (1.0f / dSqrt (matrix.m_front % matrix.m_front));
-	matrix.m_right = matrix.m_front * matrix.m_up;
-	matrix.m_right = matrix.m_right.Scale (1.0f / dSqrt (matrix.m_right % matrix.m_right));
-	matrix.m_up = matrix.m_right * matrix.m_front;
-
-	dVector size (originalSize);
-
-	NewtonCollision* collision = NULL;
-
-	#define STEPS_HULL 16
-	#define SAMPLE_COUNT 5000
-	dVector cloud [SAMPLE_COUNT];
-
-	switch (type) 
-	{
-		case _SPHERE_PRIMITIVE:
-		{
-			// create the collision 
-			collision = NewtonCreateSphere (world, size.m_x * 0.5f, size.m_y * 0.5f, size.m_z * 0.5f, 0, NULL); 
-			break;
-		}
-
-		case _BOX_PRIMITIVE:
-		{
-			// create the collision 
-			collision = NewtonCreateBox (world, size.m_x, size.m_y, size.m_z, 0, NULL); 
-			break;
-		}
 
 
-		case _CONE_PRIMITIVE:
-		{
-			dFloat h = size.m_x;
-			dFloat r = size.m_y;
-
-			// create the collision 
-			collision = NewtonCreateCone (world, r, h, 0, NULL); 
-			break;
-		}
-
-		case _CYLINDER_PRIMITIVE:
-		{
-			// create the collision 
-			collision = NewtonCreateCylinder (world, size.m_y, size.m_x, 0, NULL); 
-			break;
-		}
-
-
-		case _CAPSULE_PRIMITIVE:
-		{
-			// create the collision 
-			collision = NewtonCreateCapsule (world, size.m_y, size.m_x, 0, NULL); 
-
-//NewtonCollision* collision1;
-//collision1 = NewtonCreateCapsule (world, size.m_y, size.m_x, NULL); 
-//collision = NewtonCreateConvexHullModifier( world, collision1 );
-//float my_matrix[16] = { 1,0,0,0,
-//						0,1,0,0,
-//						0,0,1,0,
-//						0,0,0,1 };
-//NewtonConvexHullModifierSetMatrix( collision, my_matrix );
-//NewtonReleaseCollision (world, collision1);
-			break;
-		}
-
-		case _CHAMFER_CYLINDER_PRIMITIVE:
-		{
-			// create the collision 
-			collision = NewtonCreateChamferCylinder (world, size.m_x, size.m_y, 0, NULL); 
-			break;
-		}
-
-		case _RANDOM_CONVEX_HULL_PRIMITIVE:
-		{
-			int i;			
-			int count;
-			// Create a clouds of random point around the origin
-
-			// make sure that at least the top and bottom are present
-			cloud [0] = dVector ( size.m_x * 0.5f, -0.3f,  0.0f);
-			cloud [1] = dVector ( size.m_x * 0.5f,  0.3f,  0.3f);
-			cloud [2] = dVector ( size.m_x * 0.5f,  0.3f, -0.3f);
-			cloud [3] = dVector (-size.m_x * 0.5f, -0.3f,  0.0f);
-			cloud [4] = dVector (-size.m_x * 0.5f,  0.3f,  0.3f);
-			cloud [5] = dVector (-size.m_x * 0.5f,  0.3f, -0.3f);
-			count = 5;
-
-			// populate the cloud with pseudo Gaussian random points
-			for (i = 6; i < SAMPLE_COUNT; i ++) {
-				cloud [i].m_x = RandomVariable(size.m_x);
-				cloud [i].m_y = RandomVariable(size.m_y * 2.0f);
-				cloud [i].m_z = RandomVariable(size.m_z * 2.0f);
-				count ++;
-			}
-			
-			collision = NewtonCreateConvexHull (world, count, &cloud[0].m_x, sizeof (dVector), 0.01f, 0, NULL); 
-			break;
-		}
-
-		case _REGULAR_CONVEX_HULL_PRIMITIVE:
-		{
-			int i;			
-			int count;
-			// Create a clouds of random point around the origin
-
-			dInt32 j;
-			dFloat x;
-			dFloat height;
-			dFloat radius;
-
-			count = 0;
-			radius = size.m_y;
-			height = size.m_x * 0.999f;
-			x = - height * 0.5f;
-			dMatrix rotation (dPitchMatrix(2.0f * 3.141592f / STEPS_HULL));
-			for (i = 0; i < 4; i ++) {
-				dFloat pad;
-				pad = ((i == 1) || (i == 2)) * 0.25f * radius;
-				dVector p (x, 0.0f, radius + pad);
-				x += 0.3333f * height;
-				dMatrix acc (GetIdentityMatrix());
-				for (j = 0; j < STEPS_HULL; j ++) {
-					cloud[count] = acc.RotateVector(p);
-					acc = acc * rotation;
-					count ++;
-				}
-			}
-
-			collision = NewtonCreateConvexHull (world, count, &cloud[0].m_x, sizeof (dVector), 0.02f, 0, NULL); 
-			break;
-		}
-
-		default: _ASSERTE (0);
-	}
-
-#ifdef USE_TEST_SERIALIZATION
-		FILE* file;
-		char fullPathName[2048];
-
-		// save the collision file
-		GetWorkingFileName ("collisiontest.bin", fullPathName);
-
-		file = fopen (fullPathName, "wb");
-//		SerializeFile (file, MAGIC_NUMBER, strlen (MAGIC_NUMBER) + 1);
-		NewtonCollisionSerialize (world, collision, SerializeFile, file);
-		fclose (file);
-
-		// load the collision file
-		NewtonReleaseCollision (world, collision);
-
-		file = fopen (fullPathName, "rb");
-
-//		DeSerializeFile (file, magicNumber, strlen (MAGIC_NUMBER) + 1);
-
-		collision = NewtonCreateCollisionFromSerialization (world, DeSerializeFile, file);
-
-		fclose (file);
-		NewtonCollisionInfoRecord collisionInfo;
-		NewtonCollisionGetInfo (collision, &collisionInfo);
-
-#endif
-	return collision;
-}
-
-
-NewtonBody* CreateSimpleSolid (NewtonWorld* world, SceneManager* scene, OGLMesh* mesh, dFloat mass, const dMatrix& matrix, NewtonCollision* collision, int materialId)
-{
-_ASSERTE (0);
-return NULL;
-/*
-	dFloat Ixx;
-	dFloat Iyy;
-	dFloat Izz;
-	dFloat volume;
-	NewtonBody* rigidBody;
-	RenderPrimitive* primitive;
-	dVector origin;
-	dVector inertia;
-
-	_ASSERTE (collision);
-	_ASSERTE (mesh);
-
-	// create a visual geometry
-	primitive = new RenderPrimitive (matrix, mesh);
-	scene->AddModel___ (primitive);
-	primitive->Release();
-
-	// create a visual effect for fracture
-	primitive->CreateVisualEffect (world);
-
-	// save the collision volume, (this si all tweaked by trial and error heuristic)
-	#define CONTROL_VOLUME 0.1f
-	dFloat randomizeDnsdity = 1.0f + ((RandomVariable(0.4f) + RandomVariable(0.4f)) - 0.1f);
-	volume = 0.5f * NewtonConvexCollisionCalculateVolume (collision);
-	primitive->m_density =  randomizeDnsdity * mass / volume;
-//	primitive->m_controlVolume = NewtonConvexCollisionCalculateVolume (collision) * (CONTROL_VOLUME * CONTROL_VOLUME * CONTROL_VOLUME);
-
-	// calculate the moment of inertia and the relative center of mass of the solid
-	NewtonConvexCollisionCalculateInertialMatrix (collision, &inertia[0], &origin[0]);	
-	Ixx = mass * inertia[0];
-	Iyy = mass * inertia[1];
-	Izz = mass * inertia[2];
-
-	//create the rigid body
-	rigidBody = NewtonCreateBody (world, collision);
-
-	// set the correct center of gravity for this body
-	NewtonBodySetCentreOfMass (rigidBody, &origin[0]);
-
-	// set the mass matrix
-	NewtonBodySetMassMatrix (rigidBody, mass, Ixx, Iyy, Izz);
-
-	// activate 
-	//	NewtonBodyCoriolisForcesMode (blockBoxBody, 1);
-
-	// save the pointer to the graphic object with the body.
-	NewtonBodySetUserData (rigidBody, primitive);
-
-	// assign the wood id
-	NewtonBodySetMaterialGroupID (rigidBody, materialId);
-
-	//  set continue collision mode
-	//	NewtonBodySetContinuousCollisionMode (rigidBody, continueCollisionMode);
-
-	// set a destructor for this rigid body
-	NewtonBodySetDestructorCallback (rigidBody, PhysicsBodyDestructor);
-
-	// set the transform call back function
-	NewtonBodySetTransformCallback (rigidBody, PhysicsSetTransform);
-
-	// set the force and torque call back function
-	NewtonBodySetForceAndTorqueCallback (rigidBody, PhysicsApplyGravityForce);
-
-	// set the matrix for both the rigid body and the graphic body
-	NewtonBodySetMatrix (rigidBody, &matrix[0][0]);
-	PhysicsSetTransform (rigidBody, &matrix[0][0], 0);
-
-	//dVector xxx (0, -9.8f * mass, 0.0f, 0.0f);
-	//NewtonBodySetForce (rigidBody, &xxx[0]);
-
-	// force the body to be active of inactive
-	//	NewtonBodySetAutoSleep (rigidBody, sleepMode);
-	return rigidBody;
-*/
-}
 
 NewtonBody* CreateGenericSolid (NewtonWorld* world, SceneManager* scene, const char* meshName, dFloat mass, const dMatrix& matrix, const dVector& size, PrimitiveType type, int materialID)
 {
@@ -1067,41 +822,271 @@ void GenericContactProcess (const NewtonJoint* contactJoint, dFloat timestep, in
 
 
 
-//void AddPrimitiveArray (SceneManager* system, dFloat mass, const dVector& origin, const dVector& oriSize, int xCount, int zCount, dFloat spacing, PrimitiveType type, int materialID)
-void AddPrimitiveArray (DemoEntityManager* const scene, dFloat mass, const dVector& origin, const dVector& size, int xCount, int zCount, dFloat spacing, PrimitiveType type, int materialID)
+NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& srcMatrix, const dVector& originalSize, PrimitiveType type, int materialID)
 {
+	dMatrix matrix (srcMatrix);
+	matrix.m_front = matrix.m_front.Scale (1.0f / dSqrt (matrix.m_front % matrix.m_front));
+	matrix.m_right = matrix.m_front * matrix.m_up;
+	matrix.m_right = matrix.m_right.Scale (1.0f / dSqrt (matrix.m_right % matrix.m_right));
+	matrix.m_up = matrix.m_right * matrix.m_front;
+
+	dVector size (originalSize);
+
+	NewtonCollision* collision = NULL;
+
+	#define STEPS_HULL 16
+	#define SAMPLE_COUNT 5000
+	dVector cloud [SAMPLE_COUNT];
+
+	switch (type) 
+	{
+		case _SPHERE_PRIMITIVE:
+		{
+			// create the collision 
+			collision = NewtonCreateSphere (world, size.m_x * 0.5f, size.m_y * 0.5f, size.m_z * 0.5f, 0, NULL); 
+			break;
+		}
+
+		case _BOX_PRIMITIVE:
+		{
+			// create the collision 
+			collision = NewtonCreateBox (world, size.m_x, size.m_y, size.m_z, 0, NULL); 
+			break;
+		}
+
+
+		case _CONE_PRIMITIVE:
+		{
+			dFloat h = size.m_x;
+			dFloat r = size.m_y;
+
+			// create the collision 
+			collision = NewtonCreateCone (world, r, h, 0, NULL); 
+			break;
+		}
+
+		case _CYLINDER_PRIMITIVE:
+		{
+			// create the collision 
+			collision = NewtonCreateCylinder (world, size.m_y, size.m_x, 0, NULL); 
+			break;
+		}
+
+
+		case _CAPSULE_PRIMITIVE:
+		{
+			// create the collision 
+			collision = NewtonCreateCapsule (world, size.m_y, size.m_x, 0, NULL); 
+
+			//NewtonCollision* collision1;
+			//collision1 = NewtonCreateCapsule (world, size.m_y, size.m_x, NULL); 
+			//collision = NewtonCreateConvexHullModifier( world, collision1 );
+			//float my_matrix[16] = { 1,0,0,0,
+			//						0,1,0,0,
+			//						0,0,1,0,
+			//						0,0,0,1 };
+			//NewtonConvexHullModifierSetMatrix( collision, my_matrix );
+			//NewtonReleaseCollision (world, collision1);
+			break;
+		}
+
+		case _CHAMFER_CYLINDER_PRIMITIVE:
+		{
+			// create the collision 
+			collision = NewtonCreateChamferCylinder (world, size.m_x, size.m_y, 0, NULL); 
+			break;
+		}
+
+		case _RANDOM_CONVEX_HULL_PRIMITIVE:
+		{
+			int i;			
+			int count;
+			// Create a clouds of random point around the origin
+
+			// make sure that at least the top and bottom are present
+			cloud [0] = dVector ( size.m_x * 0.5f, -0.3f,  0.0f);
+			cloud [1] = dVector ( size.m_x * 0.5f,  0.3f,  0.3f);
+			cloud [2] = dVector ( size.m_x * 0.5f,  0.3f, -0.3f);
+			cloud [3] = dVector (-size.m_x * 0.5f, -0.3f,  0.0f);
+			cloud [4] = dVector (-size.m_x * 0.5f,  0.3f,  0.3f);
+			cloud [5] = dVector (-size.m_x * 0.5f,  0.3f, -0.3f);
+			count = 5;
+
+			// populate the cloud with pseudo Gaussian random points
+			for (i = 6; i < SAMPLE_COUNT; i ++) {
+				cloud [i].m_x = RandomVariable(size.m_x);
+				cloud [i].m_y = RandomVariable(size.m_y * 2.0f);
+				cloud [i].m_z = RandomVariable(size.m_z * 2.0f);
+				count ++;
+			}
+
+			collision = NewtonCreateConvexHull (world, count, &cloud[0].m_x, sizeof (dVector), 0.01f, 0, NULL); 
+			break;
+		}
+
+		case _REGULAR_CONVEX_HULL_PRIMITIVE:
+		{
+			int i;			
+			int count;
+			// Create a clouds of random point around the origin
+
+			dInt32 j;
+			dFloat x;
+			dFloat height;
+			dFloat radius;
+
+			count = 0;
+			radius = size.m_y;
+			height = size.m_x * 0.999f;
+			x = - height * 0.5f;
+			dMatrix rotation (dPitchMatrix(2.0f * 3.141592f / STEPS_HULL));
+			for (i = 0; i < 4; i ++) {
+				dFloat pad;
+				pad = ((i == 1) || (i == 2)) * 0.25f * radius;
+				dVector p (x, 0.0f, radius + pad);
+				x += 0.3333f * height;
+				dMatrix acc (GetIdentityMatrix());
+				for (j = 0; j < STEPS_HULL; j ++) {
+					cloud[count] = acc.RotateVector(p);
+					acc = acc * rotation;
+					count ++;
+				}
+			}
+
+			collision = NewtonCreateConvexHull (world, count, &cloud[0].m_x, sizeof (dVector), 0.02f, 0, NULL); 
+			break;
+		}
+
+		default: _ASSERTE (0);
+	}
+
+#ifdef USE_TEST_SERIALIZATION
+	FILE* file;
+	char fullPathName[2048];
+
+	// save the collision file
+	GetWorkingFileName ("collisiontest.bin", fullPathName);
+
+	file = fopen (fullPathName, "wb");
+	//		SerializeFile (file, MAGIC_NUMBER, strlen (MAGIC_NUMBER) + 1);
+	NewtonCollisionSerialize (world, collision, SerializeFile, file);
+	fclose (file);
+
+	// load the collision file
+	NewtonReleaseCollision (world, collision);
+
+	file = fopen (fullPathName, "rb");
+
+	//		DeSerializeFile (file, magicNumber, strlen (MAGIC_NUMBER) + 1);
+
+	collision = NewtonCreateCollisionFromSerialization (world, DeSerializeFile, file);
+
+	fclose (file);
+	NewtonCollisionInfoRecord collisionInfo;
+	NewtonCollisionGetInfo (collision, &collisionInfo);
+
+#endif
+	return collision;
+}
+
+
+NewtonBody* CreateSimpleSolid (DemoEntityManager* const scene, DemoMesh* const mesh, dFloat mass, const dMatrix& matrix, NewtonCollision* const collision, int materialId)
+{
+	_ASSERTE (collision);
+	_ASSERTE (mesh);
+
+	// add an new entity to the world
+	DemoEntity* const entity = new DemoEntity(NULL);
+	scene->Append (entity);
+	entity->SetMesh(mesh);
 
 /*
+	// create a visual effect for fracture
+	primitive->CreateVisualEffect (world);
 
-	dVector size (oriSize);
+	// save the collision volume, (this si all tweaked by trial and error heuristic)
+	#define CONTROL_VOLUME 0.1f
+	dFloat randomizeDnsdity = 1.0f + ((RandomVariable(0.4f) + RandomVariable(0.4f)) - 0.1f);
+	dFloat volume = 0.5f * NewtonConvexCollisionCalculateVolume (collision);
+	primitive->m_density =  randomizeDnsdity * mass / volume;
+//	primitive->m_controlVolume = NewtonConvexCollisionCalculateVolume (collision) * (CONTROL_VOLUME * CONTROL_VOLUME * CONTROL_VOLUME);
+*/
+	// calculate the moment of inertia and the relative center of mass of the solid
+	dVector origin;
+	dVector inertia;
+	NewtonConvexCollisionCalculateInertialMatrix (collision, &inertia[0], &origin[0]);	
+
+	dFloat Ixx = mass * inertia[0];
+	dFloat Iyy = mass * inertia[1];
+	dFloat Izz = mass * inertia[2];
+
+	//create the rigid body
+	NewtonWorld* const world = scene->GetNewton();
+	NewtonBody* const rigidBody = NewtonCreateBody (world, collision, &matrix[0][0]);
+
+	// set the correct center of gravity for this body
+	NewtonBodySetCentreOfMass (rigidBody, &origin[0]);
+
+	// set the mass matrix
+	NewtonBodySetMassMatrix (rigidBody, mass, Ixx, Iyy, Izz);
+
+	// activate 
+	//	NewtonBodyCoriolisForcesMode (blockBoxBody, 1);
+
+	// save the pointer to the graphic object with the body.
+	NewtonBodySetUserData (rigidBody, entity);
+
+	// assign the wood id
+	NewtonBodySetMaterialGroupID (rigidBody, materialId);
+
+	//  set continue collision mode
+	//	NewtonBodySetContinuousCollisionMode (rigidBody, continueCollisionMode);
+
+	// set a destructor for this rigid body
+	NewtonBodySetDestructorCallback (rigidBody, PhysicsBodyDestructor);
+
+	// set the transform call back function
+	NewtonBodySetTransformCallback (rigidBody, DemoEntity::SetTransformCallback);
+
+	// set the force and torque call back function
+	NewtonBodySetForceAndTorqueCallback (rigidBody, PhysicsApplyGravityForce);
+
+	// set the matrix for both the rigid body and the graphic body
+	//NewtonBodySetMatrix (rigidBody, &matrix[0][0]);
+	//PhysicsSetTransform (rigidBody, &matrix[0][0], 0);
+
+	//dVector xxx (0, -9.8f * mass, 0.0f, 0.0f);
+	//NewtonBodySetForce (rigidBody, &xxx[0]);
+
+	// force the body to be active of inactive
+	//	NewtonBodySetAutoSleep (rigidBody, sleepMode);
+	return rigidBody;
+}
+
+
+
+void AddPrimitiveArray (DemoEntityManager* const scene, dFloat mass, const dVector& origin, const dVector& size, int xCount, int zCount, dFloat spacing, PrimitiveType type, int materialID)
+{
 	dMatrix matrix (GetIdentityMatrix());
 
 	// create the shape and visual mesh as a common data to be re used
-//	type = _BOX_PRIMITIVE;
-	NewtonCollision* boxCollision = CreateConvexCollision (system->m_world, GetIdentityMatrix(), size, type, materialID);
+	NewtonWorld* const world = scene->GetNewton();
+	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, type, materialID);
 
-	char name[256];
-	sprintf (name, "shape%d", type);
-	OGLMesh* boxMesh = new OGLMesh (name, boxCollision, "wood_0.tga", "wood_0.tga", "wood_1.tga");
+	DemoMesh* const geometry = new DemoMesh("cylinder_1", collision, "wood_0.tga", "wood_0.tga", "wood_1.tga");
 
 	for (int i = 0; i < xCount; i ++) {
-		dFloat x;
-		x = origin.m_x + (i - xCount / 2) * spacing;
-
+		dFloat x = origin.m_x + (i - xCount / 2) * spacing;
 		for (int j = 0; j < zCount; j ++) {
-			dFloat z;
-			z = origin.m_z + (j - zCount / 2) * spacing;
+			dFloat z = origin.m_z + (j - zCount / 2) * spacing;
 
 			matrix.m_posit.m_x = x;
-			matrix.m_posit.m_y = FindFloor (system->m_world, x, z) + 4.0f;
 			matrix.m_posit.m_z = z;
-//			CreateGenericSolid (system->m_world, system, mass, matrix, size, type, materialID);
-			CreateSimpleSolid (system->m_world, system, boxMesh, mass, matrix, boxCollision, materialID);
+			matrix.m_posit.m_y = FindFloor (world, x, z) + 4.0f;
+			CreateSimpleSolid (scene, geometry, mass, matrix, collision, materialID);
 		}
 	}
-
 	// do not forget to release the assets	
-	boxMesh->Release(); 
-	NewtonReleaseCollision(system->m_world, boxCollision);
-*/
+	geometry->Release(); 
+	NewtonReleaseCollision(world, collision);
 }
