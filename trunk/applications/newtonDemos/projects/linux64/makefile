@@ -49,6 +49,7 @@ QT_HEADERS_PATH = /usr/include/qt4
 
 
 SDK_INCLUDE_PATH = \
+		-I ../../../../coreLibrary_200/source/newton \
 		-I $(SDK_MAIN_PATH) \
 		-I $(SDK_DEMOS_PATH) \
 		-I $(SDK_XML_PATH) \
@@ -58,7 +59,6 @@ SDK_INCLUDE_PATH = \
 		-I $(SDK_NEWTON_PATH) \
 		-I $(SDK_TOOLBOX_PATH) \
 		-I $(SDK_CONTAINERS_PATH) \
-		-I ../../../../coreLibrary_200/source/newton \
 		-I $(QT_HEADERS_PATH) 
 
 
@@ -90,10 +90,10 @@ SDK_MAIN_SRC = \
 		$(SDK_MAIN_PATH)/DemoMesh.cpp \
 		$(SDK_MAIN_PATH)/DemoCamera.cpp \
 		$(SDK_MAIN_PATH)/DemoEntity.cpp \
-		$(SDK_MAIN_PATH)/NewtonDemos.cpp \		
+		$(SDK_MAIN_PATH)/NewtonDemos.cpp \
 		$(SDK_MAIN_PATH)/PhysicsUtils.cpp \
 		$(SDK_MAIN_PATH)/DemoEntityManager.cpp \
-		$(SDK_MAIN_PATH)/DemoDialogHelpers.cpp \		
+		$(SDK_MAIN_PATH)/DemoDialogHelpers.cpp \
 		$(SDK_MAIN_PATH)/moc_NewtonDemos.cpp 
 
 SDK_DEMOS_SRC = \
