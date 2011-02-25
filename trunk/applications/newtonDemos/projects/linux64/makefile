@@ -87,12 +87,13 @@ NEWTON_LIB = \
 
 
 SDK_MAIN_SRC = \
-		$(SDK_MAIN_PATH)/NewtonDemos.cpp \
-		$(SDK_MAIN_PATH)/DemoEntityManager.cpp \
+		$(SDK_MAIN_PATH)/DemoMesh.cpp \
 		$(SDK_MAIN_PATH)/DemoCamera.cpp \
 		$(SDK_MAIN_PATH)/DemoEntity.cpp \
-		$(SDK_MAIN_PATH)/DemoMesh.cpp \
+		$(SDK_MAIN_PATH)/NewtonDemos.cpp \		
 		$(SDK_MAIN_PATH)/PhysicsUtils.cpp \
+		$(SDK_MAIN_PATH)/DemoEntityManager.cpp \
+		$(SDK_MAIN_PATH)/DemoDialogHelpers.cpp \		
 		$(SDK_MAIN_PATH)/moc_NewtonDemos.cpp 
 
 SDK_DEMOS_SRC = \
