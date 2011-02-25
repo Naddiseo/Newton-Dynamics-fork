@@ -74,9 +74,19 @@ NewtonWorld* DemoEntityManager::GetNewton() const
 	return m_world;
 }
 
-DemoCamera* DemoEntityManager::GetCamera() const 
+DemoCamera* DemoEntityManager::GetCamera___() const 
 {
 	return m_camera;
+}
+
+void DemoEntityManager::SetCameraMatrix (const dQuaternion& rotation, const dVector& position)
+{
+	dMatrix matrix (rotation, position);
+	m_cameraPitch = dAsin (matrix.m_front.m_y);
+	m_cameraYaw = dAtan2 (-matrix.m_front.m_z, matrix.m_front.m_x);
+
+	m_camera->SetMatrix (*this, rotation, position);
+	m_camera->SetMatrix (*this, rotation, position);
 }
 
 void DemoEntityManager::initializeGL()
@@ -302,7 +312,7 @@ void DemoEntityManager::SetAutoSleepState (bool state)
 
 void DemoEntityManager::InterpolateMatrices ()
 {
-	// calculate the fraction of the time step for intepotions
+	// calculate the fraction of the time step for intepolations
 	unsigned64 timeStep = dGetTimeInMicrosenconds () - m_microsecunds;		
 	dFloat step = (dFloat (timeStep) * MAX_PHYSICS_FPS) / 1.0e6f;
 	_ASSERTE (step >= 0.0f);
@@ -368,7 +378,21 @@ void DemoEntityManager::UpdateCamera (float timestep)
 			}			
 		}
 
-		dQuaternion rot (targetMatrix);
+		if (!mainWindow->m_prevMouseDown & mainWindow->m_curMouseDown) {
+//			_ASSERTE (0); 
+		}
+
+		if (mainWindow->m_prevMouseDown & mainWindow->m_curMouseDown) {
+			int yawDir = (mainWindow->m_prevMouse_x - mainWindow->m_mouse_x);
+			if (yawDir > 0) {
+//				m_cameraYaw = dMod(m_cameraYaw + 0.1f, 2.0 * 3.1416f);
+			} else if (yawDir < 0){
+//				m_cameraYaw = dMod(m_cameraYaw - 0.1f, 2.0 * 3.1416f);
+			}
+		}
+
+		dMatrix matrix (dRollMatrix(m_cameraPitch) * dYawMatrix(m_cameraYaw));
+		dQuaternion rot (matrix);
 		m_camera->SetMatrix (*this, rot, targetMatrix.m_posit);
 		m_navegationQueueCount = 0;
 	}

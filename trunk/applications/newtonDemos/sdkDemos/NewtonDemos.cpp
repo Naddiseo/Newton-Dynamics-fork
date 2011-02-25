@@ -190,7 +190,13 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 	,m_showStatistics(true)
 	,m_doVisualUpdates(true)
 	,m_concurrentPhysicsUpdates(false)
+	,m_prevMouseDown(false)
+	,m_curMouseDown(false)
 	,m_currentThreadCount(1)
+	,m_mouse_x(0)
+	,m_mouse_y(0)
+	,m_prevMouse_x(0)
+	,m_prevMouse_y(0)
 	,m_cameraFrontSpeed(40.0f)
 	,m_sidewaysSpeed(40.0f)
 	
@@ -432,6 +438,37 @@ void newtonDemos::keyPressEvent (QKeyEvent *keyEvent)
 	}
 	keyEvent->accept();
 }
+
+
+void newtonDemos::mousePressEvent ( QMouseEvent* event) 
+{
+	m_mouse_x = event->x();
+	m_mouse_y = event->y();
+	m_prevMouse_x = m_mouse_x;
+	m_prevMouse_y = m_mouse_y;
+
+	m_prevMouseDown = m_curMouseDown;
+	m_curMouseDown = true;
+
+}
+
+void newtonDemos::mouseMoveEvent ( QMouseEvent* event)
+{
+	m_prevMouse_x = m_mouse_x;
+	m_prevMouse_y = m_mouse_y;
+	m_mouse_x = event->x();
+	m_mouse_y = event->y();
+
+	m_prevMouseDown = m_curMouseDown;
+	m_curMouseDown = true;
+}
+
+void newtonDemos::mouseReleaseEvent ( QMouseEvent* event)
+{
+	m_prevMouseDown = m_curMouseDown;
+	m_curMouseDown = false;
+}
+
 
 void newtonDemos::RestoreSettings ()
 {

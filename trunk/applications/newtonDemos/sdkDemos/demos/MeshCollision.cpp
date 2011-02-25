@@ -477,8 +477,7 @@ static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 	// place camera into position
 	dQuaternion rot;
 	dVector posit (0.0f, 1.0f, 0.0f, 0.0f);
-	scene->GetCamera()->SetMatrix (*scene, rot, posit);
-	scene->GetCamera()->SetMatrix (*scene, rot, posit);
+	scene->SetCameraMatrix(rot, posit);
 
 	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (world);
 	dVector location (0.0f, 0.0f, 0.0f, 0.0f);

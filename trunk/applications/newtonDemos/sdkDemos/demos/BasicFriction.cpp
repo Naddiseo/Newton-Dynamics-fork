@@ -176,8 +176,7 @@ void Friction (DemoEntityManager* const scene)
 	// place camera into position
 	dQuaternion rot;
 	dVector origin (-70.0f, 10.0f, 0.0f, 0.0f);
-	scene->GetCamera()->SetMatrix (*scene, rot, origin);
-	scene->GetCamera()->SetMatrix (*scene, rot, origin );
+	scene->SetCameraMatrix(rot, origin);
 
 //	scene->SaveScene ("test1.xml");
 //	dScene CreateAlchemediaFromPhysic(); 

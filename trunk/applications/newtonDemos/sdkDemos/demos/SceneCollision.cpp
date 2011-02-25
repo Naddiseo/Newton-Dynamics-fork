@@ -363,8 +363,7 @@ void SceneCollision (DemoEntityManager* const scene)
 	dMatrix camMatrix (dRollMatrix(-20.0f * 3.1416f /180.0f) * dYawMatrix(-45.0f * 3.1416f /180.0f));
 	dQuaternion rot (camMatrix);
 	dVector origin (-15.0f, 15.0f, -15.0f, 0.0f);
-	scene->GetCamera()->SetMatrix (*scene, rot, origin);
-	scene->GetCamera()->SetMatrix (*scene, rot, origin );
+	scene->SetCameraMatrix(rot, origin);
 
 	// resume the simulation
 	scene->ContinueExecution();

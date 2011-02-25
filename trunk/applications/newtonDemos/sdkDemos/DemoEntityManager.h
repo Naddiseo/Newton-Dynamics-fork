@@ -33,7 +33,9 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 	~DemoEntityManager(void);
 
 	NewtonWorld* GetNewton() const;
-	DemoCamera* GetCamera() const;
+	DemoCamera* GetCamera___() const;
+
+	void SetCameraMatrix (const dQuaternion& rotation, const dVector& position);
 
 	void QueueCommand(int command);
 
@@ -81,6 +83,9 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 	unsigned m_navegationQueueLock;
 	int m_navegationQueue[32];
 	int m_timerId;
+
+	float m_cameraYaw;
+	float m_cameraPitch;
 };
 
 

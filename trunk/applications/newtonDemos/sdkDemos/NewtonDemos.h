@@ -37,7 +37,10 @@ public:
 	static void PhysicsFree (void *ptr, int sizeInBytes);
 
 
-	virtual void keyPressEvent( QKeyEvent *e );
+	virtual void keyPressEvent( QKeyEvent *event);
+	virtual void mouseMoveEvent ( QMouseEvent* event); 
+	virtual void  mousePressEvent ( QMouseEvent* event); 
+	virtual void  mouseReleaseEvent ( QMouseEvent* event);  
 
 
 	public slots:
@@ -74,7 +77,13 @@ private:
 	bool m_showStatistics;
 	bool m_doVisualUpdates;
 	bool m_concurrentPhysicsUpdates;
+	bool m_prevMouseDown;
+	bool m_curMouseDown;
 	int m_currentThreadCount;
+	int m_mouse_x;
+	int m_mouse_y;
+	int m_prevMouse_x;
+	int m_prevMouse_y;
 
 	float m_cameraFrontSpeed;
 	float m_sidewaysSpeed;
