@@ -91,7 +91,7 @@ dThread::dThread(void)
 
 #if (defined (_LINUX_VER) || defined (_MAC_VER))
 	m_taskExecuting = 0;
-//	pthread_create( &m_threadhandle, NULL, TaskCallback, this);
+	pthread_create( &m_threadhandle, NULL, TaskCallback, this);
 #endif
 }
 
@@ -140,7 +140,6 @@ void dThread::StopsExecution ()
 	while (m_taskExecuting) {
 		YieldTime();
 	}
-
 }
 
 
