@@ -23,9 +23,9 @@
 //#define DEFAULT_SCENE	0						// friction test
 //#define DEFAULT_SCENE	1						// closest distance
 //#define DEFAULT_SCENE	2						// Box stacks
-#define DEFAULT_SCENE	3						// simple level mesh collision
+//#define DEFAULT_SCENE	3						// simple level mesh collision
 //#define DEFAULT_SCENE	4						// optimized level mesh collision
-//#define DEFAULT_SCENE	5						// Scene Collision
+#define DEFAULT_SCENE	5						// Scene Collision
 
 
 
@@ -190,14 +190,16 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 	,m_showStatistics(true)
 	,m_doVisualUpdates(true)
 	,m_concurrentPhysicsUpdates(false)
+	,m_currentThreadCount(1)
 	,m_cameraFrontSpeed(40.0f)
 	,m_sidewaysSpeed(40.0f)
+	
 {
 	setObjectName(QString::fromUtf8("newtonMain"));
 	resize(1024, 768);
 	setWindowTitle (QApplication::translate("newtonMain", "newton sdk demos", 0, QApplication::UnicodeUTF8));
 
-	// create all menu and toolbars	
+	// create all menu and tool bars	
 	QMenuBar* const menuBar = new QMenuBar(this);
 	menuBar->setObjectName(QString::fromUtf8("menubar"));
 	menuBar->setGeometry(QRect(0, 0, 1024, 26));
@@ -331,7 +333,7 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnRunSymulationAsyncronous()));
 
 			action = new QAction(this);
-			action->setText(QApplication::translate("newtonMain", "select number of physics micro threads", 0, QApplication::UnicodeUTF8));
+			action->setText(QApplication::translate("newtonMain", "Select number of physics micro threads", 0, QApplication::UnicodeUTF8));
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnSelectNumberOfMicroThreads()));
 
@@ -431,6 +433,22 @@ void newtonDemos::keyPressEvent (QKeyEvent *keyEvent)
 	keyEvent->accept();
 }
 
+void newtonDemos::RestoreSettings ()
+{
+	// restore set all the settings
+	//m_showStatistics = action->isChecked();
+	//m_debugDisplayState = action->isChecked();
+	m_canvas->SetAutoSleepState (m_autoSleepState);
+	m_canvas->m_asycronousUpdate = m_concurrentPhysicsUpdates;
+
+	if (m_usesSimdInstructions) {
+		NewtonSetPlatformArchitecture (m_canvas->GetNewton(), 3);  //best hardware (SSE at this time)
+	} else {
+		NewtonSetPlatformArchitecture (m_canvas->GetNewton(), 0);  //x87 mode
+	}
+	NewtonSetThreadsCount(m_canvas->GetNewton(), m_currentThreadCount);
+}
+
 void newtonDemos::OnNotUsed()
 {
 	_ASSERTE (0);
@@ -464,7 +482,8 @@ void newtonDemos::OnLoad()
 		// place camera into position
 		dMatrix camMatrix (GetIdentityMatrix());
 		camMatrix.m_posit = dVector (-40.0f, 10.0f, 0.0f, 0.0f);
-		m_canvas->SetAutoSleepState (m_autoSleepState);
+		
+		RestoreSettings ();
 	}
 
 	END_MENU_OPTION();
@@ -497,9 +516,10 @@ void newtonDemos::OnRunDemo()
 
 	QAction* const action = (QAction*)sender();
 	int index = (int) action->data().toInt();
+
 	LoadDemo (index);
 
-
+	RestoreSettings ();
 	END_MENU_OPTION();
 }
 
@@ -511,10 +531,9 @@ void newtonDemos::OnAutoSleep()
 	m_autoSleepState = action->isChecked();
 	m_canvas->SetAutoSleepState (m_autoSleepState);
 
-
 	END_MENU_OPTION();
-
 }
+
 
 void newtonDemos::OnUseSimdInstructions()
 {
@@ -522,7 +541,6 @@ void newtonDemos::OnUseSimdInstructions()
 
 	QAction* const action = (QAction*)sender();
 	m_usesSimdInstructions = action->isChecked();
-
 
 	if (m_usesSimdInstructions) {
 		NewtonSetPlatformArchitecture (m_canvas->GetNewton(), 3);  //best hardware (SSE at this time)
@@ -607,8 +625,8 @@ void newtonDemos::OnSelectNumberOfMicroThreads()
 	SelectThreadCount selectThreadCount (m_canvas);
 	selectThreadCount.exec();
 
-	int threadCount = selectThreadCount.GetThreadCount();
-	NewtonSetThreadsCount(m_canvas->GetNewton(), threadCount);
+	m_currentThreadCount = selectThreadCount.GetThreadCount();
+	NewtonSetThreadsCount(m_canvas->GetNewton(), m_currentThreadCount);
 
 	END_MENU_OPTION();
 }

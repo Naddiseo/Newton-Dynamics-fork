@@ -59,6 +59,8 @@ public:
 		void OnNotUsed(); 
 
 private:
+	void RestoreSettings ();
+
 	static int m_totalMemoryUsed;
 
 	DemoEntityManager* m_canvas;
@@ -72,6 +74,7 @@ private:
 	bool m_showStatistics;
 	bool m_doVisualUpdates;
 	bool m_concurrentPhysicsUpdates;
+	int m_currentThreadCount;
 
 	float m_cameraFrontSpeed;
 	float m_sidewaysSpeed;

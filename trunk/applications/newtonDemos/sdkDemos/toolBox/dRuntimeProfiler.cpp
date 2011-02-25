@@ -14,13 +14,6 @@
 #include "dRuntimeProfiler.h"
 #include "dHeightResolutionTimer.h"
 
-struct GLViewPort
-{
-	GLint x;
-	GLint y;
-	GLsizei width;
-	GLsizei height;
-};
 
 dRuntimeProfiler::dRuntimeProfiler(int origin_x, int origin_y)
 {
@@ -168,26 +161,25 @@ void dRuntimeProfiler::RenderThreadPerformance (NewtonWorld* nWorld, QPainter& c
 {
 	int threadCount = NewtonGetThreadsCount(nWorld);
 	if (threadCount > 0) {
-		float x0 = float (MAX_FRAMES + 80);
+
+		QRect viewport (context.viewport());
+
+		float x0 = viewport.width() - 310; 
 		float x1 = x0 + 256.0f;
 		float y0 = 50.0f;
-
-		glDisable(GL_BLEND);
 		for (int i = 0; i < threadCount; i ++) {
 			char label[32];
 			sprintf (label, "thread %d", i);
-			DrawLabel (x0, y0 + i * 20, label, context);
+			DrawLabel (x0 - 50, y0 + i * 20 + 5, label, context);
 		}
-
-		x0 = float (MAX_FRAMES + 150);		
-		x1 = x0 + 256.0f;
+		
 		DrawLabel (x0, y0 - 20, "0.0 ms", context);
-		DrawLabel (x1, y0 - 20, "16.16 ms", context);
-
-		QRect viewport (context.viewport());
+		DrawLabel ((x1 + x0) * 0.5f, y0 - 20, "8.33 ms", context);
+		DrawLabel (x1, y0 - 20, "16.66 ms", context);
+		
 		int height = viewport.height();
 		QBrush brush (Qt::SolidPattern);
-		brush.setColor (QColor(255, 255, 0, 32));
+		brush.setColor (QColor(255, 255, 0, 64));
 		context.fillRect(x0, height - (y0 + 20.0f * threadCount), x1 - x0, 20 * threadCount, brush);
 
 		brush.setColor (QColor(255, 0, 0, 128));
