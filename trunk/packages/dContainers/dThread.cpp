@@ -90,7 +90,6 @@ dThread::dThread(void)
 #endif
 
 #if (defined (_LINUX_VER) || defined (_MAC_VER))
-	m_taskExecuting = 0;
 	pthread_create( &m_threadhandle, NULL, TaskCallback, this);
 #endif
 }
