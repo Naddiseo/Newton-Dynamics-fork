@@ -352,7 +352,6 @@ void SimpleMeshLevelCollision (NewtonFrame& system)
 
 static void CreateLevelMeshBody (NewtonWorld* const world, DemoEntity* const ent, bool optimization)
 {
-
 	// measure the time to build a collision tree
 	unsigned64 timer0 = dGetTimeInMicrosenconds();
 
@@ -461,6 +460,7 @@ static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 //	GetWorkingFileName ("playground.xml", fileName);
 	scene->LoadScene (fileName);
 
+	NewtonWorld* const world = scene->GetNewton();
 	for (DemoEntityManager::dListNode* node = scene->GetFirst(); node; node = node->GetNext()) {
 		DemoEntity* const ent = node->GetInfo();
 		DemoMesh* const mesh = ent->GetMesh();
@@ -468,7 +468,7 @@ static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 			char name[2048];
 			mesh->GetName(name);
 			if (!strcmp (name, "levelGeometry_mesh")) {
-				CreateLevelMeshBody (scene->GetNewton(), ent, optimization);
+				CreateLevelMeshBody (world, ent, optimization);
 				break;
 			}
 		}
@@ -480,6 +480,16 @@ static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 	scene->GetCamera()->SetMatrix (*scene, rot, posit);
 	scene->GetCamera()->SetMatrix (*scene, rot, posit);
 
+	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (world);
+	dVector location (0.0f, 0.0f, 0.0f, 0.0f);
+	dVector size (0.5f, 0.5f, 0.5f, 0.0f);
+	int count = 5;
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _BOX_PRIMITIVE, defaultMaterialID);
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _CYLINDER_PRIMITIVE, defaultMaterialID);
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _CONE_PRIMITIVE, defaultMaterialID);
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _CAPSULE_PRIMITIVE, defaultMaterialID);
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
 
 	// resume the simulation
 	scene->ContinueExecution();
