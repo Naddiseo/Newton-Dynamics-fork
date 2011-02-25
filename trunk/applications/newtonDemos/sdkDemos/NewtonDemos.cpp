@@ -324,7 +324,7 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnUseSimdInstructions()));
 
 			action = new QAction(this);
-			action->setText(QApplication::translate("newtonMain", "Run Physics in main Thread", 0, QApplication::UnicodeUTF8));
+			action->setText(QApplication::translate("newtonMain", "Run Physics in separate Thread", 0, QApplication::UnicodeUTF8));
 			action->setCheckable(true);
 			action->setChecked(m_concurrentPhysicsUpdates);
 			subMenu->addAction(action);
@@ -379,7 +379,9 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 	m_canvas = new DemoEntityManager (this, glFormat);
 	setCentralWidget(m_canvas);
 
+#ifndef _MAC_VER
 	connect(QAbstractEventDispatcher::instance(), SIGNAL(aboutToBlock()), this, SLOT(OnIdle())); 
+#endif
 
 	//m_asycronousUpdate
 	m_canvas->ResetTimer();
@@ -439,7 +441,7 @@ void newtonDemos::OnNotUsed()
 void newtonDemos::OnIdle()
 {
 	if (m_doVisualUpdates) {
-//		m_canvas->update();
+		m_canvas->update();
 	}
 }
 

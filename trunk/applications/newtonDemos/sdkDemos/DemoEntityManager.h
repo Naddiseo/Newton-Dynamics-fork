@@ -80,9 +80,7 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 	int m_navegationQueueCount;
 	unsigned m_navegationQueueLock;
 	int m_navegationQueue[32];
-	
 	int m_timerId;
-
 };
 
 

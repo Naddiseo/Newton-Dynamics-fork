@@ -40,13 +40,17 @@ DemoEntityManager::DemoEntityManager(QWidget* const parent, QGLFormat& format)
 
 	doubleBuffer(); 
 	setAutoFillBackground(false);
-	
+
+#ifdef _MAC_VER		
 	m_timerId = startTimer(0);
+#endif
 }
 
 DemoEntityManager::~DemoEntityManager(void)
 {
+#ifdef _MAC_VER	
 	killTimer(m_timerId);
+#endif
 
 	delete m_camera;
 
@@ -340,7 +344,6 @@ void DemoEntityManager::UpdateCamera (float timestep)
 			{
 				case Qt::Key_W:
 				{
-					//ent->SetMatrix (*world, rot, transform.m_posit);	ent->SetMatrix (*world, rot, transform.m_posit);
 					targetMatrix.m_posit += targetMatrix.m_front.Scale(linearSpeed * timestep);
 					break;
 				}
