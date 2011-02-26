@@ -145,7 +145,7 @@ dgInt32 FastRayTest::BoxTest (const dgVector& minBox, const dgVector& maxBox) co
 dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFloat32* const polygon, dgInt32 strideInBytes, const dgInt32* const indexArray, dgInt32 indexCount) const
 {
 #ifdef DG_BUILD_SIMD_CODE
-/*
+
 	dgFloatSign test;
 
 	_ASSERTE (m_p0.m_w == m_p1.m_w);
@@ -190,13 +190,13 @@ dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFlo
 				p0v_y = simd_permut_v (p0v_y, p0v2, PURMUT_MASK (3, 1, 3, 2));
 				simd_type p0v_z = simd_permut_v (simd_pack_hi_v (p0v0, p0v1), p0v2, PURMUT_MASK (3, 2, 1, 0));
 
-				simd_type tmp = simd_sub_v (simd_mul_v ((simd_type&)m_ray_yyy, p0v_z), simd_mul_v ((simd_type&)m_ray_zzz, p0v_y));
+				simd_type tmp = simd_sub_v (simd_mul_v ((simd_type&)m_ray_yyyy, p0v_z), simd_mul_v ((simd_type&)m_ray_zzzz, p0v_y));
 				simd_type alpha = simd_mul_v (simd_permut_v (tmp, tmp, PURMUT_MASK (3, 0, 2, 1)), p0v_x);
 
-				tmp = simd_sub_v (simd_mul_v ((simd_type&)m_ray_zzz, p0v_x), simd_mul_v ((simd_type&)m_ray_xxx, p0v_z));
+				tmp = simd_sub_v (simd_mul_v ((simd_type&)m_ray_zzzz, p0v_x), simd_mul_v ((simd_type&)m_ray_xxxx, p0v_z));
 				alpha = simd_mul_add_v (alpha, simd_permut_v (tmp, tmp, PURMUT_MASK (3, 0, 2, 1)), p0v_y);
 
-				tmp = simd_sub_v (simd_mul_v ((simd_type&)m_ray_xxx, p0v_y), simd_mul_v ((simd_type&)m_ray_yyy, p0v_x));
+				tmp = simd_sub_v (simd_mul_v ((simd_type&)m_ray_xxxx, p0v_y), simd_mul_v ((simd_type&)m_ray_yyyy, p0v_x));
 				alpha = simd_mul_add_v (alpha, simd_permut_v (tmp, tmp, PURMUT_MASK (3, 0, 2, 1)), p0v_z);
 
 				tmp = simd_cmpgt_v (alpha, (simd_type&) m_tolerance);
@@ -215,9 +215,9 @@ dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFlo
 		}
 	}
 	return 1.2f;
-*/
 
 
+/*
 	_ASSERTE (m_p0.m_w == m_p1.m_w);
 
 	dgFloat32 dist = normal % m_diff;
@@ -307,7 +307,7 @@ dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFlo
 		}
 	}
 	return dgFloat32 (1.2f);
-
+*/
 #else
 	return dgFloat32 (0.0f);
 #endif
