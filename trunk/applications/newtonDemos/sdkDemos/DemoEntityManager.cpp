@@ -352,43 +352,50 @@ void DemoEntityManager::UpdateCamera (float timestep)
 			int code = m_navegationQueue[i];
 			switch (code)
 			{
-				case Qt::Key_W:
+				case _moveForward:
 				{
 					targetMatrix.m_posit += targetMatrix.m_front.Scale(linearSpeed * timestep);
 					break;
 				}
 
-				case Qt::Key_S:
+				case _moveBackward:
 				{
 					targetMatrix.m_posit -= targetMatrix.m_front.Scale(linearSpeed * timestep);
 					break;
 				}
 
-				case Qt::Key_A:
+				case _moveRight:
 				{
 					targetMatrix.m_posit -= targetMatrix.m_right.Scale(sideSpeed * timestep);
 					break;
 				}
 
-				case Qt::Key_D:
+				case _moveLeft:
 				{
 					targetMatrix.m_posit += targetMatrix.m_right.Scale(sideSpeed * timestep);
 					break;
 				}
+
+				case _mouseMove:
+				{
+					if (mainWindow->m_mouseSpeedX > 0) {
+						m_cameraYaw = dMod(m_cameraYaw + mainWindow->m_yawRate, 2.0f * 3.1416f);
+					} else if (mainWindow->m_mouseSpeedX < 0){
+						m_cameraYaw = dMod(m_cameraYaw - mainWindow->m_yawRate, 2.0f * 3.1416f);
+					}
+					if (mainWindow->m_mouseSpeedY > 0) {
+						m_cameraPitch += mainWindow->m_pitchRate;
+					} else if (mainWindow->m_mouseSpeedY < 0){
+						m_cameraPitch -= mainWindow->m_pitchRate;
+					}
+					if (m_cameraPitch > 80.0f * 3.1416f / 180.0f) {
+						m_cameraPitch = 80.0f * 3.1416f / 180.0f;
+					} else if (m_cameraPitch < -80.0f * 3.1416f / 180.0f) {
+						m_cameraPitch = -80.0f * 3.1416f / 180.0f;
+					}
+					break;
+				}
 			}			
-		}
-
-		if (!mainWindow->m_prevMouseDown & mainWindow->m_curMouseDown) {
-//			_ASSERTE (0); 
-		}
-
-		if (mainWindow->m_prevMouseDown & mainWindow->m_curMouseDown) {
-			int yawDir = (mainWindow->m_prevMouse_x - mainWindow->m_mouse_x);
-			if (yawDir > 0) {
-//				m_cameraYaw = dMod(m_cameraYaw + 0.1f, 2.0 * 3.1416f);
-			} else if (yawDir < 0){
-//				m_cameraYaw = dMod(m_cameraYaw - 0.1f, 2.0 * 3.1416f);
-			}
 		}
 
 		dMatrix matrix (dRollMatrix(m_cameraPitch) * dYawMatrix(m_cameraYaw));

@@ -12,6 +12,17 @@
 #ifndef __NEWTON_DEMOS_H__
 
 
+enum ControlCommand
+{
+	_moveForward,
+	_moveBackward,
+	_moveRight,
+	_moveLeft,
+	_mousePick,
+	_mouseMove,
+	_mouseRelease,
+};
+
 
 class DemoEntityManager;
 
@@ -77,14 +88,14 @@ private:
 	bool m_showStatistics;
 	bool m_doVisualUpdates;
 	bool m_concurrentPhysicsUpdates;
-	bool m_prevMouseDown;
-	bool m_curMouseDown;
 	int m_currentThreadCount;
-	int m_mouse_x;
-	int m_mouse_y;
-	int m_prevMouse_x;
-	int m_prevMouse_y;
+	int m_mousePosX;
+	int m_mousePosY;
+	int m_mouseSpeedX;
+	int m_mouseSpeedY;
 
+	float m_yawRate;
+	float m_pitchRate;
 	float m_cameraFrontSpeed;
 	float m_sidewaysSpeed;
 
