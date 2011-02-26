@@ -364,13 +364,13 @@ void DemoEntityManager::UpdateCamera (float timestep)
 					break;
 				}
 
-				case _moveRight:
+				case _moveLeft:
 				{
 					targetMatrix.m_posit -= targetMatrix.m_right.Scale(sideSpeed * timestep);
 					break;
 				}
 
-				case _moveLeft:
+				case _moveRight:
 				{
 					targetMatrix.m_posit += targetMatrix.m_right.Scale(sideSpeed * timestep);
 					break;
