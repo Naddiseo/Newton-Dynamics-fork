@@ -151,9 +151,80 @@
 		#define simd_rcp_s(a)				_mm_rcp_ss(a)	
 		#define simd_rsqrt_s(a)				_mm_rsqrt_ss(a)	
 
+	
+		
+		class simd_128
+		{
+			public:
+			DG_INLINE simd_128 () {}
+			DG_INLINE simd_128 (dgFloat32 a): m_type(_mm_set_ps1(a)) {}
+			DG_INLINE simd_128 (dgFloat32 x, dgFloat32 y, dgFloat32 z, dgFloat32 w): m_type(_mm_set_ps(w, z, y, x)) {}
+			DG_INLINE simd_128 (simd_type type): m_type(type) {}
+			DG_INLINE simd_128 (const simd_128& data): m_type(data.m_type) {}
+
+			DG_INLINE simd_128 GetMin (const simd_128& data) const
+			{
+				return _mm_min_ps (m_type, data.m_type);
+			} 
+
+			DG_INLINE simd_128 GetMax (const simd_128& data) const
+			{
+				return _mm_max_ps (m_type, data.m_type);
+			} 
+
+			DG_INLINE simd_128 operator<= (const simd_128& data) const
+			{
+				return _mm_cmple_ps (m_type, data.m_type);	
+			}
+
+			DG_INLINE simd_128 operator>= (const simd_128& data) const
+			{
+				return _mm_cmpge_ps (m_type, data.m_type);	
+			}
+
+			DG_INLINE simd_128 operator< (const simd_128& data) const
+			{
+				return _mm_cmplt_ps (m_type, data.m_type);	
+			}
+
+			DG_INLINE simd_128 operator> (const simd_128& data) const
+			{
+				return _mm_cmpgt_ps (m_type, data.m_type);	
+			}
+
+
+			DG_INLINE simd_128 operator& (const simd_128& data) const
+			{
+				return _mm_and_ps (m_type, data.m_type);	
+			}
+
+//			DG_INLINE simd_128 Permute (const simd_128& data, const dgUnsigned32 mask) const
+//			{
+//				return _mm_shuffle_ps (m_type, data.m_type, mask);
+//				//return m_type;
+//			}
+
+			DG_INLINE simd_128 MoveHighToLow (const simd_128& data) const
+			{
+				return _mm_movehl_ps (m_type, data.m_type);
+			}
+
+			DG_INLINE simd_128 PackLow (const simd_128& data) const
+			{
+				return _mm_unpacklo_ps (m_type, data.m_type);
+			}
+
+
+
+			DG_INLINE dgInt32 GetInt () const
+			{
+				return simd_store_is(m_type);
+			}
+
+			simd_type m_type;
+		};
+
 	#endif
-
 #endif
-
 #endif
 

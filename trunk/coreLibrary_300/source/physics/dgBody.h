@@ -42,13 +42,14 @@ class dgBroadPhaseLeafNode;
 #define DG_ErrTolerance		(1.0e-2f)
 #define DG_ErrTolerance2	(DG_ErrTolerance * DG_ErrTolerance)
 
+DG_MSC_VECTOR_ALIGMENT
 struct dgLineBox
 {
 	dgVector m_l0;
 	dgVector m_l1;
 	dgVector m_boxL0;
 	dgVector m_boxL1;
-};
+} DG_GCC_VECTOR_ALIGMENT;
 
 
 class dgConvexCastReturnInfo
@@ -171,9 +172,9 @@ class dgBody
 
 	dgVector CalculateInverseDynamicForce (const dgVector& desiredVeloc, dgFloat32 timestep) const;
 
-//	dgFloat32 RayCast (const dgVector& globalP0, const dgVector& globalP1, 
-	dgFloat32 RayCast (const dgLineBox& line,
-					   OnRayCastAction filter, OnRayPrecastAction preFilter, void* const userData, dgFloat32 minT) const;
+
+	dgFloat32 RayCast (const dgLineBox& line, OnRayCastAction filter, OnRayPrecastAction preFilter, void* const userData, dgFloat32 minT) const;
+	dgFloat32 RayCastSimd (const dgLineBox& line, OnRayCastAction filter, OnRayPrecastAction preFilter, void* const userData, dgFloat32 minT) const;
 //	dgFloat32 RayCastSimd (const dgVector& globalP0, const dgVector& globalP1, 
 //					   OnRayCastAction filter, OnRayPrecastAction preFilter, void* userData, dgFloat32 minT) const;
 

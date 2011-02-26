@@ -28,7 +28,7 @@
 #include "dgBroadPhaseCollision.h"
 
 
-
+#define DG_BROADPHASE_MAX_STACK_DEPTH	256
 #define DG_BROADPHASE_AABB_SCALE		dgFloat32 (4.0f)
 #define DG_BROADPHASE_AABB_INV_SCALE	(dgFloat32 (1.0f) / DG_BROADPHASE_AABB_SCALE)
 
@@ -174,11 +174,6 @@ dgBroadPhaseLeafNode::~dgBroadPhaseLeafNode()
 }
 
 
-
-
-
-
-
 void dgBroadPhaseCollision::InvalidateCache ()
 {
 	dgTrace (("Invalidate cache\n"));
@@ -196,10 +191,6 @@ void dgBroadPhaseCollision::SetWorldSize (const dgVector& minBox, const dgVector
 	m_appMaxBox = maxBox;
 }
 
-void dgBroadPhaseCollision::RayCast (const dgVector& p0, const dgVector& p1, OnRayCastAction filter, OnRayPrecastAction prefilter, void* const userData) const
-{
-	_ASSERTE (0);
-}
 dgInt32 dgBroadPhaseCollision::ConvexCast (dgCollision* const shape, const dgMatrix& p0, const dgVector& p1, dgFloat32& timetoImpact, OnRayPrecastAction prefilter, void* const userData, dgConvexCastReturnInfo* const info, dgInt32 maxContacts, dgInt32 threadIndex) const
 {
 	_ASSERTE (0);
@@ -208,20 +199,40 @@ dgInt32 dgBroadPhaseCollision::ConvexCast (dgCollision* const shape, const dgMat
 
 void dgBroadPhaseCollision::ForEachBodyInAABB (const dgVector& q0, const dgVector& q1, OnBodiesInAABB callback, void* const userData) const
 {
-	_ASSERTE (0);
+
+	if (m_rootNode) {
+		const dgBroadPhaseNode* stackPool[DG_BROADPHASE_MAX_STACK_DEPTH];
+		dgInt32 stack = 1;
+		stackPool[0] = m_rootNode;
+
+		dgBody* const sentinel = ((dgWorld*)this)->GetSentinelBody();
+		while (stack) {
+			stack --;
+			const dgBroadPhaseNode* const rootNode = stackPool[stack];
+			if (dgOverlapTest (rootNode->m_minBox, rootNode->m_maxBox, q0, q1)) {
+
+				if (!rootNode->m_left) {
+					_ASSERTE (!rootNode->m_right);
+					dgBody* const body = ((dgBroadPhaseLeafNode*) rootNode)->m_body;
+					if (dgOverlapTest (body->m_minAABB, body->m_maxAABB, q0, q1)) {
+						if (body != sentinel) {
+							callback (body, userData);
+						}
+					}
+
+				} else {
+					stackPool[stack] = rootNode->m_left;
+					stack ++;
+					_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
+
+					stackPool[stack] = rootNode->m_right;
+					stack ++;
+					_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
+				}
+			}
+		}
+	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 dgBroadPhaseCollision::dgBroadPhaseCollision(dgMemoryAllocator* const allocator)
@@ -550,7 +561,7 @@ void dgBroadPhaseCollision::ImproveFitness()
 
 void dgBroadPhaseCollision::SubmitPairs (dgBroadPhaseLeafNode* const bodyNode, dgBroadPhaseNode* const node, dgInt32 threadID)
 {
-	dgBroadPhaseNode* pool[512];
+	dgBroadPhaseNode* pool[DG_BROADPHASE_MAX_STACK_DEPTH];
 	pool[0] = node;
 	dgInt32 stack = 1;
 
@@ -855,6 +866,118 @@ void dgBroadPhaseCollision::UpdateBodyBroadphase(dgBody* const body, dgInt32 thr
 					parent->m_maxBox = maxBox;
 					parent->m_surfaceArea = area;
 					world->ReleaseIndirectLock (&m_updateLock);
+				}
+			}
+		}
+	}
+}
+
+
+void dgBroadPhaseCollision::RayCast (const dgVector& l0, const dgVector& l1, OnRayCastAction filter, OnRayPrecastAction prefilter, void* const userData) const
+{
+	if (filter && m_rootNode) {
+		dgVector segment (l1 - l0);
+		dgFloat32 dist2 = segment % segment;
+		if (dist2 > dgFloat32 (1.0e-8f)) {
+			const dgBroadPhaseNode* stackPool[DG_BROADPHASE_MAX_STACK_DEPTH];
+			dgInt32 stack = 1;
+			stackPool[0] = m_rootNode;
+			FastRayTest ray (l0, l1);
+			dgFloat32 maxParam = dgFloat32 (1.2f);
+			const dgWorld* const world = (dgWorld*) this;
+
+			if (world->m_cpu == dgSimdPresent) {
+				dgLineBox line;	
+
+				line.m_l0 = l0;
+				line.m_l1 = l1;
+				line.m_boxL0 = dgVector ((((simd_128&)l0).GetMin((simd_128&)l1)).m_type);
+				line.m_boxL1 = dgVector ((((simd_128&)l0).GetMax((simd_128&)l1)).m_type);
+
+				while (stack) {
+					stack --;
+					const dgBroadPhaseNode* const node = stackPool[stack];
+
+					if (ray.BoxTestSimd(node->m_minBox, node->m_maxBox)) {
+
+						if (!node->m_left) {
+							_ASSERTE (!node->m_right);
+							const dgBroadPhaseLeafNode* const leafNode = (dgBroadPhaseLeafNode*) node;
+							dgFloat32 param = leafNode->m_body->RayCastSimd(line, filter, prefilter, userData, maxParam);
+							if (param < maxParam) {
+								maxParam = param;
+								ray.Reset (maxParam);
+							}
+						} else {
+							_ASSERTE (node->m_left);
+							_ASSERTE (stack < sizeof (stackPool) / sizeof (dgBroadPhaseNode*));
+							stackPool[stack] = node->m_left;
+							stack++;
+
+							_ASSERTE (node->m_right);
+							_ASSERTE (stack < sizeof (stackPool) / sizeof (dgBroadPhaseNode*));
+							stackPool[stack] = node->m_right;
+							stack++;
+						}
+					}
+				}
+
+			} else {
+				dgLineBox line;	
+
+				line.m_l0 = l0;
+				line.m_l1 = l1;
+				if (line.m_l0.m_x <= line.m_l1.m_x) {
+					line.m_boxL0.m_x = line.m_l0.m_x;
+					line.m_boxL1.m_x = line.m_l1.m_x;
+				} else {
+					line.m_boxL0.m_x = line.m_l1.m_x;
+					line.m_boxL1.m_x = line.m_l0.m_x;
+				}
+
+				if (line.m_l0.m_y <= line.m_l1.m_y) {
+					line.m_boxL0.m_y = line.m_l0.m_y;
+					line.m_boxL1.m_y = line.m_l1.m_y;
+				} else {
+					line.m_boxL0.m_y = line.m_l1.m_y;
+					line.m_boxL1.m_y = line.m_l0.m_y;
+				}
+
+				if (line.m_l0.m_z <= line.m_l1.m_z) {
+					line.m_boxL0.m_z = line.m_l0.m_z;
+					line.m_boxL1.m_z = line.m_l1.m_z;
+				} else {
+					line.m_boxL0.m_z = line.m_l1.m_z;
+					line.m_boxL1.m_z = line.m_l0.m_z;
+				}
+
+				while (stack) {
+
+					stack --;
+					const dgBroadPhaseNode* const node = stackPool[stack];
+
+					if (ray.BoxTest (node->m_minBox, node->m_maxBox)) {
+
+						if (!node->m_left) {
+							_ASSERTE (!node->m_right);
+							const dgBroadPhaseLeafNode* const leafNode = (dgBroadPhaseLeafNode*) node;
+							dgFloat32 param = leafNode->m_body->RayCast (line, filter, prefilter, userData, maxParam);
+							if (param < maxParam) {
+								maxParam = param;
+								ray.Reset (maxParam);
+							}
+						} else {
+							_ASSERTE (node->m_left);
+							_ASSERTE (stack < sizeof (stackPool) / sizeof (dgBroadPhaseNode*));
+							stackPool[stack] = node->m_left;
+							stack++;
+
+							_ASSERTE (node->m_right);
+							_ASSERTE (stack < sizeof (stackPool) / sizeof (dgBroadPhaseNode*));
+							stackPool[stack] = node->m_right;
+							stack++;
+						}
+					}
 				}
 			}
 		}

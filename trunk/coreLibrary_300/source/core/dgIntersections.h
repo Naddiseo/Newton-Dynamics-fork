@@ -168,15 +168,16 @@ DG_INLINE dgInt32 dgOverlapTestSimd (const dgVector& p0, const dgVector& p1, con
 {
 #ifdef DG_BUILD_SIMD_CODE
 	
-//	simd_type test;
+//simd_type test = simd_and_v (simd_cmplt_v ((simd_type&)p0, (simd_type&) q1), simd_cmpgt_v ((simd_type&)p1, (simd_type&) q0));
+//test = simd_and_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 2, 0)));
+//dgInt32 ret = simd_store_is(simd_and_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 1, 1))));
+//return ret;
 
-	simd_type test = simd_and_v (simd_cmplt_v ((simd_type&)p0, (simd_type&) q1), simd_cmpgt_v ((simd_type&)p1, (simd_type&) q0));
-	test = simd_and_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 2, 0)));
-
-//	dgFloatSign out;
-//	simd_store_s(simd_and_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 1, 1))), &out.m_fVal);
-//	return out.m_integer.m_iVal;
-	return simd_store_is(simd_and_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 1, 1))));
+	simd_128 val (((simd_128&)p0 < (simd_128&)q1) & ((simd_128&)p1 > (simd_128&)q0));
+	val = val & val.PackLow(val);
+	val = val & val.MoveHighToLow(val);
+	dgInt32 value = val.GetInt();
+	return value;
 
 #else
 	return 0;

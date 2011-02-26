@@ -328,7 +328,7 @@ void dgBody::UpdateCollisionMatrix (dgFloat32 timestep, dgInt32 threadIndex)
 	}
 }
 
-
+/*
 dgFloat32 dgBody::RayCast (
 	const dgLineBox& line,
 	OnRayCastAction filter, 
@@ -363,6 +363,44 @@ dgFloat32 dgBody::RayCast (
 				contactOut.m_normal = m_collisionWorldMatrix.RotateVector (contactOut.m_normal);
 				minT = filter (this, contactOut.m_normal, dgInt32 (contactOut.m_userId), userData, t);
 			}
+		}
+	}
+	return minT;
+}
+*/
+
+dgFloat32 dgBody::RayCastSimd (const dgLineBox& line, OnRayCastAction filter, OnRayPrecastAction preFilter, void* const userData, dgFloat32 minT) const
+{
+	_ASSERTE (filter);
+	if (dgOverlapTestSimd (line.m_boxL0, line.m_boxL1, m_minAABB, m_maxAABB)) {
+		dgContactPoint contactOut;
+		dgVector localP0 (m_collisionWorldMatrix.UntransformVector (line.m_l0));
+		dgVector localP1 (m_collisionWorldMatrix.UntransformVector (line.m_l1));
+		dgFloat32 t = m_collision->RayCastSimd (localP0, localP1, contactOut, preFilter, this, userData);
+		if (t < minT) {
+			_ASSERTE (t >= 0.0f);
+			_ASSERTE (t <= 1.0f);
+
+			contactOut.m_normal = m_collisionWorldMatrix.RotateVectorSimd (contactOut.m_normal);
+			minT = filter (this, contactOut.m_normal, dgInt32 (contactOut.m_userId), userData, t);
+		}
+	}
+	return minT;
+}
+
+dgFloat32 dgBody::RayCast (const dgLineBox& line, OnRayCastAction filter, OnRayPrecastAction preFilter, void* const userData, dgFloat32 minT) const
+{
+	_ASSERTE (filter);
+	if (dgOverlapTest (line.m_boxL0, line.m_boxL1, m_minAABB, m_maxAABB)) {
+		dgContactPoint contactOut;
+		dgVector localP0 (m_collisionWorldMatrix.UntransformVector (line.m_l0));
+		dgVector localP1 (m_collisionWorldMatrix.UntransformVector (line.m_l1));
+		dgFloat32 t = m_collision->RayCast (localP0, localP1, contactOut, preFilter, this, userData);
+		if (t < minT) {
+			_ASSERTE (t >= 0.0f);
+			_ASSERTE (t <= 1.0f);
+			contactOut.m_normal = m_collisionWorldMatrix.RotateVector (contactOut.m_normal);
+			minT = filter (this, contactOut.m_normal, dgInt32 (contactOut.m_userId), userData, t);
 		}
 	}
 	return minT;

@@ -400,10 +400,10 @@ dgCollidingPairCollector::~dgCollidingPairCollector ()
 
 void dgCollidingPairCollector::Init ()
 {
-//	dgWorld* const world = (dgWorld*) this;
+	dgWorld* const world = (dgWorld*) this;
 //	m_maxSize = world->m_pairMemoryBufferSizeInBytes / sizeof (dgPair);
 //	m_maxSize = world->m_pairMemoryBuffer.GetElementsCapacity() / sizeof (dgPair);
-//	m_pairs = (dgPair*) &world->m_pairMemoryBuffer[0];
+	m_pairs = (dgPair*) &world->m_pairMemoryBuffer[0];
 	m_lock = 0;
 	m_count = 0;
 }
