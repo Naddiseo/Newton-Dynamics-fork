@@ -30,15 +30,8 @@
 #define ROUNDING_DOWN		0x000000400
 
 #ifdef _WIN_32_VER
- dgFloat32 dgAbsf(dgFloat32 x) 
-{
-	_asm fld	x;
-	_asm fabs	;
-	_asm fstp	x;
-	return x;
-}
 
- dgFloat32 dgSqrt(dgFloat32 x)  
+dgFloat32 dgSqrt(dgFloat32 x)  
 {
 	_asm fld	x;
 	_asm fsqrt	;
@@ -46,7 +39,7 @@
 	return x;
 }
 
- dgFloat32 dgSin(dgFloat32 x)  
+dgFloat32 dgSin(dgFloat32 x)  
 {
 	_asm fld	x;
 	_asm fsin;
@@ -54,7 +47,7 @@
 	return x;
 }
 
- dgFloat32 dgCos(dgFloat32 x)  
+dgFloat32 dgCos(dgFloat32 x)  
 {
 	_asm fld	x;
 	_asm fcos;
@@ -62,7 +55,7 @@
 	return x;
 }
 
- dgFloat32 dgAsin(dgFloat32 x)  
+dgFloat32 dgAsin(dgFloat32 x)  
 {
 	_asm fld	x;
 	_asm fld1;             
@@ -76,7 +69,7 @@
 	return x;
 }
 
- dgFloat32 dgAcos(dgFloat32 x)  
+dgFloat32 dgAcos(dgFloat32 x)  
 {
 	_asm fld	x;
 	_asm fld1;             
@@ -91,7 +84,7 @@
 	return x;
 }
 
- dgFloat32 dgAtan2(dgFloat32 x, dgFloat32 y)  
+dgFloat32 dgAtan2(dgFloat32 x, dgFloat32 y)  
 {
 	_asm fld	x;
 	_asm fld	y;
@@ -101,8 +94,16 @@
 }
 
 
+/*
+dgFloat32 dgAbsf(dgFloat32 x) 
+{
+	_asm fld	x;
+	_asm fabs	;
+	_asm fstp	x;
+	return x;
+}
 
- dgFloat32 dgFloor (dgFloat32 x) 
+dgFloat32 dgFloor (dgFloat32 x) 
 {
 	dgInt32	tmp;
 	dgInt32	controlworld;
@@ -120,7 +121,7 @@
 }
 
 
- dgInt32 dgFastInt (dgFloat32 x) 
+dgInt32 dgFastInt (dgFloat32 x) 
 {
 	dgInt32	tmp;
 	dgInt32 integer;
@@ -137,6 +138,7 @@
 	__asm  fldcw	controlworld;
 	return integer;
 }
+*/
 
 #ifdef __USE_DOUBLE_PRECISION__
 void dgSinCos (dgFloat32 ang, dgFloat32& sinAng, dgFloat32& cosAng)
