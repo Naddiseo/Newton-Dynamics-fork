@@ -533,7 +533,6 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 	}
 
 	if (mainWindow->m_debugDisplayState) {
-		DebugRenderDebugInfo ();
 		DebugRenderWorldCollision (GetNewton());
 	}
 

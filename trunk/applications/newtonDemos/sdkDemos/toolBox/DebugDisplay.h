@@ -17,20 +17,7 @@
 #include <dVector.h>
 #include <dMatrix.h>
 
-
-void DebugDrawLine (const dVector& p0, const dVector& p1, dVector color = dVector (1.0f, 1.0f, 1.0f, 1.0f));
-
-void DebugDrawAABB (const dVector& p0, const dVector& p1, dVector color = dVector (1.0f, 1.0f, 1.0f, 1.0f));
-void DebugDrawPolygon (int count, dVector* points, dVector color = dVector (1.0f, 1.0f, 1.0f, 1.0f));
-void DebugDrawContact (const dVector& point, const dVector& normal, dVector color = dVector (1.0f, 1.0f, 0.0f, 1.0f), float lenght = 1.0f);
-
-void DebugDrawCollision (const NewtonCollision* collision, dMatrix& matrix, dVector color = dVector (1.0f, 1.0f, 1.0f, 1.0f));
+void RenderContactPoints (NewtonWorld* const world); 
 void DebugRenderWorldCollision (const NewtonWorld* world);
-void RenderContactPoints (NewtonWorld* world); 
-
-void DebugRenderDebugInfo ();
-
-
-
 
 #endif
