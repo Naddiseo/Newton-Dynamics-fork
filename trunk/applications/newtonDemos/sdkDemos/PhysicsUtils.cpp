@@ -150,17 +150,6 @@ void AutoSleep (SceneManager& me, int mode)
 
 
 
-void ShowBodyContacts (const NewtonBody* body)
-{
-	// iterate over all of the contact joint for this body
-	for (NewtonJoint* contactJoint = NewtonBodyGetFirstContactJoint (body); contactJoint; contactJoint = NewtonBodyGetNextContactJoint (body, contactJoint)) {
-		// for debug purpose show the contact
-		ShowJointContacts (contactJoint);
-	}
-}
-
-
-
 void ShowJointInfo(const NewtonCustomJoint* joint)
 {
 	NewtonJointRecord info;
@@ -731,33 +720,6 @@ void  PhysicsApplyGravityForce (const NewtonBody* body, dFloat timestep, int thr
 }
 
 
-
-void ShowJointContacts (const NewtonJoint* contactJoint)
-{
-	// the application can implement some kind of contact debug here
-	if (showContacts) {
-		NewtonWorld* world;
-
-		world = NewtonBodyGetWorld(NewtonJointGetBody0(contactJoint));
-		NewtonWorldCriticalSectionLock(world);
-		for (void* contact = NewtonContactJointGetFirstContact (contactJoint); contact; contact = NewtonContactJointGetNextContact (contactJoint, contact)) {
-			dVector point;
-			dVector normal;	
-
-			NewtonMaterial* material;
-
-			material = NewtonContactGetMaterial (contact);
-			NewtonMaterialGetContactPositionAndNormal (material, &point.m_x, &normal.m_x);
-
-			// if we are display debug info we need to block other threads from writing the data at the same time
-			DebugDrawContact (point, normal);
-		}
-		NewtonWorldCriticalSectionUnlock(world);
-	}
-}
-
-
-
 void GenericContactProcess (const NewtonJoint* contactJoint, dFloat timestep, int threadIndex)
 {
 #if 0 
@@ -815,9 +777,6 @@ void GenericContactProcess (const NewtonJoint* contactJoint, dFloat timestep, in
 		// play sound base of the contact speed.
 		//
 	}
-
-	// the application can implement some kind of contact debug here
-	ShowJointContacts (contactJoint);
 }
 
 

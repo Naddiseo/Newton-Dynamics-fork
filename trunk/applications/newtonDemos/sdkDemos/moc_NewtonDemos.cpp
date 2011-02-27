@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'NewtonDemos.h'
 **
-** Created: Fri Feb 25 16:27:59 2011
+** Created: Sun Feb 27 13:31:13 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -24,7 +24,7 @@ static const uint qt_meta_data_newtonDemos[] = {
        5,       // revision
        0,       // classname
        0,    0, // classinfo
-      15,   14, // methods
+      16,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -41,12 +41,13 @@ static const uint qt_meta_data_newtonDemos[] = {
       85,   12,   12,   12, 0x0a,
      104,   12,   12,   12, 0x0a,
      125,   12,   12,   12, 0x0a,
-     149,   12,   12,   12, 0x0a,
-     172,   12,   12,   12, 0x0a,
-     196,   12,   12,   12, 0x0a,
-     225,   12,   12,   12, 0x0a,
-     256,   12,   12,   12, 0x0a,
-     275,   12,   12,   12, 0x0a,
+     147,   12,   12,   12, 0x0a,
+     171,   12,   12,   12, 0x0a,
+     194,   12,   12,   12, 0x0a,
+     218,   12,   12,   12, 0x0a,
+     247,   12,   12,   12, 0x0a,
+     278,   12,   12,   12, 0x0a,
+     297,   12,   12,   12, 0x0a,
 
        0        // eod
 };
@@ -55,8 +56,8 @@ static const char qt_meta_stringdata_newtonDemos[] = {
     "newtonDemos\0\0OnIdle()\0OnLoad()\0OnSave()\0"
     "OnRunDemo()\0OnAutoSleep()\0OnShowDebugLines()\0"
     "OnShowStatistics()\0OnUseParalleSolver()\0"
-    "OnShowPhysicsProfiler()\0OnShowThreadProfiler()\0"
-    "OnUseSimdInstructions()\0"
+    "OnShowContactPoints()\0OnShowPhysicsProfiler()\0"
+    "OnShowThreadProfiler()\0OnUseSimdInstructions()\0"
     "OnRunSymulationAsyncronous()\0"
     "OnSelectNumberOfMicroThreads()\0"
     "OnSetCameraSpeed()\0OnNotUsed()\0"
@@ -99,16 +100,17 @@ int newtonDemos::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
         case 5: OnShowDebugLines(); break;
         case 6: OnShowStatistics(); break;
         case 7: OnUseParalleSolver(); break;
-        case 8: OnShowPhysicsProfiler(); break;
-        case 9: OnShowThreadProfiler(); break;
-        case 10: OnUseSimdInstructions(); break;
-        case 11: OnRunSymulationAsyncronous(); break;
-        case 12: OnSelectNumberOfMicroThreads(); break;
-        case 13: OnSetCameraSpeed(); break;
-        case 14: OnNotUsed(); break;
+        case 8: OnShowContactPoints(); break;
+        case 9: OnShowPhysicsProfiler(); break;
+        case 10: OnShowThreadProfiler(); break;
+        case 11: OnUseSimdInstructions(); break;
+        case 12: OnRunSymulationAsyncronous(); break;
+        case 13: OnSelectNumberOfMicroThreads(); break;
+        case 14: OnSetCameraSpeed(); break;
+        case 15: OnNotUsed(); break;
         default: ;
         }
-        _id -= 15;
+        _id -= 16;
     }
     return _id;
 }

@@ -187,6 +187,7 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 	,m_debugDisplayState(false)
 	,m_physicProfilerState(true)
 	,m_threadProfilerState(true)
+	,m_showContactPointState(false)
 	,m_showStatistics(true)
 	,m_doVisualUpdates(true)
 	,m_concurrentPhysicsUpdates(false)
@@ -294,13 +295,20 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnAutoSleep()));
 
 
-			// file new, open, save
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Show debug display", 0, QApplication::UnicodeUTF8));
 			action->setCheckable(true);
 			action->setChecked(m_debugDisplayState); 
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnShowDebugLines()));
+
+			action = new QAction(this);
+			action->setText(QApplication::translate("newtonMain", "Show contact points", 0, QApplication::UnicodeUTF8));
+			action->setCheckable(true);
+			action->setChecked(m_showContactPointState); 
+			subMenu->addAction(action);
+			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnShowContactPoints()));
+
 
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Show physics profiler", 0, QApplication::UnicodeUTF8));
@@ -618,6 +626,17 @@ void newtonDemos::OnShowStatistics()
 
 	QAction* const action = (QAction*)sender();
 	m_showStatistics = action->isChecked();
+
+	END_MENU_OPTION();
+}
+
+
+void newtonDemos::OnShowContactPoints()
+{
+	BEGIN_MENU_OPTION();
+
+	QAction* const action = (QAction*)sender();
+	m_showContactPointState = action->isChecked();
 
 	END_MENU_OPTION();
 }

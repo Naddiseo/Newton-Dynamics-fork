@@ -26,8 +26,11 @@ void DebugDrawContact (const dVector& point, const dVector& normal, dVector colo
 
 void DebugDrawCollision (const NewtonCollision* collision, dMatrix& matrix, dVector color = dVector (1.0f, 1.0f, 1.0f, 1.0f));
 void DebugRenderWorldCollision (const NewtonWorld* world);
+void RenderContactPoints (NewtonWorld* world); 
 
 void DebugRenderDebugInfo ();
+
+
 
 
 #endif

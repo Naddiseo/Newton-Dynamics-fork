@@ -528,6 +528,9 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 		glPopMatrix();
 	}
 
+	if (mainWindow->m_showContactPointState) {
+		RenderContactPoints (GetNewton());
+	}
 
 	if (mainWindow->m_debugDisplayState) {
 		DebugRenderDebugInfo ();

@@ -90,7 +90,7 @@ dFloat RandomVariable(dFloat amp);
 void PhysicsBodyDestructor (const NewtonBody* body);
 void PhysicsApplyGravityForce (const NewtonBody* body, dFloat timestep, int threadIndex);
 
-void ShowJointContacts (const NewtonJoint* contactJoint);
+
 void GenericContactProcess (const NewtonJoint* contactJoint, dFloat timestep, int threadIndex);
 
 NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& offsetMatrix, const dVector& size, PrimitiveType type, int materialID);

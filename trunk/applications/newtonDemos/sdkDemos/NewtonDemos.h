@@ -59,10 +59,11 @@ public:
 		void OnLoad(); 
 		void OnSave(); 
 		void OnRunDemo(); 
-		void OnAutoSleep(); 	
+		void OnAutoSleep();
 		void OnShowDebugLines();
 		void OnShowStatistics();
 		void OnUseParalleSolver(); 	
+		void OnShowContactPoints();
 		void OnShowPhysicsProfiler();
 		void OnShowThreadProfiler();
 		void OnUseSimdInstructions(); 	
@@ -85,6 +86,7 @@ private:
 	bool m_debugDisplayState;
 	bool m_physicProfilerState;
 	bool m_threadProfilerState;
+	bool m_showContactPointState;
 	bool m_showStatistics;
 	bool m_doVisualUpdates;
 	bool m_concurrentPhysicsUpdates;

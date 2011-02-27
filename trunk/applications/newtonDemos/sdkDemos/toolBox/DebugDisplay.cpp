@@ -241,6 +241,55 @@ void DebugShowBodyCollision (const NewtonBody* body, void* userData)
 }
 
 
+void RenderContactPoints (NewtonWorld* world)
+{
+	glDisable (GL_LIGHTING);
+	glDisable(GL_TEXTURE_2D);
+
+	glColor3f(1.0f, 1.0f, 1.0f);
+
+	glBegin(GL_LINES);
+	float length = 0.5f;
+	for (NewtonBody* body = NewtonWorldGetFirstBody(world); body; body = NewtonWorldGetNextBody(world, body)) {
+		for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(body); joint; joint = NewtonBodyGetNextContactJoint(body, joint)) {
+			for (void* contact = NewtonContactJointGetFirstContact (joint); contact; contact = NewtonContactJointGetNextContact (joint, contact)) {
+				dVector point;
+				dVector normal;	
+				NewtonMaterial* const material = NewtonContactGetMaterial (contact);
+				NewtonMaterialGetContactPositionAndNormal (material, &point.m_x, &normal.m_x);
+
+				// if we are display debug info we need to block other threads from writing the data at the same time
+				dVector p0 (point + normal.Scale (length));
+				dVector p1 (point - normal.Scale (length));
+				glVertex3f (p0.m_x, p0.m_y, p0.m_z);
+				glVertex3f (p1.m_x, p1.m_y, p1.m_z);
+			}
+		}
+	}
+	glEnd();
+
+	glPointSize(8.0f);
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glBegin(GL_POINTS);
+	for (NewtonBody* body = NewtonWorldGetFirstBody(world); body; body = NewtonWorldGetNextBody(world, body)) {
+		for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(body); joint; joint = NewtonBodyGetNextContactJoint(body, joint)) {
+			for (void* contact = NewtonContactJointGetFirstContact (joint); contact; contact = NewtonContactJointGetNextContact (joint, contact)) {
+				dVector point;
+				dVector normal;	
+				NewtonMaterial* const material = NewtonContactGetMaterial (contact);
+				NewtonMaterialGetContactPositionAndNormal (material, &point.m_x, &normal.m_x);
+
+				// if we are display debug info we need to block other threads from writing the data at the same time
+				glVertex3f (point.m_x, point.m_y, point.m_z);
+
+			}
+		}
+	}
+	glEnd();
+	glPointSize(1.0f);
+}
+
+
 void DebugRenderWorldCollision (const NewtonWorld* world)
 {
 	glDisable (GL_LIGHTING);
