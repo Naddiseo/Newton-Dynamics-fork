@@ -564,8 +564,8 @@ void dgSortIndirect (T** const array, dgInt32 elements, dgInt32 (*compare) (cons
 union dgDoubleInt
 {
 	struct {
-		dgUnsigned32 m_intL;
-		dgUnsigned32 m_intH;
+		dgInt32 m_intL;
+		dgInt32 m_intH;
 	};
 	dgInt64 m_int;
 	dgFloat64 m_float;
@@ -633,7 +633,7 @@ enum dgCpuClass
 	}
 #endif
 
-inline dgFloat32 dgAbsf(dgFloat32 x)
+DG_INLINE dgFloat32 dgAbsf(dgFloat32 x)
 {
 	dgDoubleInt val;
 	val.m_float = x;
@@ -643,24 +643,19 @@ inline dgFloat32 dgAbsf(dgFloat32 x)
 }
 
 
-inline dgInt32 dgFastInt (dgFloat32 x)
+DG_INLINE dgInt32 dgFastInt (dgFloat32 x)
 {
-	return int (floor (x));
-/*
-x = -1.1f;
 	volatile dgDoubleInt val;
-	dgFloat32 absolute = dgAbsf(x);
-	val.m_float = absolute + dgFloat64 (dgInt64(1)<<52);
-	dgInt32 returnValue = dgInt32 (val.m_int);
-	val.m_float = absolute - dgFloat32 (returnValue);
-	returnValue -= (val.m_intH >> 31);
-
-	_ASSERTE (returnValue == dgInt32 (floor (x)));
-	return returnValue;
-*/
+	volatile dgDoubleInt round;
+	const dgFloat64 conversionMagicConst = ((dgFloat64 (dgInt64(1)<<52)) * dgFloat64 (1.5f));
+	val.m_float = dgFloat64 (x) + conversionMagicConst; 
+	round.m_float = x - dgFloat64 (val.m_intL);
+	dgInt32 ret = val.m_intL + (round.m_intH >> 31);
+	_ASSERTE (ret == dgInt32 (floor (x)));
+	return ret;
 }
 
-inline dgFloat32 dgFloor(dgFloat32 x)
+DG_INLINE dgFloat32 dgFloor(dgFloat32 x)
 {
 /*
 	dgFloat32 absolute = dgAbsf(x);
@@ -680,7 +675,7 @@ inline dgFloat32 dgFloor(dgFloat32 x)
 	return floor (x);
 }
 
-inline dgFloat32 dgCeil(dgFloat32 x)
+DG_INLINE dgFloat32 dgCeil(dgFloat32 x)
 {
 /*
 	dgFloat32 ret = dgFloor(x);
