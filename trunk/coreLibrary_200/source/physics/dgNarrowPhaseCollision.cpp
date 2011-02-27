@@ -1694,12 +1694,7 @@ void dgWorld::SceneContacts (const dgCollisionScene::dgProxy& sceneProxy, dgColl
 
 void dgWorld::SceneContacts (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
 {
-	dgInt32 contactCount;
-	dgContact* constraint;
-	dgCollisionScene* scene;
-
-	contactCount = 0;
-	constraint = pair->m_contact;
+	dgContact* const constraint = pair->m_contact;
 
 	pair->m_isTrigger = 0;
 	pair->m_contactCount = 0;
@@ -1711,8 +1706,7 @@ void dgWorld::SceneContacts (dgCollidingPairCollector::dgPair* const pair, dgCol
 //	_ASSERTE (pair->m_body0->m_invMass.m_w != dgFloat32 (0.0f));
 //	_ASSERTE (pair->m_body1->m_invMass.m_w == dgFloat32 (0.0f));
 	if (constraint) {
-		dgInt32 contactCount;
-		contactCount = ValidateContactCache (pair->m_body0, pair->m_body1, constraint);
+		dgInt32 contactCount = ValidateContactCache (pair->m_body0, pair->m_body1, constraint);
 		if (contactCount) {
 			pair->m_contactCount = 0;
 			pair->m_contactBuffer = NULL;
@@ -1720,7 +1714,7 @@ void dgWorld::SceneContacts (dgCollidingPairCollector::dgPair* const pair, dgCol
 		}
 	}
 
-	scene = (dgCollisionScene*) pair->m_body1->GetCollision();
+	dgCollisionScene* const scene = (dgCollisionScene*) pair->m_body1->GetCollision();
 	_ASSERTE (scene->IsType(dgCollision::dgCollisionScene_RTTI));
 	if (pair->m_body0->GetCollision()->IsType (dgCollision::dgConvexCollision_RTTI)) {
 		proxi.m_referenceBody = pair->m_body0;
@@ -1743,12 +1737,7 @@ void dgWorld::SceneContacts (dgCollidingPairCollector::dgPair* const pair, dgCol
 
 void dgWorld::SceneContactsSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
 {
-	dgInt32 contactCount;
-	dgContact* constraint;
-	dgCollisionScene* scene;
-
-	contactCount = 0;
-	constraint = pair->m_contact;
+	dgContact* const constraint = pair->m_contact;
 
 	pair->m_isTrigger = 0;
 	pair->m_contactCount = 0;
@@ -1760,8 +1749,7 @@ void dgWorld::SceneContactsSimd (dgCollidingPairCollector::dgPair* const pair, d
 //	_ASSERTE (pair->m_body0->m_invMass.m_w != dgFloat32 (0.0f));
 //	_ASSERTE (pair->m_body1->m_invMass.m_w == dgFloat32 (0.0f));
 	if (constraint) {
-		dgInt32 contactCount;
-		contactCount = ValidateContactCache (pair->m_body0, pair->m_body1, constraint);
+		dgInt32 contactCount = ValidateContactCache (pair->m_body0, pair->m_body1, constraint);
 		if (contactCount) {
 			pair->m_contactCount = 0;
 			pair->m_contactBuffer = NULL;
@@ -1769,7 +1757,7 @@ void dgWorld::SceneContactsSimd (dgCollidingPairCollector::dgPair* const pair, d
 		}
 	}
 
-	scene = (dgCollisionScene*) pair->m_body1->GetCollision();
+	dgCollisionScene* const scene = (dgCollisionScene*) pair->m_body1->GetCollision();
 	_ASSERTE (scene->IsType(dgCollision::dgCollisionScene_RTTI));
 	if (pair->m_body0->GetCollision()->IsType (dgCollision::dgConvexCollision_RTTI)) {
 		proxi.m_referenceBody = pair->m_body0;

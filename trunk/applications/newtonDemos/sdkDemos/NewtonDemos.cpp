@@ -541,9 +541,8 @@ void newtonDemos::LoadDemo (int index)
 
 	m_canvas->Cleanup();
 	demosSelection[index].m_launchDemoCallback (m_canvas);
-	m_canvas->SetAutoSleepState (m_autoSleepState);
 
-
+	RestoreSettings ();
 	END_MENU_OPTION();
 }
 
