@@ -561,6 +561,17 @@ void dgSortIndirect (T** const array, dgInt32 elements, dgInt32 (*compare) (cons
 	};
 #endif
 
+union dgDoubleInt
+{
+	struct {
+		dgUnsigned32 m_intL;
+		dgUnsigned32 m_intH;
+	};
+	dgInt64 m_int;
+	dgFloat64 m_float;
+};
+
+
 
 void dgApi GetMinMax (dgVector &Min, dgVector &Max, const dgFloat32* const vArray, dgInt32 vCount, dgInt32 StrideInBytes);
 
@@ -580,45 +591,34 @@ enum dgCpuClass
 
 
 #ifdef _WIN_32_VER
-
-	dgFloat32 dgAbsf(dgFloat32 x); 
 	dgFloat32 dgSqrt(dgFloat32 x);  
 	dgFloat32 dgSin(dgFloat32 x);  
 	dgFloat32 dgCos(dgFloat32 x);  
 	dgFloat32 dgAsin(dgFloat32 x);  
 	dgFloat32 dgAcos(dgFloat32 x);  
 	dgFloat32 dgAtan2(dgFloat32 x, dgFloat32 y);  
-	dgFloat32 dgFloor (dgFloat32 x); 
-	dgInt32 dgFastInt (dgFloat32 x); 
 	void dgSinCos (dgFloat32 ang, dgFloat32& sinAng, dgFloat32& cosAng);
 
 	#define dgRsqrt(x) (dgFloat32 (1.0f) / dgSqrt(x))
 	#define dgControlFP(x,y) _controlfp(x,y)
 
 	#ifdef __USE_DOUBLE_PRECISION__
-		#define dgCeil(x) ceil(x)
 		#define dgLog(x) log(x)
 		#define dgPow(x,y) pow(x,y)
 		#define dgFmod(x,y) fmod(x,y)
 	
 	#else
-		#define dgCeil(x) ceilf(x)
 		#define dgLog(x) logf(x)
 		#define dgPow(x,y) powf(x,y)
 		#define dgFmod(x,y) fmodf(x,y)
 	#endif
 
 #else 
-	#define dgAbsf(x) dgFloat32 (fabs(x))
 	#define dgSin(x) dgFloat32 (sin(x))
 	#define dgCos(x) dgFloat32 (cos(x))
 	#define dgAsin(x) dgFloat32 (asin(x))
 	#define dgAcos(x) dgFloat32 (acos(x))
 	#define dgSqrt(x) dgFloat32 (sqrt(x))	
-	#define dgCeil(x) dgFloat32 (ceil(x))
-	#define dgFloor(x) dgFloat32 (floor(x))
-	#define dgFastInt(x) ((dgInt32) dgFloor(x))
-//	#define dgLog(x) dgFloat32 (log(x))
 	#define dgLog(x) dgFloat32 (log(x))
 	#define dgPow(x,y) dgFloat32 (pow(x,y))
 	#define dgFmod(x,y) dgFloat32 (fmod(x,y))
@@ -632,6 +632,50 @@ enum dgCpuClass
 		cosAng = dgCos(ang);
 	}
 #endif
+
+inline dgFloat32 dgAbsf(dgFloat32 x)
+{
+	dgDoubleInt val;
+	val.m_float = x;
+	val.m_intH &= ~(dgUnsigned64 (1)<<31);
+	_ASSERTE (val.m_float == fabs (x));
+	return dgFloat32 (val.m_float);
+}
+
+
+inline dgInt32 dgFastInt (dgFloat32 x)
+{
+	volatile dgDoubleInt val;
+	dgFloat32 absolute = dgAbsf(x);
+	val.m_float = absolute + dgFloat64 (dgInt64(1)<<52);
+	dgInt32 returnValue = dgInt32 (val.m_int);
+	val.m_float = absolute - dgFloat32 (returnValue);
+	returnValue -= (val.m_intH >> 31);
+
+	_ASSERTE (returnValue == dgInt32 (floor (x)));
+	return returnValue;
+}
+
+inline dgFloat32 dgFloor(dgFloat32 x)
+{
+	volatile dgFloat64 shiftRight = x + dgFloat64 (dgInt64(1)<<53);
+	volatile dgFloat64 shiftLeft = shiftRight - dgFloat64 (dgInt64(1)<<53);
+	volatile dgDoubleInt sign;
+	sign.m_float = x - shiftLeft;
+	dgFloat32 ret = dgFloat32 (shiftLeft) - dgFloat32 (sign.m_intH >> 31);
+	_ASSERTE (ret == floor (x));
+	return  ret;
+}
+
+inline dgFloat32 dgCeil(dgFloat32 x)
+{
+	dgFloat32 ret = dgFloor(x);
+	if (ret < x) {
+		ret += dgFloat32 (1.0f);
+	}
+	_ASSERTE (ret == ceil (x));
+	return  ret;
+}
 
 
 typedef dgUnsigned32 (dgApi *OnGetPerformanceCountCallback) ();
