@@ -657,35 +657,19 @@ DG_INLINE dgInt32 dgFastInt (dgFloat32 x)
 
 DG_INLINE dgFloat32 dgFloor(dgFloat32 x)
 {
-/*
-	dgFloat32 absolute = dgAbsf(x);
-	volatile dgFloat64 shiftRight = absolute + dgFloat64 (dgInt64(1)<<52);
-	volatile dgFloat64 shiftLeft = shiftRight - dgFloat64 (dgInt64(1)<<52);
-
-	volatile dgDoubleInt round;
-	round.m_float = absolute - shiftLeft;
-	dgFloat32 ret = (dgFloat32 (shiftLeft) - dgFloat32 (round.m_intH >> 31));
-	if (x < dgFloat32 (0.0f)) {
-		ret = - ret - dgFloat32 (1.0f);
-	}
-
+	dgFloat32 ret = dgFloat32 (dgFastInt (x));
 	_ASSERTE (ret == floor (x));
 	return  ret;
-*/
-	return floor (x);
 }
 
 DG_INLINE dgFloat32 dgCeil(dgFloat32 x)
 {
-/*
 	dgFloat32 ret = dgFloor(x);
 	if (ret < x) {
 		ret += dgFloat32 (1.0f);
 	}
 	_ASSERTE (ret == ceil (x));
 	return  ret;
-*/
-	return ceil (x);
 }
 
 
