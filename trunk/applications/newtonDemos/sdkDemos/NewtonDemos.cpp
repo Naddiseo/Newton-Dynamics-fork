@@ -288,7 +288,7 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 		{
 			// file new, open, save
 			QAction* action = new QAction(this);
-			action->setText(QApplication::translate("newtonMain", "Autosleep dissabled", 0, QApplication::UnicodeUTF8));
+			action->setText(QApplication::translate("newtonMain", "Autosleep On", 0, QApplication::UnicodeUTF8));
 			action->setCheckable(true);
 			action->setChecked(m_autoSleepState); 
 			subMenu->addAction(action);
