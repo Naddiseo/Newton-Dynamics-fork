@@ -1135,7 +1135,7 @@ void dgWorld::ProcessContacts (dgCollidingPairCollector::dgPair* const pair, dgF
 	dgContact* contact1 = pair->m_contact;
 	const dgContactMaterial* const material = pair->m_material;
 	dgBroadPhaseCollision* const broadPhase = this;
-	_ASSERTE (pair->m_contactBufferIndex != -1);
+	_ASSERTE (pair->m_contactBufferIndex >= 0);
 //	dgContactPoint* const contactArray = pair->m_contactBuffer;
 	dgContactPoint* const contactArray = &broadPhase->m_contactBuffer[pair->m_contactBufferIndex];
 	_ASSERTE (body0 != body1);
@@ -1372,26 +1372,20 @@ void dgWorld::ProcessContacts (dgCollidingPairCollector::dgPair* const pair, dgF
 
 dgInt32 dgWorld::ValidateContactCache (dgBody* const convexBody, dgBody* const otherBody, dgContact* const contact) const
 {
-	dgInt32 contactCount;
-
 	_ASSERTE (contact && (contact->GetId() == dgContactConstraintId));
 	_ASSERTE ((contact->GetBody0() == otherBody) || (contact->GetBody1() == otherBody));
 	_ASSERTE ((contact->GetBody0() == convexBody) || (contact->GetBody1() == convexBody));
 
-	contactCount = 0;
+	dgInt32 contactCount = 0;
 
 #ifdef DG_USE_CACHE_CONTACTS
-	dgBody* body0;
-	dgBody* body1;
-	dgFloat32 err2;
-	dgList<dgContactMaterial>::dgListNode *ptr;
-#define DG_CACHE_DIST_TOL dgFloat32 (1.0e-3f)
+	#define DG_CACHE_DIST_TOL dgFloat32 (1.0e-3f)
 
-	body0 = contact->GetBody0();
+	dgBody* const body0 = contact->GetBody0();
 	dgVector error0 (contact->m_prevPosit0 - body0->m_matrix.m_posit);
-	err2 = error0 % error0;
+	dgFloat32 err2 = error0 % error0;
 	if (err2 < (DG_CACHE_DIST_TOL * DG_CACHE_DIST_TOL)) {
-		body1 = contact->GetBody1();
+		dgBody* const body1 = contact->GetBody1();
 		dgVector error1 (contact->m_prevPosit1 - body1->m_matrix.m_posit);
 		err2 = error1 % error1;
 		if (err2 < (DG_CACHE_DIST_TOL * DG_CACHE_DIST_TOL)) {
@@ -1405,7 +1399,7 @@ dgInt32 dgWorld::ValidateContactCache (dgBody* const convexBody, dgBody* const o
 					dgMatrix matrix1 (dgMatrix (contact->m_prevRotation1, contact->m_prevPosit1).Inverse() * body1->m_matrix);
 
 					dgList<dgContactMaterial>& list = *contact;
-					for (ptr = list.GetFirst(); ptr; ptr = ptr->GetNext()) {
+					for (dgList<dgContactMaterial>::dgListNode* ptr = list.GetFirst(); ptr; ptr = ptr->GetNext()) {
 						dgContactMaterial& contactMaterial = ptr->GetInfo();
 						dgVector p0 (matrix0.TransformVector (contactMaterial.m_point));
 						dgVector p1 (matrix1.TransformVector (contactMaterial.m_point));
@@ -1455,8 +1449,11 @@ void dgWorld::CompoundContactsSimd (dgCollidingPairCollector::dgPair* const pair
 	if (constraint) {
 		contactCount = ValidateContactCache (compoundBody, otherBody, constraint);
 		if (contactCount) {
+			pair->m_isTrigger = 0;
 			pair->m_contactCount = 0;
-			pair->m_contactBuffer = NULL;
+			//pair->m_contactBuffer = NULL;
+			_ASSERTE (pair->m_contactBufferIndex == -1);
+			pair->m_contactBufferIndex = 0;
 			return ;
 		}
 	}
@@ -1495,8 +1492,11 @@ void dgWorld::CompoundContacts (dgCollidingPairCollector::dgPair* const pair, dg
 	if (constraint) {
 		contactCount = ValidateContactCache (compoundBody, otherBody, constraint);
 		if (contactCount) {
+			pair->m_isTrigger = 0;
 			pair->m_contactCount = 0;
-			pair->m_contactBuffer = NULL;
+			//pair->m_contactBuffer = NULL;
+			_ASSERTE (pair->m_contactBufferIndex == -1);
+			pair->m_contactBufferIndex = 0;
 			return ;
 		}
 	}
@@ -1531,7 +1531,10 @@ void dgWorld::ConvexContactsSimd (dgCollidingPairCollector::dgPair* const pair, 
 		if (contactCount) {
 			pair->m_isTrigger = 0;
 			pair->m_contactCount = 0;
-			pair->m_contactBuffer = NULL;
+			//pair->m_contactBuffer = NULL;
+			_ASSERTE (pair->m_contactBufferIndex == -1);
+			pair->m_contactBufferIndex = 0;
+
 			return ;
 		}
 	}
@@ -1591,9 +1594,8 @@ void dgWorld::ConvexContacts (dgCollidingPairCollector::dgPair* const pair, dgCo
 		if (contactCount) {
 			pair->m_isTrigger = 0;
 			pair->m_contactCount = 0;
-//			pair->m_contactBuffer = NULL;
-//			_ASSERTE (pair->m_contactBufferIndex == -1);
-//			pair->m_contactBufferIndex = -1;
+			_ASSERTE (pair->m_contactBufferIndex == -1);
+			pair->m_contactBufferIndex = 0;
 			return ;
 		}
 	}
@@ -1723,14 +1725,21 @@ void dgWorld::SceneContacts (dgCollidingPairCollector::dgPair* const pair, dgCol
 //	_ASSERTE (pair->m_body1->m_invMass.m_w == dgFloat32 (0.0f));
 
 	if (constraint) {
+		_ASSERTE (0);
+/*
 		dgInt32 contactCount = ValidateContactCache (pair->m_body0, pair->m_body1, constraint);
 		if (contactCount) {
 			_ASSERTE (0);
+			pair->m_isTrigger = 0;
 			pair->m_contactCount = 0;
 			//pair->m_contactBuffer = NULL;
+			_ASSERTE (pair->m_contactBufferIndex == -1);
+			pair->m_contactBufferIndex = 0;
 			return ;
 		}
+*/
 	}
+
 	dgCollisionScene* const scene = (dgCollisionScene*) pair->m_body1->GetCollision();
 	_ASSERTE (scene->IsType(dgCollision::dgCollisionScene_RTTI));
 	if (pair->m_body0->GetCollision()->IsType (dgCollision::dgConvexCollision_RTTI)) {
@@ -1773,8 +1782,14 @@ void dgWorld::SceneContactsSimd (dgCollidingPairCollector::dgPair* const pair, d
 	if (constraint) {
 		dgInt32 contactCount = ValidateContactCache (pair->m_body0, pair->m_body1, constraint);
 		if (contactCount) {
+			//pair->m_contactCount = 0;
+			//pair->m_contactBuffer = NULL;
+
+			pair->m_isTrigger = 0;
 			pair->m_contactCount = 0;
-			pair->m_contactBuffer = NULL;
+			//pair->m_contactBuffer = NULL;
+			_ASSERTE (pair->m_contactBufferIndex == -1);
+			pair->m_contactBufferIndex = 0;
 			return ;
 		}
 	}

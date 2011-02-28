@@ -686,14 +686,10 @@ inline dgInt32 dgBody::GetUniqueID () const
 
 inline bool dgBody::IsInEquelibrium () const
 {
-	dgFloat32 errMag2;
-	dgFloat32 invMassMag2;
-	dgVector error;
-	
-	invMassMag2 = m_invMass[3] * m_invMass[3];
+	dgFloat32 invMassMag2 = m_invMass[3] * m_invMass[3];
 	if (m_equilibrium) {
-		error = m_accel - m_prevExternalForce;
-		errMag2 = (error % error) * invMassMag2;
+		dgVector error (m_accel - m_prevExternalForce);
+		dgFloat32 errMag2 = (error % error) * invMassMag2;
 		if (errMag2 < DG_ErrTolerance2) {
 			error = m_alpha - m_prevExternalTorque;
 			errMag2 = (error % error) * invMassMag2;

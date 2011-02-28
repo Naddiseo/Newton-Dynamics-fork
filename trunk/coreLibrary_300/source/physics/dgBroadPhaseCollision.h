@@ -43,6 +43,7 @@ class dgBroadPhaseNode
 	~dgBroadPhaseNode ();
 
 	void SetAABB (const dgVector& minBox, const dgVector& maxBox);
+	void SetAABBSimd (const dgVector& minBox, const dgVector& maxBox);
 
 	dgVector m_minBox;
 	dgVector m_maxBox;
@@ -120,12 +121,15 @@ class dgBroadPhaseCollision
 	void InvalidateCache ();
 	void UpdateContacts (dgFloat32 tiemstep, bool collisionUpdate);
 	void UpdateBodyBroadphase(dgBody* const body, dgInt32 threadIndex);
+	void UpdateBodyBroadphaseSimd(dgBody* const body, dgInt32 threadIndex);
 
 	private:
 	void ImproveFitness();
 	void ImproveNodeFitness (dgBroadPhaseNode* const node);
+	void ImproveNodeFitnessSimd (dgBroadPhaseNode* const node);
 	dgBroadPhaseNode* InsertNode (dgBroadPhaseNode* const node);
 	dgFloat32 CalculateSurfaceArea (const dgBroadPhaseNode* const node0, const dgBroadPhaseNode* const node1, dgVector& minBox, dgVector& maxBox) const;
+	dgFloat32 CalculateSurfaceAreaSimd (const dgBroadPhaseNode* const node0, const dgBroadPhaseNode* const node1, dgVector& minBox, dgVector& maxBox) const;
 
 	static void UpdateContactsDriver (void* const descriptor, dgInt32 threadID);
 

@@ -361,8 +361,8 @@ void dgCollisionSphere::CalcAABB (const dgMatrix &matrix, dgVector &p0, dgVector
 	p0.m_z = matrix[3][2] - radius;
 	p1.m_z = matrix[3][2] + radius;
 
-	p0.m_w = dgFloat32 (1.0f);
-	p1.m_w = dgFloat32 (1.0f);
+	p0.m_w = dgFloat32 (0.0f);
+	p1.m_w = dgFloat32 (0.0f);
 }
 
 dgInt32 dgCollisionSphere::CalculatePlaneIntersection (const dgVector& normal, const dgVector& point, dgVector* const contactsOut) const

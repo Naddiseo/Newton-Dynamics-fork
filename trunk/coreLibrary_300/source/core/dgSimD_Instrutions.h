@@ -92,7 +92,6 @@
 		#define simd_set1(a)				_mm_set_ps1 (a)
 		#define simd_set(x,y,z,w)			_mm_set_ps(w, z, y, x)
 		#define simd_load_s(a)				_mm_load_ss (&a)
-		//#define simd_load_is(a,i)			_mm_cvtsi32_ss (a, i)
 		#define simd_load1_v(a)				_mm_load1_ps (&a)
 		#define simd_loadu_v(a)				_mm_loadu_ps (&a)
 
@@ -162,15 +161,26 @@
 			DG_INLINE simd_128 (simd_type type): m_type(type) {}
 			DG_INLINE simd_128 (const simd_128& data): m_type(data.m_type) {}
 
-			DG_INLINE simd_128 GetMin (const simd_128& data) const
+			DG_INLINE void Store(float* const array) const
 			{
-				return _mm_min_ps (m_type, data.m_type);
-			} 
+				_mm_storeu_ps (array, m_type);
+			}
 
-			DG_INLINE simd_128 GetMax (const simd_128& data) const
+			DG_INLINE simd_128 operator+ (const simd_128& data) const
 			{
-				return _mm_max_ps (m_type, data.m_type);
-			} 
+				return _mm_add_ps (m_type, data.m_type);	
+			}
+
+			DG_INLINE simd_128 operator- (const simd_128& data) const
+			{
+				return _mm_sub_ps (m_type, data.m_type);	
+			}
+
+			DG_INLINE simd_128 operator* (const simd_128& data) const
+			{
+				return _mm_mul_ps (m_type, data.m_type);	
+			}
+
 
 			DG_INLINE simd_128 operator<= (const simd_128& data) const
 			{
@@ -198,28 +208,85 @@
 				return _mm_and_ps (m_type, data.m_type);	
 			}
 
+			DG_INLINE simd_128 operator| (const simd_128& data) const
+			{
+				return _mm_or_ps (m_type, data.m_type);	
+			}
+
+
+			DG_INLINE dgFloat32 DotProduct (const simd_128& data) const
+			{
+				dgFloat32 ret;
+				simd_128 tmp ((*this) * data);
+				tmp = tmp + _mm_shuffle_ps (tmp.m_type, tmp.m_type, PURMUT_MASK(3, 2, 3, 2));
+				tmp = _mm_add_ss (tmp.m_type, _mm_shuffle_ps (tmp.m_type, tmp.m_type, PURMUT_MASK(1, 1, 1, 1)));
+				_mm_store_ss (&ret, tmp.m_type);
+				return ret;
+			}
+
+
+			DG_INLINE simd_128 Abs () const
+			{
+				__m128i shitSign = _mm_srli_epi32 (_mm_slli_epi32 (*((__m128i*) &m_type), 1), 1);
+				return *(__m128*)&shitSign;
+			}
+
+			DG_INLINE simd_128 Floor () const
+			{
+				const dgFloat32 magicConst = (dgFloat32 (1.5f) * dgFloat32 (1<<23));
+				simd_128 mask (magicConst, magicConst, magicConst, magicConst);
+				simd_128 ret (_mm_sub_ps(_mm_add_ps(m_type, mask.m_type), mask.m_type));
+				simd_128 adjust (_mm_cmplt_ps (m_type, ret.m_type));
+				ret = _mm_sub_ps (ret.m_type, _mm_and_ps(_mm_set_ps1(1.0), adjust.m_type));
+				_ASSERTE (ret.m_type.m128_f32[0] == dgFloor(m_type.m128_f32[0]));
+				_ASSERTE (ret.m_type.m128_f32[1] == dgFloor(m_type.m128_f32[1]));
+				_ASSERTE (ret.m_type.m128_f32[2] == dgFloor(m_type.m128_f32[2]));
+				_ASSERTE (ret.m_type.m128_f32[3] == dgFloor(m_type.m128_f32[3]));
+				return ret;
+			}
+			
+			DG_INLINE dgInt32 GetSignMask() const
+			{
+				return _mm_movemask_ps(m_type);
+			} 
+
+			DG_INLINE simd_128 GetMin (const simd_128& data) const
+			{
+				return _mm_min_ps (m_type, data.m_type);
+			} 
+
+			DG_INLINE simd_128 GetMax (const simd_128& data) const
+			{
+				return _mm_max_ps (m_type, data.m_type);
+			} 
+
+			DG_INLINE dgInt32 GetInt () const
+			{
+				return simd_store_is(m_type);
+			}
+
+//			DG_INLINE dgInt32 Test () const
+//			{
+//				simd_128 val ((*this) | PackLow(*this));
+//				val = val | val.MoveHighToLow(val);
+//				return val.GetInt();
+//			}
+
 //			DG_INLINE simd_128 Permute (const simd_128& data, const dgUnsigned32 mask) const
 //			{
 //				return _mm_shuffle_ps (m_type, data.m_type, mask);
 //				//return m_type;
 //			}
 
-			DG_INLINE simd_128 MoveHighToLow (const simd_128& data) const
-			{
-				return _mm_movehl_ps (m_type, data.m_type);
-			}
+//			DG_INLINE simd_128 MoveHighToLow (const simd_128& data) const
+//			{
+//				return _mm_movehl_ps (m_type, data.m_type);
+//			}
 
-			DG_INLINE simd_128 PackLow (const simd_128& data) const
-			{
-				return _mm_unpacklo_ps (m_type, data.m_type);
-			}
-
-
-
-			DG_INLINE dgInt32 GetInt () const
-			{
-				return simd_store_is(m_type);
-			}
+//			DG_INLINE simd_128 PackLow (const simd_128& data) const
+//			{
+//				return _mm_unpacklo_ps (m_type, data.m_type);
+//			}
 
 			simd_type m_type;
 		};

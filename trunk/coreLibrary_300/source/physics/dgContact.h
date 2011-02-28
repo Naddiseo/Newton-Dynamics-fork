@@ -60,7 +60,6 @@ class dgCollidingPairCollector
 		dgBody* m_body1;
 		dgContact* m_contact;
 		const dgContactMaterial* m_material;
-//		dgContactPoint* m_contactBuffer;
 		dgInt32 m_contactBufferIndex;
 		dgInt16 m_contactCount;
 		dgInt16 m_isTrigger;

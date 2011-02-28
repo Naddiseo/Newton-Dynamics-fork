@@ -201,7 +201,6 @@ void dgBody::SetMatrixIgnoreSleep(const dgMatrix& matrix)
 
 void dgBody::UpdateCollisionMatrixSimd (dgFloat32 timestep, dgInt32 threadIndex)
 {
-	_ASSERTE (0);
 #ifdef DG_BUILD_SIMD_CODE
 	m_collisionWorldMatrix = m_collision->m_offset.MultiplySimd(m_matrix);
 
@@ -248,13 +247,15 @@ void dgBody::UpdateCollisionMatrixSimd (dgFloat32 timestep, dgInt32 threadIndex)
 	}
 
 	if (m_collisionCell) {
-		_ASSERTE (0);
 		_ASSERTE (m_world);
 		if (!m_sleeping) {
-			if ((dgAbsf (oldP0.m_x - m_minAABB.m_x) > DG_AABB_ERROR) || (dgAbsf (oldP0.m_y - m_minAABB.m_y) > DG_AABB_ERROR) ||
-				(dgAbsf (oldP0.m_z - m_minAABB.m_z) > DG_AABB_ERROR) || (dgAbsf (oldP1.m_x - m_maxAABB.m_x) > DG_AABB_ERROR) || 
-				(dgAbsf (oldP1.m_y - m_maxAABB.m_y) > DG_AABB_ERROR) || (dgAbsf (oldP1.m_z - m_maxAABB.m_z) > DG_AABB_ERROR)) {
-					m_world->UpdateBodyBroadphase (this, threadIndex);
+			simd_128 tol (DG_AABB_ERROR, DG_AABB_ERROR, DG_AABB_ERROR, DG_AABB_ERROR);
+			simd_128 diff0 (((simd_128&)oldP0) - ((simd_128&)m_minAABB));
+			simd_128 diff1 (((simd_128&)oldP1) - ((simd_128&)m_maxAABB));
+			simd_128 test ((diff0.Abs() > tol) | (diff1.Abs() > tol)); 
+			dgInt32 signMask = test.GetSignMask();
+			if (signMask & 0x07) {
+				m_world->UpdateBodyBroadphaseSimd (this, threadIndex);
 			} else {
 				//m_collisionCell.m_cell->m_active = 1;
 				m_collisionCell->m_active = true;
@@ -267,6 +268,9 @@ void dgBody::UpdateCollisionMatrixSimd (dgFloat32 timestep, dgInt32 threadIndex)
 
 void dgBody::UpdateCollisionMatrix (dgFloat32 timestep, dgInt32 threadIndex)
 {
+//UpdateCollisionMatrixSimd (timestep, threadIndex);
+//return;
+
 	m_collisionWorldMatrix = m_collision->m_offset * m_matrix;
 
 	dgVector oldP0 (m_minAABB);
@@ -583,7 +587,12 @@ void dgBody::UpdateMatrix (dgFloat32 timestep, dgInt32 threadIndex)
 		m_matrixUpdate (*this, m_matrix, threadIndex);
 //		m_world->dgReleasedUserLock_();
 	}
-	UpdateCollisionMatrix (timestep, threadIndex);
+//	UpdateCollisionMatrix (timestep, threadIndex);
+	if (m_world->m_cpu == dgSimdPresent) {
+		UpdateCollisionMatrixSimd (timestep, threadIndex);
+	} else {
+		UpdateCollisionMatrix (timestep, threadIndex);
+	}
 }
 
 void dgBody::IntegrateVelocity (dgFloat32 timestep)

@@ -534,45 +534,6 @@ void dgCollisionScene::CollidePairSimd (dgCollidingPairCollector::dgPair* const 
 
 }
 
-void dgCollisionScene::CollidePair (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
-{
-	const dgNode *stackPool[DG_SCENE_MAX_STACK_DEPTH];
-
-	_ASSERTE (pair->m_body1->GetCollision() == this);
-	_ASSERTE (pair->m_body1->GetCollision()->IsType(dgCollision::dgCollisionScene_RTTI));
-
-	dgVector p0;
-	dgVector p1;
-	_ASSERTE (m_world == pair->m_body1->GetWorld());
-	dgMatrix matrix (pair->m_body0->m_matrix * pair->m_body1->m_matrix.Inverse());
-	pair->m_body0->GetCollision()->CalcAABB (matrix, p0, p1);
-
-	dgInt32 stack = 1;
-	stackPool[0] = m_rootNode;
-	while (stack) {
-		stack --;
-		const dgNode* const me = stackPool[stack];
-
-		if (dgOverlapTest (me->m_minBox, me->m_maxBox, p0, p1)) {
-
-			if (!me->m_left) {
-				_ASSERTE (!me->m_right);
-				const dgProxy* const sceneProxy = (dgProxy*) me;
-				m_world->SceneContacts (*sceneProxy, pair, proxi);
-			} else {
-				_ASSERTE (me->m_left);
-				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-				stackPool[stack] = me->m_left;
-				stack++;
-
-				_ASSERTE (me->m_right);
-				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
-				stackPool[stack] = me->m_right;
-				stack++;
-			}
-		}
-	}
-}
 
 
 void dgCollisionScene::ImproveNodeFitness (dgNode* const node)
@@ -861,5 +822,46 @@ void dgCollisionScene::RemoveProxy (void* const proxy)
 			root->m_right->m_parent = root;
 		}
 		delete (treeNode->m_parent);
+	}
+}
+
+
+void dgCollisionScene::CollidePair (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
+{
+	const dgNode *stackPool[DG_SCENE_MAX_STACK_DEPTH];
+
+	_ASSERTE (pair->m_body1->GetCollision() == this);
+	_ASSERTE (pair->m_body1->GetCollision()->IsType(dgCollision::dgCollisionScene_RTTI));
+
+	dgVector p0;
+	dgVector p1;
+	_ASSERTE (m_world == pair->m_body1->GetWorld());
+	dgMatrix matrix (pair->m_body0->m_matrix * pair->m_body1->m_matrix.Inverse());
+	pair->m_body0->GetCollision()->CalcAABB (matrix, p0, p1);
+
+	dgInt32 stack = 1;
+	stackPool[0] = m_rootNode;
+	while (stack) {
+		stack --;
+		const dgNode* const me = stackPool[stack];
+
+		if (dgOverlapTest (me->m_minBox, me->m_maxBox, p0, p1)) {
+
+			if (!me->m_left) {
+				_ASSERTE (!me->m_right);
+				const dgProxy* const sceneProxy = (dgProxy*) me;
+				m_world->SceneContacts (*sceneProxy, pair, proxi);
+			} else {
+				_ASSERTE (me->m_left);
+				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
+				stackPool[stack] = me->m_left;
+				stack++;
+
+				_ASSERTE (me->m_right);
+				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
+				stackPool[stack] = me->m_right;
+				stack++;
+			}
+		}
 	}
 }

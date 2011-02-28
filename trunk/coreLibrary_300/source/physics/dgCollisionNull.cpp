@@ -79,8 +79,8 @@ void dgCollisionNull::CalcAABB (const dgMatrix &matrix, dgVector &p0, dgVector &
 	p0.m_z = matrix[3][2];
 	p1.m_z = matrix[3][2];
 
-	p0.m_w = 1.0f;
-	p1.m_w = 1.0f;
+	p0.m_w = 0.0f;
+	p1.m_w = 0.0f;
 }
 
 void dgCollisionNull::CalcAABBSimd (const dgMatrix& matrix, dgVector& p0, dgVector& p1) const

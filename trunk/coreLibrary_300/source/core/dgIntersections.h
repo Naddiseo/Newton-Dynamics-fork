@@ -167,22 +167,50 @@ DG_INLINE dgInt32 dgOverlapTest (const dgVector& p0, const dgVector& p1, const d
 DG_INLINE dgInt32 dgOverlapTestSimd (const dgVector& p0, const dgVector& p1, const dgVector& q0, const dgVector& q1)
 {
 #ifdef DG_BUILD_SIMD_CODE
-	
-//simd_type test = simd_and_v (simd_cmplt_v ((simd_type&)p0, (simd_type&) q1), simd_cmpgt_v ((simd_type&)p1, (simd_type&) q0));
-//test = simd_and_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 2, 0)));
-//dgInt32 ret = simd_store_is(simd_and_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 1, 1))));
-//return ret;
+	//simd_type test = simd_and_v (simd_cmplt_v ((simd_type&)p0, (simd_type&) q1), simd_cmpgt_v ((simd_type&)p1, (simd_type&) q0));
+	//test = simd_and_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 2, 0)));
+	//dgInt32 ret = simd_store_is(simd_and_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 1, 1))));
+	//return ret;
 
+	_ASSERTE (p0.m_w == dgFloat32 (0.0f));
+	_ASSERTE (p1.m_w == dgFloat32 (0.0f));
+	_ASSERTE (q0.m_w == dgFloat32 (0.0f));
+	_ASSERTE (q1.m_w == dgFloat32 (0.0f));
 	simd_128 val (((simd_128&)p0 < (simd_128&)q1) & ((simd_128&)p1 > (simd_128&)q0));
-	val = val & val.PackLow(val);
-	val = val & val.MoveHighToLow(val);
-	dgInt32 value = val.GetInt();
-	return value;
+//	val = val & val.PackLow(val);
+//	val = val & val.MoveHighToLow(val);
+//	return val.GetInt();
+	dgInt32 mask = val.GetSignMask();
+	return ((mask & 0x07) == 0x07);
 
 #else
 	return 0;
 #endif
 }
+
+
+DG_INLINE dgInt32 dgBoxInclusionTest (const dgVector& p0, const dgVector& p1, const dgVector& q0, const dgVector& q1)
+{
+	return (p0.m_x >= q0.m_x) && (p0.m_y >= q0.m_y) && (p0.m_z >= q0.m_z) && (p1.m_x <= q1.m_x) && (p1.m_y <= q1.m_y) && (p1.m_z <= q1.m_z);
+}
+
+DG_INLINE dgInt32 dgBoxInclusionTestSimd (const dgVector& p0, const dgVector& p1, const dgVector& q0, const dgVector& q1)
+{
+#ifdef DG_BUILD_SIMD_CODE
+	_ASSERTE (p0.m_w == dgFloat32 (0.0f));
+	_ASSERTE (p1.m_w == dgFloat32 (0.0f));
+	_ASSERTE (q0.m_w == dgFloat32 (0.0f));
+	_ASSERTE (q1.m_w == dgFloat32 (0.0f));
+
+	simd_128 val (((simd_128&)p0 >= (simd_128&)q0) & ((simd_128&)p1 <= (simd_128&)q1));
+	dgInt32 mask = val.GetSignMask();
+	return ((mask & 0x07) == 0x07);
+#else
+	return 0;
+#endif
+}
+
+
 
 
 dgBigVector LineTriangleIntersection (const dgBigVector& l0, const dgBigVector& l1, const dgBigVector& A, const dgBigVector& B, const dgBigVector& C);

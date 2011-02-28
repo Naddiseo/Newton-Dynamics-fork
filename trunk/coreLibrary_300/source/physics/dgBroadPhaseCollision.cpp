@@ -118,20 +118,38 @@ dgBroadPhaseNode::~dgBroadPhaseNode ()
 	}
 }
 
-/*
-void dgBroadPhaseNode::UpdateAABBFromChidren ()
-{
-	dgBroadPhaseNode* const left = m_left;
-	dgBroadPhaseNode* const right = m_right;
-	
-	m_minBox = dgVector (GetMin (left->m_minBox.m_x, right->m_minBox.m_x), GetMin (left->m_minBox.m_y, right->m_minBox.m_y), GetMin (left->m_minBox.m_z, right->m_minBox.m_z), dgFloat32 (0.0f));
-	m_maxBox = dgVector (GetMax (left->m_maxBox.m_x, right->m_maxBox.m_x), GetMax (left->m_maxBox.m_y, right->m_maxBox.m_y), GetMax (left->m_maxBox.m_z, right->m_maxBox.m_z), dgFloat32 (0.0f));
 
-	dgVector side0 (m_maxBox - m_minBox);
-	dgVector side1 (side0.m_y, side0.m_z, side0.m_x, dgFloat32 (0.0f));
-	m_surfaceArea = side0 % side1;
+
+void dgBroadPhaseNode::SetAABBSimd (const dgVector& minBox, const dgVector& maxBox)
+{
+	_ASSERTE (minBox.m_x <= maxBox.m_x);
+	_ASSERTE (minBox.m_y <= maxBox.m_y);
+	_ASSERTE (minBox.m_z <= maxBox.m_z);
+	_ASSERTE (minBox.m_w == dgFloat32 (0.0f));
+	_ASSERTE (maxBox.m_w == dgFloat32 (0.0f));
+
+	simd_128 scale (DG_BROADPHASE_AABB_SCALE);
+	simd_128 invScale (DG_BROADPHASE_AABB_INV_SCALE);
+
+	simd_128 p0 ((simd_128&)minBox * scale);
+	simd_128 p1 ((simd_128&)maxBox * scale);
+
+	p0 = p0.Floor() * invScale; 
+	p1 = (p1 + simd_128(dgFloat32(1.0f))).Floor() * invScale; 
+
+	(simd_128&) m_minBox = p0;
+	(simd_128&) m_maxBox = p1;
+	m_minBox.m_w = dgFloat32 (0.0f);
+	m_maxBox.m_w = dgFloat32 (0.0f);
+
+	simd_128 size (p1 - p0);
+	dgVector temp;
+	size.Store(&temp.m_x);
+	simd_128 size1 (temp.m_y, temp.m_z, temp.m_x, dgFloat32 (0.0f));
+	m_surfaceArea = size.DotProduct (size1);
 }
-*/
+
+
 
 void dgBroadPhaseNode::SetAABB (const dgVector& minBox, const dgVector& maxBox)
 {
@@ -152,12 +170,13 @@ void dgBroadPhaseNode::SetAABB (const dgVector& minBox, const dgVector& maxBox)
 
 	m_minBox = p0;
 	m_maxBox = p1;
+	m_minBox.m_w = dgFloat32 (0.0f);
+	m_maxBox.m_w = dgFloat32 (0.0f);
 
 	dgVector side0 (p1 - p0);
 	dgVector side1 (side0.m_y, side0.m_z, side0.m_x, dgFloat32 (0.0f));
 	m_surfaceArea = side0 % side1;
 }
-
 
 dgBroadPhaseLeafNode::dgBroadPhaseLeafNode (dgBody* const body)
 	:dgBroadPhaseNode (NULL, body->m_minAABB, body->m_maxAABB), m_body (body), m_active(true)
@@ -266,6 +285,18 @@ dgFloat32 dgBroadPhaseCollision::CalculateSurfaceArea (const dgBroadPhaseNode* c
 	dgVector side0 (maxBox - minBox);
 	dgVector side1 (side0.m_y, side0.m_z, side0.m_x, dgFloat32 (0.0f));
 	return side0 % side1;
+}
+
+dgFloat32 dgBroadPhaseCollision::CalculateSurfaceAreaSimd (const dgBroadPhaseNode* const node0, const dgBroadPhaseNode* const node1, dgVector& minBox, dgVector& maxBox) const
+{
+	(simd_128&) minBox = ((simd_128&)node0->m_minBox).GetMin((simd_128&)node1->m_minBox);
+	(simd_128&) maxBox = ((simd_128&)node0->m_maxBox).GetMax((simd_128&)node1->m_maxBox);
+
+	simd_128 size (((simd_128&) maxBox) - ((simd_128&)minBox));
+	dgVector temp;
+	size.Store(&temp.m_x);
+	simd_128 size1 (temp.m_y, temp.m_z, temp.m_x, dgFloat32 (0.0f));
+	return size.DotProduct (size1);
 }
 
 
@@ -388,6 +419,143 @@ void dgBroadPhaseCollision::Remove (dgBody* const body)
 		delete node;
 		m_rootNode = NULL;
 	}
+}
+
+
+void dgBroadPhaseCollision::ImproveNodeFitnessSimd (dgBroadPhaseNode* const node)
+{
+	_ASSERTE (node->m_left);
+	_ASSERTE (node->m_right);
+
+	if (node->m_parent)	{
+		if (node->m_parent->m_left == node) {
+			dgFloat32 cost0 = node->m_surfaceArea;
+
+			dgVector cost1P0;
+			dgVector cost1P1;		
+			dgFloat32 cost1 = CalculateSurfaceAreaSimd (node->m_right, node->m_parent->m_right, cost1P0, cost1P1);
+
+			dgVector cost2P0;
+			dgVector cost2P1;		
+			dgFloat32 cost2 = CalculateSurfaceAreaSimd (node->m_left, node->m_parent->m_right, cost2P0, cost2P1);
+
+			if ((cost1 <= cost0) && (cost1 <= cost2)) {
+				dgBroadPhaseNode* const parent = node->m_parent;
+				node->m_minBox = parent->m_minBox;
+				node->m_maxBox = parent->m_maxBox;
+				node->m_surfaceArea = parent->m_surfaceArea; 
+				if (parent->m_parent) {
+					if (parent->m_parent->m_left == parent) {
+						parent->m_parent->m_left = node;
+					} else {
+						_ASSERTE (parent->m_parent->m_right == parent);
+						parent->m_parent->m_right = node;
+					}
+				} else {
+					m_rootNode = node;
+				}
+				node->m_parent = parent->m_parent;
+				parent->m_parent = node;
+				node->m_right->m_parent = parent;
+				parent->m_left = node->m_right;
+				node->m_right = parent;
+				parent->m_minBox = cost1P0;
+				parent->m_maxBox = cost1P1;		
+				parent->m_surfaceArea = cost1;
+
+
+			} else if ((cost2 <= cost0) && (cost2 <= cost1)) {
+				dgBroadPhaseNode* const parent = node->m_parent;
+				node->m_minBox = parent->m_minBox;
+				node->m_maxBox = parent->m_maxBox;
+				node->m_surfaceArea = parent->m_surfaceArea; 
+
+				if (parent->m_parent) {
+					if (parent->m_parent->m_left == parent) {
+						parent->m_parent->m_left = node;
+					} else {
+						_ASSERTE (parent->m_parent->m_right == parent);
+						parent->m_parent->m_right = node;
+					}
+				} else {
+					m_rootNode = node;
+				}
+				node->m_parent = parent->m_parent;
+				parent->m_parent = node;
+				node->m_left->m_parent = parent;
+				parent->m_left = node->m_left;
+				node->m_left = parent;
+
+				parent->m_minBox = cost2P0;
+				parent->m_maxBox = cost2P1;		
+				parent->m_surfaceArea = cost2;
+			}
+		} else {
+			dgFloat32 cost0 = node->m_surfaceArea;
+
+			dgVector cost1P0;
+			dgVector cost1P1;		
+			dgFloat32 cost1 = CalculateSurfaceAreaSimd (node->m_left, node->m_parent->m_left, cost1P0, cost1P1);
+
+			dgVector cost2P0;
+			dgVector cost2P1;		
+			dgFloat32 cost2 = CalculateSurfaceAreaSimd (node->m_right, node->m_parent->m_left, cost2P0, cost2P1);
+
+
+			if ((cost1 <= cost0) && (cost1 <= cost2)) {
+
+				dgBroadPhaseNode* const parent = node->m_parent;
+				node->m_minBox = parent->m_minBox;
+				node->m_maxBox = parent->m_maxBox;
+				node->m_surfaceArea = parent->m_surfaceArea; 
+				if (parent->m_parent) {
+					if (parent->m_parent->m_left == parent) {
+						parent->m_parent->m_left = node;
+					} else {
+						_ASSERTE (parent->m_parent->m_right == parent);
+						parent->m_parent->m_right = node;
+					}
+				} else {
+					m_rootNode = node;
+				}
+				node->m_parent = parent->m_parent;
+				parent->m_parent = node;
+				node->m_left->m_parent = parent;
+				parent->m_right = node->m_left;
+				node->m_left = parent;
+
+				parent->m_minBox = cost1P0;
+				parent->m_maxBox = cost1P1;		
+				parent->m_surfaceArea = cost1;
+
+			} else if ((cost2 <= cost0) && (cost2 <= cost1)) {
+				dgBroadPhaseNode* const parent = node->m_parent;
+				node->m_minBox = parent->m_minBox;
+				node->m_maxBox = parent->m_maxBox;
+				node->m_surfaceArea = parent->m_surfaceArea; 
+				if (parent->m_parent) {
+					if (parent->m_parent->m_left == parent) {
+						parent->m_parent->m_left = node;
+					} else {
+						_ASSERTE (parent->m_parent->m_right == parent);
+						parent->m_parent->m_right = node;
+					}
+				} else {
+					m_rootNode = node;
+				}
+				node->m_parent = parent->m_parent;
+				parent->m_parent = node;
+				node->m_right->m_parent = parent;
+				parent->m_right = node->m_right;
+				node->m_right = parent;
+
+				parent->m_minBox = cost2P0;
+				parent->m_maxBox = cost2P1;		
+				parent->m_surfaceArea = cost2;
+			}
+		}
+	}
+	_ASSERTE (!m_rootNode->m_parent);
 }
 
 
@@ -524,7 +692,6 @@ void dgBroadPhaseCollision::ImproveNodeFitness (dgBroadPhaseNode* const node)
 			}
 		}
 	}
-
 	_ASSERTE (!m_rootNode->m_parent);
 }
 
@@ -537,19 +704,36 @@ void dgBroadPhaseCollision::ImproveFitness()
 	dgFloat64 cost0 = m_fitness.TotalCost ();
 #endif
 
+	dgWorld* const world = (dgWorld*) this;
 	if (count) {
 		dgFitnessList::dgListNode* node = m_fitness.m_current;
-		for (dgInt32 i = 0; i < count; i ++) {
-			if (node == NULL) {
-				node = m_fitness.GetFirst();
+		if (world->m_cpu == dgSimdPresent) {
+			for (dgInt32 i = 0; i < count; i ++) {
+				if (node == NULL) {
+					node = m_fitness.GetFirst();
+				}
+				ImproveNodeFitnessSimd (node->GetInfo());
+				node = node->GetNext();
 			}
-			ImproveNodeFitness (node->GetInfo());
-			node = node->GetNext();
+		} else {
+			for (dgInt32 i = 0; i < count; i ++) {
+				if (node == NULL) {
+					node = m_fitness.GetFirst();
+				}
+				ImproveNodeFitness (node->GetInfo());
+				node = node->GetNext();
+			}
 		}
 		m_fitness.m_current = node;
 	} else {
-		for (dgFitnessList::dgListNode* node = m_fitness.m_current; node; node = node->GetNext()) {
-			ImproveNodeFitness (node->GetInfo());
+		if (world->m_cpu == dgSimdPresent) {
+			for (dgFitnessList::dgListNode* node = m_fitness.GetFirst(); node; node = node->GetNext()) {
+				ImproveNodeFitnessSimd (node->GetInfo());
+			}
+		} else {
+			for (dgFitnessList::dgListNode* node = m_fitness.GetFirst(); node; node = node->GetNext()) {
+				ImproveNodeFitness (node->GetInfo());
+			}
 		}
 	}
 
@@ -558,6 +742,8 @@ void dgBroadPhaseCollision::ImproveFitness()
 	_ASSERTE (cost1 <= cost0);
 #endif
 }
+
+
 
 void dgBroadPhaseCollision::SubmitPairs (dgBroadPhaseLeafNode* const bodyNode, dgBroadPhaseNode* const node, dgInt32 threadID)
 {
@@ -625,40 +811,6 @@ void dgBroadPhaseCollision::UpdateContactsBroadPhaseEnd ()
 }
 
 
-void dgBroadPhaseCollision::UpdateContacts (dgFloat32 timestep, bool collisionUpdate)
-{
-	dgWorld* const world = (dgWorld*) this;
-	dgUnsigned32 ticks = world->m_getPerformanceCount();
-
-	ImproveFitness();
-
-
-	m_contactCount = 0;
-	dgCollidingPairCollector* const contactPairs = (dgWorld*)this;
-	contactPairs->Init();
-	world->m_broadPhaseLru = world->m_broadPhaseLru + 1;
-
-	dgInt32 threadsCount = world->GetThreadCount();	
-	dgBroadphaseSyncDescriptor sincksPoints;
-	sincksPoints.m_world = world;
-	sincksPoints.m_timestep = timestep;
-
-	const dgBodyMasterList* const masterList = world;
-	dgBodyMasterList::dgListNode* const firstBodyNode = masterList->GetFirst()->GetNext();
-	sincksPoints.m_collindPairBodyNode = firstBodyNode;
-	sincksPoints.m_forceAndTorqueBodyNode = firstBodyNode;
-
-	for (dgInt32 i = 0; i < threadsCount; i ++) {
-		world->QueueJob (UpdateContactsDriver, &sincksPoints);
-	}
-	world->SynchronizationBarrier();
-
-	UpdateContactsBroadPhaseEnd();
-
-	dgUnsigned32 endTicks = world->m_getPerformanceCount();
-//	world->m_perfomanceCounters[m_narrowPhaseTicks] = endTicks - narrowTicks;
-	world->m_perfomanceCounters[m_collisionTicks] = endTicks - ticks;
-}
 
 void dgBroadPhaseCollision::UpdateContactsDriver (void* const context, dgInt32 threadID)
 {
@@ -673,6 +825,7 @@ void dgBroadPhaseCollision::UpdateContactsDriver (void* const context, dgInt32 t
 //		xxx = world->m_getPerformanceCount()- xxx0;
 //	} while (xxx < 1000);
 
+
 	world->ApplyForceAndtorque (descriptor, threadID);
 	world->FindCollidingPairs (descriptor, threadID);
 	world->CalculatePairContacts (descriptor, threadID);
@@ -686,6 +839,7 @@ void dgBroadPhaseCollision::ApplyForceAndtorque (dgBroadphaseSyncDescriptor* con
 
 	dgFloat32 timeStep = descriptor->m_timestep; 
 
+	bool simd = (world->m_cpu == dgSimdPresent);
 	world->GetIndirectLock (&descriptor->m_lock);
 	dgBodyMasterList::dgListNode* node = descriptor->m_forceAndTorqueBodyNode;
 	if (node) {
@@ -711,7 +865,11 @@ void dgBroadPhaseCollision::ApplyForceAndtorque (dgBroadphaseSyncDescriptor* con
 			if (!body->IsInEquelibrium()) {
 				body->m_sleeping = false;
 				body->m_equilibrium = false;
-				body->UpdateCollisionMatrix (timeStep, threadID);
+				if (simd) {
+					body->UpdateCollisionMatrixSimd (timeStep, threadID);
+				} else {
+					body->UpdateCollisionMatrix (timeStep, threadID);
+				}
 			}
 			body->m_prevExternalForce = body->m_accel;
 			body->m_prevExternalTorque = body->m_alpha;
@@ -816,57 +974,10 @@ void dgBroadPhaseCollision::SubmitContactJoint (dgBroadphaseSyncDescriptor* cons
 			}
 
 		} else if (pair->m_contact) {
-			if (pair->m_contactBufferIndex == -1) {
+			if (pair->m_contactBufferIndex >= 0) {
 				world->ProcessCachedContacts (pair->m_contact, pair->m_material, timestep, threadID);
 			} else {
 				pair->m_contact->m_maxDOF = 0;
-			}
-		}
-	}
-}
-
-
-void dgBroadPhaseCollision::UpdateBodyBroadphase(dgBody* const body, dgInt32 threadIndex)
-{
-	if (m_rootNode) {
-
-		// if the body is move inside the world, then active it
-		if (!body->m_isInWorld) {
-			if (dgOverlapTest (body->m_minAABB, body->m_maxAABB, m_appMinBox, m_appMaxBox)) {
-				body->m_isInWorld = true;
-				body->m_sleeping = false;
-				body->m_equilibrium = false;
-			}
-		}
-
-
-		// update bodies only if they are in the world
-		if (body->m_isInWorld) {
-
-			dgBroadPhaseLeafNode* const node = body->m_collisionCell;
-			_ASSERTE (!node->m_left);
-			_ASSERTE (!node->m_right);
-
-			if ((body->m_minAABB.m_x < node->m_minBox.m_x) || (body->m_minAABB.m_y < node->m_minBox.m_y) || (body->m_minAABB.m_z < node->m_minBox.m_z) || 
-				(body->m_maxAABB.m_x > node->m_maxBox.m_x) || (body->m_maxAABB.m_y > node->m_maxBox.m_y) || (body->m_maxAABB.m_z > node->m_maxBox.m_z)) {  
-
-				node->SetAABB(body->m_minAABB, body->m_maxAABB);
-				dgWorld* const world = (dgWorld*) this;
-				for (dgBroadPhaseNode* parent = node->m_parent; parent; parent = parent->m_parent) {
-					dgVector minBox;
-					dgVector maxBox;
-					dgFloat32 area = CalculateSurfaceArea (parent->m_left, parent->m_right, minBox, maxBox);
-					if (!((parent->m_minBox.m_x < minBox.m_x) || (parent->m_minBox.m_y < minBox.m_y) || (parent->m_minBox.m_z < minBox.m_z) ||
-						  (parent->m_maxBox.m_x > maxBox.m_x) || (parent->m_maxBox.m_y < maxBox.m_y) || (parent->m_maxBox.m_z < maxBox.m_z))) {
-						break;
-					}
-
-					world->GetIndirectLock (&m_updateLock);
-					parent->m_minBox = minBox;
-					parent->m_maxBox = maxBox;
-					parent->m_surfaceArea = area;
-					world->ReleaseIndirectLock (&m_updateLock);
-				}
 			}
 		}
 	}
@@ -982,4 +1093,124 @@ void dgBroadPhaseCollision::RayCast (const dgVector& l0, const dgVector& l1, OnR
 			}
 		}
 	}
+}
+
+
+void dgBroadPhaseCollision::UpdateBodyBroadphaseSimd(dgBody* const body, dgInt32 threadIndex)
+{
+	if (m_rootNode) {
+
+		// if the body is move inside the world, then active it
+		if (!body->m_isInWorld) {
+			if (dgOverlapTestSimd(body->m_minAABB, body->m_maxAABB, m_appMinBox, m_appMaxBox)) {
+				body->m_isInWorld = true;
+				body->m_sleeping = false;
+				body->m_equilibrium = false;
+			}
+		}
+
+		// update bodies only if they are in the world
+		if (body->m_isInWorld) {
+			dgBroadPhaseLeafNode* const node = body->m_collisionCell;
+			_ASSERTE (!node->m_left);
+			_ASSERTE (!node->m_right);
+
+			if (!dgBoxInclusionTestSimd (body->m_minAABB, body->m_maxAABB, node->m_minBox, node->m_maxBox)) {
+				node->SetAABBSimd(body->m_minAABB, body->m_maxAABB);
+				dgWorld* const world = (dgWorld*) this;
+				for (dgBroadPhaseNode* parent = node->m_parent; parent; parent = parent->m_parent) {
+					dgVector minBox;
+					dgVector maxBox;
+					dgFloat32 area = CalculateSurfaceAreaSimd (parent->m_left, parent->m_right, minBox, maxBox);
+					if (dgBoxInclusionTestSimd(minBox, maxBox, parent->m_minBox, parent->m_maxBox)) {
+						break;
+					}
+
+					world->GetIndirectLock (&m_updateLock);
+					parent->m_minBox = minBox;
+					parent->m_maxBox = maxBox;
+					parent->m_surfaceArea = area;
+					world->ReleaseIndirectLock (&m_updateLock);
+				}
+			}
+		}
+	}
+}
+
+void dgBroadPhaseCollision::UpdateBodyBroadphase(dgBody* const body, dgInt32 threadIndex)
+{
+	if (m_rootNode) {
+
+		// if the body is move inside the world, then active it
+		if (!body->m_isInWorld) {
+			if (dgOverlapTest (body->m_minAABB, body->m_maxAABB, m_appMinBox, m_appMaxBox)) {
+				body->m_isInWorld = true;
+				body->m_sleeping = false;
+				body->m_equilibrium = false;
+			}
+		}
+
+
+		// update bodies only if they are in the world
+		if (body->m_isInWorld) {
+
+			dgBroadPhaseLeafNode* const node = body->m_collisionCell;
+			_ASSERTE (!node->m_left);
+			_ASSERTE (!node->m_right);
+
+			if (!dgBoxInclusionTest (body->m_minAABB, body->m_maxAABB, node->m_minBox, node->m_maxBox)) {
+				node->SetAABB(body->m_minAABB, body->m_maxAABB);
+				dgWorld* const world = (dgWorld*) this;
+				for (dgBroadPhaseNode* parent = node->m_parent; parent; parent = parent->m_parent) {
+					dgVector minBox;
+					dgVector maxBox;
+					dgFloat32 area = CalculateSurfaceArea (parent->m_left, parent->m_right, minBox, maxBox);
+					if (dgBoxInclusionTest (minBox, maxBox, parent->m_minBox, parent->m_maxBox)) {
+						break;
+					}
+
+					world->GetIndirectLock (&m_updateLock);
+					parent->m_minBox = minBox;
+					parent->m_maxBox = maxBox;
+					parent->m_surfaceArea = area;
+					world->ReleaseIndirectLock (&m_updateLock);
+				}
+			}
+		}
+	}
+}
+
+
+void dgBroadPhaseCollision::UpdateContacts (dgFloat32 timestep, bool collisionUpdate)
+{
+	dgWorld* const world = (dgWorld*) this;
+	dgUnsigned32 ticks = world->m_getPerformanceCount();
+
+	ImproveFitness();
+
+	m_contactCount = 0;
+	dgCollidingPairCollector* const contactPairs = (dgWorld*)this;
+	contactPairs->Init();
+	world->m_broadPhaseLru = world->m_broadPhaseLru + 1;
+
+	dgInt32 threadsCount = world->GetThreadCount();	
+	dgBroadphaseSyncDescriptor sincksPoints;
+	sincksPoints.m_world = world;
+	sincksPoints.m_timestep = timestep;
+
+	const dgBodyMasterList* const masterList = world;
+	dgBodyMasterList::dgListNode* const firstBodyNode = masterList->GetFirst()->GetNext();
+	sincksPoints.m_collindPairBodyNode = firstBodyNode;
+	sincksPoints.m_forceAndTorqueBodyNode = firstBodyNode;
+
+	for (dgInt32 i = 0; i < threadsCount; i ++) {
+		world->QueueJob (UpdateContactsDriver, &sincksPoints);
+	}
+	world->SynchronizationBarrier();
+
+	UpdateContactsBroadPhaseEnd();
+
+	dgUnsigned32 endTicks = world->m_getPerformanceCount();
+	//	world->m_perfomanceCounters[m_narrowPhaseTicks] = endTicks - narrowTicks;
+	world->m_perfomanceCounters[m_collisionTicks] = endTicks - ticks;
 }

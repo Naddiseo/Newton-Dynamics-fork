@@ -529,6 +529,8 @@ void dgCollisionCompound::CalcAABB (const dgMatrix &matrix, dgVector& p0, dgVect
 
 	p0 = origin - size;
 	p1 = origin + size;
+	_ASSERTE (p0.m_w == dgFloat32 (0.0f));
+	_ASSERTE (p1.m_w == dgFloat32 (0.0f));
 }
 
 
@@ -543,6 +545,9 @@ void dgCollisionCompound::CalcAABBSimd (const dgMatrix &matrix, dgVector& p0, dg
 
 	p0 = origin - size;
 	p1 = origin + size;
+	_ASSERTE (p0.m_w == dgFloat32 (0.0f));
+	_ASSERTE (p1.m_w == dgFloat32 (0.0f));
+
 }
 
 //void dgCollisionCompound::dgMatrix& matrix, DebugCollisionMeshCallback callback) const

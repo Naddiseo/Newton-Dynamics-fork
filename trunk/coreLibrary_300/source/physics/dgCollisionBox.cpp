@@ -206,8 +206,8 @@ void dgCollisionBox::CalcAABB (const dgMatrix &matrix, dgVector &p0, dgVector &p
 	p0.m_z = matrix[3][2] - z;
 	p1.m_z = matrix[3][2] + z;
 
-	p0.m_w = dgFloat32 (1.0f);
-	p1.m_w = dgFloat32 (1.0f);
+	p0.m_w = dgFloat32 (0.0f);
+	p1.m_w = dgFloat32 (0.0f);
 }
 
 
@@ -217,16 +217,15 @@ void dgCollisionBox::CalcAABBSimd (const dgMatrix &matrix, dgVector &p0, dgVecto
 //	dgFloat32 x;
 //	dgFloat32 y;
 //	dgFloat32 z;
-	simd_type tmp;
 
 //	x = m_size[0].m_x * dgAbsf(matrix[0][0]) + m_size[0].m_y * dgAbsf(matrix[1][0]) + m_size[0].m_z * dgAbsf(matrix[2][0]) + DG_MAX_COLLISION_PADDING;  
 //	y = m_size[0].m_x * dgAbsf(matrix[0][1]) + m_size[0].m_y * dgAbsf(matrix[1][1]) + m_size[0].m_z * dgAbsf(matrix[2][1]) + DG_MAX_COLLISION_PADDING;  
 //	z = m_size[0].m_x * dgAbsf(matrix[0][2]) + m_size[0].m_y * dgAbsf(matrix[1][2]) + m_size[0].m_z * dgAbsf(matrix[2][2]) + DG_MAX_COLLISION_PADDING;  
-	tmp = simd_mul_add_v (
-			simd_mul_add_v (
-				simd_mul_add_v ((simd_type&) m_aabb_padd, (simd_type&) m_size_x, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[0])),
-														  (simd_type&) m_size_y, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[1])),		   
-														  (simd_type&) m_size_z, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[2]));
+	simd_type tmp = simd_mul_add_v (
+						simd_mul_add_v (
+							simd_mul_add_v ((simd_type&) m_aabb_padd, (simd_type&) m_size_x, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[0])),
+																	  (simd_type&) m_size_y, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[1])),		   
+																	  (simd_type&) m_size_z, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[2]));
 
 
 //	p0.m_x = matrix[3][0] - x;
@@ -240,7 +239,8 @@ void dgCollisionBox::CalcAABBSimd (const dgMatrix &matrix, dgVector &p0, dgVecto
 	(simd_type&)p0 = simd_sub_v ((simd_type&)matrix[3], tmp);
 	(simd_type&)p1 = simd_add_v ((simd_type&)matrix[3], tmp);
 
-
+	p0.m_w = dgFloat32 (0.0f);
+	p1.m_w = dgFloat32 (0.0f);
 #else
 
 #endif

@@ -179,25 +179,28 @@ void dgCollisionConvexModifier::SetCollisionBBox (const dgVector& p0__, const dg
 
 void dgCollisionConvexModifier::CalcAABB (const dgMatrix &matrix, dgVector &p0, dgVector &p1) const
 {
-	dgInt32 i;
 	dgMatrix trans (matrix.Transpose());
 	
-	for (i = 0; i < 3; i ++) {
+	for (dgInt32 i = 0; i < 3; i ++) {
 		p0[i] = matrix.m_posit[i] + matrix.RotateVector (SupportVertex(trans[i].Scale (-dgFloat32 (1.0f))))[i] - dgFloat32 (5.0e-2f);
 		p1[i] = matrix.m_posit[i] + matrix.RotateVector (SupportVertex(trans[i]))[i] +  dgFloat32 (5.0e-2f);
 	}
+	p0.m_w = dgFloat32 (0.0f);
+	p1.m_w = dgFloat32 (0.0f);
 }
 
 void dgCollisionConvexModifier::CalcAABBSimd (const dgMatrix &matrix, dgVector &p0, dgVector &p1) const
 {
 #ifdef DG_BUILD_SIMD_CODE
-	dgInt32 i;
 	dgMatrix trans (matrix.Transpose());
-	for (i = 0; i < 3; i ++) {
+	for (dgInt32 i = 0; i < 3; i ++) {
 		p0[i] = matrix.m_posit[i] + matrix.RotateVectorSimd(SupportVertexSimd(trans[i].Scale (-dgFloat32 (1.0f))))[i] - dgFloat32 (5.0e-2f);
 		p1[i] = matrix.m_posit[i] + matrix.RotateVectorSimd(SupportVertexSimd(trans[i]))[i] + dgFloat32 (5.0e-2f);
 	}
+	p0.m_w = dgFloat32 (0.0f);
+	p1.m_w = dgFloat32 (0.0f);
 #endif
+
 }
 
 
