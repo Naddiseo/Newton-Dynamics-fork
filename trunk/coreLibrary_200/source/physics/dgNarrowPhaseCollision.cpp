@@ -1376,26 +1376,20 @@ void dgWorld::ProcessContacts (dgCollidingPairCollector::dgPair* const pair, dgF
 
 dgInt32 dgWorld::ValidateContactCache (dgBody* const convexBody, dgBody* const otherBody, dgContact* const contact) const
 {
-	dgInt32 contactCount;
-
 	_ASSERTE (contact && (contact->GetId() == dgContactConstraintId));
 	_ASSERTE ((contact->GetBody0() == otherBody) || (contact->GetBody1() == otherBody));
 	_ASSERTE ((contact->GetBody0() == convexBody) || (contact->GetBody1() == convexBody));
 
-	contactCount = 0;
+	dgInt32 contactCount = 0;
 
 #ifdef DG_USE_CACHE_CONTACTS
-	dgBody* body0;
-	dgBody* body1;
-	dgFloat32 err2;
-	dgList<dgContactMaterial>::dgListNode *ptr;
-#define DG_CACHE_DIST_TOL dgFloat32 (1.0e-3f)
+	#define DG_CACHE_DIST_TOL dgFloat32 (1.0e-3f)
 
-	body0 = contact->GetBody0();
+	dgBody* const body0 = contact->GetBody0();
 	dgVector error0 (contact->m_prevPosit0 - body0->m_matrix.m_posit);
-	err2 = error0 % error0;
+	dgFloat32 err2 = error0 % error0;
 	if (err2 < (DG_CACHE_DIST_TOL * DG_CACHE_DIST_TOL)) {
-		body1 = contact->GetBody1();
+		dgBody* const body1 = contact->GetBody1();
 		dgVector error1 (contact->m_prevPosit1 - body1->m_matrix.m_posit);
 		err2 = error1 % error1;
 		if (err2 < (DG_CACHE_DIST_TOL * DG_CACHE_DIST_TOL)) {
@@ -1409,7 +1403,7 @@ dgInt32 dgWorld::ValidateContactCache (dgBody* const convexBody, dgBody* const o
 					dgMatrix matrix1 (dgMatrix (contact->m_prevRotation1, contact->m_prevPosit1).Inverse() * body1->m_matrix);
 
 					dgList<dgContactMaterial>& list = *contact;
-					for (ptr = list.GetFirst(); ptr; ptr = ptr->GetNext()) {
+					for (dgList<dgContactMaterial>::dgListNode *ptr = list.GetFirst(); ptr; ptr = ptr->GetNext()) {
 						dgContactMaterial& contactMaterial = ptr->GetInfo();
 						dgVector p0 (matrix0.TransformVector (contactMaterial.m_point));
 						dgVector p1 (matrix1.TransformVector (contactMaterial.m_point));
@@ -1426,8 +1420,6 @@ dgInt32 dgWorld::ValidateContactCache (dgBody* const convexBody, dgBody* const o
 			}
 		}
 	}
-
-
 #endif
 
 	return contactCount;

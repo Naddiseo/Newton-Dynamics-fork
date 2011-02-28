@@ -455,7 +455,8 @@ static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 
 	// load the scene from and alchemedia file format
 	char fileName[2048];
-	GetWorkingFileName ("sponza.xml", fileName);
+	GetWorkingFileName ("flatPlane.xml", fileName);
+//	GetWorkingFileName ("sponza.xml", fileName);
 //	GetWorkingFileName ("cattle.xml", fileName);
 //	GetWorkingFileName ("playground.xml", fileName);
 	scene->LoadScene (fileName);
@@ -475,9 +476,16 @@ static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 	}
 	
 	// place camera into position
-	dQuaternion rot;
-	dVector posit (0.0f, 1.0f, 0.0f, 0.0f);
-	scene->SetCameraMatrix(rot, posit);
+//	dQuaternion rot;
+//	dVector posit (0.0f, 1.0f, 0.0f, 0.0f);
+//	scene->SetCameraMatrix(rot, posit);
+
+	dMatrix camMatrix (dRollMatrix(-20.0f * 3.1416f /180.0f) * dYawMatrix(-45.0f * 3.1416f /180.0f));
+	dQuaternion rot (camMatrix);
+	dVector origin (-15.0f, 15.0f, -15.0f, 0.0f);
+	scene->SetCameraMatrix(rot, origin);
+
+
 
 	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (world);
 	dVector location (0.0f, 0.0f, 0.0f, 0.0f);
