@@ -455,8 +455,8 @@ static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 
 	// load the scene from and alchemedia file format
 	char fileName[2048];
-	GetWorkingFileName ("flatPlane.xml", fileName);
-//	GetWorkingFileName ("sponza.xml", fileName);
+//	GetWorkingFileName ("flatPlane.xml", fileName);
+	GetWorkingFileName ("sponza.xml", fileName);
 //	GetWorkingFileName ("cattle.xml", fileName);
 //	GetWorkingFileName ("playground.xml", fileName);
 	scene->LoadScene (fileName);
