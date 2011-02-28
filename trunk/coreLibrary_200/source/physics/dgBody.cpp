@@ -555,7 +555,12 @@ void dgBody::UpdateMatrix (dgFloat32 timestep, dgInt32 threadIndex)
 		m_matrixUpdate (*this, m_matrix, threadIndex);
 //		m_world->dgReleasedUserLock_();
 	}
-	UpdateCollisionMatrix (timestep, threadIndex);
+//	UpdateCollisionMatrix (timestep, threadIndex);
+	if (m_world->m_cpu == dgSimdPresent) {
+		UpdateCollisionMatrixSimd (timestep, threadIndex);
+	} else {
+		UpdateCollisionMatrix (timestep, threadIndex);
+	}
 }
 
 void dgBody::IntegrateVelocity (dgFloat32 timestep)
