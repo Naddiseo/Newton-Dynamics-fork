@@ -274,10 +274,8 @@ void dgCollisionConvex::SetVolumeAndCG ()
 
 dgFloat32 dgCollisionConvex::GetDiscretedAngleStep (dgFloat32 radius) const
 {
-	dgFloat32 segments;
-
 //	segments = GetMax (GetMin (dgFloor (radius * DG_MAX_CIRCLE_DISCRETE_STEPS) + 1.0f, 1024.0f), 128.0f);
-	segments = ClampValue(dgFloor (radius * DG_MAX_CIRCLE_DISCRETE_STEPS), dgFloat32(128.0f), dgFloat32(1024.0f));
+	dgFloat32 segments = ClampValue(dgFloor (radius * DG_MAX_CIRCLE_DISCRETE_STEPS), dgFloat32(128.0f), dgFloat32(1024.0f));
 	return dgPI2 / segments;
 }
 
