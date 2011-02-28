@@ -88,6 +88,7 @@ class dgCollisionParamProxi;
 enum dgPerformanceCounters
 {
 	m_worldTicks = 0,
+
 	m_collisionTicks,
 	m_forceCallback,
 	m_broadPhaceTicks,

@@ -824,12 +824,29 @@ void dgBroadPhaseCollision::UpdateContactsDriver (void* const context, dgInt32 t
 //	do {
 //		xxx = world->m_getPerformanceCount()- xxx0;
 //	} while (xxx < 1000);
+	if (!threadID) {
+		dgUnsigned32 ticks0 = world->m_getPerformanceCount();
+		world->ApplyForceAndtorque (descriptor, threadID);
+		dgUnsigned32 ticks1 = world->m_getPerformanceCount();
+		world->m_perfomanceCounters[m_forceCallback] = ticks1 - ticks0;
 
+		ticks0 = ticks1;
+		world->FindCollidingPairs (descriptor, threadID);
+		ticks1 = world->m_getPerformanceCount();
+		world->m_perfomanceCounters[m_broadPhaceTicks] = ticks1 - ticks0;
 
-	world->ApplyForceAndtorque (descriptor, threadID);
-	world->FindCollidingPairs (descriptor, threadID);
-	world->CalculatePairContacts (descriptor, threadID);
-	world->SubmitContactJoint (descriptor, threadID);
+		ticks0 = ticks1;
+		world->CalculatePairContacts (descriptor, threadID);
+		world->SubmitContactJoint (descriptor, threadID);
+		ticks1 = world->m_getPerformanceCount();
+		world->m_perfomanceCounters[m_narrowPhaseTicks] = ticks1 - ticks0;
+
+	} else {
+		world->ApplyForceAndtorque (descriptor, threadID);
+		world->FindCollidingPairs (descriptor, threadID);
+		world->CalculatePairContacts (descriptor, threadID);
+		world->SubmitContactJoint (descriptor, threadID);
+	}
 }
 
 void dgBroadPhaseCollision::ApplyForceAndtorque (dgBroadphaseSyncDescriptor* const descriptor, dgInt32 threadID)

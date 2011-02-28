@@ -109,29 +109,31 @@ void dRuntimeProfiler::Render (NewtonWorld* nWorld, int mask, QPainter& context)
 	// draw collision performance
 	if (mask & 2) { 
 		context.setPen(Qt::blue);
-//		DrawTrack (x0, y0, dVector (0.0f, 0.0f, 1.0f), m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_COLLISION_UPDATE][0]);
 		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_COLLISION_UPDATE][0], context);
 	}
 
 
 	// draw force Update performance
 	if (mask & 4) { 
-//		DrawTrack (x0, y0, dVector (0.5f, 1.0f, 0.5f), m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_FORCE_CALLBACK_UPDATE][0]);
+		context.setPen(Qt::darkMagenta);
+		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_FORCE_CALLBACK_UPDATE][0], context);
 	}
 
 	if (mask & 8) { 
-//		DrawTrack (x0, y0, dVector (0.0f, 0.0f, 1.0f), m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_COLLISION_UPDATE_BROAD_PHASE][0]);
+		context.setPen(Qt::yellow);
+		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_COLLISION_UPDATE_BROAD_PHASE][0], context);
 	}
 
 	if (mask & 16) { 
-//		DrawTrack (x0, y0, dVector (1.0f, 0.0f, 0.0f), m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_COLLISION_UPDATE_NARROW_PHASE][0]);
+		context.setPen(Qt::cyan);
+		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_COLLISION_UPDATE_NARROW_PHASE][0], context);
 	}
 
 
 	// draw dynamics performance
 	if (mask & 32) { 
 		context.setPen(Qt::red);
-		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_DYNAMICS_UPDATE][0], context);
+//		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_DYNAMICS_UPDATE][0], context);
 	}
 
 	if (mask & 64) { 
