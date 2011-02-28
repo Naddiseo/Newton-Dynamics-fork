@@ -591,46 +591,10 @@ enum dgCpuClass
 
 
 #ifdef _WIN_32_VER
-	dgFloat32 dgSqrt(dgFloat32 x);  
-	dgFloat32 dgSin(dgFloat32 x);  
-	dgFloat32 dgCos(dgFloat32 x);  
-	dgFloat32 dgAsin(dgFloat32 x);  
-	dgFloat32 dgAcos(dgFloat32 x);  
-	dgFloat32 dgAtan2(dgFloat32 x, dgFloat32 y);  
-	void dgSinCos (dgFloat32 ang, dgFloat32& sinAng, dgFloat32& cosAng);
-
-	#define dgRsqrt(x) (dgFloat32 (1.0f) / dgSqrt(x))
 	#define dgControlFP(x,y) _controlfp(x,y)
-
-	#ifdef __USE_DOUBLE_PRECISION__
-		#define dgLog(x) log(x)
-		#define dgPow(x,y) pow(x,y)
-		#define dgFmod(x,y) fmod(x,y)
-	
-	#else
-		#define dgLog(x) logf(x)
-		#define dgPow(x,y) powf(x,y)
-		#define dgFmod(x,y) fmodf(x,y)
-	#endif
-
 #else 
-	#define dgSin(x) dgFloat32 (sin(x))
-	#define dgCos(x) dgFloat32 (cos(x))
-	#define dgAsin(x) dgFloat32 (asin(x))
-	#define dgAcos(x) dgFloat32 (acos(x))
-	#define dgSqrt(x) dgFloat32 (sqrt(x))	
-	#define dgLog(x) dgFloat32 (log(x))
-	#define dgPow(x,y) dgFloat32 (pow(x,y))
-	#define dgFmod(x,y) dgFloat32 (fmod(x,y))
-	#define dgAtan2(x,y) dgFloat32 (atan2(x,y))
-	#define dgRsqrt(x) (dgFloat32 (1.0f) / dgSqrt(x))		
 	#define dgControlFP(x,y) x
 	#define stricmp(x,y) strcasecmp(x,y)
-	inline void dgSinCos (dgFloat32 ang, dgFloat32& sinAng, dgFloat32& cosAng)
-	{
-		sinAng = dgSin(ang);
-		cosAng = dgCos(ang);
-	}
 #endif
 
 DG_INLINE dgFloat32 dgAbsf(dgFloat32 x)
@@ -671,6 +635,17 @@ DG_INLINE dgFloat32 dgCeil(dgFloat32 x)
 	_ASSERTE (ret == ceil (x));
 	return  ret;
 }
+
+#define dgSqrt(x) dgFloat32 (sqrt(x))	
+#define dgRsqrt(x) (dgFloat32 (1.0f) / dgSqrt(x))		
+#define dgSin(x) dgFloat32 (sin(x))
+#define dgCos(x) dgFloat32 (cos(x))
+#define dgAsin(x) dgFloat32 (asin(x))
+#define dgAcos(x) dgFloat32 (acos(x))
+#define dgAtan2(x,y) dgFloat32 (atan2(x,y))
+#define dgLog(x) dgFloat32 (log(x))
+#define dgPow(x,y) dgFloat32 (pow(x,y))
+#define dgFmod(x,y) dgFloat32 (fmod(x,y))
 
 
 typedef dgUnsigned32 (dgApi *OnGetPerformanceCountCallback) ();
