@@ -22,6 +22,211 @@
 #ifndef __dgMinkowskiConv__
 #define __dgMinkowskiConv__
 
+#define DG_MINK_MAX_FACES								64
+#define DG_MINK_MAX_FACES_SIZE							(DG_MINK_MAX_FACES + 16)
+#define DG_MINK_MAX_POINTS								64
+#define DG_MINK_MAX_POINTS_SIZE							(DG_MINK_MAX_POINTS + 16)
+#define DG_MAX_SIMPLEX_FACE								(DG_MINK_MAX_POINTS * 4)
+#define DG_HEAP_EDGE_COUNT								256 
+#define DG_ROBUST_PLANE_CLIP							dgFloat32 (1.0f / 256.0f)
+#define DG_DISTANCE_TOLERANCE							dgFloat32 (1.0e-3f)
+#define DG_DISTANCE_TOLERANCE_ZERO						dgFloat32 (1.0e-24f)
+#define DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION		32
+#define DG_UPDATE_SEPARATING_PLANE_DISTANCE_TOLERANCE1	(DG_DISTANCE_TOLERANCE * dgFloat32 (1.0e-1f))
+#define DG_UPDATE_SEPARATING_PLANE_DISTANCE_TOLERANCE2	(DG_DISTANCE_TOLERANCE * dgFloat32 (1.0e-3f))
+#define DG_MIN_VERTEX_ERROR								(dgFloat32 (1.0e-3f))
+#define DG_MIN_VERTEX_ERROR_2							(DG_MIN_VERTEX_ERROR * DG_MIN_VERTEX_ERROR)
+#define DG_FALLBACK_SEPARATING_PLANE_ITERATIONS			32
+#define DG_FALLBACK_SEPARATING_DIST_TOLERANCE			dgFloat32(1.0e-6f)
+#define DG_CALCULATE_SEPARATING_PLANE_ERROR				(DG_ROBUST_PLANE_CLIP * dgFloat32 (2.0f))
+#define DG_CALCULATE_SEPARATING_PLANE_ERROR1			(DG_ROBUST_PLANE_CLIP * dgFloat32 (0.5f))
+#define DG_GETADJACENTINDEX_ACTIVE(x)					((!m_simplex[x->m_adjancentFace[1]].m_isActive) ? 1 : ((!m_simplex[x->m_adjancentFace[2]].m_isActive) ? 2 : 0))
+#define DG_GETADJACENTINDEX_VERTEX(x,v)					(((x->m_vertex[1] == v) ? 1 : 0) | ((x->m_vertex[2] == v) ? 2 : 0))
+#define DG_RSQRT_SIMD_S(x,y)							{simd_type tmp0 = simd_rsqrt_s(x); y = simd_mul_s (simd_mul_s(dgContactSolver::m_nrh0p5, tmp0), simd_mul_sub_v (dgContactSolver::m_nrh3p0, simd_mul_s (x, tmp0), tmp0));}
+
+
+DG_MSC_VECTOR_ALIGMENT 
+class dgContactSolver
+{
+	enum dgMinkReturnCode
+	{
+		dgMinkError,
+		dgMinkDisjoint,
+		dgMinkIntersecting
+	};
+
+	DG_MSC_VECTOR_ALIGMENT
+	class dgMinkFace: public dgPlane
+	{
+		public:
+		dgInt16 m_vertex[4];	
+		dgInt16 m_adjancentFace[3];	
+		dgInt8	m_inHeap;
+		dgInt8	m_isActive;
+	}DG_GCC_VECTOR_ALIGMENT;
+
+	class dgMinkFacePurge
+	{	
+		public:
+		dgMinkFacePurge* m_next;
+	};
+
+	class SilhouetteFaceCap
+	{
+		public:
+		dgMinkFace* m_face;
+		dgInt16* m_faceCopling;
+	};
+
+
+	DG_MSC_VECTOR_ALIGMENT
+	struct dgPerimenterEdge
+	{
+		const dgVector* m_vertex;
+		dgPerimenterEdge* m_next;
+		dgPerimenterEdge* m_prev;
+	} DG_GCC_VECTOR_ALIGMENT;
+
+
+	class dgClosestFace: public dgDownHeap<dgMinkFace *, dgFloat32>
+	{
+		public:
+		inline dgClosestFace(void *ptr, dgInt32 sizeInBytes)
+			:dgDownHeap<dgMinkFace *, dgFloat32> (ptr, sizeInBytes)
+		{
+		}
+	};
+
+
+	inline dgFloat32 GetShapeClipSize (dgCollision* const collision) const
+	{
+		return GetMax (collision->GetBoxMaxRadius() * dgFloat32 (4.0f) + dgFloat32 (1.0f), dgFloat32 (32.0f));
+//		return GetMax (collision->GetBoxMaxRadius() * dgFloat32 (4.0f) + dgFloat32 (1.0f), dgFloat32 (10000.0f));
+	}
+
+	inline bool CheckTetraHedronVolume () const
+	{
+		dgVector e0 (m_hullVertex[1] - m_hullVertex[0]);
+		dgVector e1 (m_hullVertex[2] - m_hullVertex[0]);
+		dgVector e2 (m_hullVertex[3] - m_hullVertex[0]);
+
+		dgFloat32 volume = (e1 * e0) % e2;
+		return (volume >= dgFloat32 (0.0f));
+	}
+
+	inline bool CheckTetraHedronVolumeLarge () const
+	{
+		dgBigVector e0 (m_hullVertexLarge[1] - m_hullVertexLarge[0]);
+		dgBigVector e1 (m_hullVertexLarge[2] - m_hullVertexLarge[0]);
+		dgBigVector e2 (m_hullVertexLarge[3] - m_hullVertexLarge[0]);
+
+		dgFloat64 volume = (e1 * e0) % e2;
+		return (volume >= dgFloat32 (0.0f));
+	}
+
+	void CalcSupportVertexSimd (const dgVector& dir, dgInt32 entry);
+	void CalcSupportVertex (const dgVector& dir, dgInt32 entry);
+	void CalcSupportVertexLarge (const dgVector& dir, dgInt32 entry);
+	bool CheckNormal (dgPerimenterEdge* const polygon, const dgVector& shapeNormal) const;
+	dgInt32 CalculateClosestPoints ();
+	dgInt32 CalculateConvexShapeIntersectionLine (const dgMatrix& matrix, const dgVector& shapeNormal, dgUnsigned32 id, dgFloat32 penetration, 
+			dgInt32 shape1VertexCount, dgVector* const shape1, dgInt32 shape2VertexCount, dgVector* const shape2,dgContactPoint* const contactOut) const;
+
+	dgPerimenterEdge *ReduceContacts (dgPerimenterEdge *poly, dgInt32 maxCount) const;
+
+	dgInt32 CalculateContactAlternateMethod(dgMinkFace* const face, dgInt32 contacID, dgContactPoint* const contactOut, dgInt32 maxContacts);
+	dgInt32 CalculateConvexShapeIntersectionSimd (const dgMatrix& matrix, const dgVector& shapeNormal, dgUnsigned32 id, dgFloat32 penetration,
+												  dgInt32 shape1VertexCount, dgVector* const shape1, dgInt32 shape2VertexCount, dgVector* const shape2, dgContactPoint* const contactOut, dgInt32 maxContacts) const;
+	dgInt32 CalculateConvexShapeIntersection (const dgMatrix& matrix, const dgVector& shapeNormal, dgUnsigned32 id,	dgFloat32 penetration,
+											 dgInt32 shape1VertexCount, dgVector* const shape1, dgInt32 shape2VertexCount, dgVector* const shape2, dgContactPoint* const contactOut, dgInt32 maxContacts) const;
+
+	dgInt32 CalculateContactsSimd(dgMinkFace* const face, dgInt32 contacID, dgContactPoint* const contactOut, dgInt32 maxContacts);
+	dgInt32 CalculateContacts(dgMinkFace* const face, dgInt32 contacID, dgContactPoint* const contactOut, dgInt32 maxContacts);
+
+	dgInt32 CalculateContactsContinuesSimd(dgInt32 contacID, dgContactPoint* const contactOut, dgInt32 maxContacts, const dgVector* diffPoins, const dgVector* averPoins, dgFloat32 timestep);
+	dgInt32 CalculateContactsContinues(dgInt32 contacID, dgContactPoint* const contactOut, dgInt32 maxContacts, const dgVector* diffPoins, const dgVector* averPoins, dgFloat32 timestep);
+	dgVector ReduceLine (const dgVector& origin);
+	dgBigVector ReduceLineLarge (const dgBigVector& origin);
+	dgVector ReduceTriangle (const dgVector& origin);
+	dgBigVector ReduceTriangleLarge (const dgBigVector& origin);
+	dgVector ReduceTetrahedrum (const dgVector& origin);
+	dgBigVector ReduceTetrahedrumLarge (const dgBigVector& origin);
+	dgMinkReturnCode UpdateSeparatingPlaneFallbackSolution(dgMinkFace*& plane, const dgVector& origin);
+	dgMinkReturnCode UpdateSeparatingPlaneFallbackSolutionLarge(dgMinkFace*& plane, const dgBigVector& origin);
+	dgMinkReturnCode UpdateSeparatingPlaneSimd(dgMinkFace*& plane, const dgVector& origin);
+	dgMinkReturnCode UpdateSeparatingPlane(dgMinkFace*& plane, const dgVector& origin);
+	dgMinkReturnCode UpdateSeparatingPlaneLarge(dgMinkFace*& plane, const dgBigVector& origin);
+	dgMinkReturnCode CalcSeparatingPlaneSimd(dgMinkFace*& plane, const dgVector& origin = dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (1.0f)));
+	dgMinkReturnCode CalcSeparatingPlane(dgMinkFace*& plane, const dgVector& origin = dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (1.0f)));
+	dgMinkReturnCode CalcSeparatingPlaneLarge(dgMinkFace*& plane, const dgBigVector& origin = dgBigVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (1.0f)));
+
+
+//	bool CalcFacePlaneSimd (dgMinkFace *face);
+	inline bool CalcFacePlaneSimd (dgMinkFace *face)
+	{
+		return CalcFacePlane (face);
+	}
+
+	bool CalcFacePlane (dgMinkFace* const face);
+	bool CalcFacePlaneLarge (dgMinkFace* const face);
+	inline dgMinkFace *NewFace();
+	dgMinkFace *CalculateClipPlaneSimd ();
+	dgMinkFace *CalculateClipPlane ();
+	dgMinkFace *CalculateClipPlaneLarge ();
+
+
+	public:
+	dgContactSolver(dgCollisionParamProxi& proxi);
+	dgContactSolver(dgCollisionParamProxi& proxi, dgCollision *polygon);
+	dgContactSolver& operator= (const dgContactSolver& me);
+
+	dgInt32 HullHullContactsSimd (dgInt32 contactID);
+	dgInt32 HullHullContacts (dgInt32 contactID);
+	dgInt32 HullHullContactsLarge (dgInt32 contactID);
+	dgInt32 HullHullContinueContactsSimd (dgFloat32& timeStep, dgContactPoint* const contactOut, dgInt32 contactID, dgInt32 maxContacts, dgInt32 conditionalContactCalculationAtOrigin);
+	dgInt32 HullHullContinueContacts (dgFloat32& timeStep, dgContactPoint* const contactOut, dgInt32 contactID, dgInt32 maxContacts, dgInt32 conditionalContactCalculationAtOrigin);
+	void CalculateVelocities (dgFloat32 timestep); 
+	void CalculateVelocitiesSimd (dgFloat32 timestep) ;
+
+	dgMatrix m_matrix;
+	dgVector m_localRelVeloc;
+	dgVector m_floatingBodyVeloc;
+	dgVector m_referenceBodyVeloc;
+	dgVector m_hullVertex[DG_MINK_MAX_POINTS_SIZE * 2];
+	dgVector m_averVertex[DG_MINK_MAX_POINTS_SIZE * 2];
+	dgMinkFace m_simplex[DG_MINK_MAX_FACES_SIZE * 2];
+
+	dgInt32 m_planeIndex;
+	dgInt32 m_vertexIndex;
+	dgFloat32 m_penetrationPadding;
+	dgBody* m_floatingBody; 
+	dgBody* m_referenceBody; 
+	dgCollisionConvex* m_floatingcollision;
+	dgCollisionConvex* m_referenceCollision;
+	dgCollisionParamProxi* m_proxi;
+	dgMinkFacePurge *m_facePurge;
+	dgBigVector* m_hullVertexLarge;
+	dgBigVector* m_averVertexLarge;
+
+	dgMinkReturnCode m_lastFaceCode;
+
+#ifdef DG_BUILD_SIMD_CODE
+	static simd_type m_zero;
+	static simd_type m_nrh0p5;
+	static simd_type m_nrh3p0;
+	static simd_type m_negIndex;
+	static simd_type m_index_yx;
+	static simd_type m_index_wz;
+	static simd_type m_negativeOne;
+	static simd_type m_zeroTolerenace;
+#endif
+
+	static dgVector m_dir[14];
+	static dgInt32 m_faceIndex[][4];
+
+	friend class dgWorld;
+}DG_GCC_VECTOR_ALIGMENT;
+
 
 #endif
 

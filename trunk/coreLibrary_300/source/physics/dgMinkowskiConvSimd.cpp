@@ -20,6 +20,7 @@
 */
 
 #include "dgPhysicsStdafx.h"
+#if 0
 #include "dgWorld.h"
 #include "dgCollisionBox.h"
 #include "dgCollisionMesh.h"
@@ -29,7 +30,34 @@
 #include "dgCollisionEllipse.h"
 #include "dgCollisionCapsule.h"
 #include "dgWorldDynamicUpdate.h"
-#if 0
+
+
+
+
+#define DG_MINK_MAX_FACES								64
+#define DG_MINK_MAX_FACES_SIZE							(DG_MINK_MAX_FACES + 16)
+#define DG_MINK_MAX_POINTS								64
+#define DG_MINK_MAX_POINTS_SIZE							(DG_MINK_MAX_POINTS + 16)
+#define DG_MAX_SIMPLEX_FACE								(DG_MINK_MAX_POINTS * 4)
+#define DG_HEAP_EDGE_COUNT								256 
+#define DG_ROBUST_PLANE_CLIP							dgFloat32 (1.0f / 256.0f)
+#define DG_DISTANCE_TOLERANCE							dgFloat32 (1.0e-3f)
+#define DG_DISTANCE_TOLERANCE_ZERO						dgFloat32 (1.0e-24f)
+#define DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION		32
+#define DG_UPDATE_SEPARATING_PLANE_DISTANCE_TOLERANCE1	(DG_DISTANCE_TOLERANCE * dgFloat32 (1.0e-1f))
+#define DG_UPDATE_SEPARATING_PLANE_DISTANCE_TOLERANCE2	(DG_DISTANCE_TOLERANCE * dgFloat32 (1.0e-3f))
+#define DG_MIN_VERTEX_ERROR								(dgFloat32 (1.0e-3f))
+#define DG_MIN_VERTEX_ERROR_2							(DG_MIN_VERTEX_ERROR * DG_MIN_VERTEX_ERROR)
+#define DG_FALLBACK_SEPARATING_PLANE_ITERATIONS			32
+#define DG_FALLBACK_SEPARATING_DIST_TOLERANCE			dgFloat32(1.0e-6f)
+#define DG_CALCULATE_SEPARATING_PLANE_ERROR				(DG_ROBUST_PLANE_CLIP * dgFloat32 (2.0f))
+#define DG_CALCULATE_SEPARATING_PLANE_ERROR1			(DG_ROBUST_PLANE_CLIP * dgFloat32 (0.5f))
+#define DG_GETADJACENTINDEX_ACTIVE(x)					((!m_simplex[x->m_adjancentFace[1]].m_isActive) ? 1 : ((!m_simplex[x->m_adjancentFace[2]].m_isActive) ? 2 : 0))
+#define DG_GETADJACENTINDEX_VERTEX(x,v)					(((x->m_vertex[1] == v) ? 1 : 0) | ((x->m_vertex[2] == v) ? 2 : 0))
+#define DG_RSQRT_SIMD_S(x,y)							{simd_type tmp0 = simd_rsqrt_s(x); y = simd_mul_s (simd_mul_s(dgContactSolver::m_nrh0p5, tmp0), simd_mul_sub_v (dgContactSolver::m_nrh3p0, simd_mul_s (x, tmp0), tmp0));}
+
+
+
 
 DG_MSC_VECTOR_ALIGMENT 
 class dgContactSolver
@@ -8187,5 +8215,4 @@ dgInt32 dgWorld::CalculateConvexToNonConvexContacts (dgCollisionParamProxi& prox
 	}
 	return count;
 }
-
 #endif
