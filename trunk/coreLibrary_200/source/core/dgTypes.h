@@ -599,11 +599,14 @@ enum dgCpuClass
 
 DG_INLINE dgFloat32 dgAbsf(dgFloat32 x)
 {
-	dgDoubleInt val;
-	val.m_float = x;
-	val.m_intH &= ~(dgUnsigned64 (1)<<31);
-	_ASSERTE (val.m_float == fabs (x));
-	return dgFloat32 (val.m_float);
+//	dgDoubleInt val;
+//	val.m_float = x;
+//	val.m_intH &= ~(dgUnsigned64 (1)<<31);
+//	_ASSERTE (val.m_float == fabs (x));
+//	return dgFloat32 (val.m_float);
+
+	// according to Intel this is better because is doe not read after write
+	return (x >= dgFloat32 (0.0f)) ? x : -x;
 }
 
 
