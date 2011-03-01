@@ -20,7 +20,6 @@
 */
 
 #include "dgPhysicsStdafx.h"
-#if 0
 #include "dgWorld.h"
 #include "dgCollisionBox.h"
 #include "dgCollisionMesh.h"
@@ -32,7 +31,17 @@
 #include "dgWorldDynamicUpdate.h"
 
 
+simd_type dgContactSolver::m_zero;
+simd_type dgContactSolver::m_nrh0p5;
+simd_type dgContactSolver::m_nrh3p0;
+simd_type dgContactSolver::m_negIndex;
+simd_type dgContactSolver::m_index_yx;
+simd_type dgContactSolver::m_index_wz;
+simd_type dgContactSolver::m_negativeOne;
+simd_type dgContactSolver::m_zeroTolerenace;
 
+
+#if 0
 
 #define DG_MINK_MAX_FACES								64
 #define DG_MINK_MAX_FACES_SIZE							(DG_MINK_MAX_FACES + 16)

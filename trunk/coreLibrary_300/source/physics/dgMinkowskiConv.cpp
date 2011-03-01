@@ -29,6 +29,10 @@
 #include "dgCollisionEllipse.h"
 #include "dgCollisionCapsule.h"
 #include "dgWorldDynamicUpdate.h"
+
+dgVector dgContactSolver::m_dir[14];
+dgInt32 dgContactSolver::m_faceIndex[][4];
+
 #if 0
 
 DG_MSC_VECTOR_ALIGMENT 
@@ -5378,121 +5382,6 @@ dgInt32 dgContactSolver::m_faceIndex[][4] =
 
 
 
-void dgWorld::InitConvexCollision ()
-{
-	dgInt32 i;
-	
-
-//	#ifndef __USE_DOUBLE_PRECISION__
-	#ifdef DG_BUILD_SIMD_CODE
-//		dgInt32* ptr;
-
-		((dgVector&) dgContactSolver::m_zero) = dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f)); 
-		((dgVector&) dgContactSolver::m_negativeOne) = dgVector (dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f));
-		((dgVector&) dgContactSolver::m_zeroTolerenace) = dgVector (DG_DISTANCE_TOLERANCE_ZERO, DG_DISTANCE_TOLERANCE_ZERO, DG_DISTANCE_TOLERANCE_ZERO, DG_DISTANCE_TOLERANCE_ZERO);
-		((dgVector&) dgContactSolver::m_nrh0p5) = dgVector (dgFloat32 (0.5f), dgFloat32 (0.5f), dgFloat32 (0.5f), dgFloat32 (0.5f));
-		((dgVector&) dgContactSolver::m_nrh3p0) = dgVector (dgFloat32 (3.0f), dgFloat32 (3.0f), dgFloat32 (3.0f), dgFloat32 (3.0f));
-		
-
-		((dgVector&) dgContactSolver::m_index_yx) = dgVector (dgFloat32 (0.0f), dgFloat32 (1.0f), dgFloat32 (0.0f), dgFloat32 (1.0f)); 
-//		ptr = (dgInt32*) &dgContactSolver::m_index_yx ;
-//		ptr[0] = 0;
-//		ptr[1] = 1;
-//		ptr[2] = 0;
-//		ptr[3] = 1;
-
-		((dgVector&) dgContactSolver::m_index_wz) = dgVector (dgFloat32 (2.0f), dgFloat32 (3.0f), dgFloat32 (2.0f), dgFloat32 (3.0f)); 
-//		ptr = (dgInt32*) &dgContactSolver::m_index_wz;
-//		ptr[0] = 2;
-//		ptr[1] = 3;
-//		ptr[2] = 2;
-//		ptr[3] = 3;
-
-		((dgVector&) dgContactSolver::m_negIndex) = dgVector (dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f)); 
-//		ptr = (dgInt32*) &dgContactSolver::m_negIndex;
-//		ptr[0] = -1;
-//		ptr[1] = -1;
-//		ptr[2] = -1;
-//		ptr[3] = -1;
-	#endif
-
-	dgContactSolver::m_dir[0]  = dgVector ( dgFloat32 (1.0f), -dgFloat32 (1.0f),  dgFloat32 (1.0f), dgFloat32 (0.0f));
-	dgContactSolver::m_dir[1]  = dgVector (-dgFloat32 (1.0f), -dgFloat32 (1.0f), -dgFloat32 (1.0f), dgFloat32 (0.0f));
-	dgContactSolver::m_dir[2]  = dgVector ( dgFloat32 (1.0f), -dgFloat32 (1.0f), -dgFloat32 (1.0f), dgFloat32 (0.0f));
-	dgContactSolver::m_dir[3]  = dgVector (-dgFloat32 (1.0f),  dgFloat32 (1.0f),  dgFloat32 (1.0f), dgFloat32 (0.0f));
-	dgContactSolver::m_dir[4]  = dgVector ( dgFloat32 (1.0f),  dgFloat32 (1.0f), -dgFloat32 (1.0f), dgFloat32 (0.0f));
-	dgContactSolver::m_dir[5]  = dgVector (-dgFloat32 (1.0f),  dgFloat32 (1.0f), -dgFloat32 (1.0f), dgFloat32 (0.0f));
-	dgContactSolver::m_dir[6]  = dgVector (-dgFloat32 (1.0f), -dgFloat32 (1.0f),  dgFloat32 (1.0f), dgFloat32 (0.0f));
-	dgContactSolver::m_dir[7]  = dgVector ( dgFloat32 (1.0f),  dgFloat32 (1.0f),  dgFloat32 (1.0f), dgFloat32 (0.0f));
-	dgContactSolver::m_dir[8]  = dgVector ( dgFloat32 (0.0f), -dgFloat32 (1.0f),  dgFloat32 (0.0f), dgFloat32 (0.0f));
-	dgContactSolver::m_dir[9]  = dgVector ( dgFloat32 (0.0f),  dgFloat32 (1.0f),  dgFloat32 (0.0f), dgFloat32 (0.0f));
-	dgContactSolver::m_dir[10] = dgVector ( dgFloat32 (1.0f),  dgFloat32 (0.0f),  dgFloat32 (0.0f), dgFloat32 (0.0f));
-	dgContactSolver::m_dir[11] = dgVector (-dgFloat32 (1.0f),  dgFloat32 (0.0f),  dgFloat32 (0.0f), dgFloat32 (0.0f));
-	dgContactSolver::m_dir[12] = dgVector ( dgFloat32 (0.0f),  dgFloat32 (0.0f),  dgFloat32 (1.0f), dgFloat32 (0.0f));
-	dgContactSolver::m_dir[13] = dgVector ( dgFloat32 (0.0f),  dgFloat32 (0.0f), -dgFloat32 (1.0f), dgFloat32 (0.0f));
-
-	for (i = 0; i < dgInt32(sizeof(dgContactSolver::m_dir) / sizeof(dgContactSolver::m_dir[0])); i ++) {
-		dgVector dir (dgContactSolver::m_dir[i]);
-		dgContactSolver::m_dir[i] = dir.Scale (dgFloat32 (1.0f) / dgSqrt (dir % dir));
-	}
-
-
-	dgCollisionConvex::m_multiResDir[0] = dgVector (dgFloat32 ( 0.577350f), dgFloat32 ( 0.577350f), dgFloat32 ( 0.577350f), dgFloat32 (0.0f));
-	dgCollisionConvex::m_multiResDir[1] = dgVector (dgFloat32 (-0.577350f), dgFloat32 ( 0.577350f), dgFloat32 ( 0.577350f), dgFloat32 (0.0f));
-	dgCollisionConvex::m_multiResDir[2] = dgVector (dgFloat32 ( 0.577350f), dgFloat32 (-0.577350f), dgFloat32 ( 0.577350f), dgFloat32 (0.0f));
-	dgCollisionConvex::m_multiResDir[3] = dgVector (dgFloat32 (-0.577350f), dgFloat32 (-0.577350f), dgFloat32 ( 0.577350f), dgFloat32 (0.0f));
-
-	dgCollisionConvex::m_multiResDir[4] = dgCollisionConvex::m_multiResDir[0].Scale (dgFloat32 (-1.0f));
-	dgCollisionConvex::m_multiResDir[5] = dgCollisionConvex::m_multiResDir[1].Scale (dgFloat32 (-1.0f));
-	dgCollisionConvex::m_multiResDir[6] = dgCollisionConvex::m_multiResDir[2].Scale (dgFloat32 (-1.0f));
-	dgCollisionConvex::m_multiResDir[7] = dgCollisionConvex::m_multiResDir[3].Scale (dgFloat32 (-1.0f));
-
-	dgCollisionConvex::m_multiResDir_sse[0] = dgVector (dgCollisionConvex::m_multiResDir[0].m_x, dgCollisionConvex::m_multiResDir[1].m_x, dgCollisionConvex::m_multiResDir[2].m_x, dgCollisionConvex::m_multiResDir[3].m_x);
-	dgCollisionConvex::m_multiResDir_sse[1] = dgVector (dgCollisionConvex::m_multiResDir[0].m_y, dgCollisionConvex::m_multiResDir[1].m_y, dgCollisionConvex::m_multiResDir[2].m_y, dgCollisionConvex::m_multiResDir[3].m_y);
-	dgCollisionConvex::m_multiResDir_sse[2] = dgVector (dgCollisionConvex::m_multiResDir[0].m_z, dgCollisionConvex::m_multiResDir[1].m_z, dgCollisionConvex::m_multiResDir[2].m_z, dgCollisionConvex::m_multiResDir[3].m_z);
-	dgCollisionConvex::m_multiResDir_sse[3] = dgVector (dgCollisionConvex::m_multiResDir[4].m_x, dgCollisionConvex::m_multiResDir[5].m_x, dgCollisionConvex::m_multiResDir[6].m_x, dgCollisionConvex::m_multiResDir[7].m_x);
-	dgCollisionConvex::m_multiResDir_sse[4] = dgVector (dgCollisionConvex::m_multiResDir[4].m_y, dgCollisionConvex::m_multiResDir[5].m_y, dgCollisionConvex::m_multiResDir[6].m_y, dgCollisionConvex::m_multiResDir[7].m_y);
-	dgCollisionConvex::m_multiResDir_sse[5] = dgVector (dgCollisionConvex::m_multiResDir[4].m_z, dgCollisionConvex::m_multiResDir[5].m_z, dgCollisionConvex::m_multiResDir[6].m_z, dgCollisionConvex::m_multiResDir[7].m_z);
-
-	#ifdef DG_BUILD_SIMD_CODE
-
-//	dgInt32* ptr;
-//	ptr = (dgInt32*) &dgCollisionConvex::m_signMask.m_x;
-//	ptr[0] = 0x7fffffff;
-//	ptr[1] = 0x7fffffff;
-//	ptr[2] = 0x7fffffff;
-//	ptr[3] = 0x7fffffff;
-
-	dgFloatSign tmp;
-	tmp.m_integer.m_iVal = 0x7fffffff;
-	dgCollisionConvex::m_signMask.m_x = tmp.m_fVal;
-	dgCollisionConvex::m_signMask.m_y = tmp.m_fVal;
-	dgCollisionConvex::m_signMask.m_z = tmp.m_fVal;
-	dgCollisionConvex::m_signMask.m_w = tmp.m_fVal;
-
-//	ptr = (dgInt32*) &dgCollisionConvex::m_triplexMask.m_x;
-//	ptr[0] = 0xffffffff;
-//	ptr[1] = 0xffffffff;
-//	ptr[2] = 0xffffffff;
-//	ptr[3] = 0x0;
-
-	tmp.m_integer.m_iVal = 0xffffffff;
-	dgCollisionConvex::m_triplexMask.m_x = tmp.m_fVal;
-	dgCollisionConvex::m_triplexMask.m_y = tmp.m_fVal;
-	dgCollisionConvex::m_triplexMask.m_z = tmp.m_fVal;
-	dgCollisionConvex::m_triplexMask.m_w = 0.0f;
-
-	#endif
-
-#ifdef _DEBUG
-	for (i = 0; i < dgInt32(sizeof(dgContactSolver::m_dir) / sizeof(dgContactSolver::m_dir[0])); i ++) {
-		_ASSERTE (dgContactSolver::m_dir[i] % dgContactSolver::m_dir[i] > dgFloat32 (0.9999f));
-		for (dgInt32 j = i + 1; j < dgInt32(sizeof(dgContactSolver::m_dir) / sizeof(dgContactSolver::m_dir[0])); j ++) {
-			_ASSERTE (dgContactSolver::m_dir[i] % dgContactSolver::m_dir[j] < dgFloat32 (0.9999f));
-		}
-	}
-#endif
-}
 
 
 
@@ -6466,14 +6355,6 @@ dgInt32 dgWorld::FlattenContinueContacts (dgInt32 count, dgContactPoint* const c
 */
 
 
-
-//dgInt32 dgWorld::ClosestPoint (
-//	dgBody* convexA, 
-//	dgBody* convexB, 
-//	dgTriplex& contactA, 
-//	dgTriplex& contactB, 
-//	dgTriplex& normalAB) const	
-
 dgInt32 dgWorld::ClosestPoint (dgCollisionParamProxi& proxi) const	
 {
 	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgConvexCollision_RTTI));
@@ -6764,210 +6645,6 @@ dgInt32 dgWorld::CalculateConvexToConvexContactsSimd (dgCollisionParamProxi& pro
 
 
 
-dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) const
-{
-	_ASSERTE (proxi.m_referenceCollision->IsType (dgCollision::dgConvexCollision_RTTI));
-	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgConvexCollision_RTTI));
-
-	proxi.m_inTriggerVolume = 0;
-
-	dgInt32 count = 0;
-	dgCollision* const collision1 = proxi.m_referenceCollision;
-	dgCollision* const collision2 = proxi.m_floatingCollision;
-	
-
-	if (!(((dgCollisionConvex*)collision1)->m_vertexCount && ((dgCollisionConvex*)collision2)->m_vertexCount)) {
-		return count;
-	}
-
-	_ASSERTE (collision1->GetCollisionPrimityType() != m_nullCollision);
-	_ASSERTE (collision2->GetCollisionPrimityType() != m_nullCollision);
-
-	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgConvexCollision_RTTI));
-	if (proxi.m_continueCollision) {
-		dgInt32 maxContaCount;
-		dgFloat32 dist;
-		dgFloat32 timestep;
-		dgFloat32 distTravel;
-
-		dgMatrix matrix (proxi.m_floatingMatrix * proxi.m_referenceMatrix.Inverse());
-		proxi.m_localMatrixInv = &matrix;
-		dgContactSolver mink (proxi);
-
-		timestep = proxi.m_timestep;
-		mink.CalculateVelocities(proxi.m_timestep);
-
-		maxContaCount = GetMin (proxi.m_maxContacts, 16); 
-		count = mink.HullHullContinueContacts (proxi.m_timestep, proxi.m_contacts, 0, maxContaCount, proxi.m_unconditionalCast);
-
-		if (count) {
-			dist = GetMin (collision1->GetBoxMinRadius(), collision2->GetBoxMinRadius());
-			dist *= dist;
-			distTravel = (mink.m_localRelVeloc % mink.m_localRelVeloc) * timestep * timestep;
-			if (distTravel * dgFloat32 (0.25f * 0.25f) > dist) {
-				dgWorld* const world = proxi.m_referenceBody->GetWorld();
-				_ASSERTE (world);
-				if (proxi.m_referenceBody->m_mass.m_w > dgFloat32 (0.0f)) {
-					world->GetIndirectLock(&proxi.m_referenceBody->m_locks);
-					proxi.m_referenceBody->m_solverInContinueCollision = true;
-					world->ReleaseIndirectLock(&proxi.m_referenceBody->m_locks);
-				}
-				if (proxi.m_floatingBody->m_mass.m_w > dgFloat32 (0.0f)) {
-					world->GetIndirectLock(&proxi.m_floatingBody->m_locks);
-					proxi.m_floatingBody->m_solverInContinueCollision = true;
-					world->ReleaseIndirectLock(&proxi.m_floatingBody->m_locks);
-				}
-			}
-		}
-
-	} else {
-		dgCollisionID id1 = collision1->GetCollisionPrimityType();
-		dgCollisionID id2 = collision2->GetCollisionPrimityType();
-		_ASSERTE (id1 != m_nullCollision);
-		_ASSERTE (id2 != m_nullCollision);
-
-		switch (id1) 
-		{
-			case m_sphereCollision:
-			{
-				switch (id2) 
-				{
-					case m_sphereCollision:
-					{
-						count = CalculateSphereToSphereContacts (proxi);
-						break;
-					}
-
-					case m_capsuleCollision:
-					{
-						dgCollisionParamProxi tmp(proxi.m_threadIndex);
-						tmp.m_referenceBody = proxi.m_floatingBody;
-						tmp.m_floatingBody = proxi.m_referenceBody;
-						tmp.m_referenceCollision = proxi.m_floatingCollision;
-						tmp.m_floatingCollision = proxi.m_referenceCollision;
-						tmp.m_referenceMatrix = proxi.m_floatingMatrix;
-						tmp.m_floatingMatrix = proxi.m_referenceMatrix;
-						tmp.m_timestep = proxi.m_timestep;
-						tmp.m_penetrationPadding = proxi.m_penetrationPadding;
-						tmp.m_contacts = proxi.m_contacts;
-						tmp.m_inTriggerVolume = 0;
-						tmp.m_isTriggerVolume = proxi.m_isTriggerVolume; 
-
-						count = CalculateCapsuleToSphereContacts (tmp);
-						for (dgInt32 i = 0; i < count; i ++) {
-							proxi.m_contacts[i].m_normal = tmp.m_contacts[0].m_normal.Scale (dgFloat32 (-1.0f));
-						}
-						proxi.m_inTriggerVolume = tmp.m_inTriggerVolume;
-						break;
-					}
-
-					case m_boxCollision:
-					{
-						dgCollisionParamProxi tmp(proxi.m_threadIndex);
-
-						tmp.m_referenceBody = proxi.m_floatingBody;
-						tmp.m_floatingBody = proxi.m_referenceBody;
-						tmp.m_referenceCollision = proxi.m_floatingCollision;
-						tmp.m_floatingCollision = proxi.m_referenceCollision;
-						tmp.m_referenceMatrix = proxi.m_floatingMatrix;
-						tmp.m_floatingMatrix = proxi.m_referenceMatrix;
-						tmp.m_timestep = proxi.m_timestep;
-						tmp.m_penetrationPadding = proxi.m_penetrationPadding;
-						tmp.m_contacts = proxi.m_contacts;
-						tmp.m_inTriggerVolume = 0;
-						tmp.m_maxContacts = proxi.m_maxContacts;
-						tmp.m_isTriggerVolume = proxi.m_isTriggerVolume; 
-
-						count = CalculateBoxToSphereContacts (tmp);
-						if (count) {
-							proxi.m_contacts[0].m_normal = tmp.m_contacts[0].m_normal.Scale (dgFloat32 (-1.0f));
-						}
-						proxi.m_inTriggerVolume = tmp.m_inTriggerVolume;
-
-						break;
-					}
-
-					default:
-					{
-						count = CalculateHullToHullContacts (proxi);
-						break;
-					}
-				}
-
-				break;
-			}
-
-			case m_capsuleCollision:
-			{
-				switch (id2) 
-				{
-					case m_sphereCollision:
-					{
-						count = CalculateCapsuleToSphereContacts (proxi);
-						break;
-					}
-
-					case m_capsuleCollision:
-					{
-						count = CalculateCapsuleToCapsuleContacts (proxi);
-						break;
-					}
-
-					default:
-					{
-						count = CalculateHullToHullContacts (proxi);
-						break;
-					}
-				}
-				break;
-			}
-
-			case m_boxCollision:
-			{
-				switch (id2) 
-				{
-					case m_sphereCollision:
-					{
-						count = CalculateBoxToSphereContacts (proxi);
-						break;
-					}
-
-					//case m_boxCollision:
-					//{
-					//count = CalculateBoxToBoxContacts (body1, body2, contactOut);
-					//break;
-					//}
-
-					default:
-					{
-						count = CalculateHullToHullContacts (proxi);
-						break;
-					}
-				}
-				break;
-			}
-
-			default: 
-			{
-				count = CalculateHullToHullContacts (proxi);
-				break;
-			}
-		}
-
-		if (count) {
-			proxi.m_timestep = dgFloat32 (0.0f);
-		}
-	}
-
-	dgContactPoint* const contactOut = proxi.m_contacts;
-	for (dgInt32 i = 0; i < count; i ++) {
-		contactOut[i].m_body0 = proxi.m_referenceBody;
-		contactOut[i].m_body1 = proxi.m_floatingBody;
-		contactOut[i].m_collision0 = collision1;
-		contactOut[i].m_collision1 = collision2;
-	}
-	return count;
-}
 
 
 
@@ -8009,10 +7686,110 @@ return 0;
 #endif
 */
 }
+#endif
+
+
+
+void dgWorld::InitConvexCollision ()
+{
+	((dgVector&) dgContactSolver::m_zero) = dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f)); 
+	((dgVector&) dgContactSolver::m_negativeOne) = dgVector (dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f));
+	((dgVector&) dgContactSolver::m_zeroTolerenace) = dgVector (DG_DISTANCE_TOLERANCE_ZERO, DG_DISTANCE_TOLERANCE_ZERO, DG_DISTANCE_TOLERANCE_ZERO, DG_DISTANCE_TOLERANCE_ZERO);
+	((dgVector&) dgContactSolver::m_nrh0p5) = dgVector (dgFloat32 (0.5f), dgFloat32 (0.5f), dgFloat32 (0.5f), dgFloat32 (0.5f));
+	((dgVector&) dgContactSolver::m_nrh3p0) = dgVector (dgFloat32 (3.0f), dgFloat32 (3.0f), dgFloat32 (3.0f), dgFloat32 (3.0f));
+
+
+	((dgVector&) dgContactSolver::m_index_yx) = dgVector (dgFloat32 (0.0f), dgFloat32 (1.0f), dgFloat32 (0.0f), dgFloat32 (1.0f)); 
+	((dgVector&) dgContactSolver::m_index_wz) = dgVector (dgFloat32 (2.0f), dgFloat32 (3.0f), dgFloat32 (2.0f), dgFloat32 (3.0f)); 
+	((dgVector&) dgContactSolver::m_negIndex) = dgVector (dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f)); 
+
+	dgContactSolver::m_dir[0]  = dgVector ( dgFloat32 (1.0f), -dgFloat32 (1.0f),  dgFloat32 (1.0f), dgFloat32 (0.0f));
+	dgContactSolver::m_dir[1]  = dgVector (-dgFloat32 (1.0f), -dgFloat32 (1.0f), -dgFloat32 (1.0f), dgFloat32 (0.0f));
+	dgContactSolver::m_dir[2]  = dgVector ( dgFloat32 (1.0f), -dgFloat32 (1.0f), -dgFloat32 (1.0f), dgFloat32 (0.0f));
+	dgContactSolver::m_dir[3]  = dgVector (-dgFloat32 (1.0f),  dgFloat32 (1.0f),  dgFloat32 (1.0f), dgFloat32 (0.0f));
+	dgContactSolver::m_dir[4]  = dgVector ( dgFloat32 (1.0f),  dgFloat32 (1.0f), -dgFloat32 (1.0f), dgFloat32 (0.0f));
+	dgContactSolver::m_dir[5]  = dgVector (-dgFloat32 (1.0f),  dgFloat32 (1.0f), -dgFloat32 (1.0f), dgFloat32 (0.0f));
+	dgContactSolver::m_dir[6]  = dgVector (-dgFloat32 (1.0f), -dgFloat32 (1.0f),  dgFloat32 (1.0f), dgFloat32 (0.0f));
+	dgContactSolver::m_dir[7]  = dgVector ( dgFloat32 (1.0f),  dgFloat32 (1.0f),  dgFloat32 (1.0f), dgFloat32 (0.0f));
+	dgContactSolver::m_dir[8]  = dgVector ( dgFloat32 (0.0f), -dgFloat32 (1.0f),  dgFloat32 (0.0f), dgFloat32 (0.0f));
+	dgContactSolver::m_dir[9]  = dgVector ( dgFloat32 (0.0f),  dgFloat32 (1.0f),  dgFloat32 (0.0f), dgFloat32 (0.0f));
+	dgContactSolver::m_dir[10] = dgVector ( dgFloat32 (1.0f),  dgFloat32 (0.0f),  dgFloat32 (0.0f), dgFloat32 (0.0f));
+	dgContactSolver::m_dir[11] = dgVector (-dgFloat32 (1.0f),  dgFloat32 (0.0f),  dgFloat32 (0.0f), dgFloat32 (0.0f));
+	dgContactSolver::m_dir[12] = dgVector ( dgFloat32 (0.0f),  dgFloat32 (0.0f),  dgFloat32 (1.0f), dgFloat32 (0.0f));
+	dgContactSolver::m_dir[13] = dgVector ( dgFloat32 (0.0f),  dgFloat32 (0.0f), -dgFloat32 (1.0f), dgFloat32 (0.0f));
+
+	for (dgInt32 i = 0; i < dgInt32(sizeof(dgContactSolver::m_dir) / sizeof(dgContactSolver::m_dir[0])); i ++) {
+		dgVector dir (dgContactSolver::m_dir[i]);
+		dgContactSolver::m_dir[i] = dir.Scale (dgFloat32 (1.0f) / dgSqrt (dir % dir));
+	}
+
+
+	dgCollisionConvex::m_multiResDir[0] = dgVector (dgFloat32 ( 0.577350f), dgFloat32 ( 0.577350f), dgFloat32 ( 0.577350f), dgFloat32 (0.0f));
+	dgCollisionConvex::m_multiResDir[1] = dgVector (dgFloat32 (-0.577350f), dgFloat32 ( 0.577350f), dgFloat32 ( 0.577350f), dgFloat32 (0.0f));
+	dgCollisionConvex::m_multiResDir[2] = dgVector (dgFloat32 ( 0.577350f), dgFloat32 (-0.577350f), dgFloat32 ( 0.577350f), dgFloat32 (0.0f));
+	dgCollisionConvex::m_multiResDir[3] = dgVector (dgFloat32 (-0.577350f), dgFloat32 (-0.577350f), dgFloat32 ( 0.577350f), dgFloat32 (0.0f));
+
+	dgCollisionConvex::m_multiResDir[4] = dgCollisionConvex::m_multiResDir[0].Scale (dgFloat32 (-1.0f));
+	dgCollisionConvex::m_multiResDir[5] = dgCollisionConvex::m_multiResDir[1].Scale (dgFloat32 (-1.0f));
+	dgCollisionConvex::m_multiResDir[6] = dgCollisionConvex::m_multiResDir[2].Scale (dgFloat32 (-1.0f));
+	dgCollisionConvex::m_multiResDir[7] = dgCollisionConvex::m_multiResDir[3].Scale (dgFloat32 (-1.0f));
+
+	dgCollisionConvex::m_multiResDir_sse[0] = dgVector (dgCollisionConvex::m_multiResDir[0].m_x, dgCollisionConvex::m_multiResDir[1].m_x, dgCollisionConvex::m_multiResDir[2].m_x, dgCollisionConvex::m_multiResDir[3].m_x);
+	dgCollisionConvex::m_multiResDir_sse[1] = dgVector (dgCollisionConvex::m_multiResDir[0].m_y, dgCollisionConvex::m_multiResDir[1].m_y, dgCollisionConvex::m_multiResDir[2].m_y, dgCollisionConvex::m_multiResDir[3].m_y);
+	dgCollisionConvex::m_multiResDir_sse[2] = dgVector (dgCollisionConvex::m_multiResDir[0].m_z, dgCollisionConvex::m_multiResDir[1].m_z, dgCollisionConvex::m_multiResDir[2].m_z, dgCollisionConvex::m_multiResDir[3].m_z);
+	dgCollisionConvex::m_multiResDir_sse[3] = dgVector (dgCollisionConvex::m_multiResDir[4].m_x, dgCollisionConvex::m_multiResDir[5].m_x, dgCollisionConvex::m_multiResDir[6].m_x, dgCollisionConvex::m_multiResDir[7].m_x);
+	dgCollisionConvex::m_multiResDir_sse[4] = dgVector (dgCollisionConvex::m_multiResDir[4].m_y, dgCollisionConvex::m_multiResDir[5].m_y, dgCollisionConvex::m_multiResDir[6].m_y, dgCollisionConvex::m_multiResDir[7].m_y);
+	dgCollisionConvex::m_multiResDir_sse[5] = dgVector (dgCollisionConvex::m_multiResDir[4].m_z, dgCollisionConvex::m_multiResDir[5].m_z, dgCollisionConvex::m_multiResDir[6].m_z, dgCollisionConvex::m_multiResDir[7].m_z);
+
+	dgFloatSign tmp;
+	tmp.m_integer.m_iVal = 0x7fffffff;
+	dgCollisionConvex::m_signMask.m_x = tmp.m_fVal;
+	dgCollisionConvex::m_signMask.m_y = tmp.m_fVal;
+	dgCollisionConvex::m_signMask.m_z = tmp.m_fVal;
+	dgCollisionConvex::m_signMask.m_w = tmp.m_fVal;
+
+
+	tmp.m_integer.m_iVal = 0xffffffff;
+	dgCollisionConvex::m_triplexMask.m_x = tmp.m_fVal;
+	dgCollisionConvex::m_triplexMask.m_y = tmp.m_fVal;
+	dgCollisionConvex::m_triplexMask.m_z = tmp.m_fVal;
+	dgCollisionConvex::m_triplexMask.m_w = 0.0f;
+
+#ifdef _DEBUG
+	for (dgInt32 i = 0; i < dgInt32(sizeof(dgContactSolver::m_dir) / sizeof(dgContactSolver::m_dir[0])); i ++) {
+		_ASSERTE (dgContactSolver::m_dir[i] % dgContactSolver::m_dir[i] > dgFloat32 (0.9999f));
+		for (dgInt32 j = i + 1; j < dgInt32(sizeof(dgContactSolver::m_dir) / sizeof(dgContactSolver::m_dir[0])); j ++) {
+			_ASSERTE (dgContactSolver::m_dir[i] % dgContactSolver::m_dir[j] < dgFloat32 (0.9999f));
+		}
+	}
+#endif
+}
+
+
+
+
+dgInt32 dgWorld::ClosestPoint (dgCollisionParamProxi& proxi) const	
+{
+	_ASSERTE (0);
+	return 0;
+/*
+	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgConvexCollision_RTTI));
+	_ASSERTE (proxi.m_referenceCollision->IsType (dgCollision::dgConvexCollision_RTTI));
+
+	dgMatrix matrix (proxi.m_floatingMatrix * proxi.m_referenceMatrix.Inverse());
+	proxi.m_localMatrixInv = &matrix;
+
+	dgContactSolver mink (proxi);
+	return mink.CalculateClosestPoints ();
+*/
+}
 
 
 dgInt32 dgWorld::CalculateConvexToNonConvexContacts (dgCollisionParamProxi& proxi) const
 {
+_ASSERTE (0);
+return 0;
+/*
 	dgPolygonMeshDesc data;
 	dgInt32 count = 0;
 	proxi.m_inTriggerVolume = 0;
@@ -8040,9 +7817,9 @@ dgInt32 dgWorld::CalculateConvexToNonConvexContacts (dgCollisionParamProxi& prox
 	dgInt32 doContinueCollision = 0;
 	bool solverInContinueCollision = false;
 	if (proxi.m_continueCollision) {
-//		dgFloat32 dist;
-//		dgFloat32 mag2;
-//		dgFloat32 spand;
+		//		dgFloat32 dist;
+		//		dgFloat32 mag2;
+		//		dgFloat32 spand;
 		dgVector hullOmega;
 		dgVector hullVeloc;
 
@@ -8124,17 +7901,17 @@ dgInt32 dgWorld::CalculateConvexToNonConvexContacts (dgCollisionParamProxi& prox
 		if (doContinueCollision) {
 			switch (collision->GetCollisionPrimityType()) 
 			{
-				case m_sphereCollision:
+			case m_sphereCollision:
 				{
 					count = CalculatePolySoupToSphereContactsContinue (proxi);
 					break;
 				}
 
-				default: 
+			default: 
 				{
-//if (!proxi.m_unconditionalCast &&  (xxx == 5)) {
-//xxx *= 1;
-//}
+					//if (!proxi.m_unconditionalCast &&  (xxx == 5)) {
+					//xxx *= 1;
+					//}
 					count = CalculateConvexToNonConvexContactsContinue (proxi);
 					break;
 				}
@@ -8152,19 +7929,19 @@ dgInt32 dgWorld::CalculateConvexToNonConvexContacts (dgCollisionParamProxi& prox
 
 			switch (collision->GetCollisionPrimityType()) 
 			{
-				case m_sphereCollision:
+			case m_sphereCollision:
 				{
 					count = CalculatePolySoupToSphereContactsDescrete (proxi);
 					break;
 				}
 
-				case m_ellipseCollision:
+			case m_ellipseCollision:
 				{
 					count = CalculatePolySoupToElipseContactsDescrete (proxi);
 					break;
 				}
 
-				default: 
+			default: 
 				{
 					count = CalculatePolySoupToHullContactsDescrete (proxi);
 				}
@@ -8186,6 +7963,215 @@ dgInt32 dgWorld::CalculateConvexToNonConvexContacts (dgCollisionParamProxi& prox
 		}
 	}
 	return count;
+*/
 }
 
-#endif
+
+dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) const
+{
+	_ASSERTE (0);
+	return 0;
+/*
+	_ASSERTE (proxi.m_referenceCollision->IsType (dgCollision::dgConvexCollision_RTTI));
+	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgConvexCollision_RTTI));
+
+	proxi.m_inTriggerVolume = 0;
+
+	dgInt32 count = 0;
+	dgCollision* const collision1 = proxi.m_referenceCollision;
+	dgCollision* const collision2 = proxi.m_floatingCollision;
+
+
+	if (!(((dgCollisionConvex*)collision1)->m_vertexCount && ((dgCollisionConvex*)collision2)->m_vertexCount)) {
+		return count;
+	}
+
+	_ASSERTE (collision1->GetCollisionPrimityType() != m_nullCollision);
+	_ASSERTE (collision2->GetCollisionPrimityType() != m_nullCollision);
+
+	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgConvexCollision_RTTI));
+	if (proxi.m_continueCollision) {
+		dgInt32 maxContaCount;
+		dgFloat32 dist;
+		dgFloat32 timestep;
+		dgFloat32 distTravel;
+
+		dgMatrix matrix (proxi.m_floatingMatrix * proxi.m_referenceMatrix.Inverse());
+		proxi.m_localMatrixInv = &matrix;
+		dgContactSolver mink (proxi);
+
+		timestep = proxi.m_timestep;
+		mink.CalculateVelocities(proxi.m_timestep);
+
+		maxContaCount = GetMin (proxi.m_maxContacts, 16); 
+		count = mink.HullHullContinueContacts (proxi.m_timestep, proxi.m_contacts, 0, maxContaCount, proxi.m_unconditionalCast);
+
+		if (count) {
+			dist = GetMin (collision1->GetBoxMinRadius(), collision2->GetBoxMinRadius());
+			dist *= dist;
+			distTravel = (mink.m_localRelVeloc % mink.m_localRelVeloc) * timestep * timestep;
+			if (distTravel * dgFloat32 (0.25f * 0.25f) > dist) {
+				dgWorld* const world = proxi.m_referenceBody->GetWorld();
+				_ASSERTE (world);
+				if (proxi.m_referenceBody->m_mass.m_w > dgFloat32 (0.0f)) {
+					world->GetIndirectLock(&proxi.m_referenceBody->m_locks);
+					proxi.m_referenceBody->m_solverInContinueCollision = true;
+					world->ReleaseIndirectLock(&proxi.m_referenceBody->m_locks);
+				}
+				if (proxi.m_floatingBody->m_mass.m_w > dgFloat32 (0.0f)) {
+					world->GetIndirectLock(&proxi.m_floatingBody->m_locks);
+					proxi.m_floatingBody->m_solverInContinueCollision = true;
+					world->ReleaseIndirectLock(&proxi.m_floatingBody->m_locks);
+				}
+			}
+		}
+
+	} else {
+		dgCollisionID id1 = collision1->GetCollisionPrimityType();
+		dgCollisionID id2 = collision2->GetCollisionPrimityType();
+		_ASSERTE (id1 != m_nullCollision);
+		_ASSERTE (id2 != m_nullCollision);
+
+		switch (id1) 
+		{
+		case m_sphereCollision:
+			{
+				switch (id2) 
+				{
+				case m_sphereCollision:
+					{
+						count = CalculateSphereToSphereContacts (proxi);
+						break;
+					}
+
+				case m_capsuleCollision:
+					{
+						dgCollisionParamProxi tmp(proxi.m_threadIndex);
+						tmp.m_referenceBody = proxi.m_floatingBody;
+						tmp.m_floatingBody = proxi.m_referenceBody;
+						tmp.m_referenceCollision = proxi.m_floatingCollision;
+						tmp.m_floatingCollision = proxi.m_referenceCollision;
+						tmp.m_referenceMatrix = proxi.m_floatingMatrix;
+						tmp.m_floatingMatrix = proxi.m_referenceMatrix;
+						tmp.m_timestep = proxi.m_timestep;
+						tmp.m_penetrationPadding = proxi.m_penetrationPadding;
+						tmp.m_contacts = proxi.m_contacts;
+						tmp.m_inTriggerVolume = 0;
+						tmp.m_isTriggerVolume = proxi.m_isTriggerVolume; 
+
+						count = CalculateCapsuleToSphereContacts (tmp);
+						for (dgInt32 i = 0; i < count; i ++) {
+							proxi.m_contacts[i].m_normal = tmp.m_contacts[0].m_normal.Scale (dgFloat32 (-1.0f));
+						}
+						proxi.m_inTriggerVolume = tmp.m_inTriggerVolume;
+						break;
+					}
+
+				case m_boxCollision:
+					{
+						dgCollisionParamProxi tmp(proxi.m_threadIndex);
+
+						tmp.m_referenceBody = proxi.m_floatingBody;
+						tmp.m_floatingBody = proxi.m_referenceBody;
+						tmp.m_referenceCollision = proxi.m_floatingCollision;
+						tmp.m_floatingCollision = proxi.m_referenceCollision;
+						tmp.m_referenceMatrix = proxi.m_floatingMatrix;
+						tmp.m_floatingMatrix = proxi.m_referenceMatrix;
+						tmp.m_timestep = proxi.m_timestep;
+						tmp.m_penetrationPadding = proxi.m_penetrationPadding;
+						tmp.m_contacts = proxi.m_contacts;
+						tmp.m_inTriggerVolume = 0;
+						tmp.m_maxContacts = proxi.m_maxContacts;
+						tmp.m_isTriggerVolume = proxi.m_isTriggerVolume; 
+
+						count = CalculateBoxToSphereContacts (tmp);
+						if (count) {
+							proxi.m_contacts[0].m_normal = tmp.m_contacts[0].m_normal.Scale (dgFloat32 (-1.0f));
+						}
+						proxi.m_inTriggerVolume = tmp.m_inTriggerVolume;
+
+						break;
+					}
+
+				default:
+					{
+						count = CalculateHullToHullContacts (proxi);
+						break;
+					}
+				}
+
+				break;
+			}
+
+		case m_capsuleCollision:
+			{
+				switch (id2) 
+				{
+				case m_sphereCollision:
+					{
+						count = CalculateCapsuleToSphereContacts (proxi);
+						break;
+					}
+
+				case m_capsuleCollision:
+					{
+						count = CalculateCapsuleToCapsuleContacts (proxi);
+						break;
+					}
+
+				default:
+					{
+						count = CalculateHullToHullContacts (proxi);
+						break;
+					}
+				}
+				break;
+			}
+
+		case m_boxCollision:
+			{
+				switch (id2) 
+				{
+				case m_sphereCollision:
+					{
+						count = CalculateBoxToSphereContacts (proxi);
+						break;
+					}
+
+					//case m_boxCollision:
+					//{
+					//count = CalculateBoxToBoxContacts (body1, body2, contactOut);
+					//break;
+					//}
+
+				default:
+					{
+						count = CalculateHullToHullContacts (proxi);
+						break;
+					}
+				}
+				break;
+			}
+
+		default: 
+			{
+				count = CalculateHullToHullContacts (proxi);
+				break;
+			}
+		}
+
+		if (count) {
+			proxi.m_timestep = dgFloat32 (0.0f);
+		}
+	}
+
+	dgContactPoint* const contactOut = proxi.m_contacts;
+	for (dgInt32 i = 0; i < count; i ++) {
+		contactOut[i].m_body0 = proxi.m_referenceBody;
+		contactOut[i].m_body1 = proxi.m_floatingBody;
+		contactOut[i].m_collision0 = collision1;
+		contactOut[i].m_collision1 = collision2;
+	}
+	return count;
+*/
+}

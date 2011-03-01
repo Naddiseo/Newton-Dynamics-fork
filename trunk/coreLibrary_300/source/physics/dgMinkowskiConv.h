@@ -210,7 +210,6 @@ class dgContactSolver
 
 	dgMinkReturnCode m_lastFaceCode;
 
-#ifdef DG_BUILD_SIMD_CODE
 	static simd_type m_zero;
 	static simd_type m_nrh0p5;
 	static simd_type m_nrh3p0;
@@ -219,8 +218,6 @@ class dgContactSolver
 	static simd_type m_index_wz;
 	static simd_type m_negativeOne;
 	static simd_type m_zeroTolerenace;
-#endif
-
 	static dgVector m_dir[14];
 	static dgInt32 m_faceIndex[][4];
 
