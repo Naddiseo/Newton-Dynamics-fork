@@ -133,7 +133,7 @@ void dRuntimeProfiler::Render (NewtonWorld* nWorld, int mask, QPainter& context)
 	// draw dynamics performance
 	if (mask & 32) { 
 		context.setPen(Qt::red);
-//		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_DYNAMICS_UPDATE][0], context);
+		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_DYNAMICS_UPDATE][0], context);
 	}
 
 	if (mask & 64) { 
