@@ -33,8 +33,406 @@
 dgVector dgContactSolver::m_dir[14];
 dgInt32 dgContactSolver::m_faceIndex[][4];
 
-#if 0
 
+dgContactSolver::dgContactSolver(dgCollisionParamProxi& proxi)
+	:m_matrix (*proxi.m_localMatrixInv)
+//m_simplexLarge ((dgMinkFaceLarge*) m_simplex),
+//m_hullVertexLarge ((dgBigVector*) m_hullVertex),
+//m_averVertexLarge ((dgBigVector*) m_averVertex)
+{
+	void* const hullVertexLarge = m_hullVertex;
+	void* const averVertexLarge = m_averVertex;
+	m_hullVertexLarge = (dgBigVector*)hullVertexLarge;
+	m_averVertexLarge = (dgBigVector*)averVertexLarge;
+
+	_ASSERTE ((m_matrix.m_front % m_matrix.m_front) > dgFloat32 (0.9995f));
+	_ASSERTE ((m_matrix.m_up % m_matrix.m_up) > dgFloat32 (0.9995f));
+	_ASSERTE ((m_matrix.m_right % m_matrix.m_right) > dgFloat32 (0.9995f));
+	_ASSERTE (((m_matrix.m_front * m_matrix.m_up) % m_matrix.m_right) < dgFloat32 (1.0001f));
+
+	m_lastFaceCode = dgMinkError;
+
+	m_proxi = &proxi;
+	m_floatingBody = proxi.m_floatingBody; 
+	m_referenceBody = proxi.m_referenceBody; 
+	m_penetrationPadding = proxi.m_penetrationPadding;
+	m_floatingcollision = (dgCollisionConvex*) proxi.m_floatingCollision;
+	m_referenceCollision = (dgCollisionConvex*) proxi.m_referenceCollision;
+}
+
+
+void dgContactSolver::CalcSupportVertex (const dgVector& dir, dgInt32 entry)
+{
+	_ASSERTE ((dir % dir) > dgFloat32 (0.999f));
+	dgVector p (m_referenceCollision->SupportVertex (dir));
+	dgVector dir1 (m_matrix.UnrotateVector (dir.Scale (dgFloat32 (-1.0f))));
+	dgVector q (m_matrix.TransformVector (m_floatingcollision->SupportVertex (dir1)));
+
+	m_hullVertex[entry] = p - q;
+	m_averVertex[entry] = p + q;
+}
+
+
+dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlane(dgMinkFace*& plane, const dgVector& origin)
+{
+	dgVector diff[4];
+	dgVector aveg[4];
+
+	plane = NULL;
+
+	dgMinkFace* lastDescendFace = NULL;
+	dgMinkReturnCode code = dgMinkIntersecting;
+
+	// this loop can calculate the closest point to the origin usually in 4 to 5 passes,
+	dgInt32 j = 0;
+	dgInt32 ciclingCount = -1;
+	dgFloat32 minDist = dgFloat32 (1.0e20f);
+
+	dgMinkFace* face = &m_simplex[0];
+	for (; face && (j < DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION); j ++) {
+
+		face = NULL;
+		dgVector normal;
+		// initialize distance to zero (very important)
+		dgFloat32 maxDist = dgFloat32 (0.0f);
+		for (dgInt32 i = 0; i < 4; i ++) {
+			dgInt32 i0 = m_faceIndex[i][0];
+			dgInt32 i1 = m_faceIndex[i][1];
+			dgInt32 i2 = m_faceIndex[i][2];
+
+			_ASSERTE (i0 == m_simplex[i].m_vertex[0]);
+			_ASSERTE (i1 == m_simplex[i].m_vertex[1]);
+			_ASSERTE (i2 == m_simplex[i].m_vertex[2]);
+
+			const dgVector& p0 = m_hullVertex[i0];
+			const dgVector& p1 = m_hullVertex[i1];
+			const dgVector& p2 = m_hullVertex[i2];
+			dgVector e0 (p1 - p0);
+			dgVector e1 (p2 - p0);
+			dgVector n (e0 * e1);
+
+			dgFloat32 dist = n % n;
+			if (dist > DG_DISTANCE_TOLERANCE_ZERO) {
+				n = n.Scale (dgRsqrt (dist));
+				dist = n % (origin - p0);
+
+				// find the plane farther away from the origin
+				if (dist > maxDist) {
+					maxDist = dist;
+					normal = n;
+					face = &m_simplex[i];
+				}
+			}
+		}
+
+
+		// if we do not have a face at this point it means that the mink shape of the tow convexity face have a very 
+		// skew ratios on floating point accuracy is not enough to guarantee convexity of the shape
+		if (face) {
+			dgInt32 index = face->m_vertex[0];
+			CalcSupportVertex (normal, 4);
+			dgFloat32 dist = normal % (m_hullVertex[4] - m_hullVertex[index]);
+
+			// if we are doing too many passes it means that it is a skew shape with big and small floats  
+			// significant bits may be lost in dist calculation, increasing the tolerance help to resolve the problem
+			if(dist < DG_UPDATE_SEPARATING_PLANE_DISTANCE_TOLERANCE1) {
+				plane = face;
+				code = dgMinkDisjoint;
+				break;
+			}
+
+			if (dist < minDist) {
+				minDist = dist;
+				lastDescendFace = face;
+				ciclingCount = -1;
+				for (dgInt32 k = 0; k < 4; k ++) {
+					diff[k] = m_hullVertex[k];
+					aveg[k] = m_averVertex[k];
+				}
+			}
+
+			ciclingCount ++;
+			if (ciclingCount > 4) {
+				for (dgInt32 k = 0; k < 4; k ++) {
+					m_hullVertex[k] = diff[k];
+					m_averVertex[k] = aveg[k];
+				}
+				code = dgMinkDisjoint;
+				plane = lastDescendFace;
+				break;
+			}
+
+
+			if (dist < DG_DISTANCE_TOLERANCE) {
+				dgInt32 i = 0;
+				for (; i < 4; i ++ ) {
+					_ASSERTE (0);
+/*
+					dgVector error (m_hullVertex[i] - m_hullVertex[4]);
+					if ((error % error) < (DG_DISTANCE_TOLERANCE * DG_DISTANCE_TOLERANCE)) {
+						plane = face;
+						code = UpdateSeparatingPlaneFallbackSolution (plane, origin);
+						_ASSERTE ((code == dgMinkDisjoint) || ((code == dgMinkIntersecting) && (m_vertexIndex == 4)));
+						break;
+					}
+*/
+				}
+				if (i < 4) {
+					break;
+				}
+			}
+
+			dgInt32 i0 = face->m_vertex[0];
+			dgInt32 i1 = face->m_vertex[1];
+			dgInt32 i2 = m_faceIndex[face - m_simplex][3];
+			_ASSERTE (i2 != face->m_vertex[0]);
+			_ASSERTE (i2 != face->m_vertex[1]);
+			_ASSERTE (i2 != face->m_vertex[2]);
+			Swap (m_hullVertex[i0], m_hullVertex[i1]);
+			Swap (m_averVertex[i0], m_averVertex[i1]);
+			m_hullVertex[i2] = m_hullVertex[4];
+			m_averVertex[i2] = m_averVertex[4];
+			if (!CheckTetraHedronVolume ()) {
+				Swap (m_hullVertex[1], m_hullVertex[2]);
+				Swap (m_averVertex[1], m_averVertex[2]);
+				_ASSERTE (CheckTetraHedronVolume ());
+			}
+		}
+	} 
+
+	if (j >= DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION) {
+		_ASSERTE (CheckTetraHedronVolume());
+		_ASSERTE (0);
+		//code = UpdateSeparatingPlaneFallbackSolution (plane, origin);
+	}
+	return code;
+}
+
+
+dgContactSolver::dgMinkReturnCode dgContactSolver::CalcSeparatingPlane(dgMinkFace*& plane, const dgVector& origin)
+{
+//	dgInt32 best;
+//	dgFloat32 maxErr;
+//	dgFloat32 error2;
+//	dgVector e3;
+//	dgVector normal (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+
+	CalcSupportVertex (m_dir[0], 0);
+	dgInt32 i = 1;
+	dgVector e1;
+	for (; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+		CalcSupportVertex (m_dir[i], 1);
+		e1 = m_hullVertex[1] - m_hullVertex[0];
+		dgFloat32 error2 = e1 % e1;
+		if (error2 > DG_CALCULATE_SEPARATING_PLANE_ERROR) {
+			break;
+		}
+	}
+
+	dgVector e2;
+	dgVector normal (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+	for (i ++; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+		CalcSupportVertex (m_dir[i], 2);
+		e2 = m_hullVertex[2] - m_hullVertex[0];
+		normal = e1 * e2;
+		dgFloat32 error2 = normal % normal;
+		if (error2 > DG_CALCULATE_SEPARATING_PLANE_ERROR1) {
+			break;
+		}
+	}
+
+	
+//	dgVector e3;
+	dgFloat32 error2 = dgFloat32 (0.0f);
+	for (i ++; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+		CalcSupportVertex (m_dir[i], 3);
+		dgVector e3 (m_hullVertex[3] - m_hullVertex[0]);
+		dgFloat32 error2 = normal % e3;
+		if (dgAbsf (error2) > DG_CALCULATE_SEPARATING_PLANE_ERROR1) {
+			break;
+		}
+	}
+
+	if (i >= dgInt32(sizeof(m_dir) / sizeof(m_dir[0]))) {
+
+		dgInt32 best = 0;
+		dgFloat32 maxErr = dgFloat32 (0.0f);
+		for (dgInt32 i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+			CalcSupportVertex (m_dir[i], 1);
+			dgVector e1 (m_hullVertex[1] - m_hullVertex[0]);
+			dgFloat32 error2 = e1 % e1;
+			if (error2 > maxErr) {
+				best = i;
+				maxErr = error2;
+			}
+		}
+		CalcSupportVertex (m_dir[best], 1);
+		dgVector e1 (m_hullVertex[1] - m_hullVertex[0]);
+
+		best = 0;
+		maxErr = dgFloat32 (0.0f);
+		for (dgInt32 i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+			CalcSupportVertex (m_dir[i], 2);
+			dgVector e2 (m_hullVertex[2] - m_hullVertex[0]);
+			dgVector normal (e1 * e2);
+			dgFloat32 error2 = normal % normal;
+			if (error2 > maxErr) {
+				best = i;
+				maxErr = error2;
+			}
+		}
+
+		CalcSupportVertex (m_dir[best], 2);
+		e2 = m_hullVertex[2] - m_hullVertex[0];
+		normal = e1 * e2;
+
+		best = 0;
+		maxErr = dgFloat32 (0.0f);
+		for (dgInt32 i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+			CalcSupportVertex (m_dir[i], 3);
+
+			dgVector e3 (m_hullVertex[3] - m_hullVertex[0]);
+			dgFloat32 error2 = normal % e3;
+			if (dgAbsf (error2) > dgAbsf (maxErr)) {
+				best = i;
+				maxErr = error2;
+			}
+		}
+		error2 = maxErr;
+		CalcSupportVertex (m_dir[best], 3);
+	}
+
+	m_vertexIndex = 4;
+	if (error2 > dgFloat32 (0.0f)) {
+		Swap (m_hullVertex[1], m_hullVertex[2]);
+		Swap (m_averVertex[1], m_averVertex[2]);
+	}
+	_ASSERTE (CheckTetraHedronVolume ());
+
+	_ASSERTE ( (((dgUnsigned64)&m_simplex[0]) & 0x0f)== 0);
+	_ASSERTE ( (((dgUnsigned64)&m_simplex[1]) & 0x0f)== 0);
+
+	// face 0
+	m_simplex[0].m_vertex[0] = 0;
+	m_simplex[0].m_vertex[1] = 1;
+	m_simplex[0].m_vertex[2] = 2;
+	m_simplex[0].m_vertex[3] = 0;
+	m_simplex[0].m_adjancentFace[0] = 1;	
+	m_simplex[0].m_adjancentFace[1] = 3;	
+	m_simplex[0].m_adjancentFace[2] = 2;	
+
+	// face 1
+	m_simplex[1].m_vertex[0] = 1;
+	m_simplex[1].m_vertex[1] = 0;
+	m_simplex[1].m_vertex[2] = 3;
+	m_simplex[1].m_vertex[3] = 1;
+	m_simplex[1].m_adjancentFace[0] = 0;	
+	m_simplex[1].m_adjancentFace[1] = 2;	
+	m_simplex[1].m_adjancentFace[2] = 3;	
+
+	// face 2
+	m_simplex[2].m_vertex[0] = 0;
+	m_simplex[2].m_vertex[1] = 2;
+	m_simplex[2].m_vertex[2] = 3;
+	m_simplex[2].m_vertex[3] = 0;
+	m_simplex[2].m_adjancentFace[0] = 0;	
+	m_simplex[2].m_adjancentFace[1] = 3;	
+	m_simplex[2].m_adjancentFace[2] = 1;	
+
+
+	// face 3
+	m_simplex[3].m_vertex[0] = 2;
+	m_simplex[3].m_vertex[1] = 1;
+	m_simplex[3].m_vertex[2] = 3;
+	m_simplex[3].m_vertex[3] = 2;
+	m_simplex[3].m_adjancentFace[0] = 0;	
+	m_simplex[3].m_adjancentFace[1] = 1;	
+	m_simplex[3].m_adjancentFace[2] = 2;	
+
+	return UpdateSeparatingPlane(plane, origin);
+}
+
+
+dgInt32 dgContactSolver::HullHullContacts (dgInt32 contactID)
+{
+//	dgInt32 i0;
+//	dgInt32 count;
+//	dgMinkFace *face;
+//	dgMinkReturnCode code;
+//	dgContactPoint* contactOut; 
+	dgInt32 count = 0;
+
+	m_proxi->m_inTriggerVolume = 0;
+	dgMinkFace* face;
+	dgMinkReturnCode code = CalcSeparatingPlane(face);
+	switch (code)
+	{
+		case dgMinkIntersecting:
+		{
+			_ASSERTE (0);
+/*
+			if (m_proxi->m_isTriggerVolume) {
+				m_proxi->m_inTriggerVolume = 1;
+			} else {
+				face = CalculateClipPlane ();
+				if (face) {
+					count = CalculateContacts (face, contactID, m_proxi->m_contacts, m_proxi->m_maxContacts);
+					_ASSERTE (count <= m_proxi->m_maxContacts);
+				}
+			}
+*/
+			break;
+		}
+
+		case dgMinkDisjoint:
+		{
+			_ASSERTE (0);
+/*
+			_ASSERTE (face);
+
+			if (CalcFacePlane (face)) {
+				//_ASSERTE (face->m_w >= dgFloat32 (0.0f));
+				_ASSERTE (face->m_w >= dgFloat32 (-1.0e-2f));
+				_ASSERTE ((*face) % (*face) > dgFloat32 (0.0f));
+				if (face->m_w < m_penetrationPadding) {
+					dgVector step (*face);
+					step = step.Scale (-(face->m_w + DG_IMPULSIVE_CONTACT_PENETRATION));
+
+					i0 = face->m_vertex[0];
+					m_hullVertex[i0] -= step;
+					m_averVertex[i0] += step;
+
+					m_matrix.m_posit += step;
+					dgVector stepWorld (m_proxi->m_referenceMatrix.RotateVector(step));
+					m_proxi->m_floatingMatrix.m_posit += stepWorld;
+
+					count = CalculateContacts(face, contactID, m_proxi->m_contacts, m_proxi->m_maxContacts);
+					stepWorld = stepWorld.Scale (dgFloat32 (0.5f));
+
+					if (m_proxi->m_isTriggerVolume) {
+						m_proxi->m_inTriggerVolume = 1;
+						count = 0;
+					}
+
+					contactOut = m_proxi->m_contacts; 
+					for (i0 = 0; i0 < count; i0 ++ ) {
+						contactOut[i0].m_point -= stepWorld ;
+					}
+					return count;
+				}
+			}
+*/
+			break;
+		}
+		case dgMinkError:
+		default:;
+	}
+	return count;
+}
+
+
+
+#if 0
 DG_MSC_VECTOR_ALIGMENT 
 class dgContactSolver
 {
@@ -124,16 +522,6 @@ class dgContactSolver
 #endif
 	}
 
-	void CalcSupportVertex (const dgVector& dir, dgInt32 entry)
-	{
-		_ASSERTE ((dir % dir) > dgFloat32 (0.999f));
-		dgVector p (m_referenceCollision->SupportVertex (dir));
-		dgVector dir1 (m_matrix.UnrotateVector (dir.Scale (dgFloat32 (-1.0f))));
-		dgVector q (m_matrix.TransformVector (m_floatingcollision->SupportVertex (dir1)));
-
-		m_hullVertex[entry] = p - q;
-		m_averVertex[entry] = p + q;
-	}
 
 	void CalcSupportVertexLarge (const dgVector& dir, dgInt32 entry)
 	{
@@ -2846,134 +3234,6 @@ class dgContactSolver
 	}
 
 
-	dgMinkReturnCode UpdateSeparatingPlane(dgMinkFace*& plane, const dgVector& origin)
-	{
-		dgVector diff[4];
-		dgVector aveg[4];
-
-		plane = NULL;
-		dgMinkFace* face = &m_simplex[0];
-		dgMinkFace* lastDescendFace = NULL;
-		dgMinkReturnCode code = dgMinkIntersecting;
-		
-		// this loop can calculate the closest point to the origin usually in 4 to 5 passes,
-		dgInt32 j = 0;
-		dgInt32 ciclingCount = -1;
-		dgFloat32 minDist = dgFloat32 (1.0e20f);
-		for (; face && (j < DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION); j ++) {
-			face = NULL;
-			dgVector normal;
-			// initialize distance to zero (very important)
-			dgFloat32 maxDist = dgFloat32 (0.0f);
-			for (dgInt32 i = 0; i < 4; i ++) {
-				dgInt32 i0 = m_faceIndex[i][0];
-				dgInt32 i1 = m_faceIndex[i][1];
-				dgInt32 i2 = m_faceIndex[i][2];
-
-				_ASSERTE (i0 == m_simplex[i].m_vertex[0]);
-				_ASSERTE (i1 == m_simplex[i].m_vertex[1]);
-				_ASSERTE (i2 == m_simplex[i].m_vertex[2]);
-
-				const dgVector& p0 = m_hullVertex[i0];
-				const dgVector& p1 = m_hullVertex[i1];
-				const dgVector& p2 = m_hullVertex[i2];
-				dgVector e0 (p1 - p0);
-				dgVector e1 (p2 - p0);
-				dgVector n (e0 * e1);
-
-				dgFloat32 dist = n % n;
-				if (dist > DG_DISTANCE_TOLERANCE_ZERO) {
-					n = n.Scale (dgRsqrt (dist));
-					dist = n % (origin - p0);
-
-					// find the plane farther away from the origin
-					if (dist > maxDist) {
-						maxDist = dist;
-						normal = n;
-						face = &m_simplex[i];
-					}
-				}
-			}
-
-
-			// if we do not have a face at this point it means that the mink shape of the tow convexity face have a very 
-			// skew ratios on floating point accuracy is not enough to guarantee convexity of the shape
-			if (face) {
-				dgInt32 index = face->m_vertex[0];
-				CalcSupportVertex (normal, 4);
-				dgFloat32 dist = normal % (m_hullVertex[4] - m_hullVertex[index]);
-
-				// if we are doing too many passes it means that it is a skew shape with big and small floats  
-				// significant bits may be lost in dist calculation, increasing the tolerance help to resolve the problem
-				if(dist < DG_UPDATE_SEPARATING_PLANE_DISTANCE_TOLERANCE1) {
-					plane = face;
-					code = dgMinkDisjoint;
-					break;
-				}
-
-				if (dist < minDist) {
-					minDist = dist;
-					lastDescendFace = face;
-					ciclingCount = -1;
-					for (dgInt32 k = 0; k < 4; k ++) {
-						diff[k] = m_hullVertex[k];
-						aveg[k] = m_averVertex[k];
-					}
-				}
-
-				ciclingCount ++;
-				if (ciclingCount > 4) {
-					for (dgInt32 k = 0; k < 4; k ++) {
-						m_hullVertex[k] = diff[k];
-						m_averVertex[k] = aveg[k];
-					}
-					code = dgMinkDisjoint;
-					plane = lastDescendFace;
-					break;
-				}
-
-
-				if (dist < DG_DISTANCE_TOLERANCE) {
-					dgInt32 i = 0;
-					for (; i < 4; i ++ ) {
-						dgVector error (m_hullVertex[i] - m_hullVertex[4]);
-						if ((error % error) < (DG_DISTANCE_TOLERANCE * DG_DISTANCE_TOLERANCE)) {
-							plane = face;
-							//code = dgMinkDisjoint;
-							code = UpdateSeparatingPlaneFallbackSolution (plane, origin);
-							_ASSERTE ((code == dgMinkDisjoint) || ((code == dgMinkIntersecting) && (m_vertexIndex == 4)));
-							break;
-						}
-					}
-					if (i < 4) {
-						break;
-					}
-				}
-
-				dgInt32 i0 = face->m_vertex[0];
-				dgInt32 i1 = face->m_vertex[1];
-				dgInt32 i2 = m_faceIndex[face - m_simplex][3];
-				_ASSERTE (i2 != face->m_vertex[0]);
-				_ASSERTE (i2 != face->m_vertex[1]);
-				_ASSERTE (i2 != face->m_vertex[2]);
-				Swap (m_hullVertex[i0], m_hullVertex[i1]);
-				Swap (m_averVertex[i0], m_averVertex[i1]);
-				m_hullVertex[i2] = m_hullVertex[4];
-				m_averVertex[i2] = m_averVertex[4];
-				if (!CheckTetraHedronVolume ()) {
-					Swap (m_hullVertex[1], m_hullVertex[2]);
-					Swap (m_averVertex[1], m_averVertex[2]);
-					_ASSERTE (CheckTetraHedronVolume ());
-				}
-			}
-		} 
-
-		if (j >= DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION) {
-			_ASSERTE (CheckTetraHedronVolume());
-			code = UpdateSeparatingPlaneFallbackSolution (plane, origin);
-		}
-		return code;
-	}
 
 
 	dgMinkReturnCode UpdateSeparatingPlaneLarge(dgMinkFace*& plane, const dgBigVector& origin)
@@ -3264,147 +3524,6 @@ class dgContactSolver
 	}
 
 
-	dgMinkReturnCode CalcSeparatingPlane(
-		dgMinkFace*& plane, 
-		const dgVector& origin = dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (1.0f)))
-	{
-		dgInt32 best;
-		dgFloat32 maxErr;
-		dgFloat32 error2;
-		dgVector e1;
-		dgVector e2;
-		dgVector e3;
-		dgVector normal (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-
-		CalcSupportVertex (m_dir[0], 0);
-		dgInt32 i = 1;
-		for (; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-			CalcSupportVertex (m_dir[i], 1);
-			e1 = m_hullVertex[1] - m_hullVertex[0];
-			error2 = e1 % e1;
-			if (error2 > DG_CALCULATE_SEPARATING_PLANE_ERROR) {
-				break;
-			}
-		}
-
-		for (i ++; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-			CalcSupportVertex (m_dir[i], 2);
-			e2 = m_hullVertex[2] - m_hullVertex[0];
-			normal = e1 * e2;
-			error2 = normal % normal;
-			if (error2 > DG_CALCULATE_SEPARATING_PLANE_ERROR1) {
-				break;
-			}
-		}
-
-		error2 = dgFloat32 (0.0f);
-		for (i ++; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-			CalcSupportVertex (m_dir[i], 3);
-			e3 = m_hullVertex[3] - m_hullVertex[0];
-			error2 = normal % e3;
-			if (dgAbsf (error2) > DG_CALCULATE_SEPARATING_PLANE_ERROR1) {
-				break;
-			}
-		}
-
-		if (i >= dgInt32(sizeof(m_dir) / sizeof(m_dir[0]))) {
-			best = 0;
-			maxErr = dgFloat32 (0.0f);
-			for (i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-				CalcSupportVertex (m_dir[i], 1);
-				e1 = m_hullVertex[1] - m_hullVertex[0];
-				error2 = e1 % e1;
-				if (error2 > maxErr) {
-					best = i;
-					maxErr = error2;
-				}
-			}
-			CalcSupportVertex (m_dir[best], 1);
-			e1 = m_hullVertex[1] - m_hullVertex[0];
-
-			best = 0;
-			maxErr = dgFloat32 (0.0f);
-			for (i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-				CalcSupportVertex (m_dir[i], 2);
-				e2 = m_hullVertex[2] - m_hullVertex[0];
-				normal = e1 * e2;
-				error2 = normal % normal;
-				if (error2 > maxErr) {
-					best = i;
-					maxErr = error2;
-				}
-			}
-
-			CalcSupportVertex (m_dir[best], 2);
-			e2 = m_hullVertex[2] - m_hullVertex[0];
-			normal = e1 * e2;
-
-			best = 0;
-			maxErr = dgFloat32 (0.0f);
-			for (i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-				CalcSupportVertex (m_dir[i], 3);
-
-				e3 = m_hullVertex[3] - m_hullVertex[0];
-				error2 = normal % e3;
-				if (dgAbsf (error2) > dgAbsf (maxErr)) {
-					best = i;
-					maxErr = error2;
-				}
-			}
-			error2 = maxErr;
-			CalcSupportVertex (m_dir[best], 3);
-		}
-
-
-		m_vertexIndex = 4;
-		if (error2 > dgFloat32 (0.0f)) {
-			Swap (m_hullVertex[1], m_hullVertex[2]);
-			Swap (m_averVertex[1], m_averVertex[2]);
-		}
-		_ASSERTE (CheckTetraHedronVolume ());
-
-		_ASSERTE ( (((dgUnsigned64)&m_simplex[0]) & 0x0f)== 0);
-		_ASSERTE ( (((dgUnsigned64)&m_simplex[1]) & 0x0f)== 0);
-
-		// face 0
-		m_simplex[0].m_vertex[0] = 0;
-		m_simplex[0].m_vertex[1] = 1;
-		m_simplex[0].m_vertex[2] = 2;
-		m_simplex[0].m_vertex[3] = 0;
-		m_simplex[0].m_adjancentFace[0] = 1;	
-		m_simplex[0].m_adjancentFace[1] = 3;	
-		m_simplex[0].m_adjancentFace[2] = 2;	
-
-		// face 1
-		m_simplex[1].m_vertex[0] = 1;
-		m_simplex[1].m_vertex[1] = 0;
-		m_simplex[1].m_vertex[2] = 3;
-		m_simplex[1].m_vertex[3] = 1;
-		m_simplex[1].m_adjancentFace[0] = 0;	
-		m_simplex[1].m_adjancentFace[1] = 2;	
-		m_simplex[1].m_adjancentFace[2] = 3;	
-
-		// face 2
-		m_simplex[2].m_vertex[0] = 0;
-		m_simplex[2].m_vertex[1] = 2;
-		m_simplex[2].m_vertex[2] = 3;
-		m_simplex[2].m_vertex[3] = 0;
-		m_simplex[2].m_adjancentFace[0] = 0;	
-		m_simplex[2].m_adjancentFace[1] = 3;	
-		m_simplex[2].m_adjancentFace[2] = 1;	
-
-
-		// face 3
-		m_simplex[3].m_vertex[0] = 2;
-		m_simplex[3].m_vertex[1] = 1;
-		m_simplex[3].m_vertex[2] = 3;
-		m_simplex[3].m_vertex[3] = 2;
-		m_simplex[3].m_adjancentFace[0] = 0;	
-		m_simplex[3].m_adjancentFace[1] = 1;	
-		m_simplex[3].m_adjancentFace[2] = 2;	
-
-		return UpdateSeparatingPlane(plane, origin);
-	}
 
 
 	dgMinkReturnCode CalcSeparatingPlaneLarge(
@@ -4684,31 +4803,6 @@ class dgContactSolver
 	}
 
 
-	inline dgContactSolver(dgCollisionParamProxi& proxi)
-		:m_matrix (*proxi.m_localMatrixInv)
-//		 m_simplexLarge ((dgMinkFaceLarge*) m_simplex),
-//		 m_hullVertexLarge ((dgBigVector*) m_hullVertex),
-//		 m_averVertexLarge ((dgBigVector*) m_averVertex)
-	{
-		void* hullVertexLarge = m_hullVertex;
-		void* averVertexLarge = m_averVertex;
-		m_hullVertexLarge = (dgBigVector*)hullVertexLarge;
-		m_averVertexLarge = (dgBigVector*)averVertexLarge;
-
-		_ASSERTE ((m_matrix.m_front % m_matrix.m_front) > dgFloat32 (0.9995f));
-		_ASSERTE ((m_matrix.m_up % m_matrix.m_up) > dgFloat32 (0.9995f));
-		_ASSERTE ((m_matrix.m_right % m_matrix.m_right) > dgFloat32 (0.9995f));
-		_ASSERTE (((m_matrix.m_front * m_matrix.m_up) % m_matrix.m_right) < dgFloat32 (1.0001f));
-
-		m_lastFaceCode = dgMinkError;
-		
-		m_proxi = &proxi;
-		m_floatingBody = proxi.m_floatingBody; 
-		m_referenceBody = proxi.m_referenceBody; 
-		m_penetrationPadding = proxi.m_penetrationPadding;
-		m_floatingcollision = (dgCollisionConvex*) proxi.m_floatingCollision;
-		m_referenceCollision = (dgCollisionConvex*) proxi.m_referenceCollision;
-	}
 
 	dgContactSolver& operator= (const dgContactSolver& me);
 
@@ -4788,75 +4882,6 @@ class dgContactSolver
 #endif
 	}
 
-	dgInt32 HullHullContacts (dgInt32 contactID)
-	{
-		dgInt32 i0;
-		dgInt32 count;
-		dgMinkFace *face;
-		dgMinkReturnCode code;
-		dgContactPoint* contactOut; 
-
-
-		count = 0;
-		m_proxi->m_inTriggerVolume = 0;
-		code = CalcSeparatingPlane(face);
-		switch (code)
-		{
-			case dgMinkIntersecting:
-			{
-				if (m_proxi->m_isTriggerVolume) {
-					m_proxi->m_inTriggerVolume = 1;
-				} else {
-					face = CalculateClipPlane ();
-					if (face) {
-						count = CalculateContacts (face, contactID, m_proxi->m_contacts, m_proxi->m_maxContacts);
-						_ASSERTE (count <= m_proxi->m_maxContacts);
-					}
-				}
-				break;
-			}
-
-			case dgMinkDisjoint:
-			{
-				_ASSERTE (face);
-
-				if (CalcFacePlane (face)) {
-					//_ASSERTE (face->m_w >= dgFloat32 (0.0f));
-					_ASSERTE (face->m_w >= dgFloat32 (-1.0e-2f));
-					_ASSERTE ((*face) % (*face) > dgFloat32 (0.0f));
-					if (face->m_w < m_penetrationPadding) {
-						dgVector step (*face);
-						step = step.Scale (-(face->m_w + DG_IMPULSIVE_CONTACT_PENETRATION));
-
-						i0 = face->m_vertex[0];
-						m_hullVertex[i0] -= step;
-						m_averVertex[i0] += step;
-
-						m_matrix.m_posit += step;
-						dgVector stepWorld (m_proxi->m_referenceMatrix.RotateVector(step));
-						m_proxi->m_floatingMatrix.m_posit += stepWorld;
-
-						count = CalculateContacts(face, contactID, m_proxi->m_contacts, m_proxi->m_maxContacts);
-						stepWorld = stepWorld.Scale (dgFloat32 (0.5f));
-
-						if (m_proxi->m_isTriggerVolume) {
-							m_proxi->m_inTriggerVolume = 1;
-							count = 0;
-						}
-
-						contactOut = m_proxi->m_contacts; 
-						for (i0 = 0; i0 < count; i0 ++ ) {
-							contactOut[i0].m_point -= stepWorld ;
-						}
-						return count;
-					}
-				}
-			}
-			case dgMinkError:
-			default:;
-		}
-		return count;
-	}
 
 
 	dgInt32 HullHullContactsLarge (dgInt32 contactID)
@@ -5620,435 +5645,6 @@ dgInt32 dgWorld::CalculateCapsuleToCapsuleContacts (dgCollisionParamProxi& proxi
 	return count;
 }
 
-dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxi& proxi) const
-{
-	dgInt32 code;
-	dgInt32 codeX;
-	dgInt32 codeY;
-	dgInt32 codeZ;
-	dgFloat32 dist;
-	dgFloat32 radius;
-	dgContactPoint* contactOut;
-	const dgCollisionBox* collBox;
-	const dgCollisionSphere* collSph;
-
-	_ASSERTE (proxi.m_referenceCollision->IsType (dgCollision::dgCollisionBox_RTTI));
-	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgCollisionSphere_RTTI));
-
-	const dgMatrix& boxMatrix = proxi.m_referenceMatrix;
-	const dgMatrix& sphMatrix = proxi.m_floatingMatrix;
-
-	collBox = (dgCollisionBox*) proxi.m_referenceCollision;
-	collSph = (dgCollisionSphere*) proxi.m_floatingCollision;
-
-	radius = collSph->m_radius + proxi.m_penetrationPadding;
-	dgVector size (collBox->m_size[0]);
-	dgVector center (boxMatrix.UntransformVector (sphMatrix.m_posit));
-
-	codeX = (center.m_x < - size.m_x) + (center.m_x > size.m_x) * 2;
-	codeY = (center.m_y < - size.m_y) + (center.m_y > size.m_y) * 2;
-	codeZ = (center.m_z < - size.m_z) + (center.m_z > size.m_z) * 2;
-	code = codeZ * 9 + codeY * 3 + codeX;
-
-	if (!code) {
-		return CalculateHullToHullContacts (proxi);
-	}
-
-	dist = dgFloat32 (0.0f);
-	dgVector point (center); 
-	dgVector normal (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f)); 
-
-	switch (code) 
-	{
-		case 2 * 9 + 1 * 3 + 2:
-		{
-			size.m_y *= dgFloat32 (-1.0f);
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_y = size.m_y -  center.m_y; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-		case 2 * 9 + 1 * 3 + 1:
-		{
-			size.m_x *= dgFloat32 (-1.0f);
-			size.m_y *= dgFloat32 (-1.0f);
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_y = size.m_y -  center.m_y; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-		case 1 * 9 + 1 * 3 + 2:
-		{
-			size.m_y *= dgFloat32 (-1.0f);
-			size.m_z *= dgFloat32 (-1.0f);
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_y = size.m_y -  center.m_y; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-		case 1 * 9 + 1 * 3 + 1:
-		{
-			size.m_x *= dgFloat32 (-1.0f);
-			size.m_y *= dgFloat32 (-1.0f);
-			size.m_z *= dgFloat32 (-1.0f);
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_y = size.m_y -  center.m_y; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-		case 2 * 9 + 2 * 3 + 2:
-		{
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_y = size.m_y -  center.m_y; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-		case 2 * 9 + 2 * 3 + 1:
-		{
-			size.m_x *= dgFloat32 (-1.0f);
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_y = size.m_y -  center.m_y; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-		case 1 * 9 + 2 * 3 + 2:
-		{
-			size.m_z *= dgFloat32 (-1.0f);
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_y = size.m_y -  center.m_y; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-		case 1 * 9 + 2 * 3 + 1:
-		{
-			size.m_x *= dgFloat32 (-1.0f);
-			size.m_z *= dgFloat32 (-1.0f);
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_y = size.m_y -  center.m_y; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-
-		case 2 * 9 + 0 * 3 + 2:
-		{
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-		case 2 * 9 + 0 * 3 + 1:
-		{
-			size.m_x *= dgFloat32 (-1.0f);
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-
-		case 1 * 9 + 0 * 3 + 2:
-		{
-			size.m_z *= dgFloat32 (-1.0f);
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-		case 1 * 9 + 0 * 3 + 1:
-		{
-			size.m_x *= dgFloat32 (-1.0f);
-			size.m_z *= dgFloat32 (-1.0f);
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-
-		case 0 * 9 + 2 * 3 + 2:
-		{
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_y = size.m_y -  center.m_y; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-		case 0 * 9 + 2 * 3 + 1:
-		{
-			size.m_x *= dgFloat32 (-1.0f);
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_y = size.m_y -  center.m_y; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-
-		case 0 * 9 + 1 * 3 + 2:
-		{
-			size.m_y *= dgFloat32 (-1.0f);
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_y = size.m_y -  center.m_y; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-		case 0 * 9 + 1 * 3 + 1:
-		{
-			size.m_x *= dgFloat32 (-1.0f);
-			size.m_y *= dgFloat32 (-1.0f);
-			normal.m_x = size.m_x -  center.m_x; 
-			normal.m_y = size.m_y -  center.m_y; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-		case 2 * 9 + 2 * 3 + 0:
-		{
-			normal.m_y = size.m_y -  center.m_y; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-		case 1 * 9 + 2 * 3 + 0:
-		{
-			size.m_z *= dgFloat32 (-1.0f);
-			normal.m_y = size.m_y -  center.m_y; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-
-		case 2 * 9 + 1 * 3 + 0:
-		{
-			size.m_y *= dgFloat32 (-1.0f);
-			normal.m_y = size.m_y -  center.m_y; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-		case 1 * 9 + 1 * 3 + 0:
-		{
-			size.m_y *= dgFloat32 (-1.0f);
-			size.m_z *= dgFloat32 (-1.0f);
-			normal.m_y = size.m_y -  center.m_y; 
-			normal.m_z = size.m_z -  center.m_z; 
-			normal = normal.Scale (dgRsqrt (normal % normal));
-			dist =  normal % (size - center) - radius;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
-			break;
-		}
-
-
-
-
-		case 0 * 9 + 0 * 3 + 1:
-		{
-			dist = -((center.m_x + radius) + size.m_x);
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			normal.m_x = 1.0f;
-			point.m_x = -size.m_x - (dist + proxi.m_penetrationPadding) * dgFloat32 (0.5f);
-			break;
-		}
-
-		case 0 * 9 + 1 * 3 + 0:
-		{
-			dist = -((center.m_y + radius) + size.m_y);
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			normal.m_y = dgFloat32 (1.0f);
-			point.m_y = -size.m_y - (dist + proxi.m_penetrationPadding) * dgFloat32 (0.5f);
-			break;
-		}
-
-		case 1 * 9 + 0 * 3 + 0:
-		{
-			dist = -((center.m_z + radius) + size.m_z);
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			normal.m_z = dgFloat32 (1.0f);
-			point.m_z = -size.m_z - (dist + proxi.m_penetrationPadding) * dgFloat32 (0.5f);
-			break;
-		}
-
-		case 0 * 9 + 0 * 3 + 2:
-		{
-			dist = (center.m_x - radius) - size.m_x;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			normal.m_x = dgFloat32 (-1.0f);
-			point.m_x = size.m_x + (dist + proxi.m_penetrationPadding) * dgFloat32 (0.5f);
-			break;
-		}
-
-		case 0 * 9 + 2 * 3 + 0:
-		{
-			dist = (center.m_y - radius) - size.m_y;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			normal.m_y = dgFloat32 (-1.0f);
-			point.m_y = size.m_y + (dist + proxi.m_penetrationPadding) * dgFloat32 (0.5f);
-			break;
-		}
-
-		case 2 * 9 + 0 * 3 + 0:
-		{
-			dist = (center.m_z - radius) - size.m_z;
-			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
-				return 0;
-			}
-			normal.m_z = dgFloat32 (-1.0f);
-			point.m_z = size.m_z + (dist + proxi.m_penetrationPadding) * dgFloat32 (0.5f);
-			break;
-		}
-
-		default:
-		{
-			return 0;
-		}
-	}
-
-	if (proxi.m_isTriggerVolume) {
-		proxi.m_inTriggerVolume = 1;
-		return 0;
-	}
-
-	dist = (dgAbsf (dist) - DG_IMPULSIVE_CONTACT_PENETRATION);
-	if (dist < dgFloat32 (0.0f)) {
-		dist = dgFloat32 (0.0f);
-	}
-
-	contactOut = proxi.m_contacts;
-	contactOut[0].m_point = boxMatrix.TransformVector (point);
-	contactOut[0].m_normal = boxMatrix.RotateVector (normal);
-	contactOut[0].m_penetration = dist;
-	contactOut[0].m_userId = 0;
-	return 1;
-}
 
 
 /*
@@ -6239,63 +5835,6 @@ return 0;
 */
 
 
-dgInt32 dgWorld::FilterPolygonEdgeContacts (dgInt32 count, dgContactPoint* const contact) const
-{
-	dgInt32 j;
-	dgInt32 faceCount;
-
-	if (count > 1) {
-		faceCount = 0;
-		j = count - 1;
-		while (faceCount <= j) {
-			while ((faceCount <= j) && !contact[faceCount].m_isEdgeContact) {
-				faceCount ++;
-			}
-			while ((faceCount <= j) && contact[j].m_isEdgeContact) {
-				j --;
-			}
-
-			if (faceCount < j) {
-				Swap (contact[faceCount], contact[j]);
-			}
-		}
-
-		if (faceCount < count) {
-			for (dgInt32 i = 0; i < faceCount; i ++) {
-				_ASSERTE ((contact[i].m_isEdgeContact == 0) || (contact[i].m_isEdgeContact == 1));
-				for (dgInt32 j = faceCount; j < count; j ++) {
-					dgFloat32 dist;
-					dgVector distVector (contact[i].m_point - contact[j].m_point);
-					dist = distVector % distVector;
-//					if (dist < dgFloat32 (0.04f)) {
-					if (dist < dgFloat32 (1.e-2f)) {
-						count --;
-						contact[j] = contact[count];
-						j --;
-					}
-				}
-			}
-		}
-
-		for (dgInt32 i = 0; i < count - 1; i ++) {
-			_ASSERTE ((contact[i].m_isEdgeContact == 0) || (contact[i].m_isEdgeContact == 1));
-			for (dgInt32 j = i + 1; j < count; j ++) {
-				dgFloat32 dist;
-				dgVector distVector (contact[i].m_point - contact[j].m_point);
-				dist = distVector % distVector;
-//				if (dist < dgFloat32 (0.04f)) {
-//				if ((dist < dgFloat32 (0.001f)) || ((dist < dgFloat32 (0.01f)) && ((contact[i].m_normal % contact[j].m_normal) > dgFloat32 (0.86f)))) {
-				if (dist < dgFloat32 (1.e-3f)) {
-					count --;
-					contact[j] = contact[count];
-					j --;
-				}
-			}
-		}
-	}
-
-	return count;
-}
 
 /*
 dgInt32 dgWorld::FlattenContinueContacts (dgInt32 count, dgContactPoint* const contact, dgFloat32 size) const
@@ -6369,11 +5908,6 @@ dgInt32 dgWorld::ClosestPoint (dgCollisionParamProxi& proxi) const
 
 
 
-// *******************************************************************************************************
-//
-// convex contact calculation
-//
-// *******************************************************************************************************
 dgInt32 dgWorld::CalculateHullToHullContactsSimd (dgCollisionParamProxi& proxi) const
 {
 #ifdef DG_BUILD_SIMD_CODE
@@ -6404,32 +5938,6 @@ dgInt32 dgWorld::CalculateHullToHullContactsSimd (dgCollisionParamProxi& proxi) 
 #endif
 }
 
-dgInt32 dgWorld::CalculateHullToHullContacts (dgCollisionParamProxi& proxi) const
-{
-	dgFloat32 radiusA;
-	dgFloat32 radiusB;
-	_ASSERTE (proxi.m_referenceCollision->IsType (dgCollision::dgConvexCollision_RTTI));
-	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgConvexCollision_RTTI));
-
-	dgMatrix matrix (proxi.m_floatingMatrix * proxi.m_referenceMatrix.Inverse());
-	proxi.m_localMatrixInv = &matrix;
-
-	//	dgContactSolver mink (hull1, hull2, penetrationPadding);
-	dgContactSolver mink (proxi);
-
-	radiusA = proxi.m_referenceCollision->GetBoxMaxRadius();
-	radiusB = proxi.m_floatingCollision->GetBoxMaxRadius();
-
-#ifdef __USE_DOUBLE_PRECISION__
-		return mink.HullHullContactsLarge (0);
-#else
-	if ((radiusA * dgFloat64 (32.0f) < radiusB) || (radiusB * dgFloat64 (32.0f) < radiusA)) {
-		return mink.HullHullContactsLarge (0);
-	} else {
-		return mink.HullHullContacts (0);
-	}
-#endif
-}
 
 
 
@@ -6648,122 +6156,6 @@ dgInt32 dgWorld::CalculateConvexToConvexContactsSimd (dgCollisionParamProxi& pro
 
 
 
-// *******************************************************************************************************
-//
-// non convex contact calculation
-//
-// *******************************************************************************************************
-dgInt32 dgWorld::CalculatePolySoupToSphereContactsDescrete (dgCollisionParamProxi& proxi) const
-{
-	dgInt32 count;
-	dgInt32 count1;
-	dgInt32 thread;
-	dgInt32 countleft;
-	dgInt32 indexCount;
-	dgInt32 reduceContactCountLimit;
-	dgFloat32 radius;
-	dgBody* soupBody; 
-	dgBody* spheBody; 
-	dgCollisionSphere *sphere;
-	dgCollisionMesh *polysoup;
-	dgCollisionMesh::dgCollisionConvexPolygon* polygon;
-	dgVector point;
-	
-
-	count = 0;
-	_ASSERTE (proxi.m_referenceCollision->IsType (dgCollision::dgCollisionSphere_RTTI));
-	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgCollisionMesh_RTTI));
-
-	spheBody = proxi.m_referenceBody;
-	soupBody = proxi.m_floatingBody;
-	sphere = (dgCollisionSphere*) proxi.m_referenceCollision;
-	polysoup = (dgCollisionMesh *) proxi.m_floatingCollision;
-
-	const dgMatrix& sphMatrix = proxi.m_referenceMatrix;
-	const dgMatrix& soupMatrix = proxi.m_floatingMatrix;
-
-	radius = sphere->m_radius + proxi.m_penetrationPadding;
-	dgVector center (soupMatrix.UntransformVector (sphMatrix.m_posit));
-
-	const dgPolygonMeshDesc& data = *proxi.m_polyMeshData;
-	thread = data.m_threadNumber;
-
-	const dgInt32* const idArray = (dgInt32*)data.m_userAttribute; 
-	dgInt32* const indexArray = (dgInt32*)data.m_faceVertexIndex;
-
-	_ASSERTE (idArray);
-	polygon = polysoup->m_polygon[thread];
-	polygon->m_vertex = data.m_vertex;
-	polygon->m_stride = dgInt32 (data.m_vertexStrideInBytes / sizeof (dgFloat32));
-
-	dgContactPoint* const contactOut = proxi.m_contacts;
-	reduceContactCountLimit = 0;
-	countleft = proxi.m_maxContacts;
-
-	indexCount = 0;
-	_ASSERTE (data.m_faceCount);
-	//strideInBytes = data.m_vertexStrideInBytes;
-	for (dgInt32 i = 0; (i < data.m_faceCount) && (countleft > 0); i ++) {
-		polygon->m_count = data.m_faceIndexCount[i];
-		polygon->m_index = &indexArray[indexCount];
-
-		if (data.m_faceNormalIndex) {
-			polygon->m_normalIndex = data.m_faceNormalIndex[i];
-			polygon->m_adjacentNormalIndex = (dgInt32*) &data.m_faceAdjencentEdgeNormal[indexCount];
-		} else {
-			polygon->m_normalIndex = 0;
-			polygon->m_adjacentNormalIndex = NULL;
-		}
-
-
-		if (polygon->PointToPolygonDistance (center, radius, point)) {
-			dgFloat32 dist2;	
-			dgVector dp (center - point);
-			dist2 = dp % dp;
-			if (dist2 > dgFloat32 (0.0f)) {
-				dgFloat32 side;
-				dgFloat32 dist2Inv;	
-				_ASSERTE (dist2 > dgFloat32 (0.0f));
-				dist2Inv = dgRsqrt (dist2);
-				side =  dist2 * dist2Inv - radius;
-				if (side < (-DG_RESTING_CONTACT_PENETRATION)) {
-					dgVector normal (dp.Scale (dist2Inv));
-
-					_ASSERTE (dgAbsf (normal % normal - 1.0f) < dgFloat32 (1.0e-5f));
-					contactOut[count].m_point = soupMatrix.TransformVector (center - normal.Scale (radius + side * dgFloat32 (0.5f)));  
-					contactOut[count].m_normal = soupMatrix.RotateVector (normal);
-					contactOut[count].m_userId = idArray[i];
-
-					side = (dgAbsf (side) - DG_IMPULSIVE_CONTACT_PENETRATION);
-					if (side < dgFloat32 (0.0f)) {
-						side = dgFloat32 (0.0f);
-					}
-					contactOut[count].m_penetration = side;
-
-					dgVector prevNormal (contactOut[count].m_normal);
-					count1 = polygon->ClipContacts (1, &contactOut[count], soupMatrix);
-					if ((prevNormal % contactOut[count].m_normal) < dgFloat32 (0.9999f)) {
-						contactOut[count].m_point = soupMatrix.TransformVector (center) - contactOut[count].m_normal.Scale (radius + side * dgFloat32 (0.5f));  
-					}
-					
-
-					count += count1;
-					countleft -= count1;
-					reduceContactCountLimit += count;
-					if ((reduceContactCountLimit > 24) || (countleft <= 0)) {
-						count = ReduceContacts (count, contactOut, proxi.m_maxContacts >> 2, dgFloat32 (1.0e-2f));
-						countleft = proxi.m_maxContacts - count;
-						reduceContactCountLimit = 0;
-					}
-				}
-			}
-		}
-		indexCount += data.m_faceIndexCount[i];
-	}
-
-	count = FilterPolygonEdgeContacts (count, contactOut);
-	return count;
-}
 
 
 dgInt32 dgWorld::CalculatePolySoupToElipseContactsDescrete (dgCollisionParamProxi& proxi) const
@@ -7113,98 +6505,6 @@ dgInt32 dgWorld::CalculatePolySoupToHullContactsDescreteSimd (dgCollisionParamPr
 }
 
 
-dgInt32 dgWorld::CalculatePolySoupToHullContactsDescrete (dgCollisionParamProxi& proxi) const
-{
-	dgInt32 count;
-	dgInt32 count1;
-	dgInt32 faceId;
-	dgInt32 thread;
-	dgInt32 countleft;
-	dgInt32 indexCount;
-	dgInt32 reduceContactCountLimit;
-	dgCollisionBoundPlaneCache planeCache;
-
-	count = 0;
-	_ASSERTE (proxi.m_referenceCollision->IsType (dgCollision::dgConvexCollision_RTTI));
-	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgCollisionMesh_RTTI));
-
-	dgCollisionConvex* const collision = (dgCollisionConvex*) proxi.m_referenceCollision;
-	dgCollisionMesh *const polysoup = (dgCollisionMesh *) proxi.m_floatingCollision;
-	_ASSERTE (collision->IsType (dgCollision::dgConvexCollision_RTTI));
-	_ASSERTE (polysoup->IsType (dgCollision::dgCollisionMesh_RTTI));
-
-	const dgMatrix& soupMatrix = proxi.m_floatingMatrix;
-	const dgPolygonMeshDesc& data = *proxi.m_polyMeshData;
-	thread = data.m_threadNumber;
-
-	_ASSERTE (data.m_faceCount); 
-	dgFloat32* const faceSize = data.m_faceMaxSize; 
-	dgInt32* const idArray = (dgInt32*)data.m_userAttribute; 
-	dgInt32* const indexArray = (dgInt32*)data.m_faceVertexIndex;
-
-	_ASSERTE (idArray);
-
-	dgCollisionMesh::dgCollisionConvexPolygon* const polygon = polysoup->m_polygon[thread];
-	polygon->m_vertex = data.m_vertex;
-	polygon->m_stride = dgInt32 (data.m_vertexStrideInBytes / sizeof (dgFloat32));
-
-	reduceContactCountLimit = 0;
-	countleft = proxi.m_maxContacts;
-
-	indexCount = 0;
-	proxi.m_floatingCollision = polygon;
-	dgContactPoint* const contactOut = proxi.m_contacts;
-	dgContactSolver mink (proxi);
-	dgFloat32 convexSphapeSize = mink.GetShapeClipSize (collision);
-
-	for (dgInt32 j = 0; (j < data.m_faceCount) && (countleft > 0); j ++) {
-		polygon->m_count = data.m_faceIndexCount[j];
-		polygon->m_index = &indexArray[indexCount];
-
-		if (data.m_faceNormalIndex) {
-			polygon->m_normalIndex = data.m_faceNormalIndex[j];
-			polygon->m_adjacentNormalIndex = (dgInt32*) &data.m_faceAdjencentEdgeNormal[indexCount];
-		} else {
-			polygon->m_normalIndex = 0;
-			polygon->m_adjacentNormalIndex = NULL;
-		}
-
-		if (polygon->QuickTest(collision, mink.m_matrix)) {
-			if ((data.m_faceCount < 8) || collision->OOBBTest (mink.m_matrix, polygon, &planeCache))  {
-
-				if (faceSize && (faceSize[j] > convexSphapeSize)) {
-					polygon->BeamClipping (collision, mink.m_matrix, convexSphapeSize);
-				}
-
-
-				faceId = idArray[j];
-				proxi.m_maxContacts = countleft;
-				proxi.m_contacts = &contactOut[count];
-				count1 = mink.HullHullContacts (faceId);
-
-				if (count1) {
-					count1 = polygon->ClipContacts (count1, &contactOut[count], soupMatrix);
-					count += count1;
-					countleft -= count1;
-					reduceContactCountLimit += count1;
-					if ((reduceContactCountLimit > 24) || (countleft <= 0)) {
-						count = ReduceContacts (count, contactOut, proxi.m_maxContacts >> 2, dgFloat32 (1.0e-2f));
-						countleft = proxi.m_maxContacts - count;
-						reduceContactCountLimit = 0;
-					}
-				}
-			}
-		}
-		indexCount += data.m_faceIndexCount[j];
-	}
-
-	proxi.m_contacts = contactOut;
-	count = FilterPolygonEdgeContacts (count, contactOut);
-
-	// restore the pointer
-	proxi.m_floatingCollision = polysoup;
-	return count;
-}
 
 
 dgInt32 dgWorld::CalculateConvexToNonConvexContactsContinueSimd (dgCollisionParamProxi& proxi) const
@@ -7785,11 +7085,65 @@ dgInt32 dgWorld::ClosestPoint (dgCollisionParamProxi& proxi) const
 }
 
 
+
+
+
+
+dgInt32 dgWorld::FilterPolygonEdgeContacts (dgInt32 count, dgContactPoint* const contact) const
+{
+	if (count > 1) {
+		dgInt32 faceCount = 0;
+		dgInt32 j = count - 1;
+		while (faceCount <= j) {
+			while ((faceCount <= j) && !contact[faceCount].m_isEdgeContact) {
+				faceCount ++;
+			}
+			while ((faceCount <= j) && contact[j].m_isEdgeContact) {
+				j --;
+			}
+
+			if (faceCount < j) {
+				Swap (contact[faceCount], contact[j]);
+			}
+		}
+
+		if (faceCount < count) {
+			for (dgInt32 i = 0; i < faceCount; i ++) {
+				_ASSERTE ((contact[i].m_isEdgeContact == 0) || (contact[i].m_isEdgeContact == 1));
+				for (dgInt32 j = faceCount; j < count; j ++) {
+					dgVector distVector (contact[i].m_point - contact[j].m_point);
+					dgFloat32 dist = distVector % distVector;
+					//if (dist < dgFloat32 (0.04f)) {
+					if (dist < dgFloat32 (1.e-2f)) {
+						count --;
+						contact[j] = contact[count];
+						j --;
+					}
+				}
+			}
+		}
+
+		for (dgInt32 i = 0; i < count - 1; i ++) {
+			_ASSERTE ((contact[i].m_isEdgeContact == 0) || (contact[i].m_isEdgeContact == 1));
+			for (dgInt32 j = i + 1; j < count; j ++) {
+				dgVector distVector (contact[i].m_point - contact[j].m_point);
+				dgFloat32 dist = distVector % distVector;
+				//if (dist < dgFloat32 (0.04f)) {
+				//if ((dist < dgFloat32 (0.001f)) || ((dist < dgFloat32 (0.01f)) && ((contact[i].m_normal % contact[j].m_normal) > dgFloat32 (0.86f)))) {
+				if (dist < dgFloat32 (1.e-3f)) {
+					count --;
+					contact[j] = contact[count];
+					j --;
+				}
+			}
+		}
+	}
+	return count;
+}
+
+
 dgInt32 dgWorld::CalculateConvexToNonConvexContacts (dgCollisionParamProxi& proxi) const
 {
-_ASSERTE (0);
-return 0;
-/*
 	dgPolygonMeshDesc data;
 	dgInt32 count = 0;
 	proxi.m_inTriggerVolume = 0;
@@ -7799,9 +7153,9 @@ return 0;
 	}
 	proxi.m_isTriggerVolume = 0;
 
-	dgBody* hullBody = proxi.m_referenceBody; 
-	dgBody* soupBody = proxi.m_floatingBody; 
-	dgCollisionMesh* polysoup = (dgCollisionMesh *) proxi.m_floatingCollision;
+	dgBody* const hullBody = proxi.m_referenceBody; 
+	dgBody* const soupBody = proxi.m_floatingBody; 
+	dgCollisionMesh* const polysoup = (dgCollisionMesh *) proxi.m_floatingCollision;
 	_ASSERTE (proxi.m_referenceCollision->IsType (dgCollision::dgConvexCollision_RTTI));
 	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgCollisionMesh_RTTI));
 
@@ -7815,8 +7169,11 @@ return 0;
 	_ASSERTE (proxi.m_timestep >= dgFloat32 (0.0f));
 
 	dgInt32 doContinueCollision = 0;
-	bool solverInContinueCollision = false;
+//	bool solverInContinueCollision = false;
 	if (proxi.m_continueCollision) {
+		_ASSERTE (0);
+		return 0;
+	/*
 		//		dgFloat32 dist;
 		//		dgFloat32 mag2;
 		//		dgFloat32 spand;
@@ -7874,6 +7231,7 @@ return 0;
 				}
 			}
 		}
+*/
 	}
 
 	data.m_vertex = NULL;
@@ -7899,15 +7257,17 @@ return 0;
 		proxi.m_localMatrixInv = &matrixInv;
 
 		if (doContinueCollision) {
+			_ASSERTE (0);
+			/*
 			switch (collision->GetCollisionPrimityType()) 
 			{
-			case m_sphereCollision:
+				case m_sphereCollision:
 				{
 					count = CalculatePolySoupToSphereContactsContinue (proxi);
 					break;
 				}
 
-			default: 
+				default: 
 				{
 					//if (!proxi.m_unconditionalCast &&  (xxx == 5)) {
 					//xxx *= 1;
@@ -7923,25 +7283,25 @@ return 0;
 				hullBody->m_solverInContinueCollision = true;
 				hullBody->GetWorld()->ReleaseIndirectLock(&hullBody->m_locks);
 			}
-
-
+		*/
 		} else {
 
 			switch (collision->GetCollisionPrimityType()) 
 			{
-			case m_sphereCollision:
+				case m_sphereCollision:
 				{
 					count = CalculatePolySoupToSphereContactsDescrete (proxi);
 					break;
 				}
 
-			case m_ellipseCollision:
+				case m_ellipseCollision:
 				{
-					count = CalculatePolySoupToElipseContactsDescrete (proxi);
+					_ASSERTE (0);
+					//count = CalculatePolySoupToElipseContactsDescrete (proxi);
 					break;
 				}
 
-			default: 
+				default: 
 				{
 					count = CalculatePolySoupToHullContactsDescrete (proxi);
 				}
@@ -7953,7 +7313,7 @@ return 0;
 			}
 		}
 
-		dgContactPoint* contactOut = proxi.m_contacts;
+		dgContactPoint* const contactOut = proxi.m_contacts;
 		for (dgInt32 i = 0; i < count; i ++) {
 			_ASSERTE ((dgAbsf(contactOut[i].m_normal % contactOut[i].m_normal) - dgFloat32 (1.0f)) < dgFloat32 (1.0e-5f));
 			contactOut[i].m_body0 = proxi.m_referenceBody;
@@ -7963,15 +7323,108 @@ return 0;
 		}
 	}
 	return count;
-*/
+}
+
+
+dgInt32 dgWorld::CalculatePolySoupToSphereContactsDescrete (dgCollisionParamProxi& proxi) const
+{
+	dgInt32 count = 0;
+	_ASSERTE (proxi.m_referenceCollision->IsType (dgCollision::dgCollisionSphere_RTTI));
+	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgCollisionMesh_RTTI));
+
+//	dgBody* const spheBody = proxi.m_referenceBody;
+//	dgBody* const soupBody = proxi.m_floatingBody;
+	dgCollisionSphere* const sphere = (dgCollisionSphere*) proxi.m_referenceCollision;
+	dgCollisionMesh* const polysoup = (dgCollisionMesh *) proxi.m_floatingCollision;
+
+	const dgMatrix& sphMatrix = proxi.m_referenceMatrix;
+	const dgMatrix& soupMatrix = proxi.m_floatingMatrix;
+
+	dgFloat32 radius = sphere->m_radius + proxi.m_penetrationPadding;
+	dgVector center (soupMatrix.UntransformVector (sphMatrix.m_posit));
+
+	const dgPolygonMeshDesc& data = *proxi.m_polyMeshData;
+	dgInt32 thread = data.m_threadNumber;
+
+	const dgInt32* const idArray = (dgInt32*)data.m_userAttribute; 
+	dgInt32* const indexArray = (dgInt32*)data.m_faceVertexIndex;
+
+	_ASSERTE (idArray);
+	dgCollisionMesh::dgCollisionConvexPolygon* const polygon = polysoup->m_polygon[thread];
+	polygon->m_vertex = data.m_vertex;
+	polygon->m_stride = dgInt32 (data.m_vertexStrideInBytes / sizeof (dgFloat32));
+
+	dgContactPoint* const contactOut = proxi.m_contacts;
+	dgInt32 reduceContactCountLimit = 0;
+	dgInt32 countleft = proxi.m_maxContacts;
+
+	dgInt32 indexCount = 0;
+	_ASSERTE (data.m_faceCount);
+	//strideInBytes = data.m_vertexStrideInBytes;
+
+	for (dgInt32 i = 0; (i < data.m_faceCount) && (countleft > 0); i ++) {
+
+		polygon->m_count = data.m_faceIndexCount[i];
+		polygon->m_index = &indexArray[indexCount];
+
+		if (data.m_faceNormalIndex) {
+			polygon->m_normalIndex = data.m_faceNormalIndex[i];
+			polygon->m_adjacentNormalIndex = (dgInt32*) &data.m_faceAdjencentEdgeNormal[indexCount];
+		} else {
+			polygon->m_normalIndex = 0;
+			polygon->m_adjacentNormalIndex = NULL;
+		}
+
+		dgVector point;
+		if (polygon->PointToPolygonDistance (center, radius, point)) {
+			dgVector dp (center - point);
+			dgFloat32 dist2 = dp % dp;
+
+			if (dist2 > dgFloat32 (0.0f)) {
+				_ASSERTE (dist2 > dgFloat32 (0.0f));
+				dgFloat32 dist2Inv = dgRsqrt (dist2);
+				dgFloat32 side =  dist2 * dist2Inv - radius;
+
+				if (side < (-DG_RESTING_CONTACT_PENETRATION)) {
+					dgVector normal (dp.Scale (dist2Inv));
+					_ASSERTE (dgAbsf (normal % normal - 1.0f) < dgFloat32 (1.0e-5f));
+					contactOut[count].m_point = soupMatrix.TransformVector (center - normal.Scale (radius + side * dgFloat32 (0.5f)));  
+					contactOut[count].m_normal = soupMatrix.RotateVector (normal);
+					contactOut[count].m_userId = idArray[i];
+
+					side = (dgAbsf (side) - DG_IMPULSIVE_CONTACT_PENETRATION);
+					if (side < dgFloat32 (0.0f)) {
+						side = dgFloat32 (0.0f);
+					}
+					contactOut[count].m_penetration = side;
+
+					dgVector prevNormal (contactOut[count].m_normal);
+					dgInt32 count1 = polygon->ClipContacts (1, &contactOut[count], soupMatrix);
+					if ((prevNormal % contactOut[count].m_normal) < dgFloat32 (0.9999f)) {
+						contactOut[count].m_point = soupMatrix.TransformVector (center) - contactOut[count].m_normal.Scale (radius + side * dgFloat32 (0.5f));  
+					}
+
+					count += count1;
+					countleft -= count1;
+					reduceContactCountLimit += count;
+					if ((reduceContactCountLimit > 24) || (countleft <= 0)) {
+						count = ReduceContacts (count, contactOut, proxi.m_maxContacts >> 2, dgFloat32 (1.0e-2f));
+						countleft = proxi.m_maxContacts - count;
+						reduceContactCountLimit = 0;
+					}
+				}
+			}
+		}
+		indexCount += data.m_faceIndexCount[i];
+	}
+
+	count = FilterPolygonEdgeContacts (count, contactOut);
+	return count;
 }
 
 
 dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) const
 {
-	_ASSERTE (0);
-	return 0;
-/*
 	_ASSERTE (proxi.m_referenceCollision->IsType (dgCollision::dgConvexCollision_RTTI));
 	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgConvexCollision_RTTI));
 
@@ -7980,7 +7433,6 @@ dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) 
 	dgInt32 count = 0;
 	dgCollision* const collision1 = proxi.m_referenceCollision;
 	dgCollision* const collision2 = proxi.m_floatingCollision;
-
 
 	if (!(((dgCollisionConvex*)collision1)->m_vertexCount && ((dgCollisionConvex*)collision2)->m_vertexCount)) {
 		return count;
@@ -7991,6 +7443,8 @@ dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) 
 
 	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgConvexCollision_RTTI));
 	if (proxi.m_continueCollision) {
+		_ASSERTE (0);
+/*
 		dgInt32 maxContaCount;
 		dgFloat32 dist;
 		dgFloat32 timestep;
@@ -8025,7 +7479,7 @@ dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) 
 				}
 			}
 		}
-
+*/
 	} else {
 		dgCollisionID id1 = collision1->GetCollisionPrimityType();
 		dgCollisionID id2 = collision2->GetCollisionPrimityType();
@@ -8034,18 +7488,21 @@ dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) 
 
 		switch (id1) 
 		{
-		case m_sphereCollision:
+			case m_sphereCollision:
 			{
 				switch (id2) 
 				{
-				case m_sphereCollision:
+					case m_sphereCollision:
 					{
-						count = CalculateSphereToSphereContacts (proxi);
+						_ASSERTE (0);
+						//count = CalculateSphereToSphereContacts (proxi);
 						break;
 					}
 
-				case m_capsuleCollision:
+					case m_capsuleCollision:
 					{
+						//_ASSERTE (0);
+/*
 						dgCollisionParamProxi tmp(proxi.m_threadIndex);
 						tmp.m_referenceBody = proxi.m_floatingBody;
 						tmp.m_floatingBody = proxi.m_referenceBody;
@@ -8064,13 +7521,13 @@ dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) 
 							proxi.m_contacts[i].m_normal = tmp.m_contacts[0].m_normal.Scale (dgFloat32 (-1.0f));
 						}
 						proxi.m_inTriggerVolume = tmp.m_inTriggerVolume;
+*/
 						break;
 					}
 
-				case m_boxCollision:
+					case m_boxCollision:
 					{
 						dgCollisionParamProxi tmp(proxi.m_threadIndex);
-
 						tmp.m_referenceBody = proxi.m_floatingBody;
 						tmp.m_floatingBody = proxi.m_referenceBody;
 						tmp.m_referenceCollision = proxi.m_floatingCollision;
@@ -8089,13 +7546,13 @@ dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) 
 							proxi.m_contacts[0].m_normal = tmp.m_contacts[0].m_normal.Scale (dgFloat32 (-1.0f));
 						}
 						proxi.m_inTriggerVolume = tmp.m_inTriggerVolume;
-
 						break;
 					}
 
-				default:
+					default:
 					{
-						count = CalculateHullToHullContacts (proxi);
+						_ASSERTE (0);
+//						count = CalculateHullToHullContacts (proxi);
 						break;
 					}
 				}
@@ -8103,38 +7560,42 @@ dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) 
 				break;
 			}
 
-		case m_capsuleCollision:
+			case m_capsuleCollision:
 			{
 				switch (id2) 
 				{
-				case m_sphereCollision:
+					case m_sphereCollision:
 					{
-						count = CalculateCapsuleToSphereContacts (proxi);
+						_ASSERTE (0);
+						//count = CalculateCapsuleToSphereContacts (proxi);
 						break;
 					}
 
-				case m_capsuleCollision:
+					case m_capsuleCollision:
 					{
-						count = CalculateCapsuleToCapsuleContacts (proxi);
+						_ASSERTE (0);
+						//count = CalculateCapsuleToCapsuleContacts (proxi);
 						break;
 					}
 
-				default:
+					default:
 					{
-						count = CalculateHullToHullContacts (proxi);
+						_ASSERTE (0);
+						//count = CalculateHullToHullContacts (proxi);
 						break;
 					}
 				}
 				break;
 			}
 
-		case m_boxCollision:
+			case m_boxCollision:
 			{
 				switch (id2) 
 				{
-				case m_sphereCollision:
+					case m_sphereCollision:
 					{
-						count = CalculateBoxToSphereContacts (proxi);
+						_ASSERTE (0);
+						//count = CalculateBoxToSphereContacts (proxi);
 						break;
 					}
 
@@ -8144,18 +7605,20 @@ dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) 
 					//break;
 					//}
 
-				default:
+					default:
 					{
-						count = CalculateHullToHullContacts (proxi);
+						_ASSERTE (0);
+						//count = CalculateHullToHullContacts (proxi);
 						break;
 					}
 				}
 				break;
 			}
 
-		default: 
+			default: 
 			{
-				count = CalculateHullToHullContacts (proxi);
+				_ASSERTE (0);
+				//count = CalculateHullToHullContacts (proxi);
 				break;
 			}
 		}
@@ -8173,5 +7636,537 @@ dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) 
 		contactOut[i].m_collision1 = collision2;
 	}
 	return count;
+}
+
+dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxi& proxi) const
+{
+	_ASSERTE (proxi.m_referenceCollision->IsType (dgCollision::dgCollisionBox_RTTI));
+	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgCollisionSphere_RTTI));
+
+	const dgMatrix& boxMatrix = proxi.m_referenceMatrix;
+	const dgMatrix& sphMatrix = proxi.m_floatingMatrix;
+
+	const dgCollisionBox* const collBox = (dgCollisionBox*) proxi.m_referenceCollision;
+	const dgCollisionSphere* const collSph = (dgCollisionSphere*) proxi.m_floatingCollision;
+
+	dgFloat32 radius = collSph->m_radius + proxi.m_penetrationPadding;
+	dgVector size (collBox->m_size[0]);
+	dgVector center (boxMatrix.UntransformVector (sphMatrix.m_posit));
+
+	dgInt32 codeX = (center.m_x < - size.m_x) + (center.m_x > size.m_x) * 2;
+	dgInt32 codeY = (center.m_y < - size.m_y) + (center.m_y > size.m_y) * 2;
+	dgInt32 codeZ = (center.m_z < - size.m_z) + (center.m_z > size.m_z) * 2;
+	dgInt32 code = codeZ * 9 + codeY * 3 + codeX;
+
+	if (!code) {
+		return CalculateHullToHullContacts (proxi);
+	}
+
+	dgFloat32 dist = dgFloat32 (0.0f);
+	dgVector point (center); 
+	dgVector normal (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f)); 
+	switch (code) 
+	{
+		case 2 * 9 + 1 * 3 + 2:
+		{
+			size.m_y *= dgFloat32 (-1.0f);
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_y = size.m_y -  center.m_y; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+		case 2 * 9 + 1 * 3 + 1:
+		{
+			size.m_x *= dgFloat32 (-1.0f);
+			size.m_y *= dgFloat32 (-1.0f);
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_y = size.m_y -  center.m_y; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+		case 1 * 9 + 1 * 3 + 2:
+		{
+			size.m_y *= dgFloat32 (-1.0f);
+			size.m_z *= dgFloat32 (-1.0f);
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_y = size.m_y -  center.m_y; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+		case 1 * 9 + 1 * 3 + 1:
+		{
+			size.m_x *= dgFloat32 (-1.0f);
+			size.m_y *= dgFloat32 (-1.0f);
+			size.m_z *= dgFloat32 (-1.0f);
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_y = size.m_y -  center.m_y; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+		case 2 * 9 + 2 * 3 + 2:
+		{
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_y = size.m_y -  center.m_y; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+		case 2 * 9 + 2 * 3 + 1:
+		{
+			size.m_x *= dgFloat32 (-1.0f);
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_y = size.m_y -  center.m_y; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+		case 1 * 9 + 2 * 3 + 2:
+		{
+			size.m_z *= dgFloat32 (-1.0f);
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_y = size.m_y -  center.m_y; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+		case 1 * 9 + 2 * 3 + 1:
+		{
+			size.m_x *= dgFloat32 (-1.0f);
+			size.m_z *= dgFloat32 (-1.0f);
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_y = size.m_y -  center.m_y; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+
+		case 2 * 9 + 0 * 3 + 2:
+		{
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+		case 2 * 9 + 0 * 3 + 1:
+		{
+			size.m_x *= dgFloat32 (-1.0f);
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+
+		case 1 * 9 + 0 * 3 + 2:
+		{
+			size.m_z *= dgFloat32 (-1.0f);
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+		case 1 * 9 + 0 * 3 + 1:
+		{
+			size.m_x *= dgFloat32 (-1.0f);
+			size.m_z *= dgFloat32 (-1.0f);
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+
+		case 0 * 9 + 2 * 3 + 2:
+		{
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_y = size.m_y -  center.m_y; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+		case 0 * 9 + 2 * 3 + 1:
+		{
+			size.m_x *= dgFloat32 (-1.0f);
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_y = size.m_y -  center.m_y; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+
+		case 0 * 9 + 1 * 3 + 2:
+		{
+			size.m_y *= dgFloat32 (-1.0f);
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_y = size.m_y -  center.m_y; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+		case 0 * 9 + 1 * 3 + 1:
+		{
+			size.m_x *= dgFloat32 (-1.0f);
+			size.m_y *= dgFloat32 (-1.0f);
+			normal.m_x = size.m_x -  center.m_x; 
+			normal.m_y = size.m_y -  center.m_y; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+		case 2 * 9 + 2 * 3 + 0:
+		{
+			normal.m_y = size.m_y -  center.m_y; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+		case 1 * 9 + 2 * 3 + 0:
+		{
+			size.m_z *= dgFloat32 (-1.0f);
+			normal.m_y = size.m_y -  center.m_y; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+
+		case 2 * 9 + 1 * 3 + 0:
+		{
+			size.m_y *= dgFloat32 (-1.0f);
+			normal.m_y = size.m_y -  center.m_y; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+		case 1 * 9 + 1 * 3 + 0:
+		{
+			size.m_y *= dgFloat32 (-1.0f);
+			size.m_z *= dgFloat32 (-1.0f);
+			normal.m_y = size.m_y -  center.m_y; 
+			normal.m_z = size.m_z -  center.m_z; 
+			normal = normal.Scale (dgRsqrt (normal % normal));
+			dist =  normal % (size - center) - radius;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			point += normal.Scale (radius + (dist - proxi.m_penetrationPadding) * dgFloat32 (0.5f));
+			break;
+		}
+
+		case 0 * 9 + 0 * 3 + 1:
+		{
+			dist = -((center.m_x + radius) + size.m_x);
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			normal.m_x = 1.0f;
+			point.m_x = -size.m_x - (dist + proxi.m_penetrationPadding) * dgFloat32 (0.5f);
+			break;
+		}
+
+		case 0 * 9 + 1 * 3 + 0:
+		{
+			dist = -((center.m_y + radius) + size.m_y);
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			normal.m_y = dgFloat32 (1.0f);
+			point.m_y = -size.m_y - (dist + proxi.m_penetrationPadding) * dgFloat32 (0.5f);
+			break;
+		}
+
+		case 1 * 9 + 0 * 3 + 0:
+		{
+			dist = -((center.m_z + radius) + size.m_z);
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			normal.m_z = dgFloat32 (1.0f);
+			point.m_z = -size.m_z - (dist + proxi.m_penetrationPadding) * dgFloat32 (0.5f);
+			break;
+		}
+
+		case 0 * 9 + 0 * 3 + 2:
+		{
+			dist = (center.m_x - radius) - size.m_x;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			normal.m_x = dgFloat32 (-1.0f);
+			point.m_x = size.m_x + (dist + proxi.m_penetrationPadding) * dgFloat32 (0.5f);
+			break;
+		}
+
+		case 0 * 9 + 2 * 3 + 0:
+		{
+			dist = (center.m_y - radius) - size.m_y;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			normal.m_y = dgFloat32 (-1.0f);
+			point.m_y = size.m_y + (dist + proxi.m_penetrationPadding) * dgFloat32 (0.5f);
+			break;
+		}
+
+		case 2 * 9 + 0 * 3 + 0:
+		{
+			dist = (center.m_z - radius) - size.m_z;
+			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
+				return 0;
+			}
+			normal.m_z = dgFloat32 (-1.0f);
+			point.m_z = size.m_z + (dist + proxi.m_penetrationPadding) * dgFloat32 (0.5f);
+			break;
+		}
+
+		default:
+		{
+			return 0;
+		}
+	}
+
+	if (proxi.m_isTriggerVolume) {
+		proxi.m_inTriggerVolume = 1;
+		return 0;
+	}
+
+	dist = (dgAbsf (dist) - DG_IMPULSIVE_CONTACT_PENETRATION);
+	if (dist < dgFloat32 (0.0f)) {
+		dist = dgFloat32 (0.0f);
+	}
+
+	dgContactPoint* const contactOut = proxi.m_contacts;
+	contactOut[0].m_point = boxMatrix.TransformVector (point);
+	contactOut[0].m_normal = boxMatrix.RotateVector (normal);
+	contactOut[0].m_penetration = dist;
+	contactOut[0].m_userId = 0;
+	return 1;
+}
+
+dgInt32 dgWorld::CalculateHullToHullContacts (dgCollisionParamProxi& proxi) const
+{
+_ASSERTE (0);
+return 0;
+/*
+	dgFloat32 radiusA;
+	dgFloat32 radiusB;
+	_ASSERTE (proxi.m_referenceCollision->IsType (dgCollision::dgConvexCollision_RTTI));
+	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgConvexCollision_RTTI));
+
+	dgMatrix matrix (proxi.m_floatingMatrix * proxi.m_referenceMatrix.Inverse());
+	proxi.m_localMatrixInv = &matrix;
+
+	//	dgContactSolver mink (hull1, hull2, penetrationPadding);
+	dgContactSolver mink (proxi);
+
+	radiusA = proxi.m_referenceCollision->GetBoxMaxRadius();
+	radiusB = proxi.m_floatingCollision->GetBoxMaxRadius();
+
+#ifdef __USE_DOUBLE_PRECISION__
+	return mink.HullHullContactsLarge (0);
+#else
+	if ((radiusA * dgFloat64 (32.0f) < radiusB) || (radiusB * dgFloat64 (32.0f) < radiusA)) {
+		return mink.HullHullContactsLarge (0);
+	} else {
+		return mink.HullHullContacts (0);
+	}
+#endif
 */
+}
+
+
+dgInt32 dgWorld::CalculatePolySoupToHullContactsDescrete (dgCollisionParamProxi& proxi) const
+{
+	dgInt32 count = 0;
+
+	_ASSERTE (proxi.m_referenceCollision->IsType (dgCollision::dgConvexCollision_RTTI));
+	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgCollisionMesh_RTTI));
+
+	dgCollisionConvex* const collision = (dgCollisionConvex*) proxi.m_referenceCollision;
+	dgCollisionMesh *const polysoup = (dgCollisionMesh *) proxi.m_floatingCollision;
+	_ASSERTE (collision->IsType (dgCollision::dgConvexCollision_RTTI));
+	_ASSERTE (polysoup->IsType (dgCollision::dgCollisionMesh_RTTI));
+
+	const dgMatrix& soupMatrix = proxi.m_floatingMatrix;
+	const dgPolygonMeshDesc& data = *proxi.m_polyMeshData;
+	dgInt32 thread = data.m_threadNumber;
+
+	_ASSERTE (data.m_faceCount); 
+	dgFloat32* const faceSize = data.m_faceMaxSize; 
+	dgInt32* const idArray = (dgInt32*)data.m_userAttribute; 
+	dgInt32* const indexArray = (dgInt32*)data.m_faceVertexIndex;
+
+	_ASSERTE (idArray);
+
+	dgCollisionMesh::dgCollisionConvexPolygon* const polygon = polysoup->m_polygon[thread];
+	polygon->m_vertex = data.m_vertex;
+	polygon->m_stride = dgInt32 (data.m_vertexStrideInBytes / sizeof (dgFloat32));
+
+	dgInt32 reduceContactCountLimit = 0;
+	dgInt32 countleft = proxi.m_maxContacts;
+
+	dgInt32 indexCount = 0;
+	proxi.m_floatingCollision = polygon;
+	dgContactPoint* const contactOut = proxi.m_contacts;
+	dgContactSolver mink (proxi);
+	dgFloat32 convexSphapeSize = mink.GetShapeClipSize (collision);
+
+	for (dgInt32 j = 0; (j < data.m_faceCount) && (countleft > 0); j ++) {
+
+		polygon->m_count = data.m_faceIndexCount[j];
+		polygon->m_index = &indexArray[indexCount];
+
+		if (data.m_faceNormalIndex) {
+			polygon->m_normalIndex = data.m_faceNormalIndex[j];
+			polygon->m_adjacentNormalIndex = (dgInt32*) &data.m_faceAdjencentEdgeNormal[indexCount];
+		} else {
+			polygon->m_normalIndex = 0;
+			polygon->m_adjacentNormalIndex = NULL;
+		}
+
+		if (polygon->QuickTest(collision, mink.m_matrix)) {
+			dgCollisionBoundPlaneCache planeCache;
+			if ((data.m_faceCount < 8) || collision->OOBBTest (mink.m_matrix, polygon, &planeCache))  {
+				if (faceSize && (faceSize[j] > convexSphapeSize)) {
+					polygon->BeamClipping (collision, mink.m_matrix, convexSphapeSize);
+				}
+
+				dgInt32 faceId = idArray[j];
+				proxi.m_maxContacts = countleft;
+				proxi.m_contacts = &contactOut[count];
+				dgInt32 count1 = mink.HullHullContacts (faceId);
+
+				if (count1) {
+					count1 = polygon->ClipContacts (count1, &contactOut[count], soupMatrix);
+					count += count1;
+					countleft -= count1;
+					reduceContactCountLimit += count1;
+					if ((reduceContactCountLimit > 24) || (countleft <= 0)) {
+						count = ReduceContacts (count, contactOut, proxi.m_maxContacts >> 2, dgFloat32 (1.0e-2f));
+						countleft = proxi.m_maxContacts - count;
+						reduceContactCountLimit = 0;
+					}
+				}
+			}
+		}
+		indexCount += data.m_faceIndexCount[j];
+	}
+
+	proxi.m_contacts = contactOut;
+	count = FilterPolygonEdgeContacts (count, contactOut);
+
+	// restore the pointer
+	proxi.m_floatingCollision = polysoup;
+	return count;
 }
