@@ -360,135 +360,13 @@ void dgWorldDynamicUpdate::ApplyExternalForcesAndAccelerationSimd (const dgIslan
 void dgWorldDynamicUpdate::CalculateSimpleBodyReactionsForcesSimd (const dgIsland* const island, dgInt32 rowStart, dgInt32 threadIndex, dgFloat32 timestep, dgFloat32 maxAccNorm) const
 {
 /*
-	dgFloat32 accel[DG_CONSTRAINT_MAX_ROWS];
-	dgFloat32 activeRow[DG_CONSTRAINT_MAX_ROWS];
-	dgFloat32 lowBound[DG_CONSTRAINT_MAX_ROWS];
-	dgFloat32 highBound[DG_CONSTRAINT_MAX_ROWS];
-	dgFloat32 deltaForce[DG_CONSTRAINT_MAX_ROWS];
-	dgFloat32 deltaAccel[DG_CONSTRAINT_MAX_ROWS];
-
-	dgWorld* const world = (dgWorld*) this;
-	dgJointInfo* const constraintArrayPtr = (dgJointInfo*) &world->m_jointsMemory[0];
-	dgJointInfo* const constraintArray = &constraintArrayPtr[island->m_jointStart];
-	dgInt32 count = constraintArray[0].m_autoPaircount;
-	_ASSERTE (constraintArray[0].m_autoPairstart == 0);
-
 	dgFloatSign tmpIndex;
 	tmpIndex.m_integer.m_iVal = 0x7fffffff;
 	simd_type signMask = simd_set1(tmpIndex.m_fVal);
 	simd_type one = simd_set1(dgFloat32 (1.0f));
 	simd_type zero = simd_set1(dgFloat32 (0.0f));
-//	simd_type tol_pos_1eNeg5 = simd_set1 (dgFloat32 (1.0e-5f));
-//	simd_type tol_pos_1eNeg8 = simd_set1 (dgFloat32 (1.0e-8f));
 	simd_type tol_pos_1eNeg16 = simd_set1 (dgFloat32 ( 1.0e-16f));
-//	simd_type tol_neg_1eNeg16 = simd_set1 (dgFloat32 (-1.0e-16f));
 
-//	dgInt32 maxPasses = count;
-
-	simd_type passesCount = simd_set1(dgFloat32 (0.0f));
-	dgJacobianMatrixElement* const matrixRow = &m_solverMemory.m_memory[rowStart];
-	for (dgInt32 i = 0; i < count; i ++) {
-		dgJacobianMatrixElement* const row = &matrixRow[i];
-
-		dgInt32 k = row->m_normalForceIndex;
-		_ASSERTE (((k <0) && (matrixRow[k].m_force == dgFloat32 (1.0f))) || ((k >= 0) && (matrixRow[k].m_force >= dgFloat32 (0.0f))));
-		//dgFloat32 val = matrixRow[k].m_force;
-		simd_type val = simd_load_s (matrixRow[k].m_force);
-
-		//lowBound[i] = val * row->m_lowerBoundFrictionCoefficent;
-		//highBound[i] = val * row->m_upperBoundFrictionCoefficent;
-		simd_type low = simd_mul_s (val, simd_load_s(row->m_lowerBoundFrictionCoefficent));
-		simd_type high = simd_mul_s (val, simd_load_s(row->m_upperBoundFrictionCoefficent));
-		simd_store_s (low, &lowBound[i]);
-		simd_store_s (high, &highBound[i]);
-
-		//activeRow[i] = dgFloat32 (1.0f);
-		//simd_store_s (one, &activeRow[i]);
-//		if (row->m_force < lowBound[i]) {
-//			maxPasses --;
-//			row->m_force = lowBound[i];
-//			activeRow[i] = dgFloat32 (0.0f);
-//		} else if (row->m_force > highBound[i]) {
-//			maxPasses --;
-//			row->m_force = highBound[i];
-//			activeRow[i] = dgFloat32 (0.0f);
-//		}
-
-		simd_type force = simd_load_s (row->m_force);
-		simd_type lowBoundTest = simd_cmplt_s (force, low);
-		simd_type highBoundTest = simd_cmpgt_s (force, high);
-		simd_type test = simd_or_v (lowBoundTest, highBoundTest);
-
-		simd_type unit = simd_andnot_v (one, test);		
-		simd_store_s (unit, &activeRow[i]); 
-		passesCount = simd_add_s (unit, passesCount);
-		simd_store_s (simd_min_s (high, simd_max_s (force, low)), &row->m_force);
-	}
-
-	dgInt32 maxPasses = simd_store_is (passesCount);
-
-	dgJacobian y0;
-	dgJacobian y1;
-//	dgVector zero (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-//	y0.m_linear = zero;
-//	y0.m_angular = zero;
-//	y1.m_linear = zero;
-//	y1.m_angular = zero;
-	simd_type y0_linear = zero;
-	simd_type y0_angular = zero;
-	simd_type y1_linear = zero;
-	simd_type y1_angular = zero;
-	for (dgInt32 i = 0; i < count; i ++) {
-		dgJacobianMatrixElement* const row = &matrixRow[i];
-		//dgFloat32 val = row->m_force; 
-		simd_type force = simd_set1(row->m_force);
-
-		//y0.m_linear += row->m_Jt.m_jacobian_IM0.m_linear.Scale (val);
-		//y0.m_angular += row->m_Jt.m_jacobian_IM0.m_angular.Scale (val);
-		//y1.m_linear += row->m_Jt.m_jacobian_IM1.m_linear.Scale (val);
-		//y1.m_angular += row->m_Jt.m_jacobian_IM1.m_angular.Scale (val);
-		y0_linear  = simd_mul_add_v (y0_linear, (simd_type&) row->m_Jt.m_jacobian_IM0.m_linear, force);
-		y0_angular = simd_mul_add_v (y0_angular,(simd_type&) row->m_Jt.m_jacobian_IM0.m_angular, force);
-		y1_linear  = simd_mul_add_v (y1_linear, (simd_type&) row->m_Jt.m_jacobian_IM1.m_linear, force);
-		y1_angular = simd_mul_add_v (y1_angular,(simd_type&) row->m_Jt.m_jacobian_IM1.m_angular, force);
-	}
-
-
-//	dgFloat32 akNum = dgFloat32 (0.0f);
-//	dgFloat32 accNorm = dgFloat32(0.0f);
-	simd_type akNum = zero;
-	simd_type accNormTmp = zero;
-	for (dgInt32 i = 0; i < count; i ++) {
-		dgJacobianMatrixElement* const row = &matrixRow[i];
-
-		//dgVector acc (row->m_JMinv.m_jacobian_IM0.m_linear.CompProduct(y0.m_linear));
-		//acc += row->m_JMinv.m_jacobian_IM0.m_angular.CompProduct (y0.m_angular);
-		//acc += row->m_JMinv.m_jacobian_IM1.m_linear.CompProduct (y1.m_linear);
-		//acc += row->m_JMinv.m_jacobian_IM1.m_angular.CompProduct (y1.m_angular);
-
-		simd_type acc = simd_mul_v ((simd_type&)row->m_JMinv.m_jacobian_IM0.m_linear, y0_linear);
-		acc = simd_mul_add_v (acc, (simd_type&)row->m_JMinv.m_jacobian_IM0.m_angular, y0_angular);
-		acc = simd_mul_add_v (acc, (simd_type&)row->m_JMinv.m_jacobian_IM1.m_linear, y1_linear);
-		acc = simd_mul_add_v (acc, (simd_type&)row->m_JMinv.m_jacobian_IM1.m_angular, y1_angular);
-
-		//accel[i] = row->m_coordenateAccel - acc.m_x - acc.m_y - acc.m_z - row->m_force * row->m_diagDamp;
-		_ASSERTE (acc.m128_f32[3] == dgFloat32 (0.0f));
-		acc = simd_add_v (acc, simd_move_hl_v(acc, acc));
-		acc = simd_add_s(acc, simd_permut_v (acc, acc, PURMUT_MASK(3, 3, 3, 1)));
-		acc = simd_sub_s(simd_load_s(row->m_coordenateAccel), simd_mul_add_s(acc, simd_load_s(row->m_force), simd_load_s(row->m_diagDamp)));
-		simd_store_s (acc, &accel[i]);
-
-
-		//deltaForce[i] = accel[i] * row->m_invDJMinvJt * activeRow[i];
-		simd_type dtForce = simd_mul_s(acc, simd_mul_s(simd_load_s (row->m_invDJMinvJt), simd_load_s (activeRow[i])));
-		simd_store_s (dtForce, &deltaForce[i]);
-
-		//akNum += accel[i] * deltaForce[i];
-		akNum = simd_mul_add_v(akNum, dtForce, acc);
-
-		//accNorm = GetMax (dgAbsf (accel[i] * activeRow[i]), accNorm);
-		accNormTmp = simd_max_s(accNormTmp, simd_and_v(simd_mul_v (acc, simd_load_s (activeRow[i])), signMask));
-	}
 
 
 //	dgFloat32 clampedForceIndexValue = dgFloat32(0.0f);
@@ -497,72 +375,11 @@ void dgWorldDynamicUpdate::CalculateSimpleBodyReactionsForcesSimd (const dgIslan
 //	simd_store_s (tmp0, &akNum);
 	simd_store_s (accNormTmp, &accNorm);
 	for (dgInt32 i = 0; (i < maxPasses) && (accNorm > maxAccNorm); i ++) {
-		//y0.m_linear = zero;
-		//y0.m_angular = zero;
-		//y1.m_linear = zero;
-		//y1.m_angular = zero;
-		simd_type y0_linear = zero;
-		simd_type y0_angular = zero;
-		simd_type y1_linear = zero;
-		simd_type y1_angular = zero;
-		for (dgInt32 k = 0; k < count; k ++) {
-			dgJacobianMatrixElement* const row = &matrixRow[k];
-			//dgFloat32 val = deltaForce[k]; 
-			simd_type dtForce = simd_set1(deltaForce[k]);
 
-			//y0.m_linear += row->m_Jt.m_jacobian_IM0.m_linear.Scale (val);
-			//y0.m_angular += row->m_Jt.m_jacobian_IM0.m_angular.Scale (val);
-			//y1.m_linear += row->m_Jt.m_jacobian_IM1.m_linear.Scale (val);
-			//y1.m_angular += row->m_Jt.m_jacobian_IM1.m_angular.Scale (val);
-			y0_linear  = simd_mul_add_v (y0_linear, (simd_type&) row->m_Jt.m_jacobian_IM0.m_linear, dtForce);
-			y0_angular = simd_mul_add_v (y0_angular,(simd_type&) row->m_Jt.m_jacobian_IM0.m_angular, dtForce);
-			y1_linear  = simd_mul_add_v (y1_linear, (simd_type&) row->m_Jt.m_jacobian_IM1.m_linear, dtForce);
-			y1_angular = simd_mul_add_v (y1_angular,(simd_type&) row->m_Jt.m_jacobian_IM1.m_angular, dtForce);
-		}
-
-		//dgFloat32 akDen = dgFloat32 (0.0f);
-		simd_type akDen = zero;
-		for (dgInt32 k = 0; k < count; k ++) {
-			dgJacobianMatrixElement* const row = &matrixRow[k];
-
-			//dgVector acc (row->m_JMinv.m_jacobian_IM0.m_linear.CompProduct(y0.m_linear));
-			//acc += row->m_JMinv.m_jacobian_IM0.m_angular.CompProduct(y0.m_angular);
-			//acc += row->m_JMinv.m_jacobian_IM1.m_linear.CompProduct(y1.m_linear);
-			//acc += row->m_JMinv.m_jacobian_IM1.m_angular.CompProduct(y1.m_angular);
-			simd_type acc = simd_mul_v ((simd_type&)row->m_JMinv.m_jacobian_IM0.m_linear, y0_linear);
-			acc = simd_mul_add_v (acc, (simd_type&)row->m_JMinv.m_jacobian_IM0.m_angular, y0_angular);
-			acc = simd_mul_add_v (acc, (simd_type&)row->m_JMinv.m_jacobian_IM1.m_linear, y1_linear);
-			acc = simd_mul_add_v (acc, (simd_type&)row->m_JMinv.m_jacobian_IM1.m_angular, y1_angular);
-
-			//deltaAccel[k] = acc.m_x + acc.m_y + acc.m_z + deltaForce[k] * row->m_diagDamp;
-			simd_type tmp1 = simd_load_s(deltaForce[k]);
-			acc = simd_add_v (acc, simd_move_hl_v(acc, acc));
-			acc = simd_add_s(acc, simd_permut_v (acc, acc, PURMUT_MASK(3, 3, 3, 1)));
-			acc = simd_mul_add_s(acc, tmp1, simd_load_s(row->m_diagDamp));
-			simd_store_s (acc, &deltaAccel[k]);
-
-			//akDen += deltaAccel[k] * deltaForce[k];
-			akDen = simd_mul_add_s(akDen, acc, tmp1);
-		}
-
-
-		//_ASSERTE (akDen > dgFloat32 (0.0f));
-		//akDen = GetMax (akDen, dgFloat32(1.0e-16f));
-		//_ASSERTE (dgAbsf (akDen) >= dgFloat32(1.0e-16f));
-		//dgFloat32 ak = akNum / akDen;
-		//simd_type ak = simd_div_s(akNum, simd_max_s (akDen, tol_pos_1eNeg16));
-		//ak = simd_permut_v (ak, ak, PURMUT_MASK (0, 0, 0, 0));
-		dgFloat32 ak;
-		simd_store_s (simd_div_s(akNum, simd_max_s (akDen, tol_pos_1eNeg16)), &ak);
 		
 		dgInt32 clampedForceIndex = -1;
 		dgFloat32 clampedForceIndexValue = dgFloat32(0.0f);
-//		simd_type campedIndexValue = zero;
-//		simd_type minClampIndex = simd_set1 (dgFloat32 (-1.0f));
-//		simd_type min_index_step = simd_set1 (dgFloat32 (4.0f));
-//		simd_type min_index = simd_set (dgFloat32(0.0f), dgFloat32(1.0f), dgFloat32(2.0f), dgFloat32(3.0f));
 		for (dgInt32 k = 0; k < count; k ++) {
-
 			if (activeRow[k]) {
 				dgJacobianMatrixElement* const row = &matrixRow[k];
 				dgFloat32 val = row->m_force + ak * deltaForce[k];
@@ -720,105 +537,126 @@ void dgWorldDynamicUpdate::CalculateSimpleBodyReactionsForcesSimd (const dgIslan
 		passesCount = passesCount + unit;
 		high.GetMin(low.GetMax(force)).StoreScalar(&row->m_force);
 	}
-
 	dgInt32 maxPasses = passesCount.GetInt();
 
-	dgJacobian y0;
-	dgJacobian y1;
-	dgVector zero (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-	y0.m_linear = zero;
-	y0.m_angular = zero;
-	y1.m_linear = zero;
-	y1.m_angular = zero;
+	simd_128 zero(dgFloat32 (0.0f));
+	simd_128 y0_linear (zero);
+	simd_128 y0_angular (zero);
+	simd_128 y1_linear (zero);
+	simd_128 y1_angular (zero);
 	for (dgInt32 i = 0; i < count; i ++) {
 		dgJacobianMatrixElement* const row = &matrixRow[i];
-		dgFloat32 val = row->m_force; 
-		y0.m_linear += row->m_Jt.m_jacobian_IM0.m_linear.Scale (val);
-		y0.m_angular += row->m_Jt.m_jacobian_IM0.m_angular.Scale (val);
-		y1.m_linear += row->m_Jt.m_jacobian_IM1.m_linear.Scale (val);
-		y1.m_angular += row->m_Jt.m_jacobian_IM1.m_angular.Scale (val);
+		simd_128 val (row->m_force);
+		y0_linear = y0_linear + ((simd_128&)row->m_Jt.m_jacobian_IM0.m_linear) * val;
+		y0_angular = y0_angular + ((simd_128&)row->m_Jt.m_jacobian_IM0.m_angular) * val;
+		y1_linear = y1_linear + ((simd_128&)row->m_Jt.m_jacobian_IM1.m_linear) * val;
+		y1_angular = y1_angular + ((simd_128&)row->m_Jt.m_jacobian_IM1.m_angular) * val;
 	}
 
-	dgFloat32 akNum = dgFloat32 (0.0f);
-	dgFloat32 accNorm = dgFloat32(0.0f);
+	simd_128 akNum__ (zero);
+	simd_128 accNorm__(zero);
 	for (dgInt32 i = 0; i < count; i ++) {
 		dgJacobianMatrixElement* const row = &matrixRow[i];
+		simd_128 acc ((simd_128&)row->m_JMinv.m_jacobian_IM0.m_linear * y0_linear +
+					  (simd_128&)row->m_JMinv.m_jacobian_IM0.m_angular * y0_angular +
+					  (simd_128&)row->m_JMinv.m_jacobian_IM1.m_linear * y1_linear +
+					  (simd_128&)row->m_JMinv.m_jacobian_IM1.m_angular * y1_angular);
+		_ASSERTE (acc.m_type.m128_f32[3] == dgFloat32 (0.0f));
 
-		dgVector acc (row->m_JMinv.m_jacobian_IM0.m_linear.CompProduct(y0.m_linear));
-		acc += row->m_JMinv.m_jacobian_IM0.m_angular.CompProduct (y0.m_angular);
-		acc += row->m_JMinv.m_jacobian_IM1.m_linear.CompProduct (y1.m_linear);
-		acc += row->m_JMinv.m_jacobian_IM1.m_angular.CompProduct (y1.m_angular);
-		accel[i] = row->m_coordenateAccel - acc.m_x - acc.m_y - acc.m_z - row->m_force * row->m_diagDamp;
-
-		deltaForce[i] = accel[i] * row->m_invDJMinvJt * activeRow[i];
-		akNum += accel[i] * deltaForce[i];
-		accNorm = GetMax (dgAbsf (accel[i] * activeRow[i]), accNorm);
+		simd_128 acceleration (simd_128 (row->m_coordenateAccel) - acc.AddHorizontal() - simd_128(row->m_force) * simd_128(row->m_diagDamp));
+		acceleration.StoreScalar(&accel[i]);
+		simd_128 dForce (acceleration * simd_128(row->m_invDJMinvJt) * simd_128 (activeRow[i]));
+		dForce.StoreScalar(&deltaForce[i]);
+		akNum__ = akNum__ + acceleration * dForce;
+		accNorm__ = accNorm__.GetMax(acceleration.Abs() * simd_128 (activeRow[i]));
 	}
 
-
-
+dgFloat32 akNum;
+dgFloat32 accNorm;
+akNum__.StoreScalar(&akNum);
+accNorm__.StoreScalar(&accNorm);
+	
+	simd_128 tol_Pos1eNeg8 (dgFloat32 ( 1.0e-8f));
+	simd_128 tol_Pos1eNeg16 (dgFloat32 ( 1.0e-16f));
+	simd_128 tol_Neg1eNeg16 (dgFloat32 ( 1.0e-16f));
 	for (dgInt32 i = 0; (i < maxPasses) && (accNorm > maxAccNorm); i ++) {
-		y0.m_linear = zero;
-		y0.m_angular = zero;
-		y1.m_linear = zero;
-		y1.m_angular = zero;
+
+		simd_128 y0_linear (zero);
+		simd_128 y0_angular (zero);
+		simd_128 y1_linear (zero);
+		simd_128 y1_angular (zero);
 		for (dgInt32 k = 0; k < count; k ++) {
 			dgJacobianMatrixElement* const row = &matrixRow[k];
-			dgFloat32 val = deltaForce[k]; 
-			y0.m_linear += row->m_Jt.m_jacobian_IM0.m_linear.Scale (val);
-			y0.m_angular += row->m_Jt.m_jacobian_IM0.m_angular.Scale (val);
-			y1.m_linear += row->m_Jt.m_jacobian_IM1.m_linear.Scale (val);
-			y1.m_angular += row->m_Jt.m_jacobian_IM1.m_angular.Scale (val);
-		}
-
-		dgFloat32 akDen = dgFloat32 (0.0f);
-		for (dgInt32 k = 0; k < count; k ++) {
-			dgJacobianMatrixElement* const row = &matrixRow[k];
-			dgVector acc (row->m_JMinv.m_jacobian_IM0.m_linear.CompProduct(y0.m_linear));
-			acc += row->m_JMinv.m_jacobian_IM0.m_angular.CompProduct(y0.m_angular);
-			acc += row->m_JMinv.m_jacobian_IM1.m_linear.CompProduct(y1.m_linear);
-			acc += row->m_JMinv.m_jacobian_IM1.m_angular.CompProduct(y1.m_angular);
-
-			//m_accel[i0] = m_coordenateAccel[i0] - acc.m_x - acc.m_y - acc.m_z - m_force[i0] * m_diagDamp[i0];
-			deltaAccel[k] = acc.m_x + acc.m_y + acc.m_z + deltaForce[k] * row->m_diagDamp;
-			akDen += deltaAccel[k] * deltaForce[k];
+			simd_128 val (deltaForce[k]);
+			y0_linear = y0_linear + ((simd_128&)row->m_Jt.m_jacobian_IM0.m_linear) * val;
+			y0_angular = y0_angular + ((simd_128&)row->m_Jt.m_jacobian_IM0.m_angular) * val;
+			y1_linear = y1_linear + ((simd_128&)row->m_Jt.m_jacobian_IM1.m_linear) * val;
+			y1_angular = y1_angular + ((simd_128&)row->m_Jt.m_jacobian_IM1.m_angular) * val;
 		}
 
 
-		_ASSERTE (akDen > dgFloat32 (0.0f));
-		akDen = GetMax (akDen, dgFloat32(1.0e-16f));
-		_ASSERTE (dgAbsf (akDen) >= dgFloat32(1.0e-16f));
-		dgFloat32 ak = akNum / akDen;
+		simd_128 akDen__(dgFloat32 (0.0f));
+		for (dgInt32 k = 0; k < count; k ++) {
+			dgJacobianMatrixElement* const row = &matrixRow[k];
+			simd_128 acc ((simd_128&)row->m_JMinv.m_jacobian_IM0.m_linear * y0_linear +
+						  (simd_128&)row->m_JMinv.m_jacobian_IM0.m_angular * y0_angular +
+						  (simd_128&)row->m_JMinv.m_jacobian_IM1.m_linear * y1_linear +
+						  (simd_128&)row->m_JMinv.m_jacobian_IM1.m_angular * y1_angular);
+
+			simd_128 dForce (deltaForce[k]);
+			simd_128 dAccel (acc.AddHorizontal() + dForce * simd_128(row->m_diagDamp));
+			dAccel.StoreScalar(&deltaAccel[k]);
+			akDen__ = akDen__ + dAccel * dForce;
+		}
+
+		_ASSERTE (akDen__.m_type.m128_f32[0] > dgFloat32 (0.0f));
+		_ASSERTE (akDen__.m_type.m128_f32[1] > dgFloat32 (0.0f));
+		_ASSERTE (akDen__.m_type.m128_f32[2] > dgFloat32 (0.0f));
+		_ASSERTE (akDen__.m_type.m128_f32[3] > dgFloat32 (0.0f));
+		akDen__ = akDen__.GetMax (tol_Pos1eNeg16);
+		simd_128  ak__ (akNum__ / akDen__);
 
 		dgInt32 clampedForceIndex = -1;
-		dgFloat32 clampedForceIndexValue = dgFloat32(0.0f);
+		simd_128 clampedForceIndexValue__ (dgFloat32(0.0f));
 		for (dgInt32 k = 0; k < count; k ++) {
 			if (activeRow[k]) {
 				dgJacobianMatrixElement* const row = &matrixRow[k];
-				dgFloat32 val = row->m_force + ak * deltaForce[k];
-				if (deltaForce[k] < dgFloat32 (-1.0e-16f)) {
-					if (val < lowBound[k]) {
-						ak = GetMax ((lowBound[k] - row->m_force) / deltaForce[k], dgFloat32 (0.0f));
+				simd_128 force (row->m_force);
+				simd_128 dForce (deltaForce[k]);
+				simd_128 val__ (force + ak__ * dForce);
+				if ((dForce < tol_Neg1eNeg16).GetInt()) {
+					simd_128 low(lowBound[k])	;
+					if ((val__ < low).GetInt()) {
+						ak__ = zero.GetMax ((low - force) / dForce);
 						clampedForceIndex = k;
-						clampedForceIndexValue = lowBound[k];
-						if (ak < dgFloat32 (1.0e-8f)) {
-							ak = dgFloat32 (0.0f);
+						clampedForceIndexValue__ = low;
+						simd_128 test (ak__ < tol_Pos1eNeg8);
+						ak__ = ak__.GetMax(zero);
+						if (test.GetInt()) {
 							break;
 						}
 					}
-				} else if (deltaForce[k] > dgFloat32 (1.0e-16f)) {
-					if (val >= highBound[k]) {
-						ak = GetMax ((highBound[k] - row->m_force) / deltaForce[k], dgFloat32 (0.0f));;
+				} else if ((dForce > tol_Pos1eNeg16).GetInt()) {
+					simd_128 high(highBound[k])	;
+					if ((val__ > high).GetInt()) {
+						ak__ = zero.GetMax ((high - force) / dForce);
 						clampedForceIndex = k;
-						clampedForceIndexValue = highBound[k];
-						if (ak < dgFloat32 (1.0e-8f)) {
-							ak = dgFloat32 (0.0f);
+						clampedForceIndexValue__ = high;
+						simd_128 test (ak__ < tol_Pos1eNeg8);
+						ak__ = ak__.GetMax(zero);
+						if (test.GetInt()) {
 							break;
 						}
 					}
 				}
 			}
 		}
+
+
+float ak;
+ak__.StoreScalar(&ak);
+float clampedForceIndexValue;
+clampedForceIndexValue__.StoreScalar(&clampedForceIndexValue);
 
 		if (ak == dgFloat32 (0.0f) && (clampedForceIndex != -1)) {
 			_ASSERTE (clampedForceIndex !=-1);
@@ -890,7 +728,7 @@ void dgWorldDynamicUpdate::CalculateSimpleBodyReactionsForcesSimd (const dgIslan
 
 			if (accNorm > maxAccNorm) {
 
-				akDen = akNum;
+				dgFloat32 akDen = akNum;
 				akNum = dgFloat32(0.0f);
 				for (dgInt32 k = 0; k < count; k ++) {
 					deltaAccel[k] = accel[k] * matrixRow[k].m_invDJMinvJt * activeRow[k];
@@ -905,8 +743,10 @@ void dgWorldDynamicUpdate::CalculateSimpleBodyReactionsForcesSimd (const dgIslan
 				}
 			}
 		}
-	}
 
+akNum__ = simd_128 (akNum);
+
+	}
 }
 
 

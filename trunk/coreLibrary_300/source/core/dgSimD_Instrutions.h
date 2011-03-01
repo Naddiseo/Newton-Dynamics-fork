@@ -192,6 +192,12 @@
 				return _mm_mul_ps (m_type, data.m_type);	
 			}
 
+			DG_INLINE simd_128 operator/ (const simd_128& data) const
+			{
+				return _mm_div_ps (m_type, data.m_type);	
+			}
+
+
 
 			DG_INLINE simd_128 operator<= (const simd_128& data) const
 			{
@@ -228,17 +234,17 @@
 			{
 				return _mm_andnot_ps (data.m_type, m_type);	
 			}
-
-
-
-			DG_INLINE dgFloat32 DotProduct (const simd_128& data) const
+		
+			DG_INLINE simd_128 AddHorizontal () const
 			{
-				dgFloat32 ret;
-				simd_128 tmp ((*this) * data);
-				tmp = tmp + _mm_shuffle_ps (tmp.m_type, tmp.m_type, PURMUT_MASK(3, 2, 3, 2));
-				tmp = _mm_add_ss (tmp.m_type, _mm_shuffle_ps (tmp.m_type, tmp.m_type, PURMUT_MASK(1, 1, 1, 1)));
-				_mm_store_ss (&ret, tmp.m_type);
-				return ret;
+				simd_128 tmp (_mm_add_ps (m_type, _mm_shuffle_ps(m_type, m_type, PURMUT_MASK(2, 3, 0, 1))));
+				return _mm_add_ps (tmp.m_type, _mm_shuffle_ps(tmp.m_type, tmp.m_type, PURMUT_MASK(1, 0, 3, 2)));
+			}
+
+			DG_INLINE simd_128 DotProduct (const simd_128& data) const
+			{
+				simd_128 dot ((*this) * data);
+				return dot.AddHorizontal();
 			}
 
 
@@ -276,20 +282,6 @@
 			{
 				return _mm_max_ps (m_type, data.m_type);
 			} 
-
-
-//			DG_INLINE dgInt32 Test () const
-//			{
-//				simd_128 val ((*this) | PackLow(*this));
-//				val = val | val.MoveHighToLow(val);
-//				return val.GetInt();
-//			}
-
-//			DG_INLINE simd_128 Permute (const simd_128& data, const dgUnsigned32 mask) const
-//			{
-//				return _mm_shuffle_ps (m_type, data.m_type, mask);
-//				//return m_type;
-//			}
 
 //			DG_INLINE simd_128 MoveHighToLow (const simd_128& data) const
 //			{
