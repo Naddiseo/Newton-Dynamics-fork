@@ -565,12 +565,10 @@ void dgWorldDynamicUpdate::CalculateIslandReactionForces (void* const context, d
 	dgIsland* const islands = (dgIsland*) &world->m_islandMemory[0];
 
 	if (world->m_cpu == dgSimdPresent) {
-#ifdef DG_BUILD_SIMD_CODE
 		for (dgInt32 i = dgAtomicAdd(&descriptor->m_atomicCounter, 1); i < count; i = dgAtomicAdd(&descriptor->m_atomicCounter, 1)) {
 			dgIsland* const island = &islands[i]; 
 			world->CalculateIslandReactionForcesSimd (island, timestep, threadID);
 		}
-#endif
 	} else {
 		for (dgInt32 i = dgAtomicAdd(&descriptor->m_atomicCounter, 1); i < count; i = dgAtomicAdd(&descriptor->m_atomicCounter, 1)) {
 			dgIsland* const island = &islands[i]; 

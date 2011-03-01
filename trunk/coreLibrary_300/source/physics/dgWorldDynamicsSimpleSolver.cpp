@@ -544,17 +544,6 @@ void dgWorldDynamicUpdate::CalculateSimpleBodyReactionsForces (const dgIsland* c
 	dgFloat32 deltaAccel[DG_CONSTRAINT_MAX_ROWS];
 
 
-//	dgFloat32* const force = &m_solverMemory.m_force[rowStart];
-//	const dgJacobianPair* const Jt = &m_solverMemory.m_Jt[rowStart];
-//	const dgJacobianPair* const JMinv = &m_solverMemory.m_JMinv[rowStart];
-//	const dgInt32* const normalForceIndex = &m_solverMemory.m_normalForceIndex[rowStart];
-//	const dgFloat32* const diagDamp = &m_solverMemory.m_diagDamp[rowStart];
-//	const dgFloat32* const invDJMinvJt = &m_solverMemory.m_invDJMinvJt[rowStart];
-//	const dgFloat32* const lowerFrictionCoef = &m_solverMemory.m_lowerBoundFrictionCoefficent[rowStart];
-//	const dgFloat32* const upperFrictionCoef = &m_solverMemory.m_upperBoundFrictionCoefficent[rowStart];
-//	dgFloat32* const coordenateAccel = &m_solverMemory.m_coordenateAccel[rowStart];
-
-
 	dgWorld* const world = (dgWorld*) this;
 	dgJointInfo* const constraintArrayPtr = (dgJointInfo*) &world->m_jointsMemory[0];
 	dgJointInfo* const constraintArray = &constraintArrayPtr[island->m_jointStart];

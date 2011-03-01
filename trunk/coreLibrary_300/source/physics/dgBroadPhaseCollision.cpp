@@ -144,7 +144,7 @@ void dgBroadPhaseNode::SetAABBSimd (const dgVector& minBox, const dgVector& maxB
 
 	simd_128 size (p1 - p0);
 	dgVector temp;
-	size.Store(&temp.m_x);
+	size.StoreVector(&temp.m_x);
 	simd_128 size1 (temp.m_y, temp.m_z, temp.m_x, dgFloat32 (0.0f));
 	m_surfaceArea = size.DotProduct (size1);
 }
@@ -294,7 +294,7 @@ dgFloat32 dgBroadPhaseCollision::CalculateSurfaceAreaSimd (const dgBroadPhaseNod
 
 	simd_128 size (((simd_128&) maxBox) - ((simd_128&)minBox));
 	dgVector temp;
-	size.Store(&temp.m_x);
+	size.StoreVector(&temp.m_x);
 	simd_128 size1 (temp.m_y, temp.m_z, temp.m_x, dgFloat32 (0.0f));
 	return size.DotProduct (size1);
 }
@@ -754,26 +754,55 @@ void dgBroadPhaseCollision::SubmitPairs (dgBroadPhaseLeafNode* const bodyNode, d
 	dgBody* const body0 = bodyNode->m_body;
 	_ASSERTE (!body0->m_collision->IsType (dgCollision::dgCollisionNull_RTTI));
 
+	dgWorld* const world = (dgWorld*) this;
 	dgCollidingPairCollector* const contactPairs = (dgWorld*)this;
-	while (stack) {
-		stack --;
-		dgBroadPhaseNode* const rootNode = pool[stack];
-		if (dgOverlapTest (rootNode->m_minBox, rootNode->m_maxBox, bodyNode->m_minBox, bodyNode->m_maxBox)) {
 
-			if (!rootNode->m_left) {
-				_ASSERTE (!rootNode->m_right);
-				dgBody* const body1 = ((dgBroadPhaseLeafNode*) rootNode)->m_body;
-				if (!body1->m_collision->IsType (dgCollision::dgCollisionNull_RTTI)) {
-					contactPairs->AddPair(body0, body1, threadID);
+	if (world->m_cpu == dgSimdPresent) {
+		while (stack) {
+			stack --;
+			dgBroadPhaseNode* const rootNode = pool[stack];
+			if (dgOverlapTestSimd (rootNode->m_minBox, rootNode->m_maxBox, body0->m_minAABB, body0->m_maxAABB)) {
+				if (!rootNode->m_left) {
+					_ASSERTE (!rootNode->m_right);
+					dgBody* const body1 = ((dgBroadPhaseLeafNode*) rootNode)->m_body;
+					if (dgOverlapTestSimd(body1->m_minAABB, body1->m_maxAABB, body0->m_minAABB, body0->m_maxAABB)) {
+						if (!body1->m_collision->IsType (dgCollision::dgCollisionNull_RTTI)) {
+							contactPairs->AddPair(body0, body1, threadID);
+						}
+					}
+				} else {
+					pool[stack] = rootNode->m_left;
+					stack ++;
+					_ASSERTE (stack < sizeof (pool) / sizeof (pool[0]));
+
+					pool[stack] = rootNode->m_right;
+					stack ++;
+					_ASSERTE (stack < sizeof (pool) / sizeof (pool[0]));
 				}
-			} else {
-				pool[stack] = rootNode->m_left;
-				stack ++;
-				_ASSERTE (stack < sizeof (pool) / sizeof (pool[0]));
+			}
+		}
+	} else {
+		while (stack) {
+			stack --;
+			dgBroadPhaseNode* const rootNode = pool[stack];
+			if (dgOverlapTest (rootNode->m_minBox, rootNode->m_maxBox, body0->m_minAABB, body0->m_maxAABB)) {
+				if (!rootNode->m_left) {
+					_ASSERTE (!rootNode->m_right);
+					dgBody* const body1 = ((dgBroadPhaseLeafNode*) rootNode)->m_body;
+					if (dgOverlapTest(body1->m_minAABB, body1->m_maxAABB, body0->m_minAABB, body0->m_maxAABB)) {
+						if (!body1->m_collision->IsType (dgCollision::dgCollisionNull_RTTI)) {
+							contactPairs->AddPair(body0, body1, threadID);
+						}
+					}
+				} else {
+					pool[stack] = rootNode->m_left;
+					stack ++;
+					_ASSERTE (stack < sizeof (pool) / sizeof (pool[0]));
 
-				pool[stack] = rootNode->m_right;
-				stack ++;
-				_ASSERTE (stack < sizeof (pool) / sizeof (pool[0]));
+					pool[stack] = rootNode->m_right;
+					stack ++;
+					_ASSERTE (stack < sizeof (pool) / sizeof (pool[0]));
+				}
 			}
 		}
 	}

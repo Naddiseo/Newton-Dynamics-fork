@@ -161,7 +161,18 @@
 			DG_INLINE simd_128 (simd_type type): m_type(type) {}
 			DG_INLINE simd_128 (const simd_128& data): m_type(data.m_type) {}
 
-			DG_INLINE void Store(float* const array) const
+
+			DG_INLINE dgInt32 GetInt () const
+			{
+				return simd_store_is(m_type);
+			}
+
+			DG_INLINE void StoreScalar(float* const scalar) const
+			{
+				_mm_store_ss (scalar, m_type);
+			}
+
+			DG_INLINE void StoreVector(float* const array) const
 			{
 				_mm_storeu_ps (array, m_type);
 			}
@@ -213,6 +224,12 @@
 				return _mm_or_ps (m_type, data.m_type);	
 			}
 
+			DG_INLINE simd_128 AndNot (const simd_128& data) const
+			{
+				return _mm_andnot_ps (data.m_type, m_type);	
+			}
+
+
 
 			DG_INLINE dgFloat32 DotProduct (const simd_128& data) const
 			{
@@ -260,10 +277,6 @@
 				return _mm_max_ps (m_type, data.m_type);
 			} 
 
-			DG_INLINE dgInt32 GetInt () const
-			{
-				return simd_store_is(m_type);
-			}
 
 //			DG_INLINE dgInt32 Test () const
 //			{
