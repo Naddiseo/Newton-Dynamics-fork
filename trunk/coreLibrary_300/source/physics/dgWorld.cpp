@@ -603,7 +603,7 @@ void dgWorld::Update (dgFloat32 timestep)
 //timestep = 1.0f/ 1000.0f;
 
 //m_cpu = dgNoSimdPresent;
-m_cpu = dgSimdPresent;
+//m_cpu = dgSimdPresent;
 //m_solverMode = 1;
 
 //xxxxx();

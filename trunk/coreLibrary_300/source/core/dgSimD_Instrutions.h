@@ -283,6 +283,13 @@
 				return _mm_max_ps (m_type, data.m_type);
 			} 
 
+			DG_INLINE simd_128 MaximunValue() const
+			{
+				simd_128 tmp (GetMax (_mm_movehl_ps (m_type, m_type)));
+				return tmp.GetMax (_mm_shuffle_ps(tmp.m_type, tmp.m_type, PURMUT_MASK(0, 0, 0, 1)));
+			}
+
+
 //			DG_INLINE simd_128 MoveHighToLow (const simd_128& data) const
 //			{
 //				return _mm_movehl_ps (m_type, data.m_type);

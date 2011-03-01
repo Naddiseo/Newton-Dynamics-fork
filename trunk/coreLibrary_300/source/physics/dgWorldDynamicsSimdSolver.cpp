@@ -553,8 +553,8 @@ void dgWorldDynamicUpdate::CalculateSimpleBodyReactionsForcesSimd (const dgIslan
 		y1_angular = y1_angular + ((simd_128&)row->m_Jt.m_jacobian_IM1.m_angular) * val;
 	}
 
-	simd_128 akNum__ (zero);
-	simd_128 accNorm__(zero);
+	simd_128 akNumSimd (zero);
+	simd_128 accNormSimd(zero);
 	for (dgInt32 i = 0; i < count; i ++) {
 		dgJacobianMatrixElement* const row = &matrixRow[i];
 		simd_128 acc ((simd_128&)row->m_JMinv.m_jacobian_IM0.m_linear * y0_linear +
@@ -567,14 +567,14 @@ void dgWorldDynamicUpdate::CalculateSimpleBodyReactionsForcesSimd (const dgIslan
 		acceleration.StoreScalar(&accel[i]);
 		simd_128 dForce (acceleration * simd_128(row->m_invDJMinvJt) * simd_128 (activeRow[i]));
 		dForce.StoreScalar(&deltaForce[i]);
-		akNum__ = akNum__ + acceleration * dForce;
-		accNorm__ = accNorm__.GetMax(acceleration.Abs() * simd_128 (activeRow[i]));
+		akNumSimd = akNumSimd + acceleration * dForce;
+		accNormSimd = accNormSimd.GetMax(acceleration.Abs() * simd_128 (activeRow[i]));
 	}
 
-dgFloat32 akNum;
-dgFloat32 accNorm;
-akNum__.StoreScalar(&akNum);
-accNorm__.StoreScalar(&accNorm);
+	dgFloat32 akNum;
+	dgFloat32 accNorm;
+	akNumSimd.StoreScalar(&akNum);
+	accNormSimd.StoreScalar(&accNorm);
 	
 	simd_128 tol_Pos1eNeg8 (dgFloat32 ( 1.0e-8f));
 	simd_128 tol_Pos1eNeg16 (dgFloat32 ( 1.0e-16f));
@@ -595,7 +595,7 @@ accNorm__.StoreScalar(&accNorm);
 		}
 
 
-		simd_128 akDen__(dgFloat32 (0.0f));
+		simd_128 akDen(dgFloat32 (0.0f));
 		for (dgInt32 k = 0; k < count; k ++) {
 			dgJacobianMatrixElement* const row = &matrixRow[k];
 			simd_128 acc ((simd_128&)row->m_JMinv.m_jacobian_IM0.m_linear * y0_linear +
@@ -606,32 +606,32 @@ accNorm__.StoreScalar(&accNorm);
 			simd_128 dForce (deltaForce[k]);
 			simd_128 dAccel (acc.AddHorizontal() + dForce * simd_128(row->m_diagDamp));
 			dAccel.StoreScalar(&deltaAccel[k]);
-			akDen__ = akDen__ + dAccel * dForce;
+			akDen = akDen + dAccel * dForce;
 		}
 
-		_ASSERTE (akDen__.m_type.m128_f32[0] > dgFloat32 (0.0f));
-		_ASSERTE (akDen__.m_type.m128_f32[1] > dgFloat32 (0.0f));
-		_ASSERTE (akDen__.m_type.m128_f32[2] > dgFloat32 (0.0f));
-		_ASSERTE (akDen__.m_type.m128_f32[3] > dgFloat32 (0.0f));
-		akDen__ = akDen__.GetMax (tol_Pos1eNeg16);
-		simd_128  ak__ (akNum__ / akDen__);
+		_ASSERTE (akDen.m_type.m128_f32[0] > dgFloat32 (0.0f));
+		_ASSERTE (akDen.m_type.m128_f32[1] > dgFloat32 (0.0f));
+		_ASSERTE (akDen.m_type.m128_f32[2] > dgFloat32 (0.0f));
+		_ASSERTE (akDen.m_type.m128_f32[3] > dgFloat32 (0.0f));
+		akDen = akDen.GetMax (tol_Pos1eNeg16);
+		simd_128 akSimd (akNumSimd / akDen);
 
 		dgInt32 clampedForceIndex = -1;
-		simd_128 clampedForceIndexValue__ (dgFloat32(0.0f));
+		simd_128 clampedForceIndexValueSimd (dgFloat32(0.0f));
 		for (dgInt32 k = 0; k < count; k ++) {
 			if (activeRow[k]) {
 				dgJacobianMatrixElement* const row = &matrixRow[k];
 				simd_128 force (row->m_force);
 				simd_128 dForce (deltaForce[k]);
-				simd_128 val__ (force + ak__ * dForce);
+				simd_128 val__ (force + akSimd * dForce);
 				if ((dForce < tol_Neg1eNeg16).GetInt()) {
 					simd_128 low(lowBound[k])	;
 					if ((val__ < low).GetInt()) {
-						ak__ = zero.GetMax ((low - force) / dForce);
+						akSimd = zero.GetMax ((low - force) / dForce);
 						clampedForceIndex = k;
-						clampedForceIndexValue__ = low;
-						simd_128 test (ak__ < tol_Pos1eNeg8);
-						ak__ = ak__.GetMax(zero);
+						clampedForceIndexValueSimd = low;
+						simd_128 test (akSimd < tol_Pos1eNeg8);
+						akSimd = akSimd.GetMax(zero);
 						if (test.GetInt()) {
 							break;
 						}
@@ -639,11 +639,11 @@ accNorm__.StoreScalar(&accNorm);
 				} else if ((dForce > tol_Pos1eNeg16).GetInt()) {
 					simd_128 high(highBound[k])	;
 					if ((val__ > high).GetInt()) {
-						ak__ = zero.GetMax ((high - force) / dForce);
+						akSimd = zero.GetMax ((high - force) / dForce);
 						clampedForceIndex = k;
-						clampedForceIndexValue__ = high;
-						simd_128 test (ak__ < tol_Pos1eNeg8);
-						ak__ = ak__.GetMax(zero);
+						clampedForceIndexValueSimd = high;
+						simd_128 test (akSimd < tol_Pos1eNeg8);
+						akSimd = akSimd.GetMax(zero);
 						if (test.GetInt()) {
 							break;
 						}
@@ -653,15 +653,15 @@ accNorm__.StoreScalar(&accNorm);
 		}
 
 
-float ak;
-ak__.StoreScalar(&ak);
-float clampedForceIndexValue;
-clampedForceIndexValue__.StoreScalar(&clampedForceIndexValue);
+		dgFloat32 ak;
+		akSimd.StoreScalar(&ak);
+		dgFloat32 clampedForceIndexValue;
+		clampedForceIndexValueSimd.StoreScalar(&clampedForceIndexValue);
 
+		accNormSimd = zero;
 		if (ak == dgFloat32 (0.0f) && (clampedForceIndex != -1)) {
 			_ASSERTE (clampedForceIndex !=-1);
 			akNum = dgFloat32 (0.0f);
-			accNorm = dgFloat32(0.0f);
 
 			activeRow[clampedForceIndex] = dgFloat32 (0.0f);
 			deltaForce[clampedForceIndex] = dgFloat32 (0.0f);
@@ -685,7 +685,8 @@ clampedForceIndexValue__.StoreScalar(&clampedForceIndexValue);
 							_ASSERTE (activeRow[k] > dgFloat32 (0.0f));
 							deltaForce[k] = accel[k] * row->m_invDJMinvJt;
 							akNum += accel[k] * deltaForce[k];
-							accNorm = GetMax (dgAbsf (accel[k]), accNorm);
+							//accNorm = GetMax (dgAbsf (accel[k]), accNorm);
+							accNormSimd = accNormSimd.GetMax (simd_128(accel[k]).Abs());
 						}
 					}
 				}
@@ -697,13 +698,13 @@ clampedForceIndexValue__.StoreScalar(&clampedForceIndexValue);
 
 		} else if (clampedForceIndex >= 0) {
 			akNum = dgFloat32(0.0f);
-			accNorm = dgFloat32(0.0f);
 			activeRow[clampedForceIndex] = dgFloat32 (0.0f);
 			for (dgInt32 k = 0; k < count; k ++) {
 				dgJacobianMatrixElement* const row = &matrixRow[k];
 				row->m_force += ak * deltaForce[k];
 				accel[k] -= ak * deltaAccel[k];
-				accNorm = GetMax (dgAbsf (accel[k] * activeRow[k]), accNorm);
+				//accNorm = GetMax (dgAbsf (accel[k] * activeRow[k]), accNorm);
+				accNormSimd = accNormSimd.GetMax(simd_128(accel[k]).Abs() * simd_128(activeRow[k]));
 				_ASSERTE (dgCheckFloat(row->m_force));
 				_ASSERTE (dgCheckFloat(accel[k]));
 
@@ -716,18 +717,18 @@ clampedForceIndexValue__.StoreScalar(&clampedForceIndexValue);
 			maxPasses = GetMax (maxPasses - 1, 1); 
 
 		} else {
-			accNorm = dgFloat32(0.0f);
+			//accNorm = dgFloat32(0.0f);
 			for (dgInt32 k = 0; k < count; k ++) {
 				dgJacobianMatrixElement* const row = &matrixRow[k];
 				row->m_force += ak * deltaForce[k];
 				accel[k] -= ak * deltaAccel[k];
-				accNorm = GetMax (dgAbsf (accel[k] * activeRow[k]), accNorm);
+				//accNorm = GetMax (dgAbsf (accel[k] * activeRow[k]), accNorm);
+				accNormSimd = accNormSimd.GetMax(simd_128(accel[k]).Abs() * simd_128(activeRow[k]));
 				_ASSERTE (dgCheckFloat(row->m_force));
 				_ASSERTE (dgCheckFloat(accel[k]));
 			}
 
 			if (accNorm > maxAccNorm) {
-
 				dgFloat32 akDen = akNum;
 				akNum = dgFloat32(0.0f);
 				for (dgInt32 k = 0; k < count; k ++) {
@@ -743,9 +744,8 @@ clampedForceIndexValue__.StoreScalar(&clampedForceIndexValue);
 				}
 			}
 		}
-
-akNum__ = simd_128 (akNum);
-
+		akNumSimd = simd_128 (akNum);
+		accNormSimd.StoreScalar(&accNorm);
 	}
 }
 
