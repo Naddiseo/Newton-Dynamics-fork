@@ -981,21 +981,40 @@ void dgBroadPhaseCollision::CalculatePairContacts (dgBroadphaseSyncDescriptor* c
 	dgCollidingPairCollector* const pairCollector = world;
 	dgCollidingPairCollector::dgPair* const pairs = pairCollector->m_pairs;
 	dgInt32 count = pairCollector->m_count;
-	for (dgInt32 i = dgAtomicAdd(&descriptor->m_pairsAtomicCounter, 1); i < count; i = dgAtomicAdd(&descriptor->m_pairsAtomicCounter, 1)) {
-		dgCollidingPairCollector::dgPair* const pair = &pairs[i];
-		pair->m_contactBufferIndex = -1;
+	if (world->m_cpu == dgSimdPresent) {
+		for (dgInt32 i = dgAtomicAdd(&descriptor->m_pairsAtomicCounter, 1); i < count; i = dgAtomicAdd(&descriptor->m_pairsAtomicCounter, 1)) {
+			dgCollidingPairCollector::dgPair* const pair = &pairs[i];
+			pair->m_contactBufferIndex = -1;
 
-		world->CalculateContacts (pair, contacts, timestep, threadID);
+			world->CalculateContactsSimd (pair, contacts, timestep, threadID);
 
-		world->GetIndirectLock (&descriptor->m_lock);
-		m_contactBuffer.ExpandCapacityIfNeessesary (m_contactCount + pair->m_contactCount, 1);
-		_ASSERTE ((m_contactCount + pair->m_contactCount) <= m_contactBuffer.GetElementsCapacity());
-		if (pair->m_contactCount) {
-			pair->m_contactBufferIndex = m_contactCount;
-			memcpy (&m_contactBuffer[m_contactCount], contacts, pair->m_contactCount * sizeof (dgContactPoint));
-			m_contactCount += pair->m_contactCount;
+			world->GetIndirectLock (&descriptor->m_lock);
+			m_contactBuffer.ExpandCapacityIfNeessesary (m_contactCount + pair->m_contactCount, 1);
+			_ASSERTE ((m_contactCount + pair->m_contactCount) <= m_contactBuffer.GetElementsCapacity());
+			if (pair->m_contactCount) {
+				pair->m_contactBufferIndex = m_contactCount;
+				memcpy (&m_contactBuffer[m_contactCount], contacts, pair->m_contactCount * sizeof (dgContactPoint));
+				m_contactCount += pair->m_contactCount;
+			}
+			world->ReleaseIndirectLock (&descriptor->m_lock);
 		}
-		world->ReleaseIndirectLock (&descriptor->m_lock);
+	} else {
+		for (dgInt32 i = dgAtomicAdd(&descriptor->m_pairsAtomicCounter, 1); i < count; i = dgAtomicAdd(&descriptor->m_pairsAtomicCounter, 1)) {
+			dgCollidingPairCollector::dgPair* const pair = &pairs[i];
+			pair->m_contactBufferIndex = -1;
+
+			world->CalculateContacts (pair, contacts, timestep, threadID);
+
+			world->GetIndirectLock (&descriptor->m_lock);
+			m_contactBuffer.ExpandCapacityIfNeessesary (m_contactCount + pair->m_contactCount, 1);
+			_ASSERTE ((m_contactCount + pair->m_contactCount) <= m_contactBuffer.GetElementsCapacity());
+			if (pair->m_contactCount) {
+				pair->m_contactBufferIndex = m_contactCount;
+				memcpy (&m_contactBuffer[m_contactCount], contacts, pair->m_contactCount * sizeof (dgContactPoint));
+				m_contactCount += pair->m_contactCount;
+			}
+			world->ReleaseIndirectLock (&descriptor->m_lock);
+		}
 	}
 	world->SyncThreads(&descriptor->m_collindContactsSync);
 }

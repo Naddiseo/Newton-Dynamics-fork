@@ -493,7 +493,7 @@ dgFloat32 dgCollisionScene::RayCast (const dgVector& localP0, const dgVector& lo
 	return maxParam;
 }
 
-void dgCollisionScene::CollidePairSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi) const
+void dgCollisionScene::CollidePairSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxy) const
 {
 	const dgNode *stackPool[DG_SCENE_MAX_STACK_DEPTH];
 
@@ -517,7 +517,7 @@ void dgCollisionScene::CollidePairSimd (dgCollidingPairCollector::dgPair* const 
 			if (!me->m_left) {
 				_ASSERTE (!me->m_right);
 				const dgProxy* const sceneProxy = (dgProxy*) me;
-				m_world->SceneContactsSimd (*sceneProxy, pair, proxi);
+				m_world->SceneContactsSimd (*sceneProxy, pair, proxy);
 			} else {
 				_ASSERTE (me->m_left);
 				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
@@ -826,7 +826,7 @@ void dgCollisionScene::RemoveProxy (void* const proxy)
 }
 
 
-void dgCollisionScene::CollidePair (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi) const
+void dgCollisionScene::CollidePair (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxy) const
 {
 	const dgNode *stackPool[DG_SCENE_MAX_STACK_DEPTH];
 
@@ -850,7 +850,7 @@ void dgCollisionScene::CollidePair (dgCollidingPairCollector::dgPair* const pair
 			if (!me->m_left) {
 				_ASSERTE (!me->m_right);
 				const dgProxy* const sceneProxy = (dgProxy*) me;
-				m_world->SceneContacts (*sceneProxy, pair, proxi);
+				m_world->SceneContacts (*sceneProxy, pair, proxy);
 			} else {
 				_ASSERTE (me->m_left);
 				_ASSERTE (stack < sizeof (stackPool) / sizeof (dgNode*));
