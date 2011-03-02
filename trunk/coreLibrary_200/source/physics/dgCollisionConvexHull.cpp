@@ -30,8 +30,6 @@
 //////////////////////////////////////////////////////////////////////
 
 
-
-
 struct dgPlaneLocation: public dgPlane 
 {
 	int m_index;
@@ -671,3 +669,66 @@ bool dgCollisionConvexHull::OOBBTest (const dgMatrix& matrix, const dgCollisionC
 	return ret;
 }
 
+void dgCollisionConvexHull::SetVolumeAndCG ()
+{
+	dgCollisionConvex::SetVolumeAndCG ();
+}
+
+dgVector dgCollisionConvexHull::SupportVertex (const dgVector& direction) const
+{
+	const dgVector dir (direction.m_x, direction.m_y, direction.m_z, dgFloat32 (0.0f));
+	_ASSERTE (dgAbsf(dir % dir - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
+
+	dgInt32 index = 0;
+	dgFloat32 side0 = dgFloat32 (-1.0e20f);
+	for (dgInt32 i = 0; i < 4; i ++) {
+		dgFloat32 side1 = m_multiResDir[i] % dir;
+		if (side1 > side0) {
+			side0 = side1;
+			index = i;
+		}
+		side1 *= dgFloat32 (-1.0f);
+		if (side1 > side0) {
+			side0 = side1;
+			index = i + 4;
+		}
+	}
+
+int xxx = 0;
+static int xxx1 = 0;
+
+
+
+	dgConvexSimplexEdge* edge = m_supportVertexStarCuadrant[index];
+	index = edge->m_vertex;
+	side0 = m_vertex[edge->m_vertex] % dir;
+	dgConvexSimplexEdge* ptr = edge;
+	dgInt32 maxCount = 128;
+	do {
+		dgFloat32 side1 = m_vertex[ptr->m_twin->m_vertex] % dir;
+		if (side1 > side0) {
+			index = ptr->m_twin->m_vertex;
+			side0 = side1;
+			edge = ptr->m_twin;
+			ptr = edge;
+		}
+xxx ++;
+		ptr = ptr->m_twin->m_next;
+		maxCount --;
+	} while ((ptr != edge) && maxCount);
+	_ASSERTE (maxCount);
+
+xxx1 ++;
+if ((xxx1 > 1000) && (xxx1 < 1500))
+dgTrace (("%d %d\n", xxx, m_vertexCount));
+
+
+	_ASSERTE (index != -1);
+	return m_vertex[index];
+
+}
+
+dgVector dgCollisionConvexHull::SupportVertexSimd (const dgVector& dir) const
+{
+	return dgCollisionConvex::SupportVertexSimd (dir);
+}

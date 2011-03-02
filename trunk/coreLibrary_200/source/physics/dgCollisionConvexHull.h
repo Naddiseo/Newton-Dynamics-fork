@@ -24,7 +24,7 @@
 
 #include "dgCollisionConvex.h"
 
-//#define DG_USE_OLD_CONVEXHULL
+
 
 class dgCollisionConvexHull: public dgCollisionConvex  
 {
@@ -42,11 +42,9 @@ class dgCollisionConvexHull: public dgCollisionConvex
 	dgBigVector FaceNormal (const dgEdge *face, const dgVector* const pool) const;
 	bool CheckConvex (dgPolyhedra& polyhedra, const dgVector* hullVertexArray) const;
 
-#ifdef DG_USE_OLD_CONVEXHULL 
-	bool RemoveCoplanarEdge (dgPolyhedra& convex, dgVector* const hullVertexArray) const;	
-	dgBigVector FaceNormal (const dgEdge *face, const dgVector* const pool) const;
-	dgInt32 BruteForceSupportVertex (int count, dgVector* array, const dgBigVector& dir) const;
-#endif
+	virtual dgVector SupportVertex (const dgVector& dir) const;
+	virtual dgVector SupportVertexSimd (const dgVector& dir) const;
+	virtual void SetVolumeAndCG ();
 
 	virtual dgInt32 CalculateSignature () const;
 	virtual void SetCollisionBBox (const dgVector& p0, const dgVector& p1);
