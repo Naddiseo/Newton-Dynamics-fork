@@ -250,6 +250,37 @@ inline dgContactSolver::dgMinkFace* dgContactSolver::NewFace()
 	return face ;
 }
 
+
+
+inline bool dgContactSolver::CalcFacePlaneLarge (dgMinkFace* const face)
+{
+	dgInt32 i0 = face->m_vertex[0];
+	dgInt32 i1 = face->m_vertex[1];
+	dgInt32 i2 = face->m_vertex[2];
+
+	//		dgBigPlane &plane = *face;
+	dgBigPlane plane (m_hullVertexLarge[i0], m_hullVertexLarge[i1], m_hullVertexLarge[i2]);
+
+	bool ret = false;
+	dgFloat64 mag2 = plane % plane;
+	//		if (mag2 > DG_DISTANCE_TOLERANCE_ZERO) {
+	if (mag2 > dgFloat32 (1.0e-12f)) {
+		ret = true;
+		plane = plane.Scale (dgFloat64 (1.0f)/ sqrt (mag2));
+	} else {
+		//_ASSERTE (0);
+		plane.m_w = dgFloat64 (0.0f);
+	}
+
+	face->m_x = dgFloat32 (plane.m_x);
+	face->m_y = dgFloat32 (plane.m_y);
+	face->m_z = dgFloat32 (plane.m_z);
+	face->m_w = dgFloat32 (plane.m_w);
+	face->m_isActive = 1;
+	return ret;
+}
+
+
 inline bool dgContactSolver::CalcFacePlane (dgMinkFace* const face)
 {
 	dgInt32 i0 = face->m_vertex[0];
