@@ -388,7 +388,7 @@ void dgCollisionConvex::CalcAABB (const dgMatrix &matrix, dgVector& p0, dgVector
 
 void dgCollisionConvex::CalcAABBSimd (const dgMatrix &matrix, dgVector& p0, dgVector& p1) const
 {
-#ifdef DG_BUILD_SIMD_CODE
+
 	dgVector origin (matrix.TransformVectorSimd(m_boxOrigin));
 
 //	dgVector size (m_boxSize.m_x * dgAbsf(matrix[0][0]) + m_boxSize.m_y * dgAbsf(matrix[1][0]) + m_boxSize.m_z * dgAbsf(matrix[2][0]) + DG_MAX_COLLISION_PADDING,  
@@ -410,9 +410,6 @@ void dgCollisionConvex::CalcAABBSimd (const dgMatrix &matrix, dgVector& p0, dgVe
 
 	p0.m_w = dgFloat32 (0.0f);
 	p1.m_w = dgFloat32 (0.0f);
-#else
-
-#endif
 }
 
 

@@ -124,11 +124,12 @@ class dgCollisionParamProxy
 	dgInt32 m_inTriggerVolume : 1;
 
 
-	dgCollisionParamProxy(dgInt32 threadIndex)
+	dgCollisionParamProxy(dgInt32 threadIndex, dgContactPoint* const contactBuffer)
 	{
 		m_threadIndex = threadIndex;
 		m_polyMeshData = NULL;
 		m_localMatrixInv = NULL;
+		m_contacts = contactBuffer;
 //		m_projectContinueCollisionContacts = 1;
 	}
 

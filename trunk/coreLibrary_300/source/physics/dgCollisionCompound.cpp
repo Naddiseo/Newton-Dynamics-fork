@@ -2263,8 +2263,9 @@ dgInt32 dgCollisionCompound::ClosestDitance (dgBody* const compoundBody, dgTripl
 	dgContactPoint contact0;
 	dgContactPoint contact1;
 	if (bodyB->m_collision->IsType (dgCollision::dgConvexCollision_RTTI)) {
-		dgCollisionParamProxy proxy(0);
 		dgContactPoint contacts[16];
+		dgCollisionParamProxy proxy(0, &contacts[0]);
+		
 
 		proxy.m_referenceBody = compoundBody;
 		proxy.m_floatingBody = bodyB;
@@ -2298,8 +2299,9 @@ dgInt32 dgCollisionCompound::ClosestDitance (dgBody* const compoundBody, dgTripl
 		}
 	} else {
 
-		dgCollisionParamProxy proxy(0);
 		dgContactPoint contacts[16];
+		dgCollisionParamProxy proxy(0, &contacts[16]);
+		
 
 		_ASSERTE (bodyB->m_collision->IsType (dgCollision::dgCollisionCompound_RTTI));
 		dgCollisionCompound *const compoundCollision1 = (dgCollisionCompound *) bodyB->m_collision;
