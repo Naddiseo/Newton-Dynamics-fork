@@ -117,6 +117,8 @@ void dgContactSolver::CalcSupportVertex (const dgVector& dir, dgInt32 entry)
 	m_averVertex[entry] = p + q;
 }
 
+
+
 void dgContactSolver::CalculateVelocities (dgFloat32 timestep) 
 {
 	dgVector refOmega;
@@ -3130,6 +3132,7 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlane ()
 	}
 	return closestFace;
 }
+
 
 
 
