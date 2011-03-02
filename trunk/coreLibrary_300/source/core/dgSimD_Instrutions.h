@@ -245,6 +245,11 @@
 				return dot.AddHorizontal();
 			}
 
+			DG_INLINE simd_128 CrossProduct (const simd_128& data) const
+			{
+				return _mm_sub_ps (_mm_mul_ps (_mm_shuffle_ps (m_type, m_type, PURMUT_MASK(3, 0, 2, 1)), _mm_shuffle_ps (data.m_type, data.m_type, PURMUT_MASK(3, 1, 0, 2))),
+								   _mm_mul_ps (_mm_shuffle_ps (m_type, m_type, PURMUT_MASK(3, 1, 0, 2)), _mm_shuffle_ps (data.m_type, data.m_type, PURMUT_MASK(3, 0, 2, 1))));
+			}
 
 			DG_INLINE simd_128 Abs () const
 			{

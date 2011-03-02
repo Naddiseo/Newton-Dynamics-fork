@@ -330,40 +330,21 @@ DG_INLINE dgVector::dgVector (dgFloat32 x, dgFloat32 y, dgFloat32 z, dgFloat32 w
 
 DG_INLINE dgFloat32 dgVector::DotProductSimd (const dgVector& A) const
 {
-#ifdef DG_BUILD_SIMD_CODE
-//	simd_type r0;
-//	dgFloat32 dot;
-	dgVector tmp;
-	(simd_type&) tmp = simd_mul_v((simd_type&) *this, (simd_type&)A);
-//	r0 = simd_add_v(r0, simd_move_hl_v (r0, r0));
-//	simd_store_s(simd_add_s(r0, simd_permut_v (r0, r0, PURMUT_MASK(3, 3, 3, 1))), &dot);
-//	return dot;
-	return tmp.m_x + tmp.m_y + tmp.m_z;
-#else
-	return dgFloat32 (0.0f);
-#endif
+	dgFloat32 dot;
+	simd_128 temp (((simd_128&)*this).DotProduct((simd_128&)A));
+	temp.StoreScalar (&dot);
+	return dot;
 }
 
 DG_INLINE dgVector dgVector::CrossProductSimd (const dgVector &e10) const
 {
-#ifdef DG_BUILD_SIMD_CODE
-	const dgVector& e21 = *this;
-	return dgVector(simd_mul_sub_v (simd_mul_v (simd_permut_v((simd_type&)e21, (simd_type&)e21, PURMUT_MASK(3, 0, 2, 1)), simd_permut_v((simd_type&)e10, (simd_type&)e10, PURMUT_MASK(3, 1, 0, 2))), 
-												simd_permut_v((simd_type&)e21, (simd_type&)e21, PURMUT_MASK(3, 1, 0, 2)), simd_permut_v((simd_type&)e10, (simd_type&)e10, PURMUT_MASK(3, 0, 2, 1))));
-#else 
-	return dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-#endif
-
+	return ((simd_128&)*this).CrossProduct((simd_128&)e10);
 }
 
 
 DG_INLINE dgVector dgVector::CompProductSimd (const dgVector &A) const
 {
-#ifdef DG_BUILD_SIMD_CODE
-	return dgVector (simd_mul_v ((simd_type&) *this, (simd_type&)A));
-#else
-	return dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-#endif
+	return ((simd_128&)*this) * (simd_128&)A;
 }
 
 DG_INLINE dgBigVector::dgBigVector()
