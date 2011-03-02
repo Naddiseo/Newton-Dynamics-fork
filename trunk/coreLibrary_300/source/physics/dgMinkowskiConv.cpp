@@ -31,7 +31,15 @@
 #include "dgWorldDynamicUpdate.h"
 
 dgVector dgContactSolver::m_dir[14];
-dgInt32 dgContactSolver::m_faceIndex[][4];
+
+dgInt32 dgContactSolver::m_faceIndex[][4] =
+{ 
+	{0, 1, 2, 3},
+	{1, 0, 3, 2},
+	{0, 2, 3, 1},
+	{2, 1, 3, 0},
+};
+
 
 
 dgContactSolver::dgContactSolver(dgCollisionParamProxi& proxi)
@@ -71,6 +79,471 @@ void dgContactSolver::CalcSupportVertex (const dgVector& dir, dgInt32 entry)
 	m_hullVertex[entry] = p - q;
 	m_averVertex[entry] = p + q;
 }
+
+dgInt32 dgContactSolver::CalculateContacts(dgMinkFace* const face, dgInt32 contacID, dgContactPoint* const contactOut, dgInt32 maxContacts)
+{
+	dgInt32 count = 0;
+	// Get the contact form the last face
+	const dgPlane& plane = *face;
+	dgFloat32 penetration = plane.m_w - m_penetrationPadding;
+	dgFloat32 dist = (plane % m_averVertex[face->m_vertex[0]]) * dgFloat32 (0.5f);
+	const dgPlane clipPlane (plane.Scale(dgFloat32 (-1.0f)), dist);
+
+	dgVector point1 (clipPlane.Scale (-clipPlane.m_w));
+	dgVector* const shape1 = m_hullVertex;
+	dgInt32 count1 = m_referenceCollision->CalculatePlaneIntersection (clipPlane, point1, shape1);
+	if (!count1) {
+		dgVector p1 (m_referenceCollision->SupportVertex (clipPlane.Scale (dgFloat32 (-1.0f))));
+		p1 += clipPlane.Scale (DG_ROBUST_PLANE_CLIP);
+		count1 = m_referenceCollision->CalculatePlaneIntersection (clipPlane, p1, shape1);
+		dgVector err (clipPlane.Scale (clipPlane % (point1 - p1)));
+		for (dgInt32 i = 0; i < count1; i ++) {
+			shape1[i] += err;
+		}
+	}
+
+	_ASSERTE (penetration <= dgFloat32 (2.0e-1f));
+	dist = GetMax (- (penetration + DG_IMPULSIVE_CONTACT_PENETRATION), dgFloat32 (0.0f));
+	if (count1) {
+		dgVector* const shape2 = &m_hullVertex[count1];
+		const dgPlane clipPlane2 (m_matrix.UntransformPlane(clipPlane));
+
+		dgVector point2 (clipPlane2.Scale (-clipPlane2.m_w));
+		dgInt32 count2 = m_floatingcollision->CalculatePlaneIntersection (clipPlane2, point2, shape2);
+		if (!count2) {
+			dgVector p2 (m_floatingcollision->SupportVertex (clipPlane2.Scale(dgFloat32 (-1.0f))));
+			p2 += clipPlane2.Scale (DG_ROBUST_PLANE_CLIP);
+			count2 = m_floatingcollision->CalculatePlaneIntersection (clipPlane2, p2, shape2);
+			dgVector err (clipPlane2.Scale (clipPlane2 % (point2 - p2)));
+			for (dgInt32 i = 0; i < count2; i ++) {
+				shape2[i] += err;
+			}
+		}
+
+		if (count2) {
+			_ASSERTE (count1);
+			_ASSERTE (count2);
+
+			if (count1 == 1) {
+				const dgMatrix& matrix1 = m_proxi->m_referenceMatrix;
+
+				count = 1;
+				contactOut[0].m_point = matrix1.TransformVector (shape1[0]);
+				contactOut[0].m_normal = matrix1.RotateVector (clipPlane);
+				contactOut[0].m_userId = contacID;
+				contactOut[0].m_penetration = dist;
+			} else if (count2 == 1) {
+				const dgMatrix& matrix1 = m_proxi->m_referenceMatrix;
+				//const dgMatrix& matrix2 = m_proxi->m_floatingMatrix;
+
+				count = 1;
+				//					contactOut[0].m_point = matrix2.TransformVector (shape2[0]);
+				contactOut[0].m_point =  matrix1.TransformVector (m_matrix.TransformVector(shape2[0]));
+				contactOut[0].m_normal = matrix1.RotateVector (clipPlane);
+				contactOut[0].m_userId = contacID;
+				contactOut[0].m_penetration = dist;
+
+			} else if ((count1 == 2) && (count2 == 2)) {
+				const dgMatrix& matrix1 = m_proxi->m_referenceMatrix;
+				dgVector p0 (shape1[0]); 
+				dgVector p1 (shape1[1]); 
+				dgVector q0 (m_matrix.TransformVector(shape2[0])); 
+				dgVector q1 (m_matrix.TransformVector(shape2[1])); 
+				dgVector p10 (p1 - p0);
+				dgVector q10 (q1 - q0);
+				p10 = p10.Scale (dgFloat32 (1.0f) / dgSqrt (p10 % p10 + dgFloat32 (1.0e-8f)));
+				q10 = q10.Scale (dgFloat32 (1.0f) / dgSqrt (q10 % q10 + dgFloat32 (1.0e-8f)));
+				dgFloat32 dot = q10 % p10;
+				if (dgAbsf (dot) > dgFloat32 (0.998f)) {
+					dgFloat32 pl0 = p0 % p10;
+					dgFloat32 pl1 = p1 % p10;
+					dgFloat32 ql0 = q0 % p10;
+					dgFloat32 ql1 = q1 % p10;
+					if (pl0 > pl1) {
+						Swap (pl0, pl1);
+						Swap (p0, p1);
+						p10 = p10.Scale (dgFloat32 (-1.0f));
+					}
+					if (ql0 > ql1) {
+						Swap (ql0, ql1);
+					}
+					if ( !((ql0 > pl1) && (ql1 < pl0))) {
+						dgFloat32 clip0 = (ql0 > pl0) ? ql0 : pl0;
+						dgFloat32 clip1 = (ql1 < pl1) ? ql1 : pl1;
+
+						count = 2;
+						contactOut[0].m_point = p0 + p10.Scale (clip0 - pl0);
+						contactOut[0].m_normal = matrix1.RotateVector (clipPlane);
+						contactOut[0].m_userId = contacID;
+						contactOut[0].m_penetration = dist;
+
+						contactOut[1].m_point = p0 + p10.Scale (clip1 - pl0);
+						contactOut[1].m_normal = matrix1.RotateVector (clipPlane);
+						contactOut[1].m_userId = contacID;
+						contactOut[1].m_penetration = dist;
+					}
+
+				} else {
+					dgVector c0;
+					dgVector c1;
+					count = 1;
+					dgRayToRayDistance (p0, p1, q0, q1, c0, c1);
+					contactOut[0].m_point = (c0 + c1).Scale (dgFloat32 (0.5f));
+					contactOut[0].m_normal = matrix1.RotateVector (clipPlane);
+					contactOut[0].m_userId = contacID;
+					contactOut[0].m_penetration = dist;
+				}
+				if (count > maxContacts) {
+					count = maxContacts;
+				}
+				for (dgInt32 i = 0; i < count; i ++) {
+					contactOut[i].m_point = matrix1.TransformVector(contactOut[i].m_point);
+				}
+
+			} else {
+				const dgMatrix& matrix1 = m_proxi->m_referenceMatrix;
+				m_matrix.TransformTriplex(shape2, sizeof (dgVector), shape2, sizeof (dgVector), count2);
+				count = CalculateConvexShapeIntersection (matrix1, clipPlane, dgUnsigned32 (contacID), dist, count1, shape1, count2, shape2, contactOut, maxContacts);
+				if (!count) {
+					_ASSERTE (0);
+//					count = CalculateContactAlternateMethod(face, contacID, contactOut, maxContacts);
+				}
+			}
+		}
+	}
+	return count;
+}
+
+
+dgContactSolver::dgPerimenterEdge* dgContactSolver::ReduceContacts (dgPerimenterEdge *poly, dgInt32 maxCount) const
+{
+	dgInt32 buffer [256];
+	dgUpHeap<dgPerimenterEdge*, dgFloat32> heap (buffer, sizeof (buffer));	
+
+	dgInt32 restart = 1;
+	while (restart) {
+		restart = 0;
+		dgPerimenterEdge* ptr0 = poly; 
+		poly = poly->m_next;
+		if (poly->m_next != poly) {
+			heap.Flush();
+			dgPerimenterEdge* ptr = poly; 
+			do {
+				dgFloat32 dist2;
+				dgVector error (*ptr->m_next->m_vertex - *ptr->m_vertex);
+				dist2 = error % error;
+				if (dist2 < DG_MIN_VERTEX_ERROR_2) {
+					ptr0->m_next = ptr->m_next;
+					if (ptr == poly) {
+						poly = ptr0;
+						restart = 1;
+						break;
+					} 
+					ptr = ptr0;
+				} else {
+					heap.Push(ptr, dist2);
+					ptr0 = ptr;
+				}
+
+				ptr = ptr->m_next;
+			} while (ptr != poly);
+		}
+	}
+
+
+	if (heap.GetCount()) {
+		if (maxCount > 8) {
+			maxCount = 8;
+		}
+		while (heap.GetCount() > maxCount) {
+			//dgFloat32 dist2;
+			dgPerimenterEdge* ptr = heap[0];
+			heap.Pop();
+			for (dgInt32 i = 0; i < heap.GetCount(); i ++) {
+				if (heap[i] == ptr->m_next) {
+					heap.Remove(i);
+					break;
+				}
+			}
+
+			ptr->m_next = ptr->m_next->m_next;
+			dgVector error (*ptr->m_next->m_vertex - *ptr->m_vertex);
+			dgFloat32 dist2 = error % error;
+			heap.Push(ptr, dist2);
+		}
+		poly = heap[0];
+	}
+
+	return poly;
+}
+
+
+dgInt32 dgContactSolver::CalculateConvexShapeIntersectionLine (const dgMatrix& matrix, const dgVector& shapeNormal, dgUnsigned32 id,
+	dgFloat32 penetration, dgInt32 shape1VertexCount, dgVector* const shape1, dgInt32 shape2VertexCount, 
+	dgVector* const shape2, dgContactPoint* const contactOut) const
+{
+	dgInt32 count = 0;
+	dgVector* output = (dgVector*) &m_hullVertex[shape1VertexCount + shape2VertexCount + 1];
+
+	_ASSERTE (shape1VertexCount >= 3);
+	_ASSERTE (shape2VertexCount <= 2);
+
+	dgVector* ptr = NULL;
+	// face line intersection
+	if (shape2VertexCount == 2) {
+		ptr = (dgVector*)&shape2[0];
+		dgInt32 i0 = shape1VertexCount - 1;
+		for (dgInt32 i1 = 0; i1 < shape1VertexCount; i1 ++) {
+			dgVector n (shapeNormal * (shape1[i1] - shape1[i0]));
+			_ASSERTE ((n % n) > dgFloat32 (0.0f));
+			dgPlane plane (n, - (n % shape1[i0]));
+
+			dgFloat32 test0 = plane.Evalue (ptr[0]);
+			dgFloat32 test1 = plane.Evalue (ptr[1]);
+			//		ForceFloatConsistency ();
+			if (test0 >= dgFloat32 (0.0f)) {
+				if (test1 >= dgFloat32 (0.0f)) {
+					output[count + 0] = ptr[0];
+					output[count + 1] = ptr[1];
+					count += 2;
+				} else {
+					dgVector dp (ptr[1] - ptr[0]);
+					dgFloat32 den = plane % dp;
+					if (dgAbsf(den) < 1.0e-10f) {
+						den = 1.0e-10f;
+					}
+					output[count + 0] = ptr[0];
+					output[count + 1] = ptr[0] - dp.Scale (test0 / den);
+					count += 2;
+				}
+			} else if (test1 >= dgFloat32 (0.0f)) {
+				dgVector dp (ptr[1] - ptr[0]);
+				dgFloat32 den = plane % dp;
+				if (dgAbsf(den) < 1.0e-10f) {
+					den = 1.0e-10f;
+				}
+				output[count] = ptr[0] - dp.Scale (test0 / den);
+				count ++;
+				output[count] = ptr[1];
+				count ++;
+			} else {
+				return 0;
+			}
+
+
+			shape2VertexCount = count;
+			ptr = output;
+			output = &output[count];
+			count = 0;
+			i0 = i1;
+		}
+
+	} else {
+		shape2VertexCount = 0;
+	}
+
+	dgVector normal = matrix.RotateVector(shapeNormal);
+	for (dgInt32 i0 = 0; i0 < shape2VertexCount; i0 ++) {
+		contactOut[i0].m_point = matrix.TransformVector(ptr[i0]);
+		contactOut[i0].m_normal = normal;
+		contactOut[i0].m_penetration = penetration;
+		contactOut[i0].m_userId = id;
+	}
+
+	return shape2VertexCount;
+}
+
+
+dgInt32 dgContactSolver::CalculateConvexShapeIntersection (const dgMatrix& matrix, const dgVector& shapeNormal, dgUnsigned32 id,
+	dgFloat32 penetration, dgInt32 shape1VertexCount, dgVector* const shape1, dgInt32 shape2VertexCount, dgVector* const shape2,
+	dgContactPoint* const contactOut, dgInt32 maxContacts) const
+{
+	dgInt32 count = 0;
+	if (shape2VertexCount <= 2) {
+		count = CalculateConvexShapeIntersectionLine (matrix, shapeNormal, id, penetration, shape1VertexCount, shape1, shape2VertexCount, shape2, contactOut);
+		if (count > maxContacts) {
+			count = maxContacts;
+		}
+	} else if (shape1VertexCount <= 2) {
+		count = CalculateConvexShapeIntersectionLine (matrix, shapeNormal, id, penetration, shape2VertexCount, shape2, shape1VertexCount, shape1, contactOut);
+		if (count > maxContacts) {
+			count = maxContacts;
+		}
+
+	} else {
+		dgPerimenterEdge *edgeClipped[2];
+		dgPerimenterEdge subdivision[128];
+
+		_ASSERTE (shape1VertexCount >= 3);
+		_ASSERTE (shape2VertexCount >= 3);
+		dgVector* output = (dgVector*) &m_hullVertex[shape1VertexCount + shape2VertexCount];
+
+		//ptr = NULL;
+		_ASSERTE ((shape1VertexCount + shape2VertexCount) < sizeof (subdivision) / (2 * sizeof (subdivision[0])));
+		for (dgInt32 i0 = 0; i0 < shape2VertexCount; i0 ++) {
+			subdivision[i0].m_vertex = &shape2[i0];
+			subdivision[i0].m_prev = &subdivision[i0 - 1];
+			subdivision[i0].m_next = &subdivision[i0 + 1];
+		}
+		//i0 --;
+		//subdivision[0].m_prev = &subdivision[i0];
+		//subdivision[i0].m_next = &subdivision[0];
+		subdivision[0].m_prev = &subdivision[shape2VertexCount - 1];
+		subdivision[shape2VertexCount - 1].m_next = &subdivision[0];
+
+		dgPerimenterEdge* poly = &subdivision[0];
+		edgeClipped[0] = NULL;
+		edgeClipped[1] = NULL;
+		dgInt32 i0 = shape1VertexCount - 1;
+		dgInt32 edgeIndex = shape2VertexCount;
+		for (dgInt32 i1 = 0; i1 < shape1VertexCount; i1 ++) {
+			dgVector n (shapeNormal * (shape1[i1] - shape1[i0]));
+			dgPlane plane (n, - (n % shape1[i0]));
+			i0 = i1;
+
+			count = 0;
+			dgPerimenterEdge* tmp = poly;
+			dgInt32 isInside = 0;
+			dgFloat32 test0 = plane.Evalue (*tmp->m_vertex);
+			do {
+				dgFloat32 test1 = plane.Evalue (*tmp->m_next->m_vertex);
+				if (test0 >= dgFloat32 (0.0f)) {
+					isInside |= 1;
+					if (test1 < dgFloat32 (0.0f)) {
+						const dgVector& p0 = *tmp->m_vertex;
+						const dgVector& p1 = *tmp->m_next->m_vertex;
+						dgVector dp (p1 - p0); 
+						dgFloat32 den = plane % dp;
+						if (dgAbsf(den) < dgFloat32 (1.0e-24f)) {
+							den = dgFloat32 (1.0e-24f) * ((den > dgFloat32 (0.0f)) ? dgFloat32 (1.0f) : dgFloat32 (-1.0f));
+						}
+
+						den = test0 / den;
+						if (den >= dgFloat32 (0.0f)) {
+							den = dgFloat32 (0.0f);
+						} else if (den <= -1.0f) {
+							den = dgFloat32 (-1.0f);
+						}
+						output[0] = p0 - dp.Scale (den);
+						edgeClipped[0] = tmp;
+						count ++;
+					}
+				} else if (test1 >= dgFloat32 (0.0f)) {
+					const dgVector& p0 = *tmp->m_vertex;
+					const dgVector& p1 = *tmp->m_next->m_vertex;
+					isInside |= 1;
+					dgVector dp (p1 - p0); 
+					dgFloat32 den = plane % dp;
+					if (dgAbsf(den) < dgFloat32 (1.0e-24f)) {
+						den = dgFloat32 (1.0e-24f) * (den > dgFloat32 (0.0f)) ? dgFloat32 (1.0f) : dgFloat32 (-1.0f);
+					}
+					den = test0 / den;
+					if (den >= dgFloat32 (0.0f)) {
+						den = dgFloat32 (0.0f);
+					} else if (den <= -1.0f) {
+						den = dgFloat32 (-1.0f);
+					}
+					output[1] = p0 - dp.Scale (den);
+					edgeClipped[1] = tmp;
+					count ++;
+				}
+				test0 = test1;
+				tmp = tmp->m_next;
+			} while (tmp != poly && (count < 2));
+
+			if (!isInside) {
+				return 0;
+			}
+
+			if (count == 2) {
+				dgPerimenterEdge* const newEdge = &subdivision[edgeIndex];
+				newEdge->m_next = edgeClipped[1];
+				newEdge->m_prev = edgeClipped[0];
+				edgeClipped[0]->m_next = newEdge;
+				edgeClipped[1]->m_prev = newEdge;
+
+				newEdge->m_vertex = &output[0];
+				edgeClipped[1]->m_vertex = &output[1];
+				poly = newEdge;
+
+				output += 2;
+				edgeIndex ++;
+				_ASSERTE (edgeIndex < sizeof (subdivision) / sizeof (subdivision[0]));
+				//_ASSERTE (CheckNormal (poly, shapeNormal));
+			}
+		}
+
+		_ASSERTE (poly);
+
+#ifdef _DEBUG
+		{
+			dgVector p0;
+			dgVector p1;
+			m_referenceCollision->CalcAABB (dgGetIdentityMatrix(), p0, p1);
+			p0-= dgVector (2.5f, 2.5f, 2.5f, 0.0f);
+			p1+= dgVector (2.5f, 2.5f, 2.5f, 0.0f);
+			dgPerimenterEdge *tmp;
+			tmp = poly;
+			do {
+				dgVector p (*tmp->m_vertex);
+				_ASSERTE (p.m_x >= p0.m_x);
+				_ASSERTE (p.m_y >= p0.m_y);
+				_ASSERTE (p.m_z >= p0.m_z);
+				_ASSERTE (p.m_x <= p1.m_x);
+				_ASSERTE (p.m_y <= p1.m_y);
+				_ASSERTE (p.m_z <= p1.m_z);
+				tmp = tmp->m_next;
+			} while (tmp != poly);
+		}
+#endif
+
+		_ASSERTE (poly);
+		poly = ReduceContacts (poly, maxContacts);
+
+		//dgPerimenterEdge *intersection;
+		count = 0;
+		dgPerimenterEdge* intersection = poly;
+		dgVector normal = matrix.RotateVector(shapeNormal);
+		do {
+			contactOut[count].m_point = matrix.TransformVector(*intersection->m_vertex);
+			contactOut[count].m_normal = normal;
+			contactOut[count].m_penetration = penetration;
+			contactOut[count].m_userId = id;
+			count ++;
+			intersection = intersection->m_next;
+		} while (intersection != poly);
+
+	}
+
+	return count;
+}
+
+
+bool dgContactSolver::CalcFacePlane (dgMinkFace* const face)
+{
+	dgInt32 i0 = face->m_vertex[0];
+	dgInt32 i1 = face->m_vertex[1];
+	dgInt32 i2 = face->m_vertex[2];
+
+	dgPlane &plane = *face;
+	plane = dgPlane (m_hullVertex[i0], m_hullVertex[i1], m_hullVertex[i2]);
+
+	bool ret = false;
+	dgFloat32 mag2 = plane % plane;
+
+	//if (mag2 > DG_DISTANCE_TOLERANCE_ZERO) {
+	if (mag2 > dgFloat32 (1.0e-12f)) {
+		ret = true;
+		plane = plane.Scale (dgRsqrt (mag2));
+	} else {
+		//_ASSERTE (0);
+		plane.m_w = dgFloat32 (0.0f);
+	}
+
+	face->m_isActive = 1;
+	return ret;
+}
+
 
 
 dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlane(dgMinkFace*& plane, const dgVector& origin)
@@ -353,6 +826,300 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::CalcSeparatingPlane(dgMinkFac
 }
 
 
+dgContactSolver::dgMinkFace* dgContactSolver::NewFace()
+{
+	dgMinkFace* face;
+	if (m_facePurge)	{
+		face = (dgMinkFace *)m_facePurge;
+		m_facePurge = m_facePurge->m_next;
+	} else {
+		face = &m_simplex[m_planeIndex];
+		m_planeIndex ++;
+		_ASSERTE (m_planeIndex < sizeof (m_simplex) / sizeof (m_simplex[0]));
+	}
+	return face ;
+}
+
+
+dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlane ()
+{
+	m_planeIndex = 4;
+	dgMinkFace* closestFace = NULL;
+	m_facePurge = NULL;
+//	dgFloat32 penetration = dgFloat32 (0.0f);
+
+	_ASSERTE (m_vertexIndex == 4);
+	dgInt8  buffer[DG_HEAP_EDGE_COUNT * (sizeof (dgFloat32) + sizeof (dgMinkFace *))];
+	dgClosestFace heapSort (buffer, sizeof (buffer));
+	for (dgInt32 i = 0; i < 4; i ++) {
+		dgMinkFace* const face = &m_simplex[i];
+		face->m_inHeap = 0;
+		face->m_isActive = 1;
+		if (CalcFacePlane (face)) {
+			face->m_inHeap = 1;
+			heapSort.Push((dgMinkFace*) face, face->m_w);
+		}
+	}
+
+	dgInt32 cicling = 0;
+	dgFloat32 ciclingMem[4];
+	ciclingMem[0] = dgFloat32 (1.0e10f);
+	ciclingMem[1] = dgFloat32 (1.0e10f);
+	ciclingMem[2] = dgFloat32 (1.0e10f);
+	ciclingMem[3] = dgFloat32 (1.0e10f);
+
+	dgFloat32 minValue = dgFloat32 ( 1.0e10f);
+	dgPlane bestPlane (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f),dgFloat32 (0.0f));
+
+	dgVector diff[3];
+	dgVector aver[3];
+	diff[0] = bestPlane;
+	diff[1] = bestPlane;
+	diff[2] = bestPlane;
+	aver[0] = bestPlane;
+	aver[1] = bestPlane;
+	aver[2] = bestPlane;
+	while (heapSort.GetCount()) {
+		dgMinkFace* const face = heapSort[0];
+		face->m_inHeap = 0;
+		heapSort.Pop();
+
+		if (face->m_isActive) {
+			const dgPlane& plane = *face;
+
+			CalcSupportVertex (plane, m_vertexIndex);
+			const dgVector& p = m_hullVertex[m_vertexIndex];
+			dgFloat32 dist = plane.Evalue (p);
+			m_vertexIndex ++;
+
+			if (m_vertexIndex > 16) {
+				if (dist < minValue) {
+					if (dist >= dgFloat32 (0.0f)) {
+						minValue = dist;
+						bestPlane = plane;
+
+						dgInt32 i = face->m_vertex[0];
+						diff[0] = m_hullVertex[i];
+						aver[0] = m_averVertex[i];
+
+						i = face->m_vertex[1];
+						diff[1] = m_hullVertex[i];
+						aver[1] = m_averVertex[i];
+
+						i = face->m_vertex[2];
+						diff[2] = m_hullVertex[i];
+						aver[2] = m_averVertex[i];
+					}
+				}
+			}
+
+			ciclingMem[cicling] = dist;
+			cicling = (cicling + 1) & 3;
+			dgInt32 i = 0;
+			for (; i < 4; i ++) {
+				if (dgAbsf (dist - ciclingMem[i]) > dgFloat32 (1.0e-6f)) {
+					break;
+				}
+			}
+			if (i == 4) {
+				dist = dgFloat32 (0.0f);
+			}
+
+			if ((m_vertexIndex > DG_MINK_MAX_POINTS) ||
+				(m_planeIndex > DG_MINK_MAX_FACES) ||
+				(heapSort.GetCount() > (DG_HEAP_EDGE_COUNT - 24))) {
+					dgPlane& plane = *face;
+					plane = bestPlane;
+
+					i = face->m_vertex[0];
+					face->m_vertex[0] = 0;
+					m_hullVertex[i] = diff[0];
+					m_averVertex[i] = aver[0];
+
+					i = face->m_vertex[1];
+					face->m_vertex[1] = 1;
+					m_hullVertex[i] = diff[1];
+					m_averVertex[i] = aver[1];
+
+					i = face->m_vertex[2];
+					face->m_vertex[2] = 2;
+					m_hullVertex[i] = diff[2];
+					m_averVertex[i] = aver[2];
+					dist = dgFloat32 (0.0f);
+			}
+
+			if (dist < (dgFloat32 (DG_IMPULSIVE_CONTACT_PENETRATION) / dgFloat32 (16.0f))) {
+				_ASSERTE (m_planeIndex <= DG_MINK_MAX_FACES_SIZE);
+				_ASSERTE (heapSort.GetCount() <= DG_HEAP_EDGE_COUNT);
+				closestFace = face;
+				break;
+			} else if (dist > dgFloat32 (0.0f)) {
+				_ASSERTE (face->m_inHeap == 0);
+
+				dgInt32 stack = 0;
+				dgInt32 deadCount = 1;
+				dgMinkFace* silhouette = NULL;
+
+				dgMinkFace* deadFaces[128];
+				dgMinkFace* stackPool[128];
+				deadFaces[0] = face;
+				closestFace = face;
+				face->m_isActive = 0;
+				for (i = 0; i < 3; i ++) {
+					dgMinkFace* const adjacent = &m_simplex[face->m_adjancentFace[i]];
+					_ASSERTE (adjacent->m_isActive);
+					dgFloat32 dist = adjacent->Evalue (p);  
+					if (dist > dgFloat32 (0.0f)) { 
+						adjacent->m_isActive = 0;
+						stackPool[stack] = adjacent;
+						deadFaces[deadCount] = adjacent;
+						stack ++;
+						deadCount ++;
+					} else {
+						silhouette = adjacent;
+					}
+				}
+
+				dgMinkFace* face = NULL;
+				while (stack) {
+					stack --;
+					face = stackPool[stack];
+					for (i = 0; i < 3; i ++) {
+						dgMinkFace* const adjacent = &m_simplex[face->m_adjancentFace[i]];
+						if (adjacent->m_isActive){
+							dist = adjacent->Evalue (p);  
+							if (dist > dgFloat32 (0.0f)) { 
+								adjacent->m_isActive = 0;
+								stackPool[stack] = adjacent;
+								deadFaces[deadCount] = adjacent;
+								stack ++;
+								deadCount ++;
+								_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
+								_ASSERTE (deadCount < sizeof (deadFaces) / sizeof (deadFaces[0]));
+
+							} else {
+								silhouette = adjacent;
+							}
+						}
+					}
+				}
+
+				if (!silhouette) {
+					closestFace = face;
+					break;
+				}
+				// build silhouette						
+				_ASSERTE (silhouette);
+				_ASSERTE (silhouette->m_isActive);
+
+				dgInt32 i2 = (m_vertexIndex - 1);
+				dgMinkFace* const lastSilhouette = silhouette;
+				_ASSERTE ((silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[1]) &&
+						  (silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[2]) &&
+						  (silhouette->m_adjancentFace[1] != silhouette->m_adjancentFace[2]));
+
+				dgInt32 adjacentIndex = DG_GETADJACENTINDEX_ACTIVE (silhouette);
+				face = NewFace();
+				dgInt32 i0 = silhouette->m_vertex[adjacentIndex];
+				dgInt32 i1 = silhouette->m_vertex[adjacentIndex + 1];
+
+				face->m_vertex[0] = dgInt16 (i1);
+				face->m_vertex[1] = dgInt16 (i0);
+				face->m_vertex[2] = dgInt16 (i2);
+				face->m_vertex[3] = face->m_vertex[0];
+				face->m_adjancentFace[0] = dgInt16 (silhouette - m_simplex);
+				face->m_inHeap = 0; 
+				face->m_isActive = 1; 
+
+				SilhouetteFaceCap sillueteCap[128];
+				sillueteCap[0].m_face = face;
+				sillueteCap[0].m_faceCopling = &silhouette->m_adjancentFace[adjacentIndex];
+				dgInt32 silhouetteCapCount = 1;
+				_ASSERTE (silhouetteCapCount < (sizeof (sillueteCap) / sizeof (sillueteCap[0])));
+				do {
+					silhouette = &m_simplex[silhouette->m_adjancentFace[adjacentIndex]];
+					adjacentIndex = (DG_GETADJACENTINDEX_VERTEX(silhouette, i0)); 
+				} while (!silhouette->m_isActive);
+
+				dgMinkFace* prevFace = face;
+				dgMinkFace* const firstFace = face;
+				dgInt32 lastSilhouetteVertex = i0;
+				dgInt32 prevEdgeIndex = dgInt32 (face - m_simplex);
+				do {
+					_ASSERTE ((silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[1]) &&
+							  (silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[2]) &&
+						      (silhouette->m_adjancentFace[1] != silhouette->m_adjancentFace[2]));
+					adjacentIndex = adjacentIndex ? adjacentIndex - 1 : 2;
+
+					face = NewFace();
+					i0 = silhouette->m_vertex[adjacentIndex];
+					i1 = silhouette->m_vertex[adjacentIndex + 1];
+
+					face->m_vertex[0] = dgInt16 (i1);
+					face->m_vertex[1] = dgInt16 (i0);
+					face->m_vertex[2] = dgInt16 (i2);
+					face->m_vertex[3] = face->m_vertex[0];
+					face->m_adjancentFace[0] = dgInt16 (silhouette - m_simplex);
+					face->m_adjancentFace[2] = dgInt16 (prevEdgeIndex);
+					face->m_inHeap = 0; 
+					face->m_isActive = 1; 
+
+					prevEdgeIndex = dgInt32 (face - m_simplex);
+					prevFace->m_adjancentFace[1] = dgInt16 (prevEdgeIndex);
+					prevFace = face;
+
+					sillueteCap[silhouetteCapCount].m_face = face;
+					sillueteCap[silhouetteCapCount].m_faceCopling = &silhouette->m_adjancentFace[adjacentIndex];
+					silhouetteCapCount ++;
+					_ASSERTE (silhouetteCapCount < (sizeof (sillueteCap) / sizeof (sillueteCap[0])));
+
+					do {
+						silhouette = &m_simplex[silhouette->m_adjancentFace[adjacentIndex]];
+						adjacentIndex = (DG_GETADJACENTINDEX_VERTEX(silhouette, i0)); 
+					} while (!silhouette->m_isActive);
+
+				} while ((silhouette != lastSilhouette) || (silhouette->m_vertex[adjacentIndex ? adjacentIndex - 1 : 2] != lastSilhouetteVertex));
+				firstFace->m_adjancentFace[2] = dgInt16 (prevEdgeIndex);
+				prevFace->m_adjancentFace[1] = dgInt16 (firstFace - m_simplex);
+
+
+				for (i = 0; i < deadCount; i ++) {
+					if (!deadFaces[i]->m_inHeap){
+						dgMinkFacePurge* const nextPurge = (dgMinkFacePurge*) deadFaces[i];
+						nextPurge->m_next = m_facePurge;
+						m_facePurge = nextPurge;
+					}
+				}
+
+				while (heapSort.GetCount() && (!heapSort[0]->m_isActive)) {
+					face = heapSort[0];
+					heapSort.Pop();
+					dgMinkFacePurge* const nextPurge = (dgMinkFacePurge*) face;
+					nextPurge->m_next = m_facePurge;
+					m_facePurge = nextPurge;
+				}
+
+				for (i = 0; i < silhouetteCapCount; i ++) {
+					face = sillueteCap[i].m_face;
+					*sillueteCap[i].m_faceCopling = dgInt16 (face - m_simplex);
+
+					if (CalcFacePlane (face)) {
+						face->m_inHeap = 1;
+						heapSort.Push(face, face->m_w);
+					}
+				}
+			}
+		} else {
+			_ASSERTE (0);
+			dgMinkFacePurge* const nextPurge = (dgMinkFacePurge*) face;
+			nextPurge->m_next = m_facePurge;
+			m_facePurge = nextPurge;
+		}
+	}
+	return closestFace;
+}
+
+
 dgInt32 dgContactSolver::HullHullContacts (dgInt32 contactID)
 {
 //	dgInt32 i0;
@@ -369,8 +1136,6 @@ dgInt32 dgContactSolver::HullHullContacts (dgInt32 contactID)
 	{
 		case dgMinkIntersecting:
 		{
-			_ASSERTE (0);
-/*
 			if (m_proxi->m_isTriggerVolume) {
 				m_proxi->m_inTriggerVolume = 1;
 			} else {
@@ -380,16 +1145,12 @@ dgInt32 dgContactSolver::HullHullContacts (dgInt32 contactID)
 					_ASSERTE (count <= m_proxi->m_maxContacts);
 				}
 			}
-*/
 			break;
 		}
 
 		case dgMinkDisjoint:
 		{
-			_ASSERTE (0);
-/*
 			_ASSERTE (face);
-
 			if (CalcFacePlane (face)) {
 				//_ASSERTE (face->m_w >= dgFloat32 (0.0f));
 				_ASSERTE (face->m_w >= dgFloat32 (-1.0e-2f));
@@ -398,7 +1159,7 @@ dgInt32 dgContactSolver::HullHullContacts (dgInt32 contactID)
 					dgVector step (*face);
 					step = step.Scale (-(face->m_w + DG_IMPULSIVE_CONTACT_PENETRATION));
 
-					i0 = face->m_vertex[0];
+					dgInt32 i0 = face->m_vertex[0];
 					m_hullVertex[i0] -= step;
 					m_averVertex[i0] += step;
 
@@ -414,14 +1175,14 @@ dgInt32 dgContactSolver::HullHullContacts (dgInt32 contactID)
 						count = 0;
 					}
 
-					contactOut = m_proxi->m_contacts; 
+					dgContactPoint* const contactOut = m_proxi->m_contacts; 
 					for (i0 = 0; i0 < count; i0 ++ ) {
 						contactOut[i0].m_point -= stepWorld ;
 					}
 					return count;
 				}
 			}
-*/
+
 			break;
 		}
 		case dgMinkError:
@@ -786,161 +1547,7 @@ class dgContactSolver
 	}
 
 
-	dgInt32 CalculateConvexShapeIntersectionLine (
-		const dgMatrix& matrix, 
-		const dgVector& shapeNormal, 
-		dgUnsigned32 id,
-		dgFloat32 penetration,
-		dgInt32 shape1VertexCount, 
-		dgVector* const shape1,
-		dgInt32 shape2VertexCount, 
-		dgVector* const shape2,
-		dgContactPoint* const contactOut) const
-	{
-//		dgInt32 i0;
-//		dgInt32 i1;
-//		dgInt32 count;
-//		dgFloat32 den;
-//		dgFloat32 test0;
-//		dgFloat32 test1;
-//		dgVector* ptr;
-//		dgVector* output;
 
-		dgInt32 count = 0;
-		dgVector* output = (dgVector*) &m_hullVertex[shape1VertexCount + shape2VertexCount + 1];
-
-		_ASSERTE (shape1VertexCount >= 3);
-		_ASSERTE (shape2VertexCount <= 2);
-
-		dgVector* ptr = NULL;
-		// face line intersection
-		if (shape2VertexCount == 2) {
-			ptr = (dgVector*)&shape2[0];
-			dgInt32 i0 = shape1VertexCount - 1;
-			for (dgInt32 i1 = 0; i1 < shape1VertexCount; i1 ++) {
-				dgVector n (shapeNormal * (shape1[i1] - shape1[i0]));
-				_ASSERTE ((n % n) > dgFloat32 (0.0f));
-				dgPlane plane (n, - (n % shape1[i0]));
-
-				dgFloat32 test0 = plane.Evalue (ptr[0]);
-				dgFloat32 test1 = plane.Evalue (ptr[1]);
-				//		ForceFloatConsistency ();
-				if (test0 >= dgFloat32 (0.0f)) {
-					if (test1 >= dgFloat32 (0.0f)) {
-						output[count + 0] = ptr[0];
-						output[count + 1] = ptr[1];
-						count += 2;
-					} else {
-						dgVector dp (ptr[1] - ptr[0]);
-						dgFloat32 den = plane % dp;
-						if (dgAbsf(den) < 1.0e-10f) {
-							den = 1.0e-10f;
-						}
-						output[count + 0] = ptr[0];
-						output[count + 1] = ptr[0] - dp.Scale (test0 / den);
-						count += 2;
-					}
-				} else if (test1 >= dgFloat32 (0.0f)) {
-					dgVector dp (ptr[1] - ptr[0]);
-					dgFloat32 den = plane % dp;
-					if (dgAbsf(den) < 1.0e-10f) {
-						den = 1.0e-10f;
-					}
-					output[count] = ptr[0] - dp.Scale (test0 / den);
-					count ++;
-					output[count] = ptr[1];
-					count ++;
-				} else {
-					return 0;
-				}
-
-
-				shape2VertexCount = count;
-				ptr = output;
-				output = &output[count];
-				count = 0;
-				i0 = i1;
-			}
-
-		} else {
-			shape2VertexCount = 0;
-		}
-
-		dgVector normal = matrix.RotateVector(shapeNormal);
-		for (dgInt32 i0 = 0; i0 < shape2VertexCount; i0 ++) {
-			contactOut[i0].m_point = matrix.TransformVector(ptr[i0]);
-			contactOut[i0].m_normal = normal;
-			contactOut[i0].m_penetration = penetration;
-			contactOut[i0].m_userId = id;
-		}
-
-		return shape2VertexCount;
-	}
-
-
-	dgPerimenterEdge *ReduceContacts (dgPerimenterEdge *poly, dgInt32 maxCount) const
-	{
-		//dgPerimenterEdge* ptr;
-		//dgPerimenterEdge* ptr0;
-		dgInt32 buffer [256];
-		dgUpHeap<dgPerimenterEdge*, dgFloat32> heap (buffer, sizeof (buffer));	
-
-		dgInt32 restart = 1;
-		while (restart) {
-			restart = 0;
-			dgPerimenterEdge* ptr0 = poly; 
-			poly = poly->m_next;
-			if (poly->m_next != poly) {
-				heap.Flush();
-				dgPerimenterEdge* ptr = poly; 
-				do {
-					dgFloat32 dist2;
-					dgVector error (*ptr->m_next->m_vertex - *ptr->m_vertex);
-					dist2 = error % error;
-					if (dist2 < DG_MIN_VERTEX_ERROR_2) {
-						ptr0->m_next = ptr->m_next;
-						if (ptr == poly) {
-							poly = ptr0;
-							restart = 1;
-							break;
-						} 
-						ptr = ptr0;
-					} else {
-						heap.Push(ptr, dist2);
-						ptr0 = ptr;
-					}
-
-					ptr = ptr->m_next;
-				} while (ptr != poly);
-			}
-		}
-
-
-		if (heap.GetCount()) {
-			if (maxCount > 8) {
-				maxCount = 8;
-			}
-			while (heap.GetCount() > maxCount) {
-				//dgFloat32 dist2;
-				dgPerimenterEdge* ptr = heap[0];
-				heap.Pop();
-				for (dgInt32 i = 0; i < heap.GetCount(); i ++) {
-					if (heap[i] == ptr->m_next) {
-						heap.Remove(i);
-						break;
-					}
-				}
-
-				ptr->m_next = ptr->m_next->m_next;
-				dgVector error (*ptr->m_next->m_vertex - *ptr->m_vertex);
-				dgFloat32 dist2 = error % error;
-				heap.Push(ptr, dist2);
-			}
-			poly = heap[0];
-		}
-
-		return poly;
-	}
 
 
 
@@ -1350,181 +1957,6 @@ class dgContactSolver
 	}
 
 
-	dgInt32 CalculateConvexShapeIntersection (
-		const dgMatrix& matrix, 
-		const dgVector& shapeNormal, 
-		dgUnsigned32 id,
-		dgFloat32 penetration,
-		dgInt32 shape1VertexCount, 
-		dgVector* const shape1,
-		dgInt32 shape2VertexCount, 
-		dgVector* const shape2,
-		dgContactPoint* const contactOut,
-		dgInt32 maxContacts) const
-	{
-
-		dgInt32 count = 0;
-		if (shape2VertexCount <= 2) {
-			count = CalculateConvexShapeIntersectionLine (matrix, shapeNormal, id, penetration, 
-														  shape1VertexCount, shape1, shape2VertexCount, shape2, contactOut);
-
-			if (count > maxContacts) {
-				count = maxContacts;
-			}
-		} else if (shape1VertexCount <= 2) {
-			count = CalculateConvexShapeIntersectionLine (matrix, shapeNormal, id, penetration, 
-														  shape2VertexCount, shape2, shape1VertexCount, shape1, contactOut);
-			if (count > maxContacts) {
-				count = maxContacts;
-			}
-
-		} else {
-			dgPerimenterEdge *edgeClipped[2];
-			dgPerimenterEdge subdivision[128];
-			
-			_ASSERTE (shape1VertexCount >= 3);
-			_ASSERTE (shape2VertexCount >= 3);
-			dgVector* output = (dgVector*) &m_hullVertex[shape1VertexCount + shape2VertexCount];
-
-			//ptr = NULL;
-			_ASSERTE ((shape1VertexCount + shape2VertexCount) < sizeof (subdivision) / (2 * sizeof (subdivision[0])));
-			for (dgInt32 i0 = 0; i0 < shape2VertexCount; i0 ++) {
-				subdivision[i0].m_vertex = &shape2[i0];
-				subdivision[i0].m_prev = &subdivision[i0 - 1];
-				subdivision[i0].m_next = &subdivision[i0 + 1];
-			}
-			//i0 --;
-			//subdivision[0].m_prev = &subdivision[i0];
-			//subdivision[i0].m_next = &subdivision[0];
-			subdivision[0].m_prev = &subdivision[shape2VertexCount - 1];
-			subdivision[shape2VertexCount - 1].m_next = &subdivision[0];
-
-			dgPerimenterEdge* poly = &subdivision[0];
-			edgeClipped[0] = NULL;
-			edgeClipped[1] = NULL;
-			dgInt32 i0 = shape1VertexCount - 1;
-			dgInt32 edgeIndex = shape2VertexCount;
-			for (dgInt32 i1 = 0; i1 < shape1VertexCount; i1 ++) {
-				dgVector n (shapeNormal * (shape1[i1] - shape1[i0]));
-				dgPlane plane (n, - (n % shape1[i0]));
-				i0 = i1;
-
-				count = 0;
-				dgPerimenterEdge* tmp = poly;
-				dgInt32 isInside = 0;
-				dgFloat32 test0 = plane.Evalue (*tmp->m_vertex);
-				do {
-					dgFloat32 test1 = plane.Evalue (*tmp->m_next->m_vertex);
-					if (test0 >= dgFloat32 (0.0f)) {
-						isInside |= 1;
-						if (test1 < dgFloat32 (0.0f)) {
-							const dgVector& p0 = *tmp->m_vertex;
-							const dgVector& p1 = *tmp->m_next->m_vertex;
-							dgVector dp (p1 - p0); 
-							dgFloat32 den = plane % dp;
-							if (dgAbsf(den) < dgFloat32 (1.0e-24f)) {
-								den = dgFloat32 (1.0e-24f) * ((den > dgFloat32 (0.0f)) ? dgFloat32 (1.0f) : dgFloat32 (-1.0f));
-							}
-							
-							den = test0 / den;
-							if (den >= dgFloat32 (0.0f)) {
-								den = dgFloat32 (0.0f);
-							} else if (den <= -1.0f) {
-								den = dgFloat32 (-1.0f);
-							}
-							output[0] = p0 - dp.Scale (den);
-							edgeClipped[0] = tmp;
-							count ++;
-						}
-					} else if (test1 >= dgFloat32 (0.0f)) {
-						const dgVector& p0 = *tmp->m_vertex;
-						const dgVector& p1 = *tmp->m_next->m_vertex;
-						isInside |= 1;
-						dgVector dp (p1 - p0); 
-						dgFloat32 den = plane % dp;
-						if (dgAbsf(den) < dgFloat32 (1.0e-24f)) {
-							den = dgFloat32 (1.0e-24f) * (den > dgFloat32 (0.0f)) ? dgFloat32 (1.0f) : dgFloat32 (-1.0f);
-						}
-						den = test0 / den;
-						if (den >= dgFloat32 (0.0f)) {
-							den = dgFloat32 (0.0f);
-						} else if (den <= -1.0f) {
-							den = dgFloat32 (-1.0f);
-						}
-						output[1] = p0 - dp.Scale (den);
-						edgeClipped[1] = tmp;
-						count ++;
-					}
-					test0 = test1;
-					tmp = tmp->m_next;
-				} while (tmp != poly && (count < 2));
-
-				if (!isInside) {
-					return 0;
-				}
-
-				if (count == 2) {
-					dgPerimenterEdge* const newEdge = &subdivision[edgeIndex];
-					newEdge->m_next = edgeClipped[1];
-					newEdge->m_prev = edgeClipped[0];
-					edgeClipped[0]->m_next = newEdge;
-					edgeClipped[1]->m_prev = newEdge;
-
-					newEdge->m_vertex = &output[0];
-					edgeClipped[1]->m_vertex = &output[1];
-					poly = newEdge;
-
-					output += 2;
-					edgeIndex ++;
-					_ASSERTE (edgeIndex < sizeof (subdivision) / sizeof (subdivision[0]));
-					//_ASSERTE (CheckNormal (poly, shapeNormal));
-				}
-			}
-
-			_ASSERTE (poly);
-
-#ifdef _DEBUG
-			{
-				dgVector p0;
-				dgVector p1;
-				m_referenceCollision->CalcAABB (dgGetIdentityMatrix(), p0, p1);
-				p0-= dgVector (2.5f, 2.5f, 2.5f, 0.0f);
-				p1+= dgVector (2.5f, 2.5f, 2.5f, 0.0f);
-				dgPerimenterEdge *tmp;
-				tmp = poly;
-				do {
-					dgVector p (*tmp->m_vertex);
-					_ASSERTE (p.m_x >= p0.m_x);
-					_ASSERTE (p.m_y >= p0.m_y);
-					_ASSERTE (p.m_z >= p0.m_z);
-					_ASSERTE (p.m_x <= p1.m_x);
-					_ASSERTE (p.m_y <= p1.m_y);
-					_ASSERTE (p.m_z <= p1.m_z);
-					tmp = tmp->m_next;
-				} while (tmp != poly);
-			}
-#endif
-
-			_ASSERTE (poly);
-			poly = ReduceContacts (poly, maxContacts);
-
-			//dgPerimenterEdge *intersection;
-			count = 0;
-			dgPerimenterEdge* intersection = poly;
-			dgVector normal = matrix.RotateVector(shapeNormal);
-			do {
-				contactOut[count].m_point = matrix.TransformVector(*intersection->m_vertex);
-				contactOut[count].m_normal = normal;
-				contactOut[count].m_penetration = penetration;
-				contactOut[count].m_userId = id;
-				count ++;
-				intersection = intersection->m_next;
-			} while (intersection != poly);
-
-		}
-
-		return count;
-	}
 
 
 
@@ -1671,138 +2103,6 @@ class dgContactSolver
 #endif
 	}
 
-	dgInt32 CalculateContacts(dgMinkFace* const face, dgInt32 contacID, dgContactPoint* const contactOut, dgInt32 maxContacts)
-	{
-		dgInt32 count = 0;
-		// Get the contact form the last face
-		const dgPlane& plane = *face;
-		dgFloat32 penetration = plane.m_w - m_penetrationPadding;
-		dgFloat32 dist = (plane % m_averVertex[face->m_vertex[0]]) * dgFloat32 (0.5f);
-		const dgPlane clipPlane (plane.Scale(dgFloat32 (-1.0f)), dist);
-
-		dgVector point1 (clipPlane.Scale (-clipPlane.m_w));
-		dgVector* const shape1 = m_hullVertex;
-		dgInt32 count1 = m_referenceCollision->CalculatePlaneIntersection (clipPlane, point1, shape1);
-		if (!count1) {
-			dgVector p1 (m_referenceCollision->SupportVertex (clipPlane.Scale (dgFloat32 (-1.0f))));
-			p1 += clipPlane.Scale (DG_ROBUST_PLANE_CLIP);
-			count1 = m_referenceCollision->CalculatePlaneIntersection (clipPlane, p1, shape1);
-			dgVector err (clipPlane.Scale (clipPlane % (point1 - p1)));
-			for (dgInt32 i = 0; i < count1; i ++) {
-				shape1[i] += err;
-			}
-		}
-
-		_ASSERTE (penetration <= dgFloat32 (2.0e-1f));
-		dist = GetMax (- (penetration + DG_IMPULSIVE_CONTACT_PENETRATION), dgFloat32 (0.0f));
-		if (count1) {
-			dgVector* const shape2 = &m_hullVertex[count1];
-			const dgPlane clipPlane2 (m_matrix.UntransformPlane(clipPlane));
-
-			dgVector point2 (clipPlane2.Scale (-clipPlane2.m_w));
-			dgInt32 count2 = m_floatingcollision->CalculatePlaneIntersection (clipPlane2, point2, shape2);
-			if (!count2) {
-				dgVector p2 (m_floatingcollision->SupportVertex (clipPlane2.Scale(dgFloat32 (-1.0f))));
-				p2 += clipPlane2.Scale (DG_ROBUST_PLANE_CLIP);
-				count2 = m_floatingcollision->CalculatePlaneIntersection (clipPlane2, p2, shape2);
-				dgVector err (clipPlane2.Scale (clipPlane2 % (point2 - p2)));
-				for (dgInt32 i = 0; i < count2; i ++) {
-					shape2[i] += err;
-				}
-			}
-
-			if (count2) {
-				_ASSERTE (count1);
-				_ASSERTE (count2);
-
-				if (count1 == 1) {
-					const dgMatrix& matrix1 = m_proxi->m_referenceMatrix;
-					
-					count = 1;
-					contactOut[0].m_point = matrix1.TransformVector (shape1[0]);
-					contactOut[0].m_normal = matrix1.RotateVector (clipPlane);
-					contactOut[0].m_userId = contacID;
-					contactOut[0].m_penetration = dist;
-				} else if (count2 == 1) {
-					const dgMatrix& matrix1 = m_proxi->m_referenceMatrix;
-					//const dgMatrix& matrix2 = m_proxi->m_floatingMatrix;
-
-					count = 1;
-//					contactOut[0].m_point = matrix2.TransformVector (shape2[0]);
-					contactOut[0].m_point =  matrix1.TransformVector (m_matrix.TransformVector(shape2[0]));
-					contactOut[0].m_normal = matrix1.RotateVector (clipPlane);
-					contactOut[0].m_userId = contacID;
-					contactOut[0].m_penetration = dist;
-
-				} else if ((count1 == 2) && (count2 == 2)) {
-					const dgMatrix& matrix1 = m_proxi->m_referenceMatrix;
-					dgVector p0 (shape1[0]); 
-					dgVector p1 (shape1[1]); 
-					dgVector q0 (m_matrix.TransformVector(shape2[0])); 
-					dgVector q1 (m_matrix.TransformVector(shape2[1])); 
-					dgVector p10 (p1 - p0);
-					dgVector q10 (q1 - q0);
-					p10 = p10.Scale (dgFloat32 (1.0f) / dgSqrt (p10 % p10 + dgFloat32 (1.0e-8f)));
-					q10 = q10.Scale (dgFloat32 (1.0f) / dgSqrt (q10 % q10 + dgFloat32 (1.0e-8f)));
-					dgFloat32 dot = q10 % p10;
-					if (dgAbsf (dot) > dgFloat32 (0.998f)) {
-						dgFloat32 pl0 = p0 % p10;
-						dgFloat32 pl1 = p1 % p10;
-						dgFloat32 ql0 = q0 % p10;
-						dgFloat32 ql1 = q1 % p10;
-						if (pl0 > pl1) {
-							Swap (pl0, pl1);
-							Swap (p0, p1);
-							p10 = p10.Scale (dgFloat32 (-1.0f));
-						}
-						if (ql0 > ql1) {
-							Swap (ql0, ql1);
-						}
-						if ( !((ql0 > pl1) && (ql1 < pl0))) {
-							dgFloat32 clip0 = (ql0 > pl0) ? ql0 : pl0;
-							dgFloat32 clip1 = (ql1 < pl1) ? ql1 : pl1;
-
-							count = 2;
-							contactOut[0].m_point = p0 + p10.Scale (clip0 - pl0);
-							contactOut[0].m_normal = matrix1.RotateVector (clipPlane);
-							contactOut[0].m_userId = contacID;
-							contactOut[0].m_penetration = dist;
-
-							contactOut[1].m_point = p0 + p10.Scale (clip1 - pl0);
-							contactOut[1].m_normal = matrix1.RotateVector (clipPlane);
-							contactOut[1].m_userId = contacID;
-							contactOut[1].m_penetration = dist;
-						}
-						
-					} else {
-						dgVector c0;
-						dgVector c1;
-						count = 1;
-						dgRayToRayDistance (p0, p1, q0, q1, c0, c1);
-						contactOut[0].m_point = (c0 + c1).Scale (dgFloat32 (0.5f));
-						contactOut[0].m_normal = matrix1.RotateVector (clipPlane);
-						contactOut[0].m_userId = contacID;
-						contactOut[0].m_penetration = dist;
-					}
-					if (count > maxContacts) {
-						count = maxContacts;
-					}
-					for (dgInt32 i = 0; i < count; i ++) {
-						contactOut[i].m_point = matrix1.TransformVector(contactOut[i].m_point);
-					}
-
-				} else {
-					const dgMatrix& matrix1 = m_proxi->m_referenceMatrix;
-					m_matrix.TransformTriplex(shape2, sizeof (dgVector), shape2, sizeof (dgVector), count2);
-					count = CalculateConvexShapeIntersection (matrix1, clipPlane, dgUnsigned32 (contacID), dist, count1, shape1, count2, shape2, contactOut, maxContacts);
-					if (!count) {
-						count = CalculateContactAlternateMethod(face, contacID, contactOut, maxContacts);
-					}
-				}
-			}
-		}
-		return count;
-	}
 
 
 	inline dgInt32 CalculateContactsContinuesSimd(
@@ -3727,30 +4027,6 @@ class dgContactSolver
 		return CalcFacePlane (face);
 	}
 
-	inline bool CalcFacePlane (dgMinkFace* const face)
-	{
-		dgInt32 i0 = face->m_vertex[0];
-		dgInt32 i1 = face->m_vertex[1];
-		dgInt32 i2 = face->m_vertex[2];
-		
-		dgPlane &plane = *face;
-		plane = dgPlane (m_hullVertex[i0], m_hullVertex[i1], m_hullVertex[i2]);
-
-		bool ret = false;
-		dgFloat32 mag2 = plane % plane;
-
-//		if (mag2 > DG_DISTANCE_TOLERANCE_ZERO) {
-		if (mag2 > dgFloat32 (1.0e-12f)) {
-			ret = true;
-			plane = plane.Scale (dgRsqrt (mag2));
-		} else {
-			//_ASSERTE (0);
-			plane.m_w = dgFloat32 (0.0f);
-		}
-
-		face->m_isActive = 1;
-		return ret;
-	}
 
 
 	inline bool CalcFacePlaneLarge (dgMinkFace* const face)
@@ -3782,19 +4058,6 @@ class dgContactSolver
 	}
 
 
-	inline dgMinkFace *NewFace()
-	{
-		dgMinkFace *face;
-		if (m_facePurge)	{
-			face = (dgMinkFace *)m_facePurge;
-			m_facePurge = m_facePurge->m_next;
-		} else {
-			face = &m_simplex[m_planeIndex];
-			m_planeIndex ++;
-			_ASSERTE (m_planeIndex < sizeof (m_simplex) / sizeof (m_simplex[0]));
-		}
-		return face ;
-	}
 
 	struct SilhouetteFaceCap
 	{
@@ -4127,321 +4390,6 @@ class dgContactSolver
 	}
 
 
-	dgMinkFace *CalculateClipPlane ()
-	{
-		dgInt32 i;
-		dgInt32 i0;
-		dgInt32 i1;
-		dgInt32 i2;
-		dgInt32 stack;
-		dgInt32 cicling;
-		dgInt32 deadCount;
-		dgInt32 adjacentIndex;
-		dgInt32 prevEdgeIndex;
-		dgInt32 silhouetteCapCount;
-		dgInt32 lastSilhouetteVertex;
-
-		dgFloat32 dist;
-		dgFloat32 minValue;
-		dgFloat32 penetration;
-		dgFloat32 ciclingMem[4];
-		dgMinkFace *face;
-		dgMinkFace *adjacent;
-		dgMinkFace *prevFace;
-		dgMinkFace *firstFace;
-		dgMinkFace *silhouette;
-		dgMinkFace *lastSilhouette;
-		dgMinkFace *closestFace;
-		dgMinkFacePurge* nextPurge;
-		dgMinkFace *stackPool[128];
-		dgMinkFace *deadFaces[128];
-		SilhouetteFaceCap sillueteCap[128];
-		dgVector diff[3];
-		dgVector aver[3];
-		dgInt8  buffer[DG_HEAP_EDGE_COUNT * (sizeof (dgFloat32) + sizeof (dgMinkFace *))];
-		dgClosestFace heapSort (buffer, sizeof (buffer));
-
-		m_planeIndex = 4;
-		closestFace = NULL;
-		m_facePurge = NULL;
-		penetration = dgFloat32 (0.0f);
-
-		_ASSERTE (m_vertexIndex == 4);
-		for (i = 0; i < 4; i ++) {
-			face = &m_simplex[i];
-			face->m_inHeap = 0;
-			face->m_isActive = 1;
-			if (CalcFacePlane (face)) {
-				face->m_inHeap = 1;
-				heapSort.Push(face, face->m_w);
-			}
-		}
-
-		cicling = 0;
-		ciclingMem[0] = dgFloat32 (1.0e10f);
-		ciclingMem[1] = dgFloat32 (1.0e10f);
-		ciclingMem[2] = dgFloat32 (1.0e10f);
-		ciclingMem[3] = dgFloat32 (1.0e10f);
-
-		minValue = dgFloat32 ( 1.0e10f);
-		dgPlane bestPlane (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f),dgFloat32 (0.0f));
-		diff[0] = bestPlane;
-		diff[1] = bestPlane;
-		diff[2] = bestPlane;
-		aver[0] = bestPlane;
-		aver[1] = bestPlane;
-		aver[2] = bestPlane;
-		while (heapSort.GetCount()) {
-			face = heapSort[0];
-			face->m_inHeap = 0;
-			heapSort.Pop();
-
-			if (face->m_isActive) {
-				const dgPlane& plane = *face;
-
-				CalcSupportVertex (plane, m_vertexIndex);
-				const dgVector& p = m_hullVertex[m_vertexIndex];
-				dist = plane.Evalue (p);
-				m_vertexIndex ++;
-
-				if (m_vertexIndex > 16) {
-					if (dist < minValue) {
-						if (dist >= dgFloat32 (0.0f)) {
-							minValue = dist;
-							bestPlane = plane;
-
-							i = face->m_vertex[0];
-							diff[0] = m_hullVertex[i];
-							aver[0] = m_averVertex[i];
-
-							i = face->m_vertex[1];
-							diff[1] = m_hullVertex[i];
-							aver[1] = m_averVertex[i];
-
-							i = face->m_vertex[2];
-							diff[2] = m_hullVertex[i];
-							aver[2] = m_averVertex[i];
-						}
-					}
-				}
-
-				ciclingMem[cicling] = dist;
-				cicling = (cicling + 1) & 3;
-				for (i = 0; i < 4; i ++) {
-					if (dgAbsf (dist - ciclingMem[i]) > dgFloat32 (1.0e-6f)) {
-						break;
-					}
-				}
-				if (i == 4) {
-					dist = dgFloat32 (0.0f);
-				}
-
-
-				if ((m_vertexIndex > DG_MINK_MAX_POINTS) ||
-					(m_planeIndex > DG_MINK_MAX_FACES) ||
-					(heapSort.GetCount() > (DG_HEAP_EDGE_COUNT - 24))) {
-
-//					dgTrace (("Max face count overflow, breaking with last best face\n"));
-
-					dgPlane& plane = *face;
-					plane = bestPlane;
-
-					i = face->m_vertex[0];
-					face->m_vertex[0] = 0;
-					m_hullVertex[i] = diff[0];
-					m_averVertex[i] = aver[0];
-
-					i = face->m_vertex[1];
-					face->m_vertex[1] = 1;
-					m_hullVertex[i] = diff[1];
-					m_averVertex[i] = aver[1];
-
-					i = face->m_vertex[2];
-					face->m_vertex[2] = 2;
-					m_hullVertex[i] = diff[2];
-					m_averVertex[i] = aver[2];
-					dist = dgFloat32 (0.0f);
-				}
-
-				if (dist < (dgFloat32 (DG_IMPULSIVE_CONTACT_PENETRATION) / dgFloat32 (16.0f))) {
-					_ASSERTE (m_planeIndex <= DG_MINK_MAX_FACES_SIZE);
-					_ASSERTE (heapSort.GetCount() <= DG_HEAP_EDGE_COUNT);
-					closestFace = face;
-					break;
-				} else if (dist > dgFloat32 (0.0f)) {
-					_ASSERTE (face->m_inHeap == 0);
-
-					stack = 0;
-					deadCount = 1;
-					silhouette = NULL;
-					deadFaces[0] = face;
-					closestFace = face;
-					face->m_isActive = 0;
-					for (i = 0; i < 3; i ++) {
-						adjacent = &m_simplex[face->m_adjancentFace[i]];
-						_ASSERTE (adjacent->m_isActive);
-						dist = adjacent->Evalue (p);  
-						if (dist > dgFloat32 (0.0f)) { 
-							adjacent->m_isActive = 0;
-							stackPool[stack] = adjacent;
-							deadFaces[deadCount] = adjacent;
-							stack ++;
-							deadCount ++;
-						} else {
-							silhouette = adjacent;
-						}
-					}
-					while (stack) {
-						stack --;
-						face = stackPool[stack];
-						for (i = 0; i < 3; i ++) {
-							adjacent = &m_simplex[face->m_adjancentFace[i]];
-							if (adjacent->m_isActive){
-								dist = adjacent->Evalue (p);  
-								if (dist > dgFloat32 (0.0f)) { 
-									adjacent->m_isActive = 0;
-									stackPool[stack] = adjacent;
-									deadFaces[deadCount] = adjacent;
-									stack ++;
-									deadCount ++;
-									_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
-									_ASSERTE (deadCount < sizeof (deadFaces) / sizeof (deadFaces[0]));
-
-								} else {
-									silhouette = adjacent;
-								}
-							}
-						}
-					}
-
-					if (!silhouette) {
-						closestFace = face;
-						break;
-					}
-					// build silhouette						
-					_ASSERTE (silhouette);
-					_ASSERTE (silhouette->m_isActive);
-
-					i2 = (m_vertexIndex - 1);
-					lastSilhouette = silhouette;
-//					_ASSERTE ( (((!m_simplex[silhouette->m_adjancentFace[0]].m_isActive) + 
-//								(!m_simplex[silhouette->m_adjancentFace[1]].m_isActive) +
-//								(!m_simplex[silhouette->m_adjancentFace[2]].m_isActive)) == 1) ||
-//							   (((!m_simplex[silhouette->m_adjancentFace[0]].m_isActive) + 
-//								(!m_simplex[silhouette->m_adjancentFace[1]].m_isActive) +
-//								(!m_simplex[silhouette->m_adjancentFace[2]].m_isActive)) == 2));
-					_ASSERTE ((silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[1]) &&
-						      (silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[2]) &&
-							  (silhouette->m_adjancentFace[1] != silhouette->m_adjancentFace[2]));
-
-
-					adjacentIndex = DG_GETADJACENTINDEX_ACTIVE (silhouette);
-					face = NewFace();
-					i0 = silhouette->m_vertex[adjacentIndex];
-					i1 = silhouette->m_vertex[adjacentIndex + 1];
-
-					face->m_vertex[0] = dgInt16 (i1);
-					face->m_vertex[1] = dgInt16 (i0);
-					face->m_vertex[2] = dgInt16 (i2);
-					face->m_vertex[3] = face->m_vertex[0];
-					face->m_adjancentFace[0] = dgInt16 (silhouette - m_simplex);
-					face->m_inHeap = 0; 
-					face->m_isActive = 1; 
-
-					sillueteCap[0].m_face = face;
-					sillueteCap[0].m_faceCopling = &silhouette->m_adjancentFace[adjacentIndex];
-					silhouetteCapCount = 1;
-					_ASSERTE (silhouetteCapCount < (sizeof (sillueteCap) / sizeof (sillueteCap[0])));
-					do {
-						silhouette = &m_simplex[silhouette->m_adjancentFace[adjacentIndex]];
-						adjacentIndex = (DG_GETADJACENTINDEX_VERTEX(silhouette, i0)); 
-					} while (!silhouette->m_isActive);
-
-					prevFace = face;
-					firstFace = face;
-					lastSilhouetteVertex = i0;
-					prevEdgeIndex = dgInt32 (face - m_simplex);
-					do {
-//						_ASSERTE ( (((!m_simplex[silhouette->m_adjancentFace[0]].m_isActive) + 
-//									(!m_simplex[silhouette->m_adjancentFace[1]].m_isActive) +
-//									(!m_simplex[silhouette->m_adjancentFace[2]].m_isActive)) == 1) ||
-//									(((!m_simplex[silhouette->m_adjancentFace[0]].m_isActive) + 
-//									(!m_simplex[silhouette->m_adjancentFace[1]].m_isActive) +
-//									(!m_simplex[silhouette->m_adjancentFace[2]].m_isActive)) == 2));
-						_ASSERTE ((silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[1]) &&
-									(silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[2]) &&
-									(silhouette->m_adjancentFace[1] != silhouette->m_adjancentFace[2]));
-
-						
-						adjacentIndex = adjacentIndex ? adjacentIndex - 1 : 2;
-
-						face = NewFace();
-						i0 = silhouette->m_vertex[adjacentIndex];
-						i1 = silhouette->m_vertex[adjacentIndex + 1];
-						
-						face->m_vertex[0] = dgInt16 (i1);
-						face->m_vertex[1] = dgInt16 (i0);
-						face->m_vertex[2] = dgInt16 (i2);
-						face->m_vertex[3] = face->m_vertex[0];
-						face->m_adjancentFace[0] = dgInt16 (silhouette - m_simplex);
-						face->m_adjancentFace[2] = dgInt16 (prevEdgeIndex);
-						face->m_inHeap = 0; 
-						face->m_isActive = 1; 
-
-						prevEdgeIndex = dgInt32 (face - m_simplex);
-						prevFace->m_adjancentFace[1] = dgInt16 (prevEdgeIndex);
-						prevFace = face;
-						
-						sillueteCap[silhouetteCapCount].m_face = face;
-						sillueteCap[silhouetteCapCount].m_faceCopling = &silhouette->m_adjancentFace[adjacentIndex];
-						silhouetteCapCount ++;
-						_ASSERTE (silhouetteCapCount < (sizeof (sillueteCap) / sizeof (sillueteCap[0])));
-
-						do {
-							silhouette = &m_simplex[silhouette->m_adjancentFace[adjacentIndex]];
-							adjacentIndex = (DG_GETADJACENTINDEX_VERTEX(silhouette, i0)); 
-						} while (!silhouette->m_isActive);
-
-					} while ((silhouette != lastSilhouette) || (silhouette->m_vertex[adjacentIndex ? adjacentIndex - 1 : 2] != lastSilhouetteVertex));
-					firstFace->m_adjancentFace[2] = dgInt16 (prevEdgeIndex);
-					prevFace->m_adjancentFace[1] = dgInt16 (firstFace - m_simplex);
-
-
-					for (i = 0; i < deadCount; i ++) {
-						if (!deadFaces[i]->m_inHeap){
-							nextPurge = (dgMinkFacePurge*) deadFaces[i];
-							nextPurge->m_next = m_facePurge;
-							m_facePurge = nextPurge;
-						}
-					}
-
-					while (heapSort.GetCount() && (!heapSort[0]->m_isActive)) {
-						face = heapSort[0];
-						heapSort.Pop();
-						nextPurge = (dgMinkFacePurge*) face;
-						nextPurge->m_next = m_facePurge;
-						m_facePurge = nextPurge;
-					}
-
-					for (i = 0; i < silhouetteCapCount; i ++) {
-						face = sillueteCap[i].m_face;
-						*sillueteCap[i].m_faceCopling = dgInt16 (face - m_simplex);
-
-						if (CalcFacePlane (face)) {
-							face->m_inHeap = 1;
-							heapSort.Push(face, face->m_w);
-						}
-					}
-				}
-			} else {
-				_ASSERTE (0);
-				nextPurge = (dgMinkFacePurge*) face;
-				nextPurge->m_next = m_facePurge;
-				m_facePurge = nextPurge;
-			}
-		}
-		return closestFace;
-	}
 
 
 
@@ -5341,74 +5289,7 @@ class dgContactSolver
 
 	}
 
-
-	dgMatrix m_matrix;
-	dgVector m_localRelVeloc;
-	dgVector m_floatingBodyVeloc;
-	dgVector m_referenceBodyVeloc;
-	dgVector m_hullVertex[DG_MINK_MAX_POINTS_SIZE * 2];
-	dgVector m_averVertex[DG_MINK_MAX_POINTS_SIZE * 2];
-	dgMinkFace m_simplex[DG_MINK_MAX_FACES_SIZE * 2];
-
-	dgInt32 m_planeIndex;
-	dgInt32 m_vertexIndex;
-	dgFloat32 m_penetrationPadding;
-	dgBody* m_floatingBody; 
-	dgBody* m_referenceBody; 
-	dgCollisionConvex* m_floatingcollision;
-	dgCollisionConvex* m_referenceCollision;
-	dgCollisionParamProxi* m_proxi;
-	dgMinkFacePurge *m_facePurge;
-
-//	dgMinkFaceLarge* const m_simplexLarge;
-	dgBigVector* m_hullVertexLarge;
-	dgBigVector* m_averVertexLarge;
-
-	dgMinkReturnCode m_lastFaceCode;
-
-#ifdef DG_BUILD_SIMD_CODE
-	static simd_type m_zero;
-	static simd_type m_nrh0p5;
-	static simd_type m_nrh3p0;
-	static simd_type m_negIndex;
-	static simd_type m_index_yx;
-	static simd_type m_index_wz;
-	static simd_type m_negativeOne;
-	static simd_type m_zeroTolerenace;
-#endif
-
-	static dgVector m_dir[14];
-	static dgInt32 m_faceIndex[][4];
-
-	friend class dgWorld;
 }DG_GCC_VECTOR_ALIGMENT;
-
-
-#ifdef DG_BUILD_SIMD_CODE
-simd_type dgContactSolver::m_zero;
-simd_type dgContactSolver::m_nrh0p5;
-simd_type dgContactSolver::m_nrh3p0;
-simd_type dgContactSolver::m_negIndex;
-simd_type dgContactSolver::m_index_yx;
-simd_type dgContactSolver::m_index_wz;
-simd_type dgContactSolver::m_negativeOne;
-simd_type dgContactSolver::m_zeroTolerenace;
-#endif
-
-dgVector dgContactSolver::m_dir[14];
-
-dgInt32 dgContactSolver::m_faceIndex[][4] =
-{ 
-	{0, 1, 2, 3},
-	{1, 0, 3, 2},
-	{0, 2, 3, 1},
-	{2, 1, 3, 0},
-};
-
-
-
-
-
 
 dgInt32 dgWorld::SphereSphereCollision (
 	const dgVector& sph0, 
