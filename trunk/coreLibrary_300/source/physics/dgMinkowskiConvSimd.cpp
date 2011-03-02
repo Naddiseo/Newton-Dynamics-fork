@@ -307,7 +307,6 @@ dgInt32 dgContactSolver::CalculateConvexShapeIntersectionSimd (const dgMatrix& m
 
 void dgContactSolver::CalcSupportVertexSimd (const dgVector& dir, dgInt32 entry)
 {
-
 	_ASSERTE ((dir % dir) > dgFloat32 (0.999f));
 	dgVector p (m_referenceCollision->SupportVertexSimd (dir));
 	dgVector dir1 (m_matrix.UnrotateVectorSimd(simd_mul_v ((simd_type&)dir, m_negativeOne)));
