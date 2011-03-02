@@ -3890,7 +3890,9 @@ dgInt32 dgWorld::CalculateHullToHullContacts (dgCollisionParamProxy& proxy) cons
 	return mink.HullHullContactsLarge (0);
 #else
 	if ((radiusA * dgFloat64 (32.0f) < radiusB) || (radiusB * dgFloat64 (32.0f) < radiusA)) {
-		return mink.HullHullContactsLarge (0);
+		_ASSERTE (0);
+		return 0;
+//		return mink.HullHullContactsLarge (0);
 	} else {
 		return mink.HullHullContacts (0);
 	}

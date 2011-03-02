@@ -22,9 +22,7 @@
 #ifndef __dgMinkowskiConv__
 #define __dgMinkowskiConv__
 
-#define NEW_MINK
 
-#ifdef NEW_MINK
 #define DG_MINK_MAX_FACES								64
 #define DG_MINK_MAX_FACES_SIZE							(DG_MINK_MAX_FACES + 16)
 #define DG_MINK_MAX_POINTS								64
@@ -166,7 +164,7 @@ class dgContactSolver
 	dgContactSolver(dgCollisionParamProxy& proxy);
 	dgContactSolver(dgCollisionParamProxy& proxy, dgCollision *polygon);
 	dgContactSolver& operator= (const dgContactSolver& me);
-
+	
 	dgInt32 HullHullContactsSimd (dgInt32 contactID);
 	dgInt32 HullHullContacts (dgInt32 contactID);
 	dgInt32 HullHullContactsLarge (dgInt32 contactID);
@@ -238,6 +236,45 @@ inline bool dgContactSolver::CheckTetraHedronVolumeLarge () const
 	return (volume >= dgFloat32 (0.0f));
 }
 
-#endif
+inline dgContactSolver::dgMinkFace* dgContactSolver::NewFace()
+{
+	dgMinkFace *face;
+	if (m_facePurge)	{
+		face = (dgMinkFace *)m_facePurge;
+		m_facePurge = m_facePurge->m_next;
+	} else {
+		face = &m_simplex[m_planeIndex];
+		m_planeIndex ++;
+		_ASSERTE (m_planeIndex < sizeof (m_simplex) / sizeof (m_simplex[0]));
+	}
+	return face ;
+}
+
+inline bool dgContactSolver::CalcFacePlane (dgMinkFace* const face)
+{
+	dgInt32 i0 = face->m_vertex[0];
+	dgInt32 i1 = face->m_vertex[1];
+	dgInt32 i2 = face->m_vertex[2];
+
+	dgPlane &plane = *face;
+	plane = dgPlane (m_hullVertex[i0], m_hullVertex[i1], m_hullVertex[i2]);
+
+	bool ret = false;
+	dgFloat32 mag2 = plane % plane;
+
+	//if (mag2 > DG_DISTANCE_TOLERANCE_ZERO) {
+	if (mag2 > dgFloat32 (1.0e-12f)) {
+		ret = true;
+		plane = plane.Scale (dgRsqrt (mag2));
+	} else {
+		//_ASSERTE (0);
+		plane.m_w = dgFloat32 (0.0f);
+	}
+
+	face->m_isActive = 1;
+	return ret;
+}
+
+
 #endif
 

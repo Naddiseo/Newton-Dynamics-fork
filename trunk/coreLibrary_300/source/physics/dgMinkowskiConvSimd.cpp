@@ -31,7 +31,7 @@
 #include "dgCollisionCapsule.h"
 #include "dgWorldDynamicUpdate.h"
 
-#ifdef NEW_MINK
+
 simd_type dgContactSolver::m_zero;
 simd_type dgContactSolver::m_nrh0p5;
 simd_type dgContactSolver::m_nrh3p0;
@@ -42,4 +42,4 @@ simd_type dgContactSolver::m_negativeOne;
 simd_type dgContactSolver::m_zeroTolerenace;
 
 
-#endif
+
