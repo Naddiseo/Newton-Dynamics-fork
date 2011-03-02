@@ -717,7 +717,7 @@ dgInt32 dgWorld::ClosestPoint(
 
 	} else if (collisionA->IsType (dgCollision::dgConvexCollision_RTTI) && collisionB->IsType (dgCollision::dgConvexCollision_RTTI)) {
 		dgInt32 flag;
-		dgCollisionParamProxi proxi(threadIndex);
+		dgCollisionParamProxy proxi(threadIndex);
 		dgContactPoint contacts[16];
 
 		proxi.m_referenceBody = &collideBodyA;
@@ -786,7 +786,7 @@ dgInt32 dgWorld::ClosestCompoundPoint (
 	retFlag = 0;
 	if (collisionB->m_collision->IsType (dgCollision::dgConvexCollision_RTTI)) {
 		dgFloat32 minDist2;
-		dgCollisionParamProxi proxi(threadIndex);
+		dgCollisionParamProxy proxi(threadIndex);
 		dgContactPoint contacts[16];
 
 		proxi.m_referenceBody = compoundConvexA;
@@ -828,7 +828,7 @@ dgInt32 dgWorld::ClosestCompoundPoint (
 	} else {
 		dgInt32 count1;
 		dgFloat32 minDist2;
-		dgCollisionParamProxi proxi(threadIndex);
+		dgCollisionParamProxy proxi(threadIndex);
 		dgContactPoint contacts[16];
 		dgMatrix* collisionMatrixArray1;
 		dgCollisionConvex** collisionArray1;
@@ -1425,7 +1425,7 @@ dgInt32 dgWorld::ValidateContactCache (dgBody* const convexBody, dgBody* const o
 
 
 
-void dgWorld::CompoundContactsSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
+void dgWorld::CompoundContactsSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi) const
 {
 	_ASSERTE(0);
 /*
@@ -1468,7 +1468,7 @@ void dgWorld::CompoundContactsSimd (dgCollidingPairCollector::dgPair* const pair
 }
 
 
-void dgWorld::CompoundContacts (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
+void dgWorld::CompoundContacts (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi) const
 {
 	_ASSERTE(0);
 /*
@@ -1512,7 +1512,7 @@ void dgWorld::CompoundContacts (dgCollidingPairCollector::dgPair* const pair, dg
 
 
 
-void dgWorld::ConvexContactsSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
+void dgWorld::ConvexContactsSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi) const
 {
 	_ASSERTE(0);
 /*
@@ -1582,7 +1582,7 @@ void dgWorld::ConvexContactsSimd (dgCollidingPairCollector::dgPair* const pair, 
 }
 
 
-void dgWorld::ConvexContacts (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
+void dgWorld::ConvexContacts (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi) const
 {
 //	dgInt32 contactCount = 0;
 	dgContact* const constraint = pair->m_contact;
@@ -1641,7 +1641,7 @@ void dgWorld::ConvexContacts (dgCollidingPairCollector::dgPair* const pair, dgCo
 
 
 
-void dgWorld::SceneContactsSimd (const dgCollisionScene::dgProxy& sceneProxy, dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
+void dgWorld::SceneContactsSimd (const dgCollisionScene::dgProxy& sceneProxy, dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi) const
 {
 	_ASSERTE(0);
 /*
@@ -1675,7 +1675,7 @@ void dgWorld::SceneContactsSimd (const dgCollisionScene::dgProxy& sceneProxy, dg
 }
 
 
-void dgWorld::SceneContacts (const dgCollisionScene::dgProxy& sceneProxy, dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
+void dgWorld::SceneContacts (const dgCollisionScene::dgProxy& sceneProxy, dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi) const
 {
 
 	_ASSERTE (pair->m_body1->GetCollision()->IsType(dgCollision::dgCollisionScene_RTTI));
@@ -1710,7 +1710,7 @@ void dgWorld::SceneContacts (const dgCollisionScene::dgProxy& sceneProxy, dgColl
 	proxi.m_contacts = savedBuffer;
 }
 
-void dgWorld::SceneContacts (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
+void dgWorld::SceneContacts (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi) const
 {
 	dgContact* const constraint = pair->m_contact;
 
@@ -1761,7 +1761,7 @@ void dgWorld::SceneContacts (dgCollidingPairCollector::dgPair* const pair, dgCol
 }
 
 
-void dgWorld::SceneContactsSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
+void dgWorld::SceneContactsSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi) const
 {
 	_ASSERTE(0);
 /*
@@ -1825,7 +1825,7 @@ void dgWorld::CalculateContactsSimd (dgCollidingPairCollector::dgPair* const pai
 	dgBody* body1;
 	const dgContactMaterial* material;
 
-	dgCollisionParamProxi proxi(threadIndex);
+	dgCollisionParamProxy proxi(threadIndex);
 
 	body0 = pair->m_body0;
 	body1 = pair->m_body1;
@@ -1862,7 +1862,7 @@ void dgWorld::CalculateContactsSimd (dgCollidingPairCollector::dgPair* const pai
 
 void dgWorld::CalculateContacts (dgCollidingPairCollector::dgPair* const pair, dgContactPoint* const contactBuffer, dgFloat32 timestep, dgInt32 threadIndex)
 {
-	dgCollisionParamProxi proxi(threadIndex);
+	dgCollisionParamProxy proxi(threadIndex);
 
 	dgBody* const body0 = pair->m_body0;
 	dgBody* const body1 = pair->m_body1;
@@ -1958,7 +1958,7 @@ return 0;
 	collideBodyB.m_invMass = dgVector (dgFloat32 (1.0f), dgFloat32 (1.0f), dgFloat32 (1.0f), dgFloat32 (1.0f));
 	collideBodyB.UpdateCollisionMatrixSimd(dgFloat32 (1.0f), 0);
 
-	dgCollisionParamProxi proxi(threadIndex);
+	dgCollisionParamProxy proxi(threadIndex);
 	proxi.m_timestep = dgFloat32 (1.0f);
 	proxi.m_unconditionalCast = 1;
 	proxi.m_penetrationPadding = 0.0f;
@@ -2083,7 +2083,7 @@ return 0;
 	collideBodyB.m_invMass = dgVector (dgFloat32 (1.0f), dgFloat32 (1.0f), dgFloat32 (1.0f), dgFloat32 (1.0f));
 	collideBodyB.UpdateCollisionMatrix(dgFloat32 (1.0f), 0);
 
-	dgCollisionParamProxi proxi(threadIndex);
+	dgCollisionParamProxy proxi(threadIndex);
 	proxi.m_timestep = dgFloat32 (1.0f);
 	proxi.m_unconditionalCast = 1;
 	proxi.m_penetrationPadding = 0.0f;
@@ -2195,7 +2195,7 @@ return 0;
 	isTriggerA = collisionA->IsTriggerVolume();
 	isTriggerB = collisionB->IsTriggerVolume();
 
-	dgCollisionParamProxi proxi(threadIndex);
+	dgCollisionParamProxy proxi(threadIndex);
 	proxi.m_timestep = dgFloat32 (0.0f);
 	proxi.m_unconditionalCast = 1;
 	proxi.m_penetrationPadding = 0.0f;

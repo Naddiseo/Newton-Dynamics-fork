@@ -4688,7 +4688,7 @@ class dgContactSolver
 
 
 	public:
-	inline dgContactSolver(dgCollisionParamProxi& proxi, dgCollision *polygon)
+	inline dgContactSolver(dgCollisionParamProxy& proxi, dgCollision *polygon)
 		:m_matrix (*proxi.m_localMatrixInv) 
 //		 m_simplexLarge ((dgMinkFaceLarge*) m_simplex),
 //		 m_hullVertexLarge ((dgBigVector*) m_hullVertex),
@@ -4717,7 +4717,7 @@ class dgContactSolver
 	}
 
 
-	inline dgContactSolver(dgCollisionParamProxi& proxi)
+	inline dgContactSolver(dgCollisionParamProxy& proxi)
 		:m_matrix (*proxi.m_localMatrixInv)
 //		 m_simplexLarge ((dgMinkFaceLarge*) m_simplex),
 //		 m_hullVertexLarge ((dgBigVector*) m_hullVertex),
@@ -5365,7 +5365,7 @@ class dgContactSolver
 	dgBody* m_referenceBody; 
 	dgCollisionConvex* m_floatingcollision;
 	dgCollisionConvex* m_referenceCollision;
-	dgCollisionParamProxi* m_proxi;
+	dgCollisionParamProxy* m_proxi;
 	dgMinkFacePurge *m_facePurge;
 
 //	dgMinkFaceLarge* const m_simplexLarge;
@@ -5538,7 +5538,7 @@ dgInt32 dgWorld::SphereSphereCollision (
 	dgFloat32 radius0, 
 	const dgVector& sph1, 
 	dgFloat32 radius1,   
-	dgCollisionParamProxi& proxi) const
+	dgCollisionParamProxy& proxi) const
 {
 	dgFloat32 dist;
 	dgFloat32 mag2;
@@ -5591,7 +5591,7 @@ dgInt32 dgWorld::SphereSphereCollision (
 
 
 
-dgInt32 dgWorld::CalculateSphereToSphereContacts (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculateSphereToSphereContacts (dgCollisionParamProxy& proxi) const
 {
 	dgFloat32 radius1;
 	dgFloat32 radius2;
@@ -5612,7 +5612,7 @@ dgInt32 dgWorld::CalculateSphereToSphereContacts (dgCollisionParamProxi& proxi) 
 	return SphereSphereCollision (center1, radius1, center2, radius2, proxi); 
 }
 
-dgInt32 dgWorld::CalculateCapsuleToSphereContacts (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculateCapsuleToSphereContacts (dgCollisionParamProxy& proxi) const
 {
 	dgFloat32 sphereRadius;
 	dgFloat32 capsuleRadius;
@@ -5635,7 +5635,7 @@ dgInt32 dgWorld::CalculateCapsuleToSphereContacts (dgCollisionParamProxi& proxi)
 	return SphereSphereCollision (point, capsuleRadius, sphereCenter, sphereRadius, proxi); 
 }
 
-dgInt32 dgWorld::CalculateCapsuleToCapsuleContacts (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculateCapsuleToCapsuleContacts (dgCollisionParamProxy& proxi) const
 {
 	dgInt32 count;
 	dgFloat32 dot;
@@ -5768,7 +5768,7 @@ dgInt32 dgWorld::CalculateCapsuleToCapsuleContacts (dgCollisionParamProxi& proxi
 	return count;
 }
 
-dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxi) const
 {
 	dgInt32 code;
 	dgInt32 codeX;
@@ -6511,7 +6511,7 @@ dgInt32 dgWorld::FlattenContinueContacts (dgInt32 count, dgContactPoint* const c
 //	dgTriplex& contactB, 
 //	dgTriplex& normalAB) const	
 
-dgInt32 dgWorld::ClosestPoint (dgCollisionParamProxi& proxi) const	
+dgInt32 dgWorld::ClosestPoint (dgCollisionParamProxy& proxi) const	
 {
 	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgConvexCollision_RTTI));
 	_ASSERTE (proxi.m_referenceCollision->IsType (dgCollision::dgConvexCollision_RTTI));
@@ -6530,7 +6530,7 @@ dgInt32 dgWorld::ClosestPoint (dgCollisionParamProxi& proxi) const
 // convex contact calculation
 //
 // *******************************************************************************************************
-dgInt32 dgWorld::CalculateHullToHullContactsSimd (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculateHullToHullContactsSimd (dgCollisionParamProxy& proxi) const
 {
 #ifdef DG_BUILD_SIMD_CODE
 	dgFloat32 radiusA;
@@ -6560,7 +6560,7 @@ dgInt32 dgWorld::CalculateHullToHullContactsSimd (dgCollisionParamProxi& proxi) 
 #endif
 }
 
-dgInt32 dgWorld::CalculateHullToHullContacts (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculateHullToHullContacts (dgCollisionParamProxy& proxi) const
 {
 	dgFloat32 radiusA;
 	dgFloat32 radiusB;
@@ -6589,7 +6589,7 @@ dgInt32 dgWorld::CalculateHullToHullContacts (dgCollisionParamProxi& proxi) cons
 
 
 
-dgInt32 dgWorld::CalculateConvexToConvexContactsSimd (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculateConvexToConvexContactsSimd (dgCollisionParamProxy& proxi) const
 {
 	_ASSERTE (0);
 	return 0;
@@ -6672,7 +6672,7 @@ dgInt32 dgWorld::CalculateConvexToConvexContactsSimd (dgCollisionParamProxi& pro
 
 					case m_capsuleCollision:
 					{
-						dgCollisionParamProxi tmp(proxi.m_threadIndex);
+						dgCollisionParamProxy tmp(proxi.m_threadIndex);
 						tmp.m_referenceBody = proxi.m_floatingBody;
 						tmp.m_floatingBody = proxi.m_referenceBody;
 						tmp.m_referenceCollision = proxi.m_floatingCollision;
@@ -6695,7 +6695,7 @@ dgInt32 dgWorld::CalculateConvexToConvexContactsSimd (dgCollisionParamProxi& pro
 
 					case m_boxCollision:
 					{
-						dgCollisionParamProxi tmp(proxi.m_threadIndex);
+						dgCollisionParamProxy tmp(proxi.m_threadIndex);
 
 						tmp.m_referenceBody = proxi.m_floatingBody;
 						tmp.m_floatingBody = proxi.m_referenceBody;
@@ -6801,7 +6801,7 @@ dgInt32 dgWorld::CalculateConvexToConvexContactsSimd (dgCollisionParamProxi& pro
 
 
 
-dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxy& proxi) const
 {
 	_ASSERTE (proxi.m_referenceCollision->IsType (dgCollision::dgConvexCollision_RTTI));
 	_ASSERTE (proxi.m_floatingCollision->IsType (dgCollision::dgConvexCollision_RTTI));
@@ -6877,7 +6877,7 @@ dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) 
 
 					case m_capsuleCollision:
 					{
-						dgCollisionParamProxi tmp(proxi.m_threadIndex);
+						dgCollisionParamProxy tmp(proxi.m_threadIndex);
 						tmp.m_referenceBody = proxi.m_floatingBody;
 						tmp.m_floatingBody = proxi.m_referenceBody;
 						tmp.m_referenceCollision = proxi.m_floatingCollision;
@@ -6900,7 +6900,7 @@ dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) 
 
 					case m_boxCollision:
 					{
-						dgCollisionParamProxi tmp(proxi.m_threadIndex);
+						dgCollisionParamProxy tmp(proxi.m_threadIndex);
 
 						tmp.m_referenceBody = proxi.m_floatingBody;
 						tmp.m_floatingBody = proxi.m_referenceBody;
@@ -7013,7 +7013,7 @@ dgInt32 dgWorld::CalculateConvexToConvexContacts (dgCollisionParamProxi& proxi) 
 // non convex contact calculation
 //
 // *******************************************************************************************************
-dgInt32 dgWorld::CalculatePolySoupToSphereContactsDescrete (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculatePolySoupToSphereContactsDescrete (dgCollisionParamProxy& proxi) const
 {
 	dgInt32 count;
 	dgInt32 count1;
@@ -7126,7 +7126,7 @@ dgInt32 dgWorld::CalculatePolySoupToSphereContactsDescrete (dgCollisionParamProx
 }
 
 
-dgInt32 dgWorld::CalculatePolySoupToElipseContactsDescrete (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculatePolySoupToElipseContactsDescrete (dgCollisionParamProxy& proxi) const
 {
 	dgInt32 count;
 	dgInt32 count1;
@@ -7247,7 +7247,7 @@ dgInt32 dgWorld::CalculatePolySoupToElipseContactsDescrete (dgCollisionParamProx
 	return count;
 }
 
-dgInt32 dgWorld::CalculatePolySoupToSphereContactsContinue (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculatePolySoupToSphereContactsContinue (dgCollisionParamProxy& proxi) const
 {
 	dgInt32 count;
 	dgInt32 count1;
@@ -7369,7 +7369,7 @@ dgInt32 dgWorld::CalculatePolySoupToSphereContactsContinue (dgCollisionParamProx
 }
 
 
-dgInt32 dgWorld::CalculatePolySoupToHullContactsDescreteSimd (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculatePolySoupToHullContactsDescreteSimd (dgCollisionParamProxy& proxi) const
 {
 
 #ifdef DG_BUILD_SIMD_CODE
@@ -7473,7 +7473,7 @@ dgInt32 dgWorld::CalculatePolySoupToHullContactsDescreteSimd (dgCollisionParamPr
 }
 
 
-dgInt32 dgWorld::CalculatePolySoupToHullContactsDescrete (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculatePolySoupToHullContactsDescrete (dgCollisionParamProxy& proxi) const
 {
 	dgInt32 count;
 	dgInt32 count1;
@@ -7567,7 +7567,7 @@ dgInt32 dgWorld::CalculatePolySoupToHullContactsDescrete (dgCollisionParamProxi&
 }
 
 
-dgInt32 dgWorld::CalculateConvexToNonConvexContactsContinueSimd (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculateConvexToNonConvexContactsContinueSimd (dgCollisionParamProxy& proxi) const
 {
 #ifdef DG_BUILD_SIMD_CODE
 
@@ -7720,7 +7720,7 @@ dgInt32 dgWorld::CalculateConvexToNonConvexContactsContinueSimd (dgCollisionPara
 }
 
 
-dgInt32 dgWorld::CalculateConvexToNonConvexContactsContinue (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculateConvexToNonConvexContactsContinue (dgCollisionParamProxy& proxi) const
 {
 	dgInt32 count;
 	dgInt32 thread;
@@ -7854,7 +7854,7 @@ dgInt32 dgWorld::CalculateConvexToNonConvexContactsContinue (dgCollisionParamPro
 }
 
 
-dgInt32 dgWorld::CalculateConvexToNonConvexContactsSimd (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculateConvexToNonConvexContactsSimd (dgCollisionParamProxy& proxi) const
 {
 _ASSERTE (0);
 return 0;
@@ -8048,7 +8048,7 @@ return 0;
 }
 
 
-dgInt32 dgWorld::CalculateConvexToNonConvexContacts (dgCollisionParamProxi& proxi) const
+dgInt32 dgWorld::CalculateConvexToNonConvexContacts (dgCollisionParamProxy& proxi) const
 {
 	dgPolygonMeshDesc data;
 	dgInt32 count = 0;

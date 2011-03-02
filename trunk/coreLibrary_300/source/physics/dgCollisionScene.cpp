@@ -493,7 +493,7 @@ dgFloat32 dgCollisionScene::RayCast (const dgVector& localP0, const dgVector& lo
 	return maxParam;
 }
 
-void dgCollisionScene::CollidePairSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
+void dgCollisionScene::CollidePairSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi) const
 {
 	const dgNode *stackPool[DG_SCENE_MAX_STACK_DEPTH];
 
@@ -826,7 +826,7 @@ void dgCollisionScene::RemoveProxy (void* const proxy)
 }
 
 
-void dgCollisionScene::CollidePair (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const
+void dgCollisionScene::CollidePair (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi) const
 {
 	const dgNode *stackPool[DG_SCENE_MAX_STACK_DEPTH];
 

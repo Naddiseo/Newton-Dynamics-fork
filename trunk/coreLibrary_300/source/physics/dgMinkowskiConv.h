@@ -176,8 +176,8 @@ class dgContactSolver
 
 
 	public:
-	dgContactSolver(dgCollisionParamProxi& proxi);
-	dgContactSolver(dgCollisionParamProxi& proxi, dgCollision *polygon);
+	dgContactSolver(dgCollisionParamProxy& proxy);
+	dgContactSolver(dgCollisionParamProxy& proxy, dgCollision *polygon);
 	dgContactSolver& operator= (const dgContactSolver& me);
 
 	dgInt32 HullHullContactsSimd (dgInt32 contactID);
@@ -203,7 +203,7 @@ class dgContactSolver
 	dgBody* m_referenceBody; 
 	dgCollisionConvex* m_floatingcollision;
 	dgCollisionConvex* m_referenceCollision;
-	dgCollisionParamProxi* m_proxi;
+	dgCollisionParamProxy* m_proxy;
 	dgMinkFacePurge *m_facePurge;
 	dgBigVector* m_hullVertexLarge;
 	dgBigVector* m_averVertexLarge;

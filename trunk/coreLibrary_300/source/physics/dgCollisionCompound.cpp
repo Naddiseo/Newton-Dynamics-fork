@@ -1449,7 +1449,7 @@ dgCollisionCompound::dgNodeBase* dgCollisionCompound::BuildTree(dgInt32 count, d
 }
 
 
-dgInt32 dgCollisionCompound::CalculateContacts (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi, dgInt32 useSimd) const
+dgInt32 dgCollisionCompound::CalculateContacts (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi, dgInt32 useSimd) const
 {
 	dgInt32 contactCount = 0;
 	if (m_root) {
@@ -1471,7 +1471,7 @@ dgInt32 dgCollisionCompound::CalculateContacts (dgCollidingPairCollector::dgPair
 }
 
 
-dgInt32 dgCollisionCompound::CalculateContactsToSingle (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi, dgInt32 useSimd) const
+dgInt32 dgCollisionCompound::CalculateContactsToSingle (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi, dgInt32 useSimd) const
 {
 	_ASSERTE (0);
 	return 0;
@@ -1568,7 +1568,7 @@ dgInt32 dgCollisionCompound::CalculateContactsToSingle (dgCollidingPairCollector
 }
 
 
-dgInt32 dgCollisionCompound::CalculateContactsToCompound (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi, dgInt32 useSimd) const
+dgInt32 dgCollisionCompound::CalculateContactsToCompound (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi, dgInt32 useSimd) const
 {
 	_ASSERTE (0);
 	return 0;
@@ -1716,7 +1716,7 @@ dgInt32 dgCollisionCompound::CalculateContactsToCompound (dgCollidingPairCollect
 }
 
 
-dgInt32 dgCollisionCompound::CalculateContactsToCollisionTree (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi, dgInt32 useSimd) const
+dgInt32 dgCollisionCompound::CalculateContactsToCollisionTree (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi, dgInt32 useSimd) const
 {
 	_ASSERTE (0);
 	return 0;
@@ -1955,7 +1955,7 @@ dgInt32 dgCollisionCompound::CalculateContactsToCollisionTree (dgCollidingPairCo
 }
 
 
-dgInt32 dgCollisionCompound::CalculateContactsToHeightField (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi, dgInt32 useSimd) const
+dgInt32 dgCollisionCompound::CalculateContactsToHeightField (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi, dgInt32 useSimd) const
 {
 	_ASSERTE (0);
 	return 0;
@@ -2040,7 +2040,7 @@ dgInt32 dgCollisionCompound::CalculateContactsToHeightField (dgCollidingPairColl
 }
 
 
-dgInt32 dgCollisionCompound::CalculateContactsBruteForce (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi, dgInt32 useSimd) const
+dgInt32 dgCollisionCompound::CalculateContactsBruteForce (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi, dgInt32 useSimd) const
 {
 	_ASSERTE (0);
 	return 0;
@@ -2263,7 +2263,7 @@ dgInt32 dgCollisionCompound::ClosestDitance (dgBody* const compoundBody, dgTripl
 	dgContactPoint contact0;
 	dgContactPoint contact1;
 	if (bodyB->m_collision->IsType (dgCollision::dgConvexCollision_RTTI)) {
-		dgCollisionParamProxi proxi(0);
+		dgCollisionParamProxy proxi(0);
 		dgContactPoint contacts[16];
 
 		proxi.m_referenceBody = compoundBody;
@@ -2298,7 +2298,7 @@ dgInt32 dgCollisionCompound::ClosestDitance (dgBody* const compoundBody, dgTripl
 		}
 	} else {
 
-		dgCollisionParamProxi proxi(0);
+		dgCollisionParamProxy proxi(0);
 		dgContactPoint contacts[16];
 
 		_ASSERTE (bodyB->m_collision->IsType (dgCollision::dgCollisionCompound_RTTI));

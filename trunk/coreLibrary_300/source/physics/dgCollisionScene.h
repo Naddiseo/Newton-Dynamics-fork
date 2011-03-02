@@ -79,8 +79,8 @@ class dgCollisionScene: public dgCollision
 	dgMatrix GetProxyMatrix (void* const proxy);
 	void SetProxyMatrix (void* const proxy, const dgMatrix& matrix);
 
-	void CollidePair (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const;
-	void CollidePairSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxi& proxi) const;
+	void CollidePair (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi) const;
+	void CollidePairSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxi) const;
 
 	void SetCollisionCallback (dgCollisionMeshCollisionCallback debugCallback);
 
