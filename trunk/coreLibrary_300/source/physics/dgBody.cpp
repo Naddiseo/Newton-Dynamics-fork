@@ -201,7 +201,6 @@ void dgBody::SetMatrixIgnoreSleep(const dgMatrix& matrix)
 
 void dgBody::UpdateCollisionMatrixSimd (dgFloat32 timestep, dgInt32 threadIndex)
 {
-#ifdef DG_BUILD_SIMD_CODE
 	m_collisionWorldMatrix = m_collision->m_offset.MultiplySimd(m_matrix);
 
 	dgVector oldP0 (m_minAABB);
@@ -262,7 +261,6 @@ void dgBody::UpdateCollisionMatrixSimd (dgFloat32 timestep, dgInt32 threadIndex)
 			}
 		}
 	}
-#endif
 }
 
 

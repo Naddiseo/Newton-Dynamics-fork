@@ -287,56 +287,27 @@ DG_INLINE dgMatrix dgMatrix::Inverse () const
 
 DG_INLINE dgVector dgMatrix::TransformVectorSimd (const dgVector &v) const
 {
-#ifdef DG_BUILD_SIMD_CODE
 	const dgMatrix& source = *this;
-	return dgVector (simd_mul_add_v (
-						simd_mul_add_v (
-							simd_mul_add_v ((simd_type&) source[3], (simd_type&) source[0], simd_permut_v ((simd_type&) v, (simd_type&) v, PURMUT_MASK(0, 0, 0, 0))), 
-																	(simd_type&) source[1], simd_permut_v ((simd_type&) v, (simd_type&) v, PURMUT_MASK(1, 1, 1, 1))), 
-																	(simd_type&) source[2], simd_permut_v ((simd_type&) v, (simd_type&) v, PURMUT_MASK(2, 2, 2, 2))));
-#else
-	return dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-#endif
+	return dgVector (((simd_128&)source[0]) * simd_128(v[0])  + ((simd_128&)source[1]) * simd_128(v[1]) + ((simd_128&)source[2]) * simd_128(v[2]) + (simd_128&)source[3]);
 }
 
 DG_INLINE void dgMatrix::TransformVectorsSimd (dgVector* const dst, const dgVector* const src, dgInt32 count) const
 {
-#ifdef DG_BUILD_SIMD_CODE
-	const dgMatrix& source = *this;
 	for (dgInt32 i = 0; i < count; i ++) {
-		(simd_type&)dst[i] = simd_mul_add_v (
-								simd_mul_add_v (
-									simd_mul_add_v ((simd_type&) source[3], 
-													(simd_type&) source[0], simd_permut_v ((simd_type&) src[i], (simd_type&) src[i], PURMUT_MASK(0, 0, 0, 0))), 
-													(simd_type&) source[1], simd_permut_v ((simd_type&) src[i], (simd_type&) src[i], PURMUT_MASK(1, 1, 1, 1))), 
-													(simd_type&) source[2], simd_permut_v ((simd_type&) src[i], (simd_type&) src[i], PURMUT_MASK(2, 2, 2, 2)));
+		dst[i] = TransformVectorSimd (src[i]);
 	}
-#endif
 }
 
 
 DG_INLINE dgVector dgMatrix::RotateVectorSimd (const dgVector &v) const
 {
-#ifdef DG_BUILD_SIMD_CODE
 	const dgMatrix& source = *this;
-	return dgVector (simd_mul_add_v (
-						simd_mul_add_v (
-							simd_mul_v ((simd_type&) source[0], simd_permut_v ((simd_type&) v, (simd_type&) v, PURMUT_MASK(0, 0, 0, 0))), 
-									    (simd_type&) source[1], simd_permut_v ((simd_type&) v, (simd_type&) v, PURMUT_MASK(1, 1, 1, 1))), 
-										(simd_type&) source[2], simd_permut_v ((simd_type&) v, (simd_type&) v, PURMUT_MASK(2, 2, 2, 2))));
-
-#else
-	return dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-#endif
+	return dgVector (((simd_128&)source[0]) * simd_128(v[0])  + ((simd_128&)source[1]) * simd_128(v[1]) + ((simd_128&)source[2]) * simd_128(v[2]));
 }
 
 DG_INLINE dgVector dgMatrix::UnrotateVectorSimd (const dgVector &v) const
 {
-#ifdef DG_BUILD_SIMD_CODE
 	return dgVector (v.DotProductSimd(m_front), v.DotProductSimd(m_up), v.DotProductSimd(m_right), v.m_w);
-#else
-	return dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-#endif
 }
 
 DG_INLINE dgMatrix dgMatrix::InverseSimd () const
@@ -347,50 +318,27 @@ DG_INLINE dgMatrix dgMatrix::InverseSimd () const
 	simd_128 tmp2 (dgFloat32 (0.0f));
 	simd_128 tmp0 (((simd_128&)source[0]).PackLow((simd_128&)source[1]));
 	simd_128 tmp1 (((simd_128&)source[2]).PackLow(tmp2));
-	(simd_128&)matrix[0] = tmp0.MoveLowToHigh (tmp1);
-	(simd_128&)matrix[1] = tmp1.MoveHighToLow (tmp0);
+	matrix[0] = tmp0.MoveLowToHigh (tmp1);
+	matrix[1] = tmp1.MoveHighToLow (tmp0);
 
 	tmp0 = ((simd_128&)source[0]).PackHigh((simd_128&)source[1]);
 	tmp1 = ((simd_128&)source[2]).PackHigh(tmp2);
-	(simd_128&)matrix[2] = tmp0.MoveLowToHigh (tmp1);
+	matrix[2] = tmp0.MoveLowToHigh (tmp1);
 
-	(simd_128&)matrix[3] = tmp2 - simd_128 (source.m_posit.m_x) * (simd_128&)matrix[0] - simd_128 (source.m_posit.m_y) * (simd_128&)matrix[1] - simd_128 (source.m_posit.m_z) * (simd_128&)matrix[2];
+	matrix[3] = tmp2 - simd_128 (source.m_posit.m_x) * (simd_128&)matrix[0] - simd_128 (source.m_posit.m_y) * (simd_128&)matrix[1] - simd_128 (source.m_posit.m_z) * (simd_128&)matrix[2];
 	matrix[3][3] = dgFloat32 (1.0f);
 	return matrix;
 }
 
 DG_INLINE dgMatrix dgMatrix::MultiplySimd (const dgMatrix& B) const
 {
-
+	dgMatrix matrix;
 	const dgMatrix& A = *this;
-	return dgMatrix (dgVector (simd_mul_add_v( 
-								simd_mul_add_v(
-									simd_mul_add_v(simd_mul_v ((simd_type&) B[0], simd_permut_v ((simd_type&) A[0], (simd_type&) A[0], PURMUT_MASK(0, 0, 0, 0))),
-															   (simd_type&) B[1], simd_permut_v ((simd_type&) A[0], (simd_type&) A[0], PURMUT_MASK(1, 1, 1, 1))),
-															   (simd_type&) B[2], simd_permut_v ((simd_type&) A[0], (simd_type&) A[0], PURMUT_MASK(2, 2, 2, 2))),
-															   (simd_type&) B[3], simd_permut_v ((simd_type&) A[0], (simd_type&) A[0], PURMUT_MASK(3, 3, 3, 3)))),
-
-					 dgVector (simd_mul_add_v( 
-								simd_mul_add_v(
-									simd_mul_add_v(simd_mul_v ((simd_type&) B[0], simd_permut_v ((simd_type&) A[1], (simd_type&) A[1], PURMUT_MASK(0, 0, 0, 0))),
-															   (simd_type&) B[1], simd_permut_v ((simd_type&) A[1], (simd_type&) A[1], PURMUT_MASK(1, 1, 1, 1))),
-															   (simd_type&) B[2], simd_permut_v ((simd_type&) A[1], (simd_type&) A[1], PURMUT_MASK(2, 2, 2, 2))),
-															   (simd_type&) B[3], simd_permut_v ((simd_type&) A[1], (simd_type&) A[1], PURMUT_MASK(3, 3, 3, 3)))),
-
-					dgVector (simd_mul_add_v( 
-								simd_mul_add_v(
-									simd_mul_add_v(simd_mul_v ((simd_type&) B[0], simd_permut_v ((simd_type&) A[2], (simd_type&) A[2], PURMUT_MASK(0, 0, 0, 0))),
-															   (simd_type&) B[1], simd_permut_v ((simd_type&) A[2], (simd_type&) A[2], PURMUT_MASK(1, 1, 1, 1))),
-															   (simd_type&) B[2], simd_permut_v ((simd_type&) A[2], (simd_type&) A[2], PURMUT_MASK(2, 2, 2, 2))),
-															   (simd_type&) B[3], simd_permut_v ((simd_type&) A[2], (simd_type&) A[2], PURMUT_MASK(3, 3, 3, 3)))),
-
-
-					dgVector (simd_mul_add_v( 
-							   simd_mul_add_v(
-								   simd_mul_add_v(simd_mul_v ((simd_type&) B[0], simd_permut_v ((simd_type&) A[3], (simd_type&) A[3], PURMUT_MASK(0, 0, 0, 0))),
-															  (simd_type&) B[1], simd_permut_v ((simd_type&) A[3], (simd_type&) A[3], PURMUT_MASK(1, 1, 1, 1))),
-															  (simd_type&) B[2], simd_permut_v ((simd_type&) A[3], (simd_type&) A[3], PURMUT_MASK(2, 2, 2, 2))),
-															  (simd_type&) B[3], simd_permut_v ((simd_type&) A[3], (simd_type&) A[3], PURMUT_MASK(3, 3, 3, 3)))));
+	matrix[0] = ((simd_128&)B[0]) * simd_128 (A[0][0]) + ((simd_128&)B[1]) * simd_128 (A[0][1]) + ((simd_128&)B[2]) * simd_128 (A[0][2]) + ((simd_128&)B[3]) * simd_128 (A[0][3]);
+	matrix[1] = ((simd_128&)B[0]) * simd_128 (A[1][0]) + ((simd_128&)B[1]) * simd_128 (A[1][1]) + ((simd_128&)B[2]) * simd_128 (A[1][2]) + ((simd_128&)B[3]) * simd_128 (A[1][3]);
+	matrix[2] = ((simd_128&)B[0]) * simd_128 (A[2][0]) + ((simd_128&)B[1]) * simd_128 (A[2][1]) + ((simd_128&)B[2]) * simd_128 (A[2][2]) + ((simd_128&)B[3]) * simd_128 (A[2][3]);
+	matrix[3] = ((simd_128&)B[0]) * simd_128 (A[3][0]) + ((simd_128&)B[1]) * simd_128 (A[3][1]) + ((simd_128&)B[2]) * simd_128 (A[3][2]) + ((simd_128&)B[3]) * simd_128 (A[3][3]);
+	return matrix;
 }
 
 

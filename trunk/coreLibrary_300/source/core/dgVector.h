@@ -83,9 +83,9 @@ class dgVector: public dgTemplateVector<dgFloat32>
 {
 	public:
 	dgVector();
-#ifdef DG_BUILD_SIMD_CODE
 	dgVector(const simd_type& val);
-#endif
+	dgVector(const simd_128& val);
+
 	dgVector (const dgTemplateVector<dgFloat32>& v);
 	dgVector (const dgFloat32 *ptr);
 	dgVector (dgFloat32 x, dgFloat32 y, dgFloat32 z, dgFloat32 w); 
@@ -306,14 +306,21 @@ DG_INLINE dgVector::dgVector (const dgFloat32 *ptr)
 	_ASSERTE (dgCheckVector ((*this)));
 }
 
-#ifdef DG_BUILD_SIMD_CODE
+
 DG_INLINE dgVector::dgVector(const simd_type& val)
 {
 	_ASSERTE ((dgUnsigned64(this) & 0x0f) == 0);
 	(simd_type&) *this = val;
 	_ASSERTE (dgCheckVector ((*this)));
 }
-#endif
+
+DG_INLINE dgVector::dgVector(const simd_128& val)
+{
+	_ASSERTE ((dgUnsigned64(this) & 0x0f) == 0);
+	(simd_128&) *this = val;
+	_ASSERTE (dgCheckVector ((*this)));
+}
+
 
 DG_INLINE dgVector::dgVector (dgFloat32 x, dgFloat32 y, dgFloat32 z, dgFloat32 w) 
 	:dgTemplateVector<dgFloat32>(x, y, z, w)
