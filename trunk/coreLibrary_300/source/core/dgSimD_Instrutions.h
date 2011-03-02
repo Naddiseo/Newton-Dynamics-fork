@@ -149,8 +149,6 @@
 		#define simd_div_s(a,b)				_mm_div_ss(a,b)	
 		#define simd_rcp_s(a)				_mm_rcp_ss(a)	
 		#define simd_rsqrt_s(a)				_mm_rsqrt_ss(a)	
-
-	
 		
 		class simd_128
 		{
@@ -290,19 +288,44 @@
 			}
 
 
-//			DG_INLINE simd_128 MoveHighToLow (const simd_128& data) const
-//			{
-//				return _mm_movehl_ps (m_type, data.m_type);
-//			}
+			DG_INLINE simd_128 MoveHighToLow (const simd_128& data) const
+			{
+				return _mm_movehl_ps (m_type, data.m_type);
+			}
 
-//			DG_INLINE simd_128 PackLow (const simd_128& data) const
-//			{
-//				return _mm_unpacklo_ps (m_type, data.m_type);
-//			}
+			DG_INLINE simd_128 MoveLowToHigh (const simd_128& data) const
+			{
+				return _mm_movelh_ps (m_type, data.m_type);
+			}
+
+			DG_INLINE simd_128 PackLow (const simd_128& data) const
+			{
+				return _mm_unpacklo_ps (m_type, data.m_type);
+			}
+
+			DG_INLINE simd_128 PackHigh (const simd_128& data) const
+			{
+				return _mm_unpackhi_ps (m_type, data.m_type);
+			}
+
 
 			simd_type m_type;
 		};
 
+
+		DG_INLINE void Transpose4x4Simd_128 (simd_128& dst0, simd_128& dst1, simd_128& dst2, simd_128& dst3, 
+									         const simd_128& src0, const simd_128& src1, const simd_128& src2, const simd_128& src3)
+		{
+			simd_128 tmp0 (src0.PackLow(src1));
+			simd_128 tmp1 (src2.PackLow(src3));
+			dst0 = tmp0.MoveLowToHigh (tmp1);
+			dst1 = tmp1.MoveHighToLow (tmp0);
+
+			tmp0 = src0.PackHigh(src1);
+			tmp1 = src2.PackHigh(src3);
+			dst2 = tmp0.MoveLowToHigh (tmp1);
+			dst3 = tmp1.MoveHighToLow (tmp0);
+		}
 	#endif
 #endif
 #endif

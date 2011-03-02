@@ -1516,26 +1516,6 @@ void dgWorld::CompoundContacts (dgCollidingPairCollector::dgPair* const pair, dg
 
 void dgWorld::ConvexContactsSimd (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxy) const
 {
-//	dgInt32 contactCount;
-//	dgBody* otherBody; 
-//	dgBody* convexBody;
-//	dgContact* constraint;
-//	contactCount = 0;
-//	constraint = pair->m_contact;
-//	convexBody = pair->m_body0;
-//	otherBody = pair->m_body1;
-//	if (constraint) {
-//		contactCount = ValidateContactCache (convexBody, otherBody, constraint);
-//		if (contactCount) {
-//			pair->m_isTrigger = 0;
-//			pair->m_contactCount = 0;
-//			//pair->m_contactBuffer = NULL;
-//			_ASSERTE (pair->m_contactBufferIndex == -1);
-//			pair->m_contactBufferIndex = 0;
-//			return ;
-//		}
-//	}
-
 	dgContact* const constraint = pair->m_contact;
 	dgBody* convexBody = pair->m_body0;
 	dgBody* otherBody = pair->m_body1;
@@ -1550,8 +1530,6 @@ void dgWorld::ConvexContactsSimd (dgCollidingPairCollector::dgPair* const pair, 
 		}
 	}
 
-	//proxy.m_maxContacts = DG_MAX_CONTATCS;
-	//proxy.m_contacts = pair->m_contactBuffer;
 	if (otherBody->m_collision->IsType (dgCollision::dgConvexCollision_RTTI)) {
 		if (convexBody->m_invMass.m_w <= dgFloat32 (1.0e-6f)) {
 			Swap (convexBody, otherBody);
@@ -3639,8 +3617,6 @@ dgInt32 dgWorld::CalculatePolySoupToSphereContactsContinue (dgCollisionParamProx
 
 dgInt32 dgWorld::CalculateConvexToNonConvexContactsSimd (dgCollisionParamProxy& proxy) const
 {
-
-	dgPolygonMeshDesc data;
 	dgInt32 count = 0;
 	proxy.m_inTriggerVolume = 0;
 	dgCollisionConvex* collision = (dgCollisionConvex*) proxy.m_referenceCollision;
@@ -3649,16 +3625,18 @@ dgInt32 dgWorld::CalculateConvexToNonConvexContactsSimd (dgCollisionParamProxy& 
 	}
 	proxy.m_isTriggerVolume = 0;
 
-	dgBody* hullBody = proxy.m_referenceBody; 
-	dgBody* soupBody = proxy.m_floatingBody; 
-	dgCollisionMesh* polysoup = (dgCollisionMesh *) proxy.m_floatingCollision;
+	dgBody* const hullBody = proxy.m_referenceBody; 
+	dgBody* const soupBody = proxy.m_floatingBody; 
+	dgCollisionMesh* const polysoup = (dgCollisionMesh *) proxy.m_floatingCollision;
 	_ASSERTE (proxy.m_referenceCollision->IsType (dgCollision::dgConvexCollision_RTTI));
 	_ASSERTE (proxy.m_floatingCollision->IsType (dgCollision::dgCollisionMesh_RTTI));
 
-
 	const dgMatrix& hullMatrix = proxy.m_referenceMatrix;
 	const dgMatrix& soupMatrix = proxy.m_floatingMatrix;
+
 	dgMatrix matrix (hullMatrix.MultiplySimd(soupMatrix.InverseSimd()));
+
+	dgPolygonMeshDesc data;
 	collision->CalcAABBSimd (matrix, data.m_boxP0, data.m_boxP1);
 
 	_ASSERTE (proxy.m_timestep <= dgFloat32 (1.0f));
@@ -3720,6 +3698,7 @@ dgInt32 dgWorld::CalculateConvexToNonConvexContactsSimd (dgCollisionParamProxy& 
 		}
 	}
 
+	
 	data.m_vertex = NULL;
 	data.m_threadNumber = proxy.m_threadIndex;
 	data.m_faceCount = 0;
