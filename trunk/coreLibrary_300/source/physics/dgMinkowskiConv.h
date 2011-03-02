@@ -22,6 +22,9 @@
 #ifndef __dgMinkowskiConv__
 #define __dgMinkowskiConv__
 
+#define NEW_MINK
+
+#ifdef NEW_MINK
 #define DG_MINK_MAX_FACES								64
 #define DG_MINK_MAX_FACES_SIZE							(DG_MINK_MAX_FACES + 16)
 #define DG_MINK_MAX_POINTS								64
@@ -104,25 +107,9 @@ class dgContactSolver
 //		return GetMax (collision->GetBoxMaxRadius() * dgFloat32 (4.0f) + dgFloat32 (1.0f), dgFloat32 (10000.0f));
 	}
 
-	inline bool CheckTetraHedronVolume () const
-	{
-		dgVector e0 (m_hullVertex[1] - m_hullVertex[0]);
-		dgVector e1 (m_hullVertex[2] - m_hullVertex[0]);
-		dgVector e2 (m_hullVertex[3] - m_hullVertex[0]);
-
-		dgFloat32 volume = (e1 * e0) % e2;
-		return (volume >= dgFloat32 (0.0f));
-	}
-
-	inline bool CheckTetraHedronVolumeLarge () const
-	{
-		dgBigVector e0 (m_hullVertexLarge[1] - m_hullVertexLarge[0]);
-		dgBigVector e1 (m_hullVertexLarge[2] - m_hullVertexLarge[0]);
-		dgBigVector e2 (m_hullVertexLarge[3] - m_hullVertexLarge[0]);
-
-		dgFloat64 volume = (e1 * e0) % e2;
-		return (volume >= dgFloat32 (0.0f));
-	}
+	inline bool CheckTetraHedronVolume () const;
+	inline bool CheckTetraHedronVolumeSimd () const;
+	inline bool CheckTetraHedronVolumeLarge () const;
 
 	void CalcSupportVertexSimd (const dgVector& dir, dgInt32 entry);
 	void CalcSupportVertex (const dgVector& dir, dgInt32 entry);
@@ -225,5 +212,32 @@ class dgContactSolver
 }DG_GCC_VECTOR_ALIGMENT;
 
 
+inline bool dgContactSolver::CheckTetraHedronVolume () const
+{
+	dgVector e0 (m_hullVertex[1] - m_hullVertex[0]);
+	dgVector e1 (m_hullVertex[2] - m_hullVertex[0]);
+	dgVector e2 (m_hullVertex[3] - m_hullVertex[0]);
+
+	dgFloat32 volume = (e1 * e0) % e2;
+	return (volume >= dgFloat32 (0.0f));
+}
+
+inline bool dgContactSolver::CheckTetraHedronVolumeSimd () const
+{
+	_ASSERTE (0);
+	return CheckTetraHedronVolume ();
+}
+
+inline bool dgContactSolver::CheckTetraHedronVolumeLarge () const
+{
+	dgBigVector e0 (m_hullVertexLarge[1] - m_hullVertexLarge[0]);
+	dgBigVector e1 (m_hullVertexLarge[2] - m_hullVertexLarge[0]);
+	dgBigVector e2 (m_hullVertexLarge[3] - m_hullVertexLarge[0]);
+
+	dgFloat64 volume = (e1 * e0) % e2;
+	return (volume >= dgFloat32 (0.0f));
+}
+
+#endif
 #endif
 
