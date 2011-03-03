@@ -163,11 +163,6 @@ dgCollisionConvexHull::dgCollisionConvexHull(dgWorld* const world, dgDeserialize
 		m_faceArray[i] = m_simplex + faceOffset; 
 	}
 
-//	if (m_boundPlanesCount) {
-//		deserialization (userData, m_boundPlanes, m_boundPlanesCount * sizeof (dgPlane));
-//	}
-
-
 	SetVolumeAndCG ();
 }
 
@@ -376,17 +371,11 @@ bool dgCollisionConvexHull::CheckConvex (dgPolyhedra& polyhedra1, const dgVector
 
 bool dgCollisionConvexHull::Create (dgInt32 count, dgInt32 strideInBytes, const dgFloat32* const vertexArray, dgFloat32 tolerance)
 {
-//	dgMeshEffect convexHull (GetAllocator(), vertexArray, count, strideInBytes, tolerance);
 	dgConvexHull3d convexHull (GetAllocator(), vertexArray, strideInBytes, count, tolerance);
 	if (!convexHull.GetCount()) {
 		return false;
 	}
 	dgInt32 vertexCount = convexHull.GetVertexCount();
-//	dgStack<dgVector> vertexPool(vertexCount);
-//	dgVector* const hullVertexArray = &vertexPool[0];
-//	for (dgInt32 i = 0; i < vertexCount; i ++) {
-//		hullVertexArray[i] = convexHull.GetVertex(i);
-//	}
 	dgVector* const hullVertexArray = (dgVector*) convexHull.GetVertexPool();
 
 	dgPolyhedra polyhedra (GetAllocator());
@@ -421,7 +410,6 @@ bool dgCollisionConvexHull::Create (dgInt32 count, dgInt32 strideInBytes, const 
 	dgInt32 stackIndex = 1; 
 	stack[0] = firstFace;
 
-//	dgInt32 vertexCount = polyhedra.GetVertexCount();
 	dgStack<dgInt32> vertexMap(vertexCount);
 	memset (&vertexMap[0], -1, vertexCount * sizeof (dgInt32));
 
@@ -487,7 +475,6 @@ bool dgCollisionConvexHull::Create (dgInt32 count, dgInt32 strideInBytes, const 
 		}
 	} 
 
-	SetVolumeAndCG ();
 	m_faceCount = 0;
 	dgStack<char> mark (m_edgeCount);
 	memset (&mark[0], 0, m_edgeCount * sizeof (dgInt8));
@@ -510,6 +497,30 @@ bool dgCollisionConvexHull::Create (dgInt32 count, dgInt32 strideInBytes, const 
 	m_faceArray = (dgConvexSimplexEdge **) m_allocator->Malloc(dgInt32 (m_faceCount * sizeof(dgConvexSimplexEdge *)));
 	memcpy (m_faceArray, &faceArray[0], m_faceCount * sizeof(dgConvexSimplexEdge *));
 
+	dgConvexHull3d convexHullLOD (GetAllocator(), &m_vertex[0].m_x, sizeof (dgVector), m_vertexCount, 0.0f, DG_LOD_CONVEX_COUNT);
+	for (dgInt32 i = 0; i < convexHullLOD.GetVertexCount(); i ++) {
+		dgVector p (convexHullLOD .GetVertex(i));
+		dgInt32 index = 0;
+		dgFloat32 dist2 = dgFloat32 (1.0e20f);
+		for (dgInt32 j = 0; j < m_edgeCount; j ++) {
+			dgConvexSimplexEdge* const face = &m_simplex[j];
+			dgVector q (m_vertex[face->m_vertex]);
+			dgVector err (p - q);
+			dgFloat32 mag2 = err % err;
+			if (mag2 < dist2) {
+				index = j;
+				dist2 = mag2;
+			}
+		}
+		m_closetEdgePoint[i] = p;
+		m_closestEdge[i] = index;
+	}
+
+	for (dgInt32 i = convexHullLOD.GetVertexCount(); i < DG_LOD_CONVEX_COUNT; i ++) {
+		m_closetEdgePoint[i] = m_closetEdgePoint[0];
+		m_closestEdge[i] = m_closestEdge[0];
+	}
+	SetVolumeAndCG ();
 	return true;
 }
 
@@ -669,62 +680,92 @@ bool dgCollisionConvexHull::OOBBTest (const dgMatrix& matrix, const dgCollisionC
 	return ret;
 }
 
-void dgCollisionConvexHull::SetVolumeAndCG ()
-{
-	dgCollisionConvex::SetVolumeAndCG ();
-}
 
 dgVector dgCollisionConvexHull::SupportVertex (const dgVector& direction) const
 {
 	const dgVector dir (direction.m_x, direction.m_y, direction.m_z, dgFloat32 (0.0f));
 	_ASSERTE (dgAbsf(dir % dir - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
 
-	dgInt32 index = 0;
-	dgFloat32 side0 = dgFloat32 (-1.0e20f);
-	for (dgInt32 i = 0; i < 4; i ++) {
-		dgFloat32 side1 = m_multiResDir[i] % dir;
-		if (side1 > side0) {
-			side0 = side1;
-			index = i;
+static int xxx = 0;
+static int xxx1 = 5;
+	{
+		dgInt32 index = 0;
+		dgFloat32 side0 = dgFloat32 (-1.0e20f);
+		for (dgInt32 i = 0; i < 4; i ++) {
+			dgFloat32 side1 = m_multiResDir[i] % dir;
+			if (side1 > side0) {
+				side0 = side1;
+				index = i;
+			}
+			side1 *= dgFloat32 (-1.0f);
+			if (side1 > side0) {
+				side0 = side1;
+				index = i + 4;
+			}
 		}
-		side1 *= dgFloat32 (-1.0f);
-		if (side1 > side0) {
-			side0 = side1;
-			index = i + 4;
+
+		dgConvexSimplexEdge* edge = m_supportVertexStarCuadrant[index];
+		side0 = m_vertex[edge->m_vertex] % dir;
+		dgConvexSimplexEdge* ptr = edge;
+		dgInt32 maxCount = 128;
+		do {
+			dgFloat32 side1 = m_vertex[ptr->m_twin->m_vertex] % dir;
+			if (side1 > side0) {
+				index = ptr->m_twin->m_vertex;
+				side0 = side1;
+				edge = ptr->m_twin;
+				ptr = edge;
+			}
+	xxx ++;
+			ptr = ptr->m_twin->m_next;
+			maxCount --;
+		} while ((ptr != edge) && maxCount);
+		_ASSERTE (maxCount);
+	}
+
+
+static int xxx2 = DG_LOD_CONVEX_COUNT + 1;
+
+	dgInt32 index__ = 0;
+	dgFloat32 side0__ = dgFloat32 (-1.0e20f);
+	for (dgInt32 i = 0; i < DG_LOD_CONVEX_COUNT; i ++) {
+
+dgVector a (m_closetEdgePoint[i]);
+dgConvexSimplexEdge* edge___ = &m_simplex[m_closestEdge[i]];
+dgVector b (m_vertex[edge___->m_vertex]);
+		dgFloat32 side1 = m_closetEdgePoint[i] % dir;
+		if (side1 > side0__) {
+			side0__ = side1;
+			index__ = i;
 		}
 	}
 
-int xxx = 0;
-static int xxx1 = 0;
-
-
-
-	dgConvexSimplexEdge* edge = m_supportVertexStarCuadrant[index];
-	index = edge->m_vertex;
-	side0 = m_vertex[edge->m_vertex] % dir;
-	dgConvexSimplexEdge* ptr = edge;
-	dgInt32 maxCount = 128;
+	dgConvexSimplexEdge* edge___ = &m_simplex[m_closestEdge[index__]];
+	side0__ = m_vertex[edge___->m_vertex] % dir;
+	dgConvexSimplexEdge* ptr___ = edge___;
+	dgInt32 maxCount___ = 128;
 	do {
-		dgFloat32 side1 = m_vertex[ptr->m_twin->m_vertex] % dir;
-		if (side1 > side0) {
-			index = ptr->m_twin->m_vertex;
-			side0 = side1;
-			edge = ptr->m_twin;
-			ptr = edge;
+		dgFloat32 side1 = m_vertex[ptr___->m_twin->m_vertex] % dir;
+		if (side1 > side0__) {
+			index__ = ptr___->m_twin->m_vertex;
+			side0__ = side1;
+			edge___ = ptr___->m_twin;
+			ptr___ = edge___;
 		}
-xxx ++;
-		ptr = ptr->m_twin->m_next;
-		maxCount --;
-	} while ((ptr != edge) && maxCount);
-	_ASSERTE (maxCount);
+		xxx2 ++;
+		ptr___ = ptr___->m_twin->m_next;
+		maxCount___ --;
+	} while ((ptr___ != edge___) && maxCount___);
+	_ASSERTE (maxCount___);
+
 
 xxx1 ++;
-if ((xxx1 > 1000) && (xxx1 < 1500))
-dgTrace (("%d %d\n", xxx, m_vertexCount));
+if ((xxx1 > 500) && (xxx1 < 1500))
+dgTrace (("%d %d %d\n", xxx, xxx2, m_vertexCount));
 
 
-	_ASSERTE (index != -1);
-	return m_vertex[index];
+	_ASSERTE (index__ != -1);
+	return m_vertex[index__];
 
 }
 
@@ -732,3 +773,5 @@ dgVector dgCollisionConvexHull::SupportVertexSimd (const dgVector& dir) const
 {
 	return dgCollisionConvex::SupportVertexSimd (dir);
 }
+
+
