@@ -187,23 +187,16 @@ void dgCollisionConvex::SetUserData (void* const userData)
 
 void dgCollisionConvex::SetVolumeAndCG ()
 {
-	dgInt32 i;
-	dgInt32 count;
-	dgFloat32 scale;
-	dgConvexSimplexEdge *edge;
-	dgConvexSimplexEdge *face;
-	dgVector inertia;
-	dgVector crossInertia;
 	dgPolyhedraMassProperties localData;
-	dgVector faceVertex[128];
+	dgVector faceVertex[512];
 	dgStack<dgInt8> edgeMarks (m_edgeCount);
 
 	memset (&edgeMarks[0], 0, sizeof (dgInt8) * m_edgeCount);
-	for (i = 0; i < m_edgeCount; i ++) {
-		face = &m_simplex[i];
+	for (dgInt32 i = 0; i < m_edgeCount; i ++) {
+		dgConvexSimplexEdge* const face = &m_simplex[i];
 		if (!edgeMarks[i]) {
-			edge = face;
-			count = 0;
+			dgConvexSimplexEdge* edge = face;
+			dgInt32 count = 0;
 			do {
 				_ASSERTE ((edge - m_simplex) >= 0);
 				edgeMarks[dgInt32 (edge - m_simplex)] = '1';
@@ -217,14 +210,16 @@ void dgCollisionConvex::SetVolumeAndCG ()
 		}
 	}
 
-	scale = localData.MassProperties (m_volume, inertia, crossInertia);
+	dgVector inertia;
+	dgVector crossInertia;
+	dgFloat32 scale = localData.MassProperties (m_volume, inertia, crossInertia);
 	m_volume = m_volume.Scale (dgFloat32 (1.0f) / GetMax (scale, dgFloat32 (1.0e-4f)));
 	m_volume.m_w = scale;
 	m_simplexVolume = m_volume.m_w;
 
 	// set the table for quick calculation of support vertex
-	count = sizeof (m_supportVertexStarCuadrant) / sizeof (m_supportVertexStarCuadrant[0]);
-	for (i = 0; i < count; i ++) {
+	dgInt32 count = sizeof (m_supportVertexStarCuadrant) / sizeof (m_supportVertexStarCuadrant[0]);
+	for (dgInt32 i = 0; i < count; i ++) {
 		m_supportVertexStarCuadrant[i] = GetSupportEdge (m_multiResDir[i]);
 	}
 	_ASSERTE (m_supportVertexStarCuadrant[4] == GetSupportEdge (m_multiResDir[0].Scale (-1.0f)));
@@ -236,7 +231,7 @@ void dgCollisionConvex::SetVolumeAndCG ()
 	// calculate the origin of the bound box of this primitive
 	dgVector p0; 
 	dgVector p1;
-	for (i = 0; i < 3; i ++) {
+	for (dgInt32 i = 0; i < 3; i ++) {
 		dgVector dir (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f)); 
 		dir[i] = dgFloat32 (-1.0f);
 		p0[i] = SupportVertex(dir)[i];
@@ -244,8 +239,8 @@ void dgCollisionConvex::SetVolumeAndCG ()
 		dir[i] = dgFloat32 (1.0f);
 		p1[i] = SupportVertex(dir)[i];
 	}
-	p0[i] = dgFloat32 (0.0f);
-	p1[i] = dgFloat32 (0.0f);
+	p0[3] = dgFloat32 (0.0f);
+	p1[3] = dgFloat32 (0.0f);
 	m_boxSize = (p1 - p0).Scale (dgFloat32 (0.5f)); 
 	m_boxOrigin = (p1 + p0).Scale (dgFloat32 (0.5f)); 
 	m_boxMinRadius = GetMin(m_boxSize.m_x, m_boxSize.m_y, m_boxSize.m_z);
@@ -265,19 +260,14 @@ void dgCollisionConvex::SetVolumeAndCG ()
 	m_size_z.m_y = m_boxSize.m_z;
 	m_size_z.m_z = m_boxSize.m_z;
 	m_size_z.m_w = dgFloat32 (0.0f); 
-
 }
-
-
 
 
 
 dgFloat32 dgCollisionConvex::GetDiscretedAngleStep (dgFloat32 radius) const
 {
-	dgFloat32 segments;
-
 //	segments = GetMax (GetMin (dgFloor (radius * DG_MAX_CIRCLE_DISCRETE_STEPS) + 1.0f, 1024.0f), 128.0f);
-	segments = ClampValue(dgFloor (radius * DG_MAX_CIRCLE_DISCRETE_STEPS), dgFloat32(128.0f), dgFloat32(1024.0f));
+	dgFloat32 segments = ClampValue(dgFloor (radius * DG_MAX_CIRCLE_DISCRETE_STEPS), dgFloat32(128.0f), dgFloat32(1024.0f));
 	return dgPI2 / segments;
 }
 
