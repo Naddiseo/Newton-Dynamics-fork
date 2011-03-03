@@ -3412,7 +3412,6 @@ dgInt32 dgContactSolver::HullHullContacts (dgInt32 contactID)
 	dgMinkReturnCode code;
 	dgContactPoint* contactOut; 
 
-
 	count = 0;
 	m_proxy->m_inTriggerVolume = 0;
 	code = CalcSeparatingPlane(face);

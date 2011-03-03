@@ -892,12 +892,11 @@ dgVector dgCollisionConvex::SupportVertex (const dgVector& direction) const
 			index = i + 4;
 		}
 	}
+
 	dgConvexSimplexEdge* edge = m_supportVertexStarCuadrant[index];
-
 	index = edge->m_vertex;
-	side0 = m_vertex[edge->m_vertex] % dir;
+	side0 = m_vertex[index] % dir;
 	dgConvexSimplexEdge* ptr = edge;
-
 	dgInt32 maxCount = 128;
 	do {
 		dgFloat32 side1 = m_vertex[ptr->m_twin->m_vertex] % dir;
@@ -919,89 +918,94 @@ dgVector dgCollisionConvex::SupportVertex (const dgVector& direction) const
 
 dgVector dgCollisionConvex::SupportVertexSimd (const dgVector& direction) const
 {
-#ifdef DG_BUILD_SIMD_CODE
-//	dgInt32 index;
-//	dgInt32 maxCount;
-//	dgFloat32 side0;
-//	dgFloat32 side1;
-//	dgConvexSimplexEdge *ptr;
-//	dgConvexSimplexEdge *edge;
-//	simd_type dot0;
-//	simd_type dot1;
-//	simd_type mask;
-//	simd_type dir_x;
-//	simd_type dir_y;
-//	simd_type dir_z;
-//	simd_type entry;
-	
+
+	dgVector a;
+	dgInt32 index0;
+	{
+		_ASSERTE (dgAbsf(direction % direction - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
+		simd_type dir_x = simd_set1 (direction.m_x);
+		simd_type dir_y = simd_set1 (direction.m_y);
+		simd_type dir_z = simd_set1 (direction.m_z);
+		simd_type dot0 = simd_mul_add_v (simd_mul_add_v (simd_mul_v (dir_x, *(simd_type*) &m_multiResDir_sse[0]), 
+			dir_y, *(simd_type*) &m_multiResDir_sse[1]), 
+			dir_z, *(simd_type*) &m_multiResDir_sse[2]);
+		simd_type dot1 = simd_mul_v (dot0, *(simd_type*) &m_negOne);
+		simd_type mask = simd_cmpgt_v(dot0, dot1);
+		dot0 = simd_max_v (dot0, dot1);
+		simd_type entry = simd_or_v (simd_and_v(*(simd_type*) &m_index_0123, mask), simd_andnot_v (*(simd_type*) &m_index_4567, mask));
+
+		dot1 = simd_move_hl_v (dot0, dot0);
+		mask = simd_cmpgt_v(dot0, dot1);
+		dot0 = simd_max_v (dot0, dot1);
+		entry = simd_or_v (simd_and_v(entry, mask), simd_andnot_v (simd_move_hl_v (entry, entry), mask));
+
+		mask = simd_cmpgt_s(dot0, simd_permut_v (dot0, dot0, PURMUT_MASK (3, 2, 1, 1)));
+
+		dgInt32 index = simd_store_is (simd_or_v (simd_and_v(entry, mask), simd_andnot_v (simd_permut_v (entry, entry, PURMUT_MASK (3, 2, 1, 1)), mask)));
+		dgConvexSimplexEdge* edge = m_supportVertexStarCuadrant[index];
+
+		index = edge->m_vertex;
+		simd_type dir = simd_set (direction.m_x, direction.m_y, direction.m_z, dgFloat32 (0.0f));
+
+		simd_type side0 = simd_mul_v (*(simd_type*)&m_vertex[index], dir);
+		side0 = simd_add_s(simd_add_v (side0, simd_move_hl_v (side0, side0)), simd_permut_v (side0, side0, PURMUT_MASK (3,3,3,1)));
+
+		dgConvexSimplexEdge* ptr = edge;
+		dgInt32 maxCount = 128;
+		do {
+			_ASSERTE (m_vertex[edge->m_twin->m_vertex].m_w == dgFloat32 (1.0f));
+			simd_type side1 = simd_mul_v (*(simd_type*)&m_vertex[ptr->m_twin->m_vertex], dir);
+			side1 = simd_add_s(simd_add_v (side1, simd_move_hl_v (side1, side1)), simd_permut_v (side1, side1, PURMUT_MASK (3,3,3,1)));
+
+			if (simd_store_is (simd_cmpgt_s(side1, side0))) {
+				index = ptr->m_twin->m_vertex;
+				side0 = side1;
+				edge = ptr->m_twin;
+				ptr = edge;
+			}
+			ptr = ptr->m_twin->m_next;
+			maxCount --;
+		} while ((ptr != edge) && maxCount);
+		_ASSERTE (maxCount);
+
+		_ASSERTE (index != -1);
+		//		return m_vertex[index];
+		a = m_vertex[index];
+		index0 = index;
+	}
+
+
 	_ASSERTE (dgAbsf(direction % direction - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
+	simd_128 dir_x (direction.m_x);
+	simd_128 dir_y (direction.m_y);
+	simd_128 dir_z (direction.m_z);
+	simd_128 dot0 (dir_x * ((simd_128&)m_multiResDir_sse[0]) + dir_y * ((simd_128&)m_multiResDir_sse[1]) + dir_z * ((simd_128&)m_multiResDir_sse[2]));
+	simd_128 dot1 (dot0 * (simd_128&)m_negOne);
 
-//	index = 0;
-//	side0 = dgFloat32 (-1.0e20f);
-//	for (i = 0; i < 4; i ++) {
-//		side1 = m_multiResDir[i] % dir;
-//		if (side1 > side0) {
-//			side0 = side1;
-//			index = i;
-//		}
-//		side1 *= dgFloat32 (-1.0f);
-//		if (side1 > side0) {
-//			side0 = side1;
-//			index = i + 4;
-//		}
-//	}
+	simd_128 mask = dot0 > dot1;
+	dot0 = dot0.GetMax(dot1);
+	simd_128 entry ((((simd_128&)m_index_0123) & mask) | ((((simd_128&)m_index_4567).AndNot(mask))));
 
-	simd_type dir_x = simd_set1 (direction.m_x);
-	simd_type dir_y = simd_set1 (direction.m_y);
-	simd_type dir_z = simd_set1 (direction.m_z);
-	simd_type dot0 = simd_mul_add_v (simd_mul_add_v (simd_mul_v (dir_x, *(simd_type*) &m_multiResDir_sse[0]), 
-															     dir_y, *(simd_type*) &m_multiResDir_sse[1]), 
-															     dir_z, *(simd_type*) &m_multiResDir_sse[2]);
-	simd_type dot1 = simd_mul_v (dot0, *(simd_type*) &m_negOne);
-	simd_type mask = simd_cmpgt_v(dot0, dot1);
-	dot0 = simd_max_v (dot0, dot1);
-	simd_type entry = simd_or_v (simd_and_v(*(simd_type*) &m_index_0123, mask), simd_andnot_v (*(simd_type*) &m_index_4567, mask));
+	dot1 = dot0.MoveHighToLow(dot0);
+	mask = dot0 > dot1;
+	dot0 = dot0.GetMax(dot1);
+	entry = (entry & mask) | entry.MoveHighToLow(entry).AndNot(mask);
 
-	dot1 = simd_move_hl_v (dot0, dot0);
-	mask = simd_cmpgt_v(dot0, dot1);
-	dot0 = simd_max_v (dot0, dot1);
-	entry = simd_or_v (simd_and_v(entry, mask), simd_andnot_v (simd_move_hl_v (entry, entry), mask));
+	dot1 = dot0.PackLow(dot0);
+	mask = dot0 > dot1.MoveHighToLow(dot1);
+	dot1 = entry.PackLow(entry);
+	dgInt32 index = ((entry & mask) | (dot1.MoveHighToLow(dot1).AndNot(mask))).GetInt();
 
-	mask = simd_cmpgt_s(dot0, simd_permut_v (dot0, dot0, PURMUT_MASK (3, 2, 1, 1)));
-	
-//	simd_store_s (simd_or_v (simd_and_v(entry, mask), simd_andnot_v (simd_permut_v (entry, entry, PURMUT_MASK (3, 2, 1, 1)), mask)), &side0);
-//	dgInt32 index = dgFastInt (side0);
-	dgInt32 index = simd_store_is (simd_or_v (simd_and_v(entry, mask), simd_andnot_v (simd_permut_v (entry, entry, PURMUT_MASK (3, 2, 1, 1)), mask)));
+	simd_128 dir (direction.m_x, direction.m_y, direction.m_z, dgFloat32 (0.0f));
+
 	dgConvexSimplexEdge* edge = m_supportVertexStarCuadrant[index];
-	index = edge->m_vertex;
-
-//	const dgVector dir (direction.m_x, direction.m_y, direction.m_z, dgFloat32 (0.0f));
-	simd_type dir = simd_set (direction.m_x, direction.m_y, direction.m_z, dgFloat32 (0.0f));
-	_ASSERTE (m_vertex[edge->m_vertex].m_w == dgFloat32 (1.0f));
-//	dgFloat32 side0 = m_vertex[edge->m_vertex] % dir;
-//	dir_x = simd_mul_v (*(simd_type*)&m_vertex[edge->m_vertex], *(simd_type*)&dir);
-//	dir_x = simd_add_s(simd_add_v (dir_x, simd_move_hl_v (dir_x, dir_x)), simd_permut_v (dir_x, dir_x, PURMUT_MASK (3,3,3,1)));
-//	dgFloat32 side0;
-//	simd_store_s (dir_x, &side0);
-
-	simd_type side0 = simd_mul_v (*(simd_type*)&m_vertex[edge->m_vertex], dir);
-	side0 = simd_add_s(simd_add_v (side0, simd_move_hl_v (side0, side0)), simd_permut_v (side0, side0, PURMUT_MASK (3,3,3,1)));
-
+	simd_128 side0 (dir.DotProduct((simd_128&)m_vertex[edge->m_vertex]));
 	dgConvexSimplexEdge* ptr = edge;
 	dgInt32 maxCount = 128;
 	do {
-		_ASSERTE (m_vertex[edge->m_twin->m_vertex].m_w == dgFloat32 (1.0f));
-//		dir_x = simd_mul_v (*(simd_type*)&m_vertex[ptr->m_twin->m_vertex], *(simd_type*)&dir);
-//		dir_x = simd_add_s(simd_add_v (dir_x, simd_move_hl_v (dir_x, dir_x)), simd_permut_v (dir_x, dir_x, PURMUT_MASK (3,3,3,1)));
-//		dgFloat32 side1;
-//		simd_store_s (dir_x, &side1);
+		simd_128 side1 (dir.DotProduct((simd_128&)m_vertex[ptr->m_twin->m_vertex]));
 
-		simd_type side1 = simd_mul_v (*(simd_type*)&m_vertex[ptr->m_twin->m_vertex], dir);
-		side1 = simd_add_s(simd_add_v (side1, simd_move_hl_v (side1, side1)), simd_permut_v (side1, side1, PURMUT_MASK (3,3,3,1)));
-
-//		dgInt32 xxx = simd_store_is (simd_cmpgt_s(side1, side0));
-//		if (side1 > side0) {
-		if (simd_store_is (simd_cmpgt_s(side1, side0))) {
+		if ((side1 > side0).GetInt()) {
 			index = ptr->m_twin->m_vertex;
 			side0 = side1;
 			edge = ptr->m_twin;
@@ -1013,21 +1017,21 @@ dgVector dgCollisionConvex::SupportVertexSimd (const dgVector& direction) const
 	_ASSERTE (maxCount);
 
 	_ASSERTE (index != -1);
-	return m_vertex[index];
 
+//dgVector xxx (SupportVertex (direction));
+dgVector xxx1 (a - m_vertex[index]);
+if ((xxx1 % xxx1) > 1.0e-5f)
+{
+	index *= 1;
+}
 
-#else
-	return dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-#endif
+//	return m_vertex[index];
+	return SupportVertex (direction);
 }
 
 
 bool dgCollisionConvex::SanityCheck(dgInt32 count, const dgVector& normal, dgVector* const contactsOut) const
 {
-//	dgInt32 i;
-//	dgInt32 j;
-//	dgFloat32 error;
-
 	if (count > 1) {
 		dgInt32 j = count - 1;
 		for (dgInt32 i = 0; i < count; i ++) {
@@ -1076,16 +1080,8 @@ bool dgCollisionConvex::SanityCheck(dgInt32 count, const dgVector& normal, dgVec
 
 
 
-dgInt32 dgCollisionConvex::SimplifyClipPolygon (
-	dgInt32 count, 
-	const dgVector& normal, 
-	dgVector* const polygon) const
+dgInt32 dgCollisionConvex::SimplifyClipPolygon (dgInt32 count, const dgVector& normal, dgVector* const polygon) const
 {
-//	dgInt32 i0;
-//	dgInt32 i1;
-//	dgInt32 i2;
-//	dgInt32 removeCount;
-//	dgFloat32 area;
 	dgInt8 mark[DG_MAX_VERTEX_CLIP_FACE * 8];
 	dgInt8 buffer[8 * DG_MAX_VERTEX_CLIP_FACE * (sizeof (dgInt32) + sizeof (dgFloat32))];
 
@@ -1141,12 +1137,7 @@ dgInt32 dgCollisionConvex::SimplifyClipPolygon (
 
 dgInt32 dgCollisionConvex::RectifyConvexSlice (dgInt32 count, const dgVector& normal, dgVector* const contactsOut) const
 {
-//	dgInt32 restart;
-//	dgInt32 tmpCount;
-//	DG_CONVEX_FIXUP_FACE *ptr;
-//	DG_CONVEX_FIXUP_FACE *poly;
 	DG_CONVEX_FIXUP_FACE linkFace[DG_CLIP_MAX_POINT_COUNT * 2];
-
 
 	_ASSERTE (count > 2);
 
@@ -1540,16 +1531,6 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersectionSimd (const dgVector& norma
 
 dgInt32 dgCollisionConvex::CalculatePlaneIntersection (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
-//	dgInt32 count;
-//	dgInt32 maxCount;
-//	dgFloat32 t;
-//	dgFloat32 side0;
-//	dgFloat32 side1;
-//	dgConvexSimplexEdge *ptr;
-//	dgConvexSimplexEdge *ptr1;
-//	dgConvexSimplexEdge *edge;
-//	dgConvexSimplexEdge *firstEdge;
-
 	dgConvexSimplexEdge* edge = &m_simplex[0];
 	dgPlane plane (normal, - (normal % origin));
 
@@ -1699,15 +1680,8 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersection (const dgVector& normal, c
 }
 
 
-dgFloat32 dgCollisionConvex::RayCast (
-	const dgVector& localP0, 
-	const dgVector& localP1, 
-	dgContactPoint& contactOut, 
-	OnRayPrecastAction preFilter, 
-	const dgBody* const body,	
-	void* const userData) const
+dgFloat32 dgCollisionConvex::RayCast (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body,	void* const userData) const
 {
-	dgFloat32 interset;
 	#define DG_LEN  (0.01f)
 	#define DG_AREA (DG_LEN * DG_LEN)
 	#define DG_VOL  (DG_AREA * DG_LEN)
@@ -1716,7 +1690,7 @@ dgFloat32 dgCollisionConvex::RayCast (
 		return dgFloat32 (1.2f);
 	}
 
-	interset = dgFloat32 (1.2f);
+	dgFloat32 interset = dgFloat32 (1.2f);
 	if (RayHitBox (localP0, localP1)) {
 		if ((m_collsionId != m_convexHullCollision) || (((dgCollisionConvexHull*) this)->m_faceCount > 48)) {
 			dgInt32 i;
@@ -1945,13 +1919,7 @@ dgFloat32 dgCollisionConvex::RayCast (
 }
 
 
-dgFloat32 dgCollisionConvex::RayCastSimd (
-	const dgVector& localP0, 
-	const dgVector& localP1, 
-	dgContactPoint& contactOut, 
-	OnRayPrecastAction preFilter, 
-	const dgBody* const body,	
-	void* const userData) const
+dgFloat32 dgCollisionConvex::RayCastSimd (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body,	void* const userData) const
 {
 	return RayCast (localP0, localP1, contactOut, preFilter, body, userData);
 }

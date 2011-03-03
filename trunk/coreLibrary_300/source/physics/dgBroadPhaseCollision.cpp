@@ -784,6 +784,7 @@ void dgBroadPhaseCollision::SubmitPairs (dgBroadPhaseLeafNode* const bodyNode, d
 			}
 		}
 	} else {
+
 		while (stack) {
 			stack --;
 			dgBroadPhaseNode* const rootNode = pool[stack];
@@ -849,12 +850,6 @@ void dgBroadPhaseCollision::UpdateContactsDriver (void* const context, dgInt32 t
 
 	dgWorld* const world = descriptor->m_world;
 
-//	dgUnsigned32 ticks = world->m_getPerformanceCount();
-//	dgUnsigned32 xxx0 = world->m_getPerformanceCount();
-//	dgUnsigned32 xxx;
-//	do {
-//		xxx = world->m_getPerformanceCount()- xxx0;
-//	} while (xxx < 1000);
 	if (!threadID) {
 		dgUnsigned32 ticks0 = world->m_getPerformanceCount();
 		world->ApplyForceAndtorque (descriptor, threadID);
@@ -975,7 +970,6 @@ void dgBroadPhaseCollision::FindCollidingPairs (dgBroadphaseSyncDescriptor* cons
 void dgBroadPhaseCollision::CalculatePairContacts (dgBroadphaseSyncDescriptor* const descriptor, dgInt32 threadID)
 {
 	dgContactPoint contacts[DG_MAX_CONTATCS];
-
 	dgWorld* const world = (dgWorld*) this;
 	dgFloat32 timestep = descriptor->m_timestep;
 	dgCollidingPairCollector* const pairCollector = world;
@@ -999,6 +993,7 @@ void dgBroadPhaseCollision::CalculatePairContacts (dgBroadphaseSyncDescriptor* c
 			world->ReleaseIndirectLock (&descriptor->m_lock);
 		}
 	} else {
+
 		for (dgInt32 i = dgAtomicAdd(&descriptor->m_pairsAtomicCounter, 1); i < count; i = dgAtomicAdd(&descriptor->m_pairsAtomicCounter, 1)) {
 			dgCollidingPairCollector::dgPair* const pair = &pairs[i];
 			pair->m_contactBufferIndex = -1;

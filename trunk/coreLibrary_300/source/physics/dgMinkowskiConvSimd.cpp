@@ -311,8 +311,8 @@ void dgContactSolver::CalcSupportVertexSimd (const dgVector& dir, dgInt32 entry)
 	dgVector p (m_referenceCollision->SupportVertexSimd (dir));
 	dgVector dir1 (m_matrix.UnrotateVectorSimd(simd_mul_v ((simd_type&)dir, m_negativeOne)));
 	dgVector q (m_matrix.TransformVectorSimd(m_floatingcollision->SupportVertexSimd (dir1)));
-	(simd_type&)m_hullVertex[entry] = simd_sub_v ((simd_type&)p, (simd_type&)q);
-	(simd_type&)m_averVertex[entry] = simd_add_v ((simd_type&)p, (simd_type&)q);
+	m_hullVertex[entry] = (simd_128&)p - (simd_128&)q;
+	m_averVertex[entry] = (simd_128&)p + (simd_128&)q;
 }
 
 

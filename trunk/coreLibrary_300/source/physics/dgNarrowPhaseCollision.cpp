@@ -305,21 +305,6 @@ dgCollision* dgWorld::CreateConvexHull (dgInt32 count, const dgFloat32 *vertexAr
 			collision->SetUserDataID (dgUnsigned32 (shapeID));
 			node = dgBodyCollisionList::Insert (collision, crc);
 		} else {
-/*
-// hack to save the data that make convex hull fail
-char xxx[32];
-static int aaa  ;
-sprintf (xxx, "file1__%d.txt", aaa);
-aaa ++;
-FILE * file = fopen (xxx, "wb");
-fprintf (file, "float data[][3] = {\n");
-for (dgInt32 i = 0; i < count; i ++) {
-	fprintf (file, "{%f, %f, %f},\n", vertexArray[i * stride + 0], vertexArray[i * stride + 1], vertexArray[i * stride + 2]);
-}
-fprintf (file, "};\n");
-fclose (file);
-*/			
-			_ASSERTE (0);
 			// could not make the shape destroy the shell and return NULL 
 			// note this is the only newton shape that can return NULL;
 			collision->Release();
@@ -1812,7 +1797,6 @@ void dgWorld::CalculateContactsSimd (dgCollidingPairCollector::dgPair* const pai
 	proxy.m_continueCollision = ((material->m_flags & dgContactMaterial::m_collisionContinueCollisionEnable__) ? 1 : 0) & (body0->m_continueCollisionMode | body1->m_continueCollisionMode);
 	proxy.m_isTriggerVolume = body0->m_collision->IsTriggerVolume() | body1->m_collision->IsTriggerVolume();
 
-//	proxy.m_contacts = contactBuffer;
 	if (body0->m_collision->IsType (dgCollision::dgCollisionScene_RTTI)) {
 		Swap(pair->m_body0, pair->m_body1);
 		SceneContactsSimd (pair, proxy);
@@ -1848,7 +1832,6 @@ void dgWorld::CalculateContacts (dgCollidingPairCollector::dgPair* const pair, d
 //	proxy.m_continueCollision = material->m_collisionContinueCollisionEnable & (body0->m_continueCollisionMode | body1->m_continueCollisionMode);
 	proxy.m_continueCollision = dgInt32 (((material->m_flags & dgContactMaterial::m_collisionContinueCollisionEnable__) ? 1 : 0) & (body0->m_continueCollisionMode | body1->m_continueCollisionMode));
 
-//	proxy.m_contacts = contactBuffer;
 	if (body0->m_collision->IsType (dgCollision::dgCollisionScene_RTTI)) {
 		Swap(pair->m_body0, pair->m_body1);
 		SceneContacts (pair, proxy);
@@ -2488,7 +2471,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 
 	switch (code) 
 	{
-	case 2 * 9 + 1 * 3 + 2:
+		case 2 * 9 + 1 * 3 + 2:
 		{
 			size.m_y *= dgFloat32 (-1.0f);
 			normal.m_x = size.m_x -  center.m_x; 
@@ -2503,7 +2486,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 2 * 9 + 1 * 3 + 1:
+		case 2 * 9 + 1 * 3 + 1:
 		{
 			size.m_x *= dgFloat32 (-1.0f);
 			size.m_y *= dgFloat32 (-1.0f);
@@ -2519,7 +2502,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 1 * 9 + 1 * 3 + 2:
+		case 1 * 9 + 1 * 3 + 2:
 		{
 			size.m_y *= dgFloat32 (-1.0f);
 			size.m_z *= dgFloat32 (-1.0f);
@@ -2535,7 +2518,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 1 * 9 + 1 * 3 + 1:
+		case 1 * 9 + 1 * 3 + 1:
 		{
 			size.m_x *= dgFloat32 (-1.0f);
 			size.m_y *= dgFloat32 (-1.0f);
@@ -2552,7 +2535,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 2 * 9 + 2 * 3 + 2:
+		case 2 * 9 + 2 * 3 + 2:
 		{
 			normal.m_x = size.m_x -  center.m_x; 
 			normal.m_y = size.m_y -  center.m_y; 
@@ -2566,7 +2549,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 2 * 9 + 2 * 3 + 1:
+		case 2 * 9 + 2 * 3 + 1:
 		{
 			size.m_x *= dgFloat32 (-1.0f);
 			normal.m_x = size.m_x -  center.m_x; 
@@ -2581,7 +2564,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 1 * 9 + 2 * 3 + 2:
+		case 1 * 9 + 2 * 3 + 2:
 		{
 			size.m_z *= dgFloat32 (-1.0f);
 			normal.m_x = size.m_x -  center.m_x; 
@@ -2596,7 +2579,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 1 * 9 + 2 * 3 + 1:
+		case 1 * 9 + 2 * 3 + 1:
 		{
 			size.m_x *= dgFloat32 (-1.0f);
 			size.m_z *= dgFloat32 (-1.0f);
@@ -2613,7 +2596,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 		}
 
 
-	case 2 * 9 + 0 * 3 + 2:
+		case 2 * 9 + 0 * 3 + 2:
 		{
 			normal.m_x = size.m_x -  center.m_x; 
 			normal.m_z = size.m_z -  center.m_z; 
@@ -2626,7 +2609,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 2 * 9 + 0 * 3 + 1:
+		case 2 * 9 + 0 * 3 + 1:
 		{
 			size.m_x *= dgFloat32 (-1.0f);
 			normal.m_x = size.m_x -  center.m_x; 
@@ -2641,7 +2624,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 		}
 
 
-	case 1 * 9 + 0 * 3 + 2:
+		case 1 * 9 + 0 * 3 + 2:
 		{
 			size.m_z *= dgFloat32 (-1.0f);
 			normal.m_x = size.m_x -  center.m_x; 
@@ -2655,7 +2638,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 1 * 9 + 0 * 3 + 1:
+		case 1 * 9 + 0 * 3 + 1:
 		{
 			size.m_x *= dgFloat32 (-1.0f);
 			size.m_z *= dgFloat32 (-1.0f);
@@ -2671,7 +2654,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 		}
 
 
-	case 0 * 9 + 2 * 3 + 2:
+		case 0 * 9 + 2 * 3 + 2:
 		{
 			normal.m_x = size.m_x -  center.m_x; 
 			normal.m_y = size.m_y -  center.m_y; 
@@ -2684,7 +2667,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 0 * 9 + 2 * 3 + 1:
+		case 0 * 9 + 2 * 3 + 1:
 		{
 			size.m_x *= dgFloat32 (-1.0f);
 			normal.m_x = size.m_x -  center.m_x; 
@@ -2699,7 +2682,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 		}
 
 
-	case 0 * 9 + 1 * 3 + 2:
+		case 0 * 9 + 1 * 3 + 2:
 		{
 			size.m_y *= dgFloat32 (-1.0f);
 			normal.m_x = size.m_x -  center.m_x; 
@@ -2713,7 +2696,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 0 * 9 + 1 * 3 + 1:
+		case 0 * 9 + 1 * 3 + 1:
 		{
 			size.m_x *= dgFloat32 (-1.0f);
 			size.m_y *= dgFloat32 (-1.0f);
@@ -2728,7 +2711,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 2 * 9 + 2 * 3 + 0:
+		case 2 * 9 + 2 * 3 + 0:
 		{
 			normal.m_y = size.m_y -  center.m_y; 
 			normal.m_z = size.m_z -  center.m_z; 
@@ -2741,7 +2724,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 1 * 9 + 2 * 3 + 0:
+		case 1 * 9 + 2 * 3 + 0:
 		{
 			size.m_z *= dgFloat32 (-1.0f);
 			normal.m_y = size.m_y -  center.m_y; 
@@ -2756,7 +2739,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 		}
 
 
-	case 2 * 9 + 1 * 3 + 0:
+		case 2 * 9 + 1 * 3 + 0:
 		{
 			size.m_y *= dgFloat32 (-1.0f);
 			normal.m_y = size.m_y -  center.m_y; 
@@ -2770,7 +2753,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 1 * 9 + 1 * 3 + 0:
+		case 1 * 9 + 1 * 3 + 0:
 		{
 			size.m_y *= dgFloat32 (-1.0f);
 			size.m_z *= dgFloat32 (-1.0f);
@@ -2785,7 +2768,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 0 * 9 + 0 * 3 + 1:
+		case 0 * 9 + 0 * 3 + 1:
 		{
 			dist = -((center.m_x + radius) + size.m_x);
 			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
@@ -2796,7 +2779,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 0 * 9 + 1 * 3 + 0:
+		case 0 * 9 + 1 * 3 + 0:
 		{
 			dist = -((center.m_y + radius) + size.m_y);
 			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
@@ -2807,7 +2790,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 1 * 9 + 0 * 3 + 0:
+		case 1 * 9 + 0 * 3 + 0:
 		{
 			dist = -((center.m_z + radius) + size.m_z);
 			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
@@ -2818,7 +2801,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 0 * 9 + 0 * 3 + 2:
+		case 0 * 9 + 0 * 3 + 2:
 		{
 			dist = (center.m_x - radius) - size.m_x;
 			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
@@ -2829,7 +2812,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 0 * 9 + 2 * 3 + 0:
+		case 0 * 9 + 2 * 3 + 0:
 		{
 			dist = (center.m_y - radius) - size.m_y;
 			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
@@ -2840,7 +2823,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	case 2 * 9 + 0 * 3 + 0:
+		case 2 * 9 + 0 * 3 + 0:
 		{
 			dist = (center.m_z - radius) - size.m_z;
 			if (dist > (-DG_RESTING_CONTACT_PENETRATION)) {
@@ -2851,7 +2834,7 @@ dgInt32 dgWorld::CalculateBoxToSphereContacts (dgCollisionParamProxy& proxy) con
 			break;
 		}
 
-	default:
+		default:
 		{
 			return 0;
 		}

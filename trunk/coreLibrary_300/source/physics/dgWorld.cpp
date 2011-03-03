@@ -606,6 +606,11 @@ void dgWorld::Update (dgFloat32 timestep)
 m_cpu = dgSimdPresent;
 //m_solverMode = 1;
 
+//static int xxx ;
+//xxx ++;
+//if (xxx >= 2000)
+//xxx *=1;
+
 //xxxxx();
 
 //static int xxx;
