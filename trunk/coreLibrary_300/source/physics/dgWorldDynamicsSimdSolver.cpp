@@ -755,16 +755,13 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 	dgJacobian* const internalVeloc = &m_solverMemory.m_internalVeloc[island->m_bodyStart];
 	dgJacobian* const internalForces = &m_solverMemory.m_internalForces[island->m_bodyStart];
 
-//	dgVector zero(dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 	simd_128 zero (dgFloat32 (0.0f));
 
-	//	sleepCount = 0;
 	dgInt32 bodyCount = island->m_bodyCount;
 	dgWorld* const world = (dgWorld*) this;
 	dgBodyInfo* const bodyArrayPtr = (dgBodyInfo*) &world->m_bodiesMemory[0]; 
 	dgBodyInfo* const bodyArray = &bodyArrayPtr[island->m_bodyStart];
 	for (dgInt32 i = 1; i < bodyCount; i ++) {
-
 		dgBody* const body = bodyArray[i].m_body;
 		(simd_128&) internalVeloc[i].m_linear = zero;
 		(simd_128&) internalVeloc[i].m_angular = zero;
@@ -790,8 +787,6 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 		dgInt32 m0 = constraintArray[i].m_m0;
 		dgInt32 m1 = constraintArray[i].m_m1;
 
-		//dgJacobian y0;
-		//dgJacobian y1;
 		simd_128 y0_linear = zero;
 		simd_128 y0_angular = zero;
 		simd_128 y1_linear = zero;
@@ -862,68 +857,34 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 								(simd_128&)row->m_JMinv.m_jacobian_IM1.m_angular * angularM1);
 
 					_ASSERTE (a.m_type.m128_f32[3] == dgFloat32 (0.0f));
-					//dgFloat32 a = coordenateAccel[index] - acc.m_x - acc.m_y - acc.m_z - force[index] * diagDamp[index];
-					//a = simd_add_v (a, simd_move_hl_v(a, a));
-					//a = simd_add_s (a, simd_permut_v (a, a, PURMUT_MASK(3, 3, 3, 1)));
-					//simd_type force = simd_load_s(row->m_force);
-					//a = simd_sub_s(simd_load_s(row->m_coordenateAccel), simd_mul_add_s(a, force, simd_load_s(row->m_diagDamp)));
 					simd_128 force (row->m_force);
 					a = simd_128(row->m_coordenateAccel) - a.AddHorizontal() - force * simd_128(row->m_diagDamp);
 					
-					//dgFloat32 f = force[index] + invDJMinvJt[index] * a;
-					//simd_type f = simd_mul_add_s (force, simd_load_s(row->m_invDJMinvJt), a);
 					simd_128 f (force + a * simd_128(row->m_invDJMinvJt));
 
 					dgInt32 frictionIndex = row->m_normalForceIndex;
 					_ASSERTE (((frictionIndex < 0) && (matrixRow[frictionIndex].m_force == dgFloat32 (1.0f))) || ((frictionIndex >= 0) && (matrixRow[frictionIndex].m_force >= dgFloat32 (0.0f))));
-
-					//dgFloat32 frictionNormal = force[frictionIndex];
-					//dgFloat32 lowerFrictionForce = frictionNormal * lowerFrictionCoef[index];
-					//dgFloat32 upperFrictionForce = frictionNormal * upperFrictionCoef[index];
-					//simd_type frictionNormal = simd_load_s(matrixRow[frictionIndex].m_force);
-					//simd_type lowerFrictionForce = simd_mul_s (frictionNormal, simd_load_s(row->m_lowerBoundFrictionCoefficent));
-					//simd_type upperFrictionForce = simd_mul_s (frictionNormal, simd_load_s(row->m_upperBoundFrictionCoefficent));
-
 					simd_128 frictionNormal (matrixRow[frictionIndex].m_force);
 					simd_128 lowerFrictionForce (frictionNormal * simd_128(row->m_lowerBoundFrictionCoefficent));
 					simd_128 upperFrictionForce (frictionNormal * simd_128(row->m_upperBoundFrictionCoefficent));
 
-
-					//if (f > upperFrictionForce) {
-					//	a = dgFloat32 (0.0f);
-					//	f = upperFrictionForce;
-					//} else if (f < lowerFrictionForce) {
-					//	a = dgFloat32 (0.0f);
-					//	f = lowerFrictionForce;
-					//}
-//					f = simd_min_s (simd_max_s (f, lowerFrictionForce), upperFrictionForce);
-//					a = simd_andnot_v (a, simd_or_v (simd_cmplt_s (f, lowerFrictionForce), simd_cmpgt_s (f, upperFrictionForce)));
-
 					f = f.GetMax(lowerFrictionForce).GetMin(upperFrictionForce);
+					a = a.AndNot((f > upperFrictionForce) | (f < upperFrictionForce));
 
-//					a = simd_andnot_v (a, simd_or_v (simd_cmplt_s (f, lowerFrictionForce), simd_cmpgt_s (f, upperFrictionForce)));
+					accNormSimd = accNormSimd.GetMax(a & signMask);
 
-/*
-					//accNorm = GetMax (accNorm, dgAbsf (a));
-					accNormSimd = simd_max_s (accNormSimd, simd_and_v (a, signMask));
+					simd_128 prevValue (f - force);
+					_ASSERTE (prevValue.m_type.m128_f32[0] == prevValue.m_type.m128_f32[1]);
+					_ASSERTE (prevValue.m_type.m128_f32[0] == prevValue.m_type.m128_f32[2]);
+					_ASSERTE (prevValue.m_type.m128_f32[0] == prevValue.m_type.m128_f32[3]);
 
-					//dgFloat32 prevValue = f - force[index];
-					simd_type prevValue = simd_sub_s (f, force);
-					prevValue = simd_permut_v (prevValue, prevValue, PURMUT_MASK(0, 0, 0, 0));
+					f.StoreScalar(&row->m_force);
 
-					//force[index] = f;
-					simd_store_s (f, &row->m_force);
-
-					//linearM0 += Jt[index].m_jacobian_IM0.m_linear.Scale (prevValue);
-					//angularM0 += Jt[index].m_jacobian_IM0.m_angular.Scale (prevValue);
-					//linearM1 += Jt[index].m_jacobian_IM1.m_linear.Scale (prevValue);
-					//angularM1 += Jt[index].m_jacobian_IM1.m_angular.Scale (prevValue);
-					linearM0 = simd_mul_add_v (linearM0, (simd_type&) row->m_Jt.m_jacobian_IM0.m_linear, prevValue);
-					angularM0 = simd_mul_add_v (angularM0,(simd_type&) row->m_Jt.m_jacobian_IM0.m_angular, prevValue);
-					linearM1 = simd_mul_add_v (linearM1, (simd_type&) row->m_Jt.m_jacobian_IM1.m_linear, prevValue);
-					angularM1 = simd_mul_add_v (angularM1,(simd_type&) row->m_Jt.m_jacobian_IM1.m_angular, prevValue);
+					linearM0 = linearM0 + (simd_128&) row->m_Jt.m_jacobian_IM0.m_linear * prevValue;
+					angularM0 = angularM0 + (simd_128&) row->m_Jt.m_jacobian_IM0.m_angular * prevValue;
+					linearM1 = linearM1 + (simd_128&) row->m_Jt.m_jacobian_IM1.m_linear * prevValue;
+					angularM1 = angularM1 + (simd_128&) row->m_Jt.m_jacobian_IM1.m_angular * prevValue;
 					index ++;
-*/
 				}
 				internalForces[m0].m_linear = linearM0;
 				internalForces[m0].m_angular = angularM0;
@@ -932,56 +893,31 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 			}
 			accNormSimd.StoreScalar(&accNorm);
 		}
-/*
+
 		for (dgInt32 i = 1; i < bodyCount; i ++) {
 			dgBody* const body = bodyArray[i].m_body;
-
-			//dgVector force (body->m_accel + internalForces[i].m_linear);
-			//dgVector torque (body->m_alpha + internalForces[i].m_angular);
-			simd_type force = simd_add_v ((simd_type&) body->m_accel, (simd_type&)internalForces[i].m_linear);
-			simd_type torque = simd_add_v ((simd_type&) body->m_alpha, (simd_type&)internalForces[i].m_angular);
-
-			//dgVector accel (force.Scale (body->m_invMass.m_w));
-			simd_type accel = simd_mul_v (force, simd_set1 (body->m_invMass.m_w));
-
-			//dgVector alpha (body->m_invWorldInertiaMatrix.RotateVector (torque));
-			simd_type alpha = simd_mul_add_v (simd_mul_add_v (simd_mul_v ((simd_type&)body->m_invWorldInertiaMatrix[0], simd_permut_v (torque, torque, PURMUT_MASK(0, 0, 0, 0))), 
-											                              (simd_type&)body->m_invWorldInertiaMatrix[1], simd_permut_v (torque, torque, PURMUT_MASK(1, 1, 1, 1))), 
-																	      (simd_type&)body->m_invWorldInertiaMatrix[2], simd_permut_v (torque, torque, PURMUT_MASK(2, 2, 2, 2)));
-
-			//body->m_veloc += accel.Scale(timestep);
-			//body->m_omega += alpha.Scale(timestep);
-			(simd_type&) body->m_veloc = simd_mul_add_v ((simd_type&) body->m_veloc, accel, timeStepSimd);
-			(simd_type&) body->m_omega = simd_mul_add_v ((simd_type&) body->m_omega, alpha, timeStepSimd);
-
-			//internalVeloc[i].m_linear += body->m_veloc;
-			//internalVeloc[i].m_angular += body->m_omega;
-			(simd_type&)internalVeloc[i].m_linear = simd_add_v ((simd_type&)internalVeloc[i].m_linear, (simd_type&) body->m_veloc);
-			(simd_type&)internalVeloc[i].m_angular = simd_add_v ((simd_type&)internalVeloc[i].m_angular, (simd_type&) body->m_omega);
+			simd_128 force ((simd_128&)body->m_accel + (simd_128&)internalForces[i].m_linear);
+			simd_128 torque((simd_128&)body->m_alpha + (simd_128&)internalForces[i].m_angular);
+			simd_128 accel (force * simd_128(body->m_invMass.m_w));
+			simd_128 alpha (body->m_invWorldInertiaMatrix.RotateVectorSimd(torque));
+			body->m_veloc = (simd_128&)body->m_veloc + accel * timeStepSimd;
+			body->m_omega = (simd_128&)body->m_omega + alpha * timeStepSimd;
+			internalVeloc[i].m_linear = (simd_128&)internalVeloc[i].m_linear + (simd_128&) body->m_veloc;
+			internalVeloc[i].m_angular = (simd_128&)internalVeloc[i].m_angular + (simd_128&) body->m_omega;
 		}
-*/
 	}
 
-/*
 	dgInt32 hasJointFeeback = 0;
 	for (dgInt32 i = 0; i < jointCount; i ++) {
 		dgInt32 first = constraintArray[i].m_autoPairstart;
 		dgInt32 count = constraintArray[i].m_autoPaircount;
 
 		for (dgInt32 j = 0; j < count; j ++) { 
-			//dgInt32 index = j + first;
-			//dgFloat32 val = force[index]; 
 			dgJacobianMatrixElement* const row = &matrixRow[j + first];
 			dgFloat32 val = row->m_force; 
-			//maxForce = GetMax (dgAbsf (val), maxForce);
 			_ASSERTE (dgCheckFloat(val));
-			//jointForceFeeback[index][0] = val;
 			row->m_jointFeebackForce[0] = val;
 		}
-		//if (constraintArray[i].m_joint->GetId() == dgContactConstraintId) {
-		//	m_world->AddToBreakQueue ((dgContact*)constraintArray[i].m_joint, maxForce);
-		//}
-
 		hasJointFeeback |= (constraintArray[i].m_joint->m_updaFeedbackCallback ? 1 : 0);
 	}
 
@@ -1056,7 +992,6 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 			}
 		}
 	}
-*/
 }
 
 #endif
