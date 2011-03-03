@@ -195,14 +195,14 @@ class dgContactSolver
 
 	dgMinkReturnCode m_lastFaceCode;
 
-	static simd_type m_zero;
-	static simd_type m_nrh0p5;
-	static simd_type m_nrh3p0;
-	static simd_type m_negIndex;
-	static simd_type m_index_yx;
-	static simd_type m_index_wz;
-	static simd_type m_negativeOne;
-	static simd_type m_zeroTolerenace;
+	static simd_128 m_zero;
+	static simd_128 m_nrh0p5;
+	static simd_128 m_nrh3p0;
+	static simd_128 m_negIndex;
+	static simd_128 m_index_yx;
+	static simd_128 m_index_wz;
+	static simd_128 m_negativeOne;
+	static simd_128 m_zeroTolerenace;
 	static dgVector m_dir[14];
 	static dgInt32 m_faceIndex[][4];
 

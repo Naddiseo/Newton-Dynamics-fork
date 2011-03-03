@@ -32,14 +32,14 @@
 #include "dgWorldDynamicUpdate.h"
 
 
-simd_type dgContactSolver::m_zero;
-simd_type dgContactSolver::m_nrh0p5;
-simd_type dgContactSolver::m_nrh3p0;
-simd_type dgContactSolver::m_negIndex;
-simd_type dgContactSolver::m_index_yx;
-simd_type dgContactSolver::m_index_wz;
-simd_type dgContactSolver::m_negativeOne;
-simd_type dgContactSolver::m_zeroTolerenace;
+simd_128 dgContactSolver::m_zero;
+simd_128 dgContactSolver::m_nrh0p5;
+simd_128 dgContactSolver::m_nrh3p0;
+simd_128 dgContactSolver::m_negIndex;
+simd_128 dgContactSolver::m_index_yx;
+simd_128 dgContactSolver::m_index_wz;
+simd_128 dgContactSolver::m_negativeOne;
+simd_128 dgContactSolver::m_zeroTolerenace;
 
 
 void dgContactSolver::CalculateVelocitiesSimd (dgFloat32 timestep) 
@@ -74,14 +74,8 @@ dgInt32 dgContactSolver::CalculateConvexShapeIntersectionSimd (const dgMatrix& m
 		}
 
 	} else {
-		//			dgInt32 i0;
-		//			dgInt32 edgeIndex;
-		//			dgVector* ptr;
-		//			dgVector* output;
-		//			dgPerimenterEdge *poly;
 		dgPerimenterEdge *edgeClipped[2];
 		dgPerimenterEdge subdivision[128];
-
 
 		_ASSERTE (shape1VertexCount >= 3);
 		_ASSERTE (shape2VertexCount >= 3);
@@ -159,23 +153,19 @@ dgInt32 dgContactSolver::CalculateConvexShapeIntersectionSimd (const dgMatrix& m
 				if (test0 >= dgFloat32 (0.0f)) {
 					isInside |= 1;
 					if (test1 < dgFloat32 (0.0f)) {
-						//dgFloat32 den;
-						//simd_type dp;
-						//simd_type den;
-						//simd_type test;
 						const dgVector& p0 = *tmp->m_vertex;
 						const dgVector& p1 = *tmp->m_next->m_vertex;
 
-						//							dgVector dp (p1 - p0); 
+						//dgVector dp (p1 - p0); 
 						simd_type dp = simd_sub_v ((simd_type&)p1, (simd_type&)p0);
 
-						//							den = plane % dp;
+						//den = plane % dp;
 						simd_type den = simd_mul_v((simd_type&) plane, dp);
 						den = simd_add_v(den, simd_move_hl_v (den, den));
 						den = simd_add_s(den, simd_permut_v (den, den, PURMUT_MASK(3, 3, 3, 1)));
-						//							if (dgAbsf(den) < dgFloat32 (1.0e-24f)) {
-						//								den = dgFloat32 (1.0e-24f) * (den > dgFloat32 (0.0f)) ? dgFloat32 (1.0f) : dgFloat32 (-1.0f);
-						//							}
+						//if (dgAbsf(den) < dgFloat32 (1.0e-24f)) {
+						//		den = dgFloat32 (1.0e-24f) * (den > dgFloat32 (0.0f)) ? dgFloat32 (1.0f) : dgFloat32 (-1.0f);
+						//}
 						simd_type test = simd_cmpge_s (den, zero);
 						den = simd_or_v (simd_and_v (simd_max_s (den, tol_pos_1e_24), test), simd_andnot_v (simd_min_s (den, tol_neg_1e_24), test)); 
 
@@ -309,15 +299,18 @@ void dgContactSolver::CalcSupportVertexSimd (const dgVector& dir, dgInt32 entry)
 {
 	_ASSERTE ((dir % dir) > dgFloat32 (0.999f));
 	dgVector p (m_referenceCollision->SupportVertexSimd (dir));
-	dgVector dir1 (m_matrix.UnrotateVectorSimd(simd_mul_v ((simd_type&)dir, m_negativeOne)));
+	dgVector dir1 (m_matrix.UnrotateVectorSimd(m_negativeOne * ((simd_type&)dir)));
 	dgVector q (m_matrix.TransformVectorSimd(m_floatingcollision->SupportVertexSimd (dir1)));
-	m_hullVertex[entry] = (simd_128&)p - (simd_128&)q;
-	m_averVertex[entry] = (simd_128&)p + (simd_128&)q;
+	(simd_128&)m_hullVertex[entry] = (simd_128&)p - (simd_128&)q;
+	(simd_128&)m_averVertex[entry] = (simd_128&)p + (simd_128&)q;
 }
 
 
 dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneSimd(dgMinkFace*& plane, const dgVector& origin)
 {
+//_ASSERTE (0);
+return UpdateSeparatingPlane(plane, origin);
+#if 0
 	dgVector diff[4];
 	dgVector aveg[4];
 
@@ -425,12 +418,6 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneSimd(dgM
 		tmp0 = simd_or_v (simd_and_v(tmp0, mask), simd_andnot_v (m_negIndex, mask));
 		dgInt32 faceIndex = simd_store_is (tmp0);
 */
-
-//			{0, 1, 2, 3},
-//			{1, 0, 3, 2},
-//			{0, 2, 3, 1},
-//			{2, 1, 3, 0},
-
 		simd_type p0_ = ((simd_type *)m_hullVertex)[0];
 		simd_type p1_ = ((simd_type *)m_hullVertex)[1];
 		simd_type p2_ = ((simd_type *)m_hullVertex)[2];
@@ -578,6 +565,7 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneSimd(dgM
 		code = UpdateSeparatingPlaneFallbackSolution (plane, origin);
 	}
 	return code;
+#endif
 }
 
 
@@ -1355,7 +1343,10 @@ dgInt32 dgContactSolver::CalculateContactsSimd(dgMinkFace* const face, dgInt32 c
 
 dgInt32 dgContactSolver::CalculateContactsContinuesSimd(dgInt32 contacID, dgContactPoint* const contactOut, dgInt32 maxContacts, const dgVector* diffPoins, const dgVector* averPoins, dgFloat32 timestep)
 {
-	//		dgInt32 i;
+_ASSERTE (0);
+return 0;
+/*
+	//dgInt32 i;
 	//dgInt32 count;
 	//dgMinkFace *face; 
 	simd_type invMag; 
@@ -1392,6 +1383,7 @@ dgInt32 dgContactSolver::CalculateContactsContinuesSimd(dgInt32 contacID, dgCont
 	m_matrix.m_posit = minkFloatingPosit;
 
 	return count;
+*/
 }
 
 dgInt32 dgContactSolver::HullHullContactsSimd (dgInt32 contactID)
@@ -1425,7 +1417,7 @@ dgInt32 dgContactSolver::HullHullContactsSimd (dgInt32 contactID)
 		{
 			_ASSERTE (face);
 			if (CalcFacePlaneSimd (face)) {
-				//					_ASSERTE (face->m_w >= dgFloat32 (0.0f));
+				//_ASSERTE (face->m_w >= dgFloat32 (0.0f));
 				_ASSERTE ((*face) % (*face) > dgFloat32 (0.0f));
 				if (face->m_w < m_penetrationPadding) {
 					dgVector step (*face);

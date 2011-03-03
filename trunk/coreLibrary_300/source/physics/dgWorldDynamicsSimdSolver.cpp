@@ -752,22 +752,6 @@ void dgWorldDynamicUpdate::CalculateSimpleBodyReactionsForcesSimd (const dgIslan
 
 void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const island, dgInt32 rowStart, dgInt32 threadIndex, dgFloat32 timestepSrc, dgFloat32 maxAccNorm) const
 {
-//	dgFloat32* const force = &m_solverMemory.m_force[rowStart];
-//	const dgJacobianPair* const Jt = &m_solverMemory.m_Jt[rowStart];
-//	const dgJacobianPair* const JMinv = &m_solverMemory.m_JMinv[rowStart];
-//	dgFloat32* const penetration = &m_solverMemory.m_penetration[rowStart];
-//	const dgFloat32* const diagDamp = &m_solverMemory.m_diagDamp[rowStart];
-//	const dgFloat32* const invDJMinvJt = &m_solverMemory.m_invDJMinvJt[rowStart];
-//	const dgFloat32* const restitution = &m_solverMemory.m_restitution[rowStart];
-//	const dgFloat32* const externAccel = &m_solverMemory.m_deltaAccel[rowStart];
-//	const dgInt32* const accelIsMortor = &m_solverMemory.m_accelIsMotor[rowStart];
-//	const dgFloat32* const penetrationStiffness = &m_solverMemory.m_penetrationStiffness[rowStart];
-//	const dgFloat32* const lowerFrictionCoef = &m_solverMemory.m_lowerBoundFrictionCoefficent[rowStart];
-//	const dgFloat32* const upperFrictionCoef = &m_solverMemory.m_upperBoundFrictionCoefficent[rowStart];
-//	dgFloat32* const coordenateAccel = &m_solverMemory.m_coordenateAccel[rowStart];
-//	dgFloat32** const jointForceFeeback = &m_solverMemory.m_jointFeebackForce[rowStart];
-//	const dgInt32* const normalForceIndex = &m_solverMemory.m_normalForceIndex[rowStart];
-
 	dgJacobian* const internalVeloc = &m_solverMemory.m_internalVeloc[island->m_bodyStart];
 	dgJacobian* const internalForces = &m_solverMemory.m_internalForces[island->m_bodyStart];
 
