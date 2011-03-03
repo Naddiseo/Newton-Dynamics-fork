@@ -154,6 +154,7 @@
 		{
 			public:
 			DG_INLINE simd_128 () {}
+			DG_INLINE simd_128 (dgInt32 a): m_type (_mm_set_ps1 (*(dgFloat32*)&a)){}
 			DG_INLINE simd_128 (dgFloat32 a): m_type(_mm_set_ps1(a)) {}
 			DG_INLINE simd_128 (dgFloat32 x, dgFloat32 y, dgFloat32 z, dgFloat32 w): m_type(_mm_set_ps(w, z, y, x)) {}
 			DG_INLINE simd_128 (simd_type type): m_type(type) {}
@@ -162,7 +163,7 @@
 
 			DG_INLINE dgInt32 GetInt () const
 			{
-				return simd_store_is(m_type);
+				return _mm_cvtss_si32(m_type);
 			}
 
 			DG_INLINE void StoreScalar(float* const scalar) const
