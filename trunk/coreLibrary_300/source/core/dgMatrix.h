@@ -80,10 +80,9 @@ class dgMatrix
 	// simd operations
 	dgMatrix InverseSimd () const;
 	dgMatrix MultiplySimd (const dgMatrix& B) const;
-//	dgVector RotateVectorSimd (const dgVector &v) const;
 	simd_128 RotateVectorSimd (const dgVector &v) const;
-	dgVector UnrotateVectorSimd (const dgVector &v) const;
-	dgVector TransformVectorSimd (const dgVector &v) const;
+	simd_128 UnrotateVectorSimd (const dgVector &v) const;
+	simd_128 TransformVectorSimd (const dgVector &v) const;
 	void TransformVectorsSimd (dgVector* const dst, const dgVector* const src, dgInt32 count) const;
 
 	dgVector m_front;
@@ -211,32 +210,6 @@ DG_INLINE void dgMatrix::EigenVectors ()
 }
 
 
-/*
-DG_INLINE dgMatrix dgMatrix::operator* (const dgMatrix &B) const
-{
-	const dgMatrix& A = *this;
-	return dgMatrix (dgVector (A[0][0] * B[0][0] + A[0][1] * B[1][0] + A[0][2] * B[2][0] + A[0][3] * B[3][0],
-							   A[0][0] * B[0][1] + A[0][1] * B[1][1] + A[0][2] * B[2][1] + A[0][3] * B[3][1],
-							   A[0][0] * B[0][2] + A[0][1] * B[1][2] + A[0][2] * B[2][2] + A[0][3] * B[3][2],
-	                           A[0][0] * B[0][3] + A[0][1] * B[1][3] + A[0][2] * B[2][3] + A[0][3] * B[3][3]),
-					 dgVector (A[1][0] * B[0][0] + A[1][1] * B[1][0] + A[1][2] * B[2][0] + A[1][3] * B[3][0],
-							   A[1][0] * B[0][1] + A[1][1] * B[1][1] + A[1][2] * B[2][1] + A[1][3] * B[3][1],
-							   A[1][0] * B[0][2] + A[1][1] * B[1][2] + A[1][2] * B[2][2] + A[1][3] * B[3][2],
-							   A[1][0] * B[0][3] + A[1][1] * B[1][3] + A[1][2] * B[2][3] + A[1][3] * B[3][3]),
-					 dgVector (A[2][0] * B[0][0] + A[2][1] * B[1][0] + A[2][2] * B[2][0] + A[2][3] * B[3][0],
-							   A[2][0] * B[0][1] + A[2][1] * B[1][1] + A[2][2] * B[2][1] + A[2][3] * B[3][1],
-							   A[2][0] * B[0][2] + A[2][1] * B[1][2] + A[2][2] * B[2][2] + A[2][3] * B[3][2],
-							   A[2][0] * B[0][3] + A[2][1] * B[1][3] + A[2][2] * B[2][3] + A[2][3] * B[3][3]),
-					 dgVector (A[3][0] * B[0][0] + A[3][1] * B[1][0] + A[3][2] * B[2][0] + A[3][3] * B[3][0],
-							   A[3][0] * B[0][1] + A[3][1] * B[1][1] + A[3][2] * B[2][1] + A[3][3] * B[3][1],
-							   A[3][0] * B[0][2] + A[3][1] * B[1][2] + A[3][2] * B[2][2] + A[3][3] * B[3][2],
-							   A[3][0] * B[0][3] + A[3][1] * B[1][3] + A[3][2] * B[2][3] + A[3][3] * B[3][3]));
-
-	
-}
-*/
-
-
 DG_INLINE dgMatrix dgPitchMatrix(dgFloat32 ang)
 {
 	dgFloat32 cosAng;
@@ -283,13 +256,10 @@ DG_INLINE dgMatrix dgMatrix::Inverse () const
 					 dgVector (- (m_posit % m_front), - (m_posit % m_up), - (m_posit % m_right), dgFloat32(1.0f)));
 }
 
-
-
-
-DG_INLINE dgVector dgMatrix::TransformVectorSimd (const dgVector &v) const
+DG_INLINE simd_128 dgMatrix::TransformVectorSimd (const dgVector &v) const
 {
 	const dgMatrix& source = *this;
-	return dgVector (((simd_128&)source[0]) * simd_128(v[0])  + ((simd_128&)source[1]) * simd_128(v[1]) + ((simd_128&)source[2]) * simd_128(v[2]) + (simd_128&)source[3]);
+	return (simd_128&)source[0] * simd_128(v[0]) + (simd_128&)source[1] * simd_128(v[1]) + (simd_128&)source[2] * simd_128(v[2]) + (simd_128&)source[3];
 }
 
 DG_INLINE void dgMatrix::TransformVectorsSimd (dgVector* const dst, const dgVector* const src, dgInt32 count) const
@@ -300,18 +270,26 @@ DG_INLINE void dgMatrix::TransformVectorsSimd (dgVector* const dst, const dgVect
 }
 
 
-//DG_INLINE dgVector dgMatrix::RotateVectorSimd (const dgVector &v) const
 DG_INLINE simd_128 dgMatrix::RotateVectorSimd (const dgVector &v) const
 {
 	const dgMatrix& source = *this;
-//	return dgVector (((simd_128&)source[0]) * simd_128(v[0])  + ((simd_128&)source[1]) * simd_128(v[1]) + ((simd_128&)source[2]) * simd_128(v[2]));
 	return (simd_128&)source[0] * simd_128(v[0])  + (simd_128&)source[1] * simd_128(v[1]) + (simd_128&)source[2] * simd_128(v[2]);
-//	return simd_128 (0);
 }
 
-DG_INLINE dgVector dgMatrix::UnrotateVectorSimd (const dgVector &v) const
+DG_INLINE simd_128 dgMatrix::UnrotateVectorSimd (const dgVector &v) const
 {
-	return dgVector (v.DotProductSimd(m_front), v.DotProductSimd(m_up), v.DotProductSimd(m_right), v.m_w);
+	simd_128 x ((simd_128&)v * (simd_128&)m_front);
+	simd_128 y ((simd_128&)v * (simd_128&)m_up);
+	simd_128 z ((simd_128&)v * (simd_128&)m_right);
+
+	simd_128 tmp2 (dgFloat32 (0.0f));
+	simd_128 tmp0 (x.PackLow(y));
+	simd_128 tmp1 (z.PackLow(tmp2));
+	simd_128 r0 (tmp0.MoveLowToHigh (tmp1) + tmp1.MoveHighToLow (tmp0));
+
+	tmp0 = x.PackHigh(y);
+	tmp1 = z.PackHigh(tmp2);
+	return tmp0.MoveLowToHigh (tmp1) + r0;
 }
 
 DG_INLINE dgMatrix dgMatrix::InverseSimd () const
