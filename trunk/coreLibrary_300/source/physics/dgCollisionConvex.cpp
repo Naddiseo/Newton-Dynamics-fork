@@ -883,28 +883,15 @@ dgVector dgCollisionConvex::CalculateVolumeIntegral (const dgPlane& plane) const
 
 
 
-
-
-
-
-
 dgVector dgCollisionConvex::SupportVertex (const dgVector& direction) const
 {
-	dgInt32 i;
-	dgInt32 index;
-	dgInt32 maxCount;
-	dgFloat32 side0;
-	dgFloat32 side1;
-	dgConvexSimplexEdge *ptr;
-	dgConvexSimplexEdge *edge;
 	const dgVector dir (direction.m_x, direction.m_y, direction.m_z, dgFloat32 (0.0f));
-
 	_ASSERTE (dgAbsf(dir % dir - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
 
-	index = 0;
-	side0 = dgFloat32 (-1.0e20f);
-	for (i = 0; i < 4; i ++) {
-		side1 = m_multiResDir[i] % dir;
+	dgInt32 index = 0;
+	dgFloat32 side0 = dgFloat32 (-1.0e20f);
+	for (dgInt32 i = 0; i < 4; i ++) {
+		dgFloat32 side1 = m_multiResDir[i] % dir;
 		if (side1 > side0) {
 			side0 = side1;
 			index = i;
@@ -915,15 +902,15 @@ dgVector dgCollisionConvex::SupportVertex (const dgVector& direction) const
 			index = i + 4;
 		}
 	}
-	edge = m_supportVertexStarCuadrant[index];
+	dgConvexSimplexEdge* edge = m_supportVertexStarCuadrant[index];
 
 	index = edge->m_vertex;
 	side0 = m_vertex[edge->m_vertex] % dir;
-	ptr = edge;
+	dgConvexSimplexEdge* ptr = edge;
 
-	maxCount = 128;
+	dgInt32 maxCount = 128;
 	do {
-		side1 = m_vertex[ptr->m_twin->m_vertex] % dir;
+		dgFloat32 side1 = m_vertex[ptr->m_twin->m_vertex] % dir;
 		if (side1 > side0) {
 			index = ptr->m_twin->m_vertex;
 			side0 = side1;
