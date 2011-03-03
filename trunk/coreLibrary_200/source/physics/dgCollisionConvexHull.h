@@ -24,7 +24,6 @@
 
 #include "dgCollisionConvex.h"
 
-#define DG_LOD_CONVEX_COUNT (16)
 
 class dgCollisionConvexHull: public dgCollisionConvex  
 {
@@ -42,10 +41,6 @@ class dgCollisionConvexHull: public dgCollisionConvex
 	dgBigVector FaceNormal (const dgEdge *face, const dgVector* const pool) const;
 	bool CheckConvex (dgPolyhedra& polyhedra, const dgVector* hullVertexArray) const;
 
-	virtual dgVector SupportVertex (const dgVector& dir) const;
-	virtual dgVector SupportVertexSimd (const dgVector& dir) const;
-	
-
 	virtual dgInt32 CalculateSignature () const;
 	virtual void SetCollisionBBox (const dgVector& p0, const dgVector& p1);
 	virtual void DebugCollision (const dgMatrix& matrix, OnDebugCollisionMeshCallback callback, void* const userData) const;
@@ -56,15 +51,10 @@ class dgCollisionConvexHull: public dgCollisionConvex
 	virtual void SetBreakImpulse(dgFloat32 force);
 	virtual dgFloat32 GetBreakImpulse() const;
 
-	dgVector m_closetEdgePoint[DG_LOD_CONVEX_COUNT]; 
-	dgInt32 m_closestEdge[DG_LOD_CONVEX_COUNT];
-
 	dgFloat32 m_destructionImpulse;
 	dgInt32 m_faceCount;
 	dgInt32 m_boundPlanesCount;
 	dgConvexSimplexEdge** m_faceArray;
-
-
 
 	friend class dgWorld;
 	friend class dgCollisionConvex;

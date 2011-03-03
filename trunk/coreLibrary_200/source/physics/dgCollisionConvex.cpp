@@ -873,11 +873,6 @@ dgVector dgCollisionConvex::CalculateVolumeIntegral (const dgPlane& plane) const
 
 
 
-
-
-
-
-
 dgVector dgCollisionConvex::SupportVertex (const dgVector& direction) const
 {
 	const dgVector dir (direction.m_x, direction.m_y, direction.m_z, dgFloat32 (0.0f));
