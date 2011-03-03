@@ -25,9 +25,9 @@
 #include "dgWorld.h"
 #include "dgConstraint.h"
 #include "dgWorldDynamicUpdate.h"
-//#include "dgBroadPhaseCollision.h"
 
-#ifdef DG_BUILD_SIMD_CODE
+
+
 
 void dgWorldDynamicUpdate::CalculateIslandReactionForcesSimd (const dgIsland* const island, dgFloat32 timestep, dgInt32 threadID) const
 {
@@ -359,150 +359,6 @@ void dgWorldDynamicUpdate::ApplyExternalForcesAndAccelerationSimd (const dgIslan
 
 void dgWorldDynamicUpdate::CalculateSimpleBodyReactionsForcesSimd (const dgIsland* const island, dgInt32 rowStart, dgInt32 threadIndex, dgFloat32 timestep, dgFloat32 maxAccNorm) const
 {
-/*
-	dgFloatSign tmpIndex;
-	tmpIndex.m_integer.m_iVal = 0x7fffffff;
-	simd_type signMask = simd_set1(tmpIndex.m_fVal);
-	simd_type one = simd_set1(dgFloat32 (1.0f));
-	simd_type zero = simd_set1(dgFloat32 (0.0f));
-	simd_type tol_pos_1eNeg16 = simd_set1 (dgFloat32 ( 1.0e-16f));
-
-
-
-//	dgFloat32 clampedForceIndexValue = dgFloat32(0.0f);
-//	dgFloat32 akNum;
-	dgFloat32 accNorm;
-//	simd_store_s (tmp0, &akNum);
-	simd_store_s (accNormTmp, &accNorm);
-	for (dgInt32 i = 0; (i < maxPasses) && (accNorm > maxAccNorm); i ++) {
-
-		
-		dgInt32 clampedForceIndex = -1;
-		dgFloat32 clampedForceIndexValue = dgFloat32(0.0f);
-		for (dgInt32 k = 0; k < count; k ++) {
-			if (activeRow[k]) {
-				dgJacobianMatrixElement* const row = &matrixRow[k];
-				dgFloat32 val = row->m_force + ak * deltaForce[k];
-				if (deltaForce[k] < dgFloat32 (-1.0e-16f)) {
-					if (val < lowBound[k]) {
-						ak = GetMax ((lowBound[k] - row->m_force) / deltaForce[k], dgFloat32 (0.0f));
-						clampedForceIndex = k;
-						clampedForceIndexValue = lowBound[k];
-						if (ak < dgFloat32 (1.0e-8f)) {
-							ak = dgFloat32 (0.0f);
-							break;
-						}
-					}
-				} else if (deltaForce[k] > dgFloat32 (1.0e-16f)) {
-					if (val >= highBound[k]) {
-						ak = GetMax ((highBound[k] - row->m_force) / deltaForce[k], dgFloat32 (0.0f));;
-						clampedForceIndex = k;
-						clampedForceIndexValue = highBound[k];
-						if (ak < dgFloat32 (1.0e-8f)) {
-							ak = dgFloat32 (0.0f);
-							break;
-						}
-					}
-				}
-			}
-		}
-
-		if (ak == dgFloat32 (0.0f) && (clampedForceIndex != -1)) {
-			_ASSERTE (clampedForceIndex !=-1);
-			dgFloat32 akNum1 = dgFloat32 (0.0f);
-			accNorm = dgFloat32(0.0f);
-
-			activeRow[clampedForceIndex] = dgFloat32 (0.0f);
-			deltaForce[clampedForceIndex] = dgFloat32 (0.0f);
-			matrixRow[clampedForceIndex].m_force = clampedForceIndexValue;
-			for (dgInt32 k = 0; k < count; k ++) {
-				if (activeRow[k]) {
-					dgJacobianMatrixElement* const row = &matrixRow[k];
-					dgFloat32 val = lowBound[k] - row->m_force;
-					if ((dgAbsf (val) < dgFloat32 (1.0e-5f)) && (accel[k] < dgFloat32 (0.0f))) {
-						row->m_force = lowBound[k];
-						activeRow[k] = dgFloat32 (0.0f);
-						deltaForce[k] = dgFloat32 (0.0f); 
-
-					} else {
-						val = highBound[k] - row->m_force;
-						if ((dgAbsf (val) < dgFloat32 (1.0e-5f)) && (accel[k] > dgFloat32 (0.0f))) {
-							row->m_force = highBound[k];
-							activeRow[k] = dgFloat32 (0.0f);
-							deltaForce[k] = dgFloat32 (0.0f); 
-						} else {
-							_ASSERTE (activeRow[k] > dgFloat32 (0.0f));
-							deltaForce[k] = accel[k] * row->m_invDJMinvJt;
-							akNum1 += accel[k] * deltaForce[k];
-							accNorm = GetMax (dgAbsf (accel[k]), accNorm);
-						}
-					}
-				}
-			}
-
-			akNum = simd_set1 (akNum1);
-			
-
-			i = -1;
-			maxPasses = GetMax (maxPasses - 1, 1); 
-
-		} else if (clampedForceIndex >= 0) {
-			dgFloat32 akNum1 = dgFloat32(0.0f);
-			accNorm = dgFloat32(0.0f);
-
-			activeRow[clampedForceIndex] = dgFloat32 (0.0f);
-			for (dgInt32 k = 0; k < count; k ++) {
-				dgJacobianMatrixElement* const row = &matrixRow[k];
-				row->m_force += ak * deltaForce[k];
-				accel[k] -= ak * deltaAccel[k];
-				accNorm = GetMax (dgAbsf (accel[k] * activeRow[k]), accNorm);
-				_ASSERTE (dgCheckFloat(row->m_force));
-				_ASSERTE (dgCheckFloat(accel[k]));
-
-				deltaForce[k] = accel[k] * row->m_invDJMinvJt * activeRow[k];
-				akNum1 += deltaForce[k] * accel[k];
-			}
-			matrixRow[clampedForceIndex].m_force = clampedForceIndexValue;
-
-			akNum = simd_set1 (akNum1);
-			
-
-			i = -1;
-			maxPasses = GetMax (maxPasses - 1, 1); 
-
-		} else {
-			accNorm = dgFloat32(0.0f);
-			for (dgInt32 k = 0; k < count; k ++) {
-				dgJacobianMatrixElement* const row = &matrixRow[k];
-				row->m_force += ak * deltaForce[k];
-				accel[k] -= ak * deltaAccel[k];
-				accNorm = GetMax (dgAbsf (accel[k] * activeRow[k]), accNorm);
-				_ASSERTE (dgCheckFloat(row->m_force));
-				_ASSERTE (dgCheckFloat(accel[k]));
-			}
-
-			if (accNorm > maxAccNorm) {
-				dgFloat32 akDen;
-				simd_store_s (akNum, &akDen);
-
-				dgFloat32 akNum1 = dgFloat32(0.0f);
-				for (dgInt32 k = 0; k < count; k ++) {
-					deltaAccel[k] = accel[k] * matrixRow[k].m_invDJMinvJt * activeRow[k];
-					akNum1 += accel[k] * deltaAccel[k];
-				}
-
-				_ASSERTE (akDen > dgFloat32(0.0f));
-				akDen = GetMax (akDen, dgFloat32 (1.0e-17f));
-				dgFloat32 ak = dgFloat32 (akNum1 / akDen);
-				for (dgInt32 k = 0; k < count; k ++) {
-					deltaForce[k] = deltaAccel[k] + ak * deltaForce[k];
-				}
-			}
-		}
-	}
-*/
-
-
 	dgFloat32 accel[DG_CONSTRAINT_MAX_ROWS];
 	dgFloat32 activeRow[DG_CONSTRAINT_MAX_ROWS];
 	dgFloat32 lowBound[DG_CONSTRAINT_MAX_ROWS];
@@ -813,9 +669,6 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 	dgFloat32 invTimestep = invTimestepSrc * dgFloat32 (LINEAR_SOLVER_SUB_STEPS);
 	_ASSERTE (bodyArray[0].m_body == world->m_sentionelBody);
 
-//	dgFloatSign tmpIndex;
-//	tmpIndex.m_integer.m_iVal = 0x7fffffff;
-//	simd_type signMask = simd_set1(tmpIndex.m_fVal);
 	simd_128 signMask (0x7fffffff);
 	simd_128 timeStepSimd (timestep);
 	dgFloat32 firstPassCoef = dgFloat32 (0.0f);
@@ -921,68 +774,37 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 		hasJointFeeback |= (constraintArray[i].m_joint->m_updaFeedbackCallback ? 1 : 0);
 	}
 
-//	dgFloat32 maxAccNorm2 = maxAccNorm * maxAccNorm;
-	simd_type invStepSimd = simd_set1 (invStep);	
-	simd_type invTimeStepSimd = simd_set1 (invTimestepSrc);	
-	simd_type accelerationTolerance = simd_set1 (maxAccNorm);	
-	accelerationTolerance = simd_mul_s (accelerationTolerance, accelerationTolerance);
+	simd_128 invStepSimd (invStep);	
+	simd_128 invTimeStepSimd (invTimestepSrc);	
+	simd_128 accelerationTolerance (maxAccNorm, maxAccNorm, maxAccNorm, dgFloat32 (0.0f));	
+
 	for (dgInt32 i = 1; i < bodyCount; i ++) {
 		dgBody* const body = bodyArray[i].m_body;
 
-		//body->m_veloc = internalVeloc[i].m_linear.Scale(invStep);
-		//body->m_omega = internalVeloc[i].m_angular.Scale(invStep);
-		(simd_type&) body->m_veloc = simd_mul_v ((simd_type&) internalVeloc[i].m_linear, invStepSimd);
-		(simd_type&) body->m_omega = simd_mul_v ((simd_type&) internalVeloc[i].m_angular, invStepSimd);
+		body->m_veloc = (simd_128&) internalVeloc[i].m_linear * invStepSimd;
+		body->m_omega = (simd_128&) internalVeloc[i].m_angular * invStepSimd;
 
-		//dgVector accel = (body->m_veloc - body->m_netForce).Scale (invTimestep);
-		//dgVector alpha = (body->m_omega - body->m_netTorque).Scale (invTimestep);
-		simd_type accel = simd_mul_v (simd_sub_v ((simd_type&) body->m_veloc, (simd_type&) body->m_netForce), invTimeStepSimd);
-		simd_type alpha = simd_mul_v (simd_sub_v ((simd_type&) body->m_omega, (simd_type&) body->m_netTorque), invTimeStepSimd);
+		simd_128 accel (((simd_128&) body->m_veloc - (simd_128&) body->m_netForce) * invTimeStepSimd);
+		simd_128 alpha (((simd_128&) body->m_omega - (simd_128&) body->m_netTorque) * invTimeStepSimd);
 
-		//if ((accel % accel) < maxAccNorm2) {
-		//	accel = zero;
-		//}
-		//if ((alpha % alpha) < maxAccNorm2) {
-		//	alpha = zero;
-		//}
-		//body->m_accel = accel;
-		//body->m_alpha = alpha;
-		//body->m_netForce = accel.Scale (body->m_mass[3]);
+		_ASSERTE (accel.m_type.m128_f32[3] == dgFloat32 (0.0f));
+		_ASSERTE (alpha.m_type.m128_f32[3] == dgFloat32 (0.0f));
 
-		_ASSERTE (accel.m128_f32[3] == dgFloat32 (0.0f));
-		simd_type tmp = simd_mul_v (accel, accel);
-		tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
-		tmp = simd_add_s (tmp, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 1)));
-		tmp = simd_cmplt_s (tmp, accelerationTolerance);
-		(simd_type&)body->m_accel = simd_andnot_v (accel, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 0)));
-		(simd_type&)body->m_netForce = simd_mul_v ((simd_type&)body->m_accel, simd_set1 (body->m_mass[3]));
+		simd_128 alphaTest ((accel * accel) > accelerationTolerance);
+		alphaTest = alphaTest | alphaTest.MoveHighToLow(alphaTest);
+		alphaTest = alphaTest | alphaTest.PackLow(alphaTest);
+		(simd_128&)body->m_accel = accel & (alphaTest | alphaTest.MoveLowToHigh(alphaTest));
 
-		_ASSERTE (alpha.m128_f32[3] == dgFloat32 (0.0f));
-		tmp = simd_mul_v (alpha, alpha);
-		tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
-		tmp = simd_add_s (tmp, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 1)));
-		tmp = simd_cmplt_s (tmp, accelerationTolerance);
-		(simd_type&)body->m_alpha = simd_andnot_v (alpha, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 0)));
+		alphaTest = (alpha * alpha) > accelerationTolerance;
+		alphaTest = alphaTest | alphaTest.MoveHighToLow(alphaTest);
+		alphaTest = alphaTest | alphaTest.PackLow(alphaTest);
+		(simd_128&)body->m_alpha = alpha & (alphaTest | alphaTest.MoveLowToHigh(alphaTest));
 
-		//alpha = body->m_matrix.UnrotateVector(alpha);
-		alpha = simd_mul_v ((simd_type&)body->m_matrix[0], (simd_type&)body->m_alpha);
-		alpha = simd_add_v (alpha, simd_move_hl_v (alpha, alpha));
-		alpha = simd_add_s (alpha, simd_permut_v (alpha, alpha, PURMUT_MASK(0, 0, 0, 1)));
-		tmp = simd_mul_v ((simd_type&)body->m_matrix[1], (simd_type&)body->m_alpha);
-		tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
-		tmp = simd_add_s (tmp, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 1)));
-		alpha = simd_pack_lo_v (alpha, tmp);
+		(simd_128&)body->m_netForce = accel * simd_128 (body->m_mass[3]);
 
-		tmp = simd_mul_v ((simd_type&)body->m_matrix[2], (simd_type&)body->m_alpha);
-		tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
-		tmp = simd_add_s (tmp, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 1)));
-		alpha = simd_permut_v (alpha, tmp, PURMUT_MASK(3, 0, 1, 0));
-
-		//body->m_netTorque = body->m_matrix.RotateVector (alpha.CompProduct(body->m_mass));
-		alpha = simd_mul_v (alpha, (simd_type&)body->m_mass);
-		(simd_type&)body->m_netTorque = simd_mul_add_v (simd_mul_add_v (simd_mul_v ((simd_type&)body->m_matrix[0], simd_permut_v (alpha, alpha, PURMUT_MASK(0, 0, 0, 0))), 
-																				    (simd_type&)body->m_matrix[1], simd_permut_v (alpha, alpha, PURMUT_MASK(1, 1, 1, 1))), 
-																					(simd_type&)body->m_matrix[2], simd_permut_v (alpha, alpha, PURMUT_MASK(2, 2, 2, 2)));
+		alpha = body->m_matrix.UnrotateVectorSimd(alpha);
+		_ASSERTE (alpha.m_type.m128_f32[3] == dgFloat32 (0.0f));
+		(simd_128&)body->m_netTorque = body->m_matrix.RotateVectorSimd(alpha * (simd_type&)body->m_mass);
 	}
 
 	if (hasJointFeeback) {
@@ -994,4 +816,4 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 	}
 }
 
-#endif
+
