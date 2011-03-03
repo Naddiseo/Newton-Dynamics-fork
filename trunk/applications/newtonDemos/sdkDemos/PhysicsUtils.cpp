@@ -878,7 +878,6 @@ NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& srcMa
 				cloud [i].m_z = RandomVariable(size.m_z * 2.0f);
 				count ++;
 			}
-
 			collision = NewtonCreateConvexHull (world, count, &cloud[0].m_x, sizeof (dVector), 0.01f, 0, NULL); 
 			break;
 		}
