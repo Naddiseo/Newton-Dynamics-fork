@@ -599,19 +599,23 @@ enum dgCpuClass
 
 DG_INLINE dgFloat32 dgAbsf(dgFloat32 x)
 {
-//	dgDoubleInt val;
-//	val.m_float = x;
-//	val.m_intH &= ~(dgUnsigned64 (1)<<31);
-//	_ASSERTE (val.m_float == fabs (x));
-//	return dgFloat32 (val.m_float);
-
+#if 0
+	dgDoubleInt val;
+	val.m_float = x;
+	val.m_intH &= ~(dgUnsigned64 (1)<<31);
+	_ASSERTE (val.m_float == fabs (x));
+	return dgFloat32 (val.m_float);
+#else
 	// according to Intel this is better because is doe not read after write
 	return (x >= dgFloat32 (0.0f)) ? x : -x;
+#endif
 }
 
 
 DG_INLINE dgInt32 dgFastInt (dgFloat32 x)
 {
+//#ifdef _MSC_VER
+#if 0
 	volatile dgDoubleInt val;
 	volatile dgDoubleInt round;
 	const dgFloat64 conversionMagicConst = ((dgFloat64 (dgInt64(1)<<52)) * dgFloat64 (1.5f));
@@ -620,23 +624,39 @@ DG_INLINE dgInt32 dgFastInt (dgFloat32 x)
 	dgInt32 ret = val.m_intL + (round.m_intH >> 31);
 	_ASSERTE (ret == dgInt32 (floor (x)));
 	return ret;
+
+#else
+	dgInt32 i = dgInt32 (x);
+	if (dgFloat32 (i) > x) {
+		i --;
+	}
+	return i;
+#endif
 }
 
 DG_INLINE dgFloat32 dgFloor(dgFloat32 x)
 {
+#ifdef _MSC_VER
 	dgFloat32 ret = dgFloat32 (dgFastInt (x));
 	_ASSERTE (ret == floor (x));
 	return  ret;
+#else 
+	return floor (x);
+#endif
 }
 
 DG_INLINE dgFloat32 dgCeil(dgFloat32 x)
 {
+#ifdef _MSC_VER
 	dgFloat32 ret = dgFloor(x);
 	if (ret < x) {
 		ret += dgFloat32 (1.0f);
 	}
 	_ASSERTE (ret == ceil (x));
 	return  ret;
+#else 
+	return ceil (x);
+#endif
 }
 
 #define dgSqrt(x) dgFloat32 (sqrt(x))	
