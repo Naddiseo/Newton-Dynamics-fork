@@ -4819,7 +4819,6 @@ class dgContactSolver
 		dgMinkReturnCode code;
 		dgContactPoint* contactOut; 
 
-
 		count = 0;
 		m_proxy->m_inTriggerVolume = 0;
 		code = CalcSeparatingPlane(face);
@@ -8189,9 +8188,6 @@ xxx += proxy.m_unconditionalCast ? 0 : xxxxx;
 
 				default: 
 				{
-//if (!proxy.m_unconditionalCast &&  (xxx == 5)) {
-//xxx *= 1;
-//}
 					count = CalculateConvexToNonConvexContactsContinue (proxy);
 					break;
 				}

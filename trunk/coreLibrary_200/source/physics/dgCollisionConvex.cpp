@@ -895,7 +895,7 @@ dgVector dgCollisionConvex::SupportVertex (const dgVector& direction) const
 	dgConvexSimplexEdge* edge = m_supportVertexStarCuadrant[index];
 
 	index = edge->m_vertex;
-	side0 = m_vertex[edge->m_vertex] % dir;
+	side0 = m_vertex[index] % dir;
 	dgConvexSimplexEdge* ptr = edge;
 
 	dgInt32 maxCount = 128;
