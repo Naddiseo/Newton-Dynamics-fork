@@ -756,7 +756,7 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 	dgJacobian* const internalForces = &m_solverMemory.m_internalForces[island->m_bodyStart];
 
 //	dgVector zero(dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-	simd_type zero = simd_set1 (dgFloat32 (0.0f));
+	simd_128 zero (dgFloat32 (0.0f));
 
 	//	sleepCount = 0;
 	dgInt32 bodyCount = island->m_bodyCount;
@@ -764,30 +764,19 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 	dgBodyInfo* const bodyArrayPtr = (dgBodyInfo*) &world->m_bodiesMemory[0]; 
 	dgBodyInfo* const bodyArray = &bodyArrayPtr[island->m_bodyStart];
 	for (dgInt32 i = 1; i < bodyCount; i ++) {
+
 		dgBody* const body = bodyArray[i].m_body;
-
-		//body->m_netForce = body->m_veloc;
-		//body->m_netTorque = body->m_omega;
-		//internalVeloc[i].m_linear = zero;
-		//internalVeloc[i].m_angular = zero;
-		//internalForces[i].m_linear = zero;
-		//internalForces[i].m_angular = zero;
-
-		(simd_type&) internalVeloc[i].m_linear = zero;
-		(simd_type&) internalVeloc[i].m_angular = zero;
-		(simd_type&) internalForces[i].m_linear = zero;
-		(simd_type&) internalForces[i].m_angular = zero;
-		(simd_type&) body->m_netForce = (simd_type&) body->m_veloc;
-		(simd_type&) body->m_netTorque = (simd_type&) body->m_omega;
+		(simd_128&) internalVeloc[i].m_linear = zero;
+		(simd_128&) internalVeloc[i].m_angular = zero;
+		(simd_128&) internalForces[i].m_linear = zero;
+		(simd_128&) internalForces[i].m_angular = zero;
+		(simd_128&) body->m_netForce = (simd_128&) body->m_veloc;
+		(simd_128&) body->m_netTorque = (simd_128&) body->m_omega;
 	}
-//	internalVeloc[0].m_linear = zero;
-//	internalVeloc[0].m_angular = zero;
-//	internalForces[0].m_linear = zero;
-//	internalForces[0].m_angular = zero;
-	(simd_type&) internalVeloc[0].m_linear = zero;
-	(simd_type&) internalVeloc[0].m_angular = zero;
-	(simd_type&) internalForces[0].m_linear = zero;
-	(simd_type&) internalForces[0].m_angular = zero;
+	(simd_128&) internalVeloc[0].m_linear = zero;
+	(simd_128&) internalVeloc[0].m_angular = zero;
+	(simd_128&) internalForces[0].m_linear = zero;
+	(simd_128&) internalForces[0].m_angular = zero;
 
 	dgJacobianMatrixElement* const matrixRow = &m_solverMemory.m_memory[rowStart];
 
@@ -801,41 +790,27 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 		dgInt32 m0 = constraintArray[i].m_m0;
 		dgInt32 m1 = constraintArray[i].m_m1;
 
-		dgJacobian y0;
-		dgJacobian y1;
-		//y0.m_linear = zero;
-		//y0.m_angular = zero;
-		//y1.m_linear = zero;
-		//y1.m_angular = zero;
-		simd_type y0_linear = zero;
-		simd_type y0_angular = zero;
-		simd_type y1_linear = zero;
-		simd_type y1_angular = zero;
-
+		//dgJacobian y0;
+		//dgJacobian y1;
+		simd_128 y0_linear = zero;
+		simd_128 y0_angular = zero;
+		simd_128 y1_linear = zero;
+		simd_128 y1_angular = zero;
 		for (dgInt32 j = 0; j < count; j ++) { 
-			//dgInt32 index = j + first;
-			//dgFloat32 val = force[index]; 
 			dgJacobianMatrixElement* const row = &matrixRow[j + first];
 			_ASSERTE (dgCheckFloat(row->m_force));
-			//y0.m_linear += Jt[index].m_jacobian_IM0.m_linear.Scale (val);
-			//y0.m_angular += Jt[index].m_jacobian_IM0.m_angular.Scale (val);
-			//y1.m_linear += Jt[index].m_jacobian_IM1.m_linear.Scale (val);
-			//y1.m_angular += Jt[index].m_jacobian_IM1.m_angular.Scale (val);
-			simd_type val = simd_set1(row->m_force);
-			y0_linear  = simd_mul_add_v (y0_linear, (simd_type&) row->m_Jt.m_jacobian_IM0.m_linear, val);
-			y0_angular = simd_mul_add_v (y0_angular,(simd_type&) row->m_Jt.m_jacobian_IM0.m_angular, val);
-			y1_linear  = simd_mul_add_v (y1_linear, (simd_type&) row->m_Jt.m_jacobian_IM1.m_linear, val);
-			y1_angular = simd_mul_add_v (y1_angular,(simd_type&) row->m_Jt.m_jacobian_IM1.m_angular, val);
+			simd_128 val (row->m_force);
+			y0_linear  = y0_linear + (simd_128&)row->m_Jt.m_jacobian_IM0.m_linear * val;
+			y0_angular = y0_angular + (simd_128&) row->m_Jt.m_jacobian_IM0.m_angular * val;
+			y1_linear  = y1_linear +  (simd_128&) row->m_Jt.m_jacobian_IM1.m_linear * val;
+			y1_angular = y1_angular + (simd_128&) row->m_Jt.m_jacobian_IM1.m_angular * val;
 		}
-		//internalForces[m0].m_linear += y0.m_linear;
-		//internalForces[m0].m_angular += y0.m_angular;
-		//internalForces[m1].m_linear += y1.m_linear;
-		//internalForces[m1].m_angular += y1.m_angular;
-		(simd_type&) internalForces[m0].m_linear = simd_add_v ((simd_type&) internalForces[m0].m_linear, y0_linear);
-		(simd_type&) internalForces[m0].m_angular = simd_add_v ((simd_type&) internalForces[m0].m_angular, y0_angular);
-		(simd_type&) internalForces[m1].m_linear = simd_add_v ((simd_type&) internalForces[m1].m_linear, y1_linear);
-		(simd_type&) internalForces[m1].m_angular = simd_add_v ((simd_type&)internalForces[m1].m_angular, y1_angular);
+		internalForces[m0].m_linear = (simd_128&) internalForces[m0].m_linear + y0_linear;
+		internalForces[m0].m_angular = (simd_128&) internalForces[m0].m_angular +  y0_angular;
+		internalForces[m1].m_linear = (simd_128&) internalForces[m1].m_linear +  y1_linear;
+		internalForces[m1].m_angular = (simd_128&)internalForces[m1].m_angular +  y1_angular;
 	}
+
 
 	dgFloat32 invTimestepSrc = dgFloat32 (1.0f) / timestepSrc;
 	dgFloat32 invStep = (dgFloat32 (1.0f) / dgFloat32 (LINEAR_SOLVER_SUB_STEPS));
@@ -843,30 +818,21 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 	dgFloat32 invTimestep = invTimestepSrc * dgFloat32 (LINEAR_SOLVER_SUB_STEPS);
 	_ASSERTE (bodyArray[0].m_body == world->m_sentionelBody);
 
-	dgFloatSign tmpIndex;
-	tmpIndex.m_integer.m_iVal = 0x7fffffff;
-	simd_type signMask = simd_set1(tmpIndex.m_fVal);
-	simd_type timeStepSimd = simd_set1 (timestep);
+//	dgFloatSign tmpIndex;
+//	tmpIndex.m_integer.m_iVal = 0x7fffffff;
+//	simd_type signMask = simd_set1(tmpIndex.m_fVal);
+	simd_128 signMask (0x7fffffff);
+	simd_128 timeStepSimd (timestep);
 	dgFloat32 firstPassCoef = dgFloat32 (0.0f);
 	dgInt32 maxPasses = dgInt32 (world->m_solverMode + DG_BASE_ITERATION_COUNT);
+
 	for (dgInt32 step = 0; step < LINEAR_SOLVER_SUB_STEPS; step ++) {
 		dgJointAccelerationDecriptor joindDesc;
-
 		joindDesc.m_timeStep = timestep;
 		joindDesc.m_invTimeStep = invTimestep;
 		joindDesc.m_firstPassCoefFlag = firstPassCoef;
-		for (dgInt32 curJoint = 0; curJoint < jointCount; curJoint ++) {
-			//dgInt32 index = constraintArray[curJoint].m_autoPairstart;
-			//joindDesc.m_rowsCount = constraintArray[curJoint].m_autoPaircount;
 
-			//joindDesc.m_Jt = &Jt[index];
-			//joindDesc.m_penetration = &penetration[index];
-			//joindDesc.m_restitution = &restitution[index];
-			//joindDesc.m_externAccelaration = &externAccel[index];
-			//joindDesc.m_coordenateAccel = &coordenateAccel[index];
-			//joindDesc.m_accelIsMotor = &accelIsMortor[index];
-			//joindDesc.m_normalForceIndex = &normalForceIndex[index];
-			//joindDesc.m_penetrationStiffness = &penetrationStiffness[index];
+		for (dgInt32 curJoint = 0; curJoint < jointCount; curJoint ++) {
 			joindDesc.m_rowsCount = constraintArray[curJoint].m_autoPaircount;
 			joindDesc.m_rowMatrix = &matrixRow[constraintArray[curJoint].m_autoPairstart];
 			constraintArray[curJoint].m_joint->JointAccelerationsSimd (&joindDesc);
@@ -875,43 +841,38 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 		firstPassCoef = dgFloat32 (1.0f);
 		dgFloat32 accNorm = maxAccNorm * dgFloat32 (2.0f);
 		for (dgInt32 passes = 0; (passes < maxPasses) && (accNorm > maxAccNorm); passes ++) {
-			//accNorm = dgFloat32 (0.0f);
-			simd_type accNormSimd = zero;
+			simd_128 accNormSimd = zero;
+
 			for (dgInt32 curJoint = 0; curJoint < jointCount; curJoint ++) {
 				dgInt32 index = constraintArray[curJoint].m_autoPairstart;
 				dgInt32 rowsCount = constraintArray[curJoint].m_autoPaircount;
 				dgInt32 m0 = constraintArray[curJoint].m_m0;
 				dgInt32 m1 = constraintArray[curJoint].m_m1;
 
-				//dgVector linearM0 (internalForces[m0].m_linear);
-				//dgVector angularM0 (internalForces[m0].m_angular);
-				//dgVector linearM1 (internalForces[m1].m_linear);
-				//dgVector angularM1 (internalForces[m1].m_angular);
-				simd_type linearM0  = (simd_type&)internalForces[m0].m_linear;
-				simd_type angularM0 = (simd_type&)internalForces[m0].m_angular;
-				simd_type linearM1  = (simd_type&)internalForces[m1].m_linear;
-				simd_type angularM1 = (simd_type&)internalForces[m1].m_angular;
+				simd_128 linearM0  = (simd_128&)internalForces[m0].m_linear;
+				simd_128 angularM0 = (simd_128&)internalForces[m0].m_angular;
+				simd_128 linearM1  = (simd_128&)internalForces[m1].m_linear;
+				simd_128 angularM1 = (simd_128&)internalForces[m1].m_angular;
+
 				for (dgInt32 k = 0; k < rowsCount; k ++) {
-					//dgVector acc (JMinv[index].m_jacobian_IM0.m_linear.CompProduct(linearM0));
-					//acc += JMinv[index].m_jacobian_IM0.m_angular.CompProduct (angularM0);
-					//acc += JMinv[index].m_jacobian_IM1.m_linear.CompProduct (linearM1);
-					//acc += JMinv[index].m_jacobian_IM1.m_angular.CompProduct (angularM1);
 					dgJacobianMatrixElement* const row = &matrixRow[index];
+					simd_128 a ((simd_128&)row->m_JMinv.m_jacobian_IM0.m_linear * linearM0 +
+								(simd_128&)row->m_JMinv.m_jacobian_IM0.m_angular * angularM0 +
+								(simd_128&)row->m_JMinv.m_jacobian_IM1.m_linear * linearM1 +
+								(simd_128&)row->m_JMinv.m_jacobian_IM1.m_angular * angularM1);
 
-					simd_type a = simd_mul_v ((simd_type&)row->m_JMinv.m_jacobian_IM0.m_linear, linearM0);
-					a = simd_mul_add_v (a, (simd_type&)row->m_JMinv.m_jacobian_IM0.m_angular, angularM0);
-					a = simd_mul_add_v (a, (simd_type&)row->m_JMinv.m_jacobian_IM1.m_linear, linearM1);
-					a = simd_mul_add_v (a, (simd_type&)row->m_JMinv.m_jacobian_IM1.m_angular, angularM1);
-
-					_ASSERTE (a.m128_f32[3] == dgFloat32 (0.0f));
+					_ASSERTE (a.m_type.m128_f32[3] == dgFloat32 (0.0f));
 					//dgFloat32 a = coordenateAccel[index] - acc.m_x - acc.m_y - acc.m_z - force[index] * diagDamp[index];
-					a = simd_add_v (a, simd_move_hl_v(a, a));
-					a = simd_add_s (a, simd_permut_v (a, a, PURMUT_MASK(3, 3, 3, 1)));
-					simd_type force = simd_load_s(row->m_force);
-					a = simd_sub_s(simd_load_s(row->m_coordenateAccel), simd_mul_add_s(a, force, simd_load_s(row->m_diagDamp)));
+					//a = simd_add_v (a, simd_move_hl_v(a, a));
+					//a = simd_add_s (a, simd_permut_v (a, a, PURMUT_MASK(3, 3, 3, 1)));
+					//simd_type force = simd_load_s(row->m_force);
+					//a = simd_sub_s(simd_load_s(row->m_coordenateAccel), simd_mul_add_s(a, force, simd_load_s(row->m_diagDamp)));
+					simd_128 force (row->m_force);
+					a = simd_128(row->m_coordenateAccel) - a.AddHorizontal() - force * simd_128(row->m_diagDamp);
 					
 					//dgFloat32 f = force[index] + invDJMinvJt[index] * a;
-					simd_type f = simd_mul_add_s (force, simd_load_s(row->m_invDJMinvJt), a);
+					//simd_type f = simd_mul_add_s (force, simd_load_s(row->m_invDJMinvJt), a);
+					simd_128 f (force + a * simd_128(row->m_invDJMinvJt));
 
 					dgInt32 frictionIndex = row->m_normalForceIndex;
 					_ASSERTE (((frictionIndex < 0) && (matrixRow[frictionIndex].m_force == dgFloat32 (1.0f))) || ((frictionIndex >= 0) && (matrixRow[frictionIndex].m_force >= dgFloat32 (0.0f))));
@@ -919,9 +880,14 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 					//dgFloat32 frictionNormal = force[frictionIndex];
 					//dgFloat32 lowerFrictionForce = frictionNormal * lowerFrictionCoef[index];
 					//dgFloat32 upperFrictionForce = frictionNormal * upperFrictionCoef[index];
-					simd_type frictionNormal = simd_load_s(matrixRow[frictionIndex].m_force);
-					simd_type lowerFrictionForce = simd_mul_s (frictionNormal, simd_load_s(row->m_lowerBoundFrictionCoefficent));
-					simd_type upperFrictionForce = simd_mul_s (frictionNormal, simd_load_s(row->m_upperBoundFrictionCoefficent));
+					//simd_type frictionNormal = simd_load_s(matrixRow[frictionIndex].m_force);
+					//simd_type lowerFrictionForce = simd_mul_s (frictionNormal, simd_load_s(row->m_lowerBoundFrictionCoefficent));
+					//simd_type upperFrictionForce = simd_mul_s (frictionNormal, simd_load_s(row->m_upperBoundFrictionCoefficent));
+
+					simd_128 frictionNormal (matrixRow[frictionIndex].m_force);
+					simd_128 lowerFrictionForce (frictionNormal * simd_128(row->m_lowerBoundFrictionCoefficent));
+					simd_128 upperFrictionForce (frictionNormal * simd_128(row->m_upperBoundFrictionCoefficent));
+
 
 					//if (f > upperFrictionForce) {
 					//	a = dgFloat32 (0.0f);
@@ -930,9 +896,14 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 					//	a = dgFloat32 (0.0f);
 					//	f = lowerFrictionForce;
 					//}
-					f = simd_min_s (simd_max_s (f, lowerFrictionForce), upperFrictionForce);
-					a = simd_andnot_v (a, simd_or_v (simd_cmplt_s (f, lowerFrictionForce), simd_cmpgt_s (f, upperFrictionForce)));
+//					f = simd_min_s (simd_max_s (f, lowerFrictionForce), upperFrictionForce);
+//					a = simd_andnot_v (a, simd_or_v (simd_cmplt_s (f, lowerFrictionForce), simd_cmpgt_s (f, upperFrictionForce)));
 
+					f = f.GetMax(lowerFrictionForce).GetMin(upperFrictionForce);
+
+//					a = simd_andnot_v (a, simd_or_v (simd_cmplt_s (f, lowerFrictionForce), simd_cmpgt_s (f, upperFrictionForce)));
+
+/*
 					//accNorm = GetMax (accNorm, dgAbsf (a));
 					accNormSimd = simd_max_s (accNormSimd, simd_and_v (a, signMask));
 
@@ -952,19 +923,16 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 					linearM1 = simd_mul_add_v (linearM1, (simd_type&) row->m_Jt.m_jacobian_IM1.m_linear, prevValue);
 					angularM1 = simd_mul_add_v (angularM1,(simd_type&) row->m_Jt.m_jacobian_IM1.m_angular, prevValue);
 					index ++;
+*/
 				}
-				//internalForces[m0].m_linear = linearM0;
-				//internalForces[m0].m_angular = angularM0;
-				//internalForces[m1].m_linear = linearM1;
-				//internalForces[m1].m_angular = angularM1;
-				(simd_type&) internalForces[m0].m_linear = linearM0;
-				(simd_type&) internalForces[m0].m_angular = angularM0;
-				(simd_type&) internalForces[m1].m_linear = linearM1;
-				(simd_type&) internalForces[m1].m_angular = angularM1;
+				internalForces[m0].m_linear = linearM0;
+				internalForces[m0].m_angular = angularM0;
+				internalForces[m1].m_linear = linearM1;
+				internalForces[m1].m_angular = angularM1;
 			}
-			simd_store_s (accNormSimd, &accNorm);
+			accNormSimd.StoreScalar(&accNorm);
 		}
-
+/*
 		for (dgInt32 i = 1; i < bodyCount; i ++) {
 			dgBody* const body = bodyArray[i].m_body;
 
@@ -991,9 +959,10 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 			(simd_type&)internalVeloc[i].m_linear = simd_add_v ((simd_type&)internalVeloc[i].m_linear, (simd_type&) body->m_veloc);
 			(simd_type&)internalVeloc[i].m_angular = simd_add_v ((simd_type&)internalVeloc[i].m_angular, (simd_type&) body->m_omega);
 		}
+*/
 	}
 
-
+/*
 	dgInt32 hasJointFeeback = 0;
 	for (dgInt32 i = 0; i < jointCount; i ++) {
 		dgInt32 first = constraintArray[i].m_autoPairstart;
@@ -1087,6 +1056,7 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 			}
 		}
 	}
+*/
 }
 
 #endif
