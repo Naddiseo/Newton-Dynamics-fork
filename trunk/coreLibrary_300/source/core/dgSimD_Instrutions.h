@@ -175,6 +175,12 @@
 				_mm_storeu_ps (array, m_type);
 			}
 
+			DG_INLINE simd_128 operator= (const simd_128& data)
+			{
+				m_type = data.m_type;
+				return (*this);
+			}
+
 			DG_INLINE simd_128 operator+ (const simd_128& data) const
 			{
 				return _mm_add_ps (m_type, data.m_type);	
