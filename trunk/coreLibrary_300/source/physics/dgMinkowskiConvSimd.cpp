@@ -41,251 +41,10 @@ void dgContactSolver::CalculateVelocitiesSimd (dgFloat32 timestep)
 
 	m_referenceBody->CalculateContinueVelocitySimd(timestep, m_referenceBodyVeloc, refOmega);
 	m_floatingBody->CalculateContinueVelocitySimd (timestep, m_floatingBodyVeloc, floatOmega);
-	dgVector vRel (m_floatingBodyVeloc - m_referenceBodyVeloc);
-	//m_localRelVeloc = m_referenceBody->m_collisionWorldMatrix.UnrotateVectorSimd(vRel);
+	simd_128 vRel ((simd_128&) m_floatingBodyVeloc - (simd_128&)m_referenceBodyVeloc);
 	m_localRelVeloc = m_proxy->m_referenceMatrix.UnrotateVectorSimd(vRel);
 }
 
-dgInt32 dgContactSolver::CalculateConvexShapeIntersectionSimd (const dgMatrix& matrix, const dgVector& shapeNormal, dgUnsigned32 id, dgFloat32 penetration,
-															   dgInt32 shape1VertexCount, dgVector* const shape1, dgInt32 shape2VertexCount, dgVector* const shape2,
-											                   dgContactPoint* const contactOut, dgInt32 maxContacts) const
-{
-	dgInt32 count = 0;
-	if (shape2VertexCount <= 2) {
-		count = CalculateConvexShapeIntersectionLine (matrix, shapeNormal, id, penetration, 
-			shape1VertexCount, shape1, shape2VertexCount, shape2, contactOut);
-		if (count > maxContacts) {
-			count = maxContacts;
-		}
-
-	} else if (shape1VertexCount <= 2) {
-		count = CalculateConvexShapeIntersectionLine (matrix, shapeNormal, id, penetration, 
-			shape2VertexCount, shape2, shape1VertexCount, shape1, contactOut);
-		if (count > maxContacts) {
-			count = maxContacts;
-		}
-
-	} else {
-		dgPerimenterEdge *edgeClipped[2];
-		dgPerimenterEdge subdivision[128];
-
-		_ASSERTE (shape1VertexCount >= 3);
-		_ASSERTE (shape2VertexCount >= 3);
-		dgVector* output = (dgVector*) &m_hullVertex[shape1VertexCount + shape2VertexCount];
-
-		//			ptr = NULL;
-		_ASSERTE ((shape1VertexCount + shape2VertexCount) < sizeof (subdivision) / (2 * sizeof (subdivision[0])));
-		for (dgInt32 i0 = 0; i0 < shape2VertexCount; i0 ++) {
-			subdivision[i0].m_vertex = &shape2[i0];
-			subdivision[i0].m_prev = &subdivision[i0 - 1];
-			subdivision[i0].m_next = &subdivision[i0 + 1];
-		}
-		//i0 --;
-		//subdivision[0].m_prev = &subdivision[i0];
-		//subdivision[i0].m_next = &subdivision[0];
-		subdivision[0].m_prev = &subdivision[shape2VertexCount - 1];
-		subdivision[shape2VertexCount - 1].m_next = &subdivision[0];
-
-		dgPerimenterEdge* poly = &subdivision[0];
-		//_ASSERTE (CheckNormal (poly, shapeNormal));
-
-#ifdef _DEBUG
-		{
-			dgVector p0;
-			dgVector p1;
-			m_referenceCollision->CalcAABB (dgGetIdentityMatrix(), p0, p1);
-			p0-= dgVector (0.5f, 0.5f, 0.5f, 0.0f);
-			p1+= dgVector (0.5f, 0.5f, 0.5f, 0.0f);
-			for (dgInt32 i = 0; i < shape1VertexCount; i ++) {
-				dgVector p (shape1[i]);
-				_ASSERTE (p.m_x >= p0.m_x);
-				_ASSERTE (p.m_y >= p0.m_y);
-				_ASSERTE (p.m_z >= p0.m_z);
-				_ASSERTE (p.m_x <= p1.m_x);
-				_ASSERTE (p.m_y <= p1.m_y);
-				_ASSERTE (p.m_z <= p1.m_z);
-			} 
-		}
-#endif
-
-		//			simd_type zero;
-		//			simd_type neg_one;
-		//			simd_type tol_pos_1e_24;
-		//			simd_type tol_neg_1e_24;
-		//			simd_type signMask;
-		//			t0 = 0x7fffffff;
-		//			signMask = simd_set1((dgFloat32&) t0 );
-
-		simd_type zero = simd_set1 (dgFloat32 (0.0f));
-		simd_type neg_one = simd_set1 (dgFloat32 (-1.0f));
-		simd_type tol_pos_1e_24 = simd_set1 (dgFloat32 (1.0e-24f));
-		simd_type tol_neg_1e_24 = simd_set1 (dgFloat32 (-1.0e-24f));
-
-		edgeClipped[0] = NULL;
-		edgeClipped[1] = NULL;
-
-		dgInt32 i0 = shape1VertexCount - 1;
-		dgInt32 edgeIndex = shape2VertexCount;
-		for (dgInt32 i1 = 0; i1 < shape1VertexCount; i1 ++) {
-			//dgInt32 isInside;
-			//dgFloat32 test0;
-			//dgFloat32 test1;
-			//dgPerimenterEdge *tmp;
-
-			dgVector n (shapeNormal.CrossProductSimd(simd_sub_v ((simd_type&)shape1[i1], (simd_type&)shape1[i0])));
-			dgPlane plane (n, - n.DotProductSimd(shape1[i0]));
-			i0 = i1;
-
-			count = 0;
-			dgPerimenterEdge* tmp = poly;
-			dgInt32 isInside = 0;
-			dgFloat32 test0 = plane.Evalue (*tmp->m_vertex);
-			do {
-				dgFloat32 test1 = plane.Evalue (*tmp->m_next->m_vertex);
-				if (test0 >= dgFloat32 (0.0f)) {
-					isInside |= 1;
-					if (test1 < dgFloat32 (0.0f)) {
-						const dgVector& p0 = *tmp->m_vertex;
-						const dgVector& p1 = *tmp->m_next->m_vertex;
-
-						//dgVector dp (p1 - p0); 
-						simd_type dp = simd_sub_v ((simd_type&)p1, (simd_type&)p0);
-
-						//den = plane % dp;
-						simd_type den = simd_mul_v((simd_type&) plane, dp);
-						den = simd_add_v(den, simd_move_hl_v (den, den));
-						den = simd_add_s(den, simd_permut_v (den, den, PURMUT_MASK(3, 3, 3, 1)));
-						//if (dgAbsf(den) < dgFloat32 (1.0e-24f)) {
-						//		den = dgFloat32 (1.0e-24f) * (den > dgFloat32 (0.0f)) ? dgFloat32 (1.0f) : dgFloat32 (-1.0f);
-						//}
-						simd_type test = simd_cmpge_s (den, zero);
-						den = simd_or_v (simd_and_v (simd_max_s (den, tol_pos_1e_24), test), simd_andnot_v (simd_min_s (den, tol_neg_1e_24), test)); 
-
-						//							den = test0 / den;
-						den = simd_div_s (simd_set1 (test0), den); 
-
-						//							if (den >= dgFloat32 (0.0f)) {
-						//								den = dgFloat32 (0.0f);
-						//							} else if (den <= -1.0f) {
-						//								den = dgFloat32 (-1.0f);
-						//							}
-						den = simd_max_v (neg_one, simd_min_v (den, zero)); 
-						//							output[0] = p0 - dp.Scale (den);
-						(simd_type&)output[0] = simd_mul_sub_v ((simd_type&)p0, dp, simd_permut_v (den, den, PURMUT_MASK(0, 0, 0, 0)));
-
-						edgeClipped[0] = tmp;
-						count ++;
-					}
-				} else if (test1 >= dgFloat32 (0.0f)) {
-					//simd_type dp;
-					//simd_type den;
-					//simd_type test;
-
-					isInside |= 1;
-					const dgVector& p0 = *tmp->m_vertex;
-					const dgVector& p1 = *tmp->m_next->m_vertex;
-
-					//dgVector dp (p1 - p0); 
-					simd_type dp = simd_sub_v ((simd_type&)p1, (simd_type&)p0);
-
-					//den = plane % dp;
-					simd_type den = simd_mul_v((simd_type&) plane, dp);
-					den = simd_add_v(den, simd_move_hl_v (den, den));
-					den = simd_add_s(den, simd_permut_v (den, den, PURMUT_MASK(3, 3, 3, 1)));
-					//if (dgAbsf(den) < dgFloat32 (1.0e-24f)) {
-					//	den = dgFloat32 (1.0e-24f) * (den > dgFloat32 (0.0f)) ? dgFloat32 (1.0f) : dgFloat32 (-1.0f);
-					//}
-					simd_type test = simd_cmpge_s (den, zero);
-					den = simd_or_v (simd_and_v (simd_max_s (den, tol_pos_1e_24), test), simd_andnot_v (simd_min_s (den, tol_neg_1e_24), test)); 
-
-					//den = test0 / den;
-					den = simd_div_s (simd_set1 (test0), den); 
-
-					//if (den >= dgFloat32 (0.0f)) {
-					//	den = dgFloat32 (0.0f);
-					//} else if (den <= -1.0f) {
-					//	den = dgFloat32 (-1.0f);
-					//}
-					den = simd_max_v (neg_one, simd_min_v (den, zero)); 
-
-					//output[1] = p0 - dp.Scale (den);
-					(simd_type&)output[1] = simd_mul_sub_v ((simd_type&)p0, dp, simd_permut_v (den, den, PURMUT_MASK(0, 0, 0, 0)));
-
-					edgeClipped[1] = tmp;
-					count ++;
-				}
-				test0 = test1;
-				tmp = tmp->m_next;
-			} while (tmp != poly && (count < 2));
-
-			if (!isInside) {
-				return 0;
-			}
-
-			if (count == 2) {
-				//dgPerimenterEdge *newEdge;
-				dgPerimenterEdge* const newEdge = &subdivision[edgeIndex];
-				newEdge->m_next = edgeClipped[1];
-				newEdge->m_prev = edgeClipped[0];
-				edgeClipped[0]->m_next = newEdge;
-				edgeClipped[1]->m_prev = newEdge;
-
-				newEdge->m_vertex = &output[0];
-				edgeClipped[1]->m_vertex = &output[1];
-				poly = newEdge;
-
-				output += 2;
-				edgeIndex ++;
-				_ASSERTE (edgeIndex < sizeof (subdivision) / sizeof (subdivision[0]));
-				//_ASSERTE (CheckNormal (poly, shapeNormal));
-			}
-		}
-
-		_ASSERTE (poly);
-
-#ifdef _DEBUG
-		{
-			dgVector p0;
-			dgVector p1;
-			m_referenceCollision->CalcAABB (dgGetIdentityMatrix(), p0, p1);
-			p0-= dgVector (0.5f, 0.5f, 0.5f, 0.0f);
-			p1+= dgVector (0.5f, 0.5f, 0.5f, 0.0f);
-			dgPerimenterEdge *tmp;
-			tmp = poly;
-			do {
-				dgVector p (*tmp->m_vertex);
-				_ASSERTE (p.m_x >= p0.m_x);
-				_ASSERTE (p.m_y >= p0.m_y);
-				_ASSERTE (p.m_z >= p0.m_z);
-				_ASSERTE (p.m_x <= p1.m_x);
-				_ASSERTE (p.m_y <= p1.m_y);
-				_ASSERTE (p.m_z <= p1.m_z);
-				tmp = tmp->m_next;
-			} while (tmp != poly);
-		}
-#endif
-
-
-		_ASSERTE (poly);
-		poly = ReduceContacts (poly, maxContacts);
-
-		//if (count > 0) {
-		//dgPerimenterEdge *intersection;
-		count = 0;
-		dgPerimenterEdge* intersection = poly;
-		dgVector normal = matrix.RotateVector(shapeNormal);
-		do {
-			contactOut[count].m_point = matrix.TransformVectorSimd(*intersection->m_vertex);
-			contactOut[count].m_normal = normal;
-			contactOut[count].m_penetration = penetration;
-			contactOut[count].m_userId = id;
-			count ++;
-			intersection = intersection->m_next;
-		} while (intersection != poly);
-		//}
-	}
-	return count;
-}
 
 void dgContactSolver::CalcSupportVertexSimd (const dgVector& dir, dgInt32 entry)
 {
@@ -1358,3 +1117,235 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneSimd(dgM
 
 
 
+
+dgInt32 dgContactSolver::CalculateConvexShapeIntersectionSimd (const dgMatrix& matrix, const dgVector& shapeNormal, dgUnsigned32 id, dgFloat32 penetration,
+															   dgInt32 shape1VertexCount, dgVector* const shape1, dgInt32 shape2VertexCount, dgVector* const shape2,
+															   dgContactPoint* const contactOut, dgInt32 maxContacts) const
+{
+	dgInt32 count = 0;
+	if (shape2VertexCount <= 2) {
+		count = CalculateConvexShapeIntersectionLine (matrix, shapeNormal, id, penetration, 
+			shape1VertexCount, shape1, shape2VertexCount, shape2, contactOut);
+		if (count > maxContacts) {
+			count = maxContacts;
+		}
+
+	} else if (shape1VertexCount <= 2) {
+		count = CalculateConvexShapeIntersectionLine (matrix, shapeNormal, id, penetration, 
+			shape2VertexCount, shape2, shape1VertexCount, shape1, contactOut);
+		if (count > maxContacts) {
+			count = maxContacts;
+		}
+
+	} else {
+		dgPerimenterEdge *edgeClipped[2];
+		dgPerimenterEdge subdivision[128];
+
+		_ASSERTE (shape1VertexCount >= 3);
+		_ASSERTE (shape2VertexCount >= 3);
+		dgVector* output = (dgVector*) &m_hullVertex[shape1VertexCount + shape2VertexCount];
+
+		//			ptr = NULL;
+		_ASSERTE ((shape1VertexCount + shape2VertexCount) < sizeof (subdivision) / (2 * sizeof (subdivision[0])));
+		for (dgInt32 i0 = 0; i0 < shape2VertexCount; i0 ++) {
+			subdivision[i0].m_vertex = &shape2[i0];
+			subdivision[i0].m_prev = &subdivision[i0 - 1];
+			subdivision[i0].m_next = &subdivision[i0 + 1];
+		}
+		//i0 --;
+		//subdivision[0].m_prev = &subdivision[i0];
+		//subdivision[i0].m_next = &subdivision[0];
+		subdivision[0].m_prev = &subdivision[shape2VertexCount - 1];
+		subdivision[shape2VertexCount - 1].m_next = &subdivision[0];
+
+		dgPerimenterEdge* poly = &subdivision[0];
+		//_ASSERTE (CheckNormal (poly, shapeNormal));
+
+#ifdef _DEBUG
+		{
+			dgVector p0;
+			dgVector p1;
+			m_referenceCollision->CalcAABB (dgGetIdentityMatrix(), p0, p1);
+			p0-= dgVector (0.5f, 0.5f, 0.5f, 0.0f);
+			p1+= dgVector (0.5f, 0.5f, 0.5f, 0.0f);
+			for (dgInt32 i = 0; i < shape1VertexCount; i ++) {
+				dgVector p (shape1[i]);
+				_ASSERTE (p.m_x >= p0.m_x);
+				_ASSERTE (p.m_y >= p0.m_y);
+				_ASSERTE (p.m_z >= p0.m_z);
+				_ASSERTE (p.m_x <= p1.m_x);
+				_ASSERTE (p.m_y <= p1.m_y);
+				_ASSERTE (p.m_z <= p1.m_z);
+			} 
+		}
+#endif
+
+		simd_type zero = simd_set1 (dgFloat32 (0.0f));
+		simd_type neg_one = simd_set1 (dgFloat32 (-1.0f));
+		simd_type tol_pos_1e_24 = simd_set1 (dgFloat32 (1.0e-24f));
+		simd_type tol_neg_1e_24 = simd_set1 (dgFloat32 (-1.0e-24f));
+
+		edgeClipped[0] = NULL;
+		edgeClipped[1] = NULL;
+
+		dgInt32 i0 = shape1VertexCount - 1;
+		dgInt32 edgeIndex = shape2VertexCount;
+		for (dgInt32 i1 = 0; i1 < shape1VertexCount; i1 ++) {
+			//dgInt32 isInside;
+			//dgFloat32 test0;
+			//dgFloat32 test1;
+			//dgPerimenterEdge *tmp;
+
+			dgVector n (shapeNormal.CrossProductSimd(simd_sub_v ((simd_type&)shape1[i1], (simd_type&)shape1[i0])));
+			dgPlane plane (n, - n.DotProductSimd(shape1[i0]));
+			i0 = i1;
+
+			count = 0;
+			dgPerimenterEdge* tmp = poly;
+			dgInt32 isInside = 0;
+			dgFloat32 test0 = plane.Evalue (*tmp->m_vertex);
+			do {
+				dgFloat32 test1 = plane.Evalue (*tmp->m_next->m_vertex);
+				if (test0 >= dgFloat32 (0.0f)) {
+					isInside |= 1;
+					if (test1 < dgFloat32 (0.0f)) {
+						const dgVector& p0 = *tmp->m_vertex;
+						const dgVector& p1 = *tmp->m_next->m_vertex;
+
+						//dgVector dp (p1 - p0); 
+						simd_type dp = simd_sub_v ((simd_type&)p1, (simd_type&)p0);
+
+						//den = plane % dp;
+						simd_type den = simd_mul_v((simd_type&) plane, dp);
+						den = simd_add_v(den, simd_move_hl_v (den, den));
+						den = simd_add_s(den, simd_permut_v (den, den, PURMUT_MASK(3, 3, 3, 1)));
+						//if (dgAbsf(den) < dgFloat32 (1.0e-24f)) {
+						//		den = dgFloat32 (1.0e-24f) * (den > dgFloat32 (0.0f)) ? dgFloat32 (1.0f) : dgFloat32 (-1.0f);
+						//}
+						simd_type test = simd_cmpge_s (den, zero);
+						den = simd_or_v (simd_and_v (simd_max_s (den, tol_pos_1e_24), test), simd_andnot_v (simd_min_s (den, tol_neg_1e_24), test)); 
+
+						//							den = test0 / den;
+						den = simd_div_s (simd_set1 (test0), den); 
+
+						//							if (den >= dgFloat32 (0.0f)) {
+						//								den = dgFloat32 (0.0f);
+						//							} else if (den <= -1.0f) {
+						//								den = dgFloat32 (-1.0f);
+						//							}
+						den = simd_max_v (neg_one, simd_min_v (den, zero)); 
+						//							output[0] = p0 - dp.Scale (den);
+						(simd_type&)output[0] = simd_mul_sub_v ((simd_type&)p0, dp, simd_permut_v (den, den, PURMUT_MASK(0, 0, 0, 0)));
+
+						edgeClipped[0] = tmp;
+						count ++;
+					}
+				} else if (test1 >= dgFloat32 (0.0f)) {
+					//simd_type dp;
+					//simd_type den;
+					//simd_type test;
+
+					isInside |= 1;
+					const dgVector& p0 = *tmp->m_vertex;
+					const dgVector& p1 = *tmp->m_next->m_vertex;
+
+					//dgVector dp (p1 - p0); 
+					simd_type dp = simd_sub_v ((simd_type&)p1, (simd_type&)p0);
+
+					//den = plane % dp;
+					simd_type den = simd_mul_v((simd_type&) plane, dp);
+					den = simd_add_v(den, simd_move_hl_v (den, den));
+					den = simd_add_s(den, simd_permut_v (den, den, PURMUT_MASK(3, 3, 3, 1)));
+					//if (dgAbsf(den) < dgFloat32 (1.0e-24f)) {
+					//	den = dgFloat32 (1.0e-24f) * (den > dgFloat32 (0.0f)) ? dgFloat32 (1.0f) : dgFloat32 (-1.0f);
+					//}
+					simd_type test = simd_cmpge_s (den, zero);
+					den = simd_or_v (simd_and_v (simd_max_s (den, tol_pos_1e_24), test), simd_andnot_v (simd_min_s (den, tol_neg_1e_24), test)); 
+
+					//den = test0 / den;
+					den = simd_div_s (simd_set1 (test0), den); 
+
+					//if (den >= dgFloat32 (0.0f)) {
+					//	den = dgFloat32 (0.0f);
+					//} else if (den <= -1.0f) {
+					//	den = dgFloat32 (-1.0f);
+					//}
+					den = simd_max_v (neg_one, simd_min_v (den, zero)); 
+
+					//output[1] = p0 - dp.Scale (den);
+					(simd_type&)output[1] = simd_mul_sub_v ((simd_type&)p0, dp, simd_permut_v (den, den, PURMUT_MASK(0, 0, 0, 0)));
+
+					edgeClipped[1] = tmp;
+					count ++;
+				}
+				test0 = test1;
+				tmp = tmp->m_next;
+			} while (tmp != poly && (count < 2));
+
+			if (!isInside) {
+				return 0;
+			}
+
+			if (count == 2) {
+				//dgPerimenterEdge *newEdge;
+				dgPerimenterEdge* const newEdge = &subdivision[edgeIndex];
+				newEdge->m_next = edgeClipped[1];
+				newEdge->m_prev = edgeClipped[0];
+				edgeClipped[0]->m_next = newEdge;
+				edgeClipped[1]->m_prev = newEdge;
+
+				newEdge->m_vertex = &output[0];
+				edgeClipped[1]->m_vertex = &output[1];
+				poly = newEdge;
+
+				output += 2;
+				edgeIndex ++;
+				_ASSERTE (edgeIndex < sizeof (subdivision) / sizeof (subdivision[0]));
+				//_ASSERTE (CheckNormal (poly, shapeNormal));
+			}
+		}
+
+		_ASSERTE (poly);
+
+#ifdef _DEBUG
+		{
+			dgVector p0;
+			dgVector p1;
+			m_referenceCollision->CalcAABB (dgGetIdentityMatrix(), p0, p1);
+			p0-= dgVector (0.5f, 0.5f, 0.5f, 0.0f);
+			p1+= dgVector (0.5f, 0.5f, 0.5f, 0.0f);
+			dgPerimenterEdge *tmp;
+			tmp = poly;
+			do {
+				dgVector p (*tmp->m_vertex);
+				_ASSERTE (p.m_x >= p0.m_x);
+				_ASSERTE (p.m_y >= p0.m_y);
+				_ASSERTE (p.m_z >= p0.m_z);
+				_ASSERTE (p.m_x <= p1.m_x);
+				_ASSERTE (p.m_y <= p1.m_y);
+				_ASSERTE (p.m_z <= p1.m_z);
+				tmp = tmp->m_next;
+			} while (tmp != poly);
+		}
+#endif
+
+
+		_ASSERTE (poly);
+		poly = ReduceContacts (poly, maxContacts);
+
+		//if (count > 0) {
+		//dgPerimenterEdge *intersection;
+		count = 0;
+		dgPerimenterEdge* intersection = poly;
+		dgVector normal = matrix.RotateVector(shapeNormal);
+		do {
+			contactOut[count].m_point = matrix.TransformVectorSimd(*intersection->m_vertex);
+			contactOut[count].m_normal = normal;
+			contactOut[count].m_penetration = penetration;
+			contactOut[count].m_userId = id;
+			count ++;
+			intersection = intersection->m_next;
+		} while (intersection != poly);
+	}
+	return count;
+}
