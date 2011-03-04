@@ -425,7 +425,7 @@ void dgBilateralConstraint::JointAccelerationsSimd(dgJointAccelerationDecriptor*
 {
 	_ASSERTE (0);
 /*
-#ifdef DG_BUILD_SIMD_CODE
+
 	dgFloat32 dt;
 
 	const dgJacobianPair* const Jt = params.m_Jt;

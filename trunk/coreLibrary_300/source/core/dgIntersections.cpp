@@ -68,7 +68,6 @@ FastRayTest::FastRayTest(const dgVector& l0, const dgVector& l1)
 
 dgInt32 FastRayTest::BoxTestSimd (const dgVector& minBox, const dgVector& maxBox) const
 {
-#ifdef DG_BUILD_SIMD_CODE
 //	dgInt32 isParallel;
 
 //	simd_type t0;
@@ -103,9 +102,6 @@ dgInt32 FastRayTest::BoxTestSimd (const dgVector& minBox, const dgVector& maxBox
 //	simd_store_s(simd_cmple_s(t0, t1), &isParallel.m_fVal);
 //	return isParallel.m_integer.m_iVal;
 	return simd_store_is(simd_cmple_s(t0, t1));
-#else
-	return 0;
-#endif
 }
 
 
@@ -144,8 +140,6 @@ dgInt32 FastRayTest::BoxTest (const dgVector& minBox, const dgVector& maxBox) co
 
 dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFloat32* const polygon, dgInt32 strideInBytes, const dgInt32* const indexArray, dgInt32 indexCount) const
 {
-#ifdef DG_BUILD_SIMD_CODE
-
 	dgFloatSign test;
 
 	_ASSERTE (m_p0.m_w == m_p1.m_w);
@@ -308,9 +302,6 @@ dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFlo
 	}
 	return dgFloat32 (1.2f);
 */
-#else
-	return dgFloat32 (0.0f);
-#endif
 }
 
 

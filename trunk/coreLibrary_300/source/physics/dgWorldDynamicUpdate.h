@@ -216,8 +216,6 @@ class dgWorldDynamicUpdate
 	void GetJacobianDerivativesParallel (dgJointInfo* const jointInfo, dgInt32 threadIndex, bool bitMode, dgInt32 rowBase, dgFloat32 timestep) const;	
 	
 	
-
-
 	
 	void CalculateIslandReactionForces (const dgIsland* const island, dgFloat32 timestep, dgInt32 threadID) const;
 	dgInt32 BuildJacobianMatrix (const dgIsland* const island, dgInt32 threadIndex, dgFloat32 timestep) const;
@@ -226,14 +224,13 @@ class dgWorldDynamicUpdate
 	void ApplyExternalForcesAndAcceleration(const dgIsland* const island, dgInt32 rowStart, dgInt32 threadIndex, dgFloat32 timestep, dgFloat32 maxAccNorm) const;
 	void CalculateSimpleBodyReactionsForces (const dgIsland* const island, dgInt32 rowStart, dgInt32 threadIndex, dgFloat32 timestep, dgFloat32 maxAccNorm) const;
 
-#ifdef DG_BUILD_SIMD_CODE
 	void CalculateIslandReactionForcesSimd (const dgIsland* const island, dgFloat32 timestep, dgInt32 threadID) const;
 	dgInt32 BuildJacobianMatrixSimd (const dgIsland* const island, dgInt32 threadIndex, dgFloat32 timestep) const; 
 	void CalculateForcesGameModeSimd (const dgIsland* const island, dgInt32 rowStart, dgInt32 threadIndex, dgFloat32 timestep, dgFloat32 maxAccNorm) const;
 	void CalculateReactionsForcesSimd(const dgIsland* const island, dgInt32 rowStart, dgInt32 threadIndex, dgFloat32 timestep, dgFloat32 maxAccNorm) const;
 	void ApplyExternalForcesAndAccelerationSimd(const dgIsland* const island, dgInt32 rowStart, dgInt32 threadIndex, dgFloat32 timestep, dgFloat32 maxAccNorm) const;
 	void CalculateSimpleBodyReactionsForcesSimd (const dgIsland* const island, dgInt32 rowStart, dgInt32 threadIndex, dgFloat32 timestep, dgFloat32 maxAccNorm) const;
-#endif
+
 
 
 	//void IntegrateArray (const dgBodyInfo* bodyArray, dgInt32 count, dgFloat32 accelTolerance, dgFloat32 timestep, dgInt32 threadIndex, bool update) const

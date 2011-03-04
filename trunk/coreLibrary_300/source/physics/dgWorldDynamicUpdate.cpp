@@ -813,7 +813,6 @@ void dgWorldDynamicUpdate::IntegrateArray (const dgIsland* const island, dgFloat
 #if 0
 void dgJacobianMemory::SwapRowsSimd (dgInt32 i, dgInt32 j) const
 {
-#ifdef DG_BUILD_SIMD_CODE
 	_ASSERTE (i != j);
 	//Swap (m_Jt[i], m_Jt[j]);
 	dgJacobianPair* const ptr0 = m_Jt;
@@ -870,10 +869,6 @@ void dgJacobianMemory::SwapRowsSimd (dgInt32 i, dgInt32 j) const
 	//	Swap (m_forceStep[i], m_forceStep[j]);
 	Swap (m_deltaAccel[i], m_deltaAccel[j]);
 	Swap (m_deltaForce[i], m_deltaForce[j]);
-
-#else
-
-#endif
 }
 
 
@@ -1457,9 +1452,6 @@ void dgJacobianMemory::CalculateForcesSimulationMode (dgFloat32 maxAccNorm) cons
 
 dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* forceStep, dgFloat32 maxAccNorm) const
 {
-
-#ifdef DG_BUILD_SIMD_CODE
-
 	dgInt32 m0;
 	dgInt32 m1;
 	dgInt32 first;
@@ -2066,11 +2058,6 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 	//	}
 
 	return retAccel;
-
-
-#else
-	return dgFloat32 (0.0f);
-#endif
 }
 
 
@@ -2385,7 +2372,6 @@ void dgParallelSolverBuildJacobianRows::ThreadExecute()
 	dgJointInfo* const constraintArray = m_constraintArray;
 
 	if (m_useSimd) {
-#ifdef DG_BUILD_SIMD_CODE
 		simd_type zero;
 		zero = simd_set1 (dgFloat32 (0.0f));
 		for (dgInt32 k = 0; k < m_count; k ++) {
@@ -2485,7 +2471,6 @@ void dgParallelSolverBuildJacobianRows::ThreadExecute()
 				index ++;
 			}
 		}
-#endif
 	} else {
 		for (dgInt32 k = 0; k < m_count; k ++) {
 			dgInt32 m0;
@@ -2820,7 +2805,6 @@ void dgParallelSolverInitInternalForces::ThreadExecute()
 	//	ticks = m_world->m_getPerformanceCount();
 
 	if (m_useSimd) {
-#ifdef DG_BUILD_SIMD_CODE
 		simd_type zero;
 		zero = simd_set1(dgFloat32 (0.0f));
 
@@ -2874,7 +2858,6 @@ void dgParallelSolverInitInternalForces::ThreadExecute()
 			m_world->dgReleaseIndirectLock(&m_locks[m1]);
 			//			m_world->dgReleasedUserLock();
 		}
-#endif
 	} else {
 		dgVector zero(dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 		for (dgInt32 i = 0; i < m_count; i ++) {
@@ -2996,7 +2979,6 @@ void dgParallelSolverUpdateVeloc::ThreadExecute()
 	//	ticks = m_world->m_getPerformanceCount();
 
 	if (m_useSimd) {
-#ifdef DG_BUILD_SIMD_CODE
 		simd_type timeStepSimd;
 		timeStepSimd = simd_set1 (m_timeStep);
 		for (dgInt32 i = 0; i < m_count; i ++) {
@@ -3027,7 +3009,6 @@ void dgParallelSolverUpdateVeloc::ThreadExecute()
 			//body->m_netTorque += body->m_omega;
 			(simd_type&)m_internalVeloc[i].m_angular = simd_add_v ((simd_type&)m_internalVeloc[i].m_angular, (simd_type&) body->m_omega);
 		}
-#endif
 	} else {
 
 		for (dgInt32 i = 0; i < m_count; i ++) {
@@ -3056,7 +3037,6 @@ void dgParallelSolverUpdateForce::ThreadExecute()
 	//	ticks = m_world->m_getPerformanceCount();
 
 	if (m_useSimd) {
-#ifdef DG_BUILD_SIMD_CODE
 		simd_type invStepSimd;
 		simd_type invTimeStepSimd;
 		simd_type accelerationTolerance;
@@ -3127,7 +3107,6 @@ void dgParallelSolverUpdateForce::ThreadExecute()
 				(simd_type&)body->m_matrix[1], simd_permut_v (alpha, alpha, PURMUT_MASK(1, 1, 1, 1))), 
 				(simd_type&)body->m_matrix[2], simd_permut_v (alpha, alpha, PURMUT_MASK(2, 2, 2, 2)));
 		}
-#endif
 
 	} else {
 		dgVector zero (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
@@ -3213,7 +3192,6 @@ void dgParallelSolverCalculateForces::ThreadExecute()
 
 	//	threadIndex = m_threadIndex;
 	if (m_useSimd) {
-#ifdef DG_BUILD_SIMD_CODE
 		dgFloatSign tmpIndex;
 		simd_type signMask;
 		simd_type accNorm;
@@ -3334,7 +3312,6 @@ void dgParallelSolverCalculateForces::ThreadExecute()
 			}
 		}
 		simd_store_s (accNorm, &m_accNorm);
-#endif
 
 	} else {
 		dgFloat32 accNorm;

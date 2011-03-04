@@ -2179,8 +2179,6 @@ return 0;
 
 void dgWorld::InitConvexCollision ()
 {
-	dgInt32 i;
-
 	((dgVector&) dgContactSolver::m_zero) = dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f)); 
 	((dgVector&) dgContactSolver::m_negativeOne) = dgVector (dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f));
 	((dgVector&) dgContactSolver::m_zeroTolerenace) = dgVector (DG_DISTANCE_TOLERANCE_ZERO, DG_DISTANCE_TOLERANCE_ZERO, DG_DISTANCE_TOLERANCE_ZERO, DG_DISTANCE_TOLERANCE_ZERO);
@@ -2210,7 +2208,7 @@ void dgWorld::InitConvexCollision ()
 	dgContactSolver::m_dir[12] = dgVector ( dgFloat32 (0.0f),  dgFloat32 (0.0f),  dgFloat32 (1.0f), dgFloat32 (0.0f));
 	dgContactSolver::m_dir[13] = dgVector ( dgFloat32 (0.0f),  dgFloat32 (0.0f), -dgFloat32 (1.0f), dgFloat32 (0.0f));
 
-	for (i = 0; i < dgInt32(sizeof(dgContactSolver::m_dir) / sizeof(dgContactSolver::m_dir[0])); i ++) {
+	for (dgInt32 i = 0; i < dgInt32(sizeof(dgContactSolver::m_dir) / sizeof(dgContactSolver::m_dir[0])); i ++) {
 		dgVector dir (dgContactSolver::m_dir[i]);
 		dgContactSolver::m_dir[i] = dir.Scale (dgFloat32 (1.0f) / dgSqrt (dir % dir));
 	}
@@ -2233,7 +2231,7 @@ void dgWorld::InitConvexCollision ()
 	dgCollisionConvex::m_multiResDir_sse[4] = dgVector (dgCollisionConvex::m_multiResDir[4].m_y, dgCollisionConvex::m_multiResDir[5].m_y, dgCollisionConvex::m_multiResDir[6].m_y, dgCollisionConvex::m_multiResDir[7].m_y);
 	dgCollisionConvex::m_multiResDir_sse[5] = dgVector (dgCollisionConvex::m_multiResDir[4].m_z, dgCollisionConvex::m_multiResDir[5].m_z, dgCollisionConvex::m_multiResDir[6].m_z, dgCollisionConvex::m_multiResDir[7].m_z);
 
-#ifdef DG_BUILD_SIMD_CODE
+_ASSERTE (0);
 	dgFloatSign tmp;
 	tmp.m_integer.m_iVal = 0x7fffffff;
 	dgCollisionConvex::m_signMask.m_x = tmp.m_fVal;
@@ -2247,10 +2245,9 @@ void dgWorld::InitConvexCollision ()
 	dgCollisionConvex::m_triplexMask.m_z = tmp.m_fVal;
 	dgCollisionConvex::m_triplexMask.m_w = 0.0f;
 
-#endif
 
 #ifdef _DEBUG
-	for (i = 0; i < dgInt32(sizeof(dgContactSolver::m_dir) / sizeof(dgContactSolver::m_dir[0])); i ++) {
+	for (dgInt32 i = 0; i < dgInt32(sizeof(dgContactSolver::m_dir) / sizeof(dgContactSolver::m_dir[0])); i ++) {
 		_ASSERTE (dgContactSolver::m_dir[i] % dgContactSolver::m_dir[i] > dgFloat32 (0.9999f));
 		for (dgInt32 j = i + 1; j < dgInt32(sizeof(dgContactSolver::m_dir) / sizeof(dgContactSolver::m_dir[0])); j ++) {
 			_ASSERTE (dgContactSolver::m_dir[i] % dgContactSolver::m_dir[j] < dgFloat32 (0.9999f));

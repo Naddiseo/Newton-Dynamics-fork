@@ -118,7 +118,6 @@ dgVector dgCollisionEllipse::SupportVertex (const dgVector& dir) const
 
 dgVector dgCollisionEllipse::SupportVertexSimd (const dgVector& dir) const
 {
-#ifdef DG_BUILD_SIMD_CODE
 	_ASSERTE ((dir % dir) > dgFloat32 (0.999f));
 	_ASSERTE ((dgUnsigned64(&dir) & 0x0f) == 0);
 	_ASSERTE ((dgUnsigned64(&m_scale) & 0x0f) == 0);
@@ -140,11 +139,6 @@ dgVector dgCollisionEllipse::SupportVertexSimd (const dgVector& dir) const
 
 	dgVector p (dgCollisionSphere::SupportVertexSimd (dir1));
 	return dgVector (p.m_x * m_scale.m_x, p.m_y * m_scale.m_y, p.m_z * m_scale.m_z, dgFloat32 (0.0f)); 
-
-
-#else
-	return dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-#endif
 }
 
 
@@ -161,16 +155,12 @@ dgInt32 dgCollisionEllipse::CalculatePlaneIntersection (const dgVector& normal, 
 
 dgInt32 dgCollisionEllipse::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& point, dgVector* const contactsOut) const
 {
-#ifdef DG_BUILD_SIMD_CODE	
+_ASSERTE (0);
 	_ASSERTE ((normal % normal) > dgFloat32 (0.999f));
 	dgVector n (normal.m_x * m_scale.m_x, normal.m_y * m_scale.m_y, normal.m_z * m_scale.m_z, dgFloat32 (0.0f));
 	n = n.Scale ((normal % point) / (n % n));
 	contactsOut[0] = dgVector (n.m_x * m_scale.m_x, n.m_y * m_scale.m_y, n.m_z * m_scale.m_z, dgFloat32 (0.0f)); 
 	return 1;
-
-#else
-	return 0;
-#endif
 }
 
 

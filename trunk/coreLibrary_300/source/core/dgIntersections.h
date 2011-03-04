@@ -166,7 +166,6 @@ DG_INLINE dgInt32 dgOverlapTest (const dgVector& p0, const dgVector& p1, const d
 
 DG_INLINE dgInt32 dgOverlapTestSimd (const dgVector& p0, const dgVector& p1, const dgVector& q0, const dgVector& q1)
 {
-#ifdef DG_BUILD_SIMD_CODE
 	//simd_type test = simd_and_v (simd_cmplt_v ((simd_type&)p0, (simd_type&) q1), simd_cmpgt_v ((simd_type&)p1, (simd_type&) q0));
 	//test = simd_and_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 2, 0)));
 	//dgInt32 ret = simd_store_is(simd_and_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 1, 1))));
@@ -182,10 +181,6 @@ DG_INLINE dgInt32 dgOverlapTestSimd (const dgVector& p0, const dgVector& p1, con
 //	return val.GetInt();
 	dgInt32 mask = val.GetSignMask();
 	return ((mask & 0x07) == 0x07);
-
-#else
-	return 0;
-#endif
 }
 
 
@@ -196,18 +191,13 @@ DG_INLINE dgInt32 dgBoxInclusionTest (const dgVector& p0, const dgVector& p1, co
 
 DG_INLINE dgInt32 dgBoxInclusionTestSimd (const dgVector& p0, const dgVector& p1, const dgVector& q0, const dgVector& q1)
 {
-#ifdef DG_BUILD_SIMD_CODE
 	_ASSERTE (p0.m_w == dgFloat32 (0.0f));
 	_ASSERTE (p1.m_w == dgFloat32 (0.0f));
 	_ASSERTE (q0.m_w == dgFloat32 (0.0f));
 	_ASSERTE (q1.m_w == dgFloat32 (0.0f));
-
 	simd_128 val (((simd_128&)p0 >= (simd_128&)q0) & ((simd_128&)p1 <= (simd_128&)q1));
 	dgInt32 mask = val.GetSignMask();
 	return ((mask & 0x07) == 0x07);
-#else
-	return 0;
-#endif
 }
 
 

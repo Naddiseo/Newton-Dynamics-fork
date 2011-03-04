@@ -144,7 +144,6 @@ dgVector dgCollisionMesh::dgCollisionConvexPolygon::SupportVertex (const dgVecto
 
 dgVector dgCollisionMesh::dgCollisionConvexPolygon::SupportVertexSimd (const dgVector& dir) const
 {
-#ifdef DG_BUILD_SIMD_CODE	
 //	dgInt32 i;
 //	dgFloat32 fIndex;
 //	simd_type dot;
@@ -190,17 +189,12 @@ dgVector dgCollisionMesh::dgCollisionConvexPolygon::SupportVertexSimd (const dgV
 //	simd_store_s (simd_or_v (simd_and_v(index, mask), simd_andnot_v (simd_permut_v (index, index, PURMUT_MASK(0, 0, 0, 1)), mask)), &fIndex);
 //	dgInt32 i = dgFastInt (fIndex);
 	return m_localPoly[i]; 
-
-#else
-	return dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-#endif
 }
 
 
 void dgCollisionMesh::dgCollisionConvexPolygon::CalculateNormalSimd()
 {
 	//	CalculateNormal();
-#ifdef DG_BUILD_SIMD_CODE	
 	if (m_normalIndex) {
 		m_normal = dgVector (&m_vertex[m_normalIndex * m_stride]);
 	} else {
@@ -224,7 +218,6 @@ void dgCollisionMesh::dgCollisionConvexPolygon::CalculateNormalSimd()
 		mag2 = simd_mul_s (simd_mul_s(*(simd_type*)&m_nrh0p5, tmp0), simd_mul_sub_s (*(simd_type*)&m_nrh3p0, simd_mul_s (mag2, tmp0), tmp0));
 		(*(simd_type*)&m_normal) = simd_mul_v (normal, simd_permut_v(mag2, mag2, PURMUT_MASK(3, 0, 0, 0)));
 	}
-#endif
 }
 
 
@@ -249,8 +242,7 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTestContinueSimd (
 	const dgCollisionConvex* hull, 
 	const dgMatrix& matrix)
 {
-
-#ifdef DG_BUILD_SIMD_CODE
+	_ASSERTE (0);
 	dgInt32 ret;
 	dgFloat32 val1;
 	m_localPoly[0] = dgVector (&m_vertex[m_index[0] * m_stride]);
@@ -286,9 +278,6 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTestContinueSimd (
 	}
 
 	return ret;
-#else
-	return 0;
-#endif
 }
 
 
@@ -325,7 +314,6 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTestSimd (
 	const dgCollisionConvex* hull, 
 	const dgMatrix& matrix)
 {
-#ifdef DG_BUILD_SIMD_CODE	
 	dgInt32 i; 
 //	dgInt32 i0; 
 //	dgInt32 i1; 
@@ -378,10 +366,6 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTestSimd (
 
 	m_paddedCount = i1;
 	return 1;
-
-#else
-	return 0;
-#endif
 }
 
 
@@ -1127,7 +1111,7 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersectionSim
 	const dgVector& origin, 
 	dgVector contactsOut[]) const
 {
-#ifdef DG_BUILD_SIMD_CODE
+	_ASSERTE (0);
 /*
 	dgInt32 i;
 	dgInt32 count;
@@ -1259,9 +1243,6 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersectionSim
 	return count;
 */
 	return CalculatePlaneIntersection (normal, origin, contactsOut);
-#else
-	return 0;
-#endif
 }
 
 

@@ -146,8 +146,7 @@ dgInt32 dgCollisionBox::CalculateSignature () const
 
 dgVector dgCollisionBox::SupportVertexSimd (const dgVector& dir) const
 {
-#ifdef DG_BUILD_SIMD_CODE
-
+	_ASSERTE (0);
 	dgInt32 x;
 	dgInt32 y;
 	dgInt32 z;
@@ -157,10 +156,6 @@ dgVector dgCollisionBox::SupportVertexSimd (const dgVector& dir) const
 	y = -(ptr[1].m_integer.m_iVal >> 31);
 	z = -(ptr[2].m_integer.m_iVal >> 31);
 	return dgVector (m_size[x].m_x, m_size[y].m_y, m_size[z].m_z, dgFloat32 (0.0f));
-
-#else
-	return dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-#endif
 }
 
 dgVector dgCollisionBox::SupportVertex (const dgVector& dir) const
@@ -213,7 +208,6 @@ void dgCollisionBox::CalcAABB (const dgMatrix &matrix, dgVector &p0, dgVector &p
 
 void dgCollisionBox::CalcAABBSimd (const dgMatrix &matrix, dgVector &p0, dgVector &p1) const
 {
-#ifdef DG_BUILD_SIMD_CODE
 //	dgFloat32 x;
 //	dgFloat32 y;
 //	dgFloat32 z;
@@ -241,21 +235,11 @@ void dgCollisionBox::CalcAABBSimd (const dgMatrix &matrix, dgVector &p0, dgVecto
 
 	p0.m_w = dgFloat32 (0.0f);
 	p1.m_w = dgFloat32 (0.0f);
-#else
-
-#endif
 }
 
 
-dgFloat32 dgCollisionBox::RayCast (
-	const dgVector& localP0, 
-	const dgVector& localP1, 
-	dgContactPoint& contactOut, 
-	OnRayPrecastAction preFilter,
-	const dgBody* const body,	
-	void* const userData) const
+dgFloat32 dgCollisionBox::RayCast (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
 {
-
 	if (PREFILTER_RAYCAST (preFilter, body, this, userData)) {
 		return dgFloat32 (1.2f);
 	}
@@ -539,7 +523,6 @@ dgInt32 dgCollisionBox::CalculatePlaneIntersection (const dgVector& normal, cons
 
 dgInt32 dgCollisionBox::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& point, dgVector* const contactsOut) const
 {
-#ifdef DG_BUILD_SIMD_CODE
 	dgInt32 i;
 	dgInt32 count;
 	dgInt32 index0;
@@ -665,11 +648,6 @@ dgInt32 dgCollisionBox::CalculatePlaneIntersectionSimd (const dgVector& normal, 
 		count = RectifyConvexSlice (count, normal, contactsOut);
 	}
 	return count;
-
-
-#else
-	return 0;
-#endif
 }
 
 void dgCollisionBox::GetCollisionInfo(dgCollisionInfo* info) const

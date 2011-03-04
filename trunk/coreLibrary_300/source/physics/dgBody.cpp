@@ -481,7 +481,6 @@ void dgBody::CalcInvInertiaMatrix ()
 
 void dgBody::CalcInvInertiaMatrixSimd ()
 {
-#ifdef DG_BUILD_SIMD_CODE
 //	simd_type m0;
 //	simd_type m1;
 //	simd_type m2;
@@ -530,13 +529,6 @@ void dgBody::CalcInvInertiaMatrixSimd ()
 	_ASSERTE (m_invWorldInertiaMatrix[1][3] == dgFloat32 (0.0f));
 	_ASSERTE (m_invWorldInertiaMatrix[2][3] == dgFloat32 (0.0f));
 	_ASSERTE (m_invWorldInertiaMatrix[3][3] == dgFloat32 (1.0f));
-
-#else
-
-
-#endif
-
-
 }
 
 /*
@@ -657,14 +649,14 @@ void dgBody::CalculateContinueVelocitySimd (
 	dgVector& veloc, 
 	dgVector& omega) const
 {
-#ifdef DG_BUILD_SIMD_CODE
 	//	timestep = m_world->m_currTimestep;
-	veloc = m_veloc + m_accel.Scale (timestep * m_invMass.m_w); 
+	simd_128 time (timestep);
+	(simd_128&)veloc = (simd_128&)m_veloc + (simd_128&)m_accel * time * simd_128 (m_invMass.m_w); 
 
-	dgVector localAlpha (m_matrix.UnrotateVectorSimd (m_alpha));
-	dgVector alpha (m_matrix.RotateVectorSimd (localAlpha.CompProductSimd (m_invMass)));
-	omega = m_omega + alpha.Scale (timestep);
-#endif
+	simd_128 localAlpha (m_matrix.UnrotateVectorSimd (m_alpha));
+	_ASSERTE (localAlpha.m_type.m128_f32[3] = dgFloat32 (0.0f));
+	simd_128 alpha (m_matrix.RotateVectorSimd (localAlpha * (simd_128&)m_invMass));
+	(simd_128&)omega = (simd_128&)m_omega + alpha * time;
 }
 
 

@@ -312,8 +312,7 @@ void dgCollisionCapsule::SetCollisionBBox (const dgVector& p0__, const dgVector&
 
 dgVector dgCollisionCapsule::SupportVertexSimd (const dgVector& dir) const
 {
-#ifdef DG_BUILD_SIMD_CODE
-
+	_ASSERTE (0);
 	dgInt32 index;
 	dgFloatSign *ptr; 
 
@@ -324,10 +323,6 @@ dgVector dgCollisionCapsule::SupportVertexSimd (const dgVector& dir) const
 	dgVector p (dir.Scale (m_radius));
 	p.m_x += m_height[index];
 	return p;
-
-#else
-	return dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-#endif
 }
 
 
@@ -619,11 +614,8 @@ dgInt32 dgCollisionCapsule::CalculatePlaneIntersectionSimd (
 	const dgVector& origin, 
 	dgVector contactsOut[]) const
 {
-#ifdef DG_BUILD_SIMD_CODE
+	_ASSERTE (0);
 	return dgCollisionCapsule::CalculatePlaneIntersection (normal, origin, contactsOut);
-#else
-	return 0;
-#endif
 }
 
 

@@ -31,9 +31,14 @@
 #include <new>
 
 
-#if !(defined (__ppc__) || defined (__USE_DOUBLE_PRECISION__) || defined (_SCALAR_ARITHMETIC_ONLY))
+//#if !(defined (__ppc__) || defined (__USE_DOUBLE_PRECISION__) || defined (_SCALAR_ARITHMETIC_ONLY))
+//	#define DG_BUILD_SIMD_CODE
+//#endif
+
+#ifndef __USE_DOUBLE_PRECISION__
 	#define DG_BUILD_SIMD_CODE
 #endif
+
 
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 
@@ -92,28 +97,28 @@
 #endif
 
 
-#ifdef DG_BUILD_SIMD_CODE
 
-	#if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
-		#if (_MSC_VER >= 1400)
-			#include <intrin.h>
-		#else 
-			#if (_MSC_VER >= 1300)
-				#include <xmmintrin.h>
-			#endif
+
+#if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
+	#if (_MSC_VER >= 1400)
+		#include <intrin.h>
+	#else 
+		#if (_MSC_VER >= 1300)
+			#include <xmmintrin.h>
 		#endif
 	#endif
-
-
-	
-	#ifdef __ppc__
-		#include <vecLib/veclib.h>
-	#endif
-
-	#if (defined (__i386__) || defined (__x86_64__))
-		#include <xmmintrin.h>
-	#endif
 #endif
+
+
+
+#ifdef __ppc__
+	#include <vecLib/veclib.h>
+#endif
+
+#if (defined (__i386__) || defined (__x86_64__))
+	#include <xmmintrin.h>
+#endif
+
 
 
 
@@ -170,11 +175,7 @@
 #endif
 
 
-#ifdef DG_BUILD_SIMD_CODE
-	#define DG_SIMD_WORD_SIZE	dgInt32 (sizeof (simd_type) / sizeof (dgFloat32))
-#else
-	#define DG_SIMD_WORD_SIZE	dgInt32 (sizeof (dgVector) / sizeof (dgFloat32))
-#endif
+#define DG_SIMD_WORD_SIZE	dgInt32 (sizeof (simd_128) / sizeof (dgFloat32))
 
 
 

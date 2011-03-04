@@ -569,9 +569,11 @@ void dgWorld::UpdateCollision ()
 		simd_env rounding;
 		rounding = simd_get_ctrl();
 		simd_set_FZ_mode();
+#endif
 
-		_ASSERTE (0);
-//		UpdateContactsSimd (timestep, true);
+		UpdateContacts (timestep, true);
+
+#ifdef DG_BUILD_SIMD_CODE	
 		simd_set_ctrl (rounding);
 #endif
 
@@ -641,14 +643,16 @@ m_cpu = dgSimdPresent;
 #endif
 
 	if (m_cpu == dgSimdPresent) {
-#ifdef DG_BUILD_SIMD_CODE	
-			simd_env rounding = simd_get_ctrl();
-			simd_set_FZ_mode();
+#ifdef DG_BUILD_SIMD_CODE
+		simd_env rounding = simd_get_ctrl();
+		simd_set_FZ_mode();
+#endif
 
-			UpdateContacts (timestep, false);
-			UpdateDynamics (timestep);
+		UpdateContacts (timestep, false);
+		UpdateDynamics (timestep);
 
-			simd_set_ctrl (rounding);
+#ifdef DG_BUILD_SIMD_CODE
+		simd_set_ctrl (rounding);
 #endif
 
 	} else {

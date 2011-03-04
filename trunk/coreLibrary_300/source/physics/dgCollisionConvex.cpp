@@ -1236,7 +1236,6 @@ dgInt32 dgCollisionConvex::RectifyConvexSlice (dgInt32 count, const dgVector& no
 
 dgInt32 dgCollisionConvex::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
-#ifdef DG_BUILD_SIMD_CODE
 //	dgInt32 count;
 //	dgFloat32 side0;
 //	dgFloat32 side1;
@@ -1522,11 +1521,6 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersectionSimd (const dgVector& norma
 		}
 	}
 	return count;
-
-
-#else
-	return 0;
-#endif
 }
 
 dgInt32 dgCollisionConvex::CalculatePlaneIntersection (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const

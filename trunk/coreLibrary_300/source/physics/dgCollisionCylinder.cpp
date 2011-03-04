@@ -378,7 +378,7 @@ dgInt32 dgCollisionCylinder::CalculatePlaneIntersectionSimd (
 	const dgVector& origin, 
 	dgVector contactsOut[]) const
 {
-#ifdef DG_BUILD_SIMD_CODE
+
 	dgInt32 i;
 	dgInt32 count;
 	dgFloat32 y;
@@ -427,10 +427,6 @@ dgInt32 dgCollisionCylinder::CalculatePlaneIntersectionSimd (
 	}
 
 	return count;
-
-#else
-	return 0;
-#endif
 }
 
 

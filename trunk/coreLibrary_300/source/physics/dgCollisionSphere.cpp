@@ -375,16 +375,11 @@ dgInt32 dgCollisionSphere::CalculatePlaneIntersection (const dgVector& normal, c
 
 dgInt32 dgCollisionSphere::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& point, dgVector* const contactsOut) const
 {
-#ifdef DG_BUILD_SIMD_CODE	
-
+	_ASSERTE (0);
 	_ASSERTE ((normal % normal) > dgFloat32 (0.999f));
 	//	contactsOut[0] = point;
 	contactsOut[0] = normal.Scale (normal % point);
 	return 1;
-
-#else
-	return 0;
-#endif
 }
 
 

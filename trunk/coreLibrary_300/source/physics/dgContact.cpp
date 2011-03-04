@@ -246,8 +246,6 @@ void dgContact::JacobianContactDerivative (dgContraintDescritor& params, const d
 
 void dgContact::JointAccelerationsSimd(dgJointAccelerationDecriptor* const params)
 {
-#ifdef DG_BUILD_SIMD_CODE
-
 //	const dgJacobianPair* const Jt = params.m_Jt;
 
 	simd_type zero = simd_set1 (dgFloat32 (0.0f));
@@ -325,7 +323,6 @@ void dgContact::JointAccelerationsSimd(dgJointAccelerationDecriptor* const param
 			simd_store_s (simd_mul_sub_s (relAccel, relVeloc, invTimeStep), &row->m_coordenateAccel);
 		}
 	}
-#endif
 }
 
 

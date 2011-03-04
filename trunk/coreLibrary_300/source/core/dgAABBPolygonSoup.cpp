@@ -753,7 +753,6 @@ class dgAABBTree
 		const dgVector& min, 
 		const dgVector& max) const
 	{
-#ifdef DG_BUILD_SIMD_CODE
 //		dgInt32 out;
 //		dgFloatSign out;
 //		simd_type test;
@@ -769,9 +768,6 @@ class dgAABBTree
 //		simd_store_s(simd_or_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 1, 1))), &out.m_fVal);
 //		return out.m_integer.m_iVal; 
 		return simd_store_is(simd_or_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 1, 1))));
-#else
-		return 0;
-#endif
 	}
 
 
@@ -804,7 +800,6 @@ class dgAABBTree
 
 	DG_INLINE dgInt32 RayTestSimd (const FastRayTest& ray, const dgTriplex* const vertexArray) const
 	{
-#ifdef DG_BUILD_SIMD_CODE
 //		simd_type t0;
 //		simd_type t1;
 //		simd_type tt0;
@@ -842,9 +837,6 @@ class dgAABBTree
 //		simd_store_s(simd_cmple_s(t0, t1), &isParallel.m_fVal);
 //		return isParallel.m_integer.m_iVal;
 		return simd_store_is(simd_cmple_s(t0, t1));
-#else
-		return 0;
-#endif
 	}
 
 	DG_INLINE dgInt32 RayTest (const FastRayTest& ray, const dgTriplex* const vertexArray) const

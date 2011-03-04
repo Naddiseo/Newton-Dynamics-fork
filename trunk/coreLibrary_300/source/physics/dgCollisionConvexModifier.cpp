@@ -220,7 +220,6 @@ dgVector dgCollisionConvexModifier::SupportVertex (const dgVector& dir) const
 
 dgVector dgCollisionConvexModifier::SupportVertexSimd (const dgVector& dir) const
 {
-#ifdef DG_BUILD_SIMD_CODE
 	simd_type tmp1;
 	simd_type tmp0;
 	dgVector localDir; 
@@ -238,11 +237,6 @@ dgVector dgCollisionConvexModifier::SupportVertexSimd (const dgVector& dir) cons
 
 	_ASSERTE (dgAbsf(localDir % localDir - dgFloat32 (1.0f)) < dgFloat32 (1.0e-2f));
 	return m_modifierMatrix.TransformVectorSimd (m_convexCollision->SupportVertexSimd(localDir)); 
-
-
-#else
-	return dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-#endif
 }
 
 
