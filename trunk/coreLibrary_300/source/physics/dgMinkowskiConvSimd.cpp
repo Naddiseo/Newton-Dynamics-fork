@@ -32,14 +32,6 @@
 #include "dgWorldDynamicUpdate.h"
 
 
-simd_128 dgContactSolver::m_zero;
-//simd_128 dgContactSolver::m_nrh0p5;
-//simd_128 dgContactSolver::m_nrh3p0;
-simd_128 dgContactSolver::m_negIndex;
-//simd_128 dgContactSolver::m_index_yx;
-//simd_128 dgContactSolver::m_index_wz;
-//simd_128 dgContactSolver::m_negativeOne;
-//simd_128 dgContactSolver::m_zeroTolerenace;
 
 
 void dgContactSolver::CalculateVelocitiesSimd (dgFloat32 timestep) 
