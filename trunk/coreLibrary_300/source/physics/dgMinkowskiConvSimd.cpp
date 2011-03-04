@@ -50,7 +50,7 @@ void dgContactSolver::CalcSupportVertexSimd (const dgVector& dir, dgInt32 entry)
 {
 	_ASSERTE ((dir % dir) > dgFloat32 (0.999f));
 	dgVector p (m_referenceCollision->SupportVertexSimd (dir));
-	dgVector dir1 (m_matrix.UnrotateVectorSimd(simd_128(dgFloat32 (-1.0f)) * (simd_type&)dir));
+	dgVector dir1 (m_matrix.UnrotateVectorSimd(simd_128(dgFloat32 (-1.0f)) * (simd_128&)dir));
 	dgVector q (m_matrix.TransformVectorSimd(m_floatingcollision->SupportVertexSimd (dir1)));
 	(simd_128&)m_hullVertex[entry] = (simd_128&)p - (simd_128&)q;
 	(simd_128&)m_averVertex[entry] = (simd_128&)p + (simd_128&)q;
@@ -524,7 +524,6 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 
 dgInt32 dgContactSolver::HullHullContinueContactsSimd (dgFloat32& timeStep, dgContactPoint* const contactOut, dgInt32 contactID, dgInt32 maxContacts, dgInt32 conditionalContactCalculationAtOrigin)
 {
-
 	dgInt32 count;
 	dgMinkFace *face;
 	dgMinkReturnCode code;
