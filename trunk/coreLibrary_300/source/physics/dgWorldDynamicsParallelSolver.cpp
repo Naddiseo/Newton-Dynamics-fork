@@ -41,14 +41,16 @@ class dgCalculateForceLocks
 };
 
 
-class dgPalellelSolveSyncData
+class dgParallelSolverSyncData
 {
 	public:
 
-	dgPalellelSolveSyncData()
+	dgParallelSolverSyncData()
 	{
-		memset (this, 0, sizeof (dgPalellelSolveSyncData));
+		memset (this, 0, sizeof (dgParallelSolverSyncData));
 	}
+	dgWorld* m_world;
+	dgFloat32 m_timestep;
 
 	dgInt32 m_bodyCount;
 	dgInt32 m_jointCount;
@@ -72,13 +74,9 @@ class dgPalellelSolveSyncData
 	dgInt32 m_updateBodyVelocitySync;
 	dgInt32 m_updateBodyVelocityCounter;
 
-
 	dgInt32 m_subStepLocks;
 	dgInt32 m_calculateInternalForcesSync;
-
-	dgFloat32 m_timestep;
-
-	dgWorld* m_world;
+	
 	dgInt32* m_bodyInfoMap;
 	dgInt32* m_jointInfoMap;
 
@@ -138,31 +136,31 @@ void dgWorldDynamicUpdate::CalculateReactionForcesParallel (const dgIsland* cons
 		}
 	} 
 
-	_ASSERTE (0);
-/*
-	dgPalellelSolveSyncData sincksPoints;
-	void* userParamArray[DG_MAX_THREADS_HIVE_PARAMETERS];
-	userParamArray[0] = &sincksPoints;
+	dgParallelSolverSyncData sincksPoints;
+
+	sincksPoints.m_world = world;
+	sincksPoints.m_timestep = timestep;
+
+//	void* userParamArray[DG_MAX_THREADS_HIVE_PARAMETERS];
+//	userParamArray[0] = &sincksPoints;
 
 	sincksPoints.m_bodyCount = bodyCount;
 	sincksPoints.m_jointCount = jointsCount;
-	sincksPoints.m_world = world;
-	sincksPoints.m_timestep = timestep;
 	sincksPoints.m_bodyInfoMap = bodyInfoMap;
 	sincksPoints.m_jointInfoMap = jointInfoMap;
 
 	dgInt32 threadCounts = world->GetThreadCount();	
 	for (dgInt32 i = 0; i < threadCounts; i ++) {
-		world->QueueJob (ParallelSolverDriver, &userParamArray[0], 1);
+		//world->QueueJob (ParallelSolverDriver, &userParamArray[0], 1);
+		world->QueueJob (ParallelSolverDriver, &sincksPoints);
 	}
 	world->SynchronizationBarrier();
-*/
 }
 
 
-void dgWorldDynamicUpdate::ParallelSolverDriver (void** const userParamArray, dgInt32 threadID)
+void dgWorldDynamicUpdate::ParallelSolverDriver (void* const userParamArray, dgInt32 threadID)
 {
-	dgPalellelSolveSyncData* const data = (dgPalellelSolveSyncData*) userParamArray[0];
+	dgParallelSolverSyncData* const data = (dgParallelSolverSyncData*) userParamArray;
 
 	dgWorld* const world = data->m_world;
 	world->InitilizeBodyArrayParallel (data, threadID);
@@ -263,7 +261,7 @@ void dgWorldDynamicUpdate::GetJacobianDerivativesParallel (dgJointInfo* const jo
 
 
 
-void dgWorldDynamicUpdate::InitilizeBodyArrayParallel (dgPalellelSolveSyncData* const syncData, dgInt32 threadIndex) const 
+void dgWorldDynamicUpdate::InitilizeBodyArrayParallel (dgParallelSolverSyncData* const syncData, dgInt32 threadIndex) const 
 {
 	dgWorld* const world = (dgWorld*)this;
 	dgInt32* const atomicIndex = &syncData->m_initBodiesCounter; 
@@ -295,7 +293,7 @@ void dgWorldDynamicUpdate::InitilizeBodyArrayParallel (dgPalellelSolveSyncData* 
 	world->SyncThreads(&syncData->m_initBodiesSync);
 }
 
-void dgWorldDynamicUpdate::BuildJacobianMatrixParallel (dgPalellelSolveSyncData* const syncData, dgInt32 threadIndex) const 
+void dgWorldDynamicUpdate::BuildJacobianMatrixParallel (dgParallelSolverSyncData* const syncData, dgInt32 threadIndex) const 
 {
 	dgWorld* const world = (dgWorld*) this;
 	const dgInt32* const jointInfoIndexArray = syncData->m_jointInfoMap;
@@ -378,7 +376,7 @@ void dgWorldDynamicUpdate::BuildJacobianMatrixParallel (dgPalellelSolveSyncData*
 }
 
 
-void dgWorldDynamicUpdate::SolverInitInternalForcesParallel (dgPalellelSolveSyncData* const syncData, dgInt32 threadIndex) const 
+void dgWorldDynamicUpdate::SolverInitInternalForcesParallel (dgParallelSolverSyncData* const syncData, dgInt32 threadIndex) const 
 {
 	dgWorld* const world = (dgWorld*) this;
 	dgInt32* const treadLocks = &m_solverMemory.m_treadLocks[0];
@@ -433,7 +431,7 @@ void dgWorldDynamicUpdate::SolverInitInternalForcesParallel (dgPalellelSolveSync
 }
 
 
-void dgWorldDynamicUpdate::CalculateForcesGameModeParallel (dgPalellelSolveSyncData* const syncData, dgInt32 threadIndex) const
+void dgWorldDynamicUpdate::CalculateForcesGameModeParallel (dgParallelSolverSyncData* const syncData, dgInt32 threadIndex) const
 {
 	dgWorld* const world = (dgWorld*) this;
 	dgInt32* const treadLocks = &m_solverMemory.m_treadLocks[0];

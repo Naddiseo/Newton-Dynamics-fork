@@ -96,7 +96,7 @@ enum dgPerformanceCounters
 
 	m_dynamicsTicks,
 	m_dynamicsBuildSpanningTreeTicks,
-	m_dynamicsSolveSpanningTreeTicks,
+	m_dynamicsSolverSpanningTreeTicks,
 
 	m_counterSize
 };

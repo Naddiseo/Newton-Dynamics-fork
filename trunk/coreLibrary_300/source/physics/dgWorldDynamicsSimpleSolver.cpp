@@ -207,7 +207,7 @@ void dgWorldDynamicUpdate::CalculateIslandReactionForces (const dgIsland* const 
 			}
 		}
 	}
-	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolveSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
+	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolverSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
 */
 
 

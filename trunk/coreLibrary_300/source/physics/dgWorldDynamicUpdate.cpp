@@ -88,10 +88,7 @@ void dgWorldDynamicUpdate::UpdateDynamics(dgFloat32 timestep)
 
 	dgBodyMasterList& me = *world;
 
-
 	world->m_pairMemoryBuffer.ExpandCapacityIfNeessesary (4 * me.GetCount(), sizeof (dgBody*));
-	
-
 
 	_ASSERTE (me.GetFirst()->GetInfo().GetBody() == world->m_sentionelBody);
 
@@ -133,38 +130,36 @@ void dgWorldDynamicUpdate::UpdateDynamics(dgFloat32 timestep)
 	m_rowCountAtomicIndex = 0;
 
 	if (world->m_singleIslandMultithreading) {
-//if (1) {
-		_ASSERTE (0);
-/*
-dgWorldDynamicUpdateSyncDescriptor descriptor;
-
-//	dgInt32 atomicCounter = 0;
-//	userParamArray[0] = this;
-//	userParamArray[1] = *((void**) &timestep);
-//	userParamArray[2] = &atomicCounter;
-//	m_rowCountAtomicIndex = 0;
-dgInt32 threadCounts = world->GetThreadCount();	
-
-descriptor.m_world = world;
-descriptor.m_timestep = timestep;
-
-
 		dgInt32 unilarealJointsCount = 0;
 		for (dgInt32 i = 0; (i < m_islands) && islands[i].m_hasUnilateralJoints; i ++) {
 			unilarealJointsCount ++;
 		}
 
 		if (unilarealJointsCount) {
+			_ASSERTE (0);
+/*
+			//	dgInt32 atomicCounter = 0;
+			//	userParamArray[0] = this;
+			//	userParamArray[1] = *((void**) &timestep);
+			//	userParamArray[2] = &atomicCounter;
+			//	m_rowCountAtomicIndex = 0;
+			dgWorldDynamicUpdateSyncDescriptor descriptor;
+			dgInt32 threadCounts = world->GetThreadCount();	
+			descriptor.m_world = world;
+			descriptor.m_timestep = timestep;
+
 			dgInt32 islandCount = m_islands;
 			m_islands = unilarealJointsCount;
 			for (dgInt32 i = 0; i < threadCounts; i ++) {
-				world->QueueJob (CalculateIslandReactionForces, &userParamArray[0], 3);
+				//world->QueueJob (CalculateIslandReactionForces, &userParamArray[0], 3);
+				world->QueueJob (CalculateIslandReactionForces, &descriptor);
 			}
 			world->SynchronizationBarrier();
 			m_islands = islandCount;
+*/
 		}
 		CalculateReactionForcesParallel (&islands[unilarealJointsCount], m_islands - unilarealJointsCount, timestep);
-*/			
+			
 	} else {
 		dgWorldDynamicUpdateSyncDescriptor descriptor;
 		//	dgInt32 atomicCounter = 0;
@@ -173,7 +168,6 @@ descriptor.m_timestep = timestep;
 		//	userParamArray[2] = &atomicCounter;
 		
 		dgInt32 threadCounts = world->GetThreadCount();	
-
 		descriptor.m_world = world;
 		descriptor.m_timestep = timestep;
 		for (dgInt32 i = 0; i < threadCounts; i ++) {
@@ -183,7 +177,7 @@ descriptor.m_timestep = timestep;
 	}
 
 	dgUnsigned32 ticks = world->m_getPerformanceCount();
-	world->m_perfomanceCounters[m_dynamicsSolveSpanningTreeTicks] = ticks - dynamicsTime;
+	world->m_perfomanceCounters[m_dynamicsSolverSpanningTreeTicks] = ticks - dynamicsTime;
 	world->m_perfomanceCounters[m_dynamicsTicks] = ticks - updateTime;
 }
 
@@ -2371,7 +2365,7 @@ void dgParallelSolverBodyInertia::ThreadExecute()
 		}
 	}
 
-	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolveSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
+	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolverSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
 }
 
 
@@ -2563,7 +2557,7 @@ void dgParallelSolverBuildJacobianRows::ThreadExecute()
 		}
 	}
 
-	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolveSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
+	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolverSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
 }
 
 
@@ -2678,7 +2672,7 @@ void dgParallelSolverBuildJacobianMatrix::ThreadExecute()
 
 	m_jointSolved = jointSolved;
 
-	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolveSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
+	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolverSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
 }
 
 
@@ -2929,7 +2923,7 @@ void dgParallelSolverInitInternalForces::ThreadExecute()
 		}
 	}
 
-	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolveSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
+	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolverSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
 }
 
 
@@ -2995,7 +2989,7 @@ void dgParallelSolverJointAcceleration::ThreadExecute()
 	}
 
 	m_firstPassCoef = dgFloat32 (1.0f);
-	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolveSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
+	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolverSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
 }
 
 
@@ -3055,7 +3049,7 @@ void dgParallelSolverUpdateVeloc::ThreadExecute()
 
 	}
 
-	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolveSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
+	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolverSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
 }
 
 
@@ -3166,7 +3160,7 @@ void dgParallelSolverUpdateForce::ThreadExecute()
 		}
 	}
 
-	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolveSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
+	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolverSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
 }
 
 void dgParallelSolverInitFeedbackUpdate::ThreadExecute()
@@ -3210,7 +3204,7 @@ void dgParallelSolverInitFeedbackUpdate::ThreadExecute()
 		//		}
 	}
 
-	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolveSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
+	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolverSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
 }
 
 
@@ -3429,7 +3423,7 @@ void dgParallelSolverCalculateForces::ThreadExecute()
 		m_accNorm = accNorm;
 	}
 
-	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolveSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
+	//	m_world->m_perfomanceCounters[m_threadIndex][m_dynamicsSolverSpanningTreeTicks] += (m_world->m_getPerformanceCount() - ticks);
 }
 
 

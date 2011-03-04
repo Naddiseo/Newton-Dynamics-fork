@@ -191,7 +191,7 @@ class dgJacobianMemory
 };
 
 
-class dgPalellelSolveSyncData;
+class dgParallelSolverSyncData;
 class dgWorldDynamicUpdateSyncDescriptor;
 
 class dgWorldDynamicUpdate
@@ -205,12 +205,12 @@ class dgWorldDynamicUpdate
 
 	static dgInt32 CompareIslands (const dgIsland* const islandA, const dgIsland* const islandB, void* notUsed);
 	static void CalculateIslandReactionForces (void* const context, dgInt32 threadID);
-	static void ParallelSolverDriver (void** const userParamArray, dgInt32 threadID);
+	static void ParallelSolverDriver (void* const userParamArray, dgInt32 threadID);
 
-	void InitilizeBodyArrayParallel (dgPalellelSolveSyncData* const syncData, dgInt32 threadIndex) const; 
-	void BuildJacobianMatrixParallel (dgPalellelSolveSyncData* const syncData, dgInt32 threadIndex) const; 
-	void SolverInitInternalForcesParallel (dgPalellelSolveSyncData* const syncData, dgInt32 threadIndex) const; 
-	void CalculateForcesGameModeParallel (dgPalellelSolveSyncData* const syncData, dgInt32 threadIndex) const; 
+	void InitilizeBodyArrayParallel (dgParallelSolverSyncData* const syncData, dgInt32 threadIndex) const; 
+	void BuildJacobianMatrixParallel (dgParallelSolverSyncData* const syncData, dgInt32 threadIndex) const; 
+	void SolverInitInternalForcesParallel (dgParallelSolverSyncData* const syncData, dgInt32 threadIndex) const; 
+	void CalculateForcesGameModeParallel (dgParallelSolverSyncData* const syncData, dgInt32 threadIndex) const; 
 	
 	void CalculateReactionForcesParallel (const dgIsland* const island, dgInt32 inlansdCount, dgFloat32 timestep) const;
 	void GetJacobianDerivativesParallel (dgJointInfo* const jointInfo, dgInt32 threadIndex, bool bitMode, dgInt32 rowBase, dgFloat32 timestep) const;	
