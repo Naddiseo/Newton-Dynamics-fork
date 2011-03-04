@@ -2231,7 +2231,7 @@ void dgWorld::InitConvexCollision ()
 	dgCollisionConvex::m_multiResDir_sse[4] = dgVector (dgCollisionConvex::m_multiResDir[4].m_y, dgCollisionConvex::m_multiResDir[5].m_y, dgCollisionConvex::m_multiResDir[6].m_y, dgCollisionConvex::m_multiResDir[7].m_y);
 	dgCollisionConvex::m_multiResDir_sse[5] = dgVector (dgCollisionConvex::m_multiResDir[4].m_z, dgCollisionConvex::m_multiResDir[5].m_z, dgCollisionConvex::m_multiResDir[6].m_z, dgCollisionConvex::m_multiResDir[7].m_z);
 
-_ASSERTE (0);
+//_ASSERTE (0);
 	dgFloatSign tmp;
 	tmp.m_integer.m_iVal = 0x7fffffff;
 	dgCollisionConvex::m_signMask.m_x = tmp.m_fVal;

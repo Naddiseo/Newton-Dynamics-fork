@@ -146,16 +146,8 @@ dgInt32 dgCollisionBox::CalculateSignature () const
 
 dgVector dgCollisionBox::SupportVertexSimd (const dgVector& dir) const
 {
-	_ASSERTE (0);
-	dgInt32 x;
-	dgInt32 y;
-	dgInt32 z;
-	dgFloatSign *ptr =  (dgFloatSign*) &dir; 
-
-	x = -(ptr[0].m_integer.m_iVal >> 31);
-	y = -(ptr[1].m_integer.m_iVal >> 31);
-	z = -(ptr[2].m_integer.m_iVal >> 31);
-	return dgVector (m_size[x].m_x, m_size[y].m_y, m_size[z].m_z, dgFloat32 (0.0f));
+	simd_128 test ((simd_128&)dir > simd_128(dgFloat32 (0.0f)));
+  	return ((simd_128&)m_size[0] & test) | ((simd_128&)m_size[1]).AndNot(test); 
 }
 
 dgVector dgCollisionBox::SupportVertex (const dgVector& dir) const

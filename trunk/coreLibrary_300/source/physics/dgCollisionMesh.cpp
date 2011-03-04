@@ -938,41 +938,35 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 }
 
 
-
-dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersection (
-	const dgVector& normalIn, 
+dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersectionSimd (
+	const dgVector& normal, 
 	const dgVector& origin, 
 	dgVector contactsOut[]) const
 {
-	dgInt32 i;
-	dgInt32 count;
-	dgFloat32 t;
-	dgFloat32 side0;
-	dgFloat32 side1;
-	dgFloat32 error;
-	dgFloat32 maxDist;
-	dgFloat32 projectFactor;
-	dgVector normal(normalIn);
+	return CalculatePlaneIntersection (normal, origin, contactsOut);
+}
 
-	count = 0;
-	maxDist = dgFloat32 (1.0f);
-	
-	projectFactor = m_normal % normal;
+
+dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersection (const dgVector& normalIn, const dgVector& origin, dgVector contactsOut[]) const
+{
+	dgVector normal(normalIn);
+	dgInt32 count = 0;
+	dgFloat32 maxDist = dgFloat32 (1.0f);
+	dgFloat32 projectFactor = m_normal % normal;
 	if (projectFactor < dgFloat32 (0.0f)) {
 		projectFactor *= dgFloat32 (-1.0f);
 		normal = normal.Scale (dgFloat32 (-1.0f));
 	}
 
 	if (projectFactor > dgFloat32 (0.9999f)) {
-		for (i = 0; i < m_count; i ++) {
+		for (dgInt32 i = 0; i < m_count; i ++) {
 			contactsOut[count] = m_localPoly[i];
 			count ++;
 		}
 
 		#ifdef _DEBUG
-		dgInt32 j;
-		j = count - 1;
-		for (i = 0; i < count; i ++) {
+		dgInt32 j = count - 1;
+		for (dgInt32 i = 0; i < count; i ++) {
 			dgVector error (contactsOut[i] - contactsOut[j]);
 			_ASSERTE ((error % error) > dgFloat32 (1.0e-20f));
 			j = i;
@@ -984,10 +978,10 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersection (
 		dgPlane plane (normal, - (normal % origin));
 		
 		dgVector p0 (m_localPoly[m_count - 1]);
-		side0 = plane.Evalue (p0);
-		for (i = 0; i < m_count; i ++) {
+		dgFloat32 side0 = plane.Evalue (p0);
+		for (dgInt32 i = 0; i < m_count; i ++) {
 			dgVector p1 (m_localPoly[i]);
-			side1 = plane.Evalue (p1);
+			dgFloat32 side1 = plane.Evalue (p1);
 
 			if (side0 > dgFloat32 (0.0f)) {
 				maxDist = GetMax (maxDist, side0);
@@ -995,7 +989,7 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersection (
 				count ++;
 				if (count > 1) {
 					dgVector edgeSegment (contactsOut[count - 1] - contactsOut[count - 2]);
-					error = edgeSegment % edgeSegment;
+					dgFloat32 error = edgeSegment % edgeSegment;
 					if (error < dgFloat32 (1.0e-8f)) {
 						count --;
 					}
@@ -1003,7 +997,7 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersection (
 
 				if (side1 <= dgFloat32 (0.0f)) {
 					dgVector dp (p1 - p0);
-					t = plane % dp;
+					dgFloat32 t = plane % dp;
 					_ASSERTE (dgAbsf (t) >= dgFloat32 (0.0f));
 					if (dgAbsf (t) < dgFloat32 (1.0e-8f)) {
 						t = GetSign(t) * dgFloat32 (1.0e-8f);	
@@ -1012,7 +1006,7 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersection (
 					count ++;
 					if (count > 1) {
 						dgVector edgeSegment (contactsOut[count - 1] - contactsOut[count - 2]);
-						error = edgeSegment % edgeSegment;
+						dgFloat32 error = edgeSegment % edgeSegment;
 						if (error < dgFloat32 (1.0e-8f)) {
 							count --;
 						}
@@ -1020,7 +1014,7 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersection (
 				} 
 			} else if (side1 > dgFloat32 (0.0f)) {
 				dgVector dp (p1 - p0);
-				t = plane % dp;
+				dgFloat32 t = plane % dp;
 				_ASSERTE (dgAbsf (t) >= dgFloat32 (0.0f));
 				if (dgAbsf (t) < dgFloat32 (1.0e-8f)) {
 					t = GetSign(t) * dgFloat32 (1.0e-8f);	
@@ -1029,7 +1023,7 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersection (
 				count ++;
 				if (count > 1) {
 					dgVector edgeSegment (contactsOut[count - 1] - contactsOut[count - 2]);
-					error = edgeSegment % edgeSegment;
+					dgFloat32 error = edgeSegment % edgeSegment;
 					if (error < dgFloat32 (1.0e-8f)) {
 						count --;
 					}
@@ -1080,9 +1074,8 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersection (
 
 	#ifdef _DEBUG
 	if (count > 1) {
-		dgInt32 j;
-		j = count - 1;
-		for (i = 0; i < count; i ++) {
+		dgInt32 j = count - 1;
+		for (dgInt32 i = 0; i < count; i ++) {
 			dgVector error (contactsOut[i] - contactsOut[j]);
 			_ASSERTE ((error % error) > dgFloat32 (1.0e-20f));
 			j = i;
@@ -1091,7 +1084,7 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersection (
 		if (count >= 3) {
 			dgVector n (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 			dgVector e0 (contactsOut[1] - contactsOut[0]);
-			for (i = 2; i < count; i ++) {
+			for (dgInt32 i = 2; i < count; i ++) {
 				dgVector e1 (contactsOut[i] - contactsOut[0]);
 				n += e0 * e1;
 				e0 = e1;
@@ -1106,144 +1099,6 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersection (
 	return count;
 }
 
-dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersectionSimd (
-	const dgVector& normal, 
-	const dgVector& origin, 
-	dgVector contactsOut[]) const
-{
-	_ASSERTE (0);
-/*
-	dgInt32 i;
-	dgInt32 count;
-	dgFloat32 t;
-	dgFloat32 side0;
-	dgFloat32 side1;
-	dgFloat32 error;
-	dgFloat32 projectFactor;
-
-	count = 0;
-	side0 = m_normal % normal;
-
-	projectFactor = m_normal % normal;
-	if (projectFactor < dgFloat32 (0.0f)) {
-		projectFactor *= dgFloat32 (-1.0f);
-		normal = normal.Scale (dgFloat32 (-1.0f));
-	}
-
-//	if (dgAbsf (projectFactor) > dgFloat32 (0.9999f)) {
-	if (projectFactor > dgFloat32 (0.9999f)) {
-
-		for (i = 0; i < m_count; i ++) {
-			contactsOut[count] = m_localPoly[i];
-			count ++;
-		}
-
-		#ifdef _DEBUG
-		dgInt32 j;
-		j = count - 1;
-		for (i = 0; i < count; i ++) {
-			dgVector error (contactsOut[i] - contactsOut[j]);
-			_ASSERTE ((error % error) > dgFloat32 (1.0e-20f));
-			j = i;
-		}
-		#endif
-
-
-	} else if (projectFactor > dgFloat32 (0.1736f)) {
-		dgPlane plane (normal, - (normal % origin));
-		
-		dgVector p0 (m_localPoly[m_count - 1]);
-		side0 = plane.Evalue (p0);
-		for (i = 0; i < m_count; i ++) {
-			dgVector p1 (m_localPoly[i]);
-			side1 = plane.Evalue (p1);
-
-			if (side0 > dgFloat32 (0.0f)) {
-				contactsOut[count] = p0 - plane.Scale (side0);
-				count ++;
-				if (count > 1) {
-					dgVector edgeSegment (contactsOut[count - 1] - contactsOut[count - 2]);
-					error = edgeSegment % edgeSegment;
-					if (error < dgFloat32 (1.0e-8f)) {
-						count --;
-					}
-				}
-
-				if (side1 <= dgFloat32 (0.0f)) {
-					dgVector dp (p1 - p0);
-					t = plane % dp;
-					_ASSERTE (dgAbsf (t) >= dgFloat32 (0.0f));
-					if (dgAbsf (t) < dgFloat32 (1.0e-8f)) {
-						t = GetSign(t) * dgFloat32 (1.0e-8f);	
-					}
-					contactsOut[count] = p0 - dp.Scale (side0 / t);
-					count ++;
-					if (count > 1) {
-						dgVector edgeSegment (contactsOut[count - 1] - contactsOut[count - 2]);
-						error = edgeSegment % edgeSegment;
-						if (error < dgFloat32 (1.0e-8f)) {
-							count --;
-						}
-					}
-				} 
-			} else if (side1 > dgFloat32 (0.0f)) {
-				dgVector dp (p1 - p0);
-				t = plane % dp;
-				_ASSERTE (dgAbsf (t) >= dgFloat32 (0.0f));
-				if (dgAbsf (t) < dgFloat32 (1.0e-8f)) {
-					t = GetSign(t) * dgFloat32 (1.0e-8f);	
-				}
-				contactsOut[count] = p0 - dp.Scale (side0 / t);
-				count ++;
-				if (count > 1) {
-					dgVector edgeSegment (contactsOut[count - 1] - contactsOut[count - 2]);
-					error = edgeSegment % edgeSegment;
-					if (error < dgFloat32 (1.0e-8f)) {
-						count --;
-					}
-				}
-			}
-
-			side0 = side1;
-			p0 = p1;
-		}
-	}
-
-	if (count > 1) {
-		dgVector error (contactsOut[count - 1] - contactsOut[0]);
-		if ((error % error) < dgFloat32 (1.0e-8f)) {
-			count --;
-		}
-	}
-
-	#ifdef _DEBUG
-	if (count > 1) {
-		dgInt32 j;
-		j = count - 1;
-		for (i = 0; i < count; i ++) {
-			dgVector error (contactsOut[i] - contactsOut[j]);
-			_ASSERTE ((error % error) > dgFloat32 (1.0e-20f));
-			j = i;
-		}
-		if (count >= 3) {
-			dgVector n (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-			dgVector e0 (contactsOut[1] - contactsOut[0]);
-			for (i = 2; i < count; i ++) {
-				dgVector e1 (contactsOut[i] - contactsOut[0]);
-				n += e0 * e1;
-				e0 = e1;
-			} 
-			n = n.Scale (dgFloat32 (1.0f) / dgSqrt(n % n));
-			dgFloat32 test = n % normal;
-			_ASSERTE (test > dgFloat32 (0.9f));
-		}
-	}
-	#endif
-
-	return count;
-*/
-	return CalculatePlaneIntersection (normal, origin, contactsOut);
-}
 
 
 
