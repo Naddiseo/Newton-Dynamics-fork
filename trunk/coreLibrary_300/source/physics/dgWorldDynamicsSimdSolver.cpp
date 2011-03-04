@@ -91,29 +91,38 @@ dgInt32 dgWorldDynamicUpdate::BuildJacobianMatrixSimd (const dgIsland* const isl
 		dgBody* const body0 = bodyArray[m0].m_body;
 		//dgFloat32 invMass0 = body0->m_invMass[3];
 		simd_128 invMass0 (body0->m_invMass[3]);
-		const dgMatrix& invInertia0 = body0->m_invWorldInertiaMatrix;
+//		const dgMatrix& invInertia0 = body0->m_invWorldInertiaMatrix;
+		dgMatrix invInertiaTrans0;
+		Transpose4x4Simd_128 ((simd_128&)invInertiaTrans0[0], (simd_128&)invInertiaTrans0[1], (simd_128&)invInertiaTrans0[2], (simd_128&)invInertiaTrans0[3], 
+							  (simd_128&)body0->m_invWorldInertiaMatrix[0], (simd_128&)body0->m_invWorldInertiaMatrix[1], 
+							  (simd_128&)body0->m_invWorldInertiaMatrix[2], (simd_128&)body0->m_invWorldInertiaMatrix[3]);
 
 		_ASSERTE (m1 >= 0);
 		_ASSERTE (m1 < bodyCount);
 		dgBody* const body1 = bodyArray[m1].m_body;
 		//dgFloat32 invMass1 = body1->m_invMass[3];
 		simd_128 invMass1 (body1->m_invMass[3]);
-		const dgMatrix& invInertia1 = body1->m_invWorldInertiaMatrix;
+		//const dgMatrix& invInertia1 = body1->m_invWorldInertiaMatrix;
+		dgMatrix invInertiaTrans1;
+		Transpose4x4Simd_128 ((simd_128&)invInertiaTrans1[0], (simd_128&)invInertiaTrans1[1], (simd_128&)invInertiaTrans1[2], (simd_128&)invInertiaTrans1[3], 
+							  (simd_128&)body1->m_invWorldInertiaMatrix[0], (simd_128&)body1->m_invWorldInertiaMatrix[1], 
+				              (simd_128&)body1->m_invWorldInertiaMatrix[2], (simd_128&)body1->m_invWorldInertiaMatrix[3]);
 
 		for (dgInt32 i = 0; i < count; i ++) {
 
 			dgJacobianMatrixElement* const row = &matrixRow[index];
 
 			row->m_JMinv.m_jacobian_IM0.m_linear = (simd_128&)row->m_Jt.m_jacobian_IM0.m_linear * invMass0;
-			row->m_JMinv.m_jacobian_IM0.m_angular = invInertia0.UnrotateVectorSimd((simd_128&)row->m_Jt.m_jacobian_IM0.m_angular);
+			//row->m_JMinv.m_jacobian_IM0.m_angular = invInertia0.UnrotateVectorSimd((simd_128&)row->m_Jt.m_jacobian_IM0.m_angular);
+			row->m_JMinv.m_jacobian_IM0.m_angular = invInertiaTrans0.RotateVectorSimd((simd_128&)row->m_Jt.m_jacobian_IM0.m_angular);
 			simd_128 tmpDiag ((simd_128&)row->m_JMinv.m_jacobian_IM0.m_linear * (simd_128&)row->m_Jt.m_jacobian_IM0.m_linear + 
 							  (simd_128&)row->m_JMinv.m_jacobian_IM0.m_angular * (simd_128&)row->m_Jt.m_jacobian_IM0.m_angular);
 			simd_128 tmpAccel ((simd_128&)row->m_JMinv.m_jacobian_IM0.m_linear * (simd_128&)body0->m_accel +
 						       (simd_128&)row->m_JMinv.m_jacobian_IM0.m_angular * (simd_128&)body0->m_alpha);
 							  
 			row->m_JMinv.m_jacobian_IM1.m_linear = (simd_128&)row->m_Jt.m_jacobian_IM1.m_linear * invMass1;
-			row->m_JMinv.m_jacobian_IM1.m_angular = invInertia1.UnrotateVectorSimd((simd_128&)row->m_Jt.m_jacobian_IM1.m_angular);
-
+			//row->m_JMinv.m_jacobian_IM1.m_angular = invInertia1.UnrotateVectorSimd((simd_128&)row->m_Jt.m_jacobian_IM1.m_angular);
+			row->m_JMinv.m_jacobian_IM1.m_angular = invInertiaTrans1.RotateVectorSimd((simd_128&)row->m_Jt.m_jacobian_IM1.m_angular);
 			tmpDiag = tmpDiag + (simd_128&)row->m_JMinv.m_jacobian_IM1.m_linear * (simd_128&)row->m_Jt.m_jacobian_IM1.m_linear + 
 								(simd_128&)row->m_JMinv.m_jacobian_IM1.m_angular * (simd_128&)row->m_Jt.m_jacobian_IM1.m_angular;
 			tmpAccel = tmpAccel + (simd_128&)row->m_JMinv.m_jacobian_IM1.m_linear * (simd_128&)body1->m_accel +
@@ -149,6 +158,7 @@ dgInt32 dgWorldDynamicUpdate::BuildJacobianMatrixSimd (const dgIsland* const isl
 			//row->m_invDJMinvJt = dgFloat32(1.0f) / diag;
 			simd_128 invDiagDamp (one / (tmpDiag * (one + stiffness)));
 			invDiagDamp.StoreScalar(&row->m_invDJMinvJt);
+
 			index ++;
 		}
 	}
