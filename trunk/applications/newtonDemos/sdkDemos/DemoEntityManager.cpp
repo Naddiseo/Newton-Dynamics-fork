@@ -164,6 +164,7 @@ void DemoEntityManager::Cleanup ()
 	// set the simplified solver mode (faster but less accurate)
 	NewtonSetSolverModel (m_world, 1);
 
+/*
 	// Set the number of internal micro threads
 	NewtonSetThreadsCount (m_world, mainWindow->m_threadCount);
 
@@ -175,7 +176,9 @@ void DemoEntityManager::Cleanup ()
 	}
 
 	// set the parallel solve on single island or or off
-	NewtonSetMultiThreadSolverOnSingleIsland (m_world, mainWindow->m_solveIslandOnSingleThread ? 1 : 0);
+	NewtonSetMultiThreadSolverOnSingleIsland (m_world, mainWindow->m_useParallelSolverOnSingleIslands ? 1 : 0);
+*/
+//	mainWindow->RestoreSettings();
 
 	// set a fix world size
 	dVector minSize (-500.0f, -500.0f, -500.0f);

@@ -183,7 +183,7 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 	,m_threadCount(1)
 	,m_autoSleepState(true)
 	,m_usesSimdInstructions(false)
-	,m_solveIslandOnSingleThread(false)
+	,m_useParallelSolverOnSingleIslands(false)
 	,m_debugDisplayState(false)
 	,m_physicProfilerState(true)
 	,m_threadProfilerState(true)
@@ -353,7 +353,7 @@ newtonDemos::newtonDemos(QWidget *parent, Qt::WFlags flags)
 			action = new QAction(this);
 			action->setText(QApplication::translate("newtonMain", "Use parallel solve", 0, QApplication::UnicodeUTF8));
 			action->setCheckable(true);
-			action->setChecked(m_solveIslandOnSingleThread); 
+			action->setChecked(m_useParallelSolverOnSingleIslands); 
 			subMenu->addAction(action);
 			connect (action, SIGNAL (triggered(bool)), this, SLOT (OnUseParalleSolver()));
 
@@ -492,6 +492,7 @@ void newtonDemos::RestoreSettings ()
 		NewtonSetPlatformArchitecture (m_canvas->GetNewton(), 0);  //x87 mode
 	}
 	NewtonSetThreadsCount(m_canvas->GetNewton(), m_currentThreadCount);
+	NewtonSetMultiThreadSolverOnSingleIsland (m_canvas->GetNewton(), m_useParallelSolverOnSingleIslands ? 1 : 0);
 }
 
 void newtonDemos::OnNotUsed()
@@ -600,9 +601,9 @@ void newtonDemos::OnUseParalleSolver()
 	BEGIN_MENU_OPTION();
 
 	QAction* const action = (QAction*)sender();
-	m_solveIslandOnSingleThread = action->isChecked();
+	m_useParallelSolverOnSingleIslands = action->isChecked();
 
-	NewtonSetMultiThreadSolverOnSingleIsland (m_canvas->GetNewton(), m_solveIslandOnSingleThread ? 1 : 0);
+	NewtonSetMultiThreadSolverOnSingleIsland (m_canvas->GetNewton(), m_useParallelSolverOnSingleIslands ? 1 : 0);
 
 	END_MENU_OPTION();
 }

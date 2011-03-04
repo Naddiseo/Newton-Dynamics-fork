@@ -82,7 +82,7 @@ private:
 	int m_threadCount;
 	bool m_autoSleepState;
 	bool m_usesSimdInstructions;
-	bool m_solveIslandOnSingleThread;
+	bool m_useParallelSolverOnSingleIslands;
 	bool m_debugDisplayState;
 	bool m_physicProfilerState;
 	bool m_threadProfilerState;
