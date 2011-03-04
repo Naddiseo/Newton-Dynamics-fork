@@ -33,13 +33,13 @@
 
 
 simd_128 dgContactSolver::m_zero;
-simd_128 dgContactSolver::m_nrh0p5;
-simd_128 dgContactSolver::m_nrh3p0;
+//simd_128 dgContactSolver::m_nrh0p5;
+//simd_128 dgContactSolver::m_nrh3p0;
 simd_128 dgContactSolver::m_negIndex;
-simd_128 dgContactSolver::m_index_yx;
-simd_128 dgContactSolver::m_index_wz;
-simd_128 dgContactSolver::m_negativeOne;
-simd_128 dgContactSolver::m_zeroTolerenace;
+//simd_128 dgContactSolver::m_index_yx;
+//simd_128 dgContactSolver::m_index_wz;
+//simd_128 dgContactSolver::m_negativeOne;
+//simd_128 dgContactSolver::m_zeroTolerenace;
 
 
 void dgContactSolver::CalculateVelocitiesSimd (dgFloat32 timestep) 
@@ -299,274 +299,13 @@ void dgContactSolver::CalcSupportVertexSimd (const dgVector& dir, dgInt32 entry)
 {
 	_ASSERTE ((dir % dir) > dgFloat32 (0.999f));
 	dgVector p (m_referenceCollision->SupportVertexSimd (dir));
-	dgVector dir1 (m_matrix.UnrotateVectorSimd(m_negativeOne * ((simd_type&)dir)));
+	dgVector dir1 (m_matrix.UnrotateVectorSimd(simd_128(dgFloat32 (-1.0f)) * (simd_type&)dir));
 	dgVector q (m_matrix.TransformVectorSimd(m_floatingcollision->SupportVertexSimd (dir1)));
 	(simd_128&)m_hullVertex[entry] = (simd_128&)p - (simd_128&)q;
 	(simd_128&)m_averVertex[entry] = (simd_128&)p + (simd_128&)q;
 }
 
 
-dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneSimd(dgMinkFace*& plane, const dgVector& origin)
-{
-//_ASSERTE (0);
-return UpdateSeparatingPlane(plane, origin);
-#if 0
-	dgVector diff[4];
-	dgVector aveg[4];
-
-	plane = NULL;
-	dgMinkFace* face = &m_simplex[0];
-	dgMinkReturnCode code = dgMinkIntersecting;
-
-	dgInt32 ciclingCount = -1;
-	dgMinkFace* lastDescendFace = NULL;
-	dgFloat32 minDist = dgFloat32 (1.0e20f);
-
-	dgInt32 j = 0;
-	for (; face && (j < DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION); j ++) {
-		face = NULL;
-
-//			maxDist = dgFloat32 (0.0f);
-//			for (dgInt32 i = 0; i < 4; i ++) {
-//				dgInt32 i0 = m_faceIndex[i][0];
-//				dgInt32 i1 = m_faceIndex[i][1];
-//				dgInt32 i2 = m_faceIndex[i][2];
-//
-//				_ASSERTE (i0 == m_simplex[i].m_vertex[0]);
-//				_ASSERTE (i1 == m_simplex[i].m_vertex[1]);
-//				_ASSERTE (i2 == m_simplex[i].m_vertex[2]);
-//
-//				const dgVector& p0 = m_hullVertex[i0];
-//				const dgVector& p1 = m_hullVertex[i1];
-//				const dgVector& p2 = m_hullVertex[i2];
-//				dgVector e0 (p1 - p0);
-//				dgVector e1 (p2 - p0);
-//				dgVector n (e0 * e1);
-//
-//				dgFloat32 dist = n % n;
-//				if (dist > DG_DISTANCE_TOLERANCE_ZERO) {
-//					n = n.Scale (dgRsqrt (dist));
-//					dist = n % (origin - p0);
-//
-//					// find the plane farther away from the origin
-//					if (dist > maxDist) {
-//						maxDist = dist;
-//						normal = n;
-//						face = &m_simplex[i];
-//					}
-//				}
-//			}
-
-/*
-		simd_type tmp0 = simd_sub_v (((simd_type *)m_hullVertex)[1], ((simd_type *)m_hullVertex)[0]);
-		simd_type tmp1 = simd_sub_v (((simd_type *)m_hullVertex)[2], ((simd_type *)m_hullVertex)[0]);
-		simd_type tmp2 = simd_sub_v (((simd_type *)m_hullVertex)[3], ((simd_type *)m_hullVertex)[0]);
-		simd_type tmp4 = simd_sub_v (((simd_type *)m_hullVertex)[3], ((simd_type *)m_hullVertex)[2]);
-		simd_type tmp5 = simd_sub_v (((simd_type *)m_hullVertex)[2], ((simd_type *)m_hullVertex)[1]);
-
-		simd_type Ax = simd_permut_v (simd_permut_v (tmp0, tmp2, PURMUT_MASK (0, 0, 0, 0)), 
-			simd_permut_v (tmp1, tmp4, PURMUT_MASK (0, 0, 0, 0)), PURMUT_MASK (2, 0, 2, 0));
-
-		simd_type Ay = simd_permut_v (simd_permut_v (tmp0, tmp2, PURMUT_MASK (1, 1, 1, 1)), 
-			simd_permut_v (tmp1, tmp4, PURMUT_MASK (1, 1, 1, 1)), PURMUT_MASK (2, 0, 2, 0));
-
-		simd_type Az = simd_permut_v (simd_permut_v (tmp0, tmp2, PURMUT_MASK (2, 2, 2, 2)), 
-			simd_permut_v (tmp1, tmp4, PURMUT_MASK (2, 2, 2, 2)), PURMUT_MASK (2, 0, 2, 0));
-
-
-		simd_type Bx = simd_permut_v (simd_permut_v (tmp1, tmp0, PURMUT_MASK (0, 0, 0, 0)), 
-			simd_permut_v (tmp2, tmp5, PURMUT_MASK (0, 0, 0, 0)), PURMUT_MASK (2, 0, 2, 0));
-
-		simd_type By = simd_permut_v (simd_permut_v (tmp1, tmp0, PURMUT_MASK (1, 1, 1, 1)), 
-			simd_permut_v (tmp2, tmp5, PURMUT_MASK (1, 1, 1, 1)), PURMUT_MASK (2, 0, 2, 0));
-
-		simd_type Bz = simd_permut_v (simd_permut_v (tmp1, tmp0, PURMUT_MASK (2, 2, 2, 2)), 
-			simd_permut_v (tmp2, tmp5, PURMUT_MASK (2, 2, 2, 2)), PURMUT_MASK (2, 0, 2, 0));
-
-		simd_type nx = simd_mul_sub_v (simd_mul_v(Ay, Bz), Az, By);
-		simd_type ny = simd_mul_sub_v (simd_mul_v(Az, Bx), Ax, Bz);
-		simd_type nz = simd_mul_sub_v (simd_mul_v(Ax, By), Ay, Bx);
-		simd_type dist2 = simd_mul_add_v (simd_mul_add_v (simd_mul_v(nx, nx), ny, ny), nz, nz);
-		simd_type mask = simd_cmpgt_v (dist2, m_zeroTolerenace);
-		dist2 = simd_max_v(dist2, m_zeroTolerenace);
-		tmp0 = simd_rsqrt_v(dist2);
-		dist2 =  simd_mul_v (simd_mul_v(m_nrh0p5, tmp0), simd_mul_sub_v (m_nrh3p0, simd_mul_v (dist2, tmp0), tmp0));
-		nx = simd_mul_v (nx, dist2);
-		ny = simd_mul_v (ny, dist2);
-		nz = simd_mul_v (nz, dist2);
-
-		tmp4 = simd_sub_v (*((simd_type *)&origin), ((simd_type *)m_hullVertex)[0]);
-		tmp5 = simd_sub_v (*((simd_type *)&origin), ((simd_type *)m_hullVertex)[3]);
-		tmp0 = simd_permut_v (tmp4, tmp5, PURMUT_MASK (0, 0, 0, 0));
-		tmp1 = simd_permut_v (tmp4, tmp5, PURMUT_MASK (1, 1, 1, 1));
-		tmp2 = simd_permut_v (tmp4, tmp5, PURMUT_MASK (2, 2, 2, 2));
-		tmp0 = simd_permut_v (tmp0, tmp0, PURMUT_MASK (3, 0, 0, 0));
-		tmp1 = simd_permut_v (tmp1, tmp1, PURMUT_MASK (3, 0, 0, 0));
-		tmp2 = simd_permut_v (tmp2, tmp2, PURMUT_MASK (3, 0, 0, 0));
-
-		dist2 = simd_mul_add_v (simd_mul_add_v (simd_mul_v(nx, tmp0), ny, tmp1), nz, tmp2);
-		dist2 = simd_or_v (simd_and_v(dist2, mask), simd_andnot_v (m_negativeOne, mask));
-		tmp2 = simd_permut_v (dist2, dist2, PURMUT_MASK (3, 2, 3, 2));
-		mask = simd_cmpgt_v (dist2, tmp2);
-		dist2 = simd_or_v (simd_and_v(dist2, mask), simd_andnot_v (tmp2, mask));
-		tmp0 = simd_or_v (simd_and_v(m_index_yx, mask), simd_andnot_v (m_index_wz, mask));
-		tmp2 = simd_permut_v (dist2, dist2, PURMUT_MASK (3, 2, 1, 1));
-		mask = simd_cmpgt_v (dist2, tmp2);
-		dist2 = simd_or_v (simd_and_v(dist2, mask), simd_andnot_v (tmp2, mask));
-		tmp0 = simd_or_v (simd_and_v(tmp0, mask), simd_andnot_v (simd_permut_v (tmp0, tmp0, PURMUT_MASK (3, 2, 1, 1)), mask));
-		mask = simd_cmpgt_v (dist2, m_zero);
-		tmp0 = simd_or_v (simd_and_v(tmp0, mask), simd_andnot_v (m_negIndex, mask));
-		dgInt32 faceIndex = simd_store_is (tmp0);
-*/
-		simd_type p0_ = ((simd_type *)m_hullVertex)[0];
-		simd_type p1_ = ((simd_type *)m_hullVertex)[1];
-		simd_type p2_ = ((simd_type *)m_hullVertex)[2];
-		simd_type p3_ = ((simd_type *)m_hullVertex)[3];
-		
-		simd_type e10_ = simd_sub_v (p1_, p0_);
-		simd_type e20_ = simd_sub_v (p2_, p0_);
-		simd_type e30_ = simd_sub_v (p3_, p0_);
-		simd_type e12_ = simd_sub_v (p1_, p2_);
-		simd_type e32_ = simd_sub_v (p3_, p2_);
-
-		simd_type tmp0_ = simd_pack_lo_v(e10_, e30_);
-		simd_type tmp1_ = simd_pack_lo_v(e20_, e12_);
-		simd_type e10_x = simd_move_lh_v (tmp0_, tmp1_);
-		simd_type e10_y = simd_move_hl_v (tmp1_, tmp0_);
-		tmp0_ = simd_pack_hi_v(e10_, e30_);
-		tmp1_ = simd_pack_hi_v(e20_, e12_);
-		simd_type e10_z = simd_move_lh_v (tmp0_, tmp1_);
-
-		tmp0_ = simd_pack_lo_v(e20_, e10_);
-		tmp1_ = simd_pack_lo_v(e30_, e32_);
-		simd_type e20_x = simd_move_lh_v (tmp0_, tmp1_);
-		simd_type e20_y = simd_move_hl_v (tmp1_, tmp0_);
-		tmp0_ = simd_pack_hi_v(e20_, e10_);
-		tmp1_ = simd_pack_hi_v(e30_, e32_);
-		simd_type e20_z = simd_move_lh_v (tmp0_, tmp1_);
-
-		simd_type nx_ = simd_mul_sub_v (simd_mul_v(e10_y, e20_z), e10_z, e20_y);
-		simd_type ny_ = simd_mul_sub_v (simd_mul_v(e10_z, e20_x), e10_x, e20_z);
-		simd_type nz_ = simd_mul_sub_v (simd_mul_v(e10_x, e20_y), e10_y, e20_x);
-
-		simd_type dist2_ = simd_mul_add_v (simd_mul_add_v (simd_mul_v(nx_, nx_), ny_, ny_), nz_, nz_);
-		simd_type mask_ = simd_cmpgt_v (dist2_, m_zeroTolerenace);
-		dist2_ = simd_max_v(dist2_, m_zeroTolerenace);
-		tmp0_ = simd_rsqrt_v(dist2_);
-		dist2_ =  simd_mul_v (simd_mul_v(m_nrh0p5, tmp0_), simd_mul_sub_v (m_nrh3p0, simd_mul_v (dist2_, tmp0_), tmp0_));
-
-		nx_ = simd_mul_v (nx_, dist2_);
-		ny_ = simd_mul_v (ny_, dist2_);
-		nz_ = simd_mul_v (nz_, dist2_);
-
-		simd_type origin_P0 = simd_sub_v (*((simd_type *)&origin), p0_);
-		simd_type origin_P3 = simd_sub_v (*((simd_type *)&origin), p3_);
-		simd_type origin_P0_xxxx = simd_permut_v (origin_P0, origin_P3, PURMUT_MASK (0, 0, 0, 0));
-		simd_type origin_P0_yyyy = simd_permut_v (origin_P0, origin_P3, PURMUT_MASK (1, 1, 1, 1));
-		simd_type origin_P0_zzzz = simd_permut_v (origin_P0, origin_P3, PURMUT_MASK (2, 2, 2, 2));
-
-		dist2_ = simd_mul_add_v (simd_mul_add_v (simd_mul_v(nx_, origin_P0_xxxx), ny_, origin_P0_yyyy), nz_, origin_P0_zzzz);
-		dist2_ = simd_or_v (simd_and_v(dist2_, mask_), simd_andnot_v (m_negativeOne, mask_));
-
-		tmp1_ = simd_permut_v (dist2_, dist2_, PURMUT_MASK (3, 2, 3, 2));
-		mask_ = simd_cmpgt_v (dist2_, tmp1_);
-		dist2_ = simd_or_v (simd_and_v(dist2_, mask_), simd_andnot_v (tmp1_, mask_));
-		tmp0_ = simd_or_v (simd_and_v(m_index_yx, mask_), simd_andnot_v (m_index_wz, mask_));
-
-		tmp1_ = simd_permut_v (dist2_, dist2_, PURMUT_MASK (3, 2, 1, 1));
-		mask_ = simd_cmpgt_v (dist2_, tmp1_);
-		dist2_ = simd_or_v (simd_and_v(dist2_, mask_), simd_andnot_v (tmp1_, mask_));
-		tmp0_ = simd_or_v (simd_and_v(tmp0_, mask_), simd_andnot_v (simd_permut_v (tmp0_, tmp0_, PURMUT_MASK (3, 2, 1, 1)), mask_));
-
-		mask_ = simd_cmpgt_v (dist2_, m_zero);
-		tmp0_ = simd_or_v (simd_and_v(tmp0_, mask_), simd_andnot_v (m_negIndex, mask_));
-		dgInt32 faceIndex = simd_store_is (tmp0_);
-
-		if (faceIndex >= 0) {
-			dgVector transposedNormals[3];
-			face = &m_simplex[faceIndex];
-			simd_store_v (nx_, &transposedNormals[0][0]);
-			simd_store_v (ny_, &transposedNormals[1][0]);
-			simd_store_v (nz_, &transposedNormals[2][0]);
-			dgVector normal (transposedNormals[0][faceIndex], transposedNormals[1][faceIndex],transposedNormals[2][faceIndex], dgFloat32 (0.0f));
-
-			//i0 = face->m_vertex;
-			dgInt32 index = face->m_vertex[0];
-			CalcSupportVertexSimd (normal, 4);
-			dgFloat32 dist = normal % (m_hullVertex[4] - m_hullVertex[index]);
-
-			// if we are doing too many passes it means that it is a skew shape 
-			// increasing the tolerance help to resolve the problem
-			if(dist < DG_UPDATE_SEPARATING_PLANE_DISTANCE_TOLERANCE1) {
-				plane = face;
-				code = dgMinkDisjoint;
-				break;
-			}
-
-			if (dist < minDist) {
-				minDist = dist;
-				lastDescendFace = face;
-				ciclingCount = -1;
-				for (dgInt32 k = 0; k < 4; k ++) {
-					diff[k] = m_hullVertex[k];
-					aveg[k] = m_averVertex[k];
-				}
-			}
-
-			ciclingCount ++;
-			if (ciclingCount > 4) {
-				for (dgInt32 k = 0; k < 4; k ++) {
-					m_hullVertex[k] = diff[k];
-					m_averVertex[k] = aveg[k];
-				}
-				code = dgMinkDisjoint;
-				plane = lastDescendFace;
-				break;
-			}
-
-
-			if (dist < DG_DISTANCE_TOLERANCE) {
-				dgInt32 i = 0;
-				for (; i < 4; i ++ ) {
-					dgVector error (m_hullVertex[i] - m_hullVertex[4]);
-					if ((error % error) < (DG_DISTANCE_TOLERANCE * DG_DISTANCE_TOLERANCE)) {
-						plane = face;
-						//code = dgMinkDisjoint;
-						code = UpdateSeparatingPlaneFallbackSolution (plane, origin);
-						_ASSERTE ((code == dgMinkDisjoint) || ((code == dgMinkIntersecting) && (m_vertexIndex == 4)));
-						break;
-					}
-				}
-				if (i < 4) {
-					break;
-				}
-			}
-
-			dgInt32 i0 = face->m_vertex[0];
-			dgInt32 i1 = face->m_vertex[1];
-			dgInt32 i2 = m_faceIndex[face - m_simplex][3];
-			_ASSERTE (i2 != face->m_vertex[0]);
-			_ASSERTE (i2 != face->m_vertex[1]);
-			_ASSERTE (i2 != face->m_vertex[2]);
-			Swap (m_hullVertex[i0], m_hullVertex[i1]);
-			Swap (m_averVertex[i0], m_averVertex[i1]);
-			m_hullVertex[i2] = m_hullVertex[4];
-			m_averVertex[i2] = m_averVertex[4];
-			if (!CheckTetraHedronVolume ()) {
-				Swap (m_hullVertex[1], m_hullVertex[2]);
-				Swap (m_averVertex[1], m_averVertex[2]);
-				_ASSERTE (CheckTetraHedronVolume ());
-			}
-		}
-	} 
-
-	if (j >= DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION) {
-		_ASSERTE (CheckTetraHedronVolume());
-		code = UpdateSeparatingPlaneFallbackSolution (plane, origin);
-	}
-	return code;
-#endif
-}
 
 
 dgContactSolver::dgMinkReturnCode dgContactSolver::CalcSeparatingPlaneSimd(dgMinkFace*& plane, const dgVector& origin)
@@ -1455,3 +1194,278 @@ dgInt32 dgContactSolver::HullHullContactsSimd (dgInt32 contactID)
 	}
 	return count;
 }
+
+dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneSimd(dgMinkFace*& plane, const dgVector& origin)
+{
+//return UpdateSeparatingPlane(plane, origin);
+	dgVector diff[4];
+	dgVector aveg[4];
+
+	plane = NULL;
+	dgMinkFace* face = &m_simplex[0];
+	dgMinkReturnCode code = dgMinkIntersecting;
+
+//	dgInt32 ciclingCount = -1;
+//	dgMinkFace* lastDescendFace = NULL;
+//	dgFloat32 minDist = dgFloat32 (1.0e20f);
+
+	dgInt32 j = 0;
+	//((dgVector&) dgContactSolver::m_index_yx) = dgVector (dgFloat32 (0.0f), dgFloat32 (1.0f), dgFloat32 (0.0f), dgFloat32 (1.0f)); 
+	//((dgVector&) dgContactSolver::m_index_wz) = dgVector (dgFloat32 (2.0f), dgFloat32 (3.0f), dgFloat32 (2.0f), dgFloat32 (3.0f)); 
+	simd_128 negOne(dgFloat32 (-1.0f));
+	simd_128 zeroTolerenace (DG_DISTANCE_TOLERANCE_ZERO);
+	simd_128 index_yx (dgFloat32 (0.0f), dgFloat32 (1.0f), dgFloat32 (0.0f), dgFloat32 (1.0f));
+	simd_128 index_zw (dgFloat32 (2.0f), dgFloat32 (3.0f), dgFloat32 (2.0f), dgFloat32 (3.0f));
+	for (; face && (j < DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION); j ++) {
+		face = NULL;
+
+//			maxDist = dgFloat32 (0.0f);
+//			for (dgInt32 i = 0; i < 4; i ++) {
+//				dgInt32 i0 = m_faceIndex[i][0];
+//				dgInt32 i1 = m_faceIndex[i][1];
+//				dgInt32 i2 = m_faceIndex[i][2];
+//
+//				_ASSERTE (i0 == m_simplex[i].m_vertex[0]);
+//				_ASSERTE (i1 == m_simplex[i].m_vertex[1]);
+//				_ASSERTE (i2 == m_simplex[i].m_vertex[2]);
+//
+//				const dgVector& p0 = m_hullVertex[i0];
+//				const dgVector& p1 = m_hullVertex[i1];
+//				const dgVector& p2 = m_hullVertex[i2];
+//				dgVector e0 (p1 - p0);
+//				dgVector e1 (p2 - p0);
+//				dgVector n (e0 * e1);
+//
+//				dgFloat32 dist = n % n;
+//				if (dist > DG_DISTANCE_TOLERANCE_ZERO) {
+//					n = n.Scale (dgRsqrt (dist));
+//					dist = n % (origin - p0);
+//
+//					// find the plane farther away from the origin
+//					if (dist > maxDist) {
+//						maxDist = dist;
+//						normal = n;
+//						face = &m_simplex[i];
+//					}
+//				}
+//			}
+
+/*
+		simd_type tmp0 = simd_sub_v (((simd_type *)m_hullVertex)[1], ((simd_type *)m_hullVertex)[0]);
+		simd_type tmp1 = simd_sub_v (((simd_type *)m_hullVertex)[2], ((simd_type *)m_hullVertex)[0]);
+		simd_type tmp2 = simd_sub_v (((simd_type *)m_hullVertex)[3], ((simd_type *)m_hullVertex)[0]);
+		simd_type tmp4 = simd_sub_v (((simd_type *)m_hullVertex)[3], ((simd_type *)m_hullVertex)[2]);
+		simd_type tmp5 = simd_sub_v (((simd_type *)m_hullVertex)[2], ((simd_type *)m_hullVertex)[1]);
+
+		simd_type Ax = simd_permut_v (simd_permut_v (tmp0, tmp2, PURMUT_MASK (0, 0, 0, 0)), 
+			simd_permut_v (tmp1, tmp4, PURMUT_MASK (0, 0, 0, 0)), PURMUT_MASK (2, 0, 2, 0));
+
+		simd_type Ay = simd_permut_v (simd_permut_v (tmp0, tmp2, PURMUT_MASK (1, 1, 1, 1)), 
+			simd_permut_v (tmp1, tmp4, PURMUT_MASK (1, 1, 1, 1)), PURMUT_MASK (2, 0, 2, 0));
+
+		simd_type Az = simd_permut_v (simd_permut_v (tmp0, tmp2, PURMUT_MASK (2, 2, 2, 2)), 
+			simd_permut_v (tmp1, tmp4, PURMUT_MASK (2, 2, 2, 2)), PURMUT_MASK (2, 0, 2, 0));
+
+
+		simd_type Bx = simd_permut_v (simd_permut_v (tmp1, tmp0, PURMUT_MASK (0, 0, 0, 0)), 
+			simd_permut_v (tmp2, tmp5, PURMUT_MASK (0, 0, 0, 0)), PURMUT_MASK (2, 0, 2, 0));
+
+		simd_type By = simd_permut_v (simd_permut_v (tmp1, tmp0, PURMUT_MASK (1, 1, 1, 1)), 
+			simd_permut_v (tmp2, tmp5, PURMUT_MASK (1, 1, 1, 1)), PURMUT_MASK (2, 0, 2, 0));
+
+		simd_type Bz = simd_permut_v (simd_permut_v (tmp1, tmp0, PURMUT_MASK (2, 2, 2, 2)), 
+			simd_permut_v (tmp2, tmp5, PURMUT_MASK (2, 2, 2, 2)), PURMUT_MASK (2, 0, 2, 0));
+
+		simd_type nx = simd_mul_sub_v (simd_mul_v(Ay, Bz), Az, By);
+		simd_type ny = simd_mul_sub_v (simd_mul_v(Az, Bx), Ax, Bz);
+		simd_type nz = simd_mul_sub_v (simd_mul_v(Ax, By), Ay, Bx);
+		simd_type dist2 = simd_mul_add_v (simd_mul_add_v (simd_mul_v(nx, nx), ny, ny), nz, nz);
+		simd_type mask = simd_cmpgt_v (dist2, m_zeroTolerenace);
+		dist2 = simd_max_v(dist2, m_zeroTolerenace);
+		tmp0 = simd_rsqrt_v(dist2);
+		dist2 =  simd_mul_v (simd_mul_v(m_nrh0p5, tmp0), simd_mul_sub_v (m_nrh3p0, simd_mul_v (dist2, tmp0), tmp0));
+		nx = simd_mul_v (nx, dist2);
+		ny = simd_mul_v (ny, dist2);
+		nz = simd_mul_v (nz, dist2);
+
+		tmp4 = simd_sub_v (*((simd_type *)&origin), ((simd_type *)m_hullVertex)[0]);
+		tmp5 = simd_sub_v (*((simd_type *)&origin), ((simd_type *)m_hullVertex)[3]);
+		tmp0 = simd_permut_v (tmp4, tmp5, PURMUT_MASK (0, 0, 0, 0));
+		tmp1 = simd_permut_v (tmp4, tmp5, PURMUT_MASK (1, 1, 1, 1));
+		tmp2 = simd_permut_v (tmp4, tmp5, PURMUT_MASK (2, 2, 2, 2));
+		tmp0 = simd_permut_v (tmp0, tmp0, PURMUT_MASK (3, 0, 0, 0));
+		tmp1 = simd_permut_v (tmp1, tmp1, PURMUT_MASK (3, 0, 0, 0));
+		tmp2 = simd_permut_v (tmp2, tmp2, PURMUT_MASK (3, 0, 0, 0));
+
+		dist2 = simd_mul_add_v (simd_mul_add_v (simd_mul_v(nx, tmp0), ny, tmp1), nz, tmp2);
+		dist2 = simd_or_v (simd_and_v(dist2, mask), simd_andnot_v (m_negativeOne, mask));
+		tmp2 = simd_permut_v (dist2, dist2, PURMUT_MASK (3, 2, 3, 2));
+		mask = simd_cmpgt_v (dist2, tmp2);
+		dist2 = simd_or_v (simd_and_v(dist2, mask), simd_andnot_v (tmp2, mask));
+		tmp0 = simd_or_v (simd_and_v(m_index_yx, mask), simd_andnot_v (m_index_wz, mask));
+		tmp2 = simd_permut_v (dist2, dist2, PURMUT_MASK (3, 2, 1, 1));
+		mask = simd_cmpgt_v (dist2, tmp2);
+		dist2 = simd_or_v (simd_and_v(dist2, mask), simd_andnot_v (tmp2, mask));
+		tmp0 = simd_or_v (simd_and_v(tmp0, mask), simd_andnot_v (simd_permut_v (tmp0, tmp0, PURMUT_MASK (3, 2, 1, 1)), mask));
+		mask = simd_cmpgt_v (dist2, m_zero);
+		tmp0 = simd_or_v (simd_and_v(tmp0, mask), simd_andnot_v (m_negIndex, mask));
+		dgInt32 faceIndex = simd_store_is (tmp0);
+*/
+		
+		simd_128 p0_ ((simd_128&)m_hullVertex[0]);
+		simd_128 p1_ ((simd_128&)m_hullVertex[1]);
+		simd_128 p2_ ((simd_128&)m_hullVertex[2]);
+		simd_128 p3_ ((simd_128&)m_hullVertex[3]);
+		
+		simd_128 e10_ (p1_ - p0_);
+		simd_128 e20_ (p2_ - p0_);
+		simd_128 e30_ (p3_ - p0_);
+		simd_128 e12_ (p1_ - p2_);
+		simd_128 e32_ (p3_ - p2_);
+
+		simd_128 tmp0_ (e10_.PackLow(e30_));
+		simd_128 tmp1_ (e20_.PackLow(e12_));
+		simd_128 e10_x (tmp0_.MoveLowToHigh(tmp1_));
+		simd_128 e10_y (tmp1_.MoveHighToLow(tmp0_));
+		tmp0_ = e10_.PackHigh(e30_);
+		tmp1_ = e20_.PackHigh(e12_);
+		simd_128 e10_z (tmp0_.MoveLowToHigh(tmp1_));
+
+		tmp0_ = e20_.PackLow(e10_);
+		tmp1_ = e30_.PackLow(e32_);
+		simd_128 e20_x (tmp0_.MoveLowToHigh(tmp1_));
+		simd_128 e20_y (tmp1_.MoveHighToLow(tmp0_));
+		tmp0_ = e20_.PackHigh(e10_);
+		tmp1_ = e30_.PackHigh(e32_);
+		simd_128 e20_z (tmp0_.MoveLowToHigh(tmp1_));
+
+		simd_128 nx_ (e10_y * e20_z - e10_z * e20_y);
+		simd_128 ny_ (e10_z * e20_x - e10_x * e20_z);
+		simd_128 nz_ (e10_x * e20_y - e10_y * e20_x);
+
+		simd_128 dist2_ (nx_ * nx_ + ny_ * ny_ + nz_ * nz_);
+		simd_128 mask_ (dist2_ >= zeroTolerenace);
+		dist2_ = dist2_.GetMax(zeroTolerenace);
+
+//		tmp0_ = simd_rsqrt_v(dist2_);
+//		dist2_ =  simd_mul_v (simd_mul_v(m_nrh0p5, tmp0_), simd_mul_sub_v (m_nrh3p0, simd_mul_v (dist2_, tmp0_), tmp0_));
+		dist2_  = dist2_.InvRqrt();
+		nx_ = nx_ * dist2_;
+		ny_ = ny_ * dist2_;
+		nz_ = nz_ * dist2_;
+
+		simd_128 origin_P0_xxxx;
+		simd_128 origin_P0_yyyy;
+		simd_128 origin_P0_zzzz;
+		simd_128 origin_P0_ ((simd_128&)origin - p0_);
+		simd_128 origin_P3_ ((simd_128&)origin - p3_);
+		Transpose4x4Simd_128 (origin_P0_xxxx, origin_P0_yyyy, origin_P0_zzzz, tmp0_, origin_P0_, origin_P0_, origin_P0_, origin_P3_); 
+
+		//dist2_ = simd_mul_add_v (simd_mul_add_v (simd_mul_v(nx_, origin_P0_xxxx), ny_, origin_P0_yyyy), nz_, origin_P0_zzzz);
+		dist2_ = origin_P0_xxxx * nx_ + origin_P0_yyyy * ny_ + origin_P0_zzzz * nz_; 
+		//dist2_ = simd_or_v (simd_and_v(dist2_, mask_), simd_andnot_v (m_negativeOne, mask_));
+		dist2_ = (dist2_ & mask_) | negOne.AndNot(mask_);
+
+/*
+		tmp1_ = simd_permut_v (dist2_, dist2_, PURMUT_MASK (3, 2, 3, 2));
+		mask_ = simd_cmpgt_v (dist2_, tmp1_);
+		dist2_ = simd_or_v (simd_and_v(dist2_, mask_), simd_andnot_v (tmp1_, mask_));
+		tmp0_ = simd_or_v (simd_and_v(m_index_yx, mask_), simd_andnot_v (m_index_wz, mask_));
+
+		tmp1_ = simd_permut_v (dist2_, dist2_, PURMUT_MASK (3, 2, 1, 1));
+		mask_ = simd_cmpgt_v (dist2_, tmp1_);
+		dist2_ = simd_or_v (simd_and_v(dist2_, mask_), simd_andnot_v (tmp1_, mask_));
+		tmp0_ = simd_or_v (simd_and_v(tmp0_, mask_), simd_andnot_v (simd_permut_v (tmp0_, tmp0_, PURMUT_MASK (3, 2, 1, 1)), mask_));
+
+		mask_ = simd_cmpgt_v (dist2_, m_zero);
+		tmp0_ = simd_or_v (simd_and_v(tmp0_, mask_), simd_andnot_v (m_negIndex, mask_));
+		dgInt32 faceIndex = simd_store_is (tmp0_);
+
+		if (faceIndex >= 0) {
+			dgVector transposedNormals[3];
+			face = &m_simplex[faceIndex];
+			simd_store_v (nx_, &transposedNormals[0][0]);
+			simd_store_v (ny_, &transposedNormals[1][0]);
+			simd_store_v (nz_, &transposedNormals[2][0]);
+			dgVector normal (transposedNormals[0][faceIndex], transposedNormals[1][faceIndex],transposedNormals[2][faceIndex], dgFloat32 (0.0f));
+
+			//i0 = face->m_vertex;
+			dgInt32 index = face->m_vertex[0];
+			CalcSupportVertexSimd (normal, 4);
+			dgFloat32 dist = normal % (m_hullVertex[4] - m_hullVertex[index]);
+
+			// if we are doing too many passes it means that it is a skew shape 
+			// increasing the tolerance help to resolve the problem
+			if(dist < DG_UPDATE_SEPARATING_PLANE_DISTANCE_TOLERANCE1) {
+				plane = face;
+				code = dgMinkDisjoint;
+				break;
+			}
+
+			if (dist < minDist) {
+				minDist = dist;
+				lastDescendFace = face;
+				ciclingCount = -1;
+				for (dgInt32 k = 0; k < 4; k ++) {
+					diff[k] = m_hullVertex[k];
+					aveg[k] = m_averVertex[k];
+				}
+			}
+
+			ciclingCount ++;
+			if (ciclingCount > 4) {
+				for (dgInt32 k = 0; k < 4; k ++) {
+					m_hullVertex[k] = diff[k];
+					m_averVertex[k] = aveg[k];
+				}
+				code = dgMinkDisjoint;
+				plane = lastDescendFace;
+				break;
+			}
+
+
+			if (dist < DG_DISTANCE_TOLERANCE) {
+				dgInt32 i = 0;
+				for (; i < 4; i ++ ) {
+					dgVector error (m_hullVertex[i] - m_hullVertex[4]);
+					if ((error % error) < (DG_DISTANCE_TOLERANCE * DG_DISTANCE_TOLERANCE)) {
+						plane = face;
+						//code = dgMinkDisjoint;
+						code = UpdateSeparatingPlaneFallbackSolution (plane, origin);
+						_ASSERTE ((code == dgMinkDisjoint) || ((code == dgMinkIntersecting) && (m_vertexIndex == 4)));
+						break;
+					}
+				}
+				if (i < 4) {
+					break;
+				}
+			}
+
+			dgInt32 i0 = face->m_vertex[0];
+			dgInt32 i1 = face->m_vertex[1];
+			dgInt32 i2 = m_faceIndex[face - m_simplex][3];
+			_ASSERTE (i2 != face->m_vertex[0]);
+			_ASSERTE (i2 != face->m_vertex[1]);
+			_ASSERTE (i2 != face->m_vertex[2]);
+			Swap (m_hullVertex[i0], m_hullVertex[i1]);
+			Swap (m_averVertex[i0], m_averVertex[i1]);
+			m_hullVertex[i2] = m_hullVertex[4];
+			m_averVertex[i2] = m_averVertex[4];
+			if (!CheckTetraHedronVolume ()) {
+				Swap (m_hullVertex[1], m_hullVertex[2]);
+				Swap (m_averVertex[1], m_averVertex[2]);
+				_ASSERTE (CheckTetraHedronVolume ());
+			}
+		}
+*/
+	} 
+
+	if (j >= DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION) {
+		_ASSERTE (CheckTetraHedronVolume());
+		code = UpdateSeparatingPlaneFallbackSolution (plane, origin);
+	}
+	return code;
+}
+
+
+

@@ -283,6 +283,14 @@
 				return _mm_movemask_ps(m_type);
 			} 
 
+			DG_INLINE simd_128 InvRqrt () const
+			{
+				simd_128 half (dgFloat32 (0.5f));
+				simd_128 three (dgFloat32 (3.0f));
+				simd_128 tmp0 (_mm_rsqrt_ps(m_type));
+				return half * tmp0 * (three - (*this) * tmp0 * tmp0);
+			}
+
 			DG_INLINE simd_128 GetMin (const simd_128& data) const
 			{
 				return _mm_min_ps (m_type, data.m_type);

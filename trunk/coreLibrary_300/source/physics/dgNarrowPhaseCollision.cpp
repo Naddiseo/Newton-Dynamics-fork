@@ -2180,18 +2180,13 @@ return 0;
 void dgWorld::InitConvexCollision ()
 {
 	((dgVector&) dgContactSolver::m_zero) = dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f)); 
-	((dgVector&) dgContactSolver::m_negativeOne) = dgVector (dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f));
-	((dgVector&) dgContactSolver::m_zeroTolerenace) = dgVector (DG_DISTANCE_TOLERANCE_ZERO, DG_DISTANCE_TOLERANCE_ZERO, DG_DISTANCE_TOLERANCE_ZERO, DG_DISTANCE_TOLERANCE_ZERO);
-	((dgVector&) dgContactSolver::m_nrh0p5) = dgVector (dgFloat32 (0.5f), dgFloat32 (0.5f), dgFloat32 (0.5f), dgFloat32 (0.5f));
-	((dgVector&) dgContactSolver::m_nrh3p0) = dgVector (dgFloat32 (3.0f), dgFloat32 (3.0f), dgFloat32 (3.0f), dgFloat32 (3.0f));
-
-
-	((dgVector&) dgContactSolver::m_index_yx) = dgVector (dgFloat32 (0.0f), dgFloat32 (1.0f), dgFloat32 (0.0f), dgFloat32 (1.0f)); 
-
-	((dgVector&) dgContactSolver::m_index_wz) = dgVector (dgFloat32 (2.0f), dgFloat32 (3.0f), dgFloat32 (2.0f), dgFloat32 (3.0f)); 
-
+//	((dgVector&) dgContactSolver::m_negativeOne) = dgVector (dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f));
+//	((dgVector&) dgContactSolver::m_zeroTolerenace) = dgVector (DG_DISTANCE_TOLERANCE_ZERO, DG_DISTANCE_TOLERANCE_ZERO, DG_DISTANCE_TOLERANCE_ZERO, DG_DISTANCE_TOLERANCE_ZERO);
+//	((dgVector&) dgContactSolver::m_nrh0p5) = dgVector (dgFloat32 (0.5f), dgFloat32 (0.5f), dgFloat32 (0.5f), dgFloat32 (0.5f));
+//	((dgVector&) dgContactSolver::m_nrh3p0) = dgVector (dgFloat32 (3.0f), dgFloat32 (3.0f), dgFloat32 (3.0f), dgFloat32 (3.0f));
+//	((dgVector&) dgContactSolver::m_index_yx) = dgVector (dgFloat32 (0.0f), dgFloat32 (1.0f), dgFloat32 (0.0f), dgFloat32 (1.0f)); 
+//	((dgVector&) dgContactSolver::m_index_wz) = dgVector (dgFloat32 (2.0f), dgFloat32 (3.0f), dgFloat32 (2.0f), dgFloat32 (3.0f)); 
 	((dgVector&) dgContactSolver::m_negIndex) = dgVector (dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f)); 
-
 
 	dgContactSolver::m_dir[0]  = dgVector ( dgFloat32 (1.0f), -dgFloat32 (1.0f),  dgFloat32 (1.0f), dgFloat32 (0.0f));
 	dgContactSolver::m_dir[1]  = dgVector (-dgFloat32 (1.0f), -dgFloat32 (1.0f), -dgFloat32 (1.0f), dgFloat32 (0.0f));
