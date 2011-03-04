@@ -90,6 +90,8 @@ class dgVector: public dgTemplateVector<dgFloat32>
 	dgVector (const dgFloat32 *ptr);
 	dgVector (dgFloat32 x, dgFloat32 y, dgFloat32 z, dgFloat32 w); 
 
+	dgVector operator= (const simd_type& val);
+
 	dgFloat32 DotProductSimd (const dgVector& A) const;
 	dgVector CrossProductSimd (const dgVector &A) const;
 	dgVector CompProductSimd (const dgVector &A) const;
@@ -321,6 +323,11 @@ DG_INLINE dgVector::dgVector(const simd_128& val)
 	_ASSERTE (dgCheckVector ((*this)));
 }
 
+DG_INLINE dgVector dgVector::operator= (const simd_type& val)
+{
+	(simd_type&)*this = val;
+	return *this;
+}
 
 DG_INLINE dgVector::dgVector (dgFloat32 x, dgFloat32 y, dgFloat32 z, dgFloat32 w) 
 	:dgTemplateVector<dgFloat32>(x, y, z, w)

@@ -196,141 +196,74 @@ void dgWorldDynamicUpdate::ApplyExternalForcesAndAccelerationSimd (const dgIslan
 {
 	dgJacobian* const internalForces = &m_solverMemory.m_internalForces[island->m_bodyStart];
 
-//	dgVector zero (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-//	dgInt32 bodyCount = island->m_bodyCount;
-//	for (dgInt32 i = 0; i < bodyCount; i ++) {
-//		internalForces[i].m_linear = zero;
-//		internalForces[i].m_angular = zero;
-//	}
-	simd_type zero = simd_set1(dgFloat32 (0.0f));
+	simd_128 zero (dgFloat32 (0.0f));
 	dgInt32 bodyCount = island->m_bodyCount;
 	for (dgInt32 i = 0; i < bodyCount; i ++) {
-		(simd_type&)internalForces[i].m_linear = zero;
-		(simd_type&)internalForces[i].m_angular = zero;
+		(simd_128&) internalForces[i].m_linear = zero;
+		(simd_128&) internalForces[i].m_angular = zero;
 	}
 
-
 	dgInt32 hasJointFeeback = 0;
-
 	dgInt32 jointCount = island->m_jointCount;
 	dgWorld* const world = (dgWorld*) this;
 	dgJointInfo* const constraintArrayPtr = (dgJointInfo*) &world->m_jointsMemory[0];
 	dgJointInfo* const constraintArray = &constraintArrayPtr[island->m_jointStart];
-
-//	dgBodyInfo* const bodyArrayPtr = (dgBodyInfo*) &world->m_bodiesMemory[0]; 
-//	dgBodyInfo* const bodyArray = &bodyArrayPtr[island->m_bodyStart];
-//	dgFloat32* const force = &m_solverMemory.m_force[rowStart];
-//	const dgJacobianPair* const Jt = &m_solverMemory.m_Jt[rowStart];
-//	dgFloat32** const jointForceFeeback = &m_solverMemory.m_jointFeebackForce[rowStart];
-
 	dgJacobianMatrixElement* const matrixRow = &m_solverMemory.m_memory[rowStart];
 
-	simd_type timestep = simd_set1(timestepSrc);
-	simd_type toleranceSimd = simd_set1(maxAccNorm);
-	toleranceSimd = simd_mul_s (toleranceSimd, toleranceSimd);
+	simd_128 timestep (timestepSrc);
 	for (dgInt32 i = 0; i < jointCount; i ++) {
 		dgInt32 first = constraintArray[i].m_autoPairstart;
 		dgInt32 count = constraintArray[i].m_autoPaircount;
 		dgInt32 m0 = constraintArray[i].m_m0;
 		dgInt32 m1 = constraintArray[i].m_m1;
 
-//		dgJacobian y0;
-//		dgJacobian y1;
-//		y0.m_linear = zero;
-//		y0.m_angular = zero;
-//		y1.m_linear = zero;
-//		y1.m_angular = zero;
-		simd_type y0_linear = zero;
-		simd_type y0_angular = zero;
-		simd_type y1_linear = zero;
-		simd_type y1_angular = zero;
+		simd_128 y0_linear (zero);
+		simd_128 y0_angular (zero);
+		simd_128 y1_linear (zero);
+		simd_128 y1_angular (zero);
 		for (dgInt32 j = 0; j < count; j ++) { 
-			//dgInt32 index = j + first;
-			//dgFloat32 val = force[index]; 
-			//_ASSERTE (dgCheckFloat(val));
-			//jointForceFeeback[index][0] = val;
 			dgJacobianMatrixElement* const row = &matrixRow[j + first];
 
 			_ASSERTE (dgCheckFloat(row->m_force));
-			simd_type val = simd_set1 (row->m_force);
-			simd_store_s (val, &row->m_jointFeebackForce[0]);
-
-			//y0.m_linear += Jt[index].m_jacobian_IM0.m_linear.Scale (val);
-			//y0.m_angular += Jt[index].m_jacobian_IM0.m_angular.Scale (val);
-			//y1.m_linear += Jt[index].m_jacobian_IM1.m_linear.Scale (val);
-			//y1.m_angular += Jt[index].m_jacobian_IM1.m_angular.Scale (val);
-			y0_linear = simd_mul_add_v (y0_linear, (simd_type&)row->m_Jt.m_jacobian_IM0.m_linear, val);
-			y0_angular = simd_mul_add_v (y0_angular, (simd_type&)row->m_Jt.m_jacobian_IM0.m_angular, val);
-			y1_linear = simd_mul_add_v (y1_linear, (simd_type&)row->m_Jt.m_jacobian_IM1.m_linear, val);
-			y1_angular = simd_mul_add_v (y1_angular, (simd_type&)row->m_Jt.m_jacobian_IM1.m_angular, val);
+			simd_128 val (row->m_force);
+			val.StoreScalar(&row->m_jointFeebackForce[0]);
+			y0_linear = y0_linear + (simd_128&)row->m_Jt.m_jacobian_IM0.m_linear * val;
+			y0_angular = y0_angular + (simd_128&)row->m_Jt.m_jacobian_IM0.m_angular * val;
+			y1_linear = y1_linear + (simd_128&)row->m_Jt.m_jacobian_IM1.m_linear * val;
+			y1_angular = y1_angular + (simd_128&)row->m_Jt.m_jacobian_IM1.m_angular * val;
 		}
-
-		//if (constraintArray[i].m_joint->GetId() == dgContactConstraintId) {
-		//		m_world->AddToBreakQueue ((dgContact*)constraintArray[i].m_joint, maxForce);
-		//}
 		hasJointFeeback |= (constraintArray[i].m_joint->m_updaFeedbackCallback ? 1 : 0);
-
-		//internalForces[m0].m_linear += y0.m_linear;
-		//internalForces[m0].m_angular += y0.m_angular;
-		//internalForces[m1].m_linear += y1.m_linear;
-		//internalForces[m1].m_angular += y1.m_angular;
-		(simd_type&)internalForces[m0].m_linear = simd_add_v ((simd_type&)internalForces[m0].m_linear, y0_linear);
-		(simd_type&)internalForces[m0].m_angular = simd_add_v ((simd_type&)internalForces[m0].m_angular, y0_angular);
-		(simd_type&)internalForces[m1].m_linear = simd_add_v ((simd_type&)internalForces[m1].m_linear, y1_linear);
-		(simd_type&)internalForces[m1].m_angular = simd_add_v ((simd_type&)internalForces[m1].m_angular, y1_angular);
+		(simd_128&)internalForces[m0].m_linear = (simd_128&)internalForces[m0].m_linear + y0_linear;
+		(simd_128&)internalForces[m0].m_angular = (simd_128&)internalForces[m0].m_angular + y0_angular;
+		(simd_128&)internalForces[m1].m_linear = (simd_128&)internalForces[m1].m_linear + y1_linear;
+		(simd_128&)internalForces[m1].m_angular = (simd_128&)internalForces[m1].m_angular + y1_angular;
 	}
 
-//	dgFloat32 accelTol2 = maxAccNorm * maxAccNorm;
+	simd_128 toleranceSimd (simd_128 (maxAccNorm) * simd_128 (maxAccNorm));
 	dgBodyInfo* const bodyArrayPtr = (dgBodyInfo*) &world->m_bodiesMemory[0]; 
 	dgBodyInfo* const bodyArray = &bodyArrayPtr[island->m_bodyStart];
 	for (dgInt32 i = 1; i < bodyCount; i ++) {
 		dgBody* const body = bodyArray[i].m_body;
-		//body->m_accel += internalForces[i].m_linear;
-		//body->m_alpha += internalForces[i].m_angular;
-		(simd_type&)body->m_accel = simd_add_v ((simd_type&)internalForces[i].m_linear, (simd_type&)body->m_accel);
-		(simd_type&)body->m_alpha = simd_add_v ((simd_type&)internalForces[i].m_angular, (simd_type&)body->m_alpha);
+		(simd_128&)body->m_accel = (simd_128&)body->m_accel + (simd_128&)internalForces[i].m_linear;
+		(simd_128&)body->m_alpha = (simd_128&)body->m_alpha + (simd_128&)internalForces[i].m_angular;
 
-		//dgVector accel (body->m_accel.Scale (body->m_invMass.m_w));
-		//dgVector alpha (body->m_invWorldInertiaMatrix.RotateVector (body->m_alpha));
-		simd_type accel = simd_mul_v ((simd_type&)body->m_accel, simd_set1 (body->m_invMass.m_w));
-		simd_type alpha = simd_mul_add_v (simd_mul_add_v (simd_mul_v ((simd_type&)body->m_invWorldInertiaMatrix[0], simd_set1 (body->m_alpha.m_x)), 
-																	  (simd_type&)body->m_invWorldInertiaMatrix[1], simd_set1 (body->m_alpha.m_y)), 
-																	  (simd_type&)body->m_invWorldInertiaMatrix[2], simd_set1 (body->m_alpha.m_z));
-		//dgFloat32 error = accel % accel;
-		//if (error < accelTol2) {
-		//	accel = zero;
-		//	body->m_accel = zero;
-		//}
-		simd_type tmp = simd_mul_v (accel, accel);
-		tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
-		tmp = simd_add_s (tmp, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 1)));
-		tmp = simd_cmplt_s (tmp, toleranceSimd);
-		tmp = simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 0));
-		accel = simd_andnot_v (accel, tmp);
-		(simd_type&)body->m_accel = simd_andnot_v ((simd_type&)body->m_accel, tmp);
+		simd_128 accel = (simd_128&)body->m_accel * simd_128(body->m_invMass.m_w);
+		simd_128 alpha (body->m_invWorldInertiaMatrix.RotateVectorSimd(body->m_alpha));
 
-		//error = alpha % alpha;
-		//if (error < accelTol2) {
-		//	alpha = zero;
-		//	body->m_alpha = zero;
-		//}
-		tmp = simd_mul_v (alpha, alpha);
-		tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
-		tmp = simd_add_s (tmp, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 1)));
-		tmp = simd_cmplt_s (tmp, toleranceSimd);
-		tmp = simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 0));
-		alpha = simd_andnot_v (alpha, tmp);
-		(simd_type&)body->m_alpha = simd_andnot_v ((simd_type&)body->m_alpha, tmp);
+		simd_128 alphaTest ((accel * accel) > toleranceSimd);
+		alphaTest = alphaTest | alphaTest.MoveHighToLow(alphaTest);
+		alphaTest = alphaTest | alphaTest.PackLow(alphaTest);
+		(simd_128&)body->m_accel = accel & (alphaTest | alphaTest.MoveLowToHigh(alphaTest));
 
-		//body->m_netForce = body->m_accel;
-		//body->m_netTorque = body->m_alpha;
-		//body->m_veloc += accel.Scale(timestep);
-		//body->m_omega += alpha.Scale(timestep);
+		alphaTest = (alpha * alpha) > toleranceSimd;
+		alphaTest = alphaTest | alphaTest.MoveHighToLow(alphaTest);
+		alphaTest = alphaTest | alphaTest.PackLow(alphaTest);
+		(simd_128&)body->m_alpha = alpha & (alphaTest | alphaTest.MoveLowToHigh(alphaTest));
 
-		(simd_type&)body->m_netForce = (simd_type&)body->m_accel;
-		(simd_type&)body->m_netTorque = (simd_type&)body->m_alpha;
-		(simd_type&)body->m_veloc = simd_mul_add_v ((simd_type&)body->m_veloc, accel, timestep);
-		(simd_type&)body->m_omega = simd_mul_add_v ((simd_type&)body->m_omega, alpha, timestep);
+		(simd_128&)body->m_netForce = (simd_128&)body->m_accel;
+		(simd_128&)body->m_netTorque = (simd_128&)body->m_alpha;
+		(simd_128&)body->m_veloc = (simd_128&)body->m_veloc +  accel * timestep;
+		(simd_128&)body->m_omega = (simd_128&)body->m_omega + alpha * timestep;
 	}
 
 	if (hasJointFeeback) {
@@ -642,10 +575,10 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 			y1_linear  = y1_linear +  (simd_128&) row->m_Jt.m_jacobian_IM1.m_linear * val;
 			y1_angular = y1_angular + (simd_128&) row->m_Jt.m_jacobian_IM1.m_angular * val;
 		}
-		internalForces[m0].m_linear = (simd_128&) internalForces[m0].m_linear + y0_linear;
-		internalForces[m0].m_angular = (simd_128&) internalForces[m0].m_angular +  y0_angular;
-		internalForces[m1].m_linear = (simd_128&) internalForces[m1].m_linear +  y1_linear;
-		internalForces[m1].m_angular = (simd_128&)internalForces[m1].m_angular +  y1_angular;
+		(simd_128&)internalForces[m0].m_linear = (simd_128&) internalForces[m0].m_linear + y0_linear;
+		(simd_128&)internalForces[m0].m_angular = (simd_128&) internalForces[m0].m_angular +  y0_angular;
+		(simd_128&)internalForces[m1].m_linear = (simd_128&) internalForces[m1].m_linear +  y1_linear;
+		(simd_128&)internalForces[m1].m_angular = (simd_128&)internalForces[m1].m_angular +  y1_angular;
 	}
 
 
@@ -725,10 +658,10 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 					angularM1 = angularM1 + (simd_128&) row->m_Jt.m_jacobian_IM1.m_angular * prevValue;
 					index ++;
 				}
-				internalForces[m0].m_linear = linearM0;
-				internalForces[m0].m_angular = angularM0;
-				internalForces[m1].m_linear = linearM1;
-				internalForces[m1].m_angular = angularM1;
+				(simd_128&)internalForces[m0].m_linear = linearM0;
+				(simd_128&)internalForces[m0].m_angular = angularM0;
+				(simd_128&)internalForces[m1].m_linear = linearM1;
+				(simd_128&)internalForces[m1].m_angular = angularM1;
 			}
 			accNormSimd.StoreScalar(&accNorm);
 		}
@@ -739,10 +672,10 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 			simd_128 torque((simd_128&)body->m_alpha + (simd_128&)internalForces[i].m_angular);
 			simd_128 accel (force * simd_128(body->m_invMass.m_w));
 			simd_128 alpha (body->m_invWorldInertiaMatrix.RotateVectorSimd(torque));
-			body->m_veloc = (simd_128&)body->m_veloc + accel * timeStepSimd;
-			body->m_omega = (simd_128&)body->m_omega + alpha * timeStepSimd;
-			internalVeloc[i].m_linear = (simd_128&)internalVeloc[i].m_linear + (simd_128&) body->m_veloc;
-			internalVeloc[i].m_angular = (simd_128&)internalVeloc[i].m_angular + (simd_128&) body->m_omega;
+			(simd_128&)body->m_veloc = (simd_128&)body->m_veloc + accel * timeStepSimd;
+			(simd_128&)body->m_omega = (simd_128&)body->m_omega + alpha * timeStepSimd;
+			(simd_128&)internalVeloc[i].m_linear = (simd_128&)internalVeloc[i].m_linear + (simd_128&) body->m_veloc;
+			(simd_128&)internalVeloc[i].m_angular = (simd_128&)internalVeloc[i].m_angular + (simd_128&) body->m_omega;
 		}
 	}
 
@@ -767,8 +700,8 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 	for (dgInt32 i = 1; i < bodyCount; i ++) {
 		dgBody* const body = bodyArray[i].m_body;
 
-		body->m_veloc = (simd_128&) internalVeloc[i].m_linear * invStepSimd;
-		body->m_omega = (simd_128&) internalVeloc[i].m_angular * invStepSimd;
+		(simd_128&)body->m_veloc = (simd_128&) internalVeloc[i].m_linear * invStepSimd;
+		(simd_128&)body->m_omega = (simd_128&) internalVeloc[i].m_angular * invStepSimd;
 
 		simd_128 accel (((simd_128&) body->m_veloc - (simd_128&) body->m_netForce) * invTimeStepSimd);
 		simd_128 alpha (((simd_128&) body->m_omega - (simd_128&) body->m_netTorque) * invTimeStepSimd);
