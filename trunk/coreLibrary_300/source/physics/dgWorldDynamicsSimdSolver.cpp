@@ -72,19 +72,14 @@ dgInt32 dgWorldDynamicUpdate::BuildJacobianMatrixSimd (const dgIsland* const isl
 	rowCount = GetJacobianDerivatives (island, threadIndex, true, rowBase, rowCount, timestep);
 	_ASSERTE (rowCount <= island->m_rowsCount);
 
-//	dgFloat32* const force = &m_solverMemory.m_force[rowBase];
-//	const dgJacobianPair* const Jt = &m_solverMemory.m_Jt[rowBase];
-//	dgJacobianPair* const JMinv = &m_solverMemory.m_JMinv[rowBase];
-//	dgFloat32* const diagDamp = &m_solverMemory.m_diagDamp[rowBase];
-//	dgFloat32* const extAccel = &m_solverMemory.m_deltaAccel[rowBase];
-//	dgFloat32* const invDJMinvJt = &m_solverMemory.m_invDJMinvJt[rowBase];
-//	dgFloat32* const coordenateAccel = &m_solverMemory.m_coordenateAccel[rowBase];
-//	dgFloat32** const jointForceFeeback = &m_solverMemory.m_jointFeebackForce[rowBase];
 
 	dgJacobianMatrixElement* const matrixRow = &m_solverMemory.m_memory[rowBase];
 
-	simd_type zero = simd_set1 (dgFloat32 (0.0f));
+	simd_128 one (dgFloat32 (1.0f));
+	simd_128 zero (dgFloat32 (0.0f));
+	simd_128 diagDampConst (DG_PSD_DAMP_TOL);
 	for (dgInt32 k = 0; k < jointCount; k ++) {
+
 		const dgJointInfo* const jointInfo = &constraintArray[k];
 		dgInt32 index = jointInfo->m_autoPairstart;
 		dgInt32 count = jointInfo->m_autoPaircount;
@@ -95,87 +90,68 @@ dgInt32 dgWorldDynamicUpdate::BuildJacobianMatrixSimd (const dgIsland* const isl
 		_ASSERTE (m0 < bodyCount);
 		dgBody* const body0 = bodyArray[m0].m_body;
 		//dgFloat32 invMass0 = body0->m_invMass[3];
-		simd_type invMass0 = simd_set1 (body0->m_invMass[3]);
+		simd_128 invMass0 (body0->m_invMass[3]);
 		const dgMatrix& invInertia0 = body0->m_invWorldInertiaMatrix;
 
 		_ASSERTE (m1 >= 0);
 		_ASSERTE (m1 < bodyCount);
 		dgBody* const body1 = bodyArray[m1].m_body;
 		//dgFloat32 invMass1 = body1->m_invMass[3];
-		simd_type invMass1 = simd_set1 (body1->m_invMass[3]);
+		simd_128 invMass1 (body1->m_invMass[3]);
 		const dgMatrix& invInertia1 = body1->m_invWorldInertiaMatrix;
 
 		for (dgInt32 i = 0; i < count; i ++) {
-			//JMinv[index].m_jacobian_IM0.m_linear = Jt[index].m_jacobian_IM0.m_linear.Scale (invMass0);
-			//JMinv[index].m_jacobian_IM0.m_angular = invInertia0.UnrotateVector (Jt[index].m_jacobian_IM0.m_angular);
-			//dgVector tmpDiag (JMinv[index].m_jacobian_IM0.m_linear.CompProduct(Jt[index].m_jacobian_IM0.m_linear));
-			//tmpDiag += JMinv[index].m_jacobian_IM0.m_angular.CompProduct(Jt[index].m_jacobian_IM0.m_angular);
-			//dgVector tmpAccel (JMinv[index].m_jacobian_IM0.m_linear.CompProduct(body0->m_accel));
-			//tmpAccel += JMinv[index].m_jacobian_IM0.m_angular.CompProduct(body0->m_alpha);
 
 			dgJacobianMatrixElement* const row = &matrixRow[index];
-			
-			((simd_type&)row->m_JMinv.m_jacobian_IM0.m_linear) = simd_mul_v ((simd_type&)row->m_Jt.m_jacobian_IM0.m_linear, invMass0);
-			simd_type tmp0 = (simd_type&)row->m_Jt.m_jacobian_IM0.m_angular;
-			simd_type tmp1 = simd_mul_v ((simd_type&)invInertia0.m_front, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 0, 0, 0)));
-			tmp1 = simd_mul_add_v (tmp1, (simd_type&)invInertia0.m_up, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 1, 1, 1)));
-			((simd_type&)row->m_JMinv.m_jacobian_IM0.m_angular) = simd_mul_add_v (tmp1, (simd_type&)invInertia0.m_right, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 2, 2, 2)));
-			simd_type tmpDiag = simd_mul_v ((simd_type&)row->m_JMinv.m_jacobian_IM0.m_linear, (simd_type&)row->m_Jt.m_jacobian_IM0.m_linear);
-			tmpDiag = simd_mul_add_v (tmpDiag, (simd_type&)row->m_JMinv.m_jacobian_IM0.m_angular, (simd_type&)row->m_Jt.m_jacobian_IM0.m_angular);
-			simd_type tmpAccel = simd_mul_v ((simd_type&)row->m_JMinv.m_jacobian_IM0.m_linear, (simd_type&)body0->m_accel);
-			tmpAccel = simd_mul_add_v (tmpAccel, (simd_type&)row->m_JMinv.m_jacobian_IM0.m_angular, (simd_type&)body0->m_alpha);
 
+			row->m_JMinv.m_jacobian_IM0.m_linear = (simd_128&)row->m_Jt.m_jacobian_IM0.m_linear * invMass0;
+			row->m_JMinv.m_jacobian_IM0.m_angular = invInertia0.UnrotateVectorSimd((simd_128&)row->m_Jt.m_jacobian_IM0.m_angular);
+			simd_128 tmpDiag ((simd_128&)row->m_JMinv.m_jacobian_IM0.m_linear * (simd_128&)row->m_Jt.m_jacobian_IM0.m_linear + 
+							  (simd_128&)row->m_JMinv.m_jacobian_IM0.m_angular * (simd_128&)row->m_Jt.m_jacobian_IM0.m_angular);
+			simd_128 tmpAccel ((simd_128&)row->m_JMinv.m_jacobian_IM0.m_linear * (simd_128&)body0->m_accel +
+						       (simd_128&)row->m_JMinv.m_jacobian_IM0.m_angular * (simd_128&)body0->m_alpha);
+							  
+			row->m_JMinv.m_jacobian_IM1.m_linear = (simd_128&)row->m_Jt.m_jacobian_IM1.m_linear * invMass1;
+			row->m_JMinv.m_jacobian_IM1.m_angular = invInertia1.UnrotateVectorSimd((simd_128&)row->m_Jt.m_jacobian_IM1.m_angular);
 
-			//JMinv[index].m_jacobian_IM1.m_linear = Jt[index].m_jacobian_IM1.m_linear.Scale (invMass1);
-			//JMinv[index].m_jacobian_IM1.m_angular = invInertia1.UnrotateVector (Jt[index].m_jacobian_IM1.m_angular);
-			//tmpDiag += JMinv[index].m_jacobian_IM1.m_linear.CompProduct(Jt[index].m_jacobian_IM1.m_linear);
-			//tmpDiag += JMinv[index].m_jacobian_IM1.m_angular.CompProduct(Jt[index].m_jacobian_IM1.m_angular);
-			//tmpAccel += JMinv[index].m_jacobian_IM1.m_linear.CompProduct(body1->m_accel);
-			//tmpAccel += JMinv[index].m_jacobian_IM1.m_angular.CompProduct(body1->m_alpha);
-			
-			((simd_type&)row->m_JMinv.m_jacobian_IM1.m_linear) = simd_mul_v ((simd_type&)row->m_Jt.m_jacobian_IM1.m_linear, invMass1);
-			tmp0 = (simd_type&)row->m_Jt.m_jacobian_IM1.m_angular;
-			tmp1 = simd_mul_v ((simd_type&)invInertia1.m_front, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 0, 0, 0)));
-			tmp1 = simd_mul_add_v (tmp1, (simd_type&)invInertia1.m_up, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 1, 1, 1)));
-			((simd_type&)row->m_JMinv.m_jacobian_IM1.m_angular) = simd_mul_add_v (tmp1, (simd_type&)invInertia1.m_right, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 2, 2, 2)));
-			tmpDiag = simd_mul_add_v (tmpDiag, (simd_type&)row->m_JMinv.m_jacobian_IM1.m_linear, (simd_type&)row->m_Jt.m_jacobian_IM1.m_linear);
-			tmpDiag = simd_mul_add_v (tmpDiag, (simd_type&)row->m_JMinv.m_jacobian_IM1.m_angular, (simd_type&)row->m_Jt.m_jacobian_IM1.m_angular);
-			tmpAccel = simd_mul_add_v (tmpAccel, (simd_type&)row->m_JMinv.m_jacobian_IM1.m_linear, (simd_type&)body1->m_accel);
-			tmpAccel = simd_mul_add_v (tmpAccel, (simd_type&)row->m_JMinv.m_jacobian_IM1.m_angular, (simd_type&)body1->m_alpha);
+			tmpDiag = tmpDiag + (simd_128&)row->m_JMinv.m_jacobian_IM1.m_linear * (simd_128&)row->m_Jt.m_jacobian_IM1.m_linear + 
+								(simd_128&)row->m_JMinv.m_jacobian_IM1.m_angular * (simd_128&)row->m_Jt.m_jacobian_IM1.m_angular;
+			tmpAccel = tmpAccel + (simd_128&)row->m_JMinv.m_jacobian_IM1.m_linear * (simd_128&)body1->m_accel +
+								  (simd_128&)row->m_JMinv.m_jacobian_IM1.m_angular * (simd_128&)body1->m_alpha;
+
 
 			//dgFloat32 extenalAcceleration = -(tmpAccel.m_x + tmpAccel.m_y + tmpAccel.m_z);
-			//extAccel[index] = extenalAcceleration;
-			//coordenateAccel[index] += extenalAcceleration;
+			_ASSERTE (tmpAccel.m_type.m128_f32[3] == dgFloat32 (0.0f));
+			tmpAccel = zero - tmpAccel.AddHorizontal();
 
-			_ASSERTE (tmpAccel.m128_f32[3] == dgFloat32 (0.0f));
-			tmpAccel = simd_add_v (tmpAccel, simd_move_hl_v(tmpAccel, tmpAccel));
-			tmpAccel = simd_sub_s (zero, simd_add_s(tmpAccel, simd_permut_v (tmpAccel, tmpAccel, PURMUT_MASK(3, 3, 3, 1))));
-			//simd_store_s (tmpAccel, &extAccel[index]);
-			simd_store_s (tmpAccel, &row->m_deltaAccel);
-			simd_store_s (simd_add_s(simd_load_s(row->m_coordenateAccel), tmpAccel), &row->m_coordenateAccel);
+			//row->m_deltaAccel = extenalAcceleration;
+			//row->m_coordenateAccel += extenalAcceleration;
+			tmpAccel.StoreScalar(&row->m_deltaAccel);
+			tmpAccel = tmpAccel + simd_128 (row->m_coordenateAccel);
+			tmpAccel.StoreScalar(&row->m_coordenateAccel);
 
+			//row->m_force = row->m_jointFeebackForce[0];
 			row->m_force = row->m_jointFeebackForce[0];
-			//simd_store_s (simd_load_s (row->m_jointFeebackForce[0]), &row->m_force);
-
+		
 			_ASSERTE (row->m_diagDamp >= dgFloat32(0.1f));
 			_ASSERTE (row->m_diagDamp <= dgFloat32(100.0f));
-			dgFloat32 stiffness = DG_PSD_DAMP_TOL * row->m_diagDamp;
+			_ASSERTE (tmpDiag.m_type.m128_f32[3] == dgFloat32 (0.0f));
 
+			//dgFloat32 stiffness = DG_PSD_DAMP_TOL * row->m_diagDamp;
 			//dgFloat32 diag = (tmpDiag.m_x + tmpDiag.m_y + tmpDiag.m_z);
-			tmpDiag = simd_add_v (tmpDiag, simd_move_hl_v(tmpDiag, tmpDiag));
-			dgFloat32 diag;
-			simd_store_s (simd_add_s(tmpDiag, simd_permut_v (tmpDiag, tmpDiag, PURMUT_MASK(3, 3, 3, 1))), &diag);
-			_ASSERTE (diag > dgFloat32 (0.0f));
-			row->m_diagDamp = diag * stiffness;
+			//row->m_diagDamp = diag * stiffness;
+			simd_128 stiffness (simd_128(row->m_diagDamp) * diagDampConst);
+			tmpDiag = tmpDiag.AddHorizontal();
+			simd_128 diagDamp (tmpDiag * stiffness);
+			diagDamp.StoreScalar (&row->m_diagDamp);
 
-			diag *= (dgFloat32(1.0f) + stiffness);
-			//solverMemory.m_diagJMinvJt[index] = diag;
-			row->m_invDJMinvJt = dgFloat32(1.0f) / diag;
-
+			//diag *= (dgFloat32(1.0f) + stiffness);
+			//row->m_invDJMinvJt = dgFloat32(1.0f) / diag;
+			simd_128 invDiagDamp (one / (tmpDiag * (one + stiffness)));
+			invDiagDamp.StoreScalar(&row->m_invDJMinvJt);
 			index ++;
 		}
 	}
-
 	return rowBase;
 }
 

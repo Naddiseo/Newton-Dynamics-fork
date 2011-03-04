@@ -129,7 +129,8 @@ void dgWorldDynamicUpdate::UpdateDynamics(dgFloat32 timestep)
 
 	m_rowCountAtomicIndex = 0;
 
-	if (world->m_singleIslandMultithreading) {
+//	if (world->m_singleIslandMultithreading) {
+if (0) {
 		dgInt32 unilarealJointsCount = 0;
 		for (dgInt32 i = 0; (i < m_islands) && islands[i].m_hasUnilateralJoints; i ++) {
 			unilarealJointsCount ++;
@@ -162,10 +163,6 @@ void dgWorldDynamicUpdate::UpdateDynamics(dgFloat32 timestep)
 			
 	} else {
 		dgWorldDynamicUpdateSyncDescriptor descriptor;
-		//	dgInt32 atomicCounter = 0;
-		//	userParamArray[0] = this;
-		//	userParamArray[1] = *((void**) &timestep);
-		//	userParamArray[2] = &atomicCounter;
 		
 		dgInt32 threadCounts = world->GetThreadCount();	
 		descriptor.m_world = world;

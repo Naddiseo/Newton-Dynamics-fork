@@ -380,13 +380,11 @@ dgInt32 dgWorldDynamicUpdate::BuildJacobianMatrix (const dgIsland* const island,
 			tmpAccel += row->m_JMinv.m_jacobian_IM1.m_angular.CompProduct(body1->m_alpha);
 
 			dgFloat32 extenalAcceleration = -(tmpAccel.m_x + tmpAccel.m_y + tmpAccel.m_z);
-			//row->m_extAccel = extenalAcceleration;
 			row->m_deltaAccel = extenalAcceleration;
 			row->m_coordenateAccel += extenalAcceleration;
 			row->m_force = row->m_jointFeebackForce[0];
 
 			//force[index] = 0.0f;
-
 			_ASSERTE (row->m_diagDamp >= dgFloat32(0.1f));
 			_ASSERTE (row->m_diagDamp <= dgFloat32(100.0f));
 			dgFloat32 stiffness = DG_PSD_DAMP_TOL * row->m_diagDamp;
@@ -396,9 +394,7 @@ dgInt32 dgWorldDynamicUpdate::BuildJacobianMatrix (const dgIsland* const island,
 			row->m_diagDamp = diag * stiffness;
 
 			diag *= (dgFloat32(1.0f) + stiffness);
-			//solverMemory.m_diagJMinvJt[index] = diag;
 			row->m_invDJMinvJt = dgFloat32(1.0f) / diag;
-
 			index ++;
 		}
 	}
