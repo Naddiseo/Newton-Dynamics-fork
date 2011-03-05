@@ -918,63 +918,6 @@ dgVector dgCollisionConvex::SupportVertex (const dgVector& direction) const
 
 dgVector dgCollisionConvex::SupportVertexSimd (const dgVector& direction) const
 {
-
-	dgVector a;
-	dgInt32 index0;
-	{
-		_ASSERTE (dgAbsf(direction % direction - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
-		simd_type dir_x = simd_set1 (direction.m_x);
-		simd_type dir_y = simd_set1 (direction.m_y);
-		simd_type dir_z = simd_set1 (direction.m_z);
-		simd_type dot0 = simd_mul_add_v (simd_mul_add_v (simd_mul_v (dir_x, *(simd_type*) &m_multiResDir_sse[0]), 
-			dir_y, *(simd_type*) &m_multiResDir_sse[1]), 
-			dir_z, *(simd_type*) &m_multiResDir_sse[2]);
-		simd_type dot1 = simd_mul_v (dot0, *(simd_type*) &m_negOne);
-		simd_type mask = simd_cmpgt_v(dot0, dot1);
-		dot0 = simd_max_v (dot0, dot1);
-		simd_type entry = simd_or_v (simd_and_v(*(simd_type*) &m_index_0123, mask), simd_andnot_v (*(simd_type*) &m_index_4567, mask));
-
-		dot1 = simd_move_hl_v (dot0, dot0);
-		mask = simd_cmpgt_v(dot0, dot1);
-		dot0 = simd_max_v (dot0, dot1);
-		entry = simd_or_v (simd_and_v(entry, mask), simd_andnot_v (simd_move_hl_v (entry, entry), mask));
-
-		mask = simd_cmpgt_s(dot0, simd_permut_v (dot0, dot0, PURMUT_MASK (3, 2, 1, 1)));
-
-		dgInt32 index = simd_store_is (simd_or_v (simd_and_v(entry, mask), simd_andnot_v (simd_permut_v (entry, entry, PURMUT_MASK (3, 2, 1, 1)), mask)));
-		dgConvexSimplexEdge* edge = m_supportVertexStarCuadrant[index];
-
-		index = edge->m_vertex;
-		simd_type dir = simd_set (direction.m_x, direction.m_y, direction.m_z, dgFloat32 (0.0f));
-
-		simd_type side0 = simd_mul_v (*(simd_type*)&m_vertex[index], dir);
-		side0 = simd_add_s(simd_add_v (side0, simd_move_hl_v (side0, side0)), simd_permut_v (side0, side0, PURMUT_MASK (3,3,3,1)));
-
-		dgConvexSimplexEdge* ptr = edge;
-		dgInt32 maxCount = 128;
-		do {
-			_ASSERTE (m_vertex[edge->m_twin->m_vertex].m_w == dgFloat32 (1.0f));
-			simd_type side1 = simd_mul_v (*(simd_type*)&m_vertex[ptr->m_twin->m_vertex], dir);
-			side1 = simd_add_s(simd_add_v (side1, simd_move_hl_v (side1, side1)), simd_permut_v (side1, side1, PURMUT_MASK (3,3,3,1)));
-
-			if (simd_store_is (simd_cmpgt_s(side1, side0))) {
-				index = ptr->m_twin->m_vertex;
-				side0 = side1;
-				edge = ptr->m_twin;
-				ptr = edge;
-			}
-			ptr = ptr->m_twin->m_next;
-			maxCount --;
-		} while ((ptr != edge) && maxCount);
-		_ASSERTE (maxCount);
-
-		_ASSERTE (index != -1);
-		//		return m_vertex[index];
-		a = m_vertex[index];
-		index0 = index;
-	}
-
-
 	_ASSERTE (dgAbsf(direction % direction - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
 	simd_128 dir_x (direction.m_x);
 	simd_128 dir_y (direction.m_y);
@@ -1002,9 +945,9 @@ dgVector dgCollisionConvex::SupportVertexSimd (const dgVector& direction) const
 	simd_128 side0 (dir.DotProduct((simd_128&)m_vertex[edge->m_vertex]));
 	dgConvexSimplexEdge* ptr = edge;
 	dgInt32 maxCount = 128;
+	index = edge->m_vertex;
 	do {
 		simd_128 side1 (dir.DotProduct((simd_128&)m_vertex[ptr->m_twin->m_vertex]));
-
 		if ((side1 > side0).GetInt()) {
 			index = ptr->m_twin->m_vertex;
 			side0 = side1;
@@ -1017,16 +960,7 @@ dgVector dgCollisionConvex::SupportVertexSimd (const dgVector& direction) const
 	_ASSERTE (maxCount);
 
 	_ASSERTE (index != -1);
-
-//dgVector xxx (SupportVertex (direction));
-dgVector xxx1 (a - m_vertex[index]);
-if ((xxx1 % xxx1) > 1.0e-5f)
-{
-	index *= 1;
-}
-
-//	return m_vertex[index];
-	return SupportVertex (direction);
+	return m_vertex[index];
 }
 
 

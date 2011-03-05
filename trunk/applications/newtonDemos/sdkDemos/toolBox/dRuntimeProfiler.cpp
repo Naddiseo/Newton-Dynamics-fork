@@ -75,6 +75,7 @@ void dRuntimeProfiler::Render (NewtonWorld* nWorld, int mask, QPainter& context)
 	//Retrieves the viewport and stores it in the variable
 	for (int i = 0; i < MAX_TRACKS; i ++) {
 		m_perfomanceTracks[i][m_frameIndex] = NewtonReadPerformanceTicks (nWorld, i);
+//m_perfomanceTracks[i][m_frameIndex] /=2 ;
 	}
 
 	QRect viewport (context.viewport());
@@ -116,17 +117,17 @@ void dRuntimeProfiler::Render (NewtonWorld* nWorld, int mask, QPainter& context)
 	// draw force Update performance
 	if (mask & 4) { 
 		context.setPen(Qt::darkMagenta);
-		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_FORCE_CALLBACK_UPDATE][0], context);
+//		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_FORCE_CALLBACK_UPDATE][0], context);
 	}
 
 	if (mask & 8) { 
 		context.setPen(Qt::yellow);
-		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_COLLISION_UPDATE_BROAD_PHASE][0], context);
+//		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_COLLISION_UPDATE_BROAD_PHASE][0], context);
 	}
 
 	if (mask & 16) { 
 		context.setPen(Qt::cyan);
-		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_COLLISION_UPDATE_NARROW_PHASE][0], context);
+//		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_COLLISION_UPDATE_NARROW_PHASE][0], context);
 	}
 
 
