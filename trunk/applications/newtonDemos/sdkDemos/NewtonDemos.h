@@ -79,7 +79,6 @@ private:
 	static int m_totalMemoryUsed;
 
 	DemoEntityManager* m_canvas;
-	int m_threadCount;
 	bool m_autoSleepState;
 	bool m_usesSimdInstructions;
 	bool m_useParallelSolverOnSingleIslands;

@@ -154,8 +154,7 @@ void DemoEntityManager::Cleanup ()
 	// check that there are no memory leak on exit
 	_ASSERTE (NewtonGetMemoryUsed () == 0);
 
-
-	newtonDemos* const mainWindow = (newtonDemos*) parent();
+//	newtonDemos* const mainWindow = (newtonDemos*) parent();
 
 	// create the newton world
 	m_world = NewtonCreate();
