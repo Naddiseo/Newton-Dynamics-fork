@@ -92,7 +92,7 @@ class dgContactSolver
 	class dgClosestFace: public dgDownHeap<dgMinkFace *, dgFloat32>
 	{
 		public:
-		inline dgClosestFace(void *ptr, dgInt32 sizeInBytes)
+		inline dgClosestFace(void* ptr, dgInt32 sizeInBytes)
 			:dgDownHeap<dgMinkFace *, dgFloat32> (ptr, sizeInBytes)
 		{
 		}

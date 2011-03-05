@@ -154,13 +154,13 @@
 		{
 			public:
 			DG_INLINE simd_128 () {}
-			DG_INLINE simd_128 (dgInt32 a): m_type (_mm_set_ps1 (*(dgFloat32*)&a)){}
-			DG_INLINE simd_128 (dgFloat32 a): m_type(_mm_set_ps1(a)) {}
-			DG_INLINE simd_128 (dgFloat32 x, dgFloat32 y, dgFloat32 z, dgFloat32 w): m_type(_mm_set_ps(w, z, y, x)) {}
 			DG_INLINE simd_128 (simd_type type): m_type(type) {}
+			DG_INLINE simd_128 (dgFloat32 a): m_type(_mm_set_ps1(a)) {}
 			DG_INLINE simd_128 (const simd_128& data): m_type(data.m_type) {}
-
-
+			DG_INLINE simd_128 (dgInt32 a): m_type (_mm_set_ps1 (*(dgFloat32*)&a)){}
+			DG_INLINE simd_128 (dgFloat32 x, dgFloat32 y, dgFloat32 z, dgFloat32 w): m_type(_mm_set_ps(w, z, y, x)) {}
+			DG_INLINE simd_128 (dgInt32 ix, dgInt32 iy, dgInt32 iz, dgInt32 iw): m_type(_mm_set_ps(*(dgFloat32*)&iw, *(dgFloat32*)&iz, *(dgFloat32*)&iy, *(dgFloat32*)&ix)) {}
+			
 			DG_INLINE dgInt32 GetInt () const
 			{
 				return _mm_cvtss_si32(m_type);
