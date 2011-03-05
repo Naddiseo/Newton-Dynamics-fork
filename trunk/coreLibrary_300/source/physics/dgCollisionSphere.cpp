@@ -348,10 +348,7 @@ dgInt32 dgCollisionSphere::CalculateSignature () const
 
 void dgCollisionSphere::CalcAABB (const dgMatrix &matrix, dgVector &p0, dgVector &p1) const
 {
-
-	dgFloat32 radius;
-
-	radius =  m_radius + DG_MAX_COLLISION_PADDING;
+	dgFloat32 radius =  m_radius + DG_MAX_COLLISION_PADDING;
 	p0.m_x = matrix[3][0] - radius;
 	p1.m_x = matrix[3][0] + radius;
 
@@ -363,6 +360,14 @@ void dgCollisionSphere::CalcAABB (const dgMatrix &matrix, dgVector &p0, dgVector
 
 	p0.m_w = dgFloat32 (0.0f);
 	p1.m_w = dgFloat32 (0.0f);
+}
+
+void dgCollisionSphere::CalcAABBSimd (const dgMatrix &matrix, dgVector &p0, dgVector &p1) const
+{
+	simd_128 mask (-1, -1, -1, 0);
+	simd_128 radius (simd_128 (m_radius) + simd_128(DG_MAX_COLLISION_PADDING));
+	(simd_128&)p0 = ((simd_128&)matrix[3] - radius) & mask;
+	(simd_128&)p1 = ((simd_128&)matrix[3] + radius) & mask;
 }
 
 dgInt32 dgCollisionSphere::CalculatePlaneIntersection (const dgVector& normal, const dgVector& point, dgVector* const contactsOut) const

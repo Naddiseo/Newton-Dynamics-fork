@@ -58,150 +58,6 @@ void dgContactSolver::CalcSupportVertexSimd (const dgVector& dir, dgInt32 entry)
 
 
 
-
-dgContactSolver::dgMinkReturnCode dgContactSolver::CalcSeparatingPlaneSimd(dgMinkFace*& plane, const dgVector& origin)
-{
-	dgInt32 best;
-	dgFloat32 maxErr;
-	dgFloat32 error2;
-	dgVector e1;
-	dgVector e2;
-	dgVector e3;
-	dgVector normal (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-
-	CalcSupportVertexSimd (m_dir[0], 0);
-
-	dgInt32 i = 1;
-	for (; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-		CalcSupportVertexSimd (m_dir[i], 1);
-		e1 = m_hullVertex[1] - m_hullVertex[0];
-		error2 = e1 % e1;
-		if (error2 > DG_CALCULATE_SEPARATING_PLANE_ERROR) {
-			break;
-		}
-	}
-
-	for (i ++; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-		CalcSupportVertexSimd (m_dir[i], 2);
-		e2 = m_hullVertex[2] - m_hullVertex[0];
-		normal = e1 * e2;
-		error2 = normal % normal;
-		if (error2 > DG_CALCULATE_SEPARATING_PLANE_ERROR1) {
-			break;
-		}
-	}
-
-	error2 = dgFloat32 (0.0f);
-	for (i ++; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-		CalcSupportVertexSimd (m_dir[i], 3);
-
-		e3 = m_hullVertex[3] - m_hullVertex[0];
-		error2 = normal % e3;
-		if (dgAbsf (error2) > DG_CALCULATE_SEPARATING_PLANE_ERROR1) {
-			break;
-		}
-	}
-
-	if (i >= dgInt32(sizeof(m_dir) / sizeof(m_dir[0]))) {
-		best = 0;
-		maxErr = dgFloat32 (0.0f);
-		for (i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-			CalcSupportVertexSimd (m_dir[i], 1);
-			e1 = m_hullVertex[1] - m_hullVertex[0];
-			error2 = e1 % e1;
-			if (error2 > maxErr) {
-				best = i;
-				maxErr = error2;
-			}
-		}
-		CalcSupportVertexSimd (m_dir[best], 1);
-		e1 = m_hullVertex[1] - m_hullVertex[0];
-
-		best = 0;
-		maxErr = dgFloat32 (0.0f);
-		for (i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-			CalcSupportVertexSimd (m_dir[i], 2);
-			e2 = m_hullVertex[2] - m_hullVertex[0];
-			normal = e1 * e2;
-			error2 = normal % normal;
-			if (error2 > maxErr) {
-				best = i;
-				maxErr = error2;
-			}
-		}
-
-		CalcSupportVertexSimd (m_dir[best], 2);
-		e2 = m_hullVertex[2] - m_hullVertex[0];
-		normal = e1 * e2;
-
-		best = 0;
-		maxErr = dgFloat32 (0.0f);
-		for (i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-			CalcSupportVertexSimd (m_dir[i], 3);
-
-			e3 = m_hullVertex[3] - m_hullVertex[0];
-			error2 = normal % e3;
-			if (dgAbsf (error2) > dgAbsf (maxErr)) {
-				best = i;
-				maxErr = error2;
-			}
-		}
-		error2 = maxErr;
-		CalcSupportVertexSimd (m_dir[best], 3);
-	}
-
-
-	m_vertexIndex = 4;
-	if (error2 > dgFloat32 (0.0f)) {
-		Swap (m_hullVertex[1], m_hullVertex[2]);
-		Swap (m_averVertex[1], m_averVertex[2]);
-	}
-
-	_ASSERTE (CheckTetraHedronVolume ());
-
-	_ASSERTE ( (((dgUnsigned64)&m_simplex[0]) & 0x0f)== 0);
-	_ASSERTE ( (((dgUnsigned64)&m_simplex[1]) & 0x0f)== 0);
-
-	// face 0
-	m_simplex[0].m_vertex[0] = 0;
-	m_simplex[0].m_vertex[1] = 1;
-	m_simplex[0].m_vertex[2] = 2;
-	m_simplex[0].m_vertex[3] = 0;
-	m_simplex[0].m_adjancentFace[0] = 1;	
-	m_simplex[0].m_adjancentFace[1] = 3;	
-	m_simplex[0].m_adjancentFace[2] = 2;	
-
-	// face 1
-	m_simplex[1].m_vertex[0] = 1;
-	m_simplex[1].m_vertex[1] = 0;
-	m_simplex[1].m_vertex[2] = 3;
-	m_simplex[1].m_vertex[3] = 1;
-	m_simplex[1].m_adjancentFace[0] = 0;	
-	m_simplex[1].m_adjancentFace[1] = 2;	
-	m_simplex[1].m_adjancentFace[2] = 3;	
-
-	// face 2
-	m_simplex[2].m_vertex[0] = 0;
-	m_simplex[2].m_vertex[1] = 2;
-	m_simplex[2].m_vertex[2] = 3;
-	m_simplex[2].m_vertex[3] = 0;
-	m_simplex[2].m_adjancentFace[0] = 0;	
-	m_simplex[2].m_adjancentFace[1] = 3;	
-	m_simplex[2].m_adjancentFace[2] = 1;	
-
-	// face 3
-	m_simplex[3].m_vertex[0] = 2;
-	m_simplex[3].m_vertex[1] = 1;
-	m_simplex[3].m_vertex[2] = 3;
-	m_simplex[3].m_vertex[3] = 2;
-	m_simplex[3].m_adjancentFace[0] = 0;	
-	m_simplex[3].m_adjancentFace[1] = 1;	
-	m_simplex[3].m_adjancentFace[2] = 2;	
-
-	return UpdateSeparatingPlaneSimd(plane, origin);
-}
-
-
 dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 {
 	dgInt32 i;
@@ -528,6 +384,9 @@ dgInt32 dgContactSolver::HullHullContinueContactsSimd (dgFloat32& timeStep, dgCo
 	dgMinkFace *face;
 	dgMinkReturnCode code;
 
+_ASSERTE (0);
+// remembe to complete simd convertion
+
 	count = 0;
 	code = CalcSeparatingPlaneSimd(face);
 
@@ -682,8 +541,8 @@ dgInt32 dgContactSolver::HullHullContinueContactsSimd (dgFloat32& timeStep, dgCo
 					//dgVector step (refVeloc.Scale (timeOfImpact));
 					dgVector step (m_referenceBodyVeloc.Scale (timeOfImpact));
 					for (i0 = 0; i0 < count; i0 ++) {
-						//							contactOut[i0].m_point += step;
-						(simd_type&)contactOut[i0].m_point = simd_add_v ((simd_type&)contactOut[i0].m_point, (simd_type&)step);
+						//contactOut[i0].m_point += step;
+						(simd_128&)contactOut[i0].m_point = (simd_128&)contactOut[i0].m_point + (simd_128&)step;
 					}
 				}
 			}
@@ -838,7 +697,7 @@ return 0;
 	//dgInt32 i;
 	//dgInt32 count;
 	//dgMinkFace *face; 
-	simd_type invMag; 
+	simd_128 invMag; 
 
 	//		m_planePurge = NULL;
 	//		m_facePlaneIndex = 0;
@@ -847,15 +706,15 @@ return 0;
 	//		dgVector step (veloc.Scale (timestep + DG_ROBUST_PLANE_CLIP * dgRsqrt(veloc % veloc)));
 	DG_RSQRT_SIMD_S(simd_set1(m_localRelVeloc.DotProductSimd(m_localRelVeloc)), invMag)
 		invMag = simd_mul_add_s (simd_set1(timestep), simd_set1(DG_ROBUST_PLANE_CLIP), invMag);
-	dgVector step (simd_mul_v((simd_type&) m_localRelVeloc, simd_permut_v (invMag, invMag, PURMUT_MASK(0, 0, 0, 0))));
+	dgVector step (simd_mul_v((simd_128&) m_localRelVeloc, simd_permut_v (invMag, invMag, PURMUT_MASK(0, 0, 0, 0))));
 
 
 	for (dgInt32 i = 0; i < 3; i ++) {
 		//			m_hullVertex[i] = diffPoins[i] - step;
-		(simd_type&)m_hullVertex[i] = simd_sub_v ((simd_type&)diffPoins[i], (simd_type&)step);
+		(simd_128&)m_hullVertex[i] = simd_sub_v ((simd_128&)diffPoins[i], (simd_128&)step);
 
 		//			m_averVertex[i] = averPoins[i] + step;
-		(simd_type&)m_averVertex[i] = simd_add_v ((simd_type&)averPoins[i], (simd_type&)step);
+		(simd_128&)m_averVertex[i] = simd_add_v ((simd_128&)averPoins[i], (simd_128&)step);
 	}
 
 	CalcFacePlaneSimd (face);
@@ -865,7 +724,7 @@ return 0;
 	}
 
 	dgVector minkFloatingPosit (m_matrix.m_posit );
-	(simd_type&)m_matrix.m_posit = simd_add_v ((simd_type&)m_matrix.m_posit, (simd_type&)step);
+	(simd_128&)m_matrix.m_posit = simd_add_v ((simd_128&)m_matrix.m_posit, (simd_128&)step);
 	dgInt32 count = CalculateContactsSimd(face, contacID, contactOut, maxContacts);
 	_ASSERTE (count <= maxContacts);
 
@@ -874,246 +733,6 @@ return 0;
 	return count;
 */
 }
-
-dgInt32 dgContactSolver::HullHullContactsSimd (dgInt32 contactID)
-{
-	dgInt32 i0;
-	dgInt32 count;
-	dgMinkFace *face;
-	dgMinkReturnCode code;
-	dgContactPoint* contactOut;
-
-	count = 0;
-	m_proxy->m_inTriggerVolume = 0;
-	code = CalcSeparatingPlaneSimd (face);
-	switch (code)
-	{
-		case dgMinkIntersecting:
-		{
-			if (m_proxy->m_isTriggerVolume) {
-				m_proxy->m_inTriggerVolume = 1;
-			} else {
-				face = CalculateClipPlaneSimd ();
-				if (face) {
-					count = CalculateContactsSimd (face, contactID, m_proxy->m_contacts, m_proxy->m_maxContacts);
-					_ASSERTE (count <= m_proxy->m_maxContacts);
-				}
-			}
-			break;
-		}
-
-		case dgMinkDisjoint:
-		{
-			_ASSERTE (face);
-			if (CalcFacePlaneSimd (face)) {
-				//_ASSERTE (face->m_w >= dgFloat32 (0.0f));
-				_ASSERTE ((*face) % (*face) > dgFloat32 (0.0f));
-				if (face->m_w < m_penetrationPadding) {
-					dgVector step (*face);
-					step = step.Scale (-(face->m_w + DG_IMPULSIVE_CONTACT_PENETRATION));
-
-					i0 = face->m_vertex[0];
-					m_hullVertex[i0] -= step;
-					m_averVertex[i0] += step;
-
-					m_matrix.m_posit += step;
-					dgVector stepWorld (m_proxy->m_referenceMatrix.RotateVectorSimd(step));
-					m_proxy->m_floatingMatrix.m_posit += stepWorld;
-
-					count = CalculateContactsSimd (face, contactID, m_proxy->m_contacts, m_proxy->m_maxContacts);
-					_ASSERTE (count < m_proxy->m_maxContacts);
-					stepWorld = stepWorld.Scale (dgFloat32 (0.5f));
-
-					if (m_proxy->m_isTriggerVolume) {
-						m_proxy->m_inTriggerVolume = 1;
-						count = 0;
-					}
-
-					contactOut = m_proxy->m_contacts; 
-					for (i0 = 0; i0 < count; i0 ++ ) {
-						//contactOut[i0].m_point -= stepWorld ;
-						(simd_type&)contactOut[i0].m_point = simd_sub_v ((simd_type&)contactOut[i0].m_point, (simd_type&)stepWorld) ;
-					}
-					return count;
-				}
-			}
-		}
-		case dgMinkError:
-		default:;
-
-	}
-	return count;
-}
-
-dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneSimd(dgMinkFace*& plane, const dgVector& origin)
-{
-//return UpdateSeparatingPlane(plane, origin);
-	simd_128 diff[4];
-	simd_128 aveg[4];
-
-	plane = NULL;
-	dgMinkFace* face = &m_simplex[0];
-	dgMinkReturnCode code = dgMinkIntersecting;
-
-	dgInt32 ciclingCount = -1;
-	dgMinkFace* lastDescendFace = NULL;
-//	dgFloat32 minDist = dgFloat32 (1.0e20f);
-
-	dgInt32 j = 0;
-	simd_128 zero (dgFloat32 (0.0f));
-	simd_128 negOne(dgFloat32 (-1.0f));
-	simd_128 minDist (dgFloat32 (1.0e20f));
-	simd_128 distTolerance (DG_DISTANCE_TOLERANCE);
-	simd_128 zeroTolerance (DG_DISTANCE_TOLERANCE_ZERO);
-	simd_128 separatingTol (DG_UPDATE_SEPARATING_PLANE_DISTANCE_TOLERANCE1);
-	simd_128 index_yx (dgFloat32 (0.0f), dgFloat32 (1.0f), dgFloat32 (0.0f), dgFloat32 (1.0f));
-	simd_128 index_wz (dgFloat32 (2.0f), dgFloat32 (3.0f), dgFloat32 (2.0f), dgFloat32 (3.0f));
-	for (; face && (j < DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION); j ++) {
-		face = NULL;
-		simd_128 p0 ((simd_128&)m_hullVertex[0]);
-		simd_128 p1 ((simd_128&)m_hullVertex[1]);
-		simd_128 p2 ((simd_128&)m_hullVertex[2]);
-		simd_128 p3 ((simd_128&)m_hullVertex[3]);
-		
-		simd_128 e10 (p1 - p0);
-		simd_128 e20 (p2 - p0);
-		simd_128 e30 (p3 - p0);
-		simd_128 e12 (p1 - p2);
-		simd_128 e32 (p3 - p2);
-
-		simd_128 tmp;
-		simd_128 e10_x;
-		simd_128 e10_y;
-		simd_128 e10_z;
-		simd_128 e20_x;
-		simd_128 e20_y;
-		simd_128 e20_z;
-		Transpose4x4Simd_128 (e10_x, e10_y, e10_z, tmp, e10, e30, e20, e12); 
-		Transpose4x4Simd_128 (e20_x, e20_y, e20_z, tmp, e20, e10, e30, e32); 
-
-		simd_128 nx (e10_y * e20_z - e10_z * e20_y);
-		simd_128 ny (e10_z * e20_x - e10_x * e20_z);
-		simd_128 nz (e10_x * e20_y - e10_y * e20_x);
-
-		simd_128 dist2 (nx * nx + ny * ny + nz * nz);
-		simd_128 mask (dist2 >= zeroTolerance);
-		dist2 = dist2.GetMax(zeroTolerance);
-
-		dist2  = dist2.InvRqrt();
-		nx = nx * dist2;
-		ny = ny * dist2;
-		nz = nz * dist2;
-
-		simd_128 origin_P0_xxxx;
-		simd_128 origin_P0_yyyy;
-		simd_128 origin_P0_zzzz;
-		simd_128 origin_P0 ((simd_128&)origin - p0);
-		simd_128 origin_P3 ((simd_128&)origin - p3);
-		Transpose4x4Simd_128 (origin_P0_xxxx, origin_P0_yyyy, origin_P0_zzzz, tmp, origin_P0, origin_P0, origin_P0, origin_P3); 
-
-		//dist2_ = simd_mul_add_v (simd_mul_add_v (simd_mul_v(nx_, origin_P0_xxxx), ny_, origin_P0_yyyy), nz_, origin_P0_zzzz);
-		dist2 = origin_P0_xxxx * nx + origin_P0_yyyy * ny + origin_P0_zzzz * nz; 
-		//dist2_ = simd_or_v (simd_and_v(dist2_, mask_), simd_andnot_v (m_negativeOne, mask_));
-		dist2 = (dist2 & mask) | negOne.AndNot(mask);
-
-		tmp = dist2.MoveHighToLow(dist2);
-		mask = dist2 > tmp;
-		dist2 = (dist2 & mask) | tmp.AndNot(mask);
-		simd_128 index ((index_yx & mask) | index_wz.AndNot(mask));
-
-		tmp = dist2.PackLow(dist2);
-		tmp = tmp.MoveHighToLow(tmp);
-		mask = dist2 > tmp;
-		dist2 = (dist2 & mask) | tmp.AndNot(mask);
-		tmp = index.PackLow(index);
-		index = ((index & mask) | tmp.MoveHighToLow(tmp).AndNot(mask));
-
-		mask = dist2 > zero;
-		index = (index & mask) | negOne.AndNot(mask);
-		dgInt32 faceIndex = index.GetInt();
-		if (faceIndex >= 0) {
-			simd_128 transposedNormals[4];
-			face = &m_simplex[faceIndex];
-
-			Transpose4x4Simd_128 (transposedNormals[0], transposedNormals[1], transposedNormals[2], transposedNormals[3], nx, ny, nz, zero); 
-			dgVector normal (transposedNormals[faceIndex]);
-
-			//i0 = face->m_vertex;
-			dgInt32 index = face->m_vertex[0];
-			CalcSupportVertexSimd (normal, 4);
-			simd_128 dist (((simd_128&)normal).DotProduct((simd_128&)m_hullVertex[4] - (simd_128&)m_hullVertex[index]));
-
-			// if we are doing too many passes it means that it is a skew shape 
-			// increasing the tolerance help to resolve the problem
-			if ((dist < separatingTol).GetSignMask() & 1) {
-				plane = face;
-				code = dgMinkDisjoint;
-				break;
-			}
-
-			if ((dist < minDist).GetSignMask() & 1) {
-				minDist = dist;
-				lastDescendFace = face;
-				ciclingCount = -1;
-				for (dgInt32 k = 0; k < 4; k ++) {
-					diff[k] = (simd_128&)m_hullVertex[k];
-					aveg[k] = (simd_128&)m_averVertex[k];
-				}
-			}
-
-			ciclingCount ++;
-			if (ciclingCount > 4) {
-				for (dgInt32 k = 0; k < 4; k ++) {
-					(simd_128&)m_hullVertex[k] = diff[k];
-					(simd_128&)m_averVertex[k] = aveg[k];
-				}
-				code = dgMinkDisjoint;
-				plane = lastDescendFace;
-				break;
-			}
-
-			if ((dist < distTolerance).GetSignMask() & 1) {
-				dgInt32 i = 0;
-				for (; i < 4; i ++ ) {
-					dgVector error (m_hullVertex[i] - m_hullVertex[4]);
-					if ((error % error) < (DG_DISTANCE_TOLERANCE * DG_DISTANCE_TOLERANCE)) {
-						plane = face;
-						//code = dgMinkDisjoint;
-						code = UpdateSeparatingPlaneFallbackSolution (plane, origin);
-						_ASSERTE ((code == dgMinkDisjoint) || ((code == dgMinkIntersecting) && (m_vertexIndex == 4)));
-						break;
-					}
-				}
-				if (i < 4) {
-					break;
-				}
-			}
-
-			dgInt32 i0 = face->m_vertex[0];
-			dgInt32 i1 = face->m_vertex[1];
-			dgInt32 i2 = m_faceIndex[face - m_simplex][3];
-			_ASSERTE (i2 != face->m_vertex[0]);
-			_ASSERTE (i2 != face->m_vertex[1]);
-			_ASSERTE (i2 != face->m_vertex[2]);
-			Swap ((simd_128&)m_hullVertex[i0], (simd_128&)m_hullVertex[i1]);
-			Swap ((simd_128&)m_averVertex[i0], (simd_128&)m_averVertex[i1]);
-			(simd_128&)m_hullVertex[i2] = (simd_128&)m_hullVertex[4];
-			(simd_128&)m_averVertex[i2] = (simd_128&)m_averVertex[4];
-			if (!CheckTetraHedronVolume ()) {
-				Swap ((simd_128&)m_hullVertex[1], (simd_128&)m_hullVertex[2]);
-				Swap ((simd_128&)m_averVertex[1], (simd_128&)m_averVertex[2]);
-				_ASSERTE (CheckTetraHedronVolume ());
-			}
-		}
-	} 
-
-	if (j >= DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION) {
-		_ASSERTE (CheckTetraHedronVolume());
-		code = UpdateSeparatingPlaneFallbackSolution (plane, origin);
-	}
-	return code;
-}
-
 
 
 
@@ -1301,4 +920,387 @@ xxx ++;
 	}
 
 	return count;
+}
+
+
+dgInt32 dgContactSolver::HullHullContactsSimd (dgInt32 contactID)
+{
+	dgInt32 i0;
+	dgInt32 count;
+	dgMinkFace *face;
+	dgMinkReturnCode code;
+	dgContactPoint* contactOut;
+
+	count = 0;
+	m_proxy->m_inTriggerVolume = 0;
+	code = CalcSeparatingPlaneSimd (face);
+	switch (code)
+	{
+		case dgMinkIntersecting:
+		{
+			if (m_proxy->m_isTriggerVolume) {
+				m_proxy->m_inTriggerVolume = 1;
+			} else {
+				face = CalculateClipPlaneSimd ();
+				if (face) {
+					count = CalculateContactsSimd (face, contactID, m_proxy->m_contacts, m_proxy->m_maxContacts);
+					_ASSERTE (count <= m_proxy->m_maxContacts);
+				}
+			}
+			break;
+		}
+
+		case dgMinkDisjoint:
+		{
+			_ASSERTE (face);
+			if (CalcFacePlaneSimd (face)) {
+				//_ASSERTE (face->m_w >= dgFloat32 (0.0f));
+				_ASSERTE ((*face) % (*face) > dgFloat32 (0.0f));
+				if (face->m_w < m_penetrationPadding) {
+					dgVector step (*face);
+					step = step.Scale (-(face->m_w + DG_IMPULSIVE_CONTACT_PENETRATION));
+
+					i0 = face->m_vertex[0];
+					m_hullVertex[i0] -= step;
+					m_averVertex[i0] += step;
+
+					m_matrix.m_posit += step;
+					dgVector stepWorld (m_proxy->m_referenceMatrix.RotateVectorSimd(step));
+					m_proxy->m_floatingMatrix.m_posit += stepWorld;
+
+					count = CalculateContactsSimd (face, contactID, m_proxy->m_contacts, m_proxy->m_maxContacts);
+					_ASSERTE (count < m_proxy->m_maxContacts);
+					stepWorld = stepWorld.Scale (dgFloat32 (0.5f));
+
+					if (m_proxy->m_isTriggerVolume) {
+						m_proxy->m_inTriggerVolume = 1;
+						count = 0;
+					}
+
+					contactOut = m_proxy->m_contacts; 
+					for (dgInt32 i0 = 0; i0 < count; i0 ++ ) {
+						//contactOut[i0].m_point -= stepWorld ;
+						//(simd_type&)contactOut[i0].m_point = simd_sub_v ((simd_type&)contactOut[i0].m_point, (simd_type&)stepWorld) ;
+						(simd_128&)contactOut[i0].m_point = (simd_128&)contactOut[i0].m_point - (simd_128&)stepWorld;
+
+					}
+					return count;
+				}
+			}
+		}
+		case dgMinkError:
+		default:;
+	}
+	return count;
+}
+
+
+dgContactSolver::dgMinkReturnCode dgContactSolver::CalcSeparatingPlaneSimd(dgMinkFace*& plane, const dgVector& origin)
+{
+	dgInt32 best;
+	dgFloat32 maxErr;
+	dgFloat32 error2;
+	dgVector e1;
+	dgVector e2;
+	dgVector e3;
+	dgVector normal (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+
+	CalcSupportVertexSimd (m_dir[0], 0);
+
+	dgInt32 i = 1;
+	for (; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+		CalcSupportVertexSimd (m_dir[i], 1);
+		e1 = m_hullVertex[1] - m_hullVertex[0];
+		error2 = e1 % e1;
+		if (error2 > DG_CALCULATE_SEPARATING_PLANE_ERROR) {
+			break;
+		}
+	}
+
+	for (i ++; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+		CalcSupportVertexSimd (m_dir[i], 2);
+		e2 = m_hullVertex[2] - m_hullVertex[0];
+		normal = e1 * e2;
+		error2 = normal % normal;
+		if (error2 > DG_CALCULATE_SEPARATING_PLANE_ERROR1) {
+			break;
+		}
+	}
+
+	error2 = dgFloat32 (0.0f);
+	for (i ++; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+		CalcSupportVertexSimd (m_dir[i], 3);
+
+		e3 = m_hullVertex[3] - m_hullVertex[0];
+		error2 = normal % e3;
+		if (dgAbsf (error2) > DG_CALCULATE_SEPARATING_PLANE_ERROR1) {
+			break;
+		}
+	}
+
+	if (i >= dgInt32(sizeof(m_dir) / sizeof(m_dir[0]))) {
+		best = 0;
+		maxErr = dgFloat32 (0.0f);
+		for (i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+			CalcSupportVertexSimd (m_dir[i], 1);
+			e1 = m_hullVertex[1] - m_hullVertex[0];
+			error2 = e1 % e1;
+			if (error2 > maxErr) {
+				best = i;
+				maxErr = error2;
+			}
+		}
+		CalcSupportVertexSimd (m_dir[best], 1);
+		e1 = m_hullVertex[1] - m_hullVertex[0];
+
+		best = 0;
+		maxErr = dgFloat32 (0.0f);
+		for (i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+			CalcSupportVertexSimd (m_dir[i], 2);
+			e2 = m_hullVertex[2] - m_hullVertex[0];
+			normal = e1 * e2;
+			error2 = normal % normal;
+			if (error2 > maxErr) {
+				best = i;
+				maxErr = error2;
+			}
+		}
+
+		CalcSupportVertexSimd (m_dir[best], 2);
+		e2 = m_hullVertex[2] - m_hullVertex[0];
+		normal = e1 * e2;
+
+		best = 0;
+		maxErr = dgFloat32 (0.0f);
+		for (i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+			CalcSupportVertexSimd (m_dir[i], 3);
+
+			e3 = m_hullVertex[3] - m_hullVertex[0];
+			error2 = normal % e3;
+			if (dgAbsf (error2) > dgAbsf (maxErr)) {
+				best = i;
+				maxErr = error2;
+			}
+		}
+		error2 = maxErr;
+		CalcSupportVertexSimd (m_dir[best], 3);
+	}
+
+
+	m_vertexIndex = 4;
+	if (error2 > dgFloat32 (0.0f)) {
+		Swap (m_hullVertex[1], m_hullVertex[2]);
+		Swap (m_averVertex[1], m_averVertex[2]);
+	}
+
+	_ASSERTE (CheckTetraHedronVolume ());
+
+	_ASSERTE ( (((dgUnsigned64)&m_simplex[0]) & 0x0f)== 0);
+	_ASSERTE ( (((dgUnsigned64)&m_simplex[1]) & 0x0f)== 0);
+
+	// face 0
+	m_simplex[0].m_vertex[0] = 0;
+	m_simplex[0].m_vertex[1] = 1;
+	m_simplex[0].m_vertex[2] = 2;
+	m_simplex[0].m_vertex[3] = 0;
+	m_simplex[0].m_adjancentFace[0] = 1;	
+	m_simplex[0].m_adjancentFace[1] = 3;	
+	m_simplex[0].m_adjancentFace[2] = 2;	
+
+	// face 1
+	m_simplex[1].m_vertex[0] = 1;
+	m_simplex[1].m_vertex[1] = 0;
+	m_simplex[1].m_vertex[2] = 3;
+	m_simplex[1].m_vertex[3] = 1;
+	m_simplex[1].m_adjancentFace[0] = 0;	
+	m_simplex[1].m_adjancentFace[1] = 2;	
+	m_simplex[1].m_adjancentFace[2] = 3;	
+
+	// face 2
+	m_simplex[2].m_vertex[0] = 0;
+	m_simplex[2].m_vertex[1] = 2;
+	m_simplex[2].m_vertex[2] = 3;
+	m_simplex[2].m_vertex[3] = 0;
+	m_simplex[2].m_adjancentFace[0] = 0;	
+	m_simplex[2].m_adjancentFace[1] = 3;	
+	m_simplex[2].m_adjancentFace[2] = 1;	
+
+	// face 3
+	m_simplex[3].m_vertex[0] = 2;
+	m_simplex[3].m_vertex[1] = 1;
+	m_simplex[3].m_vertex[2] = 3;
+	m_simplex[3].m_vertex[3] = 2;
+	m_simplex[3].m_adjancentFace[0] = 0;	
+	m_simplex[3].m_adjancentFace[1] = 1;	
+	m_simplex[3].m_adjancentFace[2] = 2;	
+
+	return UpdateSeparatingPlaneSimd(plane, origin);
+}
+
+
+dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneSimd(dgMinkFace*& plane, const dgVector& origin)
+{
+	simd_128 diff[4];
+	simd_128 aveg[4];
+
+	plane = NULL;
+	dgMinkFace* face = &m_simplex[0];
+	dgMinkReturnCode code = dgMinkIntersecting;
+
+	dgInt32 ciclingCount = -1;
+	dgMinkFace* lastDescendFace = NULL;
+
+	dgInt32 j = 0;
+	simd_128 zero (dgFloat32 (0.0f));
+	simd_128 negOne(dgFloat32 (-1.0f));
+	simd_128 minDist (dgFloat32 (1.0e20f));
+	simd_128 distTolerance (DG_DISTANCE_TOLERANCE);
+	simd_128 zeroTolerance (DG_DISTANCE_TOLERANCE_ZERO);
+	simd_128 separatingTol (DG_UPDATE_SEPARATING_PLANE_DISTANCE_TOLERANCE1);
+	simd_128 index_yx (dgFloat32 (0.0f), dgFloat32 (1.0f), dgFloat32 (0.0f), dgFloat32 (1.0f));
+	simd_128 index_wz (dgFloat32 (2.0f), dgFloat32 (3.0f), dgFloat32 (2.0f), dgFloat32 (3.0f));
+	for (; face && (j < DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION); j ++) {
+		face = NULL;
+		simd_128 p0 ((simd_128&)m_hullVertex[0]);
+		simd_128 p1 ((simd_128&)m_hullVertex[1]);
+		simd_128 p2 ((simd_128&)m_hullVertex[2]);
+		simd_128 p3 ((simd_128&)m_hullVertex[3]);
+
+		simd_128 e10 (p1 - p0);
+		simd_128 e20 (p2 - p0);
+		simd_128 e30 (p3 - p0);
+		simd_128 e12 (p1 - p2);
+		simd_128 e32 (p3 - p2);
+
+		simd_128 tmp;
+		simd_128 e10_x;
+		simd_128 e10_y;
+		simd_128 e10_z;
+		simd_128 e20_x;
+		simd_128 e20_y;
+		simd_128 e20_z;
+		Transpose4x4Simd_128 (e10_x, e10_y, e10_z, tmp, e10, e30, e20, e12); 
+		Transpose4x4Simd_128 (e20_x, e20_y, e20_z, tmp, e20, e10, e30, e32); 
+
+		simd_128 nx (e10_y * e20_z - e10_z * e20_y);
+		simd_128 ny (e10_z * e20_x - e10_x * e20_z);
+		simd_128 nz (e10_x * e20_y - e10_y * e20_x);
+
+		simd_128 dist2 (nx * nx + ny * ny + nz * nz);
+		simd_128 mask (dist2 >= zeroTolerance);
+		dist2 = dist2.GetMax(zeroTolerance);
+
+		dist2  = dist2.InvRqrt();
+		nx = nx * dist2;
+		ny = ny * dist2;
+		nz = nz * dist2;
+
+		simd_128 origin_P0_xxxx;
+		simd_128 origin_P0_yyyy;
+		simd_128 origin_P0_zzzz;
+		simd_128 origin_P0 ((simd_128&)origin - p0);
+		simd_128 origin_P3 ((simd_128&)origin - p3);
+		Transpose4x4Simd_128 (origin_P0_xxxx, origin_P0_yyyy, origin_P0_zzzz, tmp, origin_P0, origin_P0, origin_P0, origin_P3); 
+
+		//dist2_ = simd_mul_add_v (simd_mul_add_v (simd_mul_v(nx_, origin_P0_xxxx), ny_, origin_P0_yyyy), nz_, origin_P0_zzzz);
+		dist2 = origin_P0_xxxx * nx + origin_P0_yyyy * ny + origin_P0_zzzz * nz; 
+		//dist2_ = simd_or_v (simd_and_v(dist2_, mask_), simd_andnot_v (m_negativeOne, mask_));
+		dist2 = (dist2 & mask) | negOne.AndNot(mask);
+
+		tmp = dist2.MoveHighToLow(dist2);
+		mask = dist2 > tmp;
+		dist2 = (dist2 & mask) | tmp.AndNot(mask);
+		simd_128 index ((index_yx & mask) | index_wz.AndNot(mask));
+
+		tmp = dist2.PackLow(dist2);
+		tmp = tmp.MoveHighToLow(tmp);
+		mask = dist2 > tmp;
+		dist2 = (dist2 & mask) | tmp.AndNot(mask);
+		tmp = index.PackLow(index);
+		index = ((index & mask) | tmp.MoveHighToLow(tmp).AndNot(mask));
+
+		mask = dist2 > zero;
+		index = (index & mask) | negOne.AndNot(mask);
+		dgInt32 faceIndex = index.GetInt();
+		if (faceIndex >= 0) {
+			simd_128 transposedNormals[4];
+			face = &m_simplex[faceIndex];
+
+			Transpose4x4Simd_128 (transposedNormals[0], transposedNormals[1], transposedNormals[2], transposedNormals[3], nx, ny, nz, zero); 
+			dgVector normal (transposedNormals[faceIndex]);
+
+			//i0 = face->m_vertex;
+			dgInt32 index = face->m_vertex[0];
+			CalcSupportVertexSimd (normal, 4);
+			simd_128 dist (((simd_128&)normal).DotProduct((simd_128&)m_hullVertex[4] - (simd_128&)m_hullVertex[index]));
+
+			// if we are doing too many passes it means that it is a skew shape 
+			// increasing the tolerance help to resolve the problem
+			if ((dist < separatingTol).GetSignMask() & 1) {
+				plane = face;
+				code = dgMinkDisjoint;
+				break;
+			}
+
+			if ((dist < minDist).GetSignMask() & 1) {
+				minDist = dist;
+				lastDescendFace = face;
+				ciclingCount = -1;
+				for (dgInt32 k = 0; k < 4; k ++) {
+					diff[k] = (simd_128&)m_hullVertex[k];
+					aveg[k] = (simd_128&)m_averVertex[k];
+				}
+			}
+
+			ciclingCount ++;
+			if (ciclingCount > 4) {
+				for (dgInt32 k = 0; k < 4; k ++) {
+					(simd_128&)m_hullVertex[k] = diff[k];
+					(simd_128&)m_averVertex[k] = aveg[k];
+				}
+				code = dgMinkDisjoint;
+				plane = lastDescendFace;
+				break;
+			}
+
+			if ((dist < distTolerance).GetSignMask() & 1) {
+				dgInt32 i = 0;
+				for (; i < 4; i ++ ) {
+					dgVector error (m_hullVertex[i] - m_hullVertex[4]);
+					if ((error % error) < (DG_DISTANCE_TOLERANCE * DG_DISTANCE_TOLERANCE)) {
+						plane = face;
+						//code = dgMinkDisjoint;
+						code = UpdateSeparatingPlaneFallbackSolution (plane, origin);
+						_ASSERTE ((code == dgMinkDisjoint) || ((code == dgMinkIntersecting) && (m_vertexIndex == 4)));
+						break;
+					}
+				}
+				if (i < 4) {
+					break;
+				}
+			}
+
+			dgInt32 i0 = face->m_vertex[0];
+			dgInt32 i1 = face->m_vertex[1];
+			dgInt32 i2 = m_faceIndex[face - m_simplex][3];
+			_ASSERTE (i2 != face->m_vertex[0]);
+			_ASSERTE (i2 != face->m_vertex[1]);
+			_ASSERTE (i2 != face->m_vertex[2]);
+			Swap ((simd_128&)m_hullVertex[i0], (simd_128&)m_hullVertex[i1]);
+			Swap ((simd_128&)m_averVertex[i0], (simd_128&)m_averVertex[i1]);
+			(simd_128&)m_hullVertex[i2] = (simd_128&)m_hullVertex[4];
+			(simd_128&)m_averVertex[i2] = (simd_128&)m_averVertex[4];
+			if (!CheckTetraHedronVolume ()) {
+				Swap ((simd_128&)m_hullVertex[1], (simd_128&)m_hullVertex[2]);
+				Swap ((simd_128&)m_averVertex[1], (simd_128&)m_averVertex[2]);
+				_ASSERTE (CheckTetraHedronVolume ());
+			}
+		}
+	} 
+
+	if (j >= DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION) {
+		_ASSERTE (CheckTetraHedronVolume());
+		code = UpdateSeparatingPlaneFallbackSolution (plane, origin);
+	}
+	return code;
 }

@@ -109,8 +109,8 @@ class dgContactSolver
 	inline bool CheckTetraHedronVolumeSimd () const;
 	inline bool CheckTetraHedronVolumeLarge () const;
 
-	void CalcSupportVertexSimd (const dgVector& dir, dgInt32 entry);
 	void CalcSupportVertex (const dgVector& dir, dgInt32 entry);
+	void CalcSupportVertexSimd (const dgVector& dir, dgInt32 entry);
 	void CalcSupportVertexLarge (const dgVector& dir, dgInt32 entry);
 	bool CheckNormal (dgPerimenterEdge* const polygon, const dgVector& shapeNormal) const;
 	dgInt32 CalculateClosestPoints ();

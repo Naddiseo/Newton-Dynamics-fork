@@ -3334,15 +3334,10 @@ dgInt32 dgContactSolver::CalculateContactsContinues(dgInt32 contacID, dgContactP
 
 dgInt32 dgContactSolver::HullHullContactsLarge (dgInt32 contactID)
 {
-	//		dgInt32 i0;
-	dgInt32 count;
-	dgMinkFace *face;
-	dgMinkReturnCode code;
-	dgContactPoint* contactOut; 
-
-	count = 0;
+	dgInt32 count = 0;
 	m_proxy->m_inTriggerVolume = 0;
-	code = CalcSeparatingPlaneLarge(face);
+	dgMinkFace* face;
+	dgMinkReturnCode code = CalcSeparatingPlaneLarge(face);
 
 	switch (code)
 	{
@@ -3367,11 +3362,10 @@ dgInt32 dgContactSolver::HullHullContactsLarge (dgInt32 contactID)
 				_ASSERTE (face->m_w >= dgFloat32 (-1.0e-1f));
 				_ASSERTE ((*face) % (*face) > dgFloat32 (0.0f));
 				if (face->m_w < m_penetrationPadding) {
-					dgInt32 i0;
 					dgVector step (*face);
 					step = step.Scale (-(face->m_w + DG_IMPULSIVE_CONTACT_PENETRATION));
 
-					i0 = face->m_vertex[0];
+					dgInt32 i0 = face->m_vertex[0];
 					m_hullVertex[i0] = dgVector (dgFloat32 (m_hullVertexLarge[i0].m_x), dgFloat32 (m_hullVertexLarge[i0].m_y), dgFloat32 (m_hullVertexLarge[i0].m_z), dgFloat32 (0.0f));
 					m_averVertex[i0] = dgVector (dgFloat32 (m_averVertexLarge[i0].m_x), dgFloat32 (m_averVertexLarge[i0].m_y), dgFloat32 (m_averVertexLarge[i0].m_z), dgFloat32 (0.0f));
 					m_hullVertex[i0] -= step;
@@ -3389,8 +3383,8 @@ dgInt32 dgContactSolver::HullHullContactsLarge (dgInt32 contactID)
 						count = 0;
 					}
 
-					contactOut = m_proxy->m_contacts; 
-					for (i0 = 0; i0 < count; i0 ++ ) {
+					dgContactPoint* const contactOut = m_proxy->m_contacts; 
+					for (dgInt32 i0 = 0; i0 < count; i0 ++ ) {
 						contactOut[i0].m_point -= stepWorld ;
 					}
 					return count;

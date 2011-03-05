@@ -975,6 +975,7 @@ void dgBroadPhaseCollision::CalculatePairContacts (dgBroadphaseSyncDescriptor* c
 	dgCollidingPairCollector* const pairCollector = world;
 	dgCollidingPairCollector::dgPair* const pairs = pairCollector->m_pairs;
 	dgInt32 count = pairCollector->m_count;
+
 	if (world->m_cpu == dgSimdPresent) {
 		for (dgInt32 i = dgAtomicAdd(&descriptor->m_pairsAtomicCounter, 1); i < count; i = dgAtomicAdd(&descriptor->m_pairsAtomicCounter, 1)) {
 			dgCollidingPairCollector::dgPair* const pair = &pairs[i];
