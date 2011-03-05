@@ -493,7 +493,10 @@ static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 	int count = 10;
 	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
 	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _BOX_PRIMITIVE, defaultMaterialID);
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _CAPSULE_PRIMITIVE, defaultMaterialID);
 	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _CYLINDER_PRIMITIVE, defaultMaterialID);
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _CHAMFER_CYLINDER_PRIMITIVE, defaultMaterialID);
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _BOX_PRIMITIVE, defaultMaterialID);
 	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _CONE_PRIMITIVE, defaultMaterialID);
 	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _CAPSULE_PRIMITIVE, defaultMaterialID);
 	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID);

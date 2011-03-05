@@ -174,7 +174,7 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 				(m_planeIndex > DG_MINK_MAX_FACES) ||
 				(heapSort.GetCount() > (DG_HEAP_EDGE_COUNT - 24))) {
 
-					//						dgTrace (("Max face count overflow, breaking with last best face\n"));
+					//dgTrace (("Max face count overflow, breaking with last best face\n"));
 
 					dgPlane& plane = *face;
 					plane = bestPlane;
@@ -259,12 +259,6 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 
 				i2 = (m_vertexIndex - 1);
 				lastSilhouette = silhouette;
-				//					_ASSERTE ( (((!m_simplex[silhouette->m_adjancentFace[0]].m_isActive) + 
-				//						(!m_simplex[silhouette->m_adjancentFace[1]].m_isActive) +
-				//						(!m_simplex[silhouette->m_adjancentFace[2]].m_isActive)) == 1) ||
-				//						(((!m_simplex[silhouette->m_adjancentFace[0]].m_isActive) + 
-				//						(!m_simplex[silhouette->m_adjancentFace[1]].m_isActive) +
-				//						(!m_simplex[silhouette->m_adjancentFace[2]].m_isActive)) == 2));
 				_ASSERTE ((silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[1]) &&
 					(silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[2]) &&
 					(silhouette->m_adjancentFace[1] != silhouette->m_adjancentFace[2]));
@@ -297,16 +291,9 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 				lastSilhouetteVertex = i0;
 				prevEdgeIndex = dgInt32 (face - m_simplex);
 				do {
-					//						_ASSERTE ( (((!m_simplex[silhouette->m_adjancentFace[0]].m_isActive) + 
-					//							(!m_simplex[silhouette->m_adjancentFace[1]].m_isActive) +
-					//							(!m_simplex[silhouette->m_adjancentFace[2]].m_isActive)) == 1) ||
-					//							(((!m_simplex[silhouette->m_adjancentFace[0]].m_isActive) + 
-					//							(!m_simplex[silhouette->m_adjancentFace[1]].m_isActive) +
-					//							(!m_simplex[silhouette->m_adjancentFace[2]].m_isActive)) == 2));
 					_ASSERTE ((silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[1]) &&
-						(silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[2]) &&
-						(silhouette->m_adjancentFace[1] != silhouette->m_adjancentFace[2]));
-
+								(silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[2]) &&
+								(silhouette->m_adjancentFace[1] != silhouette->m_adjancentFace[2]));
 
 					adjacentIndex = adjacentIndex ? adjacentIndex - 1 : 2;
 
