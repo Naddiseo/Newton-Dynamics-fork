@@ -105,9 +105,9 @@ class dgContactSolver
 //		return GetMax (collision->GetBoxMaxRadius() * dgFloat32 (4.0f) + dgFloat32 (1.0f), dgFloat32 (10000.0f));
 	}
 
-	inline bool CheckTetraHedronVolume () const;
-	inline bool CheckTetraHedronVolumeSimd () const;
-	inline bool CheckTetraHedronVolumeLarge () const;
+	inline dgInt32 CheckTetrahedronVolume () const;
+	inline dgInt32 CheckTetrahedronVolumeSimd () const;
+	inline dgInt32 CheckTetrahedronVolumeLarge () const;
 
 	void CalcSupportVertex (const dgVector& dir, dgInt32 entry);
 	void CalcSupportVertexSimd (const dgVector& dir, dgInt32 entry);
@@ -204,7 +204,7 @@ class dgContactSolver
 }DG_GCC_VECTOR_ALIGMENT;
 
 
-inline bool dgContactSolver::CheckTetraHedronVolume () const
+inline dgInt32 dgContactSolver::CheckTetrahedronVolume () const
 {
 	dgVector e0 (m_hullVertex[1] - m_hullVertex[0]);
 	dgVector e1 (m_hullVertex[2] - m_hullVertex[0]);
@@ -214,13 +214,16 @@ inline bool dgContactSolver::CheckTetraHedronVolume () const
 	return (volume >= dgFloat32 (0.0f));
 }
 
-inline bool dgContactSolver::CheckTetraHedronVolumeSimd () const
+inline dgInt32 dgContactSolver::CheckTetrahedronVolumeSimd () const
 {
-	_ASSERTE (0);
-	return CheckTetraHedronVolume ();
+	simd_128 e0 ((simd_128&)m_hullVertex[1] - (simd_128&)m_hullVertex[0]);
+	simd_128 e1 ((simd_128&)m_hullVertex[2] - (simd_128&)m_hullVertex[0]);
+	simd_128 e2 ((simd_128&)m_hullVertex[3] - (simd_128&)m_hullVertex[0]);
+	simd_128 volume (e1.CrossProduct(e0).DotProduct(e2));
+	return !volume.GetSignMask();
 }
 
-inline bool dgContactSolver::CheckTetraHedronVolumeLarge () const
+inline dgInt32 dgContactSolver::CheckTetrahedronVolumeLarge () const
 {
 	dgBigVector e0 (m_hullVertexLarge[1] - m_hullVertexLarge[0]);
 	dgBigVector e1 (m_hullVertexLarge[2] - m_hullVertexLarge[0]);

@@ -910,76 +910,6 @@ xxx ++;
 }
 
 
-dgInt32 dgContactSolver::HullHullContactsSimd (dgInt32 contactID)
-{
-	dgInt32 i0;
-	dgInt32 count;
-	dgMinkFace *face;
-	dgMinkReturnCode code;
-	dgContactPoint* contactOut;
-
-	count = 0;
-	m_proxy->m_inTriggerVolume = 0;
-	code = CalcSeparatingPlaneSimd (face);
-	switch (code)
-	{
-		case dgMinkIntersecting:
-		{
-			if (m_proxy->m_isTriggerVolume) {
-				m_proxy->m_inTriggerVolume = 1;
-			} else {
-				face = CalculateClipPlaneSimd ();
-				if (face) {
-					count = CalculateContactsSimd (face, contactID, m_proxy->m_contacts, m_proxy->m_maxContacts);
-					_ASSERTE (count <= m_proxy->m_maxContacts);
-				}
-			}
-			break;
-		}
-
-		case dgMinkDisjoint:
-		{
-			_ASSERTE (face);
-			if (CalcFacePlaneSimd (face)) {
-				//_ASSERTE (face->m_w >= dgFloat32 (0.0f));
-				_ASSERTE ((*face) % (*face) > dgFloat32 (0.0f));
-				if (face->m_w < m_penetrationPadding) {
-					dgVector step (*face);
-					step = step.Scale (-(face->m_w + DG_IMPULSIVE_CONTACT_PENETRATION));
-
-					i0 = face->m_vertex[0];
-					m_hullVertex[i0] -= step;
-					m_averVertex[i0] += step;
-
-					m_matrix.m_posit += step;
-					dgVector stepWorld (m_proxy->m_referenceMatrix.RotateVectorSimd(step));
-					m_proxy->m_floatingMatrix.m_posit += stepWorld;
-
-					count = CalculateContactsSimd (face, contactID, m_proxy->m_contacts, m_proxy->m_maxContacts);
-					_ASSERTE (count < m_proxy->m_maxContacts);
-					stepWorld = stepWorld.Scale (dgFloat32 (0.5f));
-
-					if (m_proxy->m_isTriggerVolume) {
-						m_proxy->m_inTriggerVolume = 1;
-						count = 0;
-					}
-
-					contactOut = m_proxy->m_contacts; 
-					for (dgInt32 i0 = 0; i0 < count; i0 ++ ) {
-						//contactOut[i0].m_point -= stepWorld ;
-						//(simd_type&)contactOut[i0].m_point = simd_sub_v ((simd_type&)contactOut[i0].m_point, (simd_type&)stepWorld) ;
-						(simd_128&)contactOut[i0].m_point = (simd_128&)contactOut[i0].m_point - (simd_128&)stepWorld;
-
-					}
-					return count;
-				}
-			}
-		}
-		case dgMinkError:
-		default:;
-	}
-	return count;
-}
 
 
 dgContactSolver::dgMinkReturnCode dgContactSolver::CalcSeparatingPlaneSimd(dgMinkFace*& plane, const dgVector& origin)
@@ -1080,7 +1010,7 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::CalcSeparatingPlaneSimd(dgMin
 		Swap (m_averVertex[1], m_averVertex[2]);
 	}
 
-	_ASSERTE (CheckTetraHedronVolume ());
+	_ASSERTE (CheckTetrahedronVolumeSimd ());
 
 	_ASSERTE ( (((dgUnsigned64)&m_simplex[0]) & 0x0f)== 0);
 	_ASSERTE ( (((dgUnsigned64)&m_simplex[1]) & 0x0f)== 0);
@@ -1277,17 +1207,88 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneSimd(dgM
 			Swap ((simd_128&)m_averVertex[i0], (simd_128&)m_averVertex[i1]);
 			(simd_128&)m_hullVertex[i2] = (simd_128&)m_hullVertex[4];
 			(simd_128&)m_averVertex[i2] = (simd_128&)m_averVertex[4];
-			if (!CheckTetraHedronVolume ()) {
+			if (!CheckTetrahedronVolumeSimd ()) {
 				Swap ((simd_128&)m_hullVertex[1], (simd_128&)m_hullVertex[2]);
 				Swap ((simd_128&)m_averVertex[1], (simd_128&)m_averVertex[2]);
-				_ASSERTE (CheckTetraHedronVolume ());
+				_ASSERTE (CheckTetrahedronVolumeSimd ());
 			}
 		}
 	} 
 
 	if (j >= DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION) {
-		_ASSERTE (CheckTetraHedronVolume());
+		_ASSERTE (CheckTetrahedronVolumeSimd());
 		code = UpdateSeparatingPlaneFallbackSolution (plane, origin);
 	}
 	return code;
+}
+
+
+dgInt32 dgContactSolver::HullHullContactsSimd (dgInt32 contactID)
+{
+	dgInt32 i0;
+	dgInt32 count;
+	dgMinkFace *face;
+	dgMinkReturnCode code;
+	dgContactPoint* contactOut;
+
+	count = 0;
+	m_proxy->m_inTriggerVolume = 0;
+	code = CalcSeparatingPlaneSimd (face);
+	switch (code)
+	{
+		case dgMinkIntersecting:
+		{
+			if (m_proxy->m_isTriggerVolume) {
+				m_proxy->m_inTriggerVolume = 1;
+			} else {
+				face = CalculateClipPlaneSimd ();
+				if (face) {
+					count = CalculateContactsSimd (face, contactID, m_proxy->m_contacts, m_proxy->m_maxContacts);
+					_ASSERTE (count <= m_proxy->m_maxContacts);
+				}
+			}
+			break;
+		}
+
+		case dgMinkDisjoint:
+		{
+			_ASSERTE (face);
+			if (CalcFacePlaneSimd (face)) {
+				//_ASSERTE (face->m_w >= dgFloat32 (0.0f));
+				_ASSERTE ((*face) % (*face) > dgFloat32 (0.0f));
+				if (face->m_w < m_penetrationPadding) {
+					dgVector step (*face);
+					step = step.Scale (-(face->m_w + DG_IMPULSIVE_CONTACT_PENETRATION));
+
+					i0 = face->m_vertex[0];
+					m_hullVertex[i0] -= step;
+					m_averVertex[i0] += step;
+
+					m_matrix.m_posit += step;
+					dgVector stepWorld (m_proxy->m_referenceMatrix.RotateVectorSimd(step));
+					m_proxy->m_floatingMatrix.m_posit += stepWorld;
+
+					count = CalculateContactsSimd (face, contactID, m_proxy->m_contacts, m_proxy->m_maxContacts);
+					_ASSERTE (count < m_proxy->m_maxContacts);
+					stepWorld = stepWorld.Scale (dgFloat32 (0.5f));
+
+					if (m_proxy->m_isTriggerVolume) {
+						m_proxy->m_inTriggerVolume = 1;
+						count = 0;
+					}
+
+					contactOut = m_proxy->m_contacts; 
+					for (dgInt32 i0 = 0; i0 < count; i0 ++ ) {
+						//contactOut[i0].m_point -= stepWorld ;
+						(simd_128&)contactOut[i0].m_point = (simd_128&)contactOut[i0].m_point - (simd_128&)stepWorld;
+
+					}
+					return count;
+				}
+			}
+		}
+		case dgMinkError:
+		default:;
+	}
+	return count;
 }

@@ -547,10 +547,10 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneFallback
 					}
 					m_vertexIndex = 4;
 
-					if (!CheckTetraHedronVolumeLarge()) {
+					if (!CheckTetrahedronVolumeLarge()) {
 						Swap (m_hullVertexLarge[2], m_hullVertexLarge[1]);
 						Swap (m_averVertexLarge[2], m_averVertexLarge[1]);
-						_ASSERTE (CheckTetraHedronVolumeLarge());
+						_ASSERTE (CheckTetrahedronVolumeLarge());
 					}
 				}
 			}
@@ -736,10 +736,10 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneFallback
 
 			m_vertexIndex = 4;
 			plane = &m_simplex[0];
-			if (!CheckTetraHedronVolumeLarge()) {
+			if (!CheckTetrahedronVolumeLarge()) {
 				Swap (m_hullVertexLarge[2], m_hullVertexLarge[1]);
 				Swap (m_averVertexLarge[2], m_averVertexLarge[1]);
-				_ASSERTE (CheckTetraHedronVolumeLarge());
+				_ASSERTE (CheckTetrahedronVolumeLarge());
 			}
 
 			return dgMinkDisjoint;
@@ -776,10 +776,10 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneFallback
 
 
 	if (m_vertexIndex == 4) {
-		if (!CheckTetraHedronVolumeLarge()) {
+		if (!CheckTetrahedronVolumeLarge()) {
 			Swap (m_hullVertexLarge[2], m_hullVertexLarge[1]);
 			Swap (m_averVertexLarge[2], m_averVertexLarge[1]);
-			_ASSERTE (CheckTetraHedronVolumeLarge());
+			_ASSERTE (CheckTetrahedronVolumeLarge());
 		}
 
 		dgFloat64 minDist = dgFloat64 (1.0e20f);
@@ -911,10 +911,10 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneFallback
 					}
 					m_vertexIndex = 4;
 
-					if (!CheckTetraHedronVolume()) {
+					if (!CheckTetrahedronVolume()) {
 						Swap (m_hullVertex[2], m_hullVertex[1]);
 						Swap (m_averVertex[2], m_averVertex[1]);
-						_ASSERTE (CheckTetraHedronVolume());
+						_ASSERTE (CheckTetrahedronVolume());
 					}
 				}
 			}
@@ -1086,10 +1086,10 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneFallback
 
 			m_vertexIndex = 4;
 			plane = &m_simplex[0];
-			if (!CheckTetraHedronVolume()) {
+			if (!CheckTetrahedronVolume()) {
 				Swap (m_hullVertex[2], m_hullVertex[1]);
 				Swap (m_averVertex[2], m_averVertex[1]);
-				_ASSERTE (CheckTetraHedronVolume());
+				_ASSERTE (CheckTetrahedronVolume());
 			}
 
 			return dgMinkDisjoint;
@@ -1126,10 +1126,10 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneFallback
 
 	if (m_vertexIndex == 4) {
 		dgFloat32 minDist;
-		if (!CheckTetraHedronVolume()) {
+		if (!CheckTetrahedronVolume()) {
 			Swap (m_hullVertex[2], m_hullVertex[1]);
 			Swap (m_averVertex[2], m_averVertex[1]);
-			_ASSERTE (CheckTetraHedronVolume());
+			_ASSERTE (CheckTetrahedronVolume());
 		}
 
 		minDist = dgFloat32 (1.0e20f);
@@ -1296,17 +1296,17 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneLarge(dg
 			Swap (m_averVertexLarge[i0], m_averVertexLarge[i1]);
 			m_hullVertexLarge[i2] = m_hullVertexLarge[4];
 			m_averVertexLarge[i2] = m_averVertexLarge[4];
-			if (!CheckTetraHedronVolumeLarge ()) {
+			if (!CheckTetrahedronVolumeLarge ()) {
 				Swap (m_hullVertexLarge[1], m_hullVertexLarge[2]);
 				Swap (m_averVertexLarge[1], m_averVertexLarge[2]);
-				_ASSERTE (CheckTetraHedronVolumeLarge ());
+				_ASSERTE (CheckTetrahedronVolumeLarge ());
 			}
 		}
 
 	} 
 
 	if (j >= DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION) {
-		_ASSERTE (CheckTetraHedronVolumeLarge());
+		_ASSERTE (CheckTetrahedronVolumeLarge());
 		code = UpdateSeparatingPlaneFallbackSolutionLarge (plane, origin);
 	}
 	return code;
@@ -1427,16 +1427,16 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlane(dgMinkF
 			Swap (m_averVertex[i0], m_averVertex[i1]);
 			m_hullVertex[i2] = m_hullVertex[4];
 			m_averVertex[i2] = m_averVertex[4];
-			if (!CheckTetraHedronVolume ()) {
+			if (!CheckTetrahedronVolume ()) {
 				Swap (m_hullVertex[1], m_hullVertex[2]);
 				Swap (m_averVertex[1], m_averVertex[2]);
-				_ASSERTE (CheckTetraHedronVolume ());
+				_ASSERTE (CheckTetrahedronVolume ());
 			}
 		}
 	} 
 
 	if (j >= DG_UPDATE_SEPARATING_PLANE_MAX_ITERATION) {
-		_ASSERTE (CheckTetraHedronVolume());
+		_ASSERTE (CheckTetrahedronVolume());
 		code = UpdateSeparatingPlaneFallbackSolution (plane, origin);
 	}
 	return code;
@@ -1542,7 +1542,7 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::CalcSeparatingPlaneLarge(dgMi
 		Swap (m_hullVertexLarge[1], m_hullVertexLarge[2]);
 		Swap (m_averVertexLarge[1], m_averVertexLarge[2]);
 	}
-	_ASSERTE (CheckTetraHedronVolumeLarge ());
+	_ASSERTE (CheckTetrahedronVolumeLarge ());
 
 	_ASSERTE ( (((dgUnsigned64)&m_simplex[0]) & 0x0f)== 0);
 	_ASSERTE ( (((dgUnsigned64)&m_simplex[1]) & 0x0f)== 0);
@@ -1684,7 +1684,7 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::CalcSeparatingPlane(dgMinkFac
 		Swap (m_hullVertex[1], m_hullVertex[2]);
 		Swap (m_averVertex[1], m_averVertex[2]);
 	}
-	_ASSERTE (CheckTetraHedronVolume ());
+	_ASSERTE (CheckTetrahedronVolume ());
 
 	_ASSERTE ( (((dgUnsigned64)&m_simplex[0]) & 0x0f)== 0);
 	_ASSERTE ( (((dgUnsigned64)&m_simplex[1]) & 0x0f)== 0);

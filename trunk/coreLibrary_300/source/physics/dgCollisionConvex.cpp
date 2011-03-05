@@ -620,7 +620,7 @@ dgInt32 dgCollisionConvex::RayCastClosestFace (
 			if (dist <= dgFloat32 (0.0f)) {
 				//				_ASSERTE (0);
 				Swap (tetrahedrum[1], tetrahedrum[2]);
-				//				_ASSERTE (CheckTetraHedronVolume ());
+				//				_ASSERTE (CheckTetrahedronVolume ());
 			}
 		}
 	} 
