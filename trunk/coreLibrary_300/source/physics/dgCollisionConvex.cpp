@@ -380,30 +380,12 @@ void dgCollisionConvex::CalcAABB (const dgMatrix &matrix, dgVector& p0, dgVector
 
 void dgCollisionConvex::CalcAABBSimd (const dgMatrix &matrix, dgVector& p0, dgVector& p1) const
 {
-_ASSERTE (0);
-/*
-	dgVector origin (matrix.TransformVectorSimd(m_boxOrigin));
-
-//	dgVector size (m_boxSize.m_x * dgAbsf(matrix[0][0]) + m_boxSize.m_y * dgAbsf(matrix[1][0]) + m_boxSize.m_z * dgAbsf(matrix[2][0]) + DG_MAX_COLLISION_PADDING,  
-//				   m_boxSize.m_x * dgAbsf(matrix[0][1]) + m_boxSize.m_y * dgAbsf(matrix[1][1]) + m_boxSize.m_z * dgAbsf(matrix[2][1]) + DG_MAX_COLLISION_PADDING,  
-//		           m_boxSize.m_x * dgAbsf(matrix[0][2]) + m_boxSize.m_y * dgAbsf(matrix[1][2]) + m_boxSize.m_z * dgAbsf(matrix[2][2]) + DG_MAX_COLLISION_PADDING,
-//		           dgFloat32 (0.0f));
-
-	simd_type tmp = simd_mul_add_v (
-					simd_mul_add_v (
-						simd_mul_add_v ((simd_type&) m_aabb_padd, (simd_type&) m_size_x, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[0])),
-														  (simd_type&) m_size_y, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[1])),		   
-														  (simd_type&) m_size_z, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[2]));
-
-
-//	p0 = origin - size;
-//	p1 = origin + size;
-	(simd_type&)p0 = simd_sub_v ((simd_type&)origin, tmp);
-	(simd_type&)p1 = simd_add_v ((simd_type&)origin, tmp);
-
-	p0.m_w = dgFloat32 (0.0f);
-	p1.m_w = dgFloat32 (0.0f);
-*/
+	simd_128 origin (matrix.TransformVectorSimd((simd_128&)m_boxOrigin));
+	simd_128 size (((simd_128&)matrix[0] & m_signMask) * (simd_128&) m_size_x + 
+				   ((simd_128&)matrix[1] & m_signMask) * (simd_128&) m_size_y + 
+				   ((simd_128&)matrix[2] & m_signMask) * (simd_128&) m_size_z + m_aabbPadding); 
+	(simd_128&)p0 = (origin - size) & m_triplexMask;
+	(simd_128&)p1 = (origin + size) & m_triplexMask;
 }
 
 
