@@ -156,7 +156,6 @@
 			DG_INLINE simd_128 () {}
 			DG_INLINE simd_128 (simd_type type): m_type(type) {}
 			DG_INLINE simd_128 (dgFloat32 a): m_type(_mm_set_ps1(a)) {}
-			//DG_INLINE simd_128 (const simd_128 data): m_type(data.m_type) {}
 			DG_INLINE simd_128 (const simd_128& data): m_type(data.m_type) {}
 			DG_INLINE simd_128 (dgInt32 a): m_type (_mm_set_ps1 (*(dgFloat32*)&a)){}
 			DG_INLINE simd_128 (const dgFloat32* const ptr): m_type(_mm_loadu_ps (ptr)) {}
@@ -178,66 +177,66 @@
 				_mm_storeu_ps (array, m_type);
 			}
 
-			DG_INLINE simd_128 operator= (const simd_128 data)
+			DG_INLINE simd_128 operator= (const simd_128& data)
 			{
 				m_type = data.m_type;
 				return (*this);
 			}
 
-			DG_INLINE simd_128 operator+ (const simd_128 data) const
+			DG_INLINE simd_128 operator+ (const simd_128& data) const
 			{
 				return _mm_add_ps (m_type, data.m_type);	
 			}
 
-			DG_INLINE simd_128 operator- (const simd_128 data) const
+			DG_INLINE simd_128 operator- (const simd_128& data) const
 			{
 				return _mm_sub_ps (m_type, data.m_type);	
 			}
 
-			DG_INLINE simd_128 operator* (const simd_128 data) const
+			DG_INLINE simd_128 operator* (const simd_128& data) const
 			{
 				return _mm_mul_ps (m_type, data.m_type);	
 			}
 
-			DG_INLINE simd_128 operator/ (const simd_128 data) const
+			DG_INLINE simd_128 operator/ (const simd_128& data) const
 			{
 				return _mm_div_ps (m_type, data.m_type);	
 			}
 
 
 
-			DG_INLINE simd_128 operator<= (const simd_128 data) const
+			DG_INLINE simd_128 operator<= (const simd_128& data) const
 			{
 				return _mm_cmple_ps (m_type, data.m_type);	
 			}
 
-			DG_INLINE simd_128 operator>= (const simd_128 data) const
+			DG_INLINE simd_128 operator>= (const simd_128& data) const
 			{
 				return _mm_cmpge_ps (m_type, data.m_type);	
 			}
 
-			DG_INLINE simd_128 operator< (const simd_128 data) const
+			DG_INLINE simd_128 operator< (const simd_128& data) const
 			{
 				return _mm_cmplt_ps (m_type, data.m_type);	
 			}
 
-			DG_INLINE simd_128 operator> (const simd_128 data) const
+			DG_INLINE simd_128 operator> (const simd_128& data) const
 			{
 				return _mm_cmpgt_ps (m_type, data.m_type);	
 			}
 
 
-			DG_INLINE simd_128 operator& (const simd_128 data) const
+			DG_INLINE simd_128 operator& (const simd_128& data) const
 			{
 				return _mm_and_ps (m_type, data.m_type);	
 			}
 
-			DG_INLINE simd_128 operator| (const simd_128 data) const
+			DG_INLINE simd_128 operator| (const simd_128& data) const
 			{
 				return _mm_or_ps (m_type, data.m_type);	
 			}
 
-			DG_INLINE simd_128 AndNot (const simd_128 data) const
+			DG_INLINE simd_128 AndNot (const simd_128& data) const
 			{
 				return _mm_andnot_ps (data.m_type, m_type);	
 			}
@@ -248,13 +247,13 @@
 				return _mm_add_ps (tmp.m_type, _mm_shuffle_ps(tmp.m_type, tmp.m_type, PURMUT_MASK(1, 0, 3, 2)));
 			}
 
-			DG_INLINE simd_128 DotProduct (const simd_128 data) const
+			DG_INLINE simd_128 DotProduct (const simd_128& data) const
 			{
 				simd_128 dot ((*this) * data);
 				return dot.AddHorizontal();
 			}
 
-			DG_INLINE simd_128 CrossProduct (const simd_128 data) const
+			DG_INLINE simd_128 CrossProduct (const simd_128& data) const
 			{
 				return _mm_sub_ps (_mm_mul_ps (_mm_shuffle_ps (m_type, m_type, PURMUT_MASK(3, 0, 2, 1)), _mm_shuffle_ps (data.m_type, data.m_type, PURMUT_MASK(3, 1, 0, 2))),
 								   _mm_mul_ps (_mm_shuffle_ps (m_type, m_type, PURMUT_MASK(3, 1, 0, 2)), _mm_shuffle_ps (data.m_type, data.m_type, PURMUT_MASK(3, 0, 2, 1))));
@@ -268,8 +267,8 @@
 
 			DG_INLINE simd_128 Floor () const
 			{
-				const dgFloat32 magicConst = (dgFloat32 (1.5f) * dgFloat32 (1<<23));
-				simd_128 mask (magicConst, magicConst, magicConst, magicConst);
+				//const dgFloat32 magicConst = ;
+				simd_128 mask ((dgFloat32 (1.5f) * dgFloat32 (1<<23)));
 				simd_128 ret (_mm_sub_ps(_mm_add_ps(m_type, mask.m_type), mask.m_type));
 				simd_128 adjust (_mm_cmplt_ps (m_type, ret.m_type));
 				ret = _mm_sub_ps (ret.m_type, _mm_and_ps(_mm_set_ps1(1.0), adjust.m_type));
@@ -293,12 +292,12 @@
 				return half * tmp0 * (three - (*this) * tmp0 * tmp0);
 			}
 
-			DG_INLINE simd_128 GetMin (const simd_128 data) const
+			DG_INLINE simd_128 GetMin (const simd_128& data) const
 			{
 				return _mm_min_ps (m_type, data.m_type);
 			} 
 
-			DG_INLINE simd_128 GetMax (const simd_128 data) const
+			DG_INLINE simd_128 GetMax (const simd_128& data) const
 			{
 				return _mm_max_ps (m_type, data.m_type);
 			} 
@@ -310,24 +309,34 @@
 			}
 
 
-			DG_INLINE simd_128 MoveHighToLow (const simd_128 data) const
+			DG_INLINE simd_128 MoveHighToLow (const simd_128& data) const
 			{
 				return _mm_movehl_ps (m_type, data.m_type);
 			}
 
-			DG_INLINE simd_128 MoveLowToHigh (const simd_128 data) const
+			DG_INLINE simd_128 MoveLowToHigh (const simd_128& data) const
 			{
 				return _mm_movelh_ps (m_type, data.m_type);
 			}
 
-			DG_INLINE simd_128 PackLow (const simd_128 data) const
+			DG_INLINE simd_128 PackLow (const simd_128& data) const
 			{
 				return _mm_unpacklo_ps (m_type, data.m_type);
 			}
 
-			DG_INLINE simd_128 PackHigh (const simd_128 data) const
+			DG_INLINE simd_128 PackHigh (const simd_128& data) const
 			{
 				return _mm_unpackhi_ps (m_type, data.m_type);
+			}
+
+			DG_INLINE simd_128 ShiftTripleRight () const
+			{
+				return _mm_shuffle_ps(m_type, m_type, PURMUT_MASK(3, 1, 0, 2));
+			}
+
+			DG_INLINE simd_128 ShiftTripleLeft () const
+			{
+				return _mm_shuffle_ps(m_type, m_type, PURMUT_MASK(3, 0, 2, 1));
 			}
 
 

@@ -143,10 +143,8 @@ void dgBroadPhaseNode::SetAABBSimd (const dgVector& minBox, const dgVector& maxB
 	m_maxBox.m_w = dgFloat32 (0.0f);
 
 	simd_128 size (p1 - p0);
-	dgVector temp;
-	size.StoreVector(&temp.m_x);
-	simd_128 size1 (temp.m_y, temp.m_z, temp.m_x, dgFloat32 (0.0f));
-	size.DotProduct (size1).StoreScalar(&m_surfaceArea);
+	size = size.DotProduct(size.ShiftTripleLeft());
+	size.StoreScalar(&m_surfaceArea);
 }
 
 
@@ -293,11 +291,9 @@ dgFloat32 dgBroadPhaseCollision::CalculateSurfaceAreaSimd (const dgBroadPhaseNod
 	(simd_128&) maxBox = ((simd_128&)node0->m_maxBox).GetMax((simd_128&)node1->m_maxBox);
 
 	simd_128 size (((simd_128&) maxBox) - ((simd_128&)minBox));
-	dgVector temp;
-	size.StoreVector(&temp.m_x);
-	simd_128 size1 (temp.m_y, temp.m_z, temp.m_x, dgFloat32 (0.0f));
+	size = size.DotProduct(size.ShiftTripleLeft());
 	dgFloat32 dot;
-	size.DotProduct (size1).StoreScalar(&dot);
+	size.StoreScalar(&dot);
 	return dot;
 }
 
