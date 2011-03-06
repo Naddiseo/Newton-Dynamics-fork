@@ -524,20 +524,14 @@ dgFloat32 dgCollisionCapsule::CalculateMassProperties (dgVector& inertia, dgVect
 
 
 
-dgInt32 dgCollisionCapsule::CalculatePlaneIntersectionSimd (
-	const dgVector& normal, 
-	const dgVector& origin, 
-	dgVector contactsOut[]) const
+dgInt32 dgCollisionCapsule::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
 	return dgCollisionCapsule::CalculatePlaneIntersection (normal, origin, contactsOut);
 }
 
 
 
-dgInt32 dgCollisionCapsule::CalculatePlaneIntersection (
-	const dgVector& normal, 
-	const dgVector& origin, 
-	dgVector contactsOut[]) const
+dgInt32 dgCollisionCapsule::CalculatePlaneIntersection (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
 	dgInt32 count = 0;
 	if (dgAbsf (normal.m_x) > dgFloat32 (0.999f)) { 

@@ -460,10 +460,7 @@ dgFloat32 dgCollisionChamferCylinder::RayCastSimd (const dgVector& q0, const dgV
 
 
 
-dgInt32 dgCollisionChamferCylinder::CalculatePlaneIntersectionSimd (
-	const dgVector& normal, 
-	const dgVector& origin, 
-	dgVector contactsOut[]) const
+dgInt32 dgCollisionChamferCylinder::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
 	return dgCollisionChamferCylinder::CalculatePlaneIntersection (normal, origin, contactsOut);
 }
@@ -472,82 +469,7 @@ dgInt32 dgCollisionChamferCylinder::CalculatePlaneIntersectionSimd (
 
 dgInt32 dgCollisionChamferCylinder::CalculatePlaneIntersection (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
-
-/*
-	dgInt32 i;
-	dgInt32 count;
-	dgFloat32 test0;
-	dgFloat32 test1;
-	dgFloat32 error2;
-	dgMatrix matrix;
-
-	dgVector p0 (ImplicitCylindexSupport (normal));
-	dgVector p1 (ImplicitCylindexSupport (normal.Scale (-dgFloat32 (1.0f))));
-
-	dgPlane plane (normal, - (normal % origin));
-
-	count = 0;
-	test0 = plane.Evalue (p0);
-	test1 = plane.Evalue (p1);
-	if (test0 * test1 < dgFloat32 (0.0f)) {
-		matrix.m_front = normal; 
-		if (dgAbsf (normal.m_z) > dgFloat32 (0.577f)) {
-			matrix.m_right = normal * dgVector (-normal.m_y, normal.m_z, dgFloat32 (0.0f), dgFloat32 (0.0f));
-		} else {
-			matrix.m_right = normal * dgVector (-normal.m_y, normal.m_x, dgFloat32 (0.0f), dgFloat32 (0.0f));
-		}
-		matrix.m_right = matrix.m_right.Scale (dgRsqrt (matrix.m_right % matrix.m_right));
-		matrix.m_up = matrix.m_right * matrix.m_front;
-
-		matrix.m_up.m_w = dgFloat32 (0.0f);
-		matrix.m_right.m_w = dgFloat32 (0.0f);
-
-		_ASSERTE ((dgAbsf (matrix.m_front % matrix.m_front) - dgFloat32 (1.0f)) < dgFloat32 (1.0e-5f)); 
-		_ASSERTE ((dgAbsf (matrix.m_up % matrix.m_up) - dgFloat32 (1.0f)) < dgFloat32 (1.0e-5f)); 
-		_ASSERTE ((dgAbsf (matrix.m_right % matrix.m_right) - dgFloat32 (1.0f)) < dgFloat32 (1.0e-5f)); 
-		_ASSERTE ((dgAbsf (matrix.m_right % (matrix.m_front * matrix.m_up)) - dgFloat32 (1.0f)) < dgFloat32 (1.0e-5f)); 
-
-		if (!IsInside (plane, p0)) {
-			if (IsInside (plane, p1)) {
-				p0 = p1;
-			}
-		}
-		dgTrace (("it could be a bug here\n"));
-		//		_ASSERTE (IsInside (plane, p0));
-
-		dgVector e0;
-		dgVector dir (matrix.RotateVector (m_shapesDirs[0]));
-		for (i = 0; i < DG_MAX_CHAMFERCYLINDER_DIR_COUNT; i ++) {
-			if (GetPointOnSurface (p0, dir, contactsOut[0])) {
-				count = 1;
-				break;
-			}
-		}
-
-		for (i ++; i < DG_MAX_CHAMFERCYLINDER_DIR_COUNT; i ++) {
-			dgVector dir (matrix.RotateVector (m_shapesDirs[i]));
-			if (GetPointOnSurface (p0, dir, contactsOut[count])) {
-				e0 = contactsOut[count] - contactsOut[count - 1];
-				error2 = e0 % e0;
-				if (error2 > (dgFloat32 (1.0f) / dgFloat32 (256.0f))) {
-					count ++;
-				}
-			}
-		}
-	} else if ((origin.m_y * origin.m_y + origin.m_z * origin.m_z) >= m_radius * m_radius) {
-		dgVector side (dgFloat32 (0.0f), origin.m_y, origin.m_z, dgFloat32 (0.0f));
-		side = side.Scale (m_radius * dgRsqrt (side % side));
-		contactsOut[0] = origin;
-		dgVector p (origin - side);
-		if ((p % p) < m_height * m_height) {
-			count = 1;
-		}
-	}
-
-	return count;
-*/
-
-
+_ASSERTE (0);
 	dgInt32 i;
 	dgInt32 count;
 

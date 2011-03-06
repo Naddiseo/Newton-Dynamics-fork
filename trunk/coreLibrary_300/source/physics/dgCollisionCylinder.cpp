@@ -325,10 +325,7 @@ dgFloat32 dgCollisionCylinder::CalculateMassProperties (dgVector& inertia, dgVec
 }
 
 
-dgInt32 dgCollisionCylinder::CalculatePlaneIntersection (
-	const dgVector& normal, 
-	const dgVector& origin, 
-	dgVector contactsOut[]) const
+dgInt32 dgCollisionCylinder::CalculatePlaneIntersection (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
 	dgInt32 i;
 	dgInt32 count;
@@ -373,7 +370,7 @@ dgInt32 dgCollisionCylinder::CalculatePlaneIntersection (
 	return count;
 }
 
-dgInt32 dgCollisionCylinder::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& origin, dgVector contactsOut[]) const
+dgInt32 dgCollisionCylinder::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
 _ASSERTE (0);
 return 0;

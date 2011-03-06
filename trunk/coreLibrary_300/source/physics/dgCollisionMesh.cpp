@@ -431,11 +431,182 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::ClipContacts (dgInt32 count, 
 
 void dgCollisionMesh::dgCollisionConvexPolygon::BeamClippingSimd (const dgCollisionConvex* const hull, const dgMatrix& matrix, dgFloat32 dist)
 {
-	BeamClipping (hull, matrix, dist);
+	simd_128 planes[4];
+	simd_128 points[sizeof (m_localPoly) / sizeof (m_localPoly[0]) + 8];
+	DG_CLIPPED_FACE_EDGE clippedFace [sizeof (m_localPoly) / sizeof (m_localPoly[0]) + 8];
+
+	simd_128 wMask (0, 0, 0, -1);
+	simd_128 negOne(dgFloat32 (-1.0f));
+	simd_128 origin (matrix.UnrotateVectorSimd((simd_128&)matrix.m_posit * negOne));
+	simd_128 dir (((simd_128&)m_localPoly[1] - (simd_128&)m_localPoly[0]) & m_triplexMask);
+	_ASSERTE ((dir.DotProduct(dir) > simd_128 (1.0e-8f)).GetSignMask());
+	dir = dir * dir.DotProduct(dir).InvRqrt();
+
+	simd_128 distance (dist);
+	simd_128 test (dir.DotProduct(origin));
+	planes[0] = dir + ((distance - test) & wMask);
+	planes[2] = dir * negOne + ((distance + test) & wMask);
+	dir = ((simd_128&)m_normal).CrossProduct(dir);
+
+	test = dir.DotProduct(origin);
+	planes[1] = dir + ((distance - test) & wMask);
+	planes[3] = dir * negOne + ((distance + test) & wMask);
+
+	test = negOne & wMask;
+	for (dgInt32 i = 0; i < m_count; i ++) {
+		dgInt32 j = i << 1;
+		points[i] = ((simd_128&)m_localPoly[i]).AndNot(wMask) - test;
+
+		clippedFace[j + 0].m_twin = &clippedFace[j + 1];
+		clippedFace[j + 0].m_next = &clippedFace[j + 2];
+		clippedFace[j + 0].m_incidentVertex = i;
+		clippedFace[j + 0].m_incidentNormal = m_adjacentNormalIndex ? m_adjacentNormalIndex[i] : -1;
+
+		clippedFace[j + 1].m_twin = &clippedFace[j + 0];
+		clippedFace[j + 1].m_next = &clippedFace[j - 2];
+		clippedFace[j + 1].m_incidentVertex = i + 1;
+		clippedFace[j + 0].m_incidentNormal = -1;
+	}
+
+	clippedFace[1].m_next = &clippedFace[m_count * 2 - 2 + 1];
+	clippedFace[m_count * 2 - 2].m_next = &clippedFace[0];
+	clippedFace[m_count * 2 - 2 + 1].m_incidentVertex = 0;
+
+	dgInt32 edgeCount = m_count * 2;
+	dgInt32 indexCount = m_count;
+	DG_CLIPPED_FACE_EDGE* first = &clippedFace[0];
+
+	simd_128 zero (dgFloat32 (0.0f));
+	for (dgInt32 i = 0; i < 4; i ++) {
+		simd_128 plane (planes[i]);
+		_ASSERTE (dgPlane(plane.m_type.m128_f32[0], plane.m_type.m128_f32[1], plane.m_type.m128_f32[2], plane.m_type.m128_f32[3]).Evalue(origin) > dgFloat32 (0.0f));
+
+		dgInt32 conectCount = 0;
+		DG_CLIPPED_FACE_EDGE* connect[2];
+		DG_CLIPPED_FACE_EDGE* ptr = first;
+		DG_CLIPPED_FACE_EDGE* newFirst = first;
+
+		simd_128 test0 (plane.DotProduct(points[ptr->m_incidentVertex]));
+		do {
+			simd_128 test1 (plane.DotProduct(points[ptr->m_next->m_incidentVertex]));
+			if ((test0 > zero).GetSignMask()) {
+				if ((test1 <= zero).GetSignMask()) {
+					simd_128 p0 (points[ptr->m_incidentVertex]);
+					simd_128 p1 (points[ptr->m_next->m_incidentVertex]);
+					simd_128 dp (p1 - p0); 
+					_ASSERTE (dp.m_type.m128_f32[3] == dgFloat32 (0.0f));
+					points[indexCount] = p0 - dp * test0  / (dp.DotProduct(plane));
+
+					DG_CLIPPED_FACE_EDGE* const newEdge = &clippedFace[edgeCount];
+					newEdge->m_twin = newEdge + 1;
+					newEdge->m_twin->m_twin = newEdge;
+
+					newEdge->m_twin->m_incidentNormal = -1;
+					newEdge->m_incidentNormal = ptr->m_incidentNormal;
+
+					newEdge->m_incidentVertex = indexCount;
+					newEdge->m_twin->m_incidentVertex = ptr->m_next->m_incidentVertex;
+					ptr->m_twin->m_incidentVertex = indexCount;
+
+					newEdge->m_next = ptr->m_next;
+					ptr->m_next->m_twin->m_next = newEdge->m_twin;
+					newEdge->m_twin->m_next = ptr->m_twin;
+					ptr->m_next = newEdge;
+
+					connect[conectCount] = ptr;
+					conectCount ++;
+					indexCount ++;
+					edgeCount += 2;
+					ptr = newEdge;
+				}
+
+			} else {
+				if ((test1 > zero).GetSignMask()) {
+					newFirst = ptr->m_next;
+					simd_128 p0 (points[ptr->m_incidentVertex]);
+					simd_128 p1 (points[ptr->m_next->m_incidentVertex]);
+					simd_128 dp (p1 - p0); 
+					_ASSERTE (dp.m_type.m128_f32[3] == dgFloat32 (0.0f));
+					points[indexCount] = p0 - dp * test0  / (dp.DotProduct(plane));
+
+					DG_CLIPPED_FACE_EDGE* const newEdge = &clippedFace[edgeCount];
+					newEdge->m_twin = newEdge + 1;
+					newEdge->m_twin->m_twin = newEdge;
+
+					newEdge->m_twin->m_incidentNormal = -1;
+					newEdge->m_incidentNormal = ptr->m_incidentNormal;
+
+					newEdge->m_incidentVertex = indexCount;
+					newEdge->m_twin->m_incidentVertex = ptr->m_next->m_incidentVertex;
+					ptr->m_twin->m_incidentVertex = indexCount;
+
+					newEdge->m_next = ptr->m_next;
+					ptr->m_next->m_twin->m_next = newEdge->m_twin;
+					newEdge->m_twin->m_next = ptr->m_twin;
+					ptr->m_next = newEdge;
+
+					connect[conectCount] = ptr;
+					conectCount ++;
+					indexCount ++;
+					edgeCount += 2;
+
+					ptr = newEdge;
+				}
+			}
+
+			test0 = test1;
+			ptr = ptr->m_next;
+		} while (ptr != first);
+
+		if(conectCount) {
+			first = newFirst;
+			_ASSERTE (conectCount == 2);
+
+			DG_CLIPPED_FACE_EDGE* const newEdge = &clippedFace[edgeCount];
+			newEdge->m_twin = newEdge + 1;
+			newEdge->m_twin->m_twin = newEdge;
+
+			newEdge->m_incidentNormal = -1;
+			newEdge->m_twin->m_incidentNormal = -1;
+
+			newEdge->m_incidentVertex = connect[0]->m_next->m_incidentVertex;
+			newEdge->m_twin->m_next = connect[0]->m_next;
+			connect[0]->m_next = newEdge;
+
+			newEdge->m_twin->m_incidentVertex = connect[1]->m_next->m_incidentVertex;
+			newEdge->m_next = connect[1]->m_next;
+			connect[1]->m_next = newEdge->m_twin;
+
+			edgeCount += 2;
+		}
+	}
+
+
+	dgInt32 count = 0;
+	DG_CLIPPED_FACE_EDGE* ptr = first;
+	if (m_adjacentNormalIndex) {
+		m_adjacentNormalIndex = &m_clippEdgeNormal[0];
+		do {
+			_ASSERTE (ptr->m_incidentNormal == -1);
+			m_clippEdgeNormal[count] = ptr->m_incidentNormal;
+			(simd_128&)m_localPoly[count] = points[ptr->m_incidentVertex];
+			count ++;
+			ptr = ptr->m_next;
+		} while (ptr != first);
+
+	} else { 
+		do {
+			(simd_128&)m_localPoly[count] = points[ptr->m_incidentVertex];
+			count ++;
+			ptr = ptr->m_next;
+		} while (ptr != first);
+	}
+	m_count = count;
 
 	dgInt32 i0 = (m_count + 3) & -4;
+	origin = (simd_128&)m_localPoly[0];
 	for (dgInt32 i = m_count; i < i0; i ++) {
-		(simd_128&)m_localPoly[i] = (simd_128&)m_localPoly[0];
+		(simd_128&)m_localPoly[i] = origin;
 	}
 
 	dgInt32 i1 = 0;
@@ -863,16 +1034,13 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 }
 
 
-dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersectionSimd (
-	const dgVector& normal, 
-	const dgVector& origin, 
-	dgVector contactsOut[]) const
+dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
 	return CalculatePlaneIntersection (normal, origin, contactsOut);
 }
 
 
-dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersection (const dgVector& normalIn, const dgVector& origin, dgVector contactsOut[]) const
+dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersection (const dgVector& normalIn, const dgVector& origin, dgVector* const contactsOut) const
 {
 	dgVector normal(normalIn);
 	dgInt32 count = 0;
@@ -1121,10 +1289,7 @@ dgVector dgCollisionMesh::BoxSupportMapping  (const dgVector& dir) const
 #endif
 
 
-void dgCollisionMesh::CalcAABB(
-	const dgMatrix &matrix,
-	dgVector &p0, 
-	dgVector &p1) const
+void dgCollisionMesh::CalcAABB(const dgMatrix &matrix, dgVector &p0, dgVector &p1) const
 {
 	dgVector origin (matrix.TransformVector(m_boxOrigin));
 	dgVector size (m_boxSize.m_x * dgAbsf(matrix[0][0]) + m_boxSize.m_y * dgAbsf(matrix[1][0]) + m_boxSize.m_z * dgAbsf(matrix[2][0]) + DG_MAX_COLLISION_PADDING,  
@@ -1165,13 +1330,7 @@ void dgCollisionMesh::CalcAABBSimd(const dgMatrix &matrix,	dgVector &p0, dgVecto
 
 
 
-dgInt32 dgCollisionMesh::CalculatePlaneIntersection (
-	const dgFloat32* vertex, 
-	const dgInt32* index, 
-	dgInt32 indexCount, 
-	dgInt32 stride, 
-	const dgPlane& localPlane, 
-	dgVector contactsOut[]) const
+dgInt32 dgCollisionMesh::CalculatePlaneIntersection (const dgFloat32* vertex, const dgInt32* index, dgInt32 indexCount, dgInt32 stride, const dgPlane& localPlane, dgVector* const contactsOut) const
 {
 	dgInt32 i;
 	dgInt32 j;

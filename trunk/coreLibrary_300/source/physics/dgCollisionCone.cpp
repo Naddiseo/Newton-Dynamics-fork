@@ -369,7 +369,7 @@ dgInt32 dgCollisionCone::CalculatePlaneIntersection (const dgVector& normal, con
 }
 
 
-dgInt32 dgCollisionCone::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& origin, dgVector contactsOut[]) const
+dgInt32 dgCollisionCone::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
 _ASSERTE (0);
 return 0;

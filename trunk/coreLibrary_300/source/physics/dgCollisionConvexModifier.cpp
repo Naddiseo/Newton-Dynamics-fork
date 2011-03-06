@@ -261,10 +261,7 @@ dgInt32 dgCollisionConvexModifier::CalculatePlaneIntersection (const dgVector& n
 	return count;
 }
 
-dgInt32 dgCollisionConvexModifier::CalculatePlaneIntersectionSimd (
-	const dgVector& normal, 
-	const dgVector& point, 
-	dgVector contactsOut[]) const
+dgInt32 dgCollisionConvexModifier::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& point, dgVector* const contactsOut) const
 {
 	return CalculatePlaneIntersection (normal, point, contactsOut);
 }

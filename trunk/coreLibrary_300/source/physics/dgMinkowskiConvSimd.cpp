@@ -786,7 +786,6 @@ dgInt32 dgContactSolver::CalculateConvexShapeIntersectionSimd (const dgMatrix& m
 		edgeClipped[0] = NULL;
 		edgeClipped[1] = NULL;
 
-int xxx = 0;
 		dgInt32 i0 = shape1VertexCount - 1;
 		dgInt32 edgeIndex = shape2VertexCount;
 		simd_128 normal ((simd_128&)shapeNormal & simd_128 (-1, -1, -1, 0));
@@ -800,7 +799,6 @@ int xxx = 0;
 			dgInt32 isInside = 0;
 			simd_128 test0 (edgePlane.DotProduct (*(simd_128*)tmp->m_vertex - edgePlaneOrigin));
 			do {
-xxx ++;
 				simd_128 test1 (edgePlane.DotProduct (*(simd_128*)tmp->m_next->m_vertex - edgePlaneOrigin));
 				if ((test0 >= zero).GetSignMask()) {
 
