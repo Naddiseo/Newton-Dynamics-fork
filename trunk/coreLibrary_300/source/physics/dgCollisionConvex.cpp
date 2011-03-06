@@ -74,25 +74,28 @@ dgVector dgCollisionConvex::m_multiResDir[8];
 dgVector dgCollisionConvex::m_multiResDir_sse[6];
 
 
-dgVector dgCollisionConvex::m_zero	 (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-dgVector dgCollisionConvex::m_negOne (dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f));
-dgVector dgCollisionConvex::m_nrh0p5 (dgFloat32 (0.5f), dgFloat32 (0.5f), dgFloat32 (0.5f), dgFloat32 (0.5f));
-dgVector dgCollisionConvex::m_nrh3p0 (dgFloat32 (3.0f), dgFloat32 (3.0f), dgFloat32 (3.0f), dgFloat32 (3.0f));
-dgVector dgCollisionConvex::m_indexStep (dgFloat32 (4.0f), dgFloat32 (4.0f), dgFloat32 (4.0f), dgFloat32 (4.0f));
-dgVector dgCollisionConvex::m_index_0123 (dgFloat32 (0.0f), dgFloat32 (1.0f), dgFloat32 (2.0f), dgFloat32 (3.0f));
-dgVector dgCollisionConvex::m_index_4567 (dgFloat32 (4.0f), dgFloat32 (5.0f), dgFloat32 (6.0f), dgFloat32 (7.0f));
+//dgVector dgCollisionConvex::m_zero	 (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+//dgVector dgCollisionConvex::m_negOne (dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f), dgFloat32 (-1.0f));
+//dgVector dgCollisionConvex::m_nrh0p5 (dgFloat32 (0.5f), dgFloat32 (0.5f), dgFloat32 (0.5f), dgFloat32 (0.5f));
+//dgVector dgCollisionConvex::m_nrh3p0 (dgFloat32 (3.0f), dgFloat32 (3.0f), dgFloat32 (3.0f), dgFloat32 (3.0f));
+//dgVector dgCollisionConvex::m_indexStep (dgFloat32 (4.0f), dgFloat32 (4.0f), dgFloat32 (4.0f), dgFloat32 (4.0f));
 dgVector dgCollisionConvex::m_huge (dgFloat32 (1.0e20f), dgFloat32 (1.0e20f), dgFloat32 (1.0e20f), dgFloat32 (1.0e20f));
 dgVector dgCollisionConvex::m_negativeTiny (dgFloat32 (-1.0e-24f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-dgVector dgCollisionConvex::m_aabb_padd (DG_MAX_COLLISION_PADDING, DG_MAX_COLLISION_PADDING, DG_MAX_COLLISION_PADDING, dgFloat32 (0.0f));
+//dgVector dgCollisionConvex::m_aabb_padd (DG_MAX_COLLISION_PADDING, DG_MAX_COLLISION_PADDING, DG_MAX_COLLISION_PADDING, dgFloat32 (0.0f));
+
+simd_128 dgCollisionConvex::m_aabbPadding (DG_MAX_COLLISION_PADDING);
+simd_128 dgCollisionConvex::m_triplexMask (0xffffffff, 0xffffffff, 0xffffffff, 0);
+simd_128 dgCollisionConvex::m_signMask (0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff);
+simd_128 dgCollisionConvex::m_index_0123 (dgFloat32 (0.0f), dgFloat32 (1.0f), dgFloat32 (2.0f), dgFloat32 (3.0f));
+simd_128 dgCollisionConvex::m_index_4567 (dgFloat32 (4.0f), dgFloat32 (5.0f), dgFloat32 (6.0f), dgFloat32 (7.0f));
+
+
 
 //dgCollisionConvex::IntVector dgCollisionConvex::m_signMask = {0x7fffffff, 0x7fffffff, 0x7fffffff, 0x7fffffff};
 //dgCollisionConvex::IntVector dgCollisionConvex::m_triplexMask = {0xffffffff, 0xffffffff, 0xffffffff, 0x0};
-
-dgVector dgCollisionConvex::m_signMask (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-dgVector dgCollisionConvex::m_triplexMask (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-
-
-dgInt32 dgCollisionConvex::m_iniliazised = 0;
+//dgVector dgCollisionConvex::m_signMask (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+//dgVector dgCollisionConvex::m_triplexMask (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+//dgInt32 dgCollisionConvex::m_iniliazised = 0;
 
 
 //////////////////////////////////////////////////////////////////////
@@ -105,11 +108,10 @@ dgCollisionConvex::dgCollisionConvex (dgMemoryAllocator* const allocator, dgUnsi
 	m_boxOrigin (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (1.0f))
 {
 	m_rtti |= dgConvexCollision_RTTI;
-	if (!m_iniliazised){
-		dgWorld::InitConvexCollision ();
-		m_iniliazised = 1;
-	}
-	
+//	if (!m_iniliazised){
+//		dgWorld::InitConvexCollision ();
+//		m_iniliazised = 1;
+//	}
 
 	m_edgeCount= 0;
 	m_vertexCount = 0;
@@ -130,10 +132,10 @@ dgCollisionConvex::dgCollisionConvex (dgWorld* const world, dgDeserialize deseri
 	:dgCollision (world, deserialization, userData)
 {
 	dgInt32 isTrigger;
-	if (!m_iniliazised){
-		dgWorld::InitConvexCollision ();
-		m_iniliazised = 1;
-	}
+//	if (!m_iniliazised){
+//		dgWorld::InitConvexCollision ();
+//		m_iniliazised = 1;
+//	}
 
 	m_rtti |= dgConvexCollision_RTTI;
 	m_edgeCount= 0;
@@ -378,7 +380,8 @@ void dgCollisionConvex::CalcAABB (const dgMatrix &matrix, dgVector& p0, dgVector
 
 void dgCollisionConvex::CalcAABBSimd (const dgMatrix &matrix, dgVector& p0, dgVector& p1) const
 {
-
+_ASSERTE (0);
+/*
 	dgVector origin (matrix.TransformVectorSimd(m_boxOrigin));
 
 //	dgVector size (m_boxSize.m_x * dgAbsf(matrix[0][0]) + m_boxSize.m_y * dgAbsf(matrix[1][0]) + m_boxSize.m_z * dgAbsf(matrix[2][0]) + DG_MAX_COLLISION_PADDING,  
@@ -400,6 +403,7 @@ void dgCollisionConvex::CalcAABBSimd (const dgMatrix &matrix, dgVector& p0, dgVe
 
 	p0.m_w = dgFloat32 (0.0f);
 	p1.m_w = dgFloat32 (0.0f);
+*/
 }
 
 
@@ -542,10 +546,7 @@ dgFloat32 dgCollisionConvex::GetBoxMaxRadius () const
 } 
 
 
-dgInt32 dgCollisionConvex::RayCastClosestFace (
-	dgVector* tetrahedrum, 
-	const dgVector& origin,
-	dgFloat32& pointDist) const
+dgInt32 dgCollisionConvex::RayCastClosestFace (dgVector* tetrahedrum, const dgVector& origin, dgFloat32& pointDist) const
 {
 	dgInt32 i;
 	dgInt32 j;
@@ -923,11 +924,11 @@ dgVector dgCollisionConvex::SupportVertexSimd (const dgVector& direction) const
 	simd_128 dir_y (direction.m_y);
 	simd_128 dir_z (direction.m_z);
 	simd_128 dot0 (dir_x * ((simd_128&)m_multiResDir_sse[0]) + dir_y * ((simd_128&)m_multiResDir_sse[1]) + dir_z * ((simd_128&)m_multiResDir_sse[2]));
-	simd_128 dot1 (dot0 * (simd_128&)m_negOne);
+	simd_128 dot1 (dot0 * simd_128 (dgFloat32 (-1.0f)));
 
 	simd_128 mask = dot0 > dot1;
 	dot0 = dot0.GetMax(dot1);
-	simd_128 entry ((((simd_128&)m_index_0123) & mask) | ((((simd_128&)m_index_4567).AndNot(mask))));
+	simd_128 entry ((m_index_0123 & mask) | ((m_index_4567.AndNot(mask))));
 
 	dot1 = dot0.MoveHighToLow(dot0);
 	mask = dot0 > dot1;
@@ -1170,6 +1171,9 @@ dgInt32 dgCollisionConvex::RectifyConvexSlice (dgInt32 count, const dgVector& no
 
 dgInt32 dgCollisionConvex::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
+_ASSERTE (0);
+return 0;
+/*
 //	dgInt32 count;
 //	dgFloat32 side0;
 //	dgFloat32 side1;
@@ -1455,6 +1459,7 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersectionSimd (const dgVector& norma
 		}
 	}
 	return count;
+*/
 }
 
 dgInt32 dgCollisionConvex::CalculatePlaneIntersection (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const

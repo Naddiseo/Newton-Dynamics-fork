@@ -83,6 +83,7 @@ class dgMatrix
 	simd_128 RotateVectorSimd (const dgVector &v) const;
 	simd_128 UnrotateVectorSimd (const dgVector &v) const;
 	simd_128 TransformVectorSimd (const dgVector &v) const;
+	simd_128 UntransformVectorSimd (const dgVector &v) const;
 	void TransformVectorsSimd (dgVector* const dst, const dgVector* const src, dgInt32 count) const;
 
 	dgVector m_front;
@@ -260,6 +261,11 @@ DG_INLINE simd_128 dgMatrix::TransformVectorSimd (const dgVector &v) const
 {
 	const dgMatrix& source = *this;
 	return (simd_128&)source[0] * simd_128(v[0]) + (simd_128&)source[1] * simd_128(v[1]) + (simd_128&)source[2] * simd_128(v[2]) + (simd_128&)source[3];
+}
+
+DG_INLINE simd_128 dgMatrix::UntransformVectorSimd (const dgVector &v) const
+{
+	return UnrotateVectorSimd((simd_128&)v - (simd_128&)m_posit);
 }
 
 DG_INLINE void dgMatrix::TransformVectorsSimd (dgVector* const dst, const dgVector* const src, dgInt32 count) const

@@ -2218,18 +2218,17 @@ void dgWorld::InitConvexCollision ()
 	dgCollisionConvex::m_multiResDir_sse[5] = dgVector (dgCollisionConvex::m_multiResDir[4].m_z, dgCollisionConvex::m_multiResDir[5].m_z, dgCollisionConvex::m_multiResDir[6].m_z, dgCollisionConvex::m_multiResDir[7].m_z);
 
 //_ASSERTE (0);
-	dgFloatSign tmp;
-	tmp.m_integer.m_iVal = 0x7fffffff;
-	dgCollisionConvex::m_signMask.m_x = tmp.m_fVal;
-	dgCollisionConvex::m_signMask.m_y = tmp.m_fVal;
-	dgCollisionConvex::m_signMask.m_z = tmp.m_fVal;
-	dgCollisionConvex::m_signMask.m_w = tmp.m_fVal;
-
-	tmp.m_integer.m_iVal = 0xffffffff;
-	dgCollisionConvex::m_triplexMask.m_x = tmp.m_fVal;
-	dgCollisionConvex::m_triplexMask.m_y = tmp.m_fVal;
-	dgCollisionConvex::m_triplexMask.m_z = tmp.m_fVal;
-	dgCollisionConvex::m_triplexMask.m_w = 0.0f;
+//	dgFloatSign tmp;
+//	tmp.m_integer.m_iVal = 0x7fffffff;
+//	dgCollisionConvex::m_signMask.m_x = tmp.m_fVal;
+//	dgCollisionConvex::m_signMask.m_y = tmp.m_fVal;
+//	dgCollisionConvex::m_signMask.m_z = tmp.m_fVal;
+//	dgCollisionConvex::m_signMask.m_w = tmp.m_fVal;
+//	tmp.m_integer.m_iVal = 0xffffffff;
+//	dgCollisionConvex::m_triplexMask.m_x = tmp.m_fVal;
+//	dgCollisionConvex::m_triplexMask.m_y = tmp.m_fVal;
+//	dgCollisionConvex::m_triplexMask.m_z = tmp.m_fVal;
+//	dgCollisionConvex::m_triplexMask.m_w = 0.0f;
 
 
 #ifdef _DEBUG

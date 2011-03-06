@@ -26,8 +26,10 @@
 #include "dgCollision.h"
 #include "dgCollisionConvex.h"
 
-#define DG_MAX_COLLIDING_FACES	 (1024 * 2)
-#define DG_MAX_COLLIDING_VERTEX  (DG_MAX_COLLIDING_FACES * 4)
+
+#define DG_CONVEX_POLYGON_MAX_VERTEX_COUNT	32
+#define DG_MAX_COLLIDING_FACES				(1024 * 2)
+#define DG_MAX_COLLIDING_VERTEX				(DG_MAX_COLLIDING_FACES * 4)
 
 
 class dgCollisionMesh;
@@ -89,6 +91,7 @@ class dgCollisionMeshRayHitDesc
 }DG_GCC_VECTOR_ALIGMENT;
 
 
+
 class dgCollisionMesh: public dgCollision  
 {
 	public:
@@ -139,13 +142,13 @@ class dgCollisionMesh: public dgCollision
 		virtual void CalculateInertia (dgVector& inertia, dgVector& origin) const;
 
 
-		void BeamClipping (const dgCollisionConvex* hull, const dgMatrix& matrix, dgFloat32 size);
-		void BeamClippingSimd (const dgCollisionConvex* hull, const dgMatrix& matrix, dgFloat32 size);
-		dgInt32 QuickTest (const dgCollisionConvex* hull, const dgMatrix& matrix);
-		dgInt32 QuickTestSimd (const dgCollisionConvex* hull, const dgMatrix& matrix);
-		dgInt32 QuickTestContinue (const dgCollisionConvex* hull, const dgMatrix& matrix);
-		dgInt32 QuickTestContinueSimd (const dgCollisionConvex* hull, const dgMatrix& matrix);
-		dgInt32 ClipContacts (dgInt32 count, dgContactPoint contactOut[], const dgMatrix& globalMatrix) const;
+		void BeamClipping (const dgCollisionConvex* const hull, const dgMatrix& matrix, dgFloat32 size);
+		void BeamClippingSimd (const dgCollisionConvex* const hull, const dgMatrix& matrix, dgFloat32 size);
+		dgInt32 QuickTest (const dgCollisionConvex* const hull, const dgMatrix& matrix);
+		dgInt32 QuickTestSimd (const dgCollisionConvex* const hull, const dgMatrix& matrix);
+		dgInt32 QuickTestContinue (const dgCollisionConvex* const hull, const dgMatrix& matrix);
+		dgInt32 QuickTestContinueSimd (const dgCollisionConvex* const hull, const dgMatrix& matrix);
+		dgInt32 ClipContacts (dgInt32 count, dgContactPoint* const contactOut, const dgMatrix& globalMatrix) const;
 
 		dgVector ClosestDistanceToTriangle (const dgVector& point, const dgVector& p0, const dgVector& p1, const dgVector& p2) const;
 		bool PointToPolygonDistance (const dgVector& point, dgFloat32 radius, dgVector& out);
@@ -156,9 +159,9 @@ class dgCollisionMesh: public dgCollision
 		void CalculateNormalSimd();
 
 		dgVector m_normal;
-		dgVector m_localPoly[64];
-		dgVector m_localPolySimd[64 * 3/4];
-		dgInt32 m_clippEdgeNormal[64];
+		dgVector m_localPoly[DG_CONVEX_POLYGON_MAX_VERTEX_COUNT];
+		simd_128 m_localPolySimd[DG_CONVEX_POLYGON_MAX_VERTEX_COUNT * 3/4];
+		dgInt32 m_clippEdgeNormal[32];
 		dgInt32 m_count;
 		dgInt32 m_paddedCount;
 		dgInt32 m_normalIndex;

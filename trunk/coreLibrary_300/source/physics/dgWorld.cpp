@@ -299,6 +299,7 @@ dgWorld::dgWorld(dgMemoryAllocator* const allocator)
 	SetHardwareMode (0);
 	SetThreadsCount (0);
 
+	InitConvexCollision ();
 	dgBroadPhaseCollision::Init ();
 	dgCollidingPairCollector::Init ();
 	

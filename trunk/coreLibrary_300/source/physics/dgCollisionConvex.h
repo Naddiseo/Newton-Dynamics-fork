@@ -115,25 +115,32 @@ class dgCollisionConvex: public dgCollision
 	dgUnsigned16 m_vertexCount;
 	dgUnsigned32 m_isTriggerVolume : 1;
 	
-	static dgVector m_zero;
-	static dgVector m_negOne;
-	static dgVector m_indexStep;
-	static dgVector m_aabb_padd;
-	static dgVector m_index_0123;
-	static dgVector m_index_4567;
+//	static dgVector m_aabb_padd;
+//	static dgVector m_zero;
+//	static dgVector m_negOne;
+//	static dgVector m_nrh0p5;
+//	static dgVector m_nrh3p0;
+//	static dgVector m_indexStep;
+//	static dgInt32 m_iniliazised;
+//	static dgVector m_signMask;
+	
+	
+	static simd_128 m_signMask;
+	static simd_128 m_triplexMask;
+	static simd_128 m_aabbPadding;
+	static simd_128 m_index_0123;
+	static simd_128 m_index_4567;
+
+
 	static dgVector m_multiResDir[8];
 	static dgVector m_multiResDir_sse[6];
 	
-	static dgVector m_nrh0p5;
-	static dgVector m_nrh3p0;
 	static dgVector m_huge;
 	static dgVector m_negativeTiny;
 
-	static dgVector m_signMask;
-	static dgVector m_triplexMask;
 	static dgTriplex m_hullDirs[14]; 
 
-	static dgInt32 m_iniliazised;
+
 	static dgInt32 m_rayCastSimplex[4][4];
 	
 	friend class dgWorld;

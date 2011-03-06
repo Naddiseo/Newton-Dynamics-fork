@@ -912,147 +912,6 @@ xxx ++;
 
 
 
-dgContactSolver::dgMinkReturnCode dgContactSolver::CalcSeparatingPlaneSimd(dgMinkFace*& plane, const dgVector& origin)
-{
-	dgInt32 best;
-	dgFloat32 maxErr;
-	dgFloat32 error2;
-	dgVector e1;
-	dgVector e2;
-	dgVector e3;
-	dgVector normal (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-
-	CalcSupportVertexSimd (m_dir[0], 0);
-
-	dgInt32 i = 1;
-	for (; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-		CalcSupportVertexSimd (m_dir[i], 1);
-		e1 = m_hullVertex[1] - m_hullVertex[0];
-		error2 = e1 % e1;
-		if (error2 > DG_CALCULATE_SEPARATING_PLANE_ERROR) {
-			break;
-		}
-	}
-
-	for (i ++; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-		CalcSupportVertexSimd (m_dir[i], 2);
-		e2 = m_hullVertex[2] - m_hullVertex[0];
-		normal = e1 * e2;
-		error2 = normal % normal;
-		if (error2 > DG_CALCULATE_SEPARATING_PLANE_ERROR1) {
-			break;
-		}
-	}
-
-	error2 = dgFloat32 (0.0f);
-	for (i ++; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-		CalcSupportVertexSimd (m_dir[i], 3);
-
-		e3 = m_hullVertex[3] - m_hullVertex[0];
-		error2 = normal % e3;
-		if (dgAbsf (error2) > DG_CALCULATE_SEPARATING_PLANE_ERROR1) {
-			break;
-		}
-	}
-
-	if (i >= dgInt32(sizeof(m_dir) / sizeof(m_dir[0]))) {
-		best = 0;
-		maxErr = dgFloat32 (0.0f);
-		for (i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-			CalcSupportVertexSimd (m_dir[i], 1);
-			e1 = m_hullVertex[1] - m_hullVertex[0];
-			error2 = e1 % e1;
-			if (error2 > maxErr) {
-				best = i;
-				maxErr = error2;
-			}
-		}
-		CalcSupportVertexSimd (m_dir[best], 1);
-		e1 = m_hullVertex[1] - m_hullVertex[0];
-
-		best = 0;
-		maxErr = dgFloat32 (0.0f);
-		for (i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-			CalcSupportVertexSimd (m_dir[i], 2);
-			e2 = m_hullVertex[2] - m_hullVertex[0];
-			normal = e1 * e2;
-			error2 = normal % normal;
-			if (error2 > maxErr) {
-				best = i;
-				maxErr = error2;
-			}
-		}
-
-		CalcSupportVertexSimd (m_dir[best], 2);
-		e2 = m_hullVertex[2] - m_hullVertex[0];
-		normal = e1 * e2;
-
-		best = 0;
-		maxErr = dgFloat32 (0.0f);
-		for (i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
-			CalcSupportVertexSimd (m_dir[i], 3);
-
-			e3 = m_hullVertex[3] - m_hullVertex[0];
-			error2 = normal % e3;
-			if (dgAbsf (error2) > dgAbsf (maxErr)) {
-				best = i;
-				maxErr = error2;
-			}
-		}
-		error2 = maxErr;
-		CalcSupportVertexSimd (m_dir[best], 3);
-	}
-
-
-	m_vertexIndex = 4;
-	if (error2 > dgFloat32 (0.0f)) {
-		Swap (m_hullVertex[1], m_hullVertex[2]);
-		Swap (m_averVertex[1], m_averVertex[2]);
-	}
-
-	_ASSERTE (CheckTetrahedronVolumeSimd ());
-
-	_ASSERTE ( (((dgUnsigned64)&m_simplex[0]) & 0x0f)== 0);
-	_ASSERTE ( (((dgUnsigned64)&m_simplex[1]) & 0x0f)== 0);
-
-	// face 0
-	m_simplex[0].m_vertex[0] = 0;
-	m_simplex[0].m_vertex[1] = 1;
-	m_simplex[0].m_vertex[2] = 2;
-	m_simplex[0].m_vertex[3] = 0;
-	m_simplex[0].m_adjancentFace[0] = 1;	
-	m_simplex[0].m_adjancentFace[1] = 3;	
-	m_simplex[0].m_adjancentFace[2] = 2;	
-
-	// face 1
-	m_simplex[1].m_vertex[0] = 1;
-	m_simplex[1].m_vertex[1] = 0;
-	m_simplex[1].m_vertex[2] = 3;
-	m_simplex[1].m_vertex[3] = 1;
-	m_simplex[1].m_adjancentFace[0] = 0;	
-	m_simplex[1].m_adjancentFace[1] = 2;	
-	m_simplex[1].m_adjancentFace[2] = 3;	
-
-	// face 2
-	m_simplex[2].m_vertex[0] = 0;
-	m_simplex[2].m_vertex[1] = 2;
-	m_simplex[2].m_vertex[2] = 3;
-	m_simplex[2].m_vertex[3] = 0;
-	m_simplex[2].m_adjancentFace[0] = 0;	
-	m_simplex[2].m_adjancentFace[1] = 3;	
-	m_simplex[2].m_adjancentFace[2] = 1;	
-
-	// face 3
-	m_simplex[3].m_vertex[0] = 2;
-	m_simplex[3].m_vertex[1] = 1;
-	m_simplex[3].m_vertex[2] = 3;
-	m_simplex[3].m_vertex[3] = 2;
-	m_simplex[3].m_adjancentFace[0] = 0;	
-	m_simplex[3].m_adjancentFace[1] = 1;	
-	m_simplex[3].m_adjancentFace[2] = 2;	
-
-	return UpdateSeparatingPlaneSimd(plane, origin);
-}
 
 
 dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneSimd(dgMinkFace*& plane, const dgVector& origin)
@@ -1225,15 +1084,10 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneSimd(dgM
 
 dgInt32 dgContactSolver::HullHullContactsSimd (dgInt32 contactID)
 {
-	dgInt32 i0;
-	dgInt32 count;
-	dgMinkFace *face;
-	dgMinkReturnCode code;
-	dgContactPoint* contactOut;
-
-	count = 0;
+	dgInt32 count = 0;
 	m_proxy->m_inTriggerVolume = 0;
-	code = CalcSeparatingPlaneSimd (face);
+	dgMinkFace *face;
+	dgMinkReturnCode code = CalcSeparatingPlaneSimd (face);
 	switch (code)
 	{
 		case dgMinkIntersecting:
@@ -1257,30 +1111,35 @@ dgInt32 dgContactSolver::HullHullContactsSimd (dgInt32 contactID)
 				//_ASSERTE (face->m_w >= dgFloat32 (0.0f));
 				_ASSERTE ((*face) % (*face) > dgFloat32 (0.0f));
 				if (face->m_w < m_penetrationPadding) {
-					dgVector step (*face);
-					step = step.Scale (-(face->m_w + DG_IMPULSIVE_CONTACT_PENETRATION));
+					//dgVector step (*face);
+					//step = step.Scale (-(face->m_w + DG_IMPULSIVE_CONTACT_PENETRATION));
+					simd_128 step (*(simd_128*)face * simd_128 (-(face->m_w + DG_IMPULSIVE_CONTACT_PENETRATION)));
+					step = step & simd_128(-1, -1, -1, 0);
+					
+					dgInt32 i0 = face->m_vertex[0];
+					//m_hullVertex[i0] -= step;
+					//m_averVertex[i0] += step;
+					(simd_128&)m_hullVertex[i0] = (simd_128&)m_hullVertex[i0] - step;
+					(simd_128&)m_averVertex[i0] = (simd_128&)m_averVertex[i0] + step;
 
-					i0 = face->m_vertex[0];
-					m_hullVertex[i0] -= step;
-					m_averVertex[i0] += step;
-
-					m_matrix.m_posit += step;
-					dgVector stepWorld (m_proxy->m_referenceMatrix.RotateVectorSimd(step));
-					m_proxy->m_floatingMatrix.m_posit += stepWorld;
+					(simd_128&)m_matrix.m_posit = (simd_128&)m_matrix.m_posit + step;
+					simd_128 stepWorld (m_proxy->m_referenceMatrix.RotateVectorSimd(step));
+					(simd_128&)m_proxy->m_floatingMatrix.m_posit = (simd_128&)m_proxy->m_floatingMatrix.m_posit + stepWorld;
 
 					count = CalculateContactsSimd (face, contactID, m_proxy->m_contacts, m_proxy->m_maxContacts);
 					_ASSERTE (count < m_proxy->m_maxContacts);
-					stepWorld = stepWorld.Scale (dgFloat32 (0.5f));
+					//stepWorld = stepWorld.Scale (dgFloat32 (0.5f));
+					stepWorld = stepWorld * simd_128 (dgFloat32 (0.5f));
 
 					if (m_proxy->m_isTriggerVolume) {
 						m_proxy->m_inTriggerVolume = 1;
 						count = 0;
 					}
 
-					contactOut = m_proxy->m_contacts; 
+					dgContactPoint* const contactOut = m_proxy->m_contacts; 
 					for (dgInt32 i0 = 0; i0 < count; i0 ++ ) {
 						//contactOut[i0].m_point -= stepWorld ;
-						(simd_128&)contactOut[i0].m_point = (simd_128&)contactOut[i0].m_point - (simd_128&)stepWorld;
+						(simd_128&)contactOut[i0].m_point = (simd_128&)contactOut[i0].m_point - stepWorld;
 
 					}
 					return count;
@@ -1291,4 +1150,147 @@ dgInt32 dgContactSolver::HullHullContactsSimd (dgInt32 contactID)
 		default:;
 	}
 	return count;
+}
+
+
+dgContactSolver::dgMinkReturnCode dgContactSolver::CalcSeparatingPlaneSimd(dgMinkFace*& plane, const dgVector& origin)
+{
+	dgInt32 best;
+	dgFloat32 maxErr;
+	dgFloat32 error2;
+	dgVector e1;
+	dgVector e2;
+	dgVector e3;
+	dgVector normal (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+
+	CalcSupportVertexSimd (m_dir[0], 0);
+
+	dgInt32 i = 1;
+	for (; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+		CalcSupportVertexSimd (m_dir[i], 1);
+		e1 = m_hullVertex[1] - m_hullVertex[0];
+		error2 = e1 % e1;
+		if (error2 > DG_CALCULATE_SEPARATING_PLANE_ERROR) {
+			break;
+		}
+	}
+
+	for (i ++; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+		CalcSupportVertexSimd (m_dir[i], 2);
+		e2 = m_hullVertex[2] - m_hullVertex[0];
+		normal = e1 * e2;
+		error2 = normal % normal;
+		if (error2 > DG_CALCULATE_SEPARATING_PLANE_ERROR1) {
+			break;
+		}
+	}
+
+	error2 = dgFloat32 (0.0f);
+	for (i ++; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+		CalcSupportVertexSimd (m_dir[i], 3);
+
+		e3 = m_hullVertex[3] - m_hullVertex[0];
+		error2 = normal % e3;
+		if (dgAbsf (error2) > DG_CALCULATE_SEPARATING_PLANE_ERROR1) {
+			break;
+		}
+	}
+
+	if (i >= dgInt32(sizeof(m_dir) / sizeof(m_dir[0]))) {
+		best = 0;
+		maxErr = dgFloat32 (0.0f);
+		for (i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+			CalcSupportVertexSimd (m_dir[i], 1);
+			e1 = m_hullVertex[1] - m_hullVertex[0];
+			error2 = e1 % e1;
+			if (error2 > maxErr) {
+				best = i;
+				maxErr = error2;
+			}
+		}
+		CalcSupportVertexSimd (m_dir[best], 1);
+		e1 = m_hullVertex[1] - m_hullVertex[0];
+
+		best = 0;
+		maxErr = dgFloat32 (0.0f);
+		for (i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+			CalcSupportVertexSimd (m_dir[i], 2);
+			e2 = m_hullVertex[2] - m_hullVertex[0];
+			normal = e1 * e2;
+			error2 = normal % normal;
+			if (error2 > maxErr) {
+				best = i;
+				maxErr = error2;
+			}
+		}
+
+		CalcSupportVertexSimd (m_dir[best], 2);
+		e2 = m_hullVertex[2] - m_hullVertex[0];
+		normal = e1 * e2;
+
+		best = 0;
+		maxErr = dgFloat32 (0.0f);
+		for (i = 1; i < dgInt32(sizeof(m_dir) / sizeof(m_dir[0])); i ++) {
+			CalcSupportVertexSimd (m_dir[i], 3);
+
+			e3 = m_hullVertex[3] - m_hullVertex[0];
+			error2 = normal % e3;
+			if (dgAbsf (error2) > dgAbsf (maxErr)) {
+				best = i;
+				maxErr = error2;
+			}
+		}
+		error2 = maxErr;
+		CalcSupportVertexSimd (m_dir[best], 3);
+	}
+
+
+	m_vertexIndex = 4;
+	if (error2 > dgFloat32 (0.0f)) {
+		Swap (m_hullVertex[1], m_hullVertex[2]);
+		Swap (m_averVertex[1], m_averVertex[2]);
+	}
+
+	_ASSERTE (CheckTetrahedronVolumeSimd ());
+
+	_ASSERTE ( (((dgUnsigned64)&m_simplex[0]) & 0x0f)== 0);
+	_ASSERTE ( (((dgUnsigned64)&m_simplex[1]) & 0x0f)== 0);
+
+	// face 0
+	m_simplex[0].m_vertex[0] = 0;
+	m_simplex[0].m_vertex[1] = 1;
+	m_simplex[0].m_vertex[2] = 2;
+	m_simplex[0].m_vertex[3] = 0;
+	m_simplex[0].m_adjancentFace[0] = 1;	
+	m_simplex[0].m_adjancentFace[1] = 3;	
+	m_simplex[0].m_adjancentFace[2] = 2;	
+
+	// face 1
+	m_simplex[1].m_vertex[0] = 1;
+	m_simplex[1].m_vertex[1] = 0;
+	m_simplex[1].m_vertex[2] = 3;
+	m_simplex[1].m_vertex[3] = 1;
+	m_simplex[1].m_adjancentFace[0] = 0;	
+	m_simplex[1].m_adjancentFace[1] = 2;	
+	m_simplex[1].m_adjancentFace[2] = 3;	
+
+	// face 2
+	m_simplex[2].m_vertex[0] = 0;
+	m_simplex[2].m_vertex[1] = 2;
+	m_simplex[2].m_vertex[2] = 3;
+	m_simplex[2].m_vertex[3] = 0;
+	m_simplex[2].m_adjancentFace[0] = 0;	
+	m_simplex[2].m_adjancentFace[1] = 3;	
+	m_simplex[2].m_adjancentFace[2] = 1;	
+
+	// face 3
+	m_simplex[3].m_vertex[0] = 2;
+	m_simplex[3].m_vertex[1] = 1;
+	m_simplex[3].m_vertex[2] = 3;
+	m_simplex[3].m_vertex[3] = 2;
+	m_simplex[3].m_adjancentFace[0] = 0;	
+	m_simplex[3].m_adjancentFace[1] = 1;	
+	m_simplex[3].m_adjancentFace[2] = 2;	
+
+	return UpdateSeparatingPlaneSimd(plane, origin);
 }

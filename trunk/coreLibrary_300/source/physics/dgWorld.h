@@ -363,7 +363,7 @@ class dgWorld:
 	void AddSentinelBody();
 
 
-	static void InitConvexCollision ();
+	void InitConvexCollision ();
 	static dgUnsigned32 dgApi GetPerformanceCount ();
 
 	dgUnsigned32 m_dynamicsLru;

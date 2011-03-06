@@ -123,17 +123,11 @@ void dgCollisionMesh::dgCollisionConvexPolygon::CalculateInertia (dgVector& iner
 	
 dgVector dgCollisionMesh::dgCollisionConvexPolygon::SupportVertex (const dgVector& dir) const
 {
-	dgInt32 i;
-//	dgInt32 j;
-	dgInt32 index;
-	dgFloat32 val;
-	dgFloat32 val1;
-
 	_ASSERTE (dgAbsf (dir % dir - 1.0f) < dgFloat32 (1.0e-2f));
-	index = 0;
-	val = m_localPoly[0] % dir;
-	for (i = 1; i < m_count; i ++) {
-		val1 = m_localPoly[i] % dir;
+	dgInt32 index = 0;
+	dgFloat32 val = m_localPoly[0] % dir;
+	for (dgInt32 i = 1; i < m_count; i ++) {
+		dgFloat32 val1 = m_localPoly[i] % dir;
 		if (val1 > val) {
 			val = val1; 
 			index = i;
@@ -144,51 +138,34 @@ dgVector dgCollisionMesh::dgCollisionConvexPolygon::SupportVertex (const dgVecto
 
 dgVector dgCollisionMesh::dgCollisionConvexPolygon::SupportVertexSimd (const dgVector& dir) const
 {
-//	dgInt32 i;
-//	dgFloat32 fIndex;
-//	simd_type dot;
-//	simd_type dot1;
-//	simd_type dirX;
-//	simd_type dirY;
-//	simd_type dirZ;
-//	simd_type index;
-//	simd_type indexAcc;
-//	simd_type mask;
-	
-
 	_ASSERTE (dgAbsf (dir % dir - 1.0f) < dgFloat32 (1.0e-3f));
 
-	simd_type dirX = simd_permut_v (*(simd_type*)&dir, *(simd_type*)&dir, PURMUT_MASK(0, 0, 0, 0));
-	simd_type dirY = simd_permut_v (*(simd_type*)&dir, *(simd_type*)&dir, PURMUT_MASK(1, 1, 1, 1));
-	simd_type dirZ = simd_permut_v (*(simd_type*)&dir, *(simd_type*)&dir, PURMUT_MASK(2, 2, 2, 2));
+	simd_128 dirX (simd_128(dir.m_x));
+	simd_128 dirY (simd_128(dir.m_y));
+	simd_128 dirZ (simd_128(dir.m_z));
 
-	simd_type dot = simd_mul_add_v  (simd_mul_add_v (simd_mul_v (dirX, *(simd_type*)&m_localPolySimd[0]), 
-													             dirY, *(simd_type*)&m_localPolySimd[1]),
-													             dirZ, *(simd_type*)&m_localPolySimd[2]);
-	simd_type index = *(simd_type*)&m_index_0123;
-	simd_type indexAcc = index; 
+	simd_128 dot (dirX * m_localPolySimd[0] + dirY * m_localPolySimd[1] + dirZ * m_localPolySimd[2]);
+	simd_128 index (m_index_0123);
+	simd_128 indexAcc = index; 
+	simd_128 step (dgFloat32 (4.0f));
 	for (dgInt32 i = 3; i < m_paddedCount; i += 3) {
-		indexAcc = simd_add_v (indexAcc, *(simd_type*)&m_indexStep);
-		simd_type dot1 = simd_mul_add_v  (simd_mul_add_v (simd_mul_v (dirX, *(simd_type*)&m_localPolySimd[i + 0]), 
-														              dirY, *(simd_type*)&m_localPolySimd[i + 1]),
-														              dirZ, *(simd_type*)&m_localPolySimd[i + 2]);
-		simd_type mask = simd_cmpgt_v(dot1, dot);
-		dot = simd_max_v(dot1, dot);
-		index = simd_or_v (simd_and_v(indexAcc, mask), simd_andnot_v (index, mask));
+		indexAcc = indexAcc + step;
+		simd_128 dot1 (dirX * m_localPolySimd[i + 0] + dirY * m_localPolySimd[i + 1] + dirZ * m_localPolySimd[i + 2]);
+		simd_128 mask (dot1 > dot);
+		dot = dot1.GetMax(dot);
+		index = (indexAcc & mask) | index.AndNot(mask);
 	}
 
-	dirX = simd_permut_v (dot, dot, PURMUT_MASK(0, 0, 3, 2));
-	simd_type mask = simd_cmpge_v(dot, dirX);
-	dot = simd_max_v(dot, dirX);
-	index = simd_or_v (simd_and_v(index, mask), simd_andnot_v (simd_permut_v (index, index, PURMUT_MASK(0, 0, 3, 2)), mask));
+	dirX = dot.MoveHighToLow(dot);
+	simd_128 mask (dot > dirX);
+	dot = dot.GetMax(dirX);
+	index = (index & mask) | index.MoveHighToLow(index).AndNot(mask);
 
-	mask = simd_cmpge_s(dot, simd_permut_v (dot, dot, PURMUT_MASK(0, 0, 0, 1)));
-
-	dgInt32 i = simd_store_is (simd_or_v (simd_and_v(index, mask), simd_andnot_v (simd_permut_v (index, index, PURMUT_MASK(0, 0, 0, 1)), mask)));
-//	dgFloat32 fIndex;
-//	simd_store_s (simd_or_v (simd_and_v(index, mask), simd_andnot_v (simd_permut_v (index, index, PURMUT_MASK(0, 0, 0, 1)), mask)), &fIndex);
-//	dgInt32 i = dgFastInt (fIndex);
-	return m_localPoly[i]; 
+	dirX = dot.PackLow(dot);
+	mask = dot > dirX.MoveHighToLow(dirX);
+	indexAcc = index.PackLow(index);
+	dgInt32 i = ((index & mask) | indexAcc.MoveHighToLow(indexAcc).AndNot(mask)).GetInt();
+	return (simd_128&)m_localPoly[i]; 
 }
 
 
@@ -196,8 +173,10 @@ void dgCollisionMesh::dgCollisionConvexPolygon::CalculateNormalSimd()
 {
 	//	CalculateNormal();
 	if (m_normalIndex) {
-		m_normal = dgVector (&m_vertex[m_normalIndex * m_stride]);
+		(simd_128&) m_normal = simd_128 (&m_vertex[m_normalIndex * m_stride]) & m_triplexMask;
 	} else {
+		_ASSERTE (0);
+/*
 		simd_type e10;
 		simd_type e21;
 		simd_type tmp0;
@@ -217,6 +196,7 @@ void dgCollisionMesh::dgCollisionConvexPolygon::CalculateNormalSimd()
 		tmp0 = simd_rsqrt_s(mag2);
 		mag2 = simd_mul_s (simd_mul_s(*(simd_type*)&m_nrh0p5, tmp0), simd_mul_sub_s (*(simd_type*)&m_nrh3p0, simd_mul_s (mag2, tmp0), tmp0));
 		(*(simd_type*)&m_normal) = simd_mul_v (normal, simd_permut_v(mag2, mag2, PURMUT_MASK(3, 0, 0, 0)));
+*/
 	}
 }
 
@@ -238,11 +218,11 @@ void dgCollisionMesh::dgCollisionConvexPolygon::CalculateNormal()
 
 
 
-dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTestContinueSimd (
-	const dgCollisionConvex* hull, 
-	const dgMatrix& matrix)
+dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTestContinueSimd (const dgCollisionConvex* const hull, const dgMatrix& matrix)
 {
-	_ASSERTE (0);
+_ASSERTE (0);
+return 0;
+/*
 	dgInt32 ret;
 	dgFloat32 val1;
 	m_localPoly[0] = dgVector (&m_vertex[m_index[0] * m_stride]);
@@ -278,13 +258,15 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTestContinueSimd (
 	}
 
 	return ret;
+*/
 }
 
 
-dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTestContinue (
-	const dgCollisionConvex* hull, 
-	const dgMatrix& matrix)
+dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTestContinue (const dgCollisionConvex* hull, const dgMatrix& matrix)
 {
+_ASSERTE (0);
+return 0;
+/*
 	dgInt32 ret;
 	dgFloat32 val1;
 
@@ -305,62 +287,47 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTestContinue (
 	}
 
 	return ret;
-
+*/
 }
 
 
 
-dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTestSimd (
-	const dgCollisionConvex* hull, 
-	const dgMatrix& matrix)
+dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTestSimd (const dgCollisionConvex* const hull, const dgMatrix& matrix)
 {
-	dgInt32 i; 
-//	dgInt32 i0; 
-//	dgInt32 i1; 
-	dgFloat32 val0;
-	dgFloat32 val1;
-	simd_type normal;
-	simd_type normal1;
-	dgVector rotatedNormal;
 
 	_ASSERTE (m_count < (sizeof (m_localPoly) / sizeof (m_localPoly[0])));
 
-	m_localPoly[0] = dgVector (&m_vertex[m_index[0] * m_stride]);
-	m_localPoly[1] = dgVector (&m_vertex[m_index[1] * m_stride]);
-	m_localPoly[2] = dgVector (&m_vertex[m_index[2] * m_stride]);
+	(simd_128&)m_localPoly[0] = simd_128 (&m_vertex[m_index[0] * m_stride]);
+	(simd_128&)m_localPoly[1] = simd_128 (&m_vertex[m_index[1] * m_stride]);
+	(simd_128&)m_localPoly[2] = simd_128 (&m_vertex[m_index[2] * m_stride]);
 	CalculateNormalSimd();
 
-	//	rotatedNormal = matrix.RotateVector (normal__);
-	normal  = simd_mul_v (*(simd_type*)&m_normal, *(simd_type*)&m_negOne);
-	normal1 = simd_mul_add_v (simd_mul_add_v (simd_mul_v (*(simd_type*)&matrix[0], simd_permut_v(normal, normal, PURMUT_MASK(3, 0, 0, 0))), 
-		*(simd_type*)&matrix[1], simd_permut_v(normal, normal, PURMUT_MASK(3, 1, 1, 1))), 
-		*(simd_type*)&matrix[2], simd_permut_v(normal, normal, PURMUT_MASK(3, 2, 2, 2)));
-	(*(simd_type*)&rotatedNormal) = normal1;
-	dgVector p0 (matrix.UntransformVector (hull->SupportVertexSimd(rotatedNormal)));
+	simd_128 rotatedNormal (matrix.RotateVectorSimd((simd_128&)m_normal));
+	simd_128 p0 (matrix.UntransformVectorSimd(hull->SupportVertexSimd(rotatedNormal * simd_128(dgFloat32 (-1.0f)))));
+	simd_128 p1 (matrix.UntransformVectorSimd (hull->SupportVertexSimd(rotatedNormal)));
 
-	(*(simd_type*)&rotatedNormal) = simd_mul_v (normal1, *(simd_type*)&m_negOne);
-	dgVector p1 (matrix.UntransformVector (hull->SupportVertexSimd(rotatedNormal)));
-
-	val0 = (m_localPoly[0] - p0) % m_normal + dgFloat32 (1.0e-1f);
-	val1 = (m_localPoly[0] - p1) % m_normal - dgFloat32 (1.0e-1f);
-	if (val0 * val1 >= dgFloat32 (0.0f)) {
+	simd_128 val0 (((simd_128&)m_localPoly[0] - p0).DotProduct((simd_128&)m_normal) + simd_128 (dgFloat32 (1.0e-1f)));
+	simd_128 val1 (((simd_128&)m_localPoly[0] - p1).DotProduct((simd_128&)m_normal) - simd_128 (dgFloat32 (1.0e-1f)));
+	if (!(val0 * val1).GetSignMask()) {
 		return 0;
 	}
 
-	for (i = 3; i < m_count; i ++) {
-		m_localPoly[i] = dgVector (&m_vertex[m_index[i] * m_stride]);
+	dgInt32 i = 3;
+	for (; i < m_count; i ++) {
+		(simd_128&)m_localPoly[i] =  simd_128 (&m_vertex[m_index[i] * m_stride]);
 	}
 
 	dgInt32 i0 = (m_count + 3) & -4;
+	simd_128 firstPoint ((simd_128&)m_localPoly[i]);
 	for (; i < i0; i ++) {
-		m_localPoly[i] = m_localPoly[0];
+		(simd_128&)m_localPoly[i] = firstPoint;
 	}
 
 	dgInt32 i1 = 0;
 	for (dgInt32 i = 0; i < i0; i += 4) {
-		m_localPolySimd[i1 + 0] = dgVector (m_localPoly[i + 0].m_x, m_localPoly[i + 1].m_x, m_localPoly[i + 2].m_x, m_localPoly[i + 3].m_x); 
-		m_localPolySimd[i1 + 1] = dgVector (m_localPoly[i + 0].m_y, m_localPoly[i + 1].m_y, m_localPoly[i + 2].m_y, m_localPoly[i + 3].m_y); 
-		m_localPolySimd[i1 + 2] = dgVector (m_localPoly[i + 0].m_z, m_localPoly[i + 1].m_z, m_localPoly[i + 2].m_z, m_localPoly[i + 3].m_z); 
+		Transpose4x4Simd_128 ((simd_128&)m_localPolySimd[i1 + 0], (simd_128&)m_localPolySimd[i1 + 1], (simd_128&)m_localPolySimd[i1 + 2], firstPoint,
+							  (simd_128&)m_localPoly[i + 0], (simd_128&)m_localPoly[i + 1], (simd_128&)m_localPoly[i + 2], (simd_128&)m_localPoly[i + 3]); 
+
 		i1 += 3;
 	}
 
@@ -369,11 +336,8 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTestSimd (
 }
 
 
-dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTest (const dgCollisionConvex* hull, const dgMatrix& matrix)
+dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTest (const dgCollisionConvex* const hull, const dgMatrix& matrix)
 {
-	dgFloat32 val0;
-	dgFloat32 val1;
-
 	_ASSERTE (m_count < (sizeof (m_localPoly) / sizeof (m_localPoly[0])));
 
 	m_localPoly[0] = dgVector (&m_vertex[m_index[0] * m_stride]);
@@ -381,13 +345,15 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTest (const dgCollisionC
 	m_localPoly[2] = dgVector (&m_vertex[m_index[2] * m_stride]);
 	CalculateNormal();
 
-	dgVector normal (m_normal.Scale (dgFloat32 (-1.0f)));
+//	dgVector normal (m_normal.Scale (dgFloat32 (-1.0f)));
 	dgVector rotatedNormal (matrix.RotateVector (m_normal));
 	dgVector p0 (matrix.UntransformVector (hull->SupportVertex (rotatedNormal.Scale (dgFloat32 (-1.0f)))));
 	dgVector p1 (matrix.UntransformVector (hull->SupportVertex (rotatedNormal)));
 
-	val0 = (p0 - m_localPoly[0]) % normal + dgFloat32 (1.0e-1f);
-	val1 = (p1 - m_localPoly[0]) % normal - dgFloat32 (1.0e-1f);
+//	dgFloat32 val0 = (p0 - m_localPoly[0]) % normal + dgFloat32 (1.0e-1f);
+//	dgFloat32 val1 = (p1 - m_localPoly[0]) % normal - dgFloat32 (1.0e-1f);
+	dgFloat32 val0 = (m_localPoly[0] - p0) % m_normal + dgFloat32 (1.0e-1f);
+	dgFloat32 val1 = (m_localPoly[0] - p1) % m_normal - dgFloat32 (1.0e-1f);
 	if (val0 * val1 >= dgFloat32 (0.0f)) {
 		return 0;
 	}
@@ -401,33 +367,26 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::QuickTest (const dgCollisionC
 
 
 
-dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::ClipContacts (
-	dgInt32 count, 
-	dgContactPoint* const contactOut,
-	const dgMatrix& globalMatrix) const
+dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::ClipContacts (dgInt32 count, dgContactPoint* const contactOut, const dgMatrix& globalMatrix) const
 {
 	dgVector normal (globalMatrix.RotateVector(m_normal));
 	if (m_normalIndex) {
 		for (dgInt32 i = 0; i < count; i ++) {
-			dgFloat32 dist;
-			dist = contactOut[i].m_normal % normal;
+			dgFloat32 dist = contactOut[i].m_normal % normal;
 			contactOut[i].m_isEdgeContact = 0;
 			if (dist <= dgFloat32 (0.9998f)) {
-				dgInt32 j0;
-				dgInt32 closestEdgeIndex;
-				dgFloat32 closestEdgeDist;
 				dgVector point (globalMatrix.UntransformVector(contactOut[i].m_point));
 
-				j0 = m_count - 1;
-				closestEdgeIndex = 0;
+				dgInt32 j0 = m_count - 1;
+				dgInt32 closestEdgeIndex = 0;
 				contactOut[i].m_isEdgeContact = 1;
-				closestEdgeDist = dgFloat32 (1.0e20f);
+				dgFloat32 closestEdgeDist = dgFloat32 (1.0e20f);
 				for (dgInt32 j1 = 0; j1 < m_count; j1 ++) {
-					dgFloat32 dist2;
+					//dgFloat32 dist2;
 					dgVector edge (m_localPoly[j1] - m_localPoly[j0]);
 					dgVector dp (point - m_localPoly[j0]);
 					dgVector p (dp - edge.Scale ((dp % edge) / (edge % edge)));
-					dist2 = p % p;
+					dgFloat32 dist2 = p % p;
 					if (dist2 < closestEdgeDist) {
 						closestEdgeDist = dist2;
 						closestEdgeIndex = j0;
@@ -438,10 +397,9 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::ClipContacts (
 				if ((closestEdgeDist > (dgFloat32 (0.25f) * dgFloat32 (0.25f))) || (m_adjacentNormalIndex[closestEdgeIndex] == -1)) {
 					contactOut[i].m_normal = normal;
 				} else {
-					dgFloat32 dist;
 					dgVector aNormal (globalMatrix.RotateVector(dgVector (&m_vertex[m_adjacentNormalIndex[closestEdgeIndex] * m_stride])));
 					dgVector side (normal * aNormal);
-					dist = side % side;
+					dgFloat32 dist = side % side;
 					if (dist < dgFloat32 (0.05f * 0.05f)) {
 						normal += aNormal;
 						contactOut[i].m_normal = normal.Scale (dgRsqrt (normal % normal));
@@ -458,8 +416,7 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::ClipContacts (
 	} else {
 
 		for (dgInt32 i = 0; i < count; i ++) {
-			dgFloat32 dist;
-			dist = contactOut[i].m_normal % normal;
+			dgFloat32 dist = contactOut[i].m_normal % normal;
 			contactOut[i].m_isEdgeContact = (dist < dgFloat32 (0.999f));	
 			if (dist < dgFloat32 (0.1f)) {
 				contactOut[i] = contactOut[count - 1];
@@ -472,28 +429,28 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::ClipContacts (
 	return count;
 }
 
-void dgCollisionMesh::dgCollisionConvexPolygon::BeamClippingSimd (const dgCollisionConvex* hull, const dgMatrix& matrix, dgFloat32 dist)
+void dgCollisionMesh::dgCollisionConvexPolygon::BeamClippingSimd (const dgCollisionConvex* const hull, const dgMatrix& matrix, dgFloat32 dist)
 {
 	BeamClipping (hull, matrix, dist);
 
 	dgInt32 i0 = (m_count + 3) & -4;
 	for (dgInt32 i = m_count; i < i0; i ++) {
-		m_localPoly[i] = m_localPoly[0];
+		(simd_128&)m_localPoly[i] = (simd_128&)m_localPoly[0];
 	}
 
 	dgInt32 i1 = 0;
 	for (dgInt32 i = 0; i < i0; i += 4) {
-		m_localPolySimd[i1 + 0] = dgVector (m_localPoly[i + 0].m_x, m_localPoly[i + 1].m_x, m_localPoly[i + 2].m_x, m_localPoly[i + 3].m_x); 
-		m_localPolySimd[i1 + 1] = dgVector (m_localPoly[i + 0].m_y, m_localPoly[i + 1].m_y, m_localPoly[i + 2].m_y, m_localPoly[i + 3].m_y); 
-		m_localPolySimd[i1 + 2] = dgVector (m_localPoly[i + 0].m_z, m_localPoly[i + 1].m_z, m_localPoly[i + 2].m_z, m_localPoly[i + 3].m_z); 
+		simd_128 firstPoint;
+		Transpose4x4Simd_128 ((simd_128&)m_localPolySimd[i1 + 0], (simd_128&)m_localPolySimd[i1 + 1], (simd_128&)m_localPolySimd[i1 + 2], firstPoint,
+							  (simd_128&)m_localPoly[i + 0], (simd_128&)m_localPoly[i + 1], (simd_128&)m_localPoly[i + 2], (simd_128&)m_localPoly[i + 3]); 
+
 		i1 += 3;
 	}
-
 	m_paddedCount = i1;
 }
 
 
-void dgCollisionMesh::dgCollisionConvexPolygon::BeamClipping (const dgCollisionConvex* hull, const dgMatrix& matrix, dgFloat32 dist)
+void dgCollisionMesh::dgCollisionConvexPolygon::BeamClipping (const dgCollisionConvex* const hull, const dgMatrix& matrix, dgFloat32 dist)
 {
 	dgPlane planes[4];
 	dgVector points[sizeof (m_localPoly) / sizeof (m_localPoly[0]) + 8];
@@ -646,7 +603,7 @@ void dgCollisionMesh::dgCollisionConvexPolygon::BeamClipping (const dgCollisionC
 	if (m_adjacentNormalIndex) {
 		m_adjacentNormalIndex = &m_clippEdgeNormal[0];
 		do {
-	_ASSERTE (ptr->m_incidentNormal == -1);
+			_ASSERTE (ptr->m_incidentNormal == -1);
 			m_clippEdgeNormal[count] = ptr->m_incidentNormal;
 			m_localPoly[count] = points[ptr->m_incidentVertex];
 			count ++;
@@ -665,46 +622,42 @@ void dgCollisionMesh::dgCollisionConvexPolygon::BeamClipping (const dgCollisionC
 
 
 
-dgVector dgCollisionMesh::dgCollisionConvexPolygon::ClosestDistanceToTriangle (
-	const dgVector& point,
-	const dgVector& p0, 
-	const dgVector& p1, 
-	const dgVector& p2) const
+dgVector dgCollisionMesh::dgCollisionConvexPolygon::ClosestDistanceToTriangle (const dgVector& point, const dgVector& p0, const dgVector& p1, const dgVector& p2) const
 {
-	dgFloat32 t;
-	dgFloat32 s;
-	dgFloat32 vc;
-	dgFloat32 vb;
-	dgFloat32 va;
-	dgFloat32 den;
-	dgFloat32 alpha1;
-	dgFloat32 alpha2;
-	dgFloat32 alpha3;
-	dgFloat32 alpha4;
-	dgFloat32 alpha5;
-	dgFloat32 alpha6;
+//	dgFloat32 t;
+//	dgFloat32 s;
+//	dgFloat32 vc;
+//	dgFloat32 vb;
+//	dgFloat32 va;
+//	dgFloat32 den;
+//	dgFloat32 alpha1;
+//	dgFloat32 alpha2;
+//	dgFloat32 alpha3;
+//	dgFloat32 alpha4;
+//	dgFloat32 alpha5;
+//	dgFloat32 alpha6;
 
 	//	const dgVector p (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 	const dgVector p10 (p1 - p0);
 	const dgVector p20 (p2 - p0);
 	const dgVector p_p0 (point - p0);
 
-	alpha1 = p10 % p_p0;
-	alpha2 = p20 % p_p0;
+	dgFloat32 alpha1 = p10 % p_p0;
+	dgFloat32 alpha2 = p20 % p_p0;
 	if ((alpha1 <= dgFloat32 (0.0f)) && (alpha2 <= dgFloat32 (0.0f))) {
 		return p0;
 	}
 
 	dgVector p_p1 (point - p1);
-	alpha3 = p10 % p_p1;
-	alpha4 = p20 % p_p1;
+	dgFloat32 alpha3 = p10 % p_p1;
+	dgFloat32 alpha4 = p20 % p_p1;
 	if ((alpha3 >= dgFloat32 (0.0f)) && (alpha4 <= alpha3)) {
 		return p1;
 	}
 
-	vc = alpha1 * alpha4 - alpha3 * alpha2;
+	dgFloat32 vc = alpha1 * alpha4 - alpha3 * alpha2;
 	if ((vc <= dgFloat32 (0.0f)) && (alpha1 >= dgFloat32 (0.0f)) && (alpha3 <= dgFloat32 (0.0f))) {
-		t = alpha1 / (alpha1 - alpha3);
+		dgFloat32 t = alpha1 / (alpha1 - alpha3);
 		_ASSERTE (t >= dgFloat32 (0.0f));
 		_ASSERTE (t <= dgFloat32 (1.0f));
 		return p0 + p10.Scale (t);
@@ -712,33 +665,33 @@ dgVector dgCollisionMesh::dgCollisionConvexPolygon::ClosestDistanceToTriangle (
 
 
 	dgVector p_p2 (point - p2);
-	alpha5 = p10 % p_p2;
-	alpha6 = p20 % p_p2;
+	dgFloat32 alpha5 = p10 % p_p2;
+	dgFloat32 alpha6 = p20 % p_p2;
 	if ((alpha6 >= dgFloat32 (0.0f)) && (alpha5 <= alpha6)) {
 		return p2;
 	}
 
 
-	vb = alpha5 * alpha2 - alpha1 * alpha6;
+	dgFloat32 vb = alpha5 * alpha2 - alpha1 * alpha6;
 	if ((vb <= dgFloat32 (0.0f)) && (alpha2 >= dgFloat32 (0.0f)) && (alpha6 <= dgFloat32 (0.0f))) {
-		t = alpha2 / (alpha2 - alpha6);
+		dgFloat32 t = alpha2 / (alpha2 - alpha6);
 		_ASSERTE (t >= dgFloat32 (0.0f));
 		_ASSERTE (t <= dgFloat32 (1.0f));
 		return p0 + p20.Scale (t);
 	}
 
 
-	va = alpha3 * alpha6 - alpha5 * alpha4;
+	dgFloat32 va = alpha3 * alpha6 - alpha5 * alpha4;
 	if ((va <= dgFloat32 (0.0f)) && ((alpha4 - alpha3) >= dgFloat32 (0.0f)) && ((alpha5 - alpha6) >= dgFloat32 (0.0f))) {
-		t = (alpha4 - alpha3) / ((alpha4 - alpha3) + (alpha5 - alpha6));
+		dgFloat32 t = (alpha4 - alpha3) / ((alpha4 - alpha3) + (alpha5 - alpha6));
 		_ASSERTE (t >= dgFloat32 (0.0f));
 		_ASSERTE (t <= dgFloat32 (1.0f));
 		return p1 + (p2 - p1).Scale (t);
 	}
 
-	den = float(1.0f) / (va + vb + vc);
-	t = vb * den;
-	s = vc * den;
+	dgFloat32 den = float(1.0f) / (va + vb + vc);
+	dgFloat32 t = vb * den;
+	dgFloat32 s = vc * den;
 	_ASSERTE (t >= dgFloat32 (0.0f));
 	_ASSERTE (s >= dgFloat32 (0.0f));
 	_ASSERTE (t <= dgFloat32 (1.0f));
@@ -746,25 +699,19 @@ dgVector dgCollisionMesh::dgCollisionConvexPolygon::ClosestDistanceToTriangle (
 	return p0 + p10.Scale (t) + p20.Scale (s);
 }
 
-bool dgCollisionMesh::dgCollisionConvexPolygon::PointToPolygonDistance (
-	const dgVector& p, 
-	dgFloat32 radius,
-	dgVector& out)
+bool dgCollisionMesh::dgCollisionConvexPolygon::PointToPolygonDistance (const dgVector& p, dgFloat32 radius, dgVector& out)
 {
-	dgFloat32 minDist;
-
-	minDist = dgFloat32 (1.0e20f);
+	dgFloat32 minDist = dgFloat32 (1.0e20f);
 	m_localPoly[0] = dgVector (&m_vertex[m_index[0] * m_stride]);
 	m_localPoly[1] = dgVector (&m_vertex[m_index[1] * m_stride]);
 //	m_localPoly[2] = dgVector (&m_vertex[m_index[2] * m_stride]);
 
 	dgVector closestPoint (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 	for (dgInt32 i2 = 2; i2 < m_count; i2 ++) {
-		dgFloat32 dist;
 		m_localPoly[i2] = dgVector (&m_vertex[m_index[i2] * m_stride]);
 		const dgVector q (ClosestDistanceToTriangle (p, m_localPoly[0], m_localPoly[i2 - 1], m_localPoly[i2]));
 		const dgVector error (q - p);
-		dist = error % error;
+		dgFloat32 dist = error % error;
 		if (dist < minDist) {
 			minDist = dist;
 			closestPoint = q;
@@ -782,21 +729,17 @@ bool dgCollisionMesh::dgCollisionConvexPolygon::PointToPolygonDistance (
 
 bool dgCollisionMesh::dgCollisionConvexPolygon::DistanceToOrigen (const dgMatrix& matrix, const dgVector& scale, dgFloat32 radius, dgVector& out)
 {
-
-	dgFloat32 minDist;
-
-	minDist = dgFloat32 (1.0e20f);
+	dgFloat32 minDist = dgFloat32 (1.0e20f);
 	m_localPoly[0] = scale.CompProduct (matrix.TransformVector(dgVector (&m_vertex[m_index[0] * m_stride])));
 	m_localPoly[1] = scale.CompProduct (matrix.TransformVector(dgVector (&m_vertex[m_index[1] * m_stride])));
 
 	dgVector origin (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 	dgVector closestPoint (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 	for (dgInt32 i2 = 2; i2 < m_count; i2 ++) {
-		dgFloat32 dist;
 		m_localPoly[i2] = scale.CompProduct (matrix.TransformVector(dgVector (&m_vertex[m_index[i2] * m_stride])));
 		const dgVector q (ClosestDistanceToTriangle (origin, m_localPoly[0], m_localPoly[i2 - 1], m_localPoly[i2]));
 		const dgVector error (q - origin);
-		dist = error % error;
+		dgFloat32 dist = error % error;
 		if (dist < minDist) {
 			minDist = dist;
 			closestPoint = q;
@@ -822,30 +765,21 @@ bool dgCollisionMesh::dgCollisionConvexPolygon::DistanceToOrigen (const dgMatrix
 	return true;
 }
 
-dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact (
-	const dgVector& p, 
-	const dgVector& veloc, 
-	dgFloat32 radius,
-	dgContactPoint& contact)
+dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact (const dgVector& p, const dgVector& veloc, dgFloat32 radius, dgContactPoint& contact)
 {
-	dgFloat32 minDist;
-	dgFloat32 timestep;
-	dgFloat32 projVeloc;
-
 	m_localPoly[0] = dgVector (&m_vertex[m_index[0] * m_stride]);
 	m_localPoly[1] = dgVector (&m_vertex[m_index[1] * m_stride]);
 	m_localPoly[2] = dgVector (&m_vertex[m_index[2] * m_stride]);
 	CalculateNormal();
 
-	timestep = dgFloat32 (-1.0f);
+	dgFloat32 timestep = dgFloat32 (-1.0f);
 	dgVector closestPoint (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-	minDist = dgFloat32 (1.0e20f);
+	dgFloat32 minDist = dgFloat32 (1.0e20f);
 	for (dgInt32 j = 2; j < m_count; j ++) {
-		dgFloat32 dist;
 		m_localPoly[j] = dgVector (&m_vertex[m_index[j] * m_stride]);
 		const dgVector q (ClosestDistanceToTriangle (p, m_localPoly[0], m_localPoly[j - 1], m_localPoly[j]));
 		const dgVector error (q - p);
-		dist = error % error;
+		dgFloat32 dist = error % error;
 		if (dist < minDist) {
 			minDist = dist;
 			closestPoint = q;
@@ -879,23 +813,19 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 	}
 
 	if (timestep < 0.0f) {
-		projVeloc = veloc % m_normal;
+		dgFloat32 projVeloc = veloc % m_normal;
 		if (projVeloc < dgFloat32 (-1.0e-1f)) {
-			dgFloat32 minDist;
-			dgFloat32 timeToImpact;
 			dgVector supportPoint (p - m_normal.Scale (radius));
 
-			timeToImpact = -(m_normal % (supportPoint - m_localPoly[0])) / (m_normal % veloc); 
+			dgFloat32 timeToImpact = -(m_normal % (supportPoint - m_localPoly[0])) / (m_normal % veloc); 
 			dgVector point (supportPoint + veloc.Scale (timeToImpact));
 			dgVector closestPoint (point);
-			minDist = dgFloat32 (1.0e20f);
+			dgFloat32 minDist = dgFloat32 (1.0e20f);
 			for (int i = 2; i < m_count; i ++) {
-				dgInt32 i2;
-				dgFloat32 dist;
-				i2 = m_index[i] * m_stride;
+				//dgInt32 i2 = m_index[i] * m_stride;
 				const dgVector q (ClosestDistanceToTriangle (point, m_localPoly[0], m_localPoly[i - 1], m_localPoly[i]));
 				const dgVector error (q - point);
-				dist = error % error;
+				dgFloat32 dist = error % error;
 				if (dist < minDist) {
 					minDist = dist;
 					closestPoint = q;
@@ -908,21 +838,16 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 				contact.m_penetration = dgFloat32 (0.0f);
 				contact.m_point = (closestPoint + supportPoint).Scale (dgFloat32 (0.5f));
 			} else {
-				dgFloat32 a;
-				dgFloat32 b;
-				dgFloat32 c;
-				dgFloat32 desc;
 				dgVector dp (closestPoint - p);
 
-				a = veloc % veloc;
-				b = - dgFloat32 (2.0f) * (dp % veloc);
-				c = dp % dp - radius * radius;
+				dgFloat32 a = veloc % veloc;
+				dgFloat32 b = - dgFloat32 (2.0f) * (dp % veloc);
+				dgFloat32 c = dp % dp - radius * radius;
 
-				desc = b * b - dgFloat32 (4.0f) * a * c;
+				dgFloat32 desc = b * b - dgFloat32 (4.0f) * a * c;
 				if (desc >= dgFloat32 (0.0f)) {
-					dgFloat32 t;
 					desc = dgSqrt (desc);
-					t = dgFloat32 (0.5f) * GetMin ((b + desc), (b - desc)) / a;
+					dgFloat32 t = dgFloat32 (0.5f) * GetMin ((b + desc), (b - desc)) / a;
 					if (t >= 0.0f) {
 						timestep = t;
 						_ASSERTE (timestep > dgFloat32 (0.0f));

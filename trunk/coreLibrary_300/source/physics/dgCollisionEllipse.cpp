@@ -118,6 +118,9 @@ dgVector dgCollisionEllipse::SupportVertex (const dgVector& dir) const
 
 dgVector dgCollisionEllipse::SupportVertexSimd (const dgVector& dir) const
 {
+_ASSERTE (0);
+return SupportVertex (dir);
+/*
 	_ASSERTE ((dir % dir) > dgFloat32 (0.999f));
 	_ASSERTE ((dgUnsigned64(&dir) & 0x0f) == 0);
 	_ASSERTE ((dgUnsigned64(&m_scale) & 0x0f) == 0);
@@ -139,6 +142,7 @@ dgVector dgCollisionEllipse::SupportVertexSimd (const dgVector& dir) const
 
 	dgVector p (dgCollisionSphere::SupportVertexSimd (dir1));
 	return dgVector (p.m_x * m_scale.m_x, p.m_y * m_scale.m_y, p.m_z * m_scale.m_z, dgFloat32 (0.0f)); 
+*/
 }
 
 

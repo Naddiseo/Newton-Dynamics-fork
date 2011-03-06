@@ -369,11 +369,11 @@ dgInt32 dgCollisionCone::CalculatePlaneIntersection (const dgVector& normal, con
 }
 
 
-dgInt32 dgCollisionCone::CalculatePlaneIntersectionSimd (
-	const dgVector& normal, 
-	const dgVector& origin, 
-	dgVector contactsOut[]) const
+dgInt32 dgCollisionCone::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& origin, dgVector contactsOut[]) const
 {
+_ASSERTE (0);
+return 0;
+/*
 	dgInt32 i;
 	dgInt32 count;
 	dgFloat32 y;
@@ -385,19 +385,6 @@ dgInt32 dgCollisionCone::CalculatePlaneIntersectionSimd (
 	simd_type mag2;
 
 	if (dgAbsf (normal.m_x) < dgFloat32 (0.999f)) { 
-//		magInv = dgRsqrt (normal.m_y * normal.m_y + normal.m_z * normal.m_z);
-//		cosAng = normal.m_y * magInv;
-//		sinAng = normal.m_z * magInv;
-//		dgMatrix matrix (dgGetIdentityMatrix ());
-//		matrix[1][1] = cosAng;
-//		matrix[1][2] = sinAng;
-//		matrix[2][1] = -sinAng;
-//		matrix[2][2] = cosAng;
-//		dgVector normal2 (matrix.UnrotateVector (normal));
-//		dgVector origin2 (matrix.UnrotateVector (origin));
-//		count = dgCollisionConvex::CalculatePlaneIntersection (normal1, origin1, contactsOut);
-//		matrix.TransformTriplex (contactsOut, sizeof (dgVector), contactsOut, sizeof (dgVector), count); 
-
 		y = normal.m_y * normal.m_y + normal.m_z * normal.m_z;
 		mag2  = simd_load_s (y);
 		tmp0 = simd_rsqrt_s(mag2);
@@ -406,8 +393,6 @@ dgInt32 dgCollisionCone::CalculatePlaneIntersectionSimd (
 		cosAng = normal.m_y * magInv;
 		sinAng = normal.m_z * magInv;
 		_ASSERTE (dgAbsf (normal.m_z * cosAng - normal.m_y * sinAng) < dgFloat32 (1.0e-4f));
-//		dgVector normal1 (normal.m_x, normal.m_y * cosAng + normal.m_z * sinAng, 
-//									  normal.m_z * cosAng - normal.m_y * sinAng, dgFloat32 (0.0f));
 		dgVector normal1 (normal.m_x, normal.m_y * cosAng + normal.m_z * sinAng, dgFloat32 (0.0f), dgFloat32 (0.0f));
 		dgVector origin1 (origin.m_x, origin.m_y * cosAng + origin.m_z * sinAng, 
 			                          origin.m_z * cosAng - origin.m_y * sinAng, dgFloat32 (0.0f));
@@ -425,6 +410,7 @@ dgInt32 dgCollisionCone::CalculatePlaneIntersectionSimd (
 	}
 
 	return count;
+*/
 }
 
 

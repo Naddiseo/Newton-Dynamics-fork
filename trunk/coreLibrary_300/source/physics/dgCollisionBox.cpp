@@ -154,21 +154,19 @@ dgVector dgCollisionBox::SupportVertex (const dgVector& dir) const
 {
 	_ASSERTE (dgAbsf(dir % dir - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
 
-#if 1
-	dgInt32 x;
-	dgInt32 y;
-	dgInt32 z;
-	dgFloatSign *ptr =  (dgFloatSign*) &dir; 
+#if 0
+	dgFloatSign* const ptr =  (dgFloatSign*) &dir; 
 
-	x = -(ptr[0].m_integer.m_iVal >> 31);
-	y = -(ptr[1].m_integer.m_iVal >> 31);
-	z = -(ptr[2].m_integer.m_iVal >> 31);
+	dgInt32 x = -(ptr[0].m_integer.m_iVal >> 31);
+	dgInt32 y = -(ptr[1].m_integer.m_iVal >> 31);
+	dgInt32 z = -(ptr[2].m_integer.m_iVal >> 31);
 	return dgVector (m_size[x].m_x, m_size[y].m_y, m_size[z].m_z, dgFloat32 (0.0f));
 
 #else
-	return dgVector (dir.m_x < dgFloat32 (0.0f) ? -m_size[0].m_x : m_size[0].m_x, 
-					 dir.m_y < dgFloat32 (0.0f) ? -m_size[0].m_y : m_size[0].m_y, 
-					 dir.m_z < dgFloat32 (0.0f) ? -m_size[0].m_z : m_size[0].m_z, dgFloat32 (0.0f));
+	// according to Intel in latest possessors this is better, because read after write are very, very expensive
+	return dgVector (dir.m_x < dgFloat32 (0.0f) ? m_size[1].m_x : m_size[0].m_x, 
+					 dir.m_y < dgFloat32 (0.0f) ? m_size[1].m_y : m_size[0].m_y, 
+					 dir.m_z < dgFloat32 (0.0f) ? m_size[1].m_z : m_size[0].m_z, dgFloat32 (0.0f));
 #endif
 
 }
@@ -176,13 +174,9 @@ dgVector dgCollisionBox::SupportVertex (const dgVector& dir) const
 
 void dgCollisionBox::CalcAABB (const dgMatrix &matrix, dgVector &p0, dgVector &p1) const
 {
-	dgFloat32 x;
-	dgFloat32 y;
-	dgFloat32 z;
-
-	x = m_size[0].m_x * dgAbsf(matrix[0][0]) + m_size[0].m_y * dgAbsf(matrix[1][0]) + m_size[0].m_z * dgAbsf(matrix[2][0]) + DG_MAX_COLLISION_PADDING;  
-	y = m_size[0].m_x * dgAbsf(matrix[0][1]) + m_size[0].m_y * dgAbsf(matrix[1][1]) + m_size[0].m_z * dgAbsf(matrix[2][1]) + DG_MAX_COLLISION_PADDING;  
-	z = m_size[0].m_x * dgAbsf(matrix[0][2]) + m_size[0].m_y * dgAbsf(matrix[1][2]) + m_size[0].m_z * dgAbsf(matrix[2][2]) + DG_MAX_COLLISION_PADDING;  
+	dgFloat32 x = m_size[0].m_x * dgAbsf(matrix[0][0]) + m_size[0].m_y * dgAbsf(matrix[1][0]) + m_size[0].m_z * dgAbsf(matrix[2][0]) + DG_MAX_COLLISION_PADDING;  
+	dgFloat32 y = m_size[0].m_x * dgAbsf(matrix[0][1]) + m_size[0].m_y * dgAbsf(matrix[1][1]) + m_size[0].m_z * dgAbsf(matrix[2][1]) + DG_MAX_COLLISION_PADDING;  
+	dgFloat32 z = m_size[0].m_x * dgAbsf(matrix[0][2]) + m_size[0].m_y * dgAbsf(matrix[1][2]) + m_size[0].m_z * dgAbsf(matrix[2][2]) + DG_MAX_COLLISION_PADDING;  
 
 	p0.m_x = matrix[3][0] - x;
 	p1.m_x = matrix[3][0] + x;
@@ -200,33 +194,12 @@ void dgCollisionBox::CalcAABB (const dgMatrix &matrix, dgVector &p0, dgVector &p
 
 void dgCollisionBox::CalcAABBSimd (const dgMatrix &matrix, dgVector &p0, dgVector &p1) const
 {
-//	dgFloat32 x;
-//	dgFloat32 y;
-//	dgFloat32 z;
+	simd_128 size (m_aabbPadding + ((simd_128&)matrix[0] & m_signMask) * (simd_128&) m_size_x + 
+								   ((simd_128&)matrix[1] & m_signMask) * (simd_128&) m_size_y + 
+								   ((simd_128&)matrix[2] & m_signMask) * (simd_128&) m_size_z); 
 
-//	x = m_size[0].m_x * dgAbsf(matrix[0][0]) + m_size[0].m_y * dgAbsf(matrix[1][0]) + m_size[0].m_z * dgAbsf(matrix[2][0]) + DG_MAX_COLLISION_PADDING;  
-//	y = m_size[0].m_x * dgAbsf(matrix[0][1]) + m_size[0].m_y * dgAbsf(matrix[1][1]) + m_size[0].m_z * dgAbsf(matrix[2][1]) + DG_MAX_COLLISION_PADDING;  
-//	z = m_size[0].m_x * dgAbsf(matrix[0][2]) + m_size[0].m_y * dgAbsf(matrix[1][2]) + m_size[0].m_z * dgAbsf(matrix[2][2]) + DG_MAX_COLLISION_PADDING;  
-	simd_type tmp = simd_mul_add_v (
-						simd_mul_add_v (
-							simd_mul_add_v ((simd_type&) m_aabb_padd, (simd_type&) m_size_x, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[0])),
-																	  (simd_type&) m_size_y, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[1])),		   
-																	  (simd_type&) m_size_z, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[2]));
-
-
-//	p0.m_x = matrix[3][0] - x;
-//	p1.m_x = matrix[3][0] + x;
-//	p0.m_y = matrix[3][1] - y;
-//	p1.m_y = matrix[3][1] + y;
-//	p0.m_z = matrix[3][2] - z;
-//	p1.m_z = matrix[3][2] + z;
-//	p0.m_w = dgFloat32 (1.0f);
-//	p1.m_w = dgFloat32 (1.0f);
-	(simd_type&)p0 = simd_sub_v ((simd_type&)matrix[3], tmp);
-	(simd_type&)p1 = simd_add_v ((simd_type&)matrix[3], tmp);
-
-	p0.m_w = dgFloat32 (0.0f);
-	p1.m_w = dgFloat32 (0.0f);
+	(simd_128&)p0 = ((simd_128&)matrix[3] - size) & m_triplexMask;
+	(simd_128&)p1 = ((simd_128&)matrix[3] + size) & m_triplexMask;
 }
 
 
@@ -417,25 +390,13 @@ dgFloat32 dgCollisionBox::GetBreakImpulse() const
 
 dgInt32 dgCollisionBox::CalculatePlaneIntersection (const dgVector& normal, const dgVector& point, dgVector* const contactsOut) const
 {
-	dgInt32 i;
-	dgInt32 count;
-	dgInt32 index0;
-	dgFloat32 t;
-	dgFloat32 side0;
-	dgFloat32 side1;
-	dgConvexSimplexEdge *ptr;
-	dgConvexSimplexEdge *ptr1;
-	dgConvexSimplexEdge *edge;
-	dgConvexSimplexEdge *firstEdge;
-	
 	dgFloat32 test[8];
-
 	dgPlane plane (normal, - (normal % point));
 
-	edge = NULL;
-	side1 = dgFloat32 (1.0e20f);
-	for (i = 0; i < 8; i ++) {
-		side0 = plane.Evalue (m_vertex[i]);
+	dgConvexSimplexEdge* edge = NULL;
+	dgFloat32 side1 = dgFloat32 (1.0e20f);
+	for (dgInt32 i = 0; i < 8; i ++) {
+		dgFloat32 side0 = plane.Evalue (m_vertex[i]);
 		test[i] = side0;
 		if (side0 > dgFloat32 (0.0f)) {
 			if (side0 < side1) {
@@ -445,16 +406,16 @@ dgInt32 dgCollisionBox::CalculatePlaneIntersection (const dgVector& normal, cons
 		}
 	}
 
-	count = 0;
+	dgInt32 count = 0;
 	if (edge) {
 		_ASSERTE (test[edge->m_vertex] > dgFloat32 (0.0f));
 
-		ptr = edge;
-		firstEdge = NULL;
-		side0 = test[edge->m_vertex];
+		dgConvexSimplexEdge* ptr = edge;
+		dgConvexSimplexEdge* firstEdge = NULL;
+		dgFloat32 side0 = test[edge->m_vertex];
 		do {
 			_ASSERTE (m_vertex[ptr->m_twin->m_vertex].m_w == dgFloat32 (1.0f));
-			side1 = test[ptr->m_twin->m_vertex];
+			dgFloat32 side1 = test[ptr->m_twin->m_vertex];
 			if (side1 < side0) {
 				if (side1 < dgFloat32 (0.0f)) {
 					firstEdge = ptr;
@@ -474,7 +435,7 @@ dgInt32 dgCollisionBox::CalculatePlaneIntersection (const dgVector& normal, cons
 			do {
 				dgVector dp (m_vertex[ptr->m_twin->m_vertex] - m_vertex[ptr->m_vertex]);
 
-				t = plane % dp;
+				dgFloat32 t = plane % dp;
 				if (t >= dgFloat32 (-1.e-24f)) {
 					t = dgFloat32 (0.0f);
 				} else {
@@ -492,8 +453,9 @@ dgInt32 dgCollisionBox::CalculatePlaneIntersection (const dgVector& normal, cons
 				contactsOut[count] = m_vertex[ptr->m_vertex] - dp.Scale (t);
 				count ++;
 
-				for (ptr1 = ptr->m_next; ptr1 != ptr; ptr1 = ptr1->m_next) {
-					index0 = ptr1->m_twin->m_vertex;
+				dgConvexSimplexEdge* ptr1 = ptr1 = ptr->m_next;
+				for (; ptr1 != ptr; ptr1 = ptr1->m_next) {
+					dgInt32 index0 = ptr1->m_twin->m_vertex;
 					if (test[index0] >= dgFloat32 (0.0f)) {
 						_ASSERTE (test[ptr1->m_vertex] <= dgFloat32 (0.0f));
 						break;
@@ -515,6 +477,8 @@ dgInt32 dgCollisionBox::CalculatePlaneIntersection (const dgVector& normal, cons
 
 dgInt32 dgCollisionBox::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& point, dgVector* const contactsOut) const
 {
+return CalculatePlaneIntersection (normal, point, contactsOut);
+/*
 	dgInt32 i;
 	dgInt32 count;
 	dgInt32 index0;
@@ -640,6 +604,7 @@ dgInt32 dgCollisionBox::CalculatePlaneIntersectionSimd (const dgVector& normal, 
 		count = RectifyConvexSlice (count, normal, contactsOut);
 	}
 	return count;
+*/
 }
 
 void dgCollisionBox::GetCollisionInfo(dgCollisionInfo* info) const
