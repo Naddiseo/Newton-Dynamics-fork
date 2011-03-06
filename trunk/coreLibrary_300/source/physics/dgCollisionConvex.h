@@ -135,12 +135,10 @@ class dgCollisionConvex: public dgCollision
 	static dgVector m_multiResDir[8];
 	static dgVector m_multiResDir_sse[6];
 	
-	static dgVector m_huge;
-	static dgVector m_negativeTiny;
+//	static dgVector m_huge;
+//	static dgVector m_negativeTiny;
 
 	static dgTriplex m_hullDirs[14]; 
-
-
 	static dgInt32 m_rayCastSimplex[4][4];
 	
 	friend class dgWorld;

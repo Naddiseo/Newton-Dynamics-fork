@@ -104,13 +104,11 @@ void dgCollisionBox::Init (dgFloat32 size_x, dgFloat32 size_y, dgFloat32 size_z)
 	m_vertex[6]	= dgVector (-m_size[0].m_x,  m_size[0].m_y, -m_size[0].m_z, dgFloat32 (1.0f));
 	m_vertex[7]	= dgVector ( m_size[0].m_x,  m_size[0].m_y, -m_size[0].m_z, dgFloat32 (1.0f));
 
-	m_vertex_sse[0] = dgVector (m_vertex[0].m_x, m_vertex[1].m_x, m_vertex[2].m_x, m_vertex[3].m_x);
-	m_vertex_sse[1] = dgVector (m_vertex[0].m_y, m_vertex[1].m_y, m_vertex[2].m_y, m_vertex[3].m_y);
-	m_vertex_sse[2] = dgVector (m_vertex[0].m_z, m_vertex[1].m_z, m_vertex[2].m_z, m_vertex[3].m_z);
-	m_vertex_sse[3] = dgVector (m_vertex[4].m_x, m_vertex[5].m_x, m_vertex[6].m_x, m_vertex[7].m_x);
-	m_vertex_sse[4] = dgVector (m_vertex[4].m_y, m_vertex[5].m_y, m_vertex[6].m_y, m_vertex[7].m_y);
-	m_vertex_sse[5] = dgVector (m_vertex[4].m_z, m_vertex[5].m_z, m_vertex[6].m_z, m_vertex[7].m_z);
-
+	simd_128 tmp;
+	Transpose4x4Simd_128 (m_vertex_sse[0], m_vertex_sse[1], m_vertex_sse[2], tmp, 
+						 (simd_128&)m_vertex[0], (simd_128&)m_vertex[1], (simd_128&)m_vertex[2], (simd_128&)m_vertex[3]);
+	Transpose4x4Simd_128 (m_vertex_sse[3], m_vertex_sse[4], m_vertex_sse[5], tmp, 
+						 (simd_128&)m_vertex[4], (simd_128&)m_vertex[5], (simd_128&)m_vertex[6], (simd_128&)m_vertex[7]);
 
 	dgCollisionConvex::m_vertex = m_vertex;
 	dgCollisionConvex::m_simplex = m_edgeArray;
@@ -326,26 +324,18 @@ dgFloat32 dgCollisionBox::RayCast (const dgVector& localP0, const dgVector& loca
 #endif
 }
 
-dgFloat32 dgCollisionBox::RayCastSimd (
-	const dgVector& localP0, 
-	const dgVector& localP1, 
-	dgContactPoint& contactOut, 
-	OnRayPrecastAction preFilter,
-	const dgBody* const body,	
-	void* const userData) const
+dgFloat32 dgCollisionBox::RayCastSimd (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
 {
 	return RayCast (localP0, localP1, contactOut, preFilter, body, userData);
 }
 
 
-
 dgFloat32 dgCollisionBox::CalculateMassProperties (dgVector& inertia, dgVector& crossInertia, dgVector& centerOfMass) const
 {
-	dgFloat32 volume;
 //	volume = dgCollisionConvex::CalculateMassProperties (inertia, crossInertia, centerOfMass);
 
 	centerOfMass = GetOffsetMatrix().m_posit;
-	volume = dgFloat32 (8.0f) * m_size[0].m_x * m_size[0].m_y * m_size[0].m_z; 
+	dgFloat32 volume = dgFloat32 (8.0f) * m_size[0].m_x * m_size[0].m_y * m_size[0].m_z; 
 
 	dgVector II (dgFloat32 (1.0f / 3.0f) * volume * (m_size[0].m_y * m_size[0].m_y + m_size[0].m_z * m_size[0].m_z),
 				 dgFloat32 (1.0f / 3.0f) * volume * (m_size[0].m_x * m_size[0].m_x + m_size[0].m_z * m_size[0].m_z),
@@ -477,86 +467,65 @@ dgInt32 dgCollisionBox::CalculatePlaneIntersection (const dgVector& normal, cons
 
 dgInt32 dgCollisionBox::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& point, dgVector* const contactsOut) const
 {
-return CalculatePlaneIntersection (normal, point, contactsOut);
-/*
-	dgInt32 i;
-	dgInt32 count;
-	dgInt32 index0;
-	dgInt32 index1;
-	dgFloat32 side0;
-	dgFloat32 side1;
-	dgFloat32* test;
-	dgConvexSimplexEdge *ptr;
-	dgConvexSimplexEdge *ptr1;
-	dgConvexSimplexEdge *edge;
-	dgConvexSimplexEdge *firstEdge;
-	simd_type dot;
-	simd_type den;
-	simd_type p1p0;
-//	simd_type minVal;
-//	simd_type edgePtr;
-	simd_type plane_a;
-	simd_type plane_b;
-	simd_type plane_c;
-	simd_type plane_d;
-	simd_type side[2];
+	dgInt32 count = 0;
+	simd_128 plane (((simd_128&)normal & m_triplexMask));
+	plane = plane - plane.DotProduct((simd_128&)point).AndNot(m_triplexMask);
 
-	test = (dgFloat32*) &side[0];
-	dgPlane plane (normal, - (normal % point));
+	simd_128 plane_a;
+	simd_128 plane_b;
+	simd_128 plane_c;
+	simd_128 plane_d;
+	simd_128 side[2];
 
-	plane_a = simd_set1 (plane.m_x);
-	plane_b = simd_set1 (plane.m_y);
-	plane_c = simd_set1 (plane.m_z);
-	plane_d = simd_set1 (plane.m_w);
+	Transpose4x4Simd_128 (plane_a, plane_b, plane_c, plane_d, plane, plane, plane, plane);
+	
+	side[0] = plane_a * m_vertex_sse[0] + plane_b * m_vertex_sse[1] + plane_c * m_vertex_sse[2] + plane_d;
+	side[1] = plane_a * m_vertex_sse[3] + plane_b * m_vertex_sse[4] + plane_c * m_vertex_sse[5] + plane_d;
+	
+	simd_128 zero (dgFloat32 (0.0f));
+	simd_128 huge (dgFloat32 (1.0e20f));
+	simd_128 negOne (dgFloat32 (-1.0f));
+	
+	simd_128 sideTest (side[0] > zero);
+	simd_128 positiveSide0 ((side[0] & sideTest) | huge.AndNot(sideTest));
+	simd_128 index0 ((m_index_0123 & sideTest) | negOne.AndNot(sideTest));
 
-	side[0] = simd_mul_add_v (simd_mul_add_v (simd_mul_add_v (plane_d, *((simd_type*) &m_vertex_sse[0]), plane_a),
-																	   *((simd_type*) &m_vertex_sse[1]), plane_b),
-																	   *((simd_type*) &m_vertex_sse[2]), plane_c);
-	side[1] = simd_mul_add_v (simd_mul_add_v (simd_mul_add_v (plane_d, *((simd_type*) &m_vertex_sse[3]), plane_a),
-																	   *((simd_type*) &m_vertex_sse[4]), plane_b),
-																	   *((simd_type*) &m_vertex_sse[5]), plane_c);
+	sideTest = side[1] > zero;
+	simd_128 positiveSide1 ((side[1] & sideTest) | huge.AndNot(sideTest));
+	simd_128 index1 ((m_index_4567 & sideTest) | negOne.AndNot(sideTest));
 
-//	edgePtr = *((simd_type*) &m_zero);
-//	minVal = simd_mul_s(simd_load_s(m_huge.m_x), *((simd_type*) &m_nrh0p5));
-//	for (i = 0; i < 8; i ++) {
-//		den = simd_load_s(test[i]);
-//		dot = simd_cmpgt_s(den, *((simd_type*) &m_zero));
-//		den = simd_or_v(simd_and_v (den, dot), simd_andnot_v (*((simd_type*) &m_huge), dot));
-//		dot = simd_cmplt_s(den, minVal);
-//		minVal = simd_min_s(den, minVal);
-//		edgePtr = simd_or_v(simd_and_v (simd_load_s (*((float*) &m_supportVertexStarCuadrant[i])), dot), simd_andnot_v (edgePtr, dot));
-//	}
-//	simd_store_s(edgePtr, (dgFloat32 *)&edge);
+	sideTest = positiveSide0 < positiveSide1;
+	positiveSide0 = positiveSide0.GetMin(positiveSide1);
+	index0 = (index0 & sideTest) | index1.AndNot(sideTest);
 
-	edge = NULL;
-	side1 = dgFloat32 (1.0e20f);
-	for (i = 0; i < 8; i ++) {
-//		side0 = plane.Evalue (m_vertex[i]);
-//		test[i] = side0;
-		side0 = test[i];
-		if (side0 > dgFloat32 (0.0f)) {
-			if (side0 < side1) {
-				side1 = side0;
-				edge = m_supportVertexStarCuadrant[i];
-			}
-		}
-	}
+	positiveSide1 = positiveSide0.MoveHighToLow(positiveSide0);
+	sideTest = positiveSide0 < positiveSide1;
+	positiveSide0 = positiveSide0.GetMin(positiveSide1);
+	index0 = (index0 & sideTest) | index0.MoveHighToLow(index0).AndNot(sideTest);
 
-	count = 0;
-	if (edge) {
+	positiveSide1 = positiveSide0.PackLow(positiveSide0);
+	sideTest = positiveSide0 < positiveSide1.MoveHighToLow(positiveSide1);
+	index1 = index0.PackLow(index0);
+	dgInt32 index = ((index0 & sideTest) | (index1.MoveHighToLow(index1).AndNot(sideTest))).GetInt();
 
-		ptr = edge;
-		firstEdge = NULL;
-		side0 = test[edge->m_vertex];
+	if (index >= 0) {
+		dgConvexSimplexEdge* edge = m_supportVertexStarCuadrant[index];
+
+		const dgFloat32* const test = (dgFloat32*) &side[0];
+		_ASSERTE (test[edge->m_vertex] > dgFloat32 (0.0f));
+
+		dgConvexSimplexEdge* ptr = edge;
+		dgConvexSimplexEdge* firstEdge = NULL;
+
+		simd_128 side0 (test[edge->m_vertex]);
 		do {
 			_ASSERTE (m_vertex[ptr->m_twin->m_vertex].m_w == dgFloat32 (1.0f));
-			side1 = test[ptr->m_twin->m_vertex];
-			if (side1 < side0) {
-				if (side1 < dgFloat32 (0.0f)) {
+			simd_128 side1 (test[ptr->m_twin->m_vertex]);
+			if ((side1 < side0).GetSignMask()) {
+				if ((side1 < zero).GetSignMask()) {
 					firstEdge = ptr;
 					break;
 				}
-
 				side0 = side1;
 				edge = ptr->m_twin;
 				ptr = edge;
@@ -568,43 +537,42 @@ return CalculatePlaneIntersection (normal, point, contactsOut);
 			edge = firstEdge;
 			ptr = edge;
 			do {
-				index0 = ptr->m_vertex;
-				index1 = ptr->m_twin->m_vertex;
-	//			dgVector dp (m_vertex[index1] - m_vertex[index0]);
-	//			contactsOut[count] = m_vertex[index0] - dp.Scale (test[index0] / (plane % dp));
 
+				dgInt32 index0 = ptr->m_vertex;
+				dgInt32 index1 = ptr->m_twin->m_vertex;
 				_ASSERTE (m_vertex[index0].m_w == dgFloat32 (1.0f));
 				_ASSERTE (m_vertex[index1].m_w == dgFloat32 (1.0f));
-				p1p0 = simd_sub_v (*(simd_type*) &m_vertex[index1], *(simd_type*) &m_vertex[index0]);		
-				dot = simd_mul_v (p1p0, *(simd_type*) &plane);
-				dot = simd_add_s(simd_add_v (dot, simd_move_hl_v (dot, dot)), simd_permut_v (dot, dot, PURMUT_MASK (3,3,3,1)));
-				den = simd_rcp_s(dot);
-				den = simd_mul_s (simd_load_s(test[index0]), simd_mul_sub_s(simd_add_s(den, den), simd_mul_s(den, dot), den));
-				den = simd_min_s (simd_max_s (den, *(simd_type*)&m_negOne), *(simd_type*)&m_zero);
 
-				_ASSERTE (((dgFloat32*)&den)[0] <= dgFloat32 (0.0f));
-				_ASSERTE (((dgFloat32*)&den)[0] >= dgFloat32 (-1.0f));
-				(*(simd_type*) &contactsOut[count]) = simd_mul_sub_v (*(simd_type*) &m_vertex[index0], p1p0, simd_permut_v (den, den, PURMUT_MASK (3,0,0,0)));
+				simd_128 p1p0 ((simd_128&)m_vertex[index1] - (simd_128&)m_vertex[index0]);
+				simd_128 dot (plane.DotProduct(p1p0));
+				
+				simd_128 den (simd_128(test[index0]) / dot);
+				den = zero.GetMin (negOne.GetMax (den));
 
+				_ASSERTE (den.m_type.m128_f32[0] <= dgFloat32 (0.0f));
+				_ASSERTE (den.m_type.m128_f32[0] >= dgFloat32 (-1.0f));
+				(simd_128&)contactsOut[count] = (simd_128&)m_vertex[index0] - p1p0 * den;
 				count ++;
-				for (ptr1 = ptr->m_next; ptr1 != ptr; ptr1 = ptr1->m_next) {
-					index0 = ptr1->m_twin->m_vertex;
-					if (test[index0] >= dgFloat32 (0.0f)) {
+
+				dgConvexSimplexEdge* ptr1 = ptr1 = ptr->m_next;
+				for (; ptr1 != ptr; ptr1 = ptr1->m_next) {
+					dgInt32 index0 = ptr1->m_twin->m_vertex;
+					if ((simd_128 (test[index0]) >= zero).GetSignMask()) {
 						_ASSERTE (test[ptr1->m_vertex] <= dgFloat32 (0.0f));
 						break;
 					}
 				}
 				_ASSERTE (ptr != ptr1);
 				ptr = ptr1->m_twin;
+
 			} while ((ptr != edge) && (count < 8));
 		}
 	}
-
 	if (count > 1) {
 		count = RectifyConvexSlice (count, normal, contactsOut);
 	}
 	return count;
-*/
+
 }
 
 void dgCollisionBox::GetCollisionInfo(dgCollisionInfo* info) const

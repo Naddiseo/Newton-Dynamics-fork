@@ -79,8 +79,8 @@ dgVector dgCollisionConvex::m_multiResDir_sse[6];
 //dgVector dgCollisionConvex::m_nrh0p5 (dgFloat32 (0.5f), dgFloat32 (0.5f), dgFloat32 (0.5f), dgFloat32 (0.5f));
 //dgVector dgCollisionConvex::m_nrh3p0 (dgFloat32 (3.0f), dgFloat32 (3.0f), dgFloat32 (3.0f), dgFloat32 (3.0f));
 //dgVector dgCollisionConvex::m_indexStep (dgFloat32 (4.0f), dgFloat32 (4.0f), dgFloat32 (4.0f), dgFloat32 (4.0f));
-dgVector dgCollisionConvex::m_huge (dgFloat32 (1.0e20f), dgFloat32 (1.0e20f), dgFloat32 (1.0e20f), dgFloat32 (1.0e20f));
-dgVector dgCollisionConvex::m_negativeTiny (dgFloat32 (-1.0e-24f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+//dgVector dgCollisionConvex::m_huge (dgFloat32 (1.0e20f), dgFloat32 (1.0e20f), dgFloat32 (1.0e20f), dgFloat32 (1.0e20f));
+//dgVector dgCollisionConvex::m_negativeTiny (dgFloat32 (-1.0e-24f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 //dgVector dgCollisionConvex::m_aabb_padd (DG_MAX_COLLISION_PADDING, DG_MAX_COLLISION_PADDING, DG_MAX_COLLISION_PADDING, dgFloat32 (0.0f));
 
 simd_128 dgCollisionConvex::m_aabbPadding (DG_MAX_COLLISION_PADDING);

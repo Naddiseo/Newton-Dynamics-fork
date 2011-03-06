@@ -62,7 +62,7 @@ class dgCollisionBox: public dgCollisionConvex
 
 	dgVector m_size[2];
 	dgVector m_vertex[8];
-	dgVector m_vertex_sse[6];
+	simd_128 m_vertex_sse[6];
 	dgFloat32 m_destructionImpulse;
 	
 	static dgConvexSimplexEdge m_edgeArray[];

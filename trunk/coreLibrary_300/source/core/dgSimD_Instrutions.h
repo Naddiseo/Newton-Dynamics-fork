@@ -149,7 +149,8 @@
 		#define simd_div_s(a,b)				_mm_div_ss(a,b)	
 		#define simd_rcp_s(a)				_mm_rcp_ss(a)	
 		#define simd_rsqrt_s(a)				_mm_rsqrt_ss(a)	
-		
+
+		DG_MSC_VECTOR_ALIGMENT
 		class simd_128
 		{
 			public:
@@ -341,7 +342,7 @@
 
 
 			simd_type m_type;
-		};
+		}DG_GCC_VECTOR_ALIGMENT;
 
 
 		DG_INLINE void Transpose4x4Simd_128 (simd_128& dst0, simd_128& dst1, simd_128& dst2, simd_128& dst3, 
