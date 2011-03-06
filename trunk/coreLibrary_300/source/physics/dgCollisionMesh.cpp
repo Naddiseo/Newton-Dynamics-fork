@@ -1034,9 +1034,121 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 }
 
 
-dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
+dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersectionSimd (const dgVector& normalIn, const dgVector& origin, dgVector* const contactsOut) const
 {
-	return CalculatePlaneIntersection (normal, origin, contactsOut);
+	dgVector normal(normalIn);
+	dgInt32 count = 0;
+	dgFloat32 maxDist = dgFloat32 (1.0f);
+	dgFloat32 projectFactor = m_normal % normal;
+	if (projectFactor < dgFloat32 (0.0f)) {
+		projectFactor *= dgFloat32 (-1.0f);
+		normal = normal.Scale (dgFloat32 (-1.0f));
+	}
+
+	if (projectFactor > dgFloat32 (0.9999f)) {
+		for (dgInt32 i = 0; i < m_count; i ++) {
+			contactsOut[count] = m_localPoly[i];
+			count ++;
+		}
+	} else if (projectFactor > dgFloat32 (0.1736f)) {
+		maxDist = dgFloat32 (0.0f);
+		dgPlane plane (normal, - (normal % origin));
+
+		dgVector p0 (m_localPoly[m_count - 1]);
+		dgFloat32 side0 = plane.Evalue (p0);
+		for (dgInt32 i = 0; i < m_count; i ++) {
+			dgVector p1 (m_localPoly[i]);
+			dgFloat32 side1 = plane.Evalue (p1);
+
+			if (side0 > dgFloat32 (0.0f)) {
+				maxDist = GetMax (maxDist, side0);
+				contactsOut[count] = p0 - plane.Scale (side0);
+				count ++;
+				if (count > 1) {
+					dgVector edgeSegment (contactsOut[count - 1] - contactsOut[count - 2]);
+					dgFloat32 error = edgeSegment % edgeSegment;
+					if (error < dgFloat32 (1.0e-8f)) {
+						count --;
+					}
+				}
+
+				if (side1 <= dgFloat32 (0.0f)) {
+					dgVector dp (p1 - p0);
+					dgFloat32 t = plane % dp;
+					_ASSERTE (dgAbsf (t) >= dgFloat32 (0.0f));
+					if (dgAbsf (t) < dgFloat32 (1.0e-8f)) {
+						t = GetSign(t) * dgFloat32 (1.0e-8f);	
+					}
+					contactsOut[count] = p0 - dp.Scale (side0 / t);
+					count ++;
+					if (count > 1) {
+						dgVector edgeSegment (contactsOut[count - 1] - contactsOut[count - 2]);
+						dgFloat32 error = edgeSegment % edgeSegment;
+						if (error < dgFloat32 (1.0e-8f)) {
+							count --;
+						}
+					}
+				} 
+			} else if (side1 > dgFloat32 (0.0f)) {
+				dgVector dp (p1 - p0);
+				dgFloat32 t = plane % dp;
+				_ASSERTE (dgAbsf (t) >= dgFloat32 (0.0f));
+				if (dgAbsf (t) < dgFloat32 (1.0e-8f)) {
+					t = GetSign(t) * dgFloat32 (1.0e-8f);	
+				}
+				contactsOut[count] = p0 - dp.Scale (side0 / t);
+				count ++;
+				if (count > 1) {
+					dgVector edgeSegment (contactsOut[count - 1] - contactsOut[count - 2]);
+					dgFloat32 error = edgeSegment % edgeSegment;
+					if (error < dgFloat32 (1.0e-8f)) {
+						count --;
+					}
+				}
+			}
+
+			side0 = side1;
+			p0 = p1;
+		}
+	}
+
+
+	if (count > 1) {
+		if (maxDist < dgFloat32 (1.0e-3f)) {
+			dgFloat32 proj;
+			dgFloat32 maxProjection;
+			dgFloat32 minProjection;
+			dgVector maxPoint (contactsOut[0]);
+			dgVector minPoint (contactsOut[0]);
+			dgVector lineDir (m_normal * normal);
+
+			proj = contactsOut[0] % lineDir;
+			maxProjection = proj;
+			minProjection = proj;
+			for (dgInt32 i = 1; i < count; i ++) {
+				proj = contactsOut[i] % lineDir;
+				if (proj > maxProjection) {
+					maxProjection = proj;
+					maxPoint = contactsOut[i];
+				}
+				if (proj < minProjection) {
+					minProjection = proj;
+					minPoint = contactsOut[i];
+				}
+			}	
+
+			contactsOut[0] = maxPoint;
+			contactsOut[1] = minPoint;
+			count = 2;
+		}
+
+
+		dgVector error (contactsOut[count - 1] - contactsOut[0]);
+		if ((error % error) < dgFloat32 (1.0e-8f)) {
+			count --;
+		}
+	}
+	return count;
 }
 
 
