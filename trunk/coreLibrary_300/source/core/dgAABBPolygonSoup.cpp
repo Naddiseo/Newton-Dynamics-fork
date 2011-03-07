@@ -745,21 +745,18 @@ class dgAABBTree
 		return count;
 	}
 
-
-
 	DG_INLINE dgInt32 BoxIntersectSimd (const dgTriplex* const vertexArray, const dgVector& min, const dgVector& max) const
 	{
-		simd_type minBox = simd_loadu_v(vertexArray[m_minIndex].m_x);
-		simd_type maxBox = simd_loadu_v(vertexArray[m_maxIndex].m_x);
-
-		simd_type test = simd_or_v (simd_cmpge_v ((simd_type&)minBox, (simd_type&) max), simd_cmple_v ((simd_type&)maxBox, (simd_type&) min));
-		test = simd_or_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 2, 0)));
-		return simd_store_is(simd_or_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 1, 1))));
+		simd_128 minBox(&vertexArray[m_minIndex].m_x);
+		simd_128 maxBox(&vertexArray[m_maxIndex].m_x);
+		return dgOverlapTestSimd (minBox, maxBox, min, max) - 1;
 	}
 
 
 	DG_INLINE dgInt32 BoxIntersect (const dgTriplex* const vertexArray, const dgVector& min, const dgVector& max) const
 	{
+/*
+		// this is bad on new intel cpus because is does a read after write
 		dgFloatSign tmp0_x;
 		dgFloatSign tmp0_y;
 		dgFloatSign tmp0_z;
@@ -778,7 +775,11 @@ class dgAABBTree
 		tmp1_y.m_fVal = max.m_y - minBox.m_y;
 		tmp1_z.m_fVal = max.m_z - minBox.m_z;
 
-		return tmp0_x.m_integer.m_iVal | tmp0_y.m_integer.m_iVal | tmp0_z.m_integer.m_iVal | tmp1_x.m_integer.m_iVal | tmp1_y.m_integer.m_iVal | tmp1_z.m_integer.m_iVal;
+		int xxx = tmp0_x.m_integer.m_iVal | tmp0_y.m_integer.m_iVal | tmp0_z.m_integer.m_iVal | tmp1_x.m_integer.m_iVal | tmp1_y.m_integer.m_iVal | tmp1_z.m_integer.m_iVal;
+*/
+		dgVector boxP0 (vertexArray[m_minIndex].m_x, vertexArray[m_minIndex].m_x, vertexArray[m_minIndex].m_x, dgFloat32 (0.0f));
+		dgVector boxP1 (vertexArray[m_maxIndex].m_x, vertexArray[m_maxIndex].m_y, vertexArray[m_maxIndex].m_z, dgFloat32 (0.0f));
+		return dgOverlapTest (boxP0, boxP1, min, max) - 1;
 	}
 
 
