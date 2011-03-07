@@ -102,11 +102,7 @@ DG_INLINE dgMatrix::dgMatrix ()
 {
 }
 
-DG_INLINE dgMatrix::dgMatrix (
-	const dgVector &front, 
-	const dgVector &up,
-	const dgVector &right,
-	const dgVector &posit)
+DG_INLINE dgMatrix::dgMatrix (const dgVector &front, const dgVector &up, const dgVector &right, const dgVector &posit)
 	:m_front (front), m_up(up), m_right(right), m_posit(posit)
 {
 }

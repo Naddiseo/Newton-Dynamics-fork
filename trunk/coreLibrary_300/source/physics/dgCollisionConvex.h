@@ -124,7 +124,7 @@ class dgCollisionConvex: public dgCollision
 //	static dgInt32 m_iniliazised;
 //	static dgVector m_signMask;
 	
-	
+	public:	
 	static simd_128 m_signMask;
 	static simd_128 m_triplexMask;
 	static simd_128 m_aabbPadding;

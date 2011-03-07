@@ -816,43 +816,43 @@ void dgJacobianMemory::SwapRowsSimd (dgInt32 i, dgInt32 j) const
 	_ASSERTE (i != j);
 	//Swap (m_Jt[i], m_Jt[j]);
 	dgJacobianPair* const ptr0 = m_Jt;
-	simd_type tmp0 = (simd_type&)ptr0[i].m_jacobian_IM0.m_linear;
-	simd_type tmp1 = (simd_type&)ptr0[i].m_jacobian_IM0.m_angular;
-	simd_type tmp2 = (simd_type&)ptr0[i].m_jacobian_IM1.m_linear;
-	simd_type tmp3 = (simd_type&)ptr0[i].m_jacobian_IM1.m_angular;
-	simd_type tmp4 = (simd_type&)ptr0[j].m_jacobian_IM0.m_linear;
-	simd_type tmp5 = (simd_type&)ptr0[j].m_jacobian_IM0.m_angular;
-	simd_type tmp6 = (simd_type&)ptr0[j].m_jacobian_IM1.m_linear;
-	simd_type tmp7 = (simd_type&)ptr0[j].m_jacobian_IM1.m_angular;
+	simd_xxxx tmp0 = (simd_xxxx&)ptr0[i].m_jacobian_IM0.m_linear;
+	simd_xxxx tmp1 = (simd_xxxx&)ptr0[i].m_jacobian_IM0.m_angular;
+	simd_xxxx tmp2 = (simd_xxxx&)ptr0[i].m_jacobian_IM1.m_linear;
+	simd_xxxx tmp3 = (simd_xxxx&)ptr0[i].m_jacobian_IM1.m_angular;
+	simd_xxxx tmp4 = (simd_xxxx&)ptr0[j].m_jacobian_IM0.m_linear;
+	simd_xxxx tmp5 = (simd_xxxx&)ptr0[j].m_jacobian_IM0.m_angular;
+	simd_xxxx tmp6 = (simd_xxxx&)ptr0[j].m_jacobian_IM1.m_linear;
+	simd_xxxx tmp7 = (simd_xxxx&)ptr0[j].m_jacobian_IM1.m_angular;
 
-	(simd_type&)ptr0[j].m_jacobian_IM0.m_linear = tmp0;
-	(simd_type&)ptr0[j].m_jacobian_IM0.m_angular = tmp1;
-	(simd_type&)ptr0[j].m_jacobian_IM1.m_linear = tmp2;
-	(simd_type&)ptr0[j].m_jacobian_IM1.m_angular = tmp3;
-	(simd_type&)ptr0[i].m_jacobian_IM0.m_linear = tmp4;
-	(simd_type&)ptr0[i].m_jacobian_IM0.m_angular = tmp5;
-	(simd_type&)ptr0[i].m_jacobian_IM1.m_linear = tmp6;
-	(simd_type&)ptr0[i].m_jacobian_IM1.m_angular = tmp7;
+	(simd_xxxx&)ptr0[j].m_jacobian_IM0.m_linear = tmp0;
+	(simd_xxxx&)ptr0[j].m_jacobian_IM0.m_angular = tmp1;
+	(simd_xxxx&)ptr0[j].m_jacobian_IM1.m_linear = tmp2;
+	(simd_xxxx&)ptr0[j].m_jacobian_IM1.m_angular = tmp3;
+	(simd_xxxx&)ptr0[i].m_jacobian_IM0.m_linear = tmp4;
+	(simd_xxxx&)ptr0[i].m_jacobian_IM0.m_angular = tmp5;
+	(simd_xxxx&)ptr0[i].m_jacobian_IM1.m_linear = tmp6;
+	(simd_xxxx&)ptr0[i].m_jacobian_IM1.m_angular = tmp7;
 
 	//Swap (m_JMinv[i], m_JMinv[j]);
 	dgJacobianPair* const ptr1 = m_JMinv;
-	tmp0 = (simd_type&)ptr1[i].m_jacobian_IM0.m_linear;
-	tmp1 = (simd_type&)ptr1[i].m_jacobian_IM0.m_angular;
-	tmp2 = (simd_type&)ptr1[i].m_jacobian_IM1.m_linear;
-	tmp3 = (simd_type&)ptr1[i].m_jacobian_IM1.m_angular;
-	tmp4 = (simd_type&)ptr1[j].m_jacobian_IM0.m_linear;
-	tmp5 = (simd_type&)ptr1[j].m_jacobian_IM0.m_angular;
-	tmp6 = (simd_type&)ptr1[j].m_jacobian_IM1.m_linear;
-	tmp7 = (simd_type&)ptr1[j].m_jacobian_IM1.m_angular;
+	tmp0 = (simd_xxxx&)ptr1[i].m_jacobian_IM0.m_linear;
+	tmp1 = (simd_xxxx&)ptr1[i].m_jacobian_IM0.m_angular;
+	tmp2 = (simd_xxxx&)ptr1[i].m_jacobian_IM1.m_linear;
+	tmp3 = (simd_xxxx&)ptr1[i].m_jacobian_IM1.m_angular;
+	tmp4 = (simd_xxxx&)ptr1[j].m_jacobian_IM0.m_linear;
+	tmp5 = (simd_xxxx&)ptr1[j].m_jacobian_IM0.m_angular;
+	tmp6 = (simd_xxxx&)ptr1[j].m_jacobian_IM1.m_linear;
+	tmp7 = (simd_xxxx&)ptr1[j].m_jacobian_IM1.m_angular;
 
-	(simd_type&)ptr1[j].m_jacobian_IM0.m_linear = tmp0;
-	(simd_type&)ptr1[j].m_jacobian_IM0.m_angular = tmp1;
-	(simd_type&)ptr1[j].m_jacobian_IM1.m_linear = tmp2;
-	(simd_type&)ptr1[j].m_jacobian_IM1.m_angular = tmp3;
-	(simd_type&)ptr1[i].m_jacobian_IM0.m_linear = tmp4;
-	(simd_type&)ptr1[i].m_jacobian_IM0.m_angular = tmp5;
-	(simd_type&)ptr1[i].m_jacobian_IM1.m_linear = tmp6;
-	(simd_type&)ptr1[i].m_jacobian_IM1.m_angular = tmp7;
+	(simd_xxxx&)ptr1[j].m_jacobian_IM0.m_linear = tmp0;
+	(simd_xxxx&)ptr1[j].m_jacobian_IM0.m_angular = tmp1;
+	(simd_xxxx&)ptr1[j].m_jacobian_IM1.m_linear = tmp2;
+	(simd_xxxx&)ptr1[j].m_jacobian_IM1.m_angular = tmp3;
+	(simd_xxxx&)ptr1[i].m_jacobian_IM0.m_linear = tmp4;
+	(simd_xxxx&)ptr1[i].m_jacobian_IM0.m_angular = tmp5;
+	(simd_xxxx&)ptr1[i].m_jacobian_IM1.m_linear = tmp6;
+	(simd_xxxx&)ptr1[i].m_jacobian_IM1.m_angular = tmp7;
 
 	Swap (m_diagDamp[i], m_diagDamp[j]); 
 	Swap (m_invDJMinvJt[i], m_invDJMinvJt[j]);
@@ -1470,30 +1470,30 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 	dgFloat32 clampedForceIndexValue;
 	//dgJacobian y0;
 	//dgJacobian y1;
-	//	simd_type tmp0;
-	//	simd_type tmp1;
-	//	simd_type tmp2;
-	//	simd_type tmp3;
+	//	simd_xxxx tmp0;
+	//	simd_xxxx tmp1;
+	//	simd_xxxx tmp2;
+	//	simd_xxxx tmp3;
 
-	simd_type akNumSimd;
-	simd_type accNormSimd;
-	simd_type maxPassesSimd;
-	simd_type y0_linear;
-	simd_type y0_angular;
-	simd_type y1_linear;
-	simd_type y1_angular;
-	simd_type one;
-	simd_type zero;
-	simd_type signMask;
-	simd_type tol_pos_1eNeg5;
-	simd_type tol_pos_1eNeg8;
-	simd_type tol_neg_1eNeg16;
-	simd_type tol_pos_1eNeg16;
-	simd_type deltaAccelPtr[DG_CONSTRAINT_MAX_ROWS / DG_SIMD_WORD_SIZE];
-	simd_type deltaForcePtr[DG_CONSTRAINT_MAX_ROWS / DG_SIMD_WORD_SIZE];
-	simd_type activeRowPtr[DG_CONSTRAINT_MAX_ROWS / DG_SIMD_WORD_SIZE];
-	simd_type lowBoundPtr[DG_CONSTRAINT_MAX_ROWS / DG_SIMD_WORD_SIZE];
-	simd_type highBoundPtr[DG_CONSTRAINT_MAX_ROWS / DG_SIMD_WORD_SIZE];
+	simd_xxxx akNumSimd;
+	simd_xxxx accNormSimd;
+	simd_xxxx maxPassesSimd;
+	simd_xxxx y0_linear;
+	simd_xxxx y0_angular;
+	simd_xxxx y1_linear;
+	simd_xxxx y1_angular;
+	simd_xxxx one;
+	simd_xxxx zero;
+	simd_xxxx signMask;
+	simd_xxxx tol_pos_1eNeg5;
+	simd_xxxx tol_pos_1eNeg8;
+	simd_xxxx tol_neg_1eNeg16;
+	simd_xxxx tol_pos_1eNeg16;
+	simd_xxxx deltaAccelPtr[DG_CONSTRAINT_MAX_ROWS / DG_SIMD_WORD_SIZE];
+	simd_xxxx deltaForcePtr[DG_CONSTRAINT_MAX_ROWS / DG_SIMD_WORD_SIZE];
+	simd_xxxx activeRowPtr[DG_CONSTRAINT_MAX_ROWS / DG_SIMD_WORD_SIZE];
+	simd_xxxx lowBoundPtr[DG_CONSTRAINT_MAX_ROWS / DG_SIMD_WORD_SIZE];
+	simd_xxxx highBoundPtr[DG_CONSTRAINT_MAX_ROWS / DG_SIMD_WORD_SIZE];
 
 
 	dgFloat32* const deltaAccel = (dgFloat32*)deltaAccelPtr;
@@ -1573,14 +1573,14 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 		//dgInt32 k1;
 		//dgInt32 k2;
 		//dgInt32 k3;
-		//simd_type index_k;
-		//simd_type accel_j;
-		simd_type force_k;
-		//simd_type force_i;
-		//simd_type lowBound_j;
-		//simd_type higntBound_j;
-		//simd_type deltaforce_j;
-		simd_type lowHighBound_test;
+		//simd_xxxx index_k;
+		//simd_xxxx accel_j;
+		simd_xxxx force_k;
+		//simd_xxxx force_i;
+		//simd_xxxx lowBound_j;
+		//simd_xxxx higntBound_j;
+		//simd_xxxx deltaforce_j;
+		simd_xxxx lowHighBound_test;
 
 		i = first + j; 
 		//k = bilateralForceBounds[i].m_normalIndex;
@@ -1598,8 +1598,8 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 
 		//lowBound[j] = val * bilateralForceBounds[i].m_low;
 		//highBound[j] = val * bilateralForceBounds[i].m_upper;
-		(simd_type&)lowBound[j] = simd_mul_v (force_k, (simd_type&)lowerFrictionCoef[i]);
-		(simd_type&)highBound[j] = simd_mul_v (force_k, (simd_type&)upperFrictionCoef[i]);
+		(simd_xxxx&)lowBound[j] = simd_mul_v (force_k, (simd_xxxx&)lowerFrictionCoef[i]);
+		(simd_xxxx&)highBound[j] = simd_mul_v (force_k, (simd_xxxx&)upperFrictionCoef[i]);
 
 
 		//activeRow[j] = dgFloat32 (1.0f);
@@ -1614,26 +1614,26 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 		//	activeRow[j] = dgFloat32 (0.0f);
 		//}
 
-		(simd_type&)forceStep[j] = (simd_type&) force[i];
+		(simd_xxxx&)forceStep[j] = (simd_xxxx&) force[i];
 		//		lowBound_test = simd_cmplt_v (force_i, lowBound_j);
 		//		higntBound_test = simd_cmpgt_v (force_i, higntBound_j);
-		lowHighBound_test = simd_or_v (simd_cmplt_v ((simd_type&) force[i], (simd_type&)lowBound[j]), simd_cmpgt_v ((simd_type&) force[i], (simd_type&)highBound[j]));
-		(simd_type&)activeRow[j] = simd_andnot_v (one, lowHighBound_test);
-		maxPassesSimd = simd_add_v (maxPassesSimd, (simd_type&)activeRow[j]);
+		lowHighBound_test = simd_or_v (simd_cmplt_v ((simd_xxxx&) force[i], (simd_xxxx&)lowBound[j]), simd_cmpgt_v ((simd_xxxx&) force[i], (simd_xxxx&)highBound[j]));
+		(simd_xxxx&)activeRow[j] = simd_andnot_v (one, lowHighBound_test);
+		maxPassesSimd = simd_add_v (maxPassesSimd, (simd_xxxx&)activeRow[j]);
 
 		//force_k = simd_or_v (simd_and_v (lowBound_j, lowBound_test), simd_and_v (higntBound_j, higntBound_test));
-		//(simd_type&)force[i] = simd_mul_v (activeRow_j, simd_or_v (simd_and_v (force_k, lowHighBound_test), simd_andnot_v (force_i, lowHighBound_test)));
-		(simd_type&) force[i] = simd_min_v ((simd_type&)highBound[j], simd_max_v((simd_type&) force[i], (simd_type&)lowBound[j]));
+		//(simd_xxxx&)force[i] = simd_mul_v (activeRow_j, simd_or_v (simd_and_v (force_k, lowHighBound_test), simd_andnot_v (force_i, lowHighBound_test)));
+		(simd_xxxx&) force[i] = simd_min_v ((simd_xxxx&)highBound[j], simd_max_v((simd_xxxx&) force[i], (simd_xxxx&)lowBound[j]));
 
 
 		//deltaForce[j] = accel[j] * invDJMinvJt[i] * activeRow[j];
-		(simd_type&)deltaForce[j] = simd_mul_v ((simd_type&)accel[j] , simd_mul_v ((simd_type&)invDJMinvJt[i], (simd_type&)activeRow[j]));
+		(simd_xxxx&)deltaForce[j] = simd_mul_v ((simd_xxxx&)accel[j] , simd_mul_v ((simd_xxxx&)invDJMinvJt[i], (simd_xxxx&)activeRow[j]));
 
 		//akNum += accel[j] * deltaForce[j];
-		akNumSimd = simd_mul_add_v (akNumSimd, (simd_type&)accel[j], (simd_type&)deltaForce[j]);
+		akNumSimd = simd_mul_add_v (akNumSimd, (simd_xxxx&)accel[j], (simd_xxxx&)deltaForce[j]);
 
 		//accNorm = GetMax (dgAbsf (accel[j] * activeRow[j]), accNorm);
-		accNormSimd = simd_max_v (accNormSimd, simd_and_v (simd_mul_v ((simd_type&)accel[j], (simd_type&)activeRow[j]), signMask));
+		accNormSimd = simd_max_v (accNormSimd, simd_and_v (simd_mul_v ((simd_xxxx&)accel[j], (simd_xxxx&)activeRow[j]), signMask));
 	}
 	akNumSimd = simd_add_v (akNumSimd, simd_move_hl_v(akNumSimd, akNumSimd));
 	simd_store_s (simd_add_s (akNumSimd, simd_permut_v (akNumSimd, akNumSimd, PURMUT_MASK (0, 0, 0, 1))), &akNum);
@@ -1648,8 +1648,8 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 	retAccel = accNorm;
 	clampedForceIndexValue = dgFloat32(0.0f);
 	for (dgInt32 i = 0; (i < maxPasses) && (accNorm > maxAccNorm); i ++) {
-		simd_type akSimd;
-		simd_type akDenSimd;
+		simd_xxxx akSimd;
+		simd_xxxx akDenSimd;
 
 		//y0.m_linear = zero;
 		//y0.m_angular = zero;
@@ -1661,7 +1661,7 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 		y1_angular = zero;
 		for (dgInt32 j = 0; j < count; j ++) {
 			dgInt32 k;
-			simd_type tmp1;
+			simd_xxxx tmp1;
 			k = j + first;
 			//ak = deltaForce[j]; 
 			tmp1 = simd_set1(deltaForce[j]);
@@ -1670,27 +1670,27 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 			//y1.m_linear += m_Jt[k].m_jacobian_IM1.m_linear.Scale (ak);
 			//y1.m_angular += m_Jt[k].m_jacobian_IM1.m_angular.Scale (ak);
 
-			y0_linear  = simd_mul_add_v (y0_linear, (simd_type&) Jt[k].m_jacobian_IM0.m_linear, tmp1);
-			y0_angular = simd_mul_add_v (y0_angular,(simd_type&) Jt[k].m_jacobian_IM0.m_angular, tmp1);
-			y1_linear  = simd_mul_add_v (y1_linear, (simd_type&) Jt[k].m_jacobian_IM1.m_linear, tmp1);
-			y1_angular = simd_mul_add_v (y1_angular,(simd_type&) Jt[k].m_jacobian_IM1.m_angular, tmp1);
+			y0_linear  = simd_mul_add_v (y0_linear, (simd_xxxx&) Jt[k].m_jacobian_IM0.m_linear, tmp1);
+			y0_angular = simd_mul_add_v (y0_angular,(simd_xxxx&) Jt[k].m_jacobian_IM0.m_angular, tmp1);
+			y1_linear  = simd_mul_add_v (y1_linear, (simd_xxxx&) Jt[k].m_jacobian_IM1.m_linear, tmp1);
+			y1_angular = simd_mul_add_v (y1_angular,(simd_xxxx&) Jt[k].m_jacobian_IM1.m_angular, tmp1);
 		}
 
 		//akDen = dgFloat32 (0.0f);
 		akDenSimd = zero;
 		for (dgInt32 j = 0; j < count; j ++) {
 			dgInt32 k;
-			simd_type tmp1;
+			simd_xxxx tmp1;
 			k = j + first;
 
 			//dgVector acc (m_JMinv[k].m_jacobian_IM0.m_linear.CompProduct(y0.m_linear));
 			//acc += m_JMinv[k].m_jacobian_IM0.m_angular.CompProduct(y0.m_angular);
 			//acc += m_JMinv[k].m_jacobian_IM1.m_linear.CompProduct(y1.m_linear);
 			//acc += m_JMinv[k].m_jacobian_IM1.m_angular.CompProduct(y1.m_angular);
-			tmp1 = simd_mul_v (          (simd_type&)JMinv[k].m_jacobian_IM0.m_linear, y0_linear);
-			tmp1 = simd_mul_add_v (tmp1, (simd_type&)JMinv[k].m_jacobian_IM0.m_angular, y0_angular);
-			tmp1 = simd_mul_add_v (tmp1, (simd_type&)JMinv[k].m_jacobian_IM1.m_linear, y1_linear);
-			tmp1 = simd_mul_add_v (tmp1, (simd_type&)JMinv[k].m_jacobian_IM1.m_angular, y1_angular);
+			tmp1 = simd_mul_v (          (simd_xxxx&)JMinv[k].m_jacobian_IM0.m_linear, y0_linear);
+			tmp1 = simd_mul_add_v (tmp1, (simd_xxxx&)JMinv[k].m_jacobian_IM0.m_angular, y0_angular);
+			tmp1 = simd_mul_add_v (tmp1, (simd_xxxx&)JMinv[k].m_jacobian_IM1.m_linear, y1_linear);
+			tmp1 = simd_mul_add_v (tmp1, (simd_xxxx&)JMinv[k].m_jacobian_IM1.m_angular, y1_angular);
 
 			//deltaAccel[j] = acc.m_x + acc.m_y + acc.m_z + deltaForce[j] * m_diagDamp[k];
 			tmp1 = simd_add_v (tmp1, simd_move_hl_v(tmp1, tmp1));
@@ -1710,10 +1710,10 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 
 		//		simd_store_s (tmp0, &ak);
 		//		clampedForceIndex = -1;
-		simd_type min_index;
-		simd_type minClampIndex;
-		simd_type min_index_step;
-		simd_type campedIndexValue;
+		simd_xxxx min_index;
+		simd_xxxx minClampIndex;
+		simd_xxxx min_index_step;
+		simd_xxxx campedIndexValue;
 
 		campedIndexValue = zero;
 		minClampIndex = simd_set1 (dgFloat32 (-1.0f));
@@ -1763,33 +1763,33 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 			//dgFloat32 den;
 
 			dgInt32 k;
-			simd_type val;
-			simd_type num;
-			simd_type den;
-			simd_type test;
-			simd_type negTest;
-			simd_type posTest;
-			simd_type negValTest;
-			simd_type posValTest;
-			simd_type negDeltaForceTest;
-			simd_type posDeltaForceTest;
+			simd_xxxx val;
+			simd_xxxx num;
+			simd_xxxx den;
+			simd_xxxx test;
+			simd_xxxx negTest;
+			simd_xxxx posTest;
+			simd_xxxx negValTest;
+			simd_xxxx posValTest;
+			simd_xxxx negDeltaForceTest;
+			simd_xxxx posDeltaForceTest;
 
 			// Make sure AK is not negative
 			k = j + first;
 			//val = force[k] + ak * deltaForce[j];
-			val = simd_mul_add_v ((simd_type&)force[k], akSimd, (simd_type&)deltaForce[j]);
+			val = simd_mul_add_v ((simd_xxxx&)force[k], akSimd, (simd_xxxx&)deltaForce[j]);
 
 			//negValTest = val < lowBound[j];
-			negValTest = simd_cmplt_v (val, (simd_type&)lowBound[j]);
+			negValTest = simd_cmplt_v (val, (simd_xxxx&)lowBound[j]);
 
 			//posValTest = val > highBound[j];
-			posValTest = simd_cmpgt_v (val, (simd_type&)highBound[j]);
+			posValTest = simd_cmpgt_v (val, (simd_xxxx&)highBound[j]);
 
 			//negDeltaForceTest = deltaForce[j] < dgFloat32 (-1.0e-16f);
-			negDeltaForceTest = simd_cmplt_v ((simd_type&)deltaForce[j], tol_neg_1eNeg16);
+			negDeltaForceTest = simd_cmplt_v ((simd_xxxx&)deltaForce[j], tol_neg_1eNeg16);
 
 			//posDeltaForceTest = deltaForce[j] > dgFloat32 ( 1.0e-16f);
-			posDeltaForceTest = simd_cmpgt_v ((simd_type&)deltaForce[j], tol_pos_1eNeg16);
+			posDeltaForceTest = simd_cmpgt_v ((simd_xxxx&)deltaForce[j], tol_pos_1eNeg16);
 
 			//negTest = negValTest & negDeltaForceTest;
 			negTest = simd_and_v (negValTest,  negDeltaForceTest);
@@ -1801,18 +1801,18 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 			test = simd_or_v (negTest, posTest);
 
 			//num = negTest ? lowBound[j] : (posTest ? highBound[j] : force[k]);
-			num = simd_or_v (simd_and_v ((simd_type&)lowBound[j], negTest), simd_and_v ((simd_type&)highBound[j], posTest)); 
-			num = simd_or_v (simd_and_v (num, test), simd_andnot_v ((simd_type&)force[k], test)); 
+			num = simd_or_v (simd_and_v ((simd_xxxx&)lowBound[j], negTest), simd_and_v ((simd_xxxx&)highBound[j], posTest)); 
+			num = simd_or_v (simd_and_v (num, test), simd_andnot_v ((simd_xxxx&)force[k], test)); 
 
 			//den = test ? deltaForce[j] : dgFloat32 (1.0f);
-			den = simd_or_v (simd_and_v ((simd_type&)deltaForce[j], test), simd_andnot_v (one, test)); 
+			den = simd_or_v (simd_and_v ((simd_xxxx&)deltaForce[j], test), simd_andnot_v (one, test)); 
 
 			//test = test & (activeRow[j] > dgFloat32 (0.0f));
-			test = simd_and_v (test, simd_cmpgt_v ((simd_type&)activeRow[j], zero));
+			test = simd_and_v (test, simd_cmpgt_v ((simd_xxxx&)activeRow[j], zero));
 
 			//_ASSERTE (dgAbsf (den) > 1.0e-16f);
 			//ak = test ? (num - force[k]) / den : ak;
-			akSimd = simd_or_v (simd_div_v (simd_sub_v (num, (simd_type&)force[k]), den), simd_andnot_v (akSimd, test)); 
+			akSimd = simd_or_v (simd_div_v (simd_sub_v (num, (simd_xxxx&)force[k]), den), simd_andnot_v (akSimd, test)); 
 
 			//ak = (ak < dgFloat32 (1.0e-8f)) ? dgFloat32 (0.0f) : ak;
 			akSimd = simd_and_v(akSimd, simd_cmpgt_v (akSimd, tol_pos_1eNeg8)); 
@@ -1883,48 +1883,48 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 				//				}
 
 				dgInt32 k;
-				simd_type val_k;
-				simd_type test_0;
-				simd_type test_1;
-				//simd_type test_2;
-				simd_type accel_k;
-				simd_type force_k;
+				simd_xxxx val_k;
+				simd_xxxx test_0;
+				simd_xxxx test_1;
+				//simd_xxxx test_2;
+				simd_xxxx accel_k;
+				simd_xxxx force_k;
 
 				k = j + first;
-				accel_k = (simd_type&) accel[j];
-				force_k = (simd_type&) force[k];
+				accel_k = (simd_xxxx&) accel[j];
+				force_k = (simd_xxxx&) force[k];
 				//val = dgAbsf (lowBound[j] - force[k]);
-				val_k = simd_and_v (simd_sub_v ((simd_type&)lowBound[j], force_k), signMask);
+				val_k = simd_and_v (simd_sub_v ((simd_xxxx&)lowBound[j], force_k), signMask);
 
 				//test0 = (val < dgFloat32 (1.0e-5f)) & (accel[j] < dgFloat32 (0.0f));
 				test_0 = simd_and_v (simd_cmplt_v (val_k, tol_pos_1eNeg5), simd_cmplt_v (accel_k, zero)); 
 
 				//val = dgAbsf (highBound[j] - force[k]);
-				val_k = simd_and_v (simd_sub_v ((simd_type&)highBound[j], force_k), signMask);
+				val_k = simd_and_v (simd_sub_v ((simd_xxxx&)highBound[j], force_k), signMask);
 
 				//test1 = (val < dgFloat32 (1.0e-5f)) & (accel[j] > dgFloat32 (0.0f));
 				test_1 = simd_and_v (simd_cmplt_v (val_k, tol_pos_1eNeg5), simd_cmpgt_v (accel_k, zero)); 
 
 				//force[k] = test0 ? lowBound[j] : (test1 ? highBound[j] : force[k]);
-				//val_k = simd_or_v (simd_and_v ((simd_type&)lowBound[j], test_0), simd_and_v ((simd_type&)highBound[j], test_1));
-				//(simd_type&) force[k] = simd_or_v (simd_and_v (val_k, test_2) , simd_andnot_v (force_k, test_2));
-				(simd_type&) force[k] = simd_min_v ((simd_type&) highBound[j], simd_max_v((simd_type&) force[k], (simd_type&)lowBound[j]));
+				//val_k = simd_or_v (simd_and_v ((simd_xxxx&)lowBound[j], test_0), simd_and_v ((simd_xxxx&)highBound[j], test_1));
+				//(simd_xxxx&) force[k] = simd_or_v (simd_and_v (val_k, test_2) , simd_andnot_v (force_k, test_2));
+				(simd_xxxx&) force[k] = simd_min_v ((simd_xxxx&) highBound[j], simd_max_v((simd_xxxx&) force[k], (simd_xxxx&)lowBound[j]));
 
 				//activeRow[j] *= (test0 | test1) ? dgFloat32 (0.0f) : dgFloat32 (1.0f);
 				//test_2 = simd_or_v (test_0, test_1);
-				(simd_type&) activeRow[j] = simd_mul_v ((simd_type&) activeRow[j], simd_andnot_v (one, simd_or_v (test_0, test_1)));
+				(simd_xxxx&) activeRow[j] = simd_mul_v ((simd_xxxx&) activeRow[j], simd_andnot_v (one, simd_or_v (test_0, test_1)));
 
 				//deltaForce[j] = accel[j] * invDJMinvJt[k] * activeRow[j];
-				(simd_type&)deltaForce[j] = simd_mul_v (accel_k, simd_mul_v ((simd_type&) invDJMinvJt[k], (simd_type&) activeRow[j]));
+				(simd_xxxx&)deltaForce[j] = simd_mul_v (accel_k, simd_mul_v ((simd_xxxx&) invDJMinvJt[k], (simd_xxxx&) activeRow[j]));
 
 				//akNum += accel[j] * deltaForce[j];
-				akNumSimd = simd_mul_add_v(akNumSimd, (simd_type&)deltaForce[j], accel_k);
+				akNumSimd = simd_mul_add_v(akNumSimd, (simd_xxxx&)deltaForce[j], accel_k);
 
 				//accNorm = GetMax (dgAbsf (accel[j] * activeRow[j]), accNorm);
-				accNormSimd = simd_max_v(accNormSimd, simd_and_v(simd_mul_v (accel_k, (simd_type&)activeRow[j]), signMask));
+				accNormSimd = simd_max_v(accNormSimd, simd_and_v(simd_mul_v (accel_k, (simd_xxxx&)activeRow[j]), signMask));
 
 				// masPases += 1;
-				maxPassesSimd = simd_add_v (maxPassesSimd, (simd_type&)activeRow[j]);
+				maxPassesSimd = simd_add_v (maxPassesSimd, (simd_xxxx&)activeRow[j]);
 			}
 
 			_ASSERTE (activeRow[clampedForceIndex] == dgFloat32 (0.0f));
@@ -1958,19 +1958,19 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 				k = j + first;
 				//m_force[k] += ak * deltaForce[j];
 				//m_accel[j] -= ak * deltaAccel[j];
-				(simd_type&)force[k] = simd_mul_add_v((simd_type&)force[k], akSimd, (simd_type&)deltaForce[j]);
-				(simd_type&)accel[j] = simd_mul_sub_v((simd_type&)accel[j], akSimd, (simd_type&)deltaAccel[j]);
+				(simd_xxxx&)force[k] = simd_mul_add_v((simd_xxxx&)force[k], akSimd, (simd_xxxx&)deltaForce[j]);
+				(simd_xxxx&)accel[j] = simd_mul_sub_v((simd_xxxx&)accel[j], akSimd, (simd_xxxx&)deltaAccel[j]);
 
 				//accNorm = GetMax (dgAbsf (m_accel[j] * activeRow[j]), accNorm);
-				accNormSimd = simd_max_v(accNormSimd, simd_and_v(simd_mul_v ((simd_type&)accel[j], (simd_type&)activeRow[j]), signMask));
+				accNormSimd = simd_max_v(accNormSimd, simd_and_v(simd_mul_v ((simd_xxxx&)accel[j], (simd_xxxx&)activeRow[j]), signMask));
 				//_ASSERTE (dgCheckFloat(m_force[k]));
 				//_ASSERTE (dgCheckFloat(m_accel[j]));
 
 				//deltaForce[j] = m_accel[j] * m_invDJMinvJt[k] * activeRow[j];
-				(simd_type&)deltaForce[j] = simd_mul_v((simd_type&)accel[j], simd_mul_v((simd_type&)invDJMinvJt[k], (simd_type&)activeRow[j]));
+				(simd_xxxx&)deltaForce[j] = simd_mul_v((simd_xxxx&)accel[j], simd_mul_v((simd_xxxx&)invDJMinvJt[k], (simd_xxxx&)activeRow[j]));
 
 				//akNum += deltaForce[j] * m_accel[j];
-				akNumSimd = simd_mul_add_v(akNumSimd, (simd_type&)deltaForce[j], (simd_type&)accel[j]);
+				akNumSimd = simd_mul_add_v(akNumSimd, (simd_xxxx&)deltaForce[j], (simd_xxxx&)accel[j]);
 			}
 
 			akNumSimd = simd_add_v (akNumSimd, simd_move_hl_v(akNumSimd, akNumSimd));
@@ -1997,11 +1997,11 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 				k = j + first;
 				//m_force[k] += ak * deltaForce[j];
 				//m_accel[j] -= ak * deltaAccel[j];
-				(simd_type&)force[k] = simd_mul_add_v((simd_type&)force[k], akSimd, (simd_type&)deltaForce[j]);
-				(simd_type&)accel[j] = simd_mul_sub_v((simd_type&)accel[j], akSimd, (simd_type&)deltaAccel[j]);
+				(simd_xxxx&)force[k] = simd_mul_add_v((simd_xxxx&)force[k], akSimd, (simd_xxxx&)deltaForce[j]);
+				(simd_xxxx&)accel[j] = simd_mul_sub_v((simd_xxxx&)accel[j], akSimd, (simd_xxxx&)deltaAccel[j]);
 
 				//accNorm = GetMax (dgAbsf (m_accel[j] * activeRow[j]), accNorm);
-				accNormSimd = simd_max_v(accNormSimd, simd_and_v(simd_mul_v ((simd_type&)accel[j], (simd_type&)activeRow[j]), signMask));
+				accNormSimd = simd_max_v(accNormSimd, simd_and_v(simd_mul_v ((simd_xxxx&)accel[j], (simd_xxxx&)activeRow[j]), signMask));
 				//_ASSERTE (dgCheckFloat(m_force[k]));
 				//_ASSERTE (dgCheckFloat(m_accel[j]));
 			}
@@ -2019,9 +2019,9 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 					dgInt32 k;
 					k = j + first;
 					//deltaAccel[j] = m_accel[j] * m_invDJMinvJt[k] * activeRow[j];
-					(simd_type&)deltaAccel[j] = simd_mul_v((simd_type&)accel[j], simd_mul_v((simd_type&)invDJMinvJt[k], (simd_type&)activeRow[j]));
+					(simd_xxxx&)deltaAccel[j] = simd_mul_v((simd_xxxx&)accel[j], simd_mul_v((simd_xxxx&)invDJMinvJt[k], (simd_xxxx&)activeRow[j]));
 					//akNum += m_accel[j] * deltaAccel[j];
-					akNumSimd = simd_mul_add_v(akNumSimd, (simd_type&)accel[j], (simd_type&)deltaAccel[j]);
+					akNumSimd = simd_mul_add_v(akNumSimd, (simd_xxxx&)accel[j], (simd_xxxx&)deltaAccel[j]);
 				}
 
 				akNumSimd = simd_add_v (akNumSimd, simd_move_hl_v(akNumSimd, akNumSimd));
@@ -2038,7 +2038,7 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 				//for (j = 0; j < count; j ++) {
 				for (dgInt32 j = 0; j < roundCount; j += DG_SIMD_WORD_SIZE) {
 					//deltaForce[j] = deltaAccel[j] + ak * deltaForce[j];
-					(simd_type&)deltaForce[j] = simd_mul_add_v((simd_type&)deltaAccel[j], akSimd, (simd_type&)deltaForce[j]);
+					(simd_xxxx&)deltaForce[j] = simd_mul_add_v((simd_xxxx&)deltaAccel[j], akSimd, (simd_xxxx&)deltaForce[j]);
 				}
 			}
 		}
@@ -2047,14 +2047,14 @@ dgFloat32 dgJacobianMemory::CalculateJointForcesSimd (dgInt32 joint, dgFloat32* 
 	//	for (j = 0; j < count; j ++) {
 	for (dgInt32 j = 0; j < roundCount; j += DG_SIMD_WORD_SIZE) {
 		//forceStep[j] = force[j + first] - forceStep[j];
-		(simd_type&)forceStep[j] = simd_sub_v ((simd_type&)force[j + first], (simd_type&)forceStep[j]);
+		(simd_xxxx&)forceStep[j] = simd_sub_v ((simd_xxxx&)force[j + first], (simd_xxxx&)forceStep[j]);
 	}
 
 	//	tmp0 = simd_set1(DG_SSOR_FACTOR);
 	//	for (j = 0; j < roundCount; j += DG_SIMD_WORD_SIZE) {
-	//		tmp1 = simd_mul_add_v((simd_type&)forceStep[j], simd_sub_v ((simd_type&)force[j + first], (simd_type&)forceStep[j]), tmp0);
-	//		(simd_type&)force[j + first] = simd_min_v ((simd_type&) highBound[j], simd_max_v(tmp1, (simd_type&)lowBound[j]));
-	//		(simd_type&)forceStep[j] = simd_sub_v ((simd_type&)force[j + first], (simd_type&)forceStep[j]);
+	//		tmp1 = simd_mul_add_v((simd_xxxx&)forceStep[j], simd_sub_v ((simd_xxxx&)force[j + first], (simd_xxxx&)forceStep[j]), tmp0);
+	//		(simd_xxxx&)force[j + first] = simd_min_v ((simd_xxxx&) highBound[j], simd_max_v(tmp1, (simd_xxxx&)lowBound[j]));
+	//		(simd_xxxx&)forceStep[j] = simd_sub_v ((simd_xxxx&)force[j + first], (simd_xxxx&)forceStep[j]);
 	//	}
 
 	return retAccel;
@@ -2372,7 +2372,7 @@ void dgParallelSolverBuildJacobianRows::ThreadExecute()
 	dgJointInfo* const constraintArray = m_constraintArray;
 
 	if (m_useSimd) {
-		simd_type zero;
+		simd_xxxx zero;
 		zero = simd_set1 (dgFloat32 (0.0f));
 		for (dgInt32 k = 0; k < m_count; k ++) {
 			dgInt32 m0;
@@ -2381,12 +2381,12 @@ void dgParallelSolverBuildJacobianRows::ThreadExecute()
 			dgInt32 count;
 			dgFloat32 diag;
 			dgFloat32 stiffness;
-			simd_type tmp0;
-			simd_type tmp1;
-			simd_type invMass0;
-			simd_type invMass1;
-			simd_type tmpDiag;
-			simd_type tmpAccel;
+			simd_xxxx tmp0;
+			simd_xxxx tmp1;
+			simd_xxxx invMass0;
+			simd_xxxx invMass1;
+			simd_xxxx tmpDiag;
+			simd_xxxx tmpAccel;
 			dgBody* body0;
 			dgBody* body1;
 
@@ -2418,15 +2418,15 @@ void dgParallelSolverBuildJacobianRows::ThreadExecute()
 				//dgVector tmpAccel (JMinv[index].m_jacobian_IM0.m_linear.CompProduct(body0->m_accel));
 				//tmpAccel += JMinv[index].m_jacobian_IM0.m_angular.CompProduct(body0->m_alpha);
 
-				((simd_type&)JMinv[index].m_jacobian_IM0.m_linear) = simd_mul_v ((simd_type&)Jt[index].m_jacobian_IM0.m_linear, invMass0);
-				tmp0 = (simd_type&)Jt[index].m_jacobian_IM0.m_angular;
-				tmp1 = simd_mul_v ((simd_type&)invInertia0.m_front, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 0, 0, 0)));
-				tmp1 = simd_mul_add_v (tmp1, (simd_type&)invInertia0.m_up, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 1, 1, 1)));
-				((simd_type&)JMinv[index].m_jacobian_IM0.m_angular) = simd_mul_add_v (tmp1, (simd_type&)invInertia0.m_right, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 2, 2, 2)));
-				tmpDiag = simd_mul_v ((simd_type&)JMinv[index].m_jacobian_IM0.m_linear, (simd_type&)Jt[index].m_jacobian_IM0.m_linear);
-				tmpDiag = simd_mul_add_v (tmpDiag, (simd_type&)JMinv[index].m_jacobian_IM0.m_angular, (simd_type&)Jt[index].m_jacobian_IM0.m_angular);
-				tmpAccel = simd_mul_v ((simd_type&)JMinv[index].m_jacobian_IM0.m_linear, (simd_type&)body0->m_accel);
-				tmpAccel = simd_mul_add_v (tmpAccel, (simd_type&)JMinv[index].m_jacobian_IM0.m_angular, (simd_type&)body0->m_alpha);
+				((simd_xxxx&)JMinv[index].m_jacobian_IM0.m_linear) = simd_mul_v ((simd_xxxx&)Jt[index].m_jacobian_IM0.m_linear, invMass0);
+				tmp0 = (simd_xxxx&)Jt[index].m_jacobian_IM0.m_angular;
+				tmp1 = simd_mul_v ((simd_xxxx&)invInertia0.m_front, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 0, 0, 0)));
+				tmp1 = simd_mul_add_v (tmp1, (simd_xxxx&)invInertia0.m_up, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 1, 1, 1)));
+				((simd_xxxx&)JMinv[index].m_jacobian_IM0.m_angular) = simd_mul_add_v (tmp1, (simd_xxxx&)invInertia0.m_right, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 2, 2, 2)));
+				tmpDiag = simd_mul_v ((simd_xxxx&)JMinv[index].m_jacobian_IM0.m_linear, (simd_xxxx&)Jt[index].m_jacobian_IM0.m_linear);
+				tmpDiag = simd_mul_add_v (tmpDiag, (simd_xxxx&)JMinv[index].m_jacobian_IM0.m_angular, (simd_xxxx&)Jt[index].m_jacobian_IM0.m_angular);
+				tmpAccel = simd_mul_v ((simd_xxxx&)JMinv[index].m_jacobian_IM0.m_linear, (simd_xxxx&)body0->m_accel);
+				tmpAccel = simd_mul_add_v (tmpAccel, (simd_xxxx&)JMinv[index].m_jacobian_IM0.m_angular, (simd_xxxx&)body0->m_alpha);
 
 				//JMinv[index].m_jacobian_IM1.m_linear = Jt[index].m_jacobian_IM1.m_linear.Scale (invMass1);
 				//JMinv[index].m_jacobian_IM1.m_angular = invInertia1.UnrotateVector (Jt[index].m_jacobian_IM1.m_angular);
@@ -2435,15 +2435,15 @@ void dgParallelSolverBuildJacobianRows::ThreadExecute()
 				//tmpAccel += JMinv[index].m_jacobian_IM1.m_linear.CompProduct(body1->m_accel);
 				//tmpAccel += JMinv[index].m_jacobian_IM1.m_angular.CompProduct(body1->m_alpha);
 
-				((simd_type&)JMinv[index].m_jacobian_IM1.m_linear) = simd_mul_v ((simd_type&)Jt[index].m_jacobian_IM1.m_linear, invMass1);
-				tmp0 = (simd_type&)Jt[index].m_jacobian_IM1.m_angular;
-				tmp1 = simd_mul_v ((simd_type&)invInertia1.m_front, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 0, 0, 0)));
-				tmp1 = simd_mul_add_v (tmp1, (simd_type&)invInertia1.m_up, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 1, 1, 1)));
-				((simd_type&)JMinv[index].m_jacobian_IM1.m_angular) = simd_mul_add_v (tmp1, (simd_type&)invInertia1.m_right, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 2, 2, 2)));
-				tmpDiag = simd_mul_add_v (tmpDiag, (simd_type&)JMinv[index].m_jacobian_IM1.m_linear, (simd_type&)Jt[index].m_jacobian_IM1.m_linear);
-				tmpDiag = simd_mul_add_v (tmpDiag, (simd_type&)JMinv[index].m_jacobian_IM1.m_angular, (simd_type&)Jt[index].m_jacobian_IM1.m_angular);
-				tmpAccel = simd_mul_add_v (tmpAccel, (simd_type&)JMinv[index].m_jacobian_IM1.m_linear, (simd_type&)body1->m_accel);
-				tmpAccel = simd_mul_add_v (tmpAccel, (simd_type&)JMinv[index].m_jacobian_IM1.m_angular, (simd_type&)body1->m_alpha);
+				((simd_xxxx&)JMinv[index].m_jacobian_IM1.m_linear) = simd_mul_v ((simd_xxxx&)Jt[index].m_jacobian_IM1.m_linear, invMass1);
+				tmp0 = (simd_xxxx&)Jt[index].m_jacobian_IM1.m_angular;
+				tmp1 = simd_mul_v ((simd_xxxx&)invInertia1.m_front, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 0, 0, 0)));
+				tmp1 = simd_mul_add_v (tmp1, (simd_xxxx&)invInertia1.m_up, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 1, 1, 1)));
+				((simd_xxxx&)JMinv[index].m_jacobian_IM1.m_angular) = simd_mul_add_v (tmp1, (simd_xxxx&)invInertia1.m_right, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 2, 2, 2)));
+				tmpDiag = simd_mul_add_v (tmpDiag, (simd_xxxx&)JMinv[index].m_jacobian_IM1.m_linear, (simd_xxxx&)Jt[index].m_jacobian_IM1.m_linear);
+				tmpDiag = simd_mul_add_v (tmpDiag, (simd_xxxx&)JMinv[index].m_jacobian_IM1.m_angular, (simd_xxxx&)Jt[index].m_jacobian_IM1.m_angular);
+				tmpAccel = simd_mul_add_v (tmpAccel, (simd_xxxx&)JMinv[index].m_jacobian_IM1.m_linear, (simd_xxxx&)body1->m_accel);
+				tmpAccel = simd_mul_add_v (tmpAccel, (simd_xxxx&)JMinv[index].m_jacobian_IM1.m_angular, (simd_xxxx&)body1->m_alpha);
 
 				//coordenateAccel[index] -= (tmpAccel.m_x + tmpAccel.m_y + tmpAccel.m_z);
 				tmpAccel = simd_add_v (tmpAccel, simd_move_hl_v(tmpAccel, tmpAccel));
@@ -2805,7 +2805,7 @@ void dgParallelSolverInitInternalForces::ThreadExecute()
 	//	ticks = m_world->m_getPerformanceCount();
 
 	if (m_useSimd) {
-		simd_type zero;
+		simd_xxxx zero;
 		zero = simd_set1(dgFloat32 (0.0f));
 
 		for (dgInt32 i = 0; i < m_count; i ++) {
@@ -2814,10 +2814,10 @@ void dgParallelSolverInitInternalForces::ThreadExecute()
 			dgInt32 first;
 			dgInt32 count;
 
-			simd_type y0_linear;
-			simd_type y0_angular;
-			simd_type y1_linear;
-			simd_type y1_angular;
+			simd_xxxx y0_linear;
+			simd_xxxx y0_angular;
+			simd_xxxx y1_linear;
+			simd_xxxx y1_angular;
 
 			first = m_constraintArray[i].m_autoPairstart;
 			count = m_constraintArray[i].m_autoPairActiveCount;
@@ -2831,7 +2831,7 @@ void dgParallelSolverInitInternalForces::ThreadExecute()
 			y1_angular = zero;
 			for (dgInt32 j = 0; j < count; j ++) {
 				dgInt32 index;
-				simd_type tmp0;
+				simd_xxxx tmp0;
 				index = j + first;
 				//val = force[index]; 
 				tmp0 = simd_set1(m_force[index]);
@@ -2839,22 +2839,22 @@ void dgParallelSolverInitInternalForces::ThreadExecute()
 				//y0.m_angular += Jt[index].m_jacobian_IM0.m_angular.Scale (val);
 				//y1.m_linear += Jt[index].m_jacobian_IM1.m_linear.Scale (val);
 				//y1.m_angular += Jt[index].m_jacobian_IM1.m_angular.Scale (val);
-				y0_linear  = simd_mul_add_v (y0_linear, (simd_type&) m_Jt[index].m_jacobian_IM0.m_linear, tmp0);
-				y0_angular = simd_mul_add_v (y0_angular,(simd_type&) m_Jt[index].m_jacobian_IM0.m_angular, tmp0);
-				y1_linear  = simd_mul_add_v (y1_linear, (simd_type&) m_Jt[index].m_jacobian_IM1.m_linear, tmp0);
-				y1_angular = simd_mul_add_v (y1_angular,(simd_type&) m_Jt[index].m_jacobian_IM1.m_angular, tmp0);
+				y0_linear  = simd_mul_add_v (y0_linear, (simd_xxxx&) m_Jt[index].m_jacobian_IM0.m_linear, tmp0);
+				y0_angular = simd_mul_add_v (y0_angular,(simd_xxxx&) m_Jt[index].m_jacobian_IM0.m_angular, tmp0);
+				y1_linear  = simd_mul_add_v (y1_linear, (simd_xxxx&) m_Jt[index].m_jacobian_IM1.m_linear, tmp0);
+				y1_angular = simd_mul_add_v (y1_angular,(simd_xxxx&) m_Jt[index].m_jacobian_IM1.m_angular, tmp0);
 			}
 			//internalForces[k0] = y0;
 			//internalForces[k1] = y1;
 			//			m_world->dgGetUserLock();
 			m_world->dgGetIndirectLock(&m_locks[m0]);
-			(simd_type&) m_internalForces[m0].m_linear = simd_add_v ((simd_type&) m_internalForces[m0].m_linear, y0_linear);
-			(simd_type&) m_internalForces[m0].m_angular = simd_add_v ((simd_type&) m_internalForces[m0].m_angular, y0_angular);
+			(simd_xxxx&) m_internalForces[m0].m_linear = simd_add_v ((simd_xxxx&) m_internalForces[m0].m_linear, y0_linear);
+			(simd_xxxx&) m_internalForces[m0].m_angular = simd_add_v ((simd_xxxx&) m_internalForces[m0].m_angular, y0_angular);
 			m_world->dgReleaseIndirectLock(&m_locks[m0]);
 
 			m_world->dgGetIndirectLock(&m_locks[m1]);
-			(simd_type&) m_internalForces[m1].m_linear = simd_add_v ((simd_type&) m_internalForces[m1].m_linear, y1_linear);
-			(simd_type&) m_internalForces[m1].m_angular = simd_add_v ((simd_type&) m_internalForces[m1].m_angular, y1_angular);
+			(simd_xxxx&) m_internalForces[m1].m_linear = simd_add_v ((simd_xxxx&) m_internalForces[m1].m_linear, y1_linear);
+			(simd_xxxx&) m_internalForces[m1].m_angular = simd_add_v ((simd_xxxx&) m_internalForces[m1].m_angular, y1_angular);
 			m_world->dgReleaseIndirectLock(&m_locks[m1]);
 			//			m_world->dgReleasedUserLock();
 		}
@@ -2979,35 +2979,35 @@ void dgParallelSolverUpdateVeloc::ThreadExecute()
 	//	ticks = m_world->m_getPerformanceCount();
 
 	if (m_useSimd) {
-		simd_type timeStepSimd;
+		simd_xxxx timeStepSimd;
 		timeStepSimd = simd_set1 (m_timeStep);
 		for (dgInt32 i = 0; i < m_count; i ++) {
 			dgBody* body;
-			simd_type force;
-			simd_type torque;
-			simd_type accel;
-			simd_type alpha;
+			simd_xxxx force;
+			simd_xxxx torque;
+			simd_xxxx accel;
+			simd_xxxx alpha;
 
 			body = m_bodyArray[i].m_body;
-			force = simd_add_v ((simd_type&) body->m_accel, (simd_type&)m_internalForces[i].m_linear);
-			torque = simd_add_v ((simd_type&) body->m_alpha, (simd_type&)m_internalForces[i].m_angular);
+			force = simd_add_v ((simd_xxxx&) body->m_accel, (simd_xxxx&)m_internalForces[i].m_linear);
+			torque = simd_add_v ((simd_xxxx&) body->m_alpha, (simd_xxxx&)m_internalForces[i].m_angular);
 
 			//dgVector accel (force.Scale (body->m_invMass.m_w));
 			accel = simd_mul_v (force, simd_set1 (body->m_invMass.m_w));
 			//dgVector alpha (body->m_invWorldInertiaMatrix.RotateVector (torque));
-			alpha = simd_mul_add_v (simd_mul_add_v (simd_mul_v ((simd_type&)body->m_invWorldInertiaMatrix[0], simd_permut_v (torque, torque, PURMUT_MASK(0, 0, 0, 0))), 
-				(simd_type&)body->m_invWorldInertiaMatrix[1], simd_permut_v (torque, torque, PURMUT_MASK(1, 1, 1, 1))), 
-				(simd_type&)body->m_invWorldInertiaMatrix[2], simd_permut_v (torque, torque, PURMUT_MASK(2, 2, 2, 2)));
+			alpha = simd_mul_add_v (simd_mul_add_v (simd_mul_v ((simd_xxxx&)body->m_invWorldInertiaMatrix[0], simd_permut_v (torque, torque, PURMUT_MASK(0, 0, 0, 0))), 
+				(simd_xxxx&)body->m_invWorldInertiaMatrix[1], simd_permut_v (torque, torque, PURMUT_MASK(1, 1, 1, 1))), 
+				(simd_xxxx&)body->m_invWorldInertiaMatrix[2], simd_permut_v (torque, torque, PURMUT_MASK(2, 2, 2, 2)));
 
 			//body->m_veloc += accel.Scale(timeStep);
-			(simd_type&) body->m_veloc = simd_mul_add_v ((simd_type&) body->m_veloc, accel, timeStepSimd);
+			(simd_xxxx&) body->m_veloc = simd_mul_add_v ((simd_xxxx&) body->m_veloc, accel, timeStepSimd);
 			//body->m_omega += alpha.Scale(timeStep);
-			(simd_type&) body->m_omega = simd_mul_add_v ((simd_type&) body->m_omega, alpha, timeStepSimd);
+			(simd_xxxx&) body->m_omega = simd_mul_add_v ((simd_xxxx&) body->m_omega, alpha, timeStepSimd);
 
 			//body->m_netForce += body->m_veloc;
-			(simd_type&)m_internalVeloc[i].m_linear = simd_add_v ((simd_type&)m_internalVeloc[i].m_linear, (simd_type&) body->m_veloc);
+			(simd_xxxx&)m_internalVeloc[i].m_linear = simd_add_v ((simd_xxxx&)m_internalVeloc[i].m_linear, (simd_xxxx&) body->m_veloc);
 			//body->m_netTorque += body->m_omega;
-			(simd_type&)m_internalVeloc[i].m_angular = simd_add_v ((simd_type&)m_internalVeloc[i].m_angular, (simd_type&) body->m_omega);
+			(simd_xxxx&)m_internalVeloc[i].m_angular = simd_add_v ((simd_xxxx&)m_internalVeloc[i].m_angular, (simd_xxxx&) body->m_omega);
 		}
 	} else {
 
@@ -3037,9 +3037,9 @@ void dgParallelSolverUpdateForce::ThreadExecute()
 	//	ticks = m_world->m_getPerformanceCount();
 
 	if (m_useSimd) {
-		simd_type invStepSimd;
-		simd_type invTimeStepSimd;
-		simd_type accelerationTolerance;
+		simd_xxxx invStepSimd;
+		simd_xxxx invTimeStepSimd;
+		simd_xxxx accelerationTolerance;
 		//	signMask = simd_set1 (invStep);	
 		invStepSimd = simd_set1 (m_invStep);	
 
@@ -3047,21 +3047,21 @@ void dgParallelSolverUpdateForce::ThreadExecute()
 		accelerationTolerance = simd_set1 (m_maxAccNorm2);	
 		for (dgInt32 i = 0; i < m_count; i ++) {
 			dgBody* body;
-			simd_type tmp;
-			simd_type accel;
-			simd_type alpha;
+			simd_xxxx tmp;
+			simd_xxxx accel;
+			simd_xxxx alpha;
 			body = m_bodyArray[i].m_body;
 
 			//body->m_veloc = internalVeloc[i].m_linear.Scale(invStep);
 			//body->m_omega = internalVeloc[i].m_angular.Scale(invStep);
-			(simd_type&) body->m_veloc = simd_mul_v ((simd_type&) m_internalVeloc[i].m_linear, invStepSimd);
-			(simd_type&) body->m_omega = simd_mul_v ((simd_type&) m_internalVeloc[i].m_angular, invStepSimd);
+			(simd_xxxx&) body->m_veloc = simd_mul_v ((simd_xxxx&) m_internalVeloc[i].m_linear, invStepSimd);
+			(simd_xxxx&) body->m_omega = simd_mul_v ((simd_xxxx&) m_internalVeloc[i].m_angular, invStepSimd);
 
 
 			//dgVector accel = (body->m_veloc - body->m_netForce).Scale (m_invTimeStep);
 			//dgVector alpha = (body->m_omega - body->m_netTorque).Scale (m_invTimeStep);
-			accel = simd_mul_v (simd_sub_v ((simd_type&) body->m_veloc, (simd_type&) body->m_netForce), invTimeStepSimd);
-			alpha = simd_mul_v (simd_sub_v ((simd_type&) body->m_omega, (simd_type&) body->m_netTorque), invTimeStepSimd);
+			accel = simd_mul_v (simd_sub_v ((simd_xxxx&) body->m_veloc, (simd_xxxx&) body->m_netForce), invTimeStepSimd);
+			alpha = simd_mul_v (simd_sub_v ((simd_xxxx&) body->m_omega, (simd_xxxx&) body->m_netTorque), invTimeStepSimd);
 
 			//if ((accel % accel) < maxAccNorm2) {
 			//	accel = zero;
@@ -3072,8 +3072,8 @@ void dgParallelSolverUpdateForce::ThreadExecute()
 			tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
 			tmp = simd_add_s (tmp, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 1)));
 			tmp = simd_cmplt_s (tmp, accelerationTolerance);
-			(simd_type&)body->m_accel = simd_andnot_v (accel, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 0)));
-			(simd_type&)body->m_netForce = simd_mul_v ((simd_type&)body->m_accel, simd_set1 (body->m_mass[3]));
+			(simd_xxxx&)body->m_accel = simd_andnot_v (accel, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 0)));
+			(simd_xxxx&)body->m_netForce = simd_mul_v ((simd_xxxx&)body->m_accel, simd_set1 (body->m_mass[3]));
 
 			//if ((alpha % alpha) < maxAccNorm2) {
 			//	alpha = zero;
@@ -3083,29 +3083,29 @@ void dgParallelSolverUpdateForce::ThreadExecute()
 			tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
 			tmp = simd_add_s (tmp, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 1)));
 			tmp = simd_cmplt_s (tmp, accelerationTolerance);
-			(simd_type&)body->m_alpha = simd_andnot_v (alpha, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 0)));
+			(simd_xxxx&)body->m_alpha = simd_andnot_v (alpha, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 0)));
 
 
 			//alpha = body->m_matrix.UnrotateVector(alpha);
-			alpha = simd_mul_v ((simd_type&)body->m_matrix[0], (simd_type&)body->m_alpha);
+			alpha = simd_mul_v ((simd_xxxx&)body->m_matrix[0], (simd_xxxx&)body->m_alpha);
 			alpha = simd_add_v (alpha, simd_move_hl_v (alpha, alpha));
 			alpha = simd_add_s (alpha, simd_permut_v (alpha, alpha, PURMUT_MASK(0, 0, 0, 1)));
 
-			tmp = simd_mul_v ((simd_type&)body->m_matrix[1], (simd_type&)body->m_alpha);
+			tmp = simd_mul_v ((simd_xxxx&)body->m_matrix[1], (simd_xxxx&)body->m_alpha);
 			tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
 			tmp = simd_add_s (tmp, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 1)));
 			alpha = simd_pack_lo_v (alpha, tmp);
 
-			tmp = simd_mul_v ((simd_type&)body->m_matrix[2], (simd_type&)body->m_alpha);
+			tmp = simd_mul_v ((simd_xxxx&)body->m_matrix[2], (simd_xxxx&)body->m_alpha);
 			tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
 			tmp = simd_add_s (tmp, simd_permut_v (tmp, tmp, PURMUT_MASK(0, 0, 0, 1)));
 			alpha = simd_permut_v (alpha, tmp, PURMUT_MASK(3, 0, 1, 0));
 
 			//body->m_netTorque = body->m_matrix.RotateVector (alpha.CompProduct(body->m_mass));
-			alpha = simd_mul_v (alpha, (simd_type&)body->m_mass);
-			(simd_type&)body->m_netTorque = simd_mul_add_v (simd_mul_add_v (simd_mul_v ((simd_type&)body->m_matrix[0], simd_permut_v (alpha, alpha, PURMUT_MASK(0, 0, 0, 0))), 
-				(simd_type&)body->m_matrix[1], simd_permut_v (alpha, alpha, PURMUT_MASK(1, 1, 1, 1))), 
-				(simd_type&)body->m_matrix[2], simd_permut_v (alpha, alpha, PURMUT_MASK(2, 2, 2, 2)));
+			alpha = simd_mul_v (alpha, (simd_xxxx&)body->m_mass);
+			(simd_xxxx&)body->m_netTorque = simd_mul_add_v (simd_mul_add_v (simd_mul_v ((simd_xxxx&)body->m_matrix[0], simd_permut_v (alpha, alpha, PURMUT_MASK(0, 0, 0, 0))), 
+				(simd_xxxx&)body->m_matrix[1], simd_permut_v (alpha, alpha, PURMUT_MASK(1, 1, 1, 1))), 
+				(simd_xxxx&)body->m_matrix[2], simd_permut_v (alpha, alpha, PURMUT_MASK(2, 2, 2, 2)));
 		}
 
 	} else {
@@ -3193,8 +3193,8 @@ void dgParallelSolverCalculateForces::ThreadExecute()
 	//	threadIndex = m_threadIndex;
 	if (m_useSimd) {
 		dgFloatSign tmpIndex;
-		simd_type signMask;
-		simd_type accNorm;
+		simd_xxxx signMask;
+		simd_xxxx accNorm;
 
 		tmpIndex.m_integer.m_iVal = 0x7fffffff;
 		signMask = simd_set1(tmpIndex.m_fVal);
@@ -3209,10 +3209,10 @@ void dgParallelSolverCalculateForces::ThreadExecute()
 			//			dgInt32 rowIndex;
 			dgInt32 currJoint;
 			dgInt32 rowsCount;
-			simd_type linearM0; 
-			simd_type angularM0;
-			simd_type linearM1; 
-			simd_type angularM1;
+			simd_xxxx linearM0; 
+			simd_xxxx angularM0;
+			simd_xxxx linearM1; 
+			simd_xxxx angularM1;
 
 			currJoint = m_threadIndex + i;
 			//			rowIndex = m_jointRemapArray[i];
@@ -3228,28 +3228,28 @@ void dgParallelSolverCalculateForces::ThreadExecute()
 				m_world->dgGetIndirectLock(&m_locks[m1]);
 			}
 
-			linearM0  = (simd_type&)m_internalForces[m0].m_linear;
-			angularM0 = (simd_type&)m_internalForces[m0].m_angular;
-			linearM1  = (simd_type&)m_internalForces[m1].m_linear;
-			angularM1 = (simd_type&)m_internalForces[m1].m_angular;
+			linearM0  = (simd_xxxx&)m_internalForces[m0].m_linear;
+			angularM0 = (simd_xxxx&)m_internalForces[m0].m_angular;
+			linearM1  = (simd_xxxx&)m_internalForces[m1].m_linear;
+			angularM1 = (simd_xxxx&)m_internalForces[m1].m_angular;
 
 			for (dgInt32 k = 0; k < rowsCount; k ++) {
 				dgInt32 frictionIndex;
-				simd_type a;
-				simd_type f;
-				simd_type frictionNormal;
-				simd_type lowerFrictionForce;
-				simd_type upperFrictionForce;
+				simd_xxxx a;
+				simd_xxxx f;
+				simd_xxxx frictionNormal;
+				simd_xxxx lowerFrictionForce;
+				simd_xxxx upperFrictionForce;
 
 				//				dgVector acc (m_JMinv[index].m_jacobian_IM0.m_linear.CompProduct(linearM0));
 				//				acc += m_JMinv[index].m_jacobian_IM0.m_angular.CompProduct (angularM0);
 				//				acc += m_JMinv[index].m_jacobian_IM1.m_linear.CompProduct (linearM1);
 				//				acc += m_JMinv[index].m_jacobian_IM1.m_angular.CompProduct (angularM1);
 
-				a = simd_mul_v (       (simd_type&)m_JMinv[index].m_jacobian_IM0.m_linear, linearM0);
-				a = simd_mul_add_v (a, (simd_type&)m_JMinv[index].m_jacobian_IM0.m_angular, angularM0);
-				a = simd_mul_add_v (a, (simd_type&)m_JMinv[index].m_jacobian_IM1.m_linear, linearM1);
-				a = simd_mul_add_v (a, (simd_type&)m_JMinv[index].m_jacobian_IM1.m_angular, angularM1);
+				a = simd_mul_v (       (simd_xxxx&)m_JMinv[index].m_jacobian_IM0.m_linear, linearM0);
+				a = simd_mul_add_v (a, (simd_xxxx&)m_JMinv[index].m_jacobian_IM0.m_angular, angularM0);
+				a = simd_mul_add_v (a, (simd_xxxx&)m_JMinv[index].m_jacobian_IM1.m_linear, linearM1);
+				a = simd_mul_add_v (a, (simd_xxxx&)m_JMinv[index].m_jacobian_IM1.m_angular, angularM1);
 
 				//a = coordenateAccel[index] - acc.m_x - acc.m_y - acc.m_z - force[index] * diagDamp[index];
 				a = simd_add_v (a, simd_move_hl_v(a, a));
@@ -3292,17 +3292,17 @@ void dgParallelSolverCalculateForces::ThreadExecute()
 				//force[index] = f;
 				simd_store_s (f, &m_force[index]);
 
-				linearM0 = simd_mul_add_v (linearM0, (simd_type&) m_Jt[index].m_jacobian_IM0.m_linear, a);
-				angularM0 = simd_mul_add_v (angularM0,(simd_type&) m_Jt[index].m_jacobian_IM0.m_angular, a);
-				linearM1 = simd_mul_add_v (linearM1, (simd_type&) m_Jt[index].m_jacobian_IM1.m_linear, a);
-				angularM1 = simd_mul_add_v (angularM1,(simd_type&) m_Jt[index].m_jacobian_IM1.m_angular, a);
+				linearM0 = simd_mul_add_v (linearM0, (simd_xxxx&) m_Jt[index].m_jacobian_IM0.m_linear, a);
+				angularM0 = simd_mul_add_v (angularM0,(simd_xxxx&) m_Jt[index].m_jacobian_IM0.m_angular, a);
+				linearM1 = simd_mul_add_v (linearM1, (simd_xxxx&) m_Jt[index].m_jacobian_IM1.m_linear, a);
+				angularM1 = simd_mul_add_v (angularM1,(simd_xxxx&) m_Jt[index].m_jacobian_IM1.m_angular, a);
 				index ++;
 			}
 
-			(simd_type&)m_internalForces[m0].m_linear = linearM0;
-			(simd_type&)m_internalForces[m0].m_angular = angularM0;
-			(simd_type&)m_internalForces[m1].m_linear = linearM1;
-			(simd_type&)m_internalForces[m1].m_angular = angularM1;
+			(simd_xxxx&)m_internalForces[m0].m_linear = linearM0;
+			(simd_xxxx&)m_internalForces[m0].m_angular = angularM0;
+			(simd_xxxx&)m_internalForces[m1].m_linear = linearM1;
+			(simd_xxxx&)m_internalForces[m1].m_angular = angularM1;
 
 			if (m1) {
 				m_world->dgReleaseIndirectLock(&m_locks[m1]);

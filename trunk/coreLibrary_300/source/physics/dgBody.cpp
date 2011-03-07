@@ -481,49 +481,16 @@ void dgBody::CalcInvInertiaMatrix ()
 
 void dgBody::CalcInvInertiaMatrixSimd ()
 {
-//	simd_type m0;
-//	simd_type m1;
-//	simd_type m2;
-//	simd_type r0;
-//	simd_type r1;
-//	simd_type r2;
+	dgMatrix tmp;
+	Transpose4x4Simd_128 ((simd_128&)tmp[0], (simd_128&)tmp[1], (simd_128&)tmp[2], (simd_128&)tmp[3], 
+						  (simd_128&)m_matrix[0], (simd_128&)m_matrix[1], (simd_128&)m_matrix[2], simd_128(0.0f));
 
-	simd_type r0 = simd_pack_lo_v ((simd_type&) m_matrix[0], (simd_type&) m_matrix[1]);
-	simd_type r1 = simd_pack_lo_v ((simd_type&) m_matrix[2], (simd_type&) m_matrix[3]);
-	simd_type m0 = simd_move_lh_v (r0, r1);
-	simd_type m1 = simd_move_hl_v (r1, r0);
-	r0 = simd_pack_hi_v ((simd_type&) m_matrix[0], (simd_type&) m_matrix[1]);
-	r1 = simd_pack_hi_v ((simd_type&) m_matrix[2], (simd_type&) m_matrix[3]);
-	simd_type m2 = simd_move_lh_v (r0, r1);
 
-	r0 = simd_mul_v ((simd_type&) m_matrix[0], simd_set1 (m_invMass[0]));
-	r1 = simd_mul_v ((simd_type&) m_matrix[1], simd_set1 (m_invMass[1]));
-	simd_type r2 = simd_mul_v ((simd_type&) m_matrix[2], simd_set1 (m_invMass[2]));
-
-	(simd_type&)m_invWorldInertiaMatrix[0] = simd_mul_add_v (
-		simd_mul_add_v (simd_mul_v (r0, simd_permut_v (m0, m0, PURMUT_MASK(0, 0, 0, 0))),
-						            r1, simd_permut_v (m0, m0, PURMUT_MASK(1, 1, 1, 1))),
-									r2, simd_permut_v (m0, m0, PURMUT_MASK(2, 2, 2, 2)));
-
-	(simd_type&)m_invWorldInertiaMatrix[1] = simd_mul_add_v (
-		simd_mul_add_v (simd_mul_v (r0, simd_permut_v (m1, m1, PURMUT_MASK(0, 0, 0, 0))),
-									r1, simd_permut_v (m1, m1, PURMUT_MASK(1, 1, 1, 1))),
-									r2, simd_permut_v (m1, m1, PURMUT_MASK(2, 2, 2, 2)));
-
-	(simd_type&)m_invWorldInertiaMatrix[2] = simd_mul_add_v (
-		simd_mul_add_v (simd_mul_v (r0, simd_permut_v (m2, m2, PURMUT_MASK(0, 0, 0, 0))),
-									r1, simd_permut_v (m2, m2, PURMUT_MASK(1, 1, 1, 1))),
-									r2, simd_permut_v (m2, m2, PURMUT_MASK(2, 2, 2, 2)));
-
-#ifdef _DEBUG
-//	dgMatrix aaa (m_invWorldInertiaMatrix);
-//	CalcInvInertiaMatrix ();
-//	for (int i = 0; i < 4; i ++) {
-//		for (int j = 0; j < 4; j ++) {
-//			_ASSERTE (dgAbsf (aaa[i][j] - m_invWorldInertiaMatrix[i][j]) <= dgAbsf (aaa[i][j] * dgFloat32 (1.0e-3f)));
-//		}
-//	}
-#endif
+	(simd_128&)tmp[0] = (simd_128&)tmp[0] * simd_128 (m_invMass[0]);
+	(simd_128&)tmp[1] = (simd_128&)tmp[1] * simd_128 (m_invMass[1]);
+	(simd_128&)tmp[2] = (simd_128&)tmp[2] * simd_128 (m_invMass[2]);
+	m_invWorldInertiaMatrix = tmp.MultiplySimd(m_matrix);
+	m_invWorldInertiaMatrix[3] = simd_128(dgFloat32 (1.0f)).AndNot(dgCollisionConvex::m_triplexMask);
 
 	_ASSERTE (m_invWorldInertiaMatrix[0][3] == dgFloat32 (0.0f));
 	_ASSERTE (m_invWorldInertiaMatrix[1][3] == dgFloat32 (0.0f));
