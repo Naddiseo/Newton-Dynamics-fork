@@ -802,7 +802,7 @@ NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& srcMa
 		case _SPHERE_PRIMITIVE:
 		{
 			// create the collision 
-			collision = NewtonCreateSphere (world, size.m_x * 0.5f, size.m_y * 0.5f, size.m_z * 0.5f, 0, NULL); 
+			collision = NewtonCreateSphere (world, size.m_x * 0.5f, size.m_y * 1.0f, size.m_z * 0.5f, 0, NULL); 
 			break;
 		}
 
@@ -827,7 +827,7 @@ NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& srcMa
 		case _CYLINDER_PRIMITIVE:
 		{
 			// create the collision 
-			collision = NewtonCreateCylinder (world, size.m_y, size.m_x, 0, NULL); 
+			collision = NewtonCreateCylinder (world, size.m_x * 0.5f, size.m_y, 0, NULL); 
 			break;
 		}
 
@@ -835,7 +835,7 @@ NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& srcMa
 		case _CAPSULE_PRIMITIVE:
 		{
 			// create the collision 
-			collision = NewtonCreateCapsule (world, size.m_y, size.m_x, 0, NULL); 
+			collision = NewtonCreateCapsule (world, size.m_x * 0.5f, size.m_y, 0, NULL); 
 
 			//NewtonCollision* collision1;
 			//collision1 = NewtonCreateCapsule (world, size.m_y, size.m_x, NULL); 
@@ -852,7 +852,7 @@ NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& srcMa
 		case _CHAMFER_CYLINDER_PRIMITIVE:
 		{
 			// create the collision 
-			collision = NewtonCreateChamferCylinder (world, size.m_x, size.m_y, 0, NULL); 
+			collision = NewtonCreateChamferCylinder (world, size.m_x * 0.5f, size.m_y, 0, NULL); 
 			break;
 		}
 
