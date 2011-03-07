@@ -327,39 +327,22 @@ dgFloat32 dgCollisionCylinder::CalculateMassProperties (dgVector& inertia, dgVec
 
 dgInt32 dgCollisionCylinder::CalculatePlaneIntersection (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
-	dgInt32 i;
 	dgInt32 count;
-	dgFloat32 y;
-	dgFloat32 z;
-	dgFloat32 cosAng;
-	dgFloat32 sinAng;
-	dgFloat32 magInv;
-
 	if (dgAbsf (normal.m_x) < dgFloat32 (0.999f)) { 
-		magInv = dgRsqrt (normal.m_y * normal.m_y + normal.m_z * normal.m_z);
-		cosAng = normal.m_y * magInv;
-		sinAng = normal.m_z * magInv;
+		dgFloat32 magInv = dgRsqrt (normal.m_y * normal.m_y + normal.m_z * normal.m_z);
+		dgFloat32 cosAng = normal.m_y * magInv;
+		dgFloat32 sinAng = normal.m_z * magInv;
 
-//		dgMatrix matrix (dgGetIdentityMatrix ());
-//		matrix[1][1] = cosAng;
-//		matrix[1][2] = sinAng;
-//		matrix[2][1] = -sinAng;
-//		matrix[2][2] = cosAng;
-//		dgVector normal1 (matrix.UnrotateVector (normal));
-//		dgVector origin1 (matrix.UnrotateVector (origin));
 
 		_ASSERTE (dgAbsf (normal.m_z * cosAng - normal.m_y * sinAng) < dgFloat32 (1.0e-4f));
-//		dgVector normal1 (normal.m_x, normal.m_y * cosAng + normal.m_z * sinAng, 
-//									  normal.m_z * cosAng - normal.m_y * sinAng, dgFloat32 (0.0f));
 		dgVector normal1 (normal.m_x, normal.m_y * cosAng + normal.m_z * sinAng, dgFloat32 (0.0f), dgFloat32 (0.0f));
 		dgVector origin1 (origin.m_x, origin.m_y * cosAng + origin.m_z * sinAng, 
 									  origin.m_z * cosAng - origin.m_y * sinAng, dgFloat32 (0.0f));
 
 		count = dgCollisionConvex::CalculatePlaneIntersection (normal1, origin1, contactsOut);
-//		matrix.TransformTriplex (contactsOut, sizeof (dgVector), contactsOut, sizeof (dgVector), count); 
-		for (i = 0; i < count; i ++) {
-			y = contactsOut[i].m_y;
-			z = contactsOut[i].m_z;
+		for (dgInt32 i = 0; i < count; i ++) {
+			dgFloat32 y = contactsOut[i].m_y;
+			dgFloat32 z = contactsOut[i].m_z;
 			contactsOut[i].m_y = y * cosAng - z * sinAng; 
 			contactsOut[i].m_z = z * cosAng + y * sinAng;
 		}
@@ -372,50 +355,24 @@ dgInt32 dgCollisionCylinder::CalculatePlaneIntersection (const dgVector& normal,
 
 dgInt32 dgCollisionCylinder::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
-_ASSERTE (0);
-return 0;
-/*
-	dgInt32 i;
 	dgInt32 count;
-	dgFloat32 y;
-	dgFloat32 z;
-	dgFloat32 cosAng;
-	dgFloat32 sinAng;
-	dgFloat32 magInv;
-	simd_type tmp0;
-	simd_type mag2;
-
 	if (dgAbsf (normal.m_x) < dgFloat32 (0.999f)) { 
-//		magInv = dgRsqrt (normal.m_y * normal.m_y + normal.m_z * normal.m_z);
-		y = normal.m_y * normal.m_y + normal.m_z * normal.m_z;
-		mag2  = simd_load_s (y);
-		tmp0 = simd_rsqrt_s(mag2);
-		simd_store_s (simd_mul_s (simd_mul_s(*(simd_type*)&m_nrh0p5, tmp0), simd_mul_sub_s (*(simd_type*)&m_nrh3p0, simd_mul_s (mag2, tmp0), tmp0)), &magInv);
+		simd_128 normalYZ ((simd_128&) normal & simd_128 (0, -1, -1, 0));
+		normalYZ = normalYZ * normalYZ.DotProduct(normalYZ).InvRqrt();
 
-		cosAng = normal.m_y * magInv;
-		sinAng = normal.m_z * magInv;
-
-//		dgMatrix matrix (dgGetIdentityMatrix ());
-//		matrix[1][1] = cosAng;
-//		matrix[1][2] = sinAng;
-//		matrix[2][1] = -sinAng;
-//		matrix[2][2] = cosAng;
-//		dgVector normal1 (matrix.UnrotateVector (normal));
-//		dgVector origin1 (matrix.UnrotateVector (origin));
-		_ASSERTE (dgAbsf (normal.m_z * cosAng - normal.m_y * sinAng) < dgFloat32 (1.0e-4f));
-//		dgVector normal1 (normal.m_x, normal.m_y * cosAng + normal.m_z * sinAng, 
-//									  normal.m_z * cosAng - normal.m_y * sinAng, dgFloat32 (0.0f));
-		dgVector normal1 (normal.m_x, normal.m_y * cosAng + normal.m_z * sinAng, dgFloat32 (0.0f), dgFloat32 (0.0f));
-		dgVector origin1 (origin.m_x, origin.m_y * cosAng + origin.m_z * sinAng, 
-									  origin.m_z * cosAng - origin.m_y * sinAng, dgFloat32 (0.0f));
+		//cosAng = normal.m_y * magInv;
+		//sinAng = normal.m_z * magInv;
+		dgVector sincos (normalYZ);
+		dgVector normal1 (normal.m_x, normal.m_y * sincos.m_y + normal.m_z * sincos.m_z, dgFloat32 (0.0f), dgFloat32 (0.0f));
+		dgVector origin1 (origin.m_x, origin.m_y * sincos.m_y + origin.m_z * sincos.m_z, 
+									  origin.m_z * sincos.m_y - origin.m_y * sincos.m_z, dgFloat32 (0.0f));
 
 		count = dgCollisionConvex::CalculatePlaneIntersectionSimd (normal1, origin1, contactsOut);
-//		matrix.TransformTriplex (contactsOut, sizeof (dgVector), contactsOut, sizeof (dgVector), count); 
-		for (i = 0; i < count; i ++) {
-			y = contactsOut[i].m_y;
-			z = contactsOut[i].m_z;
-			contactsOut[i].m_y = y * cosAng - z * sinAng; 
-			contactsOut[i].m_z = z * cosAng + y * sinAng;
+		for (dgInt32 i = 0; i < count; i ++) {
+			dgFloat32 y = contactsOut[i].m_y;
+			dgFloat32 z = contactsOut[i].m_z;
+			contactsOut[i].m_y = y * sincos.m_y - z * normal.m_z; 
+			contactsOut[i].m_z = z * sincos.m_y + y * normal.m_z;
 		}
 
 	} else {
@@ -423,49 +380,39 @@ return 0;
 	}
 
 	return count;
-*/
 }
 
 
 dgFloat32 dgCollisionCylinder::RayCast (const dgVector& q0, const dgVector& q1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
 {
-	dgFloat32 t;
-	dgFloat32 a;
-	dgFloat32 b;
-	dgFloat32 c;
-	dgFloat32 y;
-	dgFloat32 z;
-	dgFloat32 t1;
-	dgFloat32 desc;
-
 	if (PREFILTER_RAYCAST (preFilter, body, this, userData)) {
 		return dgFloat32 (1.2f);
 	}
 
-	t = dgFloat32 (1.2f);
+	dgFloat32 t = dgFloat32 (1.2f);
 	dgVector p0 (q0);
 	p0.m_x = dgFloat32 (0.0f);
-	c = (p0 % p0) - m_radius * m_radius;
+	dgFloat32 c = (p0 % p0) - m_radius * m_radius;
 	if (c > dgFloat32 (0.0f)) {
 
 		dgVector dp (q1 - q0);
 		dp.m_x = dgFloat32 (0.0f);
-		a = dp % dp;
-		b = dgFloat32 (2.0f) * (p0 % dp);
+		dgFloat32 a = dp % dp;
+		dgFloat32 b = dgFloat32 (2.0f) * (p0 % dp);
 
-		desc = b * b - 4.0f * a * c;
+		dgFloat32 desc = b * b - dgFloat32 (4.0f) * a * c;
 		if (desc > 1.0e-8f) {
 			desc = dgSqrt (desc);
 			a = dgFloat32 (1.0f) / (dgFloat32 (2.0f) * a);
-			t1 = GetMin ((- b + desc) * a, (- b - desc) * a);
+			dgFloat32 t1 = GetMin ((- b + desc) * a, (- b - desc) * a);
 			if ((t1 < dgFloat32 (1.0f)) && (t1 >= dgFloat32 (0.0f))) {
 				dgVector dq (q1 - q0);
 				dgVector contact (q0 + dq.Scale (t1));
 				if (contact.m_x > m_height[0]) {
 					if (q1.m_x < m_height[0]) {
 						t1 = (m_height[0] - q0.m_x) / (q1.m_x - q0.m_x);
-						y = q0.m_y + (q1.m_y - q0.m_y) * t1;
-						z = q0.m_z + (q1.m_z - q0.m_z) * t1;
+						dgFloat32 y = q0.m_y + (q1.m_y - q0.m_y) * t1;
+						dgFloat32 z = q0.m_z + (q1.m_z - q0.m_z) * t1;
 						if ((y * y + z * z - m_radius * m_radius) < dgFloat32 (0.0f)) {
 							t = t1;
 							contactOut.m_normal = dgVector (dgFloat32 (dgFloat32 (1.0f)), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
@@ -475,8 +422,8 @@ dgFloat32 dgCollisionCylinder::RayCast (const dgVector& q0, const dgVector& q1, 
 				} else if (contact.m_x < -m_height[0]) {
 					if (q1.m_x > -m_height[0]) {
 						t1 = (-m_height[0] - q0.m_x) / (q1.m_x - q0.m_x);
-						y = q0.m_y + (q1.m_y - q0.m_y) * t1;
-						z = q0.m_z + (q1.m_z - q0.m_z) * t1;
+						dgFloat32 y = q0.m_y + (q1.m_y - q0.m_y) * t1;
+						dgFloat32 z = q0.m_z + (q1.m_z - q0.m_z) * t1;
 						if ((y * y + z * z - m_radius * m_radius) < dgFloat32 (0.0f)) {
 							t = t1;
 							contactOut.m_normal = dgVector (-dgFloat32 (dgFloat32 (1.0f)), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
@@ -495,9 +442,9 @@ dgFloat32 dgCollisionCylinder::RayCast (const dgVector& q0, const dgVector& q1, 
 	} else {
 		if (q0.m_x > m_height[0]) {
 			if (q1.m_x < m_height[0]) {
-				t1 = (m_height[0] - q0.m_x) / (q1.m_x - q0.m_x);
-				y = q0.m_y + (q1.m_y - q0.m_y) * t1;
-				z = q0.m_z + (q1.m_z - q0.m_z) * t1;
+				dgFloat32 t1 = (m_height[0] - q0.m_x) / (q1.m_x - q0.m_x);
+				dgFloat32 y = q0.m_y + (q1.m_y - q0.m_y) * t1;
+				dgFloat32 z = q0.m_z + (q1.m_z - q0.m_z) * t1;
 				if ((y * y + z * z - m_radius * m_radius) < dgFloat32 (0.0f)) {
 					t = t1;
 					contactOut.m_normal = dgVector (dgFloat32 (dgFloat32 (1.0f)), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
@@ -506,9 +453,9 @@ dgFloat32 dgCollisionCylinder::RayCast (const dgVector& q0, const dgVector& q1, 
 			}
 		} else if (q0.m_x < -m_height[0]) {
 			if (q1.m_x > -m_height[0]) {
-				t1 = (-m_height[0] - q0.m_x) / (q1.m_x - q0.m_x);
-				y = q0.m_y + (q1.m_y - q0.m_y) * t1;
-				z = q0.m_z + (q1.m_z - q0.m_z) * t1;
+				dgFloat32 t1 = (-m_height[0] - q0.m_x) / (q1.m_x - q0.m_x);
+				dgFloat32 y = q0.m_y + (q1.m_y - q0.m_y) * t1;
+				dgFloat32 z = q0.m_z + (q1.m_z - q0.m_z) * t1;
 				if ((y * y + z * z - m_radius * m_radius) < dgFloat32 (0.0f)) {
 					t = t1;
 					contactOut.m_normal = dgVector (-dgFloat32 (dgFloat32 (1.0f)), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));

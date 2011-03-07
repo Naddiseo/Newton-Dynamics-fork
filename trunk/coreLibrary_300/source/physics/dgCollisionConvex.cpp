@@ -1153,66 +1153,31 @@ dgInt32 dgCollisionConvex::RectifyConvexSlice (dgInt32 count, const dgVector& no
 
 dgInt32 dgCollisionConvex::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
-_ASSERTE (0);
-return 0;
-/*
-//	dgInt32 count;
-//	dgFloat32 side0;
-//	dgFloat32 side1;
-//	dgInt32 maxCount;
-//	dgConvexSimplexEdge *ptr;
-//	dgConvexSimplexEdge *ptr1;
-//	dgConvexSimplexEdge* edge;
-//	dgConvexSimplexEdge *firstEdge;
-//	simd_type tmp;
-//	simd_type den;
-//	simd_type deltaP;
-//	simd_type planeSimdD;
-
 	dgConvexSimplexEdge* edge = &m_simplex[0];
-	dgPlane plane (normal, - (normal % origin));
-	simd_type planeSimdD = *(simd_type*)&plane;
+
+	simd_128 plane (((simd_128&)normal & m_triplexMask));
+	plane = plane - plane.DotProduct((simd_128&)origin).AndNot(m_triplexMask);
+
 
 	_ASSERTE (m_vertex[edge->m_vertex].m_w == dgFloat32 (1.0f));
-//	side0 = plane.Evalue(m_vertex[edge->m_vertex]);
-//	simd_type tmp_ = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[edge->m_vertex]);
-//	tmp_ = simd_add_v (tmp_, simd_move_hl_v (tmp_, tmp_));
-//	tmp_ = simd_add_s(tmp_, simd_permut_v (tmp_, tmp_, PURMUT_MASK (3,3,3,1)));
-//	dgFloat32 side0;
-//	dgFloat32 side1;
-//	simd_store_s (tmp_, &side0);
-
-	simd_type side0 = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[edge->m_vertex]);
-	side0 = simd_add_v (side0, simd_move_hl_v (side0, side0));
-	side0 = simd_add_s(side0, simd_permut_v (side0, side0, PURMUT_MASK (3,3,3,1)));
-	simd_type side1 = side0;
-
-	simd_type zero = simd_set1 (dgFloat32 (0.0f));
+	simd_128 side0 = plane.DotProduct((simd_128&)m_vertex[edge->m_vertex]);
+	simd_128 side1 = side0;
+	
+	simd_128 zero (dgFloat32 (0.0f));
+	simd_128 negOne (dgFloat32 (-1.0f));
+	simd_128 negativeTiny (dgFloat32(-1.0e-20f));
 	dgConvexSimplexEdge* firstEdge = NULL;
-//	if (side0 > dgFloat32 (0.0f)) {
-	if (simd_store_is (simd_cmpgt_s(side0, zero))) {
+	if ((side0 > zero).GetSignMask()) {
+
 		dgConvexSimplexEdge* ptr = edge;
 		do {
 			_ASSERTE (m_vertex[ptr->m_twin->m_vertex].m_w == dgFloat32 (1.0f));
-//			side1 = plane.Evalue (m_vertex[ptr->m_twin->m_vertex]);
-//			simd_type tmp = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr->m_twin->m_vertex]);
-//			tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
-//			tmp = simd_add_s(tmp, simd_permut_v (tmp, tmp, PURMUT_MASK (3,3,3,1)));
-//			simd_store_s (tmp, &side1);
-
-			side1 = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr->m_twin->m_vertex]);
-			side1 = simd_add_v (side1, simd_move_hl_v (side1, side1));
-			side1 = simd_add_s(side1, simd_permut_v (side1, side1, PURMUT_MASK (3,3,3,1)));
-//			if (side1 < side0) {
-			if (simd_store_is (simd_cmplt_s(side1, side0))) {
-//				xxx = simd_store_is (simd_cmplt_s(side1, zero));
-//				if (side1 < dgFloat32 (0.0f)) {
-				if (simd_store_is (simd_cmplt_s(side1, zero))) {
+			side1 = plane.DotProduct((simd_128&)m_vertex[ptr->m_twin->m_vertex]);
+			if ((side1 < side0).GetSignMask()) {
+				if ((side1 < zero).GetSignMask()) {
 					firstEdge = ptr;
 					break;
 				}
-
-//				side0 = side1;
 				side0 = side1;
 				edge = ptr->m_twin;
 				ptr = edge;
@@ -1220,61 +1185,30 @@ return 0;
 			ptr = ptr->m_twin->m_next;
 		} while (ptr != edge);
 
-
+#ifdef _DEBUG
 		if (!firstEdge) {
 			// we may have a local minimal in the convex hull do to a big flat face
 			for (dgInt32 i = 0; i < m_edgeCount; i ++) {
 				ptr = &m_simplex[i];
-//				side0 = plane.Evalue (m_vertex[ptr->m_vertex]);
-//				simd_type tmp = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr->m_vertex]);
-//				tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
-//				tmp = simd_add_s(tmp, simd_permut_v (tmp, tmp, PURMUT_MASK (3,3,3,1)));
-//				simd_store_s (tmp, &side0);
-
-				side0 = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr->m_vertex]);
-				side0 = simd_add_v (side0, simd_move_hl_v (side0, side0));
-				side0 = simd_add_s(side0, simd_permut_v (side0, side0, PURMUT_MASK (3,3,3,1)));
-//				simd_store_s (tmp, &side0);
-
-
-//				side1 = plane.Evalue (m_vertex[ptr->m_twin->m_vertex]);
-//				tmp = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr->m_twin->m_vertex]);
-//				tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
-//				tmp = simd_add_s(tmp, simd_permut_v (tmp, tmp, PURMUT_MASK (3,3,3,1)));
-//				simd_store_s (tmp, &side1);
-
-				side1 = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr->m_twin->m_vertex]);
-				side1 = simd_add_v (side1, simd_move_hl_v (side1, side1));
-				side1 = simd_add_s(side1, simd_permut_v (side1, side1, PURMUT_MASK (3,3,3,1)));
-
-				dgInt32 test = simd_store_is(simd_and_v (simd_cmplt_s(side1, zero), simd_cmpgt_s(side0, zero)));   
-//				if ((side1 < dgFloat32 (0.0f)) && (side0 > dgFloat32 (0.0f))){
-				if (test) {
+				side0 = plane.DotProduct((simd_128&)m_vertex[ptr->m_vertex]);
+				side1 = plane.DotProduct((simd_128&)m_vertex[ptr->m_twin->m_vertex]);
+				simd_128 test ((side1 < zero) & (side0 > zero));
+				if (test.GetSignMask()) {
+					_ASSERTE (0);
 					firstEdge = ptr;
 					break;
 				}
 			}
 		}
-
-//	} else if (side0 < dgFloat32 (0.0f)) {
-	} else if (simd_store_is (simd_cmplt_s(side0, zero))) {
+#endif
+	} else if ((side0 < zero).GetSignMask()) {
 		dgConvexSimplexEdge* ptr = edge;
 		do {
 			_ASSERTE (m_vertex[ptr->m_twin->m_vertex].m_w == dgFloat32 (1.0f));
-//			side1 = plane.Evalue (m_vertex[ptr->m_twin->m_vertex]);
-//			simd_type tmp = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr->m_twin->m_vertex]);
-//			tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
-//			tmp = simd_add_s(tmp, simd_permut_v (tmp, tmp, PURMUT_MASK (3,3,3,1)));
-//			simd_store_s (tmp, &side1);
-
-			side1 = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr->m_twin->m_vertex]);
-			side1 = simd_add_v (side1, simd_move_hl_v (side1, side1));
-			side1 = simd_add_s(side1, simd_permut_v (side1, side1, PURMUT_MASK (3,3,3,1)));
-//			if (side1 > side0) {
-			if (simd_store_is (simd_cmpgt_s(side1, side0))) {
+			side1 = plane.DotProduct((simd_128&)m_vertex[ptr->m_twin->m_vertex]);
+			if ((side1 > side0).GetSignMask()) {
 				side0 = side1;
-//				if (side1 >= dgFloat32 (0.0f)) {
-				if (simd_store_is (simd_cmpge_s(side1, zero))) {
+				if ((side1 >= zero).GetSignMask()) {
 					firstEdge = ptr->m_twin;
 					break;
 				}
@@ -1284,136 +1218,58 @@ return 0;
 			ptr = ptr->m_twin->m_next;
 		} while (ptr != edge);
 
-
+#ifdef _DEBUG
 		if (!firstEdge) {
 			// we may have a local minimal in the convex hull do to a big flat face
 			for (dgInt32 i = 0; i < m_edgeCount; i ++) {
 				ptr = &m_simplex[i];
-//				side0 = plane.Evalue (m_vertex[ptr->m_vertex]);
-//				simd_type tmp = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr->m_vertex]);
-//				tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
-//				tmp = simd_add_s(tmp, simd_permut_v (tmp, tmp, PURMUT_MASK (3,3,3,1)));
-//				simd_store_s (tmp, &side0);
+				side0 = plane.DotProduct((simd_128&)m_vertex[ptr->m_vertex]);
+				side1 = plane.DotProduct((simd_128&)m_vertex[ptr->m_twin->m_vertex]);
 
-				side0 = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr->m_vertex]);
-				side0 = simd_add_v (side0, simd_move_hl_v (side0, side0));
-				side0 = simd_add_s(side0, simd_permut_v (side0, side0, PURMUT_MASK (3,3,3,1)));
-
-
-//				side1 = plane.Evalue (m_vertex[ptr->m_twin->m_vertex]);
-//				tmp = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr->m_twin->m_vertex]);
-//				tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
-//				tmp = simd_add_s(tmp, simd_permut_v (tmp, tmp, PURMUT_MASK (3,3,3,1)));
-//				simd_store_s (tmp, &side1);
-
-				side1 = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr->m_twin->m_vertex]);
-				side1 = simd_add_v (side1, simd_move_hl_v (side1, side1));
-				side1 = simd_add_s(side1, simd_permut_v (side1, side1, PURMUT_MASK (3,3,3,1)));
-			
-//				if ((side1 < dgFloat32 (0.0f)) && (side0 > dgFloat32 (0.0f))){
-				dgInt32 test = simd_store_is(simd_and_v (simd_cmplt_s(side1, zero), simd_cmpgt_s(side0, zero)));   
-				if (test) {
+				simd_128 test ((side1 < zero) & (side0 > zero));
+				if (test.GetSignMask()) {
+					_ASSERTE (0);
 					firstEdge = ptr;
 					break;
 				}
 			}
 		}
+#endif
 	}
 
 	dgInt32 count = 0;
-
 	if (firstEdge) {
-		//		hullFixup = 0;
-//		_ASSERTE (side0 >= dgFloat32 (0.0f));
-//		_ASSERTE ((side1 = plane.Evalue (m_vertex[firstEdge->m_vertex])) >= dgFloat32 (0.0f));
-//		_ASSERTE ((side1 = plane.Evalue (m_vertex[firstEdge->m_twin->m_vertex])) < dgFloat32 (0.0f));
-//		_ASSERTE (dgAbsf (side0 - plane.Evalue (m_vertex[firstEdge->m_vertex])) < dgFloat32 (1.0e-5f));
-
 		dgInt32 maxCount = 0;
 		dgConvexSimplexEdge* ptr = firstEdge;
 		do {
-//			if (side0 > dgFloat32 (0.0f)) {
-			if (simd_store_is (simd_cmpgt_s(side0, zero))) {
-//				_ASSERTE (plane.Evalue (m_vertex[ptr->m_vertex]) > dgFloat32 (0.0f));
-//				_ASSERTE (plane.Evalue (m_vertex[ptr->m_twin->m_vertex]) < dgFloat32 (0.0f));
-//				dgVector dp (m_vertex[ptr->m_twin->m_vertex] - m_vertex[ptr->m_vertex]);
-
-				simd_type deltaP = simd_sub_v (*(simd_type*)&m_vertex[ptr->m_twin->m_vertex], *(simd_type*)&m_vertex[ptr->m_vertex]);
-
+			if ((side0 > zero).GetSignMask()) {
+				simd_128 deltaP = ((simd_128&)m_vertex[ptr->m_twin->m_vertex] - (simd_128&)m_vertex[ptr->m_vertex]);
 				_ASSERTE (((dgFloat32*)&deltaP)[3] == dgFloat32 (0.0f));
-
-//				t = plane % dp;
-				simd_type tmp = simd_mul_v (planeSimdD, deltaP);
-				tmp = simd_add_s(simd_add_v (tmp, simd_move_hl_v (tmp, tmp)), simd_permut_v (tmp, tmp, PURMUT_MASK (3,3,3,1)));
-				_ASSERTE (((dgFloat32*)&tmp)[3] <= dgFloat32 (0.0f));
-
-//				_ASSERTE (t <= 0.0f);
-//				if (t < dgFloat32 (0.0f)) {
-//					t = side0 / t;
-//				}
-//				_ASSERTE (t <= dgFloat32 (0.01f));
-//				_ASSERTE (t >= dgFloat32 (-1.05f));
-//				contactsOut[count] = m_vertex[ptr->m_vertex] - dp.Scale (t);
-
-				tmp = simd_min_s (*(simd_type*)&m_negativeTiny, tmp);
-				simd_type den = simd_rcp_s(tmp);
-//				den = simd_mul_s (simd_load_s(side0), simd_mul_sub_s(simd_add_s(den, den), simd_mul_s(den, tmp), den));
-				den = simd_mul_s (side0, simd_mul_sub_s(simd_add_s(den, den), simd_mul_s(den, tmp), den));
-				den = simd_min_s (simd_max_s (den, *(simd_type*)&m_negOne), zero);
-				_ASSERTE (((dgFloat32*)&den)[0] <= dgFloat32 (0.0f));
-				_ASSERTE (((dgFloat32*)&den)[0] >= dgFloat32 (-1.0f));
-				*((simd_type*)&contactsOut[count]) = simd_mul_sub_v (*((simd_type*)&m_vertex[ptr->m_vertex]), deltaP, simd_permut_v (den, den, PURMUT_MASK (3,0,0,0)));
+				simd_128 t = plane.DotProduct(deltaP);
+				t = negativeTiny.GetMin(t);
+				t = side0 / t;
+				t = zero.GetMin(negOne.GetMax(t));
+				(simd_128&)contactsOut[count] = ((simd_128&)m_vertex[ptr->m_vertex] & m_triplexMask) - deltaP * t;
 
 				dgConvexSimplexEdge* ptr1 = ptr->m_next;
 				for (; ptr1 != ptr; ptr1 = ptr1->m_next) {
-//					side0 = plane.Evalue (m_vertex[ptr1->m_twin->m_vertex]); 
 					_ASSERTE (m_vertex[ptr1->m_twin->m_vertex].m_w = dgFloat32 (1.0f));
-//					tmp = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr1->m_twin->m_vertex]);
-//					tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
-//					tmp = simd_add_s(tmp, simd_permut_v (tmp, tmp, PURMUT_MASK (3,3,3,1)));
-//					simd_store_s (tmp, &side0);
-
-					side0 = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr1->m_twin->m_vertex]);
-					side0 = simd_add_v (side0, simd_move_hl_v (side0, side0));
-					side0 = simd_add_s(side0, simd_permut_v (side0, side0, PURMUT_MASK (3,3,3,1)));
-//					if (side0 >= dgFloat32 (0.0f)) {
-					if (simd_store_is (simd_cmpge_s(side0, zero))) {
+					side0 = plane.DotProduct((simd_128&)m_vertex[ptr1->m_twin->m_vertex]); 
+					if ((side0 >= zero).GetSignMask()) {
 						break;
 					}
 				}
 				_ASSERTE (ptr1 != ptr);
 				ptr = ptr1->m_twin;
-			} else {
-//				contactsOut[count] = m_vertex[ptr->m_vertex];
-//				side0 = plane.Evalue (m_vertex[ptr->m_prev->m_vertex]); 
-//				if (side0 > dgFloat32 (1.0e-24f)) {
-//					ptr1 = ptr;
-//					do {
-//						ptr1 = ptr1->m_twin->m_next; 
-//						side0 = plane.Evalue (m_vertex[ptr1->m_twin->m_vertex]); 
-//					} while ((ptr1 != ptr) && (side0 < dgFloat32 (0.0f)));
-//					_ASSERTE (ptr1 != ptr);
-//					do {
-//						ptr1 = ptr1->m_twin->m_next; 
-//						side0 = plane.Evalue (m_vertex[ptr1->m_twin->m_vertex]); 
-//					} while ((ptr1 != ptr) && (side0 > dgFloat32 (0.0f)));
-//					_ASSERTE (side0 <= dgFloat32 (0.0f));
-//					ptr = ptr1;
-//				}
-				contactsOut[count] = m_vertex[ptr->m_vertex];
-				dgConvexSimplexEdge* ptr1 = ptr->m_next;
-				for (; ptr1 != ptr; ptr1 = ptr1->m_next) {
-//					side0 = plane.Evalue (m_vertex[ptr1->m_twin->m_vertex]); 
-//					simd_type tmp = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr1->m_twin->m_vertex]);
-//					tmp = simd_add_v (tmp, simd_move_hl_v (tmp, tmp));
-//					tmp = simd_add_s(tmp, simd_permut_v (tmp, tmp, PURMUT_MASK (3,3,3,1)));
-//					simd_store_s (tmp, &side0);
 
-					side0 = simd_mul_v (planeSimdD, *(simd_type*)&m_vertex[ptr1->m_twin->m_vertex]);
-					side0 = simd_add_v (side0, simd_move_hl_v (side0, side0));
-					side0 = simd_add_s(side0, simd_permut_v (side0, side0, PURMUT_MASK (3,3,3,1)));
-//					if (side0 >= dgFloat32 (0.0f)) {
-					if (simd_store_is (simd_cmpge_s(side0, zero))) {
+			} else {
+
+				(simd_128 &)contactsOut[count] =(simd_128 &) m_vertex[ptr->m_vertex];
+				dgConvexSimplexEdge* ptr1 = ptr->m_next;
+
+				for (; ptr1 != ptr; ptr1 = ptr1->m_next) {
+					side0 = plane.DotProduct((simd_128&)m_vertex[ptr1->m_twin->m_vertex]); 
+					if ((side0 >= zero).GetSignMask()) {
 						break;
 					}
 				}
@@ -1428,20 +1284,17 @@ return 0;
 			maxCount ++;
 			if (count >= DG_CLIP_MAX_POINT_COUNT) {
 				for (count = 0; count < (DG_CLIP_MAX_POINT_COUNT >> 1); count ++) {
-					contactsOut[count] = contactsOut[count * 2];
+					(simd_128 &)contactsOut[count] = (simd_128 &)contactsOut[count * 2];
 				}
 			}
-
 		} while ((ptr != firstEdge) && (maxCount < DG_CLIP_MAX_COUNT));
 		_ASSERTE (maxCount < DG_CLIP_MAX_COUNT);
-
 
 		if (count > 1) {
 			count = RectifyConvexSlice (count, normal, contactsOut);
 		}
 	}
 	return count;
-*/
 }
 
 dgInt32 dgCollisionConvex::CalculatePlaneIntersection (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
@@ -1470,6 +1323,7 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersection (const dgVector& normal, c
 			ptr = ptr->m_twin->m_next;
 		} while (ptr != edge);
 
+#ifdef _DEBUG
 		if (!firstEdge) {
 			// we may have a local minimal in the convex hull do to a big flat face
 			for (dgInt32 i = 0; i < m_edgeCount; i ++) {
@@ -1477,12 +1331,13 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersection (const dgVector& normal, c
 				side0 = plane.Evalue (m_vertex[ptr->m_vertex]);
 				side1 = plane.Evalue (m_vertex[ptr->m_twin->m_vertex]);
 				if ((side1 < dgFloat32 (0.0f)) && (side0 > dgFloat32 (0.0f))){
+					_ASSERTE (0);
 					firstEdge = ptr;
 					break;
 				}
 			}
 		}
-
+#endif
 	} else if (side0 < dgFloat32 (0.0f)) {
 		dgConvexSimplexEdge* ptr = edge;
 		do {
@@ -1501,7 +1356,7 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersection (const dgVector& normal, c
 			}
 			ptr = ptr->m_twin->m_next;
 		} while (ptr != edge);
-
+#ifdef _DEBUG
 		if (!firstEdge) {
 			// we may have a local minimal in the convex hull do to a big flat face
 			for (dgInt32 i = 0; i < m_edgeCount; i ++) {
@@ -1509,11 +1364,13 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersection (const dgVector& normal, c
 				side0 = plane.Evalue (m_vertex[ptr->m_vertex]);
 				dgFloat32 side1 = plane.Evalue (m_vertex[ptr->m_twin->m_vertex]);
 				if ((side1 < dgFloat32 (0.0f)) && (side0 > dgFloat32 (0.0f))){
+					_ASSERTE (0);
 					firstEdge = ptr;
 					break;
 				}
 			}
 		}
+#endif
 	}
 
 	dgInt32 count = 0;

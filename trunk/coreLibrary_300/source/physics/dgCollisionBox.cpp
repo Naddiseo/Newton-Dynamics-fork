@@ -551,7 +551,7 @@ dgInt32 dgCollisionBox::CalculatePlaneIntersectionSimd (const dgVector& normal, 
 
 				_ASSERTE (den.m_type.m128_f32[0] <= dgFloat32 (0.0f));
 				_ASSERTE (den.m_type.m128_f32[0] >= dgFloat32 (-1.0f));
-				(simd_128&)contactsOut[count] = (simd_128&)m_vertex[index0] - p1p0 * den;
+				(simd_128&)contactsOut[count] = ((simd_128&)m_vertex[index0] & m_triplexMask) - p1p0 * den;
 				count ++;
 
 				dgConvexSimplexEdge* ptr1 = ptr1 = ptr->m_next;
