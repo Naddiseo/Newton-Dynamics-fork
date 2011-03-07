@@ -220,27 +220,14 @@ dgVector dgCollisionConvexModifier::SupportVertex (const dgVector& dir) const
 
 dgVector dgCollisionConvexModifier::SupportVertexSimd (const dgVector& dir) const
 {
-_ASSERTE (0);
-return SupportVertex (dir);
-/*
-	simd_type tmp1;
-	simd_type tmp0;
-	dgVector localDir; 
-	dgVector dir1 (m_modifierMatrix.UnrotateVectorSimd(dir));
-
 	_ASSERTE (dgAbsf(dir % dir - dgFloat32 (1.0f)) < dgFloat32 (1.0e-2f));
+//	dgVector dir1 (m_modifierMatrix.UnrotateVector (dir));
+	simd_128 dir1 (m_modifierMatrix.UnrotateVectorSimd ((simd_128&)dir));
+	_ASSERTE (dir1.m_type.m128_f32[3] == dgFloat32 (0.0f));
 //	dir1 = dir1.Scale (dgRsqrt (dir1 % dir1));
-	tmp1 = simd_mul_v ((simd_type&)dir1, simd_and_v ((simd_type&)dir1, (simd_type&)m_triplexMask));
-	tmp1 = simd_add_v (tmp1, simd_move_hl_v (tmp1, tmp1));
-	tmp1 = simd_add_s (tmp1, simd_permut_v (tmp1, tmp1, PURMUT_MASK(0, 0, 0, 1)));
-
-	tmp0 = simd_rsqrt_s(tmp1);
-	tmp0 =  simd_mul_s (simd_mul_s((simd_type&)m_nrh0p5, tmp0), simd_mul_sub_s ((simd_type&)m_nrh3p0, simd_mul_s (tmp1, tmp0), tmp0));
-	(simd_type&)localDir = simd_mul_v ((simd_type&)dir1, simd_permut_v (tmp0, tmp0, PURMUT_MASK(3, 0, 0, 0)));
-
-	_ASSERTE (dgAbsf(localDir % localDir - dgFloat32 (1.0f)) < dgFloat32 (1.0e-2f));
-	return m_modifierMatrix.TransformVectorSimd (m_convexCollision->SupportVertexSimd(localDir)); 
-*/
+	dir1 = dir1 * (dir1.DotProduct(dir1).InvSqrt());
+//	_ASSERTE (dgAbsf(dir1 % dir1 - dgFloat32 (1.0f)) < dgFloat32 (1.0e-2f));
+	return m_modifierMatrix.TransformVectorSimd(m_convexCollision->SupportVertexSimd(dir1));
 }
 
 

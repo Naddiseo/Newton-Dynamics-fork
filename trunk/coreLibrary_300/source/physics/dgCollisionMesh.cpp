@@ -175,28 +175,11 @@ void dgCollisionMesh::dgCollisionConvexPolygon::CalculateNormalSimd()
 	if (m_normalIndex) {
 		(simd_128&) m_normal = simd_128 (&m_vertex[m_normalIndex * m_stride]) & m_triplexMask;
 	} else {
-		_ASSERTE (0);
-/*
-		simd_type e10;
-		simd_type e21;
-		simd_type tmp0;
-		simd_type mag2;
-		simd_type normal;
-
-		e10 = simd_sub_v (*(simd_type*)&m_localPoly[1], *(simd_type*)&m_localPoly[0]); 
-		e21 = simd_sub_v (*(simd_type*)&m_localPoly[2], *(simd_type*)&m_localPoly[1]); 
-		normal = simd_mul_sub_v (simd_mul_v (simd_permut_v(e10, e10, PURMUT_MASK(3, 0, 2, 1)), simd_permut_v(e21, e21, PURMUT_MASK(3, 1, 0, 2))), 
-			simd_permut_v(e10, e10, PURMUT_MASK(3, 1, 0, 2)), simd_permut_v(e21, e21, PURMUT_MASK(3, 0, 2, 1)));
-
-		_ASSERTE (((dgFloat32*)&normal)[3] == dgFloat32 (0.0f));
-		mag2 = simd_mul_v (normal, normal);
-		mag2 = simd_add_v (mag2, simd_move_hl_v (mag2, mag2));
-		mag2 = simd_sub_s (simd_add_s (mag2, simd_permut_v (mag2, mag2, PURMUT_MASK (3,3,3,1))), *(simd_type*)&m_negativeTiny);
-
-		tmp0 = simd_rsqrt_s(mag2);
-		mag2 = simd_mul_s (simd_mul_s(*(simd_type*)&m_nrh0p5, tmp0), simd_mul_sub_s (*(simd_type*)&m_nrh3p0, simd_mul_s (mag2, tmp0), tmp0));
-		(*(simd_type*)&m_normal) = simd_mul_v (normal, simd_permut_v(mag2, mag2, PURMUT_MASK(3, 0, 0, 0)));
-*/
+		simd_128 e10 ((simd_128&)m_localPoly[1] - (simd_128&)m_localPoly[0]); 
+		simd_128 e21 ((simd_128&)m_localPoly[2] - (simd_128&)m_localPoly[1]); 
+		simd_128 normal (e10.CrossProduct(e21));
+		_ASSERTE (normal.m_type.m128_f32[3] == dgFloat32 (0.0f));
+		m_normal = normal * (normal.DotProduct(normal).InvSqrt());
 	}
 }
 
@@ -206,8 +189,6 @@ void dgCollisionMesh::dgCollisionConvexPolygon::CalculateNormal()
 	if (m_normalIndex) {
 		m_normal = dgVector (&m_vertex[m_normalIndex * m_stride]);
 	} else {
-		//		dgInt32 i2;
-		//		i2 = m_index[2] * m_stride;
 		dgVector e10 (m_localPoly[1] - m_localPoly[0]);
 		dgVector e21 (m_localPoly[2] - m_localPoly[1]);
 		dgVector normal (e10 * e21);
