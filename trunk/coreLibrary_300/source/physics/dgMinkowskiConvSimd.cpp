@@ -964,7 +964,7 @@ dgContactSolver::dgMinkReturnCode dgContactSolver::UpdateSeparatingPlaneSimd(dgM
 		simd_128 mask (dist2 >= zeroTolerance);
 		dist2 = dist2.GetMax(zeroTolerance);
 
-		dist2  = dist2.InvRqrt();
+		dist2  = dist2.InvSqrt();
 		nx = nx * dist2;
 		ny = ny * dist2;
 		nz = nz * dist2;

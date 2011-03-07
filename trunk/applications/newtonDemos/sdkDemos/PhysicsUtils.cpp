@@ -816,8 +816,8 @@ NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& srcMa
 
 		case _CONE_PRIMITIVE:
 		{
-			dFloat h = size.m_x;
-			dFloat r = size.m_y;
+			dFloat r = size.m_x * 0.5f;
+			dFloat h = size.m_y;
 
 			// create the collision 
 			collision = NewtonCreateCone (world, r, h, 0, NULL); 

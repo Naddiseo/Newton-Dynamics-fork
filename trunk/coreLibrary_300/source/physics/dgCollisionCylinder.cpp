@@ -358,7 +358,7 @@ dgInt32 dgCollisionCylinder::CalculatePlaneIntersectionSimd (const dgVector& nor
 	dgInt32 count;
 	if (dgAbsf (normal.m_x) < dgFloat32 (0.999f)) { 
 		simd_128 normalYZ ((simd_128&) normal & simd_128 (0, -1, -1, 0));
-		normalYZ = normalYZ * normalYZ.DotProduct(normalYZ).InvRqrt();
+		normalYZ = normalYZ * normalYZ.DotProduct(normalYZ).InvSqrt();
 
 		//cosAng = normal.m_y * magInv;
 		//sinAng = normal.m_z * magInv;

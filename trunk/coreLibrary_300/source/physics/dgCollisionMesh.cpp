@@ -440,7 +440,7 @@ void dgCollisionMesh::dgCollisionConvexPolygon::BeamClippingSimd (const dgCollis
 	simd_128 origin (matrix.UnrotateVectorSimd((simd_128&)matrix.m_posit * negOne));
 	simd_128 dir (((simd_128&)m_localPoly[1] - (simd_128&)m_localPoly[0]) & m_triplexMask);
 	_ASSERTE ((dir.DotProduct(dir) > simd_128 (1.0e-8f)).GetSignMask());
-	dir = dir * dir.DotProduct(dir).InvRqrt();
+	dir = dir * dir.DotProduct(dir).InvSqrt();
 
 	simd_128 distance (dist);
 	simd_128 test (dir.DotProduct(origin));

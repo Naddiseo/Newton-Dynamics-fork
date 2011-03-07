@@ -216,52 +216,15 @@ dgVector dgCollisionCone::SupportVertexSimd (const dgVector& dir) const
 
 dgVector dgCollisionCone::SupportVertex (const dgVector& dir) const
 {
-/*
-	dgFloat32 y0;
-	dgFloat32 z0;
-	dgFloat32 y1;
-	dgFloat32 z1;
-	dgFloat32 dist0;
-	dgFloat32 dist1;
-	dgFloat32 tetha;
-
 	_ASSERTE (dgAbsf(dir % dir - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
 
 	if (dir.m_x > m_sinAngle) {
 		return dgVector (m_height, dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));       
 	} 
 
-	tetha = m_tethaStep * dgFloor (dgAtan2 (dir.m_y, dir.m_z) * m_tethaStepInv);
-
-	dgSinCos (tetha, y0, z0);
-	y0 *= m_radius;
-	z0 *= m_radius;
-
-	y1 = y0 * m_delCosTetha + z0 * m_delSinTetha;
-	z1 = z0 * m_delCosTetha - y0 * m_delSinTetha;
-
-	dist0 = dir.m_y * y0 + dir.m_z * z0;
-	dist1 = dir.m_y * y1 + dir.m_z * z1;
-	if (dist1 > dist0) {
-		y0 = y1;
-		z0 = z1;
-	}
-	return dgVector (-m_height, y0, z0, dgFloat32 (0.0f));       
-*/
-
-	dgFloat32 y0;
-	dgFloat32 z0;
-	dgFloat32 mag2;
-
-	_ASSERTE (dgAbsf(dir % dir - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
-
-	if (dir.m_x > m_sinAngle) {
-		return dgVector (m_height, dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));       
-	} 
-
-	y0 = m_radius;
-	z0 = dgFloat32 (0.0f);
-	mag2 = dir.m_y * dir.m_y + dir.m_z * dir.m_z;
+	dgFloat32 y0 = m_radius;
+	dgFloat32 z0 = dgFloat32 (0.0f);
+	dgFloat32 mag2 = dir.m_y * dir.m_y + dir.m_z * dir.m_z;
 	if (mag2 > dgFloat32 (1.0e-12f)) {
 		mag2 = dgRsqrt(mag2);
 		y0 = dir.m_y * m_radius * mag2;
@@ -371,38 +334,22 @@ dgInt32 dgCollisionCone::CalculatePlaneIntersection (const dgVector& normal, con
 
 dgInt32 dgCollisionCone::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
-_ASSERTE (0);
-return 0;
-/*
-	dgInt32 i;
 	dgInt32 count;
-	dgFloat32 y;
-	dgFloat32 z;
-	dgFloat32 cosAng;
-	dgFloat32 sinAng;
-	dgFloat32 magInv;
-	simd_type tmp0;
-	simd_type mag2;
-
 	if (dgAbsf (normal.m_x) < dgFloat32 (0.999f)) { 
-		y = normal.m_y * normal.m_y + normal.m_z * normal.m_z;
-		mag2  = simd_load_s (y);
-		tmp0 = simd_rsqrt_s(mag2);
-		simd_store_s (simd_mul_s (simd_mul_s(*(simd_type*)&m_nrh0p5, tmp0), simd_mul_sub_s (*(simd_type*)&m_nrh3p0, simd_mul_s (mag2, tmp0), tmp0)), &magInv);
+		simd_128 normalYZ ((simd_128&) normal & simd_128 (0, -1, -1, 0));
+		normalYZ = normalYZ * normalYZ.DotProduct(normalYZ).InvSqrt();
 
-		cosAng = normal.m_y * magInv;
-		sinAng = normal.m_z * magInv;
-		_ASSERTE (dgAbsf (normal.m_z * cosAng - normal.m_y * sinAng) < dgFloat32 (1.0e-4f));
-		dgVector normal1 (normal.m_x, normal.m_y * cosAng + normal.m_z * sinAng, dgFloat32 (0.0f), dgFloat32 (0.0f));
-		dgVector origin1 (origin.m_x, origin.m_y * cosAng + origin.m_z * sinAng, 
-			                          origin.m_z * cosAng - origin.m_y * sinAng, dgFloat32 (0.0f));
+		dgVector sincos (normalYZ);
+		dgVector normal1 (normal.m_x, normal.m_y * sincos.m_y + normal.m_z * sincos.m_z, dgFloat32 (0.0f), dgFloat32 (0.0f));
+		dgVector origin1 (origin.m_x, origin.m_y * sincos.m_y + origin.m_z * sincos.m_z, 
+									  origin.m_z * sincos.m_y - origin.m_y * sincos.m_z, dgFloat32 (0.0f));
 
 		count = dgCollisionConvex::CalculatePlaneIntersectionSimd (normal1, origin1, contactsOut);
-		for (i = 0; i < count; i ++) {
-			y = contactsOut[i].m_y;
-			z = contactsOut[i].m_z;
-			contactsOut[i].m_y = y * cosAng - z * sinAng; 
-			contactsOut[i].m_z = z * cosAng + y * sinAng;
+		for (dgInt32 i = 0; i < count; i ++) {
+			dgFloat32 y = contactsOut[i].m_y;
+			dgFloat32 z = contactsOut[i].m_z;
+			contactsOut[i].m_y = y * sincos.m_y - z * normal.m_z; 
+			contactsOut[i].m_z = z * sincos.m_y + y * normal.m_z;
 		}
 
 	} else {
@@ -410,7 +357,6 @@ return 0;
 	}
 
 	return count;
-*/
 }
 
 

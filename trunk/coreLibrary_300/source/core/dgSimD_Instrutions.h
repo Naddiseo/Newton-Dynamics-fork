@@ -285,7 +285,7 @@
 				return _mm_movemask_ps(m_type);
 			} 
 
-			DG_INLINE simd_128 InvRqrt () const
+			DG_INLINE simd_128 InvSqrt () const
 			{
 				simd_128 half (dgFloat32 (0.5f));
 				simd_128 three (dgFloat32 (3.0f));

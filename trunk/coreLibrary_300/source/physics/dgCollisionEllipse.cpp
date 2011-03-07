@@ -118,31 +118,14 @@ dgVector dgCollisionEllipse::SupportVertex (const dgVector& dir) const
 
 dgVector dgCollisionEllipse::SupportVertexSimd (const dgVector& dir) const
 {
-_ASSERTE (0);
-return SupportVertex (dir);
-/*
 	_ASSERTE ((dir % dir) > dgFloat32 (0.999f));
 	_ASSERTE ((dgUnsigned64(&dir) & 0x0f) == 0);
 	_ASSERTE ((dgUnsigned64(&m_scale) & 0x0f) == 0);
 
-	dgVector dir1;
-	simd_type n;
-	simd_type tmp;
-	simd_type mag2;
-
-//	dir1 = dgVector (dir.m_x * m_scale.m_x, dir.m_y * m_scale.m_y, dir.m_z * m_scale.m_z, dgFloat32 (0.0f));
-	n = simd_mul_v (*(simd_type*)&dir, *(simd_type*)&m_scale); 
-
-//	dir1 = dir1.Scale (dgRsqrt (dir1 % dir1));
-	mag2 = simd_mul_v (n, n);
-	mag2 = simd_add_s (simd_add_v (mag2, simd_move_hl_v (mag2, mag2)), simd_permut_v (mag2, mag2, PURMUT_MASK (3,3,3,1)));
-	tmp = simd_rsqrt_s(mag2);
-	mag2 = simd_mul_s (simd_mul_s(*(simd_type*)&m_nrh0p5, tmp), simd_mul_sub_s (*(simd_type*)&m_nrh3p0, simd_mul_s (mag2, tmp), tmp));
-	(*(simd_type*)&dir1) = simd_mul_v (n, simd_permut_v (mag2, mag2, PURMUT_MASK (3,0,0,0)));
-
+	simd_128 n ((simd_128&) dir * (simd_128&)m_scale);
+	simd_128 dir1 (n * (n.DotProduct(n)).InvSqrt ());
 	dgVector p (dgCollisionSphere::SupportVertexSimd (dir1));
-	return dgVector (p.m_x * m_scale.m_x, p.m_y * m_scale.m_y, p.m_z * m_scale.m_z, dgFloat32 (0.0f)); 
-*/
+	return dgVector ((simd_128&)p * (simd_128&)m_scale); 
 }
 
 
@@ -159,11 +142,13 @@ dgInt32 dgCollisionEllipse::CalculatePlaneIntersection (const dgVector& normal, 
 
 dgInt32 dgCollisionEllipse::CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& point, dgVector* const contactsOut) const
 {
-_ASSERTE (0);
 	_ASSERTE ((normal % normal) > dgFloat32 (0.999f));
-	dgVector n (normal.m_x * m_scale.m_x, normal.m_y * m_scale.m_y, normal.m_z * m_scale.m_z, dgFloat32 (0.0f));
-	n = n.Scale ((normal % point) / (n % n));
-	contactsOut[0] = dgVector (n.m_x * m_scale.m_x, n.m_y * m_scale.m_y, n.m_z * m_scale.m_z, dgFloat32 (0.0f)); 
+//	dgVector n (normal.m_x * m_scale.m_x, normal.m_y * m_scale.m_y, normal.m_z * m_scale.m_z, dgFloat32 (0.0f));
+	simd_128 n ((simd_128&)normal * (simd_128&)m_scale);
+//	n = n.Scale ((normal % point) / (n % n));
+	n = n * ((simd_128&)normal & m_triplexMask).DotProduct((simd_128&)point) / n.DotProduct(n);
+//	contactsOut[0] = dgVector (n.m_x * m_scale.m_x, n.m_y * m_scale.m_y, n.m_z * m_scale.m_z, dgFloat32 (0.0f)); 
+	(simd_128&) contactsOut[0] = n * (simd_128&)m_scale;
 	return 1;
 }
 

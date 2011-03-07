@@ -151,70 +151,6 @@ void dgCollisionSphere::Init (dgFloat32 radius, dgMemoryAllocator* allocator)
 
 dgVector dgCollisionSphere::SupportVertexSimd (const dgVector& dir) const
 {
-	/*
-	dgFloat32 x0;
-	dgFloat32 z0;
-	dgFloat32 x1;
-	dgFloat32 z1;
-	dgFloat32 dist0;
-	dgFloat32 dist1;
-	dgFloat32 tetha;
-	dgFloat32 alpha;
-	dgFloat32 sinAlpha;
-	dgFloat32 cosAlpha;
-	dgFloat32 sinTetha;
-	dgFloat32 cosTetha;
-
-	_ASSERTE (dgAbsf(dir % dir - dgFloat32 (1.0f)) < dgFloat32 (1.0e-2f));
-
-	if (dgAbsf (dir.m_x) > dgFloat32 (0.9998f)) {
-	if (dir.m_x > dgFloat32 (0.9998f)) {
-	return dgVector (m_radius, dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f)); 
-	}
-	return dgVector (-m_radius, dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f)); 
-	}
-
-	tetha = m_tethaStep * dgFloor (dgAtan2 (dir.m_y, dir.m_z) * m_tethaStepInv);
-	alpha = m_tethaStep * dgFloor (dgAsin (dir.m_x) * m_tethaStepInv);
-	dgSinCos (tetha, sinTetha, cosTetha);
-	dgSinCos (alpha, sinAlpha, cosAlpha);
-
-	x0 = m_radius * sinAlpha;
-	z0 = m_radius * cosAlpha;
-
-	dgVector p0 (x0, z0 * sinTetha, z0 * cosTetha, dgFloat32 (0.0f));
-	x1 = x0 * m_delCosTetha + z0 * m_delSinTetha;
-	z1 = z0 * m_delCosTetha - x0 * m_delSinTetha;
-
-	dgVector p1 (x1, z1 * sinTetha, z1 * cosTetha, dgFloat32 (0.0f));
-	dgVector p2 (x0, z0 * sinTetha * m_delCosTetha + z0 * cosTetha * m_delSinTetha,
-	z0 * cosTetha * m_delCosTetha - z0 * sinTetha * m_delSinTetha, dgFloat32 (0.0f));
-
-	dgVector p3 (x1, z1 * sinTetha * m_delCosTetha + z1 * cosTetha * m_delSinTetha,
-	z1 * cosTetha * m_delCosTetha - z1 * sinTetha * m_delSinTetha, dgFloat32 (0.0f));
-
-	dist0 = p0 % dir;
-	dist1 = p1 % dir;
-	if (dist1 > dist0) {
-	p0 = p1;
-	dist0 = dist1;
-	}
-
-	dist1 = p2 % dir;
-	if (dist1 > dist0) {
-	p0 = p2;
-	dist0 = dist1;
-	}
-
-	dist1 = p3 % dir;
-	if (dist1 > dist0) {
-	p0 = p3;
-	dist0 = dist1;
-	}
-
-	return p0;       
-	*/
-
 	_ASSERTE (dgAbsf(dir % dir - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
 //	return SupportVertex (dir);
 	return dir.Scale (m_radius);
@@ -223,83 +159,13 @@ dgVector dgCollisionSphere::SupportVertexSimd (const dgVector& dir) const
 
 dgVector dgCollisionSphere::SupportVertex (const dgVector& dir) const
 {
-#if 0
-	dgFloat32 x0;
-	dgFloat32 z0;
-	dgFloat32 x1;
-	dgFloat32 z1;
-	dgFloat32 dist0;
-	dgFloat32 dist1;
-	dgFloat32 tetha;
-	dgFloat32 alpha;
-	dgFloat32 sinAlpha;
-	dgFloat32 cosAlpha;
-	dgFloat32 sinTetha;
-	dgFloat32 cosTetha;
-
-	_ASSERTE (dgAbsf(dir % dir - dgFloat32 (1.0f)) < dgFloat32 (1.0e-2f));
-	if (dgAbsf (dir.m_x) > dgFloat32 (0.9998f)) {
-		if (dir.m_x > dgFloat32 (0.9998f)) {
-			return dgVector (m_radius, dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f)); 
-		}
-		return dgVector (-m_radius, dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f)); 
-	}
-
-	tetha = m_tethaStep * dgFloor (dgAtan2 (dir.m_y, dir.m_z) * m_tethaStepInv);
-	alpha = m_tethaStep * dgFloor (dgAsin (dir.m_x) * m_tethaStepInv);
-
-	dgSinCos (tetha, sinTetha, cosTetha);
-	dgSinCos (alpha, sinAlpha, cosAlpha);
-
-	x0 = m_radius * sinAlpha;
-	z0 = m_radius * cosAlpha;
-
-	dgVector p0 (x0, z0 * sinTetha, z0 * cosTetha, dgFloat32 (0.0f));
-	x1 = x0 * m_delCosTetha + z0 * m_delSinTetha;
-	z1 = z0 * m_delCosTetha - x0 * m_delSinTetha;
-
-	dgVector p1 (x1, z1 * sinTetha, z1 * cosTetha, dgFloat32 (0.0f));
-	dgVector p2 (x0, z0 * sinTetha * m_delCosTetha + z0 * cosTetha * m_delSinTetha,
-					 z0 * cosTetha * m_delCosTetha - z0 * sinTetha * m_delSinTetha, dgFloat32 (0.0f));
-
-	dgVector p3 (x1, z1 * sinTetha * m_delCosTetha + z1 * cosTetha * m_delSinTetha,
-					 z1 * cosTetha * m_delCosTetha - z1 * sinTetha * m_delSinTetha, dgFloat32 (0.0f));
-
-	dist0 = p0 % dir;
-	dist1 = p1 % dir;
-	if (dist1 > dist0) {
-		p0 = p1;
-		dist0 = dist1;
-	}
-
-	dist1 = p2 % dir;
-	if (dist1 > dist0) {
-		p0 = p2;
-		dist0 = dist1;
-	}
-
-	dist1 = p3 % dir;
-	if (dist1 > dist0) {
-		p0 = p3;
-		dist0 = dist1;
-	}
-
-	return p0;       
-#else
 	_ASSERTE (dgAbsf(dir % dir - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
 	return dir.Scale (m_radius);
-#endif
 }
 
 
 
-void dgCollisionSphere::TesselateTriangle (
-	dgInt32 level, 
-	const dgVector& p0, 
-	const dgVector& p1, 
-	const dgVector& p2, 
-	dgInt32& count,
-	dgVector* ouput) const
+void dgCollisionSphere::TesselateTriangle (dgInt32 level, const dgVector& p0, const dgVector& p1, const dgVector& p2, dgInt32& count, dgVector* ouput) const
 {
 	if (level) {
 		_ASSERTE (dgAbsf (p0 % p0 - dgFloat32 (1.0f)) < dgFloat32 (1.0e-4f));
