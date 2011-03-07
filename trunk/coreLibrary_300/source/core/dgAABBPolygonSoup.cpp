@@ -593,7 +593,6 @@ class dgAABBTree
 			{
 				dgSpliteInfo (dgAABBTree* const boxArray, dgInt32 boxCount, const dgTriplex* const vertexArray, const dgConstructionTree* const tree)
 				{
-
 					dgVector minP ( dgFloat32 (1.0e15f),  dgFloat32 (1.0e15f),  dgFloat32 (1.0e15f), dgFloat32 (0.0f)); 
 					dgVector maxP (-dgFloat32 (1.0e15f), -dgFloat32 (1.0e15f), -dgFloat32 (1.0e15f), dgFloat32 (0.0f)); 
 
@@ -748,33 +747,18 @@ class dgAABBTree
 
 
 
-	DG_INLINE dgInt32 BoxIntersectSimd (
-		const dgTriplex* const vertexArray, 
-		const dgVector& min, 
-		const dgVector& max) const
+	DG_INLINE dgInt32 BoxIntersectSimd (const dgTriplex* const vertexArray, const dgVector& min, const dgVector& max) const
 	{
-//		dgInt32 out;
-//		dgFloatSign out;
-//		simd_type test;
-
 		simd_type minBox = simd_loadu_v(vertexArray[m_minIndex].m_x);
 		simd_type maxBox = simd_loadu_v(vertexArray[m_maxIndex].m_x);
 
 		simd_type test = simd_or_v (simd_cmpge_v ((simd_type&)minBox, (simd_type&) max), simd_cmple_v ((simd_type&)maxBox, (simd_type&) min));
 		test = simd_or_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 2, 0)));
-
-		
-//		dgFloatSign out;
-//		simd_store_s(simd_or_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 1, 1))), &out.m_fVal);
-//		return out.m_integer.m_iVal; 
 		return simd_store_is(simd_or_v (test, simd_permut_v (test, test, PURMUT_MASK (3, 2, 1, 1))));
 	}
 
 
-	DG_INLINE dgInt32 BoxIntersect (
-		const dgTriplex* const vertexArray, 
-		const dgVector& min, 
-		const dgVector& max) const
+	DG_INLINE dgInt32 BoxIntersect (const dgTriplex* const vertexArray, const dgVector& min, const dgVector& max) const
 	{
 		dgFloatSign tmp0_x;
 		dgFloatSign tmp0_y;
@@ -800,15 +784,6 @@ class dgAABBTree
 
 	DG_INLINE dgInt32 RayTestSimd (const FastRayTest& ray, const dgTriplex* const vertexArray) const
 	{
-//		simd_type t0;
-//		simd_type t1;
-//		simd_type tt0;
-//		simd_type tt1;
-//		simd_type test;
-//		simd_type paralletTest;
-//		simd_type minBox;
-//		simd_type maxBox;
-
 		simd_type minBox = simd_loadu_v (vertexArray[m_minIndex].m_x);
 		simd_type maxBox = simd_loadu_v (vertexArray[m_maxIndex].m_x);
 
@@ -890,21 +865,6 @@ class dgAABBTree
 			if (me->BoxIntersectSimd ((dgTriplex*) vertexArray, min, max) >= 0) {
 
 				if (me->m_back.IsLeaf()) {
-//					dgInt32 count;
-//					count = me->m_back.GetCount();
-//					const dgAABBTree* const firstBox = &root[me->m_back.GetIndex()];
-//					for (dgInt32 i = 0; i < count; i ++) {
-//						dgInt32 vCount;
-//						dgInt32 index;
-//						index = firstBox[i].m_back.GetIndex();
-//						vCount = (firstBox[i].m_back.GetCount() >> 1) - 1;
-//						if (firstBox[i].BoxIntersectSimd((dgTriplex*) vertexArray, min, max) >= 0) {
-//							if (callback(context, vertexArray, sizeof (dgTriplex), &indexArray[index + 1], vCount) == t_StopSearh) {
-//								return;
-//							}
-//						}
-//					}
-
 					dgInt32 index = dgInt32 (me->m_back.GetIndex());
 					dgInt32 vCount = dgInt32 ((me->m_back.GetCount() >> 1) - 1);
 					if ((vCount > 0) && callback(context, vertexArray, sizeof (dgTriplex), &indexArray[index + 1], vCount) == t_StopSearh) {
@@ -918,21 +878,6 @@ class dgAABBTree
 				}
 
 				if (me->m_front.IsLeaf()) {
-//					dgInt32 count;
-//					count = me->m_front.GetCount();
-//					const dgAABBTree* const firstBox = &root[me->m_front.GetIndex()];
-//					for (dgInt32 i = 0; i < count; i ++) {
-//						dgInt32 vCount;
-//						dgInt32 index;
-//						index = firstBox[i].m_back.GetIndex();
-//						vCount = (firstBox[i].m_back.GetCount() >> 1) - 1;
-//						if (firstBox[i].BoxIntersectSimd((dgTriplex*) vertexArray, min, max) >= 0) {
-//							if (callback(context, vertexArray, sizeof (dgTriplex), &indexArray[index + 1], vCount) == t_StopSearh) {
-//								return;
-//							}
-//						}
-
-
 					dgInt32 index = dgInt32 (me->m_front.GetIndex());
 					dgInt32 vCount = dgInt32 ((me->m_front.GetCount() >> 1) - 1);
 					if ((vCount > 0) && callback(context, vertexArray, sizeof (dgTriplex), &indexArray[index + 1], vCount) == t_StopSearh) {
@@ -963,21 +908,6 @@ class dgAABBTree
 			if (me->BoxIntersect ((dgTriplex*) vertexArray, min, max) >= 0) {
 
 				if (me->m_back.IsLeaf()) {
-//					dgInt32 count;
-//					count = me->m_back.GetCount();
-//					const dgAABBTree* const firstBox = &root[me->m_back.GetIndex()];
-//					for (dgInt32 i = 0; i < count; i ++) {
-//						dgInt32 vCount;
-//						dgInt32 index;
-//						index = firstBox[i].m_back.GetIndex();
-//						vCount = (firstBox[i].m_back.GetCount() >> 1) - 1;
-//						if (firstBox[i].BoxIntersect((dgTriplex*) vertexArray, min, max) >= 0) {
-//							if (callback(context, vertexArray, sizeof (dgTriplex), &indexArray[index + 1], vCount) == t_StopSearh) {
-//								return;
-//							}
-//						}
-//					}
-
 					dgInt32 index = dgInt32 (me->m_back.GetIndex());
 					dgInt32 vCount = dgInt32 ((me->m_back.GetCount() >> 1) - 1);
 					if ((vCount > 0) && callback(context, vertexArray, sizeof (dgTriplex), &indexArray[index + 1], vCount) == t_StopSearh) {
@@ -991,21 +921,6 @@ class dgAABBTree
 				}
 
 				if (me->m_front.IsLeaf()) {
-//					dgInt32 count;
-//					count = me->m_front.GetCount();
-//					const dgAABBTree* const firstBox = &root[me->m_front.GetIndex()];
-//					for (dgInt32 i = 0; i < count; i ++) {
-//						dgInt32 vCount;
-//						dgInt32 index;
-//						index = firstBox[i].m_back.GetIndex();
-//						vCount = (firstBox[i].m_back.GetCount() >> 1) - 1;
-//						if (firstBox[i].BoxIntersect((dgTriplex*) vertexArray, min, max) >= 0) {
-//							if (callback(context, vertexArray, sizeof (dgTriplex), &indexArray[index + 1], vCount) == t_StopSearh) {
-//								return;
-//							}
-//						}
-//					}
-
 					dgInt32 index = dgInt32 (me->m_front.GetIndex());
 					dgInt32 vCount = dgInt32 ((me->m_front.GetCount() >> 1) - 1);
 					if ((vCount > 0) && callback(context, vertexArray, sizeof (dgTriplex), &indexArray[index + 1], vCount) == t_StopSearh) {
@@ -1038,10 +953,6 @@ class dgAABBTree
 			if (me->RayTestSimd (ray, (dgTriplex*) vertexArray)) {
 				
 				if (me->m_back.IsLeaf()) {
-					//dgInt32 index;
-					//dgInt32 vCount;
-					//dgFloat32 param;
-					
 					dgInt32 vCount = dgInt32 ((me->m_back.GetCount() >> 1) - 1);
 					if (vCount > 0) {
 						dgInt32 index = dgInt32 (me->m_back.GetIndex());
@@ -1061,23 +972,6 @@ class dgAABBTree
 				}
 
 				if (me->m_front.IsLeaf()) {
-//					dgInt32 count;
-//					count = me->m_front.GetCount();
-//					const dgAABBTree* const firstBox = &root[me->m_front.GetIndex()];
-//					for (dgInt32 i = 0; i < count; i ++) {
-//						dgFloat32 param;
-//						dgInt32 vCount;
-//						dgInt32 index;
-//						index = firstBox[i].m_back.GetIndex();
-//						vCount = (firstBox[i].m_back.GetCount() >> 1) - 1;
-//						param = callback(context, vertexArray, sizeof (dgTriplex), &indexArray[index + 1], vCount);
-//						_ASSERTE (param >= dgFloat32 (0.0f));
-//						if (param < maxParam) {
-//							maxParam = param;
-//							ray.Reset (maxParam);
-//						}
-//					}
-
 					dgInt32 vCount = dgInt32 ((me->m_front.GetCount() >> 1) - 1);
 					if (vCount > 0) {
 						dgInt32 index = dgInt32 (me->m_front.GetIndex());
