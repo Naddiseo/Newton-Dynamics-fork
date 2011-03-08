@@ -93,11 +93,10 @@ class dgBroadPhaseCollision
 	{
 		public:
 		dgFitnessList (dgMemoryAllocator* const allocator)
-			:dgList <dgBroadPhaseNode*>(allocator), m_current(NULL)
+			:dgList <dgBroadPhaseNode*>(allocator)
 		{
 		}
 
-#ifdef _DEBUG
 		dgFloat64 TotalCost () const
 		{
 			dgFloat64 cost = dgFloat32 (0.0f);
@@ -107,9 +106,6 @@ class dgBroadPhaseCollision
 			}
 			return cost;
 		}
-#endif
-
-		dgListNode* m_current;
 	};
 
 	dgBroadPhaseCollision(dgMemoryAllocator* const allocator);

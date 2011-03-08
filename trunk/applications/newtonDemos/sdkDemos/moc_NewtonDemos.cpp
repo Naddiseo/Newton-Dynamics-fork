@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'NewtonDemos.h'
 **
-** Created: Sat Mar 5 09:52:50 2011
+** Created: Sun Mar 6 11:29:16 2011
 **      by: The Qt Meta Object Compiler version 62 (Qt 4.7.1)
 **
 ** WARNING! All changes made in this file will be lost!

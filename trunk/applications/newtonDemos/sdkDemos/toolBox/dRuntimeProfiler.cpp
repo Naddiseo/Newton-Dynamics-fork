@@ -122,12 +122,12 @@ void dRuntimeProfiler::Render (NewtonWorld* nWorld, int mask, QPainter& context)
 
 	if (mask & 8) { 
 		context.setPen(Qt::yellow);
-//		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_COLLISION_UPDATE_BROAD_PHASE][0], context);
+		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_COLLISION_UPDATE_BROAD_PHASE][0], context);
 	}
 
 	if (mask & 16) { 
 		context.setPen(Qt::cyan);
-//		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_COLLISION_UPDATE_NARROW_PHASE][0], context);
+		DrawTrack (x0, y0, m_frameIndex, &m_perfomanceTracks[NEWTON_PROFILER_COLLISION_UPDATE_NARROW_PHASE][0], context);
 	}
 
 

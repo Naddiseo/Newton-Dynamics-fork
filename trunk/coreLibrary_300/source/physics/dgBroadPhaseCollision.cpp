@@ -408,10 +408,6 @@ void dgBroadPhaseCollision::Remove (dgBody* const body)
 
 		_ASSERTE (node->m_parent->m_fitnessNode);
 		m_fitness.Remove(node->m_parent->m_fitnessNode);
-		if (node->m_parent->m_fitnessNode == m_fitness.m_current) {
-			m_fitness.m_current = NULL;
-		}
-
 		delete node->m_parent;
 	} else {
 		delete node;
@@ -696,49 +692,24 @@ void dgBroadPhaseCollision::ImproveNodeFitness (dgBroadPhaseNode* const node)
 
 void dgBroadPhaseCollision::ImproveFitness()
 {
-	dgInt32 count = m_fitness.GetCount() >> 2;
-
-#ifdef _DEBUG 
-	dgFloat64 cost0 = m_fitness.TotalCost ();
-#endif
-
 	dgWorld* const world = (dgWorld*) this;
-	if (count) {
-		dgFitnessList::dgListNode* node = m_fitness.m_current;
-		if (world->m_cpu == dgSimdPresent) {
-			for (dgInt32 i = 0; i < count; i ++) {
-				if (node == NULL) {
-					node = m_fitness.GetFirst();
-				}
-				ImproveNodeFitnessSimd (node->GetInfo());
-				node = node->GetNext();
-			}
-		} else {
-			for (dgInt32 i = 0; i < count; i ++) {
-				if (node == NULL) {
-					node = m_fitness.GetFirst();
-				}
-				ImproveNodeFitness (node->GetInfo());
-				node = node->GetNext();
-			}
-		}
-		m_fitness.m_current = node;
-	} else {
-		if (world->m_cpu == dgSimdPresent) {
-			for (dgFitnessList::dgListNode* node = m_fitness.GetFirst(); node; node = node->GetNext()) {
-				ImproveNodeFitnessSimd (node->GetInfo());
-			}
-		} else {
-			for (dgFitnessList::dgListNode* node = m_fitness.GetFirst(); node; node = node->GetNext()) {
-				ImproveNodeFitness (node->GetInfo());
-			}
-		}
-	}
+	dgCpuClass cpu = world->m_cpu;
 
-#ifdef _DEBUG 
-	dgFloat64 cost1 = m_fitness.TotalCost ();
-	_ASSERTE (cost1 <= cost0);
-#endif
+	dgFloat64 cost0 = m_fitness.TotalCost ();
+	dgFloat64 cost1 = cost0;
+	do {
+		cost0 = cost1;
+		if (cpu == dgSimdPresent) {
+			for (dgFitnessList::dgListNode* node = m_fitness.GetFirst(); node; node = node->GetNext()) {
+				ImproveNodeFitnessSimd (node->GetInfo());
+			}
+		} else {
+			for (dgFitnessList::dgListNode* node = m_fitness.GetFirst(); node; node = node->GetNext()) {
+				ImproveNodeFitness (node->GetInfo());
+			}
+		}
+		cost1 = m_fitness.TotalCost ();
+	} while (cost1 < (dgFloat32 (0.95f)) * cost0);
 }
 
 
@@ -756,14 +727,16 @@ void dgBroadPhaseCollision::SubmitPairs (dgBroadPhaseLeafNode* const bodyNode, d
 	dgCollidingPairCollector* const contactPairs = (dgWorld*)this;
 
 	if (world->m_cpu == dgSimdPresent) {
+		simd_128 boxP0 ((simd_128&)body0->m_minAABB);
+		simd_128 boxP1 ((simd_128&)body0->m_maxAABB);
 		while (stack) {
 			stack --;
 			dgBroadPhaseNode* const rootNode = pool[stack];
-			if (dgOverlapTestSimd (rootNode->m_minBox, rootNode->m_maxBox, body0->m_minAABB, body0->m_maxAABB)) {
+			if (dgOverlapTestSimd (rootNode->m_minBox, rootNode->m_maxBox, boxP0, boxP1)) {
 				if (!rootNode->m_left) {
 					_ASSERTE (!rootNode->m_right);
 					dgBody* const body1 = ((dgBroadPhaseLeafNode*) rootNode)->m_body;
-					if (dgOverlapTestSimd(body1->m_minAABB, body1->m_maxAABB, body0->m_minAABB, body0->m_maxAABB)) {
+					if (dgOverlapTestSimd(body1->m_minAABB, body1->m_maxAABB, boxP0, boxP1)) {
 						if (!body1->m_collision->IsType (dgCollision::dgCollisionNull_RTTI)) {
 							contactPairs->AddPair(body0, body1, threadID);
 						}

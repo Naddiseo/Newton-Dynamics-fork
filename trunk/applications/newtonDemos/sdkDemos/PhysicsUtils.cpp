@@ -802,7 +802,7 @@ NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& srcMa
 		case _SPHERE_PRIMITIVE:
 		{
 			// create the collision 
-			collision = NewtonCreateSphere (world, size.m_x * 0.5f, size.m_y * 1.0f, size.m_z * 0.5f, 0, NULL); 
+			collision = NewtonCreateSphere (world, size.m_x * 0.5f, size.m_y * 0.5f, size.m_z * 0.5f, 0, NULL); 
 			break;
 		}
 
