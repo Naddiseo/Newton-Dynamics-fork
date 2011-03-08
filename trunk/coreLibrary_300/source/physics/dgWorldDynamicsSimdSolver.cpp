@@ -723,7 +723,7 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 
 		alpha = body->m_matrix.UnrotateVectorSimd(alpha);
 		_ASSERTE (alpha.m_type.m128_f32[3] == dgFloat32 (0.0f));
-		(simd_128&)body->m_netTorque = body->m_matrix.RotateVectorSimd(alpha * (simd_type&)body->m_mass);
+		(simd_128&)body->m_netTorque = body->m_matrix.RotateVectorSimd(alpha * (simd_128&)body->m_mass);
 	}
 
 	if (hasJointFeeback) {
