@@ -246,81 +246,48 @@ void dgContact::JacobianContactDerivative (dgContraintDescritor& params, const d
 
 void dgContact::JointAccelerationsSimd(dgJointAccelerationDecriptor* const params)
 {
-//	const dgJacobianPair* const Jt = params.m_Jt;
+	simd_128 zero (dgFloat32 (0.0f));
+	simd_128 four (dgFloat32 (4.0f));
+	simd_128 negOne (dgFloat32 (-1.0f));
+	simd_128 tol002 (dgFloat32 (1.0e-2f));
+	simd_128 timeStep (params->m_timeStep);
+	simd_128 invTimeStep (params->m_invTimeStep);
 
-	simd_type zero = simd_set1 (dgFloat32 (0.0f));
-	simd_type four = simd_set1 (dgFloat32 (4.0f));
-	simd_type negOne = simd_set1 (dgFloat32 (-1.0f));
-	simd_type tol002 = simd_set1 (dgFloat32 (1.0e-2f));
-	simd_type timeStep = simd_set1 (params->m_timeStep);
-	simd_type invTimeStep = simd_set1 (params->m_invTimeStep);
-
-	simd_type bodyVeloc0 = (simd_type&) m_body0->m_veloc;
-	simd_type bodyOmega0 = (simd_type&) m_body0->m_omega;
-	simd_type bodyVeloc1 = (simd_type&) m_body1->m_veloc;
-	simd_type bodyOmega1 = (simd_type&) m_body1->m_omega;
+	simd_128 bodyVeloc0 ((simd_128&) m_body0->m_veloc);
+	simd_128 bodyOmega0 ((simd_128&) m_body0->m_omega);
+	simd_128 bodyVeloc1 ((simd_128&) m_body1->m_veloc);
+	simd_128 bodyOmega1 ((simd_128&) m_body1->m_omega);
 
 	dgInt32 count = params->m_rowsCount;
 	dgJacobianMatrixElement* const rowMatrix = params->m_rowMatrix;
+
 	for (dgInt32 k = 0; k < count; k ++) {
-		//		dgFloat32 vRel;
-		//		dgFloat32 aRel;
-		//if (!params.m_accelIsMotor[k]) {
+
 		if (!rowMatrix[k].m_accelIsMotor) {
-
-			//dgVector relVeloc (Jt[k].m_jacobian_IM0.m_linear.CompProduct(bodyVeloc0));
-			//relVeloc += Jt[k].m_jacobian_IM0.m_angular.CompProduct(bodyOmega0);
-			//relVeloc += Jt[k].m_jacobian_IM1.m_linear.CompProduct(bodyVeloc1);
-			//relVeloc += Jt[k].m_jacobian_IM1.m_angular.CompProduct(bodyOmega1);
-
 			dgJacobianMatrixElement* const row = &rowMatrix[k];
-			simd_type relVeloc = simd_mul_v (              (simd_type&)row->m_Jt.m_jacobian_IM0.m_linear, bodyVeloc0); 
-			relVeloc = simd_mul_add_v (relVeloc, (simd_type&)row->m_Jt.m_jacobian_IM0.m_angular, bodyOmega0); 
-			relVeloc = simd_mul_add_v (relVeloc, (simd_type&)row->m_Jt.m_jacobian_IM1.m_linear, bodyVeloc1); 
-			relVeloc = simd_mul_add_v (relVeloc, (simd_type&)row->m_Jt.m_jacobian_IM1.m_angular, bodyOmega1); 
+			simd_128 relVeloc ((simd_128&)row->m_Jt.m_jacobian_IM0.m_linear * bodyVeloc0 +
+							   (simd_128&)row->m_Jt.m_jacobian_IM0.m_angular * bodyOmega0 + 
+							   (simd_128&)row->m_Jt.m_jacobian_IM1.m_linear * bodyVeloc1 +
+							   (simd_128&)row->m_Jt.m_jacobian_IM1.m_angular * bodyOmega1);
 
-			//vRel = relVeloc.m_x + relVeloc.m_y + relVeloc.m_z;
-			//aRel = relAccel.m_x + relAccel.m_y + relAccel.m_z;
-			relVeloc = simd_add_v (relVeloc, simd_move_hl_v(relVeloc, relVeloc));
-			relVeloc = simd_add_s (relVeloc, simd_permut_v (relVeloc, relVeloc, PURMUT_MASK(3, 3, 3, 1)));
-			simd_type relAccel = simd_load_s (row->m_deltaAccel);
+			_ASSERTE (relVeloc.m_type.m128_f32[3] == dgFloat32 (0.0f));
+			relVeloc = relVeloc.AddHorizontal();
 
+			simd_128 relAccel (row->m_deltaAccel);
 			if (row->m_normalForceIndex < 0) {
-				//dgFloat32 restitution;
-				//restitution = dgFloat32 (1.0f);
-				//if (vRel <= dgFloat32 (0.0f)) {
-				//	restitution += params.m_restitution[k];
-				//}
-				simd_type restitution = simd_sub_s (simd_and_v (simd_set1 (row->m_restitution), simd_cmplt_s (relVeloc, zero)), negOne);
 
-				simd_type penetration = simd_load_s (row->m_penetration);
-				//dgFloat32 penetrationVeloc;
-				//penetrationVeloc = 0.0f;
-				//if (params.m_penetration[k] > dgFloat32 (1.0e-2f)) {
-				//	if (vRel > dgFloat32 (0.0f)) {
-				//		_ASSERTE (penetrationCorrection >= dgFloat32 (0.0f));
-				//		params.m_penetration[k] = GetMax (dgFloat32 (0.0f), params.m_penetration[k] - vRel * params.m_timeStep);
-				//	}
-				//	penetrationVeloc = -(params.m_penetration[k] * params.m_penetrationStiffness[k]);
-				//}
-				simd_type penetrationMask = simd_cmpgt_s (penetration, tol002);
-				simd_type velocMask = simd_and_v (penetrationMask, simd_cmpgt_s (relVeloc, zero));
-				penetration = simd_max_s (zero, simd_sub_s (penetration, simd_and_v (simd_mul_s (relVeloc, timeStep), velocMask)));
-				simd_type penetrationVeloc = simd_and_v (simd_mul_s (penetration, simd_load_s (row->m_penetrationStiffness)), penetrationMask);
-				simd_store_s (penetration, &row->m_penetration);
+				simd_128 restitution ((simd_128 (row->m_restitution) & (relVeloc <= zero)) - negOne);
+				simd_128 penetration (row->m_penetration);
 
-				//vRel *= restitution;
-				//vRel = GetMin (dgFloat32 (4.0f), vRel + penetrationVeloc);
-				//relVeloc = simd_mul_s (relVeloc, restitution);
-				relVeloc = simd_min_s (four, simd_sub_s (simd_mul_s (relVeloc, restitution), penetrationVeloc));
+				simd_128 penetrationMask (penetration > tol002);
+				simd_128 velocMask (penetrationMask & (relVeloc > zero));
+				penetration = zero.GetMax(penetration - ((relVeloc * timeStep) & velocMask));
+				simd_128 penetrationVeloc ((penetration * simd_128 (row->m_penetrationStiffness)) & penetrationMask);
+				penetration.StoreScalar(&row->m_penetration);
+				relVeloc = four.GetMin (relVeloc * restitution - penetrationVeloc);
 			}
-
-			//params.m_coordenateAccel[k] = -aRel;
-			//relAccel = simd_mul_add_s (relAccel, relVeloc, invTimeStep);
-			//simd_store_s (simd_mul_s (relAccel, negOne), &params.m_coordenateAccel[k]);
-
-			//params.m_coordenateAccel[k] = (aRel - vRel * params.m_invTimeStep);
-			simd_store_s (simd_mul_sub_s (relAccel, relVeloc, invTimeStep), &row->m_coordenateAccel);
+			simd_128 a (relAccel - relVeloc * invTimeStep);
+			a.StoreScalar(&row->m_coordenateAccel);
 		}
 	}
 }
