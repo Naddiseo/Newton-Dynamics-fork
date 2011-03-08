@@ -38,6 +38,7 @@ FastRayTest::FastRayTest(const dgVector& l0, const dgVector& l1)
 	,m_tolerance (DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR)
 	,m_zero(dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f)) 
 {
+	m_diff.m_w = dgFloat32 (0.0f);
 	m_isParallel[0] = (dgAbsf (m_diff.m_x) > dgFloat32 (1.0e-8f)) ? 0 : dgInt32 (0xffffffff); 
 	m_isParallel[1] = (dgAbsf (m_diff.m_y) > dgFloat32 (1.0e-8f)) ? 0 : dgInt32 (0xffffffff); 
 	m_isParallel[2] = (dgAbsf (m_diff.m_z) > dgFloat32 (1.0e-8f)) ? 0 : dgInt32 (0xffffffff); 
@@ -278,42 +279,99 @@ dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFlo
 	return dgFloat32 (1.2f);
 */
 
+dgFloat32 xxx = PolygonIntersect (normal, polygon, strideInBytes, indexArray, indexCount);
+return xxx;
+
 	_ASSERTE (m_p0.m_w == m_p1.m_w);
 
-	dgFloat32 dist = normal % m_diff;
-	if (dist < m_dirError) {
-
+//	dgFloat32 dist = normal % m_diff;
+	simd_128 normal1 ((simd_128&)normal & simd_128 (-1, -1, -1, 0));
+	simd_128 dist (((simd_128&)normal1).DotProduct((simd_128&)m_diff));
+	if ((dist < simd_128(m_dirError)).GetSignMask() & 1) {
 		dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat32));
 
-		dgVector v0 (&polygon[indexArray[indexCount - 1] * stride]);
-		dgVector p0v0 (v0 - m_p0);
-		dgFloat32 tOut = normal % p0v0;
+//		dgVector v0 (&polygon[indexArray[indexCount - 1] * stride]);
+//		dgVector p0v0 (v0 - m_p0);
+//		dgFloat32 tOut = normal % p0v0;
+		simd_128 v0 (&polygon[indexArray[indexCount - 1] * stride]);
+		simd_128 p0v0 (v0 - (simd_128&)m_p0);
+		simd_128 tOut = normal1.DotProduct(p0v0);
+
+		simd_128 zero (dgFloat32 (0.0f));
 		// this only work for convex polygons and for single side faces 
 		// walk the polygon around the edges and calculate the volume 
-		if ((tOut < dgFloat32 (0.0f)) && (tOut > dist)) {
-			for (dgInt32 i = 0; i < indexCount; i ++) {
-				dgInt32 i2 = indexArray[i] * stride;
-				dgVector v1 (&polygon[i2]);
-				dgVector p0v1 (v1 - m_p0);
+		simd_128 test ((tOut < zero) & (tOut > dist));
+//		if ((tOut < dgFloat32 (0.0f)) && (tOut > dist)) {
+		if (test.GetSignMask()) {
+			dgInt32 i3 = indexCount - 1; 
+			dgInt32 i2 = indexCount - 2; 
+			dgInt32 i1 = indexCount - 3; 
+			dgInt32 i0 = (indexCount > 3) ? indexCount - 4 : 0; 
+			//for (dgInt32 i = 0; i < indexCount; i ++) {
+			for (dgInt32 i4 = 0; i4 < indexCount; i4 += 4) {
+
+//				dgInt32 i2 = indexArray[i] * stride;
+//				dgVector v1 (&polygon[i2]);
+
+				simd_128 v0 (&polygon[indexArray[i0] * stride]);
+				simd_128 v1 (&polygon[indexArray[i1] * stride]);
+				simd_128 v2 (&polygon[indexArray[i2] * stride]);
+				simd_128 v3 (&polygon[indexArray[i3] * stride]);
+				simd_128 v4 (&polygon[indexArray[i4] * stride]);
+
+				//dgVector p0v1 (v1 - m_p0);
+				simd_128 p0v0 (v0 - (simd_128&)m_p0);
+				simd_128 p0v1 (v1 - (simd_128&)m_p0);
+				simd_128 p0v2 (v2 - (simd_128&)m_p0);
+				simd_128 p0v3 (v3 - (simd_128&)m_p0);
+				simd_128 p0v4 (v4 - (simd_128&)m_p0);
+
+				simd_128 p0v0_x;
+				simd_128 p0v0_y;
+				simd_128 p0v0_z;
+				simd_128 p0v1_x;
+				simd_128 p0v1_y;
+				simd_128 p0v1_z;
+
+				Transpose4x4Simd_128 (p0v0_x, p0v0_y, p0v0_z, test, p0v0, p0v1, p0v2, p0v3);
+				Transpose4x4Simd_128 (p0v1_x, p0v1_y, p0v1_z, test, p0v1, p0v2, p0v3, p0v4);
+
 				// calculate the volume formed by the line and the edge of the polygon
-				dgFloat32 alpha = (m_diff * p0v1) % p0v0;
+				//dgFloat32 alpha = (m_diff * p0v1) % p0v0;
+
+//				simd_128 cross = simd_mul_add_v (simd_mul_add_v (simd_mul_v(
+//				    p0v0_x, simd_mul_sub_v (simd_mul_v ((simd_128&)m_ray_yyyy, p0v1_z), (simd_128&)m_ray_zzzz, p0v1_y)),
+//					p0v0_y, simd_mul_sub_v (simd_mul_v ((simd_128&)m_ray_zzzz, p0v1_x), (simd_128&)m_ray_xxxx, p0v1_z)),
+//					p0v0_z, simd_mul_sub_v (simd_mul_v ((simd_128&)m_ray_xxxx, p0v1_y), (simd_128&)m_ray_yyyy, p0v1_x));
+				simd_128 volume = (m_ray_yyyy * p0v1_z - m_ray_zzzz * p0v1_y) * p0v0_x + 
+							      (m_ray_zzzz * p0v1_x - m_ray_xxxx * p0v1_z) * p0v0_y + 
+								  (m_ray_xxxx * p0v1_y - m_ray_yyyy * p0v1_x) * p0v0_z;
+
+
+				test = volume < (simd_128&)m_tolerance;
+
 				// if a least one volume is negative it mean the line cross the polygon outside this edge and do not hit the face
-				if (alpha < DG_RAY_TOL_ERROR) {
+				//if (alpha < DG_RAY_TOL_ERROR) {
+				if (test.GetSignMask()) {
 					return 1.2f;
 				}
-				p0v0 = p0v1;
+				//p0v0 = p0v1;
+				i3 = i4 + 3; 
+				i2 = i4 + 2; 
+				i1 = i4 + 1; 
+				i0 = i4 + 0; 
 			}
-
+/*
 			//the line is to the left of all the polygon edges, 
 			//then the intersection is the point we the line intersect the plane of the polygon
 			tOut = tOut / dist;
 			_ASSERTE (tOut >= dgFloat32 (0.0f));
 			_ASSERTE (tOut <= dgFloat32 (1.0f));
 			return tOut;
+*/
 		}
 	}
 	return dgFloat32 (1.2f);
-
 }
 
 
