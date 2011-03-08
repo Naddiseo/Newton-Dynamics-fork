@@ -763,34 +763,26 @@ class dgAABBTree
 
 	DG_INLINE dgInt32 RayTestSimd (const FastRayTest& ray, const dgTriplex* const vertexArray) const
 	{
-		simd_type minBox = simd_loadu_v (vertexArray[m_minIndex].m_x);
-		simd_type maxBox = simd_loadu_v (vertexArray[m_maxIndex].m_x);
+		simd_128 minBox (&vertexArray[m_minIndex].m_x);
+		simd_128 maxBox (&vertexArray[m_maxIndex].m_x);
 
-		simd_type paralletTest = simd_and_v (simd_or_v (simd_cmplt_v((simd_type&)ray.m_p0, (simd_type&)minBox), simd_cmpgt_v((simd_type&)ray.m_p0, (simd_type&)maxBox)), (simd_type&)ray.m_isParallel);
-		simd_type test = simd_or_v (paralletTest, simd_move_hl_v (paralletTest, paralletTest));
-
-//		dgFloatSign isParallel;
-//		simd_store_s(simd_or_v (test, simd_permut_v (test, test, PURMUT_MASK(3, 2, 1, 1))), &isParallel.m_fVal);
-//		if (isParallel.m_integer.m_iVal) {
-		if (simd_store_is(simd_or_v (test, simd_permut_v (test, test, PURMUT_MASK(3, 2, 1, 1))))) {
+		simd_128 paralletTest ((((simd_128&)ray.m_p0 < minBox) | ((simd_128&)ray.m_p0 > maxBox)) & (simd_128&)ray.m_isParallel);
+		if (paralletTest.GetSignMask()) {
 			return 0;
 		}
 
-		simd_type tt0 = simd_mul_v (simd_sub_v ((simd_type&)minBox, (simd_type&)ray.m_p0), (simd_type&)ray.m_dpInv);
-		simd_type tt1 = simd_mul_v (simd_sub_v ((simd_type&)maxBox, (simd_type&)ray.m_p0), (simd_type&)ray.m_dpInv);
-		test = simd_cmple_v (tt0, tt1);
+		simd_128 tt0 ((minBox - (simd_128&)ray.m_p0) * (simd_128&)ray.m_dpInv);
+		simd_128 tt1 ((maxBox - (simd_128&)ray.m_p0) * (simd_128&)ray.m_dpInv);
+		simd_128 test (tt0 < tt1);
 
-		simd_type t0 = simd_max_v(simd_or_v (simd_and_v(tt0, test), simd_andnot_v (tt1, test)), (simd_type&)ray.m_minT);
-		t0 = simd_max_v(t0, simd_permut_v (t0, t0, PURMUT_MASK(3, 2, 1, 2)));
-		t0 = simd_max_s(t0, simd_permut_v (t0, t0, PURMUT_MASK(3, 2, 1, 1)));
+		simd_128 t0 (((tt0 & test) | tt1.AndNot(test)).GetMax((simd_128&)ray.m_minT));
+		t0 = t0.GetMax(t0.ShiftTripleRight());
+		t0 = t0.GetMax(t0.ShiftTripleRight());
 
-		simd_type t1 = simd_min_v(simd_or_v (simd_and_v(tt1, test), simd_andnot_v (tt0, test)), (simd_type&)ray.m_maxT);
-		t1 = simd_min_v(t1, simd_permut_v (t1, t1, PURMUT_MASK(3, 2, 1, 2)));
-		t1 = simd_min_s(t1, simd_permut_v (t1, t1, PURMUT_MASK(3, 2, 1, 1)));
-
-//		simd_store_s(simd_cmple_s(t0, t1), &isParallel.m_fVal);
-//		return isParallel.m_integer.m_iVal;
-		return simd_store_is(simd_cmple_s(t0, t1));
+		simd_128 t1 (((tt1 & test) | tt0.AndNot(test)).GetMax((simd_128&)ray.m_maxT));
+		t1 = t1.GetMin(t1.ShiftTripleRight());
+		t1 = t1.GetMin(t1.ShiftTripleRight());
+		return (t0 < t1).GetInt();
 	}
 
 	DG_INLINE dgInt32 RayTest (const FastRayTest& ray, const dgTriplex* const vertexArray) const

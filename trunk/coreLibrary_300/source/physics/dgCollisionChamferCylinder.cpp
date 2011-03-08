@@ -295,66 +295,6 @@ dgVector dgCollisionChamferCylinder::SupportVertexSimd (const dgVector& dir) con
 
 dgVector dgCollisionChamferCylinder::SupportVertex (const dgVector& dir) const
 {
-//	dgFloat32 x0;
-//	dgFloat32 z0;
-//	dgFloat32 x1;
-//	dgFloat32 z1;
-//	dgFloat32 dist0;
-//	dgFloat32 dist1;
-//	dgFloat32 tetha;
-//	dgFloat32 alpha;
-//	dgFloat32 sinAlpha;
-//	dgFloat32 cosAlpha;
-//	dgFloat32 sinTetha;
-//	dgFloat32 cosTetha;
-
-/*
-	tetha = m_tethaStep * dgFloor (dgAtan2 (dir.m_y, dir.m_z) * m_tethaStepInv);
-	alpha = m_tethaStep * dgFloor (dgAsin (dir.m_x) * m_tethaStepInv);
-
-	dgSinCos (tetha, sinTetha, cosTetha);
-	dgSinCos (alpha, sinAlpha, cosAlpha);
-
-	x0 = sinAlpha;
-	z0 = cosAlpha;
-
-	dgVector dir0 (x0, z0 * sinTetha, z0 * cosTetha, dgFloat32 (0.0f));
-	dgVector p0 (QuatizedSupportVertex (dir0));
-
-	x1 = x0 * m_delCosTetha + z0 * m_delSinTetha;
-	z1 = z0 * m_delCosTetha - x0 * m_delSinTetha;
-
-
-	dgVector dir1 (x1, z1 * sinTetha, z1 * cosTetha, dgFloat32 (0.0f));
-	dgVector p1 (QuatizedSupportVertex (dir1));
-
-	dgVector dir2 (x0, z0 * sinTetha * m_delCosTetha + z0 * cosTetha * m_delSinTetha, z0 * cosTetha * m_delCosTetha - z0 * sinTetha * m_delSinTetha, dgFloat32 (0.0f));
-	dgVector p2 (QuatizedSupportVertex (dir2));
-
-	dgVector dir3 (x1, z1 * sinTetha * m_delCosTetha + z1 * cosTetha * m_delSinTetha, z1 * cosTetha * m_delCosTetha - z1 * sinTetha * m_delSinTetha, dgFloat32 (0.0f));
-	dgVector p3 (QuatizedSupportVertex (dir2));
-
-	dist0 = p0 % dir;
-	dist1 = p1 % dir;
-	if (dist1 > dist0) {
-		p0 = p1;
-		dist0 = dist1;
-	}
-
-	dist1 = p2 % dir;
-	if (dist1 > dist0) {
-		p0 = p2;
-		dist0 = dist1;
-	}
-
-	dist1 = p3 % dir;
-	if (dist1 > dist0) {
-		p0 = p3;
-		dist0 = dist1;
-	}
-	return p0;       
-*/
-
 	_ASSERTE (dgAbsf(dir % dir - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
 
 	if (dgAbsf (dir.m_x) > dgFloat32 (0.9998f)) {
@@ -373,22 +313,21 @@ dgVector dgCollisionChamferCylinder::SupportVertex (const dgVector& dir) const
 
 dgFloat32 dgCollisionChamferCylinder::RayCast (const dgVector& q0, const dgVector& q1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
 {
-	dgFloat32 t;
-	dgFloat32 y;
-	dgFloat32 z;
-	dgFloat32 t1;
-
+//	dgFloat32 t;
+//	dgFloat32 y;
+//	dgFloat32 z;
+//	dgFloat32 t1;
 
 	if (PREFILTER_RAYCAST (preFilter, body, this, userData)) {
 		return dgFloat32 (1.2f);
 	}
 
-	t = dgFloat32 (1.2f);
+//	dgFloat32 t = dgFloat32 (1.2f);
 	if (q0.m_x > m_height) {
 		if (q1.m_x < m_height) {
-			t1 = (m_height - q0.m_x) / (q1.m_x - q0.m_x);
-			y = q0.m_y + (q1.m_y - q0.m_y) * t1;
-			z = q0.m_z + (q1.m_z - q0.m_z) * t1;
+			dgFloat32 t1 = (m_height - q0.m_x) / (q1.m_x - q0.m_x);
+			dgFloat32 y = q0.m_y + (q1.m_y - q0.m_y) * t1;
+			dgFloat32 z = q0.m_z + (q1.m_z - q0.m_z) * t1;
 			if ((y * y + z * z) < m_radius * m_radius) {
 				contactOut.m_normal = dgVector (dgFloat32 (1.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 				contactOut.m_userId = SetUserDataID();
@@ -399,9 +338,9 @@ dgFloat32 dgCollisionChamferCylinder::RayCast (const dgVector& q0, const dgVecto
 
 	if (q0.m_x < -m_height) {
 		if (q1.m_x > -m_height) {
-			t1 = (-m_height - q0.m_x) / (q1.m_x - q0.m_x);
-			y = q0.m_y + (q1.m_y - q0.m_y) * t1;
-			z = q0.m_z + (q1.m_z - q0.m_z) * t1;
+			dgFloat32 t1 = (-m_height - q0.m_x) / (q1.m_x - q0.m_x);
+			dgFloat32 y = q0.m_y + (q1.m_y - q0.m_y) * t1;
+			dgFloat32 z = q0.m_z + (q1.m_z - q0.m_z) * t1;
 			if ((y * y + z * z) < m_radius * m_radius) {
 				contactOut.m_normal = dgVector (dgFloat32 (-1.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 				contactOut.m_userId = SetUserDataID();
@@ -416,22 +355,21 @@ dgFloat32 dgCollisionChamferCylinder::RayCast (const dgVector& q0, const dgVecto
 
 dgFloat32 dgCollisionChamferCylinder::RayCastSimd (const dgVector& q0, const dgVector& q1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
 {
-	dgFloat32 t;
-	dgFloat32 y;
-	dgFloat32 z;
-	dgFloat32 t1;
-
+//	dgFloat32 t;
+//	dgFloat32 y;
+//	dgFloat32 z;
+//	dgFloat32 t1;
 
 	if (PREFILTER_RAYCAST (preFilter, body, this, userData)) {
 		return dgFloat32 (1.2f);
 	}
 
-	t = dgFloat32 (1.2f);
+//	dgFloat32 t = dgFloat32 (1.2f);
 	if (q0.m_x > m_height) {
 		if (q1.m_x < m_height) {
-			t1 = (m_height - q0.m_x) / (q1.m_x - q0.m_x);
-			y = q0.m_y + (q1.m_y - q0.m_y) * t1;
-			z = q0.m_z + (q1.m_z - q0.m_z) * t1;
+			dgFloat32 t1 = (m_height - q0.m_x) / (q1.m_x - q0.m_x);
+			dgFloat32 y = q0.m_y + (q1.m_y - q0.m_y) * t1;
+			dgFloat32 z = q0.m_z + (q1.m_z - q0.m_z) * t1;
 			if ((y * y + z * z) < m_radius * m_radius) {
 				contactOut.m_normal = dgVector (dgFloat32 (1.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 				contactOut.m_userId = SetUserDataID();
@@ -442,9 +380,9 @@ dgFloat32 dgCollisionChamferCylinder::RayCastSimd (const dgVector& q0, const dgV
 
 	if (q0.m_x < -m_height) {
 		if (q1.m_x > -m_height) {
-			t1 = (-m_height - q0.m_x) / (q1.m_x - q0.m_x);
-			y = q0.m_y + (q1.m_y - q0.m_y) * t1;
-			z = q0.m_z + (q1.m_z - q0.m_z) * t1;
+			dgFloat32 t1 = (-m_height - q0.m_x) / (q1.m_x - q0.m_x);
+			dgFloat32 y = q0.m_y + (q1.m_y - q0.m_y) * t1;
+			dgFloat32 z = q0.m_z + (q1.m_z - q0.m_z) * t1;
 			if ((y * y + z * z) < m_radius * m_radius) {
 				contactOut.m_normal = dgVector (dgFloat32 (-1.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 				contactOut.m_userId = SetUserDataID();
@@ -452,7 +390,6 @@ dgFloat32 dgCollisionChamferCylinder::RayCastSimd (const dgVector& q0, const dgV
 			}
 		}
 	}
-
 	return dgCollisionConvex::RayCastSimd (q0, q1, contactOut, NULL, NULL, NULL);
 }
 
@@ -469,33 +406,11 @@ dgInt32 dgCollisionChamferCylinder::CalculatePlaneIntersectionSimd (const dgVect
 
 dgInt32 dgCollisionChamferCylinder::CalculatePlaneIntersection (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
-_ASSERTE (0);
-	dgInt32 i;
 	dgInt32 count;
-
-	dgFloat32 a;
-	dgFloat32 b;
-	dgFloat32 c;
-	dgFloat32 d;
-	dgFloat32 r;
-	dgFloat32 x;
-	dgFloat32 y;
-	dgFloat32 z;
-	dgFloat32 y0;
-	dgFloat32 y1;
-	dgFloat32 den;
-	dgFloat32 desc;
-	dgFloat32 test0;
-	dgFloat32 test1;
-	dgFloat32 cosAng;
-	dgFloat32 sinAng;
-	dgFloat32 magInv;
-
-
 	if (dgAbsf (normal.m_x) < dgFloat32 (0.999f)) { 
-		magInv = dgRsqrt (normal.m_y * normal.m_y + normal.m_z * normal.m_z);
-		cosAng = normal.m_y * magInv;
-		sinAng = normal.m_z * magInv;
+		dgFloat32 magInv = dgRsqrt (normal.m_y * normal.m_y + normal.m_z * normal.m_z);
+		dgFloat32 cosAng = normal.m_y * magInv;
+		dgFloat32 sinAng = normal.m_z * magInv;
 		_ASSERTE (dgAbsf (normal.m_z * cosAng - normal.m_y * sinAng) < dgFloat32 (1.0e-4f));
 		dgVector normal1 (normal.m_x, normal.m_y * cosAng + normal.m_z * sinAng, dgFloat32 (0.0f), dgFloat32 (0.0f));
 		dgVector origin1 (origin.m_x, origin.m_y * cosAng + origin.m_z * sinAng, 
@@ -505,8 +420,8 @@ _ASSERTE (0);
 		dgVector maxDir ((normal1.m_x > dgFloat32 (0.0f)) ? m_silhuette[0].m_x : -m_silhuette[0].m_x,
 						 (normal1.m_y > dgFloat32 (0.0f)) ? m_silhuette[0].m_y : -m_silhuette[0].m_y, dgFloat32 (0.0f), dgFloat32 (0.0f));  
 
-		test0 = plane.Evalue (maxDir);
-		test1 = plane.Evalue (maxDir.Scale (dgFloat32 (-1.0f)));
+		dgFloat32 test0 = plane.Evalue (maxDir);
+		dgFloat32 test1 = plane.Evalue (maxDir.Scale (dgFloat32 (-1.0f)));
 		if ((test0 * test1) > dgFloat32 (0.0f)) {
 			test0 = plane.m_w + plane.m_y * m_radius;
 			if (dgAbsf (test0) < m_height) {
@@ -524,7 +439,7 @@ _ASSERTE (0);
 
 		} else {
 			dgVector dp (m_silhuette[1] - m_silhuette[0]);
-			den = normal1 % dp;
+			dgFloat32 den = normal1 % dp;
 			_ASSERTE (dgAbsf (den) > dgFloat32 (0.0f));
 			test0 = -plane.Evalue (m_silhuette[0]) / den;
 			if ((test0 <= dgFloat32 (1.0)) && (test0 >= dgFloat32 (0.0f))) {
@@ -534,25 +449,25 @@ _ASSERTE (0);
 			if (count < 2) {
 				test0 = plane.m_w - plane.m_y * m_radius;
 				if (dgAbsf (test0) < m_height) {
-					r = -m_radius;
-					d = plane.m_w + r * plane.m_y;
+					dgFloat32 r = -m_radius;
+					dgFloat32 d = plane.m_w + r * plane.m_y;
 
-					a = plane.m_x * plane.m_x + plane.m_y * plane.m_y;
-					b = dgFloat32 (2.0f) * plane.m_y * d;
-					c = d * d - m_height * m_height * plane.m_x * plane.m_x;
-					desc = b * b - dgFloat32 (4.0f) * a * c;
+					dgFloat32 a = plane.m_x * plane.m_x + plane.m_y * plane.m_y;
+					dgFloat32 b = dgFloat32 (2.0f) * plane.m_y * d;
+					dgFloat32 c = d * d - m_height * m_height * plane.m_x * plane.m_x;
+					dgFloat32 desc = b * b - dgFloat32 (4.0f) * a * c;
 					if (desc > dgFloat32 (0.0f)) {
 						_ASSERTE (dgAbsf (a) > dgFloat32 (0.0f));
 						desc = dgSqrt (desc);
 						a = - dgFloat32 (0.5f) * b / a; 
-						y0 = a + desc;
-						y1 = a - desc;
+						dgFloat32 y0 = a + desc;
+						dgFloat32 y1 = a - desc;
 						if (y0 > dgFloat32 (0.0f)) {
 							y0 = y1;
 						}
 						_ASSERTE (y0 < dgFloat32 (0.0f));
 						_ASSERTE (dgAbsf (plane.m_x) > dgFloat32 (0.0f));
-						x = - (plane.m_y * y0 + d) / plane.m_x;
+						dgFloat32 x = - (plane.m_y * y0 + d) / plane.m_x;
 						contactsOut[count] = dgVector (x, y0 + r, dgFloat32 (0.0f), dgFloat32 (0.0f));
 						count ++;
 					}
@@ -574,25 +489,25 @@ _ASSERTE (0);
 				test0 = plane.m_w + plane.m_y * m_radius;
 				if (dgAbsf (test0) < m_height) {
 					
-					r = m_radius;
-					d = plane.m_w + r * plane.m_y;
+					dgFloat32 r = m_radius;
+					dgFloat32 d = plane.m_w + r * plane.m_y;
 
-					a = plane.m_x * plane.m_x + plane.m_y * plane.m_y;
-					b = dgFloat32 (2.0f) * plane.m_y * d;
-					c = d * d - m_height * m_height * plane.m_x * plane.m_x;
-					desc = b * b - dgFloat32 (4.0f) * a * c;
+					dgFloat32 a = plane.m_x * plane.m_x + plane.m_y * plane.m_y;
+					dgFloat32 b = dgFloat32 (2.0f) * plane.m_y * d;
+					dgFloat32 c = d * d - m_height * m_height * plane.m_x * plane.m_x;
+					dgFloat32 desc = b * b - dgFloat32 (4.0f) * a * c;
 					if (desc > dgFloat32 (0.0f)) {
 						_ASSERTE (dgAbsf (a) > dgFloat32 (0.0f));
 						desc = dgSqrt (desc);
 						a = - dgFloat32 (0.5f) * b / a; 
-						y0 = a + desc;
-						y1 = a - desc;
+						dgFloat32 y0 = a + desc;
+						dgFloat32 y1 = a - desc;
 						if (y0 < dgFloat32 (0.0f)) {
 							y0 = y1;
 						}
 						_ASSERTE (y0 > dgFloat32 (0.0f));
 						_ASSERTE (dgAbsf (plane.m_x) > dgFloat32 (0.0f));
-						x = - (plane.m_y * y0 + d) / plane.m_x;
+						dgFloat32 x = - (plane.m_y * y0 + d) / plane.m_x;
 						contactsOut[count] = dgVector (x, y0 + r, dgFloat32 (0.0f), dgFloat32 (0.0f));
 						count ++;
 					}
@@ -600,9 +515,9 @@ _ASSERTE (0);
 			}
 		}
 
-		for (i = 0; i < count; i ++) {
-			y = contactsOut[i].m_y;
-			z = contactsOut[i].m_z;
+		for (dgInt32 i = 0; i < count; i ++) {
+			dgFloat32 y = contactsOut[i].m_y;
+			dgFloat32 z = contactsOut[i].m_z;
 			contactsOut[i].m_y = y * cosAng - z * sinAng; 
 			contactsOut[i].m_z = z * cosAng + y * sinAng;
 		}
