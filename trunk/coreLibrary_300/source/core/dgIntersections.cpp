@@ -112,187 +112,14 @@ dgInt32 FastRayTest::BoxTest (const dgVector& minBox, const dgVector& maxBox) co
 }
 
 
-
-
 dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFloat32* const polygon, dgInt32 strideInBytes, const dgInt32* const indexArray, dgInt32 indexCount) const
 {
-/*
-	dgFloatSign test;
 	_ASSERTE (m_p0.m_w == m_p1.m_w);
-
-	simd_128 dist = simd_mul_v ((simd_128&)normal, (simd_128&)m_diff);
-	dist = simd_add_s (dist, simd_permut_v(dist, dist, PURMUT_MASK(3, 2, 1, 2)));
-	dist = simd_add_s (dist, simd_permut_v(dist, dist, PURMUT_MASK(3, 2, 1, 1)));
-//	simd_store_s (simd_cmple_s (dist, simd_set1(dgFloat32 (0.0f))), &test.m_fVal);
-	simd_store_s (simd_cmple_s (dist, simd_set1(m_dirError)), &test.m_fVal);
-	
-//	if (dist < dgFloat32 (0.0f)) {
-	if (test.m_integer.m_iVal) {
-		dgInt32 i1;
-
-		dgInt32 stride = strideInBytes / sizeof (dgFloat32);
-
-		dgInt32 i0 = indexArray[0] * stride;
-		simd_128 v0 = simd_loadu_v (polygon[i0]);
-		simd_128 p0v0 = simd_sub_v (v0, (simd_128&)m_p0);
-
-		simd_128 num = simd_mul_v ((simd_128&)normal, p0v0);
-		num = simd_add_s (num, simd_permut_v(num, num, PURMUT_MASK(3, 2, 1, 2)));
-		num = simd_add_s (num, simd_permut_v(num, num, PURMUT_MASK(3, 2, 1, 1)));
-//		if ((tOut < dgFloat32 (0.0f)) && (tOut > dist)) {
-		simd_store_s (simd_and_v (simd_cmplt_s (num, (simd_128&) m_zero), simd_cmpgt_s (num, (simd_128&) dist)), (dgFloat32*) &i1);
-		if (i1) {
-			i1 = indexArray[1] * stride;
-			simd_128 v1 = simd_loadu_v (polygon[i1]);
-			simd_128 p0v1 = simd_sub_v (v1, (simd_128&)m_p0);
-
-			for (dgInt32 i = 2; i < indexCount; i ++) {
-				dgFloatSign test;
-
-				i1 = indexArray[i] * stride;
-	//			dgVector v2 (&polygon[i2]);
-				simd_128 v2 = simd_loadu_v (polygon[i1]);
-	//			dgVector p0v2 (v2 - ray_p0);
-				simd_128 p0v2 = simd_sub_v (v2, (simd_128&)m_p0);
-
-				simd_128 p0v_y = simd_pack_lo_v (p0v0, p0v1);
-				simd_128 p0v_x = simd_move_lh_v (p0v_y, p0v2);
-				p0v_y = simd_permut_v (p0v_y, p0v2, PURMUT_MASK (3, 1, 3, 2));
-				simd_128 p0v_z = simd_permut_v (simd_pack_hi_v (p0v0, p0v1), p0v2, PURMUT_MASK (3, 2, 1, 0));
-
-				simd_128 tmp = simd_sub_v (simd_mul_v ((simd_128&)m_ray_yyyy, p0v_z), simd_mul_v ((simd_128&)m_ray_zzzz, p0v_y));
-				simd_128 alpha = simd_mul_v (simd_permut_v (tmp, tmp, PURMUT_MASK (3, 0, 2, 1)), p0v_x);
-
-				tmp = simd_sub_v (simd_mul_v ((simd_128&)m_ray_zzzz, p0v_x), simd_mul_v ((simd_128&)m_ray_xxxx, p0v_z));
-				alpha = simd_mul_add_v (alpha, simd_permut_v (tmp, tmp, PURMUT_MASK (3, 0, 2, 1)), p0v_y);
-
-				tmp = simd_sub_v (simd_mul_v ((simd_128&)m_ray_xxxx, p0v_y), simd_mul_v ((simd_128&)m_ray_yyyy, p0v_x));
-				alpha = simd_mul_add_v (alpha, simd_permut_v (tmp, tmp, PURMUT_MASK (3, 0, 2, 1)), p0v_z);
-
-				tmp = simd_cmpgt_v (alpha, (simd_128&) m_tolerance);
-				tmp = simd_and_v (tmp, simd_permut_v (tmp, tmp, PURMUT_MASK (3, 2, 1, 2)));
-
-				simd_store_s (simd_and_v (tmp, simd_permut_v (tmp, tmp, PURMUT_MASK (3, 2, 1, 1))), &test.m_fVal);
-				if (test.m_integer.m_iVal) {
-					dgFloat32 tOut;
-					simd_store_s (simd_div_s(num, dist), &tOut);
-					_ASSERTE (tOut >= dgFloat32 (0.0f));
-					_ASSERTE (tOut <= dgFloat32 (1.0f));
-					return tOut;
-				}
-				p0v1 = p0v2;
-			} 
-		}
-	}
-	return 1.2f;
-*/
-
-/*
-	_ASSERTE (m_p0.m_w == m_p1.m_w);
-
-	dgFloat32 dist = normal % m_diff;
-	if (dist < m_dirError) {
-		dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat32));
-
-		dgVector v0 (&polygon[indexArray[indexCount - 1] * stride]);
-		dgVector p0v0 (v0 - m_p0);
-		dgFloat32 tOut = normal % p0v0;
-		// this only work for convex polygons and for single side faces 
-		// walk the polygon around the edges and calculate the volume 
-
-		if ((tOut < dgFloat32 (0.0f)) && (tOut > dist)) {
-			dgInt32 i3 = indexCount - 1; 
-			dgInt32 i2 = indexCount - 2; 
-			dgInt32 i1 = indexCount - 3; 
-			dgInt32 i0 = (indexCount > 3) ? indexCount - 4 : 0; 
-
-			for (dgInt32 i4 = 0; i4 < indexCount; i4 += 4) {
-//				dgVector v1 (&polygon[i2]);
-//				dgVector p0v1 (v1 - m_p0);
-
-				simd_128 v0 = simd_loadu_v (polygon[indexArray[i0] * stride]);
-				simd_128 v1 = simd_loadu_v (polygon[indexArray[i1] * stride]);
-				simd_128 v2 = simd_loadu_v (polygon[indexArray[i2] * stride]);
-				simd_128 v3 = simd_loadu_v (polygon[indexArray[i3] * stride]);
-				simd_128 v4 = simd_loadu_v (polygon[indexArray[i4] * stride]);
-
-				simd_128 p0v0 = simd_sub_v (v0, (simd_128&)m_p0);
-				simd_128 p0v1 = simd_sub_v (v1, (simd_128&)m_p0);
-				simd_128 p0v2 = simd_sub_v (v2, (simd_128&)m_p0);
-				simd_128 p0v3 = simd_sub_v (v3, (simd_128&)m_p0);
-				simd_128 p0v4 = simd_sub_v (v4, (simd_128&)m_p0);
-
-				// transpose the data into a structure of arrays
-				simd_128 tmp0 = simd_pack_lo_v(p0v0, p0v1);
-				simd_128 tmp1 = simd_pack_lo_v(p0v2, p0v3);
-				simd_128 p0v0_x = simd_move_lh_v (tmp0, tmp1);
-				simd_128 p0v0_y = simd_move_hl_v (tmp1, tmp0);
-				tmp0 = simd_pack_hi_v(p0v0, p0v1);
-				tmp1 = simd_pack_hi_v(p0v2, p0v3);
-				simd_128 p0v0_z = simd_move_lh_v (tmp0, tmp1);
-
-				tmp0 = simd_pack_lo_v(p0v1, p0v2);
-				tmp1 = simd_pack_lo_v(p0v3, p0v4);
-				simd_128 p0v1_x = simd_move_lh_v (tmp0, tmp1);
-				simd_128 p0v1_y = simd_move_hl_v (tmp1, tmp0);
-				tmp0 = simd_pack_hi_v(p0v1, p0v2);
-				tmp1 = simd_pack_hi_v(p0v3, p0v4);
-				simd_128 p0v1_z = simd_move_lh_v (tmp0, tmp1);
-
-				//dgFloat32 alpha = (m_diff * p0v1) % p0v0;
-				simd_128 cross = simd_mul_add_v (simd_mul_add_v (simd_mul_v(p0v0_x, simd_mul_sub_v (simd_mul_v ((simd_128&)m_ray_yyyy, p0v1_z), (simd_128&)m_ray_zzzz, p0v1_y)),
-																		     p0v0_y, simd_mul_sub_v (simd_mul_v ((simd_128&)m_ray_zzzz, p0v1_x), (simd_128&)m_ray_xxxx, p0v1_z)),
-																		     p0v0_z, simd_mul_sub_v (simd_mul_v ((simd_128&)m_ray_xxxx, p0v1_y), (simd_128&)m_ray_yyyy, p0v1_x));
-
-				// if a least one volume is negative it mean the line cross the polygon outside this edge and do not hit the face
-				//if (alpha < DG_RAY_TOL_ERROR) {
-				//	return 1.2f;
-				//}
-				tmp0 = simd_cmpgt_v (cross, (simd_128&) m_tolerance);
-				tmp0 = simd_and_v (tmp0, simd_move_hl_v (tmp0, tmp0));
-				tmp0 = simd_and_v (tmp0, simd_permut_v (tmp0, tmp0, PURMUT_MASK (0, 0, 0, 1)));
-
-//				dgFloatSign test;
-//				simd_store_s (tmp0, &test.m_fVal);
-//				if (!test.m_integer.m_iVal) {
-				if (!simd_store_is (tmp0)) {
-					return 1.2f;
-				}
-
-				// calculate the volume formed by the line and the edge of the polygon
-//				p0v0 = p0v1;
-
-				i3 = i4 + 3; 
-				i2 = i4 + 2; 
-				i1 = i4 + 1; 
-				i0 = i4 + 0; 
-			}
-
-			//the line is to the left of all the polygon edges, 
-			//then the intersection is the point we the line intersect the plane of the polygon
-			tOut = tOut / dist;
-			_ASSERTE (tOut >= dgFloat32 (0.0f));
-			_ASSERTE (tOut <= dgFloat32 (1.0f));
-			return tOut;
-		}
-	}
-	return dgFloat32 (1.2f);
-*/
-
-dgFloat32 xxx = PolygonIntersect (normal, polygon, strideInBytes, indexArray, indexCount);
-return xxx;
-
-	_ASSERTE (m_p0.m_w == m_p1.m_w);
-
-//	dgFloat32 dist = normal % m_diff;
 	simd_128 normal1 ((simd_128&)normal & simd_128 (-1, -1, -1, 0));
 	simd_128 dist (((simd_128&)normal1).DotProduct((simd_128&)m_diff));
 	if ((dist < simd_128(m_dirError)).GetSignMask() & 1) {
 		dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat32));
 
-//		dgVector v0 (&polygon[indexArray[indexCount - 1] * stride]);
-//		dgVector p0v0 (v0 - m_p0);
-//		dgFloat32 tOut = normal % p0v0;
 		simd_128 v0 (&polygon[indexArray[indexCount - 1] * stride]);
 		simd_128 p0v0 (v0 - (simd_128&)m_p0);
 		simd_128 tOut = normal1.DotProduct(p0v0);
@@ -301,25 +128,18 @@ return xxx;
 		// this only work for convex polygons and for single side faces 
 		// walk the polygon around the edges and calculate the volume 
 		simd_128 test ((tOut < zero) & (tOut > dist));
-//		if ((tOut < dgFloat32 (0.0f)) && (tOut > dist)) {
 		if (test.GetSignMask()) {
 			dgInt32 i3 = indexCount - 1; 
 			dgInt32 i2 = indexCount - 2; 
 			dgInt32 i1 = indexCount - 3; 
-			dgInt32 i0 = (indexCount > 3) ? indexCount - 4 : 0; 
-			//for (dgInt32 i = 0; i < indexCount; i ++) {
+			dgInt32 i0 = (indexCount > 3) ? indexCount - 4 : 2; 
 			for (dgInt32 i4 = 0; i4 < indexCount; i4 += 4) {
-
-//				dgInt32 i2 = indexArray[i] * stride;
-//				dgVector v1 (&polygon[i2]);
-
 				simd_128 v0 (&polygon[indexArray[i0] * stride]);
 				simd_128 v1 (&polygon[indexArray[i1] * stride]);
 				simd_128 v2 (&polygon[indexArray[i2] * stride]);
 				simd_128 v3 (&polygon[indexArray[i3] * stride]);
 				simd_128 v4 (&polygon[indexArray[i4] * stride]);
 
-				//dgVector p0v1 (v1 - m_p0);
 				simd_128 p0v0 (v0 - (simd_128&)m_p0);
 				simd_128 p0v1 (v1 - (simd_128&)m_p0);
 				simd_128 p0v2 (v2 - (simd_128&)m_p0);
@@ -336,39 +156,29 @@ return xxx;
 				Transpose4x4Simd_128 (p0v0_x, p0v0_y, p0v0_z, test, p0v0, p0v1, p0v2, p0v3);
 				Transpose4x4Simd_128 (p0v1_x, p0v1_y, p0v1_z, test, p0v1, p0v2, p0v3, p0v4);
 
-				// calculate the volume formed by the line and the edge of the polygon
-				//dgFloat32 alpha = (m_diff * p0v1) % p0v0;
-
-//				simd_128 cross = simd_mul_add_v (simd_mul_add_v (simd_mul_v(
-//				    p0v0_x, simd_mul_sub_v (simd_mul_v ((simd_128&)m_ray_yyyy, p0v1_z), (simd_128&)m_ray_zzzz, p0v1_y)),
-//					p0v0_y, simd_mul_sub_v (simd_mul_v ((simd_128&)m_ray_zzzz, p0v1_x), (simd_128&)m_ray_xxxx, p0v1_z)),
-//					p0v0_z, simd_mul_sub_v (simd_mul_v ((simd_128&)m_ray_xxxx, p0v1_y), (simd_128&)m_ray_yyyy, p0v1_x));
 				simd_128 volume = (m_ray_yyyy * p0v1_z - m_ray_zzzz * p0v1_y) * p0v0_x + 
 							      (m_ray_zzzz * p0v1_x - m_ray_xxxx * p0v1_z) * p0v0_y + 
 								  (m_ray_xxxx * p0v1_y - m_ray_yyyy * p0v1_x) * p0v0_z;
 
 
-				test = volume < (simd_128&)m_tolerance;
-
 				// if a least one volume is negative it mean the line cross the polygon outside this edge and do not hit the face
-				//if (alpha < DG_RAY_TOL_ERROR) {
-				if (test.GetSignMask()) {
+				if ((volume < (simd_128&)m_tolerance).GetSignMask()) {
 					return 1.2f;
 				}
-				//p0v0 = p0v1;
 				i3 = i4 + 3; 
 				i2 = i4 + 2; 
 				i1 = i4 + 1; 
 				i0 = i4 + 0; 
 			}
-/*
+
 			//the line is to the left of all the polygon edges, 
 			//then the intersection is the point we the line intersect the plane of the polygon
 			tOut = tOut / dist;
-			_ASSERTE (tOut >= dgFloat32 (0.0f));
-			_ASSERTE (tOut <= dgFloat32 (1.0f));
-			return tOut;
-*/
+			dgFloat32 ret;
+			tOut.StoreScalar(&ret);
+			_ASSERTE (ret >= dgFloat32 (0.0f));
+			_ASSERTE (ret <= dgFloat32 (1.0f));
+			return ret;
 		}
 	}
 	return dgFloat32 (1.2f);
