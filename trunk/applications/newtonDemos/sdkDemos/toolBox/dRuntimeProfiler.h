@@ -14,7 +14,7 @@
 
 struct NewtonWorld;
 
-#define MAX_FRAMES 256
+#define MAX_FRAMES 512
 #define MAX_FRAMES_STEP 1
 #define MAX_TRACKS 10
 
