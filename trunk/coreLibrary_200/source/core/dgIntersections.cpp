@@ -146,6 +146,7 @@ dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFlo
 {
 #ifdef DG_BUILD_SIMD_CODE
 
+/*
 	dgFloatSign test;
 
 	_ASSERTE (m_p0.m_w == m_p1.m_w);
@@ -215,9 +216,9 @@ dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFlo
 		}
 	}
 	return 1.2f;
+*/
 
 
-/*
 	_ASSERTE (m_p0.m_w == m_p1.m_w);
 
 	dgFloat32 dist = normal % m_diff;
@@ -234,7 +235,7 @@ dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFlo
 			dgInt32 i3 = indexCount - 1; 
 			dgInt32 i2 = indexCount - 2; 
 			dgInt32 i1 = indexCount - 3; 
-			dgInt32 i0 = (indexCount > 3) ? indexCount - 4 : 0; 
+			dgInt32 i0 = (indexCount > 3) ? indexCount - 4 : 2; 
 
 			for (dgInt32 i4 = 0; i4 < indexCount; i4 += 4) {
 //				dgVector v1 (&polygon[i2]);
@@ -307,7 +308,6 @@ dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFlo
 		}
 	}
 	return dgFloat32 (1.2f);
-*/
 #else
 	return dgFloat32 (0.0f);
 #endif
