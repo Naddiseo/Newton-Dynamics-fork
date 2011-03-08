@@ -43,7 +43,7 @@
 #define DG_CALCULATE_SEPARATING_PLANE_ERROR1			(DG_ROBUST_PLANE_CLIP * dgFloat32 (0.5f))
 #define DG_GETADJACENTINDEX_ACTIVE(x)					((!m_simplex[x->m_adjancentFace[1]].m_isActive) ? 1 : ((!m_simplex[x->m_adjancentFace[2]].m_isActive) ? 2 : 0))
 #define DG_GETADJACENTINDEX_VERTEX(x,v)					(((x->m_vertex[1] == v) ? 1 : 0) | ((x->m_vertex[2] == v) ? 2 : 0))
-//#define DG_RSQRT_SIMD_S(x,y)							{simd_type tmp0 = simd_rsqrt_s(x); y = simd_mul_s (simd_mul_s(dgContactSolver::m_nrh0p5, tmp0), simd_mul_sub_v (dgContactSolver::m_nrh3p0, simd_mul_s (x, tmp0), tmp0));}
+
 
 
 DG_MSC_VECTOR_ALIGMENT 
