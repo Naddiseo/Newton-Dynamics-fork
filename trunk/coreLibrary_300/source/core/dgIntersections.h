@@ -56,9 +56,9 @@ class FastRayTest
 	dgVector m_minT;
 	dgVector m_maxT;
 
-	dgVector m_ray_xxxx;
-	dgVector m_ray_yyyy;
-	dgVector m_ray_zzzz;
+	simd_128 m_ray_xxxx;
+	simd_128 m_ray_yyyy;
+	simd_128 m_ray_zzzz;
 	dgVector m_tolerance;
 	dgVector m_zero;
 	dgInt32 m_isParallel[4];

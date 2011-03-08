@@ -32,12 +32,11 @@
 //#define DG_RAY_TOL_ERROR (dgFloat32 (-1.0e-1f))
 
 FastRayTest::FastRayTest(const dgVector& l0, const dgVector& l1)
-	: m_p0 (l0), m_p1(l1), m_diff (l1 - l0),
-	  m_minT(dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f)) , 
-	  m_maxT(dgFloat32 (1.0f), dgFloat32 (1.0f), dgFloat32 (1.0f), dgFloat32 (1.0f)),
-//	  m_tolerance (DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR, dgFloat32 (0.0f)),
-	  m_tolerance (DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR),
-	  m_zero(dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f)) 
+	:m_p0 (l0), m_p1(l1), m_diff (l1 - l0)
+	,m_minT(dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f))  
+	,m_maxT(dgFloat32 (1.0f), dgFloat32 (1.0f), dgFloat32 (1.0f), dgFloat32 (1.0f))
+	,m_tolerance (DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR)
+	,m_zero(dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f)) 
 {
 	m_isParallel[0] = (dgAbsf (m_diff.m_x) > dgFloat32 (1.0e-8f)) ? 0 : dgInt32 (0xffffffff); 
 	m_isParallel[1] = (dgAbsf (m_diff.m_y) > dgFloat32 (1.0e-8f)) ? 0 : dgInt32 (0xffffffff); 
@@ -50,17 +49,11 @@ FastRayTest::FastRayTest(const dgVector& l0, const dgVector& l1)
 	m_dpInv.m_w = dgFloat32 (0.0f);
 	m_dpBaseInv = m_dpInv;
 
-//	m_ray_xxx = dgVector (m_diff.m_x, m_diff.m_x, m_diff.m_x, dgFloat32 (0.0f));
-//	m_ray_yyy = dgVector (m_diff.m_y, m_diff.m_y, m_diff.m_y, dgFloat32 (0.0f));
-//	m_ray_zzz = dgVector (m_diff.m_z, m_diff.m_z, m_diff.m_z, dgFloat32 (0.0f));
-
-	m_ray_xxxx = dgVector (m_diff.m_x, m_diff.m_x, m_diff.m_x, m_diff.m_x);
-	m_ray_yyyy = dgVector (m_diff.m_y, m_diff.m_y, m_diff.m_y, m_diff.m_y);
-	m_ray_zzzz = dgVector (m_diff.m_z, m_diff.m_z, m_diff.m_z, m_diff.m_z);
-
+	m_ray_xxxx = simd_128(m_diff.m_x);
+	m_ray_yyyy = simd_128(m_diff.m_y);
+	m_ray_zzzz = simd_128(m_diff.m_z);
 	m_dirError = -dgFloat32 (0.0175f) * dgSqrt (m_diff % m_diff);
 
-//		simd_type tolerance;
 //	tollerance = simd_set (DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR);
 //	m_tolerance = dgVector (DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR, DG_RAY_TOL_ERROR, dgFloat32 (0.0f));
 
@@ -68,42 +61,23 @@ FastRayTest::FastRayTest(const dgVector& l0, const dgVector& l1)
 
 dgInt32 FastRayTest::BoxTestSimd (const dgVector& minBox, const dgVector& maxBox) const
 {
-//	dgInt32 isParallel;
+	simd_128 boxP0 ((simd_128&)minBox);
+	simd_128 boxP1 ((simd_128&)maxBox);
 
-//	simd_type t0;
-//	simd_type t1;
-//	simd_type tt0;
-//	simd_type tt1;
-//	simd_type test;
-//	simd_type paralletTest;
-
-	simd_type tt0 = simd_and_v (simd_or_v (simd_cmple_v((simd_type&)m_p0, (simd_type&)minBox), simd_cmpge_v((simd_type&)m_p0, (simd_type&)maxBox)), (simd_type&)m_isParallel);
-	tt0 = simd_or_v (tt0, simd_move_hl_v (tt0, tt0));
-
-//	dgFloatSign isParallel;
-//	simd_store_s(simd_or_v (tt0, simd_permut_v (tt0, tt0, PURMUT_MASK(3, 2, 1, 1))), &isParallel.m_fVal);
-//	if (isParallel.m_integer.m_iVal) {
-	if (simd_store_is(simd_or_v (tt0, simd_permut_v (tt0, tt0, PURMUT_MASK(3, 2, 1, 1))))) {
+	simd_128 tt0 (((simd_128&)m_p0 <= boxP0) | ((simd_128&)m_p0 >= boxP1) & (simd_128&)m_isParallel);
+	if (tt0.GetSignMask() & 0x07) {
 		return 0;
 	}
-
-	tt0 = simd_mul_v (simd_sub_v ((simd_type&)minBox, (simd_type&)m_p0), (simd_type&)m_dpInv);
-	simd_type tt1 = simd_mul_v (simd_sub_v ((simd_type&)maxBox, (simd_type&)m_p0), (simd_type&)m_dpInv);
-
-	simd_type t0 = simd_max_v(simd_min_v(tt0, tt1), (simd_type&)m_minT);
-	simd_type t1 = simd_min_v(simd_max_v(tt0, tt1), (simd_type&)m_maxT);
-
-	t0 = simd_max_v(t0, simd_permut_v (t0, t0, PURMUT_MASK(3, 2, 1, 2)));
-	t1 = simd_min_v(t1, simd_permut_v (t1, t1, PURMUT_MASK(3, 2, 1, 2)));
-
-	t0 = simd_max_s(t0, simd_permut_v (t0, t0, PURMUT_MASK(3, 2, 1, 1)));
-	t1 = simd_min_s(t1, simd_permut_v (t1, t1, PURMUT_MASK(3, 2, 1, 1)));
-
-//	simd_store_s(simd_cmple_s(t0, t1), &isParallel.m_fVal);
-//	return isParallel.m_integer.m_iVal;
-	return simd_store_is(simd_cmple_s(t0, t1));
+	tt0 = (boxP0 - (simd_128&)m_p0) * (simd_128&)m_dpInv;
+	simd_128 tt1 ((boxP1 - (simd_128&)m_p0) * (simd_128&)m_dpInv);
+	simd_128 t0 (((simd_128&)m_minT).GetMax(tt0.GetMin(tt1)));
+	simd_128 t1 (((simd_128&)m_maxT).GetMin(tt0.GetMax(tt1)));
+	t0 = t0.GetMax(t0.ShiftTripleRight());
+	t1 = t1.GetMin(t1.ShiftTripleRight());
+	t0 = t0.GetMax(t0.ShiftTripleRight());
+	t1 = t1.GetMin(t1.ShiftTripleRight());
+	return ((t0 < t1).GetSignMask() & 1);
 }
-
 
 dgInt32 FastRayTest::BoxTest (const dgVector& minBox, const dgVector& maxBox) const
 {
@@ -133,18 +107,19 @@ dgInt32 FastRayTest::BoxTest (const dgVector& minBox, const dgVector& maxBox) co
 			}
 		}
 	}
-	return 0xffffff;
+	return 0x1;
 }
+
 
 
 
 dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFloat32* const polygon, dgInt32 strideInBytes, const dgInt32* const indexArray, dgInt32 indexCount) const
 {
+/*
 	dgFloatSign test;
-
 	_ASSERTE (m_p0.m_w == m_p1.m_w);
 
-	simd_type dist = simd_mul_v ((simd_type&)normal, (simd_type&)m_diff);
+	simd_128 dist = simd_mul_v ((simd_128&)normal, (simd_128&)m_diff);
 	dist = simd_add_s (dist, simd_permut_v(dist, dist, PURMUT_MASK(3, 2, 1, 2)));
 	dist = simd_add_s (dist, simd_permut_v(dist, dist, PURMUT_MASK(3, 2, 1, 1)));
 //	simd_store_s (simd_cmple_s (dist, simd_set1(dgFloat32 (0.0f))), &test.m_fVal);
@@ -157,43 +132,43 @@ dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFlo
 		dgInt32 stride = strideInBytes / sizeof (dgFloat32);
 
 		dgInt32 i0 = indexArray[0] * stride;
-		simd_type v0 = simd_loadu_v (polygon[i0]);
-		simd_type p0v0 = simd_sub_v (v0, (simd_type&)m_p0);
+		simd_128 v0 = simd_loadu_v (polygon[i0]);
+		simd_128 p0v0 = simd_sub_v (v0, (simd_128&)m_p0);
 
-		simd_type num = simd_mul_v ((simd_type&)normal, p0v0);
+		simd_128 num = simd_mul_v ((simd_128&)normal, p0v0);
 		num = simd_add_s (num, simd_permut_v(num, num, PURMUT_MASK(3, 2, 1, 2)));
 		num = simd_add_s (num, simd_permut_v(num, num, PURMUT_MASK(3, 2, 1, 1)));
 //		if ((tOut < dgFloat32 (0.0f)) && (tOut > dist)) {
-		simd_store_s (simd_and_v (simd_cmplt_s (num, (simd_type&) m_zero), simd_cmpgt_s (num, (simd_type&) dist)), (dgFloat32*) &i1);
+		simd_store_s (simd_and_v (simd_cmplt_s (num, (simd_128&) m_zero), simd_cmpgt_s (num, (simd_128&) dist)), (dgFloat32*) &i1);
 		if (i1) {
 			i1 = indexArray[1] * stride;
-			simd_type v1 = simd_loadu_v (polygon[i1]);
-			simd_type p0v1 = simd_sub_v (v1, (simd_type&)m_p0);
+			simd_128 v1 = simd_loadu_v (polygon[i1]);
+			simd_128 p0v1 = simd_sub_v (v1, (simd_128&)m_p0);
 
 			for (dgInt32 i = 2; i < indexCount; i ++) {
 				dgFloatSign test;
 
 				i1 = indexArray[i] * stride;
 	//			dgVector v2 (&polygon[i2]);
-				simd_type v2 = simd_loadu_v (polygon[i1]);
+				simd_128 v2 = simd_loadu_v (polygon[i1]);
 	//			dgVector p0v2 (v2 - ray_p0);
-				simd_type p0v2 = simd_sub_v (v2, (simd_type&)m_p0);
+				simd_128 p0v2 = simd_sub_v (v2, (simd_128&)m_p0);
 
-				simd_type p0v_y = simd_pack_lo_v (p0v0, p0v1);
-				simd_type p0v_x = simd_move_lh_v (p0v_y, p0v2);
+				simd_128 p0v_y = simd_pack_lo_v (p0v0, p0v1);
+				simd_128 p0v_x = simd_move_lh_v (p0v_y, p0v2);
 				p0v_y = simd_permut_v (p0v_y, p0v2, PURMUT_MASK (3, 1, 3, 2));
-				simd_type p0v_z = simd_permut_v (simd_pack_hi_v (p0v0, p0v1), p0v2, PURMUT_MASK (3, 2, 1, 0));
+				simd_128 p0v_z = simd_permut_v (simd_pack_hi_v (p0v0, p0v1), p0v2, PURMUT_MASK (3, 2, 1, 0));
 
-				simd_type tmp = simd_sub_v (simd_mul_v ((simd_type&)m_ray_yyyy, p0v_z), simd_mul_v ((simd_type&)m_ray_zzzz, p0v_y));
-				simd_type alpha = simd_mul_v (simd_permut_v (tmp, tmp, PURMUT_MASK (3, 0, 2, 1)), p0v_x);
+				simd_128 tmp = simd_sub_v (simd_mul_v ((simd_128&)m_ray_yyyy, p0v_z), simd_mul_v ((simd_128&)m_ray_zzzz, p0v_y));
+				simd_128 alpha = simd_mul_v (simd_permut_v (tmp, tmp, PURMUT_MASK (3, 0, 2, 1)), p0v_x);
 
-				tmp = simd_sub_v (simd_mul_v ((simd_type&)m_ray_zzzz, p0v_x), simd_mul_v ((simd_type&)m_ray_xxxx, p0v_z));
+				tmp = simd_sub_v (simd_mul_v ((simd_128&)m_ray_zzzz, p0v_x), simd_mul_v ((simd_128&)m_ray_xxxx, p0v_z));
 				alpha = simd_mul_add_v (alpha, simd_permut_v (tmp, tmp, PURMUT_MASK (3, 0, 2, 1)), p0v_y);
 
-				tmp = simd_sub_v (simd_mul_v ((simd_type&)m_ray_xxxx, p0v_y), simd_mul_v ((simd_type&)m_ray_yyyy, p0v_x));
+				tmp = simd_sub_v (simd_mul_v ((simd_128&)m_ray_xxxx, p0v_y), simd_mul_v ((simd_128&)m_ray_yyyy, p0v_x));
 				alpha = simd_mul_add_v (alpha, simd_permut_v (tmp, tmp, PURMUT_MASK (3, 0, 2, 1)), p0v_z);
 
-				tmp = simd_cmpgt_v (alpha, (simd_type&) m_tolerance);
+				tmp = simd_cmpgt_v (alpha, (simd_128&) m_tolerance);
 				tmp = simd_and_v (tmp, simd_permut_v (tmp, tmp, PURMUT_MASK (3, 2, 1, 2)));
 
 				simd_store_s (simd_and_v (tmp, simd_permut_v (tmp, tmp, PURMUT_MASK (3, 2, 1, 1))), &test.m_fVal);
@@ -209,7 +184,7 @@ dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFlo
 		}
 	}
 	return 1.2f;
-
+*/
 
 /*
 	_ASSERTE (m_p0.m_w == m_p1.m_w);
@@ -234,45 +209,45 @@ dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFlo
 //				dgVector v1 (&polygon[i2]);
 //				dgVector p0v1 (v1 - m_p0);
 
-				simd_type v0 = simd_loadu_v (polygon[indexArray[i0] * stride]);
-				simd_type v1 = simd_loadu_v (polygon[indexArray[i1] * stride]);
-				simd_type v2 = simd_loadu_v (polygon[indexArray[i2] * stride]);
-				simd_type v3 = simd_loadu_v (polygon[indexArray[i3] * stride]);
-				simd_type v4 = simd_loadu_v (polygon[indexArray[i4] * stride]);
+				simd_128 v0 = simd_loadu_v (polygon[indexArray[i0] * stride]);
+				simd_128 v1 = simd_loadu_v (polygon[indexArray[i1] * stride]);
+				simd_128 v2 = simd_loadu_v (polygon[indexArray[i2] * stride]);
+				simd_128 v3 = simd_loadu_v (polygon[indexArray[i3] * stride]);
+				simd_128 v4 = simd_loadu_v (polygon[indexArray[i4] * stride]);
 
-				simd_type p0v0 = simd_sub_v (v0, (simd_type&)m_p0);
-				simd_type p0v1 = simd_sub_v (v1, (simd_type&)m_p0);
-				simd_type p0v2 = simd_sub_v (v2, (simd_type&)m_p0);
-				simd_type p0v3 = simd_sub_v (v3, (simd_type&)m_p0);
-				simd_type p0v4 = simd_sub_v (v4, (simd_type&)m_p0);
+				simd_128 p0v0 = simd_sub_v (v0, (simd_128&)m_p0);
+				simd_128 p0v1 = simd_sub_v (v1, (simd_128&)m_p0);
+				simd_128 p0v2 = simd_sub_v (v2, (simd_128&)m_p0);
+				simd_128 p0v3 = simd_sub_v (v3, (simd_128&)m_p0);
+				simd_128 p0v4 = simd_sub_v (v4, (simd_128&)m_p0);
 
 				// transpose the data into a structure of arrays
-				simd_type tmp0 = simd_pack_lo_v(p0v0, p0v1);
-				simd_type tmp1 = simd_pack_lo_v(p0v2, p0v3);
-				simd_type p0v0_x = simd_move_lh_v (tmp0, tmp1);
-				simd_type p0v0_y = simd_move_hl_v (tmp1, tmp0);
+				simd_128 tmp0 = simd_pack_lo_v(p0v0, p0v1);
+				simd_128 tmp1 = simd_pack_lo_v(p0v2, p0v3);
+				simd_128 p0v0_x = simd_move_lh_v (tmp0, tmp1);
+				simd_128 p0v0_y = simd_move_hl_v (tmp1, tmp0);
 				tmp0 = simd_pack_hi_v(p0v0, p0v1);
 				tmp1 = simd_pack_hi_v(p0v2, p0v3);
-				simd_type p0v0_z = simd_move_lh_v (tmp0, tmp1);
+				simd_128 p0v0_z = simd_move_lh_v (tmp0, tmp1);
 
 				tmp0 = simd_pack_lo_v(p0v1, p0v2);
 				tmp1 = simd_pack_lo_v(p0v3, p0v4);
-				simd_type p0v1_x = simd_move_lh_v (tmp0, tmp1);
-				simd_type p0v1_y = simd_move_hl_v (tmp1, tmp0);
+				simd_128 p0v1_x = simd_move_lh_v (tmp0, tmp1);
+				simd_128 p0v1_y = simd_move_hl_v (tmp1, tmp0);
 				tmp0 = simd_pack_hi_v(p0v1, p0v2);
 				tmp1 = simd_pack_hi_v(p0v3, p0v4);
-				simd_type p0v1_z = simd_move_lh_v (tmp0, tmp1);
+				simd_128 p0v1_z = simd_move_lh_v (tmp0, tmp1);
 
 				//dgFloat32 alpha = (m_diff * p0v1) % p0v0;
-				simd_type cross = simd_mul_add_v (simd_mul_add_v (simd_mul_v(p0v0_x, simd_mul_sub_v (simd_mul_v ((simd_type&)m_ray_yyyy, p0v1_z), (simd_type&)m_ray_zzzz, p0v1_y)),
-																		     p0v0_y, simd_mul_sub_v (simd_mul_v ((simd_type&)m_ray_zzzz, p0v1_x), (simd_type&)m_ray_xxxx, p0v1_z)),
-																		     p0v0_z, simd_mul_sub_v (simd_mul_v ((simd_type&)m_ray_xxxx, p0v1_y), (simd_type&)m_ray_yyyy, p0v1_x));
+				simd_128 cross = simd_mul_add_v (simd_mul_add_v (simd_mul_v(p0v0_x, simd_mul_sub_v (simd_mul_v ((simd_128&)m_ray_yyyy, p0v1_z), (simd_128&)m_ray_zzzz, p0v1_y)),
+																		     p0v0_y, simd_mul_sub_v (simd_mul_v ((simd_128&)m_ray_zzzz, p0v1_x), (simd_128&)m_ray_xxxx, p0v1_z)),
+																		     p0v0_z, simd_mul_sub_v (simd_mul_v ((simd_128&)m_ray_xxxx, p0v1_y), (simd_128&)m_ray_yyyy, p0v1_x));
 
 				// if a least one volume is negative it mean the line cross the polygon outside this edge and do not hit the face
 				//if (alpha < DG_RAY_TOL_ERROR) {
 				//	return 1.2f;
 				//}
-				tmp0 = simd_cmpgt_v (cross, (simd_type&) m_tolerance);
+				tmp0 = simd_cmpgt_v (cross, (simd_128&) m_tolerance);
 				tmp0 = simd_and_v (tmp0, simd_move_hl_v (tmp0, tmp0));
 				tmp0 = simd_and_v (tmp0, simd_permut_v (tmp0, tmp0, PURMUT_MASK (0, 0, 0, 1)));
 
@@ -302,6 +277,43 @@ dgFloat32 FastRayTest::PolygonIntersectSimd (const dgVector& normal, const dgFlo
 	}
 	return dgFloat32 (1.2f);
 */
+
+	_ASSERTE (m_p0.m_w == m_p1.m_w);
+
+	dgFloat32 dist = normal % m_diff;
+	if (dist < m_dirError) {
+
+		dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat32));
+
+		dgVector v0 (&polygon[indexArray[indexCount - 1] * stride]);
+		dgVector p0v0 (v0 - m_p0);
+		dgFloat32 tOut = normal % p0v0;
+		// this only work for convex polygons and for single side faces 
+		// walk the polygon around the edges and calculate the volume 
+		if ((tOut < dgFloat32 (0.0f)) && (tOut > dist)) {
+			for (dgInt32 i = 0; i < indexCount; i ++) {
+				dgInt32 i2 = indexArray[i] * stride;
+				dgVector v1 (&polygon[i2]);
+				dgVector p0v1 (v1 - m_p0);
+				// calculate the volume formed by the line and the edge of the polygon
+				dgFloat32 alpha = (m_diff * p0v1) % p0v0;
+				// if a least one volume is negative it mean the line cross the polygon outside this edge and do not hit the face
+				if (alpha < DG_RAY_TOL_ERROR) {
+					return 1.2f;
+				}
+				p0v0 = p0v1;
+			}
+
+			//the line is to the left of all the polygon edges, 
+			//then the intersection is the point we the line intersect the plane of the polygon
+			tOut = tOut / dist;
+			_ASSERTE (tOut >= dgFloat32 (0.0f));
+			_ASSERTE (tOut <= dgFloat32 (1.0f));
+			return tOut;
+		}
+	}
+	return dgFloat32 (1.2f);
+
 }
 
 
@@ -342,6 +354,7 @@ dgFloat32 FastRayTest::PolygonIntersect (const dgVector& normal, const dgFloat32
 		}
 	}
 	return dgFloat32 (1.2f);
+
 }
 
 
@@ -399,16 +412,10 @@ dgVector dgApi dgPointToRayDistance (const dgVector& point, const dgVector& ray_
 	return ray_p0 + dp.Scale (t);
 }
 
-void dgApi dgRayToRayDistance (
-	const dgVector& ray_p0, 
-	const dgVector& ray_p1,
-	const dgVector& ray_q0, 
-	const dgVector& ray_q1,
-	dgVector& pOut, 
-	dgVector& qOut)
+void dgApi dgRayToRayDistance (const dgVector& ray_p0, const dgVector& ray_p1, const dgVector& ray_q0, const dgVector& ray_q1, dgVector& pOut, dgVector& qOut)
 {
-	dgFloat32    sN;
-	dgFloat32    tN;
+	dgFloat32 sN;
+	dgFloat32 tN;
 
 	dgVector u (ray_p1 - ray_p0);
 	dgVector v (ray_q1 - ray_q0);
@@ -613,14 +620,6 @@ dgBigVector dgPointToTriangleDistance (const dgBigVector& point, const dgBigVect
 bool dgApi dgPointToPolygonDistance (const dgVector& p, const dgFloat32* const polygon, dgInt32 strideInBytes,
 									 const dgInt32* const indexArray, dgInt32 indexCount, dgFloat32 bailDistance, dgVector& out)
 {
-//	dgInt32 i;
-//	dgInt32 i0;
-//	dgInt32 i1;
-//	dgInt32 i2;
-//	dgInt32 stride;
-//	dgFloat32 dist;
-//	dgFloat32 minDist;
-
 	_ASSERTE (0);
 	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat32));
 

@@ -316,13 +316,7 @@ dgFloat32 dgCollisionBVH::RayCastSimd (const dgVector& localP0, const dgVector& 
 
 }
 
-dgFloat32 dgCollisionBVH::RayCast (
-	const dgVector& localP0, 
-	const dgVector& localP1, 
-	dgContactPoint& contactOut,
-	OnRayPrecastAction preFilter, 
-	const dgBody* const body,
-	void* const userData) const
+dgFloat32 dgCollisionBVH::RayCast (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
 {
 	if (PREFILTER_RAYCAST (preFilter, body, this, userData)) {
 		return dgFloat32 (1.2f);
@@ -356,12 +350,7 @@ dgFloat32 dgCollisionBVH::RayCast (
 	return param;
 }
 
-dgIntersectStatus dgCollisionBVH::GetPolygon (
-	void *context, 
-	const dgFloat32* const polygon, 
-	dgInt32 strideInBytes, 
-	const dgInt32* const indexArray, 
-	dgInt32 indexCount)
+dgIntersectStatus dgCollisionBVH::GetPolygon (void *context, const dgFloat32* const polygon, dgInt32 strideInBytes, const dgInt32* const indexArray, dgInt32 indexCount)
 {
 	dgPolygonMeshDesc& data = (*(dgPolygonMeshDesc*) context);
 	if (data.m_faceCount >= DG_MAX_COLLIDING_FACES) {
