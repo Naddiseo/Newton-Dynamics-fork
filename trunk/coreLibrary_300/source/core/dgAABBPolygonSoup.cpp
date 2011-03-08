@@ -755,28 +755,6 @@ class dgAABBTree
 
 	DG_INLINE dgInt32 BoxIntersect (const dgTriplex* const vertexArray, const dgVector& min, const dgVector& max) const
 	{
-/*
-		// this is bad on new intel cpus because is does a read after write
-		dgFloatSign tmp0_x;
-		dgFloatSign tmp0_y;
-		dgFloatSign tmp0_z;
-		dgFloatSign tmp1_x;
-		dgFloatSign tmp1_y;
-		dgFloatSign tmp1_z;
-
-		const dgTriplex& minBox = vertexArray[m_minIndex];
-		const dgTriplex& maxBox = vertexArray[m_maxIndex];
-
-		tmp0_x.m_fVal = maxBox.m_x - min.m_x;
-		tmp0_y.m_fVal = maxBox.m_y - min.m_y;
-		tmp0_z.m_fVal = maxBox.m_z - min.m_z;
-
-		tmp1_x.m_fVal = max.m_x - minBox.m_x;
-		tmp1_y.m_fVal = max.m_y - minBox.m_y;
-		tmp1_z.m_fVal = max.m_z - minBox.m_z;
-
-		int xxx = tmp0_x.m_integer.m_iVal | tmp0_y.m_integer.m_iVal | tmp0_z.m_integer.m_iVal | tmp1_x.m_integer.m_iVal | tmp1_y.m_integer.m_iVal | tmp1_z.m_integer.m_iVal;
-*/
 		dgVector boxP0 (vertexArray[m_minIndex].m_x, vertexArray[m_minIndex].m_x, vertexArray[m_minIndex].m_x, dgFloat32 (0.0f));
 		dgVector boxP1 (vertexArray[m_maxIndex].m_x, vertexArray[m_maxIndex].m_y, vertexArray[m_maxIndex].m_z, dgFloat32 (0.0f));
 		return dgOverlapTest (boxP0, boxP1, min, max) - 1;
