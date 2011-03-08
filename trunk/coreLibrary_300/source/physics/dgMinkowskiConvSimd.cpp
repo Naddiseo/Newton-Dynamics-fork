@@ -60,47 +60,48 @@ void dgContactSolver::CalcSupportVertexSimd (const dgVector& dir, dgInt32 entry)
 
 dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 {
-	dgInt32 i;
-	dgInt32 i0;
-	dgInt32 i1;
-	dgInt32 i2;
-	dgInt32 stack;
-	dgInt32 cicling;
-	dgInt32 deadCount;
-	dgInt32 adjacentIndex;
-	dgInt32 prevEdgeIndex;
-	dgInt32 silhouetteCapCount;
-	dgInt32 lastSilhouetteVertex;
-
-	dgFloat32 dist;
-	dgFloat32 minValue;
-	dgFloat32 penetration;
+//	dgInt32 i;
+//	dgInt32 i0;
+//	dgInt32 i1;
+//	dgInt32 i2;
+//	dgInt32 stack;
+//	dgInt32 cicling;
+//	dgInt32 deadCount;
+//	dgInt32 adjacentIndex;
+//	dgInt32 prevEdgeIndex;
+//	dgInt32 silhouetteCapCount;
+//	dgInt32 lastSilhouetteVertex;
+//	dgFloat32 dist;
+//	dgFloat32 minValue;
+//	dgFloat32 penetration;
+//	dgFloat32 ciclingMem[4];
+//	dgMinkFace *face;
+//	dgMinkFace *adjacent;
+//	dgMinkFace *prevFace;
+//	dgMinkFace *firstFace;
+//	dgMinkFace *silhouette;
+//	dgMinkFace *lastSilhouette;
+//	dgMinkFace *closestFace;
+//	dgMinkFacePurge* nextPurge;
 	dgFloat32 ciclingMem[4];
-	dgMinkFace *face;
-	dgMinkFace *adjacent;
-	dgMinkFace *prevFace;
-	dgMinkFace *firstFace;
-	dgMinkFace *silhouette;
-	dgMinkFace *lastSilhouette;
-	dgMinkFace *closestFace;
-	dgMinkFacePurge* nextPurge;
 	dgMinkFace *stackPool[128];
 	dgMinkFace *deadFaces[128];
 	SilhouetteFaceCap sillueteCap[128];
 	dgVector diff[3];
 	dgVector aver[3];
+	
 	dgInt8  buffer[DG_HEAP_EDGE_COUNT * (sizeof (dgFloat32) + sizeof (dgMinkFace *))];
 	dgClosestFace heapSort (buffer, sizeof (buffer));
 
 	m_planeIndex = 4;
-	closestFace = NULL;
+	dgMinkFace* closestFace = NULL;
 	m_facePurge = NULL;
-	penetration = dgFloat32 (0.0f);
+	//dgFloat32 penetration = dgFloat32 (0.0f);
 
 
 	_ASSERTE (m_vertexIndex == 4);
-	for (i = 0; i < 4; i ++) {
-		face = &m_simplex[i];
+	for (dgInt32 i = 0; i < 4; i ++) {
+		dgMinkFace* face = &m_simplex[i];
 		face->m_inHeap = 0;
 		face->m_isActive = 1;
 		if (CalcFacePlaneSimd (face)) {
@@ -109,14 +110,15 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 		}
 	}
 
-	cicling = 0;
+	dgInt32 cicling = 0;
 	ciclingMem[0] = dgFloat32 (1.0e10f);
 	ciclingMem[1] = dgFloat32 (1.0e10f);
 	ciclingMem[2] = dgFloat32 (1.0e10f);
 	ciclingMem[3] = dgFloat32 (1.0e10f);
 
-	minValue = dgFloat32 ( 1.0e10f);
+	dgFloat32 minValue = dgFloat32 ( 1.0e10f);
 	dgPlane bestPlane (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f),dgFloat32 (0.0f));
+	
 	diff[0] = bestPlane;
 	diff[1] = bestPlane;
 	diff[2] = bestPlane;
@@ -124,6 +126,7 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 	aver[1] = bestPlane;
 	aver[2] = bestPlane;
 
+	dgMinkFace *face = NULL;
 	while (heapSort.GetCount()) {
 		face = heapSort[0];
 		face->m_inHeap = 0;
@@ -134,7 +137,7 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 
 			CalcSupportVertexSimd (plane, m_vertexIndex);
 			const dgVector& p = m_hullVertex[m_vertexIndex];
-			dist = plane.Evalue (p);
+			dgFloat32 dist = plane.Evalue (p);
 			m_vertexIndex ++;
 
 			if (m_vertexIndex > 16) {
@@ -143,7 +146,7 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 						minValue = dist;
 						bestPlane = plane;
 
-						i = face->m_vertex[0];
+						dgInt32 i = face->m_vertex[0];
 						diff[0] = m_hullVertex[i];
 						aver[0] = m_averVertex[i];
 
@@ -160,7 +163,8 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 
 			ciclingMem[cicling] = dist;
 			cicling = (cicling + 1) & 3;
-			for (i = 0; i < 4; i ++) {
+			dgInt32 i = 0;
+			for (; i < 4; i ++) {
 				if (dgAbsf (dist - ciclingMem[i]) > dgFloat32 (1.0e-6f)) {
 					break;
 				}
@@ -204,14 +208,14 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 			} else if (dist > dgFloat32 (0.0f)) {
 				_ASSERTE (face->m_inHeap == 0);
 
-				stack = 0;
-				deadCount = 1;
-				silhouette = NULL;
+				dgInt32 stack = 0;
+				dgInt32 deadCount = 1;
+				dgMinkFace* silhouette = NULL;
 				deadFaces[0] = face;
 				closestFace = face;
 				face->m_isActive = 0;
 				for (i = 0; i < 3; i ++) {
-					adjacent = &m_simplex[face->m_adjancentFace[i]];
+					dgMinkFace* const adjacent = &m_simplex[face->m_adjancentFace[i]];
 					_ASSERTE (adjacent->m_isActive);
 					dist = adjacent->Evalue (p);  
 					if (dist > dgFloat32 (0.0f)) { 
@@ -228,7 +232,7 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 					stack --;
 					face = stackPool[stack];
 					for (i = 0; i < 3; i ++) {
-						adjacent = &m_simplex[face->m_adjancentFace[i]];
+						dgMinkFace* const adjacent = &m_simplex[face->m_adjancentFace[i]];
 						if (adjacent->m_isActive){
 							dist = adjacent->Evalue (p);  
 							if (dist > dgFloat32 (0.0f)) { 
@@ -257,17 +261,17 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 				_ASSERTE (silhouette);
 				_ASSERTE (silhouette->m_isActive);
 
-				i2 = (m_vertexIndex - 1);
-				lastSilhouette = silhouette;
+				dgInt32 i2 = (m_vertexIndex - 1);
+				dgMinkFace* const lastSilhouette = silhouette;
 				_ASSERTE ((silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[1]) &&
 					(silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[2]) &&
 					(silhouette->m_adjancentFace[1] != silhouette->m_adjancentFace[2]));
 
 
-				adjacentIndex = DG_GETADJACENTINDEX_ACTIVE (silhouette);
+				dgInt32 adjacentIndex = DG_GETADJACENTINDEX_ACTIVE (silhouette);
 				face = NewFace();
-				i0 = silhouette->m_vertex[adjacentIndex];
-				i1 = silhouette->m_vertex[adjacentIndex + 1];
+				dgInt32 i0 = silhouette->m_vertex[adjacentIndex];
+				dgInt32 i1 = silhouette->m_vertex[adjacentIndex + 1];
 
 				face->m_vertex[0] = dgInt16 (i1);
 				face->m_vertex[1] = dgInt16 (i0);
@@ -279,17 +283,17 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 
 				sillueteCap[0].m_face = face;
 				sillueteCap[0].m_faceCopling = &silhouette->m_adjancentFace[adjacentIndex];
-				silhouetteCapCount = 1;
+				dgInt32 silhouetteCapCount = 1;
 				_ASSERTE (silhouetteCapCount < (sizeof (sillueteCap) / sizeof (sillueteCap[0])));
 				do {
 					silhouette = &m_simplex[silhouette->m_adjancentFace[adjacentIndex]];
 					adjacentIndex = (DG_GETADJACENTINDEX_VERTEX(silhouette, i0)); 
 				} while (!silhouette->m_isActive);
 
-				prevFace = face;
-				firstFace = face;
-				lastSilhouetteVertex = i0;
-				prevEdgeIndex = dgInt32 (face - m_simplex);
+				dgMinkFace* prevFace = face;
+				dgMinkFace* const firstFace = face;
+				dgInt32 lastSilhouetteVertex = i0;
+				dgInt32 prevEdgeIndex = dgInt32 (face - m_simplex);
 				do {
 					_ASSERTE ((silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[1]) &&
 								(silhouette->m_adjancentFace[0] != silhouette->m_adjancentFace[2]) &&
@@ -330,7 +334,7 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 
 				for (i = 0; i < deadCount; i ++) {
 					if (!deadFaces[i]->m_inHeap){
-						nextPurge = (dgMinkFacePurge*) deadFaces[i];
+						dgMinkFacePurge* const nextPurge = (dgMinkFacePurge*) deadFaces[i];
 						nextPurge->m_next = m_facePurge;
 						m_facePurge = nextPurge;
 					}
@@ -339,7 +343,7 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 				while (heapSort.GetCount() && (!heapSort[0]->m_isActive)) {
 					face = heapSort[0];
 					heapSort.Pop();
-					nextPurge = (dgMinkFacePurge*) face;
+					dgMinkFacePurge* const nextPurge = (dgMinkFacePurge*) face;
 					nextPurge->m_next = m_facePurge;
 					m_facePurge = nextPurge;
 				}
@@ -356,7 +360,7 @@ dgContactSolver::dgMinkFace* dgContactSolver::CalculateClipPlaneSimd ()
 			}
 		} else {
 			_ASSERTE (0);
-			nextPurge = (dgMinkFacePurge*) face;
+			dgMinkFacePurge* const nextPurge = (dgMinkFacePurge*) face;
 			nextPurge->m_next = m_facePurge;
 			m_facePurge = nextPurge;
 		}
