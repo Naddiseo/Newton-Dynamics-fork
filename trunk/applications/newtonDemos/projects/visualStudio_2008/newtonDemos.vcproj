@@ -299,6 +299,10 @@
 				RelativePath="..\..\sdkDemos\demos\SceneCollision.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\sdkDemos\demos\SimpleConvexShatter.cpp"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath="..\..\sdkDemos\DemoCamera.cpp"

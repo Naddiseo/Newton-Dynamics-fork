@@ -419,24 +419,27 @@ class dgAABBTree
 	{
 		dgList<dgConstructionTree*> nodesList(allocator);
 
+		dgConstructionTree* newRoot = root;
 		PushNodes (root, nodesList);
-		dgInt32 maxPasses = CalculateMaximunDepth (root) * 2;
-		dgFloat64 newCost = TotalFitness (nodesList);
-		dgFloat64 prevCost = newCost;
-		do {
-			prevCost = newCost;
-			for (dgList<dgConstructionTree*>::dgListNode* node = nodesList.GetFirst(); node; node = node->GetNext()) {
-				dgConstructionTree* const box = node->GetInfo();
-				ImproveNodeFitness (box);
+		if (nodesList.GetCount()) {
+			dgInt32 maxPasses = CalculateMaximunDepth (root) * 2;
+			dgFloat64 newCost = TotalFitness (nodesList);
+			dgFloat64 prevCost = newCost;
+			do {
+				prevCost = newCost;
+				for (dgList<dgConstructionTree*>::dgListNode* node = nodesList.GetFirst(); node; node = node->GetNext()) {
+					dgConstructionTree* const box = node->GetInfo();
+					ImproveNodeFitness (box);
+				}
+
+				newCost = TotalFitness (nodesList);
+				maxPasses --;
+			} while (maxPasses && (newCost < prevCost));
+
+			newRoot = nodesList.GetLast()->GetInfo();
+			while (newRoot->m_parent) {
+				newRoot = newRoot->m_parent;
 			}
-
-			newCost = TotalFitness (nodesList);
-			maxPasses --;
-		} while (maxPasses && (newCost < prevCost));
-
-		dgConstructionTree* newRoot = nodesList.GetLast()->GetInfo();
-		while (newRoot->m_parent) {
-			newRoot = newRoot->m_parent;
 		}
 
 		return newRoot;

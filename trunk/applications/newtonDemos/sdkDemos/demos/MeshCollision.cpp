@@ -350,98 +350,6 @@ void SimpleMeshLevelCollision (NewtonFrame& system)
 #endif
 
 
-static void CreateLevelMeshBody (NewtonWorld* const world, DemoEntity* const ent, bool optimization)
-{
-	// measure the time to build a collision tree
-	unsigned64 timer0 = dGetTimeInMicrosenconds();
-
-
-	// create the collision tree geometry
-	NewtonCollision* const collision = NewtonCreateTreeCollision(world, 0);
-
-
-	// set the application level callback
-#ifdef USE_STATIC_MESHES_DEBUG_COLLISION
-//	NewtonStaticCollisionSetDebugCallback (collision, DebugCallback);
-#endif
-
-	// prepare to create collision geometry
-	NewtonTreeCollisionBeginBuild(collision);
-
-	int faceCount = 0;
-	// iterate the entire geometry an build the collision
-	for (DemoEntity* model = ent->GetFirst(); model; model = model->GetNext()) {
-
-		dMatrix matrix (model->CalculateGlobalMatrix(ent));
-		DemoMesh* const mesh = model->GetMesh();
-		dFloat* const vertex = mesh->m_vertex;
-		for (DemoMesh::dListNode* nodes = mesh->GetFirst(); nodes; nodes = nodes->GetNext()) {
-
-			DemoSubMesh& segment = nodes->GetInfo();
-			for (int i = 0; i < segment.m_indexCount; i += 3) {
-				int index;	
-				int matID;
-				dVector face[3];
-
-				index = segment.m_indexes[i + 0] * 3;
-				face[0] = dVector (vertex[index + 0], vertex[index + 1], vertex[index + 2]);
-
-				index = segment.m_indexes[i + 1] * 3;
-				face[1] = dVector (vertex[index + 0], vertex[index + 1], vertex[index + 2]);
-
-				index = segment.m_indexes[i + 2] * 3;
-				face[2] = dVector (vertex[index + 0], vertex[index + 1], vertex[index + 2]);
-
-				matrix.TransformTriplex (face, sizeof (dVector), face, sizeof (dVector), 3);
-
-				// stress test the collision builder
-				// matID = matID == 2 ? 1 : 2 ;
-				matID = 0;
-				faceCount ++;
-				NewtonTreeCollisionAddFace(collision, 3, &face[0].m_x, sizeof (dVector), matID);
-			}
-		}
-	}
-	NewtonTreeCollisionEndBuild(collision, optimization ? 1 : 0);
-
-	// measure the time to build a collision tree
-	timer0 = (dGetTimeInMicrosenconds() - timer0) / 1000;
-
-
-	// Get the root Matrix
-	dMatrix matrix (ent->CalculateGlobalMatrix(NULL));
-
-	// create the level rigid body
-	NewtonBody* const level = NewtonCreateBody(world, collision, &matrix[0][0]);
-
-	// set the global position of this body
-	//NewtonBodySetMatrix (level, &matrix[0][0]); 
-
-	// save the pointer to the graphic object with the body.
-	NewtonBodySetUserData (level, ent);
-
-	// set a destructor for this rigid body
-	//NewtonBodySetDestructorCallback (m_level, Destructor);
-
-	dVector boxP0; 
-	dVector boxP1; 
-	// get the position of the aabb of this geometry
-	NewtonCollisionCalculateAABB (collision, &matrix[0][0], &boxP0.m_x, &boxP1.m_x); 
-
-	// add some extra padding the world size
-	boxP0.m_x -=  50.0f;
-	boxP0.m_y -=  50.0f;
-	boxP0.m_z -=  50.0f;
-	boxP1.m_x +=  50.0f;
-	boxP1.m_y += 500.0f;
-	boxP1.m_z +=  50.0f;
-
-	// set the world size
-	NewtonSetWorldSize (world, &boxP0.m_x, &boxP1.m_x); 
-
-	// release the collision tree (this way the application does not have to do book keeping of Newton objects
-	NewtonReleaseCollision (world, collision);
-}
 
 
 static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
@@ -454,26 +362,10 @@ static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 
 
 	// load the scene from and alchemedia file format
-	char fileName[2048];
-//	GetWorkingFileName ("flatPlane.xml", fileName);
-	GetWorkingFileName ("sponza.xml", fileName);
-//	GetWorkingFileName ("cattle.xml", fileName);
-//	GetWorkingFileName ("playground.xml", fileName);
-	scene->LoadScene (fileName);
-
-	NewtonWorld* const world = scene->GetNewton();
-	for (DemoEntityManager::dListNode* node = scene->GetFirst(); node; node = node->GetNext()) {
-		DemoEntity* const ent = node->GetInfo();
-		DemoMesh* const mesh = ent->GetMesh();
-		if (mesh) {
-			char name[2048];
-			mesh->GetName(name);
-			if (!strcmp (name, "levelGeometry_mesh")) {
-				CreateLevelMeshBody (world, ent, optimization);
-				break;
-			}
-		}
-	}
+	CreateLevelMesh (scene, "flatPlane.xml", optimization);
+//	CreateLevelMesh (scene, "sponza.xml", optimization);
+//	CreateLevelMesh (scene, "cattle.xml", fileName);
+//	CreateLevelMesh (scene, "playground.xml", fileName);
 	
 	// place camera into position
 //	dQuaternion rot;
@@ -487,13 +379,12 @@ static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 //	dVector origin (-10.0f, 1.0f, 0.0f, 0.0f);
 	scene->SetCameraMatrix(rot, origin);
 
-
-
+	NewtonWorld* const world = scene->GetNewton();
 	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (world);
 	dVector location (0.0f, 0.0f, 0.0f, 0.0f);
 	dVector size (0.5f, 0.5f, 0.5f, 0.0f);
 	int count = 20;
-//	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
+	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
 //	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _BOX_PRIMITIVE, defaultMaterialID);
 //	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _CAPSULE_PRIMITIVE, defaultMaterialID);
 //	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _CYLINDER_PRIMITIVE, defaultMaterialID);
@@ -504,8 +395,8 @@ static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 //	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
 //	AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
 
-for (int i = 0; i < 20; i ++)
-AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
+//for (int i = 0; i < 20; i ++)
+//AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
 
 	// resume the simulation
 	scene->ContinueExecution();

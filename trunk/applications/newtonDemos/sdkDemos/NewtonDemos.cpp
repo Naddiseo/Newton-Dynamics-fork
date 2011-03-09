@@ -23,9 +23,10 @@
 //#define DEFAULT_SCENE	0						// friction test
 //#define DEFAULT_SCENE	1						// closest distance
 //#define DEFAULT_SCENE	2						// Box stacks
-#define DEFAULT_SCENE	3						// simple level mesh collision
+//#define DEFAULT_SCENE	3						// simple level mesh collision
 //#define DEFAULT_SCENE	4						// optimized level mesh collision
 //#define DEFAULT_SCENE	5						// Scene Collision
+#define DEFAULT_SCENE	6						// Simple convex Shatter
 
 
 
@@ -80,6 +81,8 @@ void BasicBoxStacks (DemoEntityManager* const scene);
 void SimpleMeshLevelCollision (DemoEntityManager* const scene);
 void OptimizedMeshLevelCollision (DemoEntityManager* const scene);
 void SceneCollision (DemoEntityManager* const scene);
+void SimpleConvexShatter (DemoEntityManager* const scene);
+
 
 static SDKDemos demosSelection[] = 
 {
@@ -89,6 +92,7 @@ static SDKDemos demosSelection[] =
 	{"Unoptimized Mesh collision", "show simple level mesh", SimpleMeshLevelCollision},
 	{"Optimized Mesh collision", "show optimized level mesh", OptimizedMeshLevelCollision},
 	{"multi geometry collision", "show static mesh with the ability of moving internal parts", SceneCollision},
+	{"Simple convex Shatter", "demonstrate fracture destruction using Voronoi partition", SimpleConvexShatter},
 
 /*
 	{"spinning sphere", "show a very simple rotating sphere", BasicSphereSpin},
