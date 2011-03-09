@@ -2934,16 +2934,12 @@ void dgMeshEffect::ClipFace (const dgHugeVector& normal, const dgHugeVector& ori
 			}
 
 			if ((test0.GetAproximateValue() * test1.GetAproximateValue() < dgFloat32 (0.0f))) {
-				dgBigVector xxx;
-
 				dgGoogol den;
 				dgBigVector dp (pointPool.m_points[indexP1] - pointPool.m_points[indexP0]);
 				den = normal % dgHugeVector (dp);
-				den = -test0.GetAproximateValue() / den.GetAproximateValue();
-				index = pointPool.AddPoint(pointPool.m_points[indexP0] + dp.Scale (den));
-
-
-				dgInt32 index = pointPool.AddPoint(xxx);
+				dgFloat64 invden = -test0.GetAproximateValue() / den.GetAproximateValue();
+				dgInt32 index = pointPool.AddPoint(pointPool.m_points[indexP0] + dp.Scale (invden));
+				
 				_ASSERTE (side[i] != 0);
 				side[newIndex] = 0;
 				faceIndex[newIndex] = index;
@@ -2951,6 +2947,7 @@ void dgMeshEffect::ClipFace (const dgHugeVector& normal, const dgHugeVector& ori
 				nextIndex[i0] = newIndex;
 				newIndex ++;
 			}
+			indexP0 = indexP1;
 			test0 = test1; 
 			i0 = i;
 		}
