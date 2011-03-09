@@ -2049,9 +2049,11 @@ if (convexHull.GetCount()) {
 
 
 
-
+	dgFloat32 lengPadding (500.0f);
 	dgInt32 tetraCount = delaunayTetrahedras.GetCount();
-	dgStack<dgVector> voronoiPoints(tetraCount * 2);
+	dgStack<dgVector> voronoiPoints(tetraCount);
+	dgStack<dgDelaunayTetrahedralization::dgListNode*> tetradrumNode(tetraCount);
+	dgTree<dgList<dgInt32>, dgInt32> delanayNodes (GetAllocator());	
 
 	dgInt32 index = 0;
 	const dgHullVector* const delanayPoints = delaunayTetrahedras.GetHullVertexArray();
@@ -2059,28 +2061,60 @@ if (convexHull.GetCount()) {
 		dgConvexHull4dTetraherum& tetra = node->GetInfo();
 		dgBigVector origin (tetra.CircumSphereCenter (delanayPoints));
 		voronoiPoints[index] = dgVector (dgFloat32 (origin.m_x), dgFloat32 (origin.m_y), dgFloat32 (origin.m_z), dgFloat32 (0.0f));
+		tetradrumNode[index] = node;
+
+		for (dgInt32 i = 0; i < 3; i ++) {
+			dgTree<dgList<dgInt32>, dgInt32>::dgTreeNode* header = delanayNodes.Find(tetra.m_faces[0].m_index[i]);
+			if (!header) {
+				dgList<dgInt32> list (GetAllocator());
+				header = delanayNodes.Insert(list, tetra.m_faces[0].m_index[i]);
+			}
+			header->GetInfo().Append (index);
+		}
+
+		dgTree<dgList<dgInt32>, dgInt32>::dgTreeNode* header = delanayNodes.Find(tetra.m_faces[0].m_otherVertex);
+		if (!header) {
+			dgList<dgInt32> list (GetAllocator());
+			header = delanayNodes.Insert(list, tetra.m_faces[0].m_otherVertex);
+		}
+		header->GetInfo().Append (index);
+
 		index ++;
 	}
 
-	dgTree<dgList<dgDelaunayTetrahedralization::dgListNode*>, dgInt32> delanayNodes (GetAllocator());	
-	for (dgDelaunayTetrahedralization::dgListNode* node = delaunayTetrahedras.GetFirst(); node; node = node->GetNext()) {
-		dgConvexHull4dTetraherum& tetra = node->GetInfo();
+static int xxx;
 
-		for (dgInt32 i = 0; i < 3; i ++) {
-			dgTree<dgList<dgDelaunayTetrahedralization::dgListNode*>, dgInt32>::dgTreeNode* header = delanayNodes.Find(tetra.m_faces[0].m_index[i]);
-			if (!header) {
-				dgList<dgDelaunayTetrahedralization::dgListNode*> list (GetAllocator());
-				header = delanayNodes.Insert(list, tetra.m_faces[0].m_index[i]);
+	dgTree<dgList<dgInt32>, dgInt32>::Iterator iter (delanayNodes);
+	for (iter.Begin(); iter; iter ++) {
+		dgTree<dgList<dgInt32>, dgInt32>::dgTreeNode* const nodeNode = iter.GetNode();
+		int count = 0;
+		dgVector pointArray[128];
+		dgList<dgInt32>& list = nodeNode->GetInfo();
+		for (dgList<dgInt32>::dgListNode* ptr = list.GetFirst(); ptr; ptr = ptr->GetNext()) {
+			dgInt32 i = ptr->GetInfo();
+			dgConvexHull4dTetraherum* const tetrahedrum = &tetradrumNode[i]->GetInfo();
+			for (dgInt32 j = 0; j < 4; j ++) {
+				if (!tetrahedrum->m_faces[j].m_twin) {
+					dgBigVector p0 (delaunayTetrahedras.GetVertex(tetrahedrum->m_faces[j].m_index[0]));
+					dgBigVector p1 (delaunayTetrahedras.GetVertex(tetrahedrum->m_faces[j].m_index[1]));
+					dgBigVector p2 (delaunayTetrahedras.GetVertex(tetrahedrum->m_faces[j].m_index[2]));
+					dgBigVector n ((p1 - p0) * (p2 - p0));
+					n = n.Scale (dgRsqrt (n % n));
+					dgVector normal (dgFloat32 (n.m_x), dgFloat32 (n.m_y), dgFloat32  (n.m_z), dgFloat32 (0.0f));
+					pointArray[count] = voronoiPoints[i] + normal.Scale (lengPadding);
+					count ++;
+					_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
+				}
 			}
-			header->GetInfo().Append (node);
-		}
 
-		dgTree<dgList<dgDelaunayTetrahedralization::dgListNode*>, dgInt32>::dgTreeNode* header = delanayNodes.Find(tetra.m_faces[0].m_otherVertex);
-		if (!header) {
-			dgList<dgDelaunayTetrahedralization::dgListNode*> list (GetAllocator());
-			header = delanayNodes.Insert(list, tetra.m_faces[0].m_otherVertex);
+			pointArray[count] = voronoiPoints[i];
+			count ++;
+			_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
 		}
-		header->GetInfo().Append (node);
+xxx ++;
+		dgConvexHull3d hull (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
+
+
 	}
 
 	delete tree;

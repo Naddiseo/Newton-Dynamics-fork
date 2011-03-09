@@ -129,7 +129,7 @@ dgConvexHull3d::dgConvexHull3d(dgMemoryAllocator* const allocator, const dgFloat
 
 	dgStack<dgBigVector> points (count);
 	dgStack<dgBigVector> convexPoints (count);
-	dgStack<dgAABBPointTree3dClump> treePool (treeCount);
+	dgStack<dgAABBPointTree3dClump> treePool (treeCount + 256);
 
 	count = InitVertexArray(&convexPoints[0], &points[0], vertexCloud, strideInByte, count, &treePool[0], treePool.GetSizeInBytes());
 	if (m_count >= 4) {

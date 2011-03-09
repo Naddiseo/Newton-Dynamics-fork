@@ -284,7 +284,7 @@ void dgConvexHull4d::BuildHull (dgMemoryAllocator* const allocator, const dgBigV
 	treeCount *= 2;
 
 	dgStack<dgHullVector> points (count);
-	dgStack<dgAABBPointTree4dClump> treePool (treeCount);
+	dgStack<dgAABBPointTree4dClump> treePool (treeCount + 256);
 
 	count = InitVertexArray(&points[0], vertexCloud, count, &treePool[0], treePool.GetSizeInBytes());
 	if (m_count >= 4) {
