@@ -587,12 +587,31 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, Primitiv
 	int tex0 = LoadTexture("reljef.tga");
 	NewtonMeshApplyBoxMapping(mesh, tex0, tex0, tex0);
 
+	// pepper the bing box of the mesh with random points
+	int count = 0;
+	dVector points[10];
+	do {
+		dFloat x = RandomVariable(size.m_x);
+		dFloat y = RandomVariable(size.m_y);
+		dFloat z = RandomVariable(size.m_z);
+		if ((x <= size.m_x) && (x >= -size.m_x) && (y <= size.m_y) && (y >= -size.m_y) && (z <= size.m_z) && (z >= -size.m_z)){
+			points[count] = dVector (x, y, z);
+			count ++;
+		}
+	} while (count < 10);
 
+	// Create the array of convex pieces from the mesh
+	NewtonMesh* convexParts[1024];
+	int interior = LoadTexture("KAMEN-stup.tga");
+	int convexPartsCount = NewtonMeshVoronoiDecomposition (mesh, convexParts, sizeof (convexParts)/sizeof (convexParts[0]), interior);
 
 
 
 
 	// make sure the assets are released before leaving the function
+	for (int i = 0; i < convexPartsCount; i ++) {
+		NewtonMeshDestroy (convexParts[i]);
+	}
 	NewtonMeshDestroy (mesh);
 	NewtonReleaseCollision(world, collision);
 }

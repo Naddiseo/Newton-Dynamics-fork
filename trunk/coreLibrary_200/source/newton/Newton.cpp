@@ -8228,7 +8228,11 @@ void NewtonMeshClip (const NewtonMesh* mesh, const NewtonMesh* clipper, const dF
 	((dgMeshEffect*) mesh)->ClipMesh (matrix, (dgMeshEffect*)clipper, (dgMeshEffect**) topMesh, (dgMeshEffect**) bottomMesh);
 }
 
-
+int NewtonMeshVoronoiDecomposition (const NewtonMesh* const mesh, NewtonMesh** meshArrayOut, int maxCount, int interialMaterial)
+{
+	TRACE_FUNTION(__FUNCTION__);
+	return 0;
+}
 
 NewtonMesh* NewtonMeshUnion (const NewtonMesh* mesh, const NewtonMesh* clipper, const dFloat* clipperMatrix)
 {
