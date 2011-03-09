@@ -1948,3 +1948,40 @@ for (iter.Begin(); iter; iter ++)
 }
 
 
+dgInt32 dgMeshEffect::CreateVoronoiPartition (dgMeshEffect** const arrayOut, dgInt32 maxCount, dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial) const
+{
+	dgMeshEffectSolidTree* const tree = CreateSolidTree();
+	_ASSERTE (tree);
+
+	dgStack<dgVector> pool(pointsCount + m_pointCount);
+
+	for (dgInt32 i = 0; i < m_pointCount; i ++) {
+		pool[i] = m_points[i];
+	}
+	dgInt32 count = m_pointCount;
+	dgInt32 stride = pointStrideInBytes / sizeof (dgFloat32); 
+	for (dgInt32 i = 0; i < pointsCount; i ++) {
+		dgVector p (pointCloud[i * stride], pointCloud[i * stride + 1], pointCloud[i * stride + 2], dgFloat32 (0.0f));
+		dgHugeVector p1 (p);
+		dgMeshEffectSolidTree* root = tree;
+		do {
+			dgGoogol test (root->m_normal % (p1 - root->m_point));
+			if (test.GetAproximateValue() > dgFloat32 (0.0f)) {
+				break;
+			}
+			root = root->m_back;
+		} while (root);
+
+		if (!root) {
+			pool[count] = p;
+			count ++;
+		}
+	}
+
+
+	dgDelaunayTetrahedralization (GetAllocator(), &pool[0].m_x, count, sizeof (dgVector), 0.0f);
+
+	delete tree;
+
+	return 0;
+}

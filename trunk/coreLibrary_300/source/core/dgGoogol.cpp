@@ -20,8 +20,6 @@
 */
 
 
-
-
 // based of the paper of: Jonathan Richard Shewchuk October 1, 1997
 // "Adaptive Precision Floating-Point Arithmetic and Fast Robust Geometric Predicates"
 
@@ -31,8 +29,10 @@
 // this class is by far faster an much more complete than n my old Googol big number based in integers
 // int newton 1.00
 
+
 #include "dgStdafx.h"
 #include "dgGoogol.h"
+
 
 static dgFloat64 m_splitter = 0.0f;
 
@@ -254,4 +254,17 @@ dgGoogol dgGoogol::operator* (const dgGoogol &A) const
 	}
 	tmp.PackFloat ();
 	return tmp;
+}
+
+
+dgGoogol dgGoogol::operator+= (const dgGoogol &A)
+{
+	*this = *this + A;
+	return *this;
+}
+
+dgGoogol dgGoogol::operator-= (const dgGoogol &A)
+{
+	*this = *this - A;
+	return *this;
 }
