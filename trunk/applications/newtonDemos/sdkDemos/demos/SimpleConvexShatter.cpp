@@ -13,6 +13,7 @@
 
 #include <toolbox_stdafx.h>
 #include "SkyBox.h"
+#include "TargaToOpenGl.h"
 #include "../DemoMesh.h"
 #include "../DemoEntityManager.h"
 #include "../DemoCamera.h"
@@ -572,6 +573,32 @@ void PrefabSimpleDestruction(SceneManager& system)
 
 
 
+static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, PrimitiveType type)
+{
+	// create a collision primitive
+	dVector size (1.0f, 2.0f, 2.0f);
+	NewtonWorld* const world = scene->GetNewton();
+	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, type, 0);
+
+	// create a newton mesh from the collision primitive
+	NewtonMesh* const mesh = NewtonMeshCreateFromCollision(collision);
+
+	// apply a simple Box Mapping
+	int tex0 = LoadTexture("reljef.tga");
+	NewtonMeshApplyBoxMapping(mesh, tex0, tex0, tex0);
+
+
+
+
+
+
+	// make sure the assets are released before leaving the function
+	NewtonMeshDestroy (mesh);
+	NewtonReleaseCollision(world, collision);
+}
+
+
+
 void SimpleConvexShatter (DemoEntityManager* const scene)
 {
 	// suspend simulation before making changes to the physics world
@@ -584,15 +611,9 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	CreateLevelMesh (scene, "flatPlane.xml", false);
 	//CreateLevelMesh (scene, "sponza.xml", false);
 
-/*
-	// load the scene from and alchemedia file format
-	char fileName[2048];
-	//GetWorkingFileName ("boxStacks_1.xml", fileName);
-	//GetWorkingFileName ("boxStacks_3.xml", fileName);
-//	GetWorkingFileName ("boxStacks.xml", fileName);
-	//GetWorkingFileName ("pyramid40x40.xml", fileName);
-	scene->LoadScene (fileName);
-*/
+	// create a shattered mesh array
+	CreateSimpleVoronoiShatter (scene, _BOX_PRIMITIVE);
+
 	// place camera into position
 	dQuaternion rot;
 	dVector origin (-40.0f, 10.0f, 0.0f, 0.0f);
