@@ -3282,8 +3282,8 @@ void dgMeshEffect::DestroySolidTree (dgMeshEffectSolidTree* tree)
 //void dgMeshEffect::ClipMesh (const dgMeshEffect* clipMesh, dgMeshEffect** left, dgMeshEffect** right) const
 void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** left, dgMeshEffect** right) const
 {
-	dgMeshEffect* leftMesh = new dgMeshEffect (GetAllocator(), true);
-	dgMeshEffect* rightMesh = new dgMeshEffect (GetAllocator(), true);
+	dgMeshEffect* leftMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+	dgMeshEffect* rightMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
 	leftMesh->BeginPolygon();
 	rightMesh->BeginPolygon(); 
