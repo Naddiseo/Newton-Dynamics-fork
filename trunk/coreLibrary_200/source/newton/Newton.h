@@ -935,7 +935,7 @@ extern "C" {
 	NEWTON_API NewtonMesh* NewtonMeshDifference (const NewtonMesh* mesh, const NewtonMesh* clipper, const dFloat* clipperMatrix);
 	NEWTON_API NewtonMesh* NewtonMeshIntersection (const NewtonMesh* mesh, const NewtonMesh* clipper, const dFloat* clipperMatrix);
 	NEWTON_API void NewtonMeshClip (const NewtonMesh* mesh, const NewtonMesh* clipper, const dFloat* clipperMatrix, NewtonMesh** topMesh, NewtonMesh** bottomMesh);
-	NEWTON_API int NewtonMeshVoronoiDecomposition (const NewtonMesh* const mesh, NewtonMesh** meshArrayOut, int maxCount, int pointCount, int pointStrideInBytes, dFloat* const pointCloud, int internalMaterial);
+	NEWTON_API NewtonMesh* NewtonMeshVoronoiDecomposition (const NewtonMesh* const mesh, int pointCount, int pointStrideInBytes, dFloat* const pointCloud, int internalMaterial);
 
 	NEWTON_API void NewtonRemoveUnusedVertices(const NewtonMesh* mesh, int* vertexRemapTable);
 

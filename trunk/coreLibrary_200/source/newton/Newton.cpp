@@ -8228,12 +8228,11 @@ void NewtonMeshClip (const NewtonMesh* mesh, const NewtonMesh* clipper, const dF
 	((dgMeshEffect*) mesh)->ClipMesh (matrix, (dgMeshEffect*)clipper, (dgMeshEffect**) topMesh, (dgMeshEffect**) bottomMesh);
 }
 
-int NewtonMeshVoronoiDecomposition (const NewtonMesh* const mesh, NewtonMesh** meshArrayOut, int maxCount, int pointCount, int pointStrideInBytes, dFloat* const pointCloud, int internalMaterial)
+NewtonMesh* NewtonMeshVoronoiDecomposition (const NewtonMesh* const mesh, int pointCount, int pointStrideInBytes, dFloat* const pointCloud, int internalMaterial)
 {
 	TRACE_FUNTION(__FUNCTION__);
 
-	int count = ((dgMeshEffect*) mesh)->CreateVoronoiPartition ((dgMeshEffect**)meshArrayOut, maxCount, pointCount, pointStrideInBytes, pointCloud, internalMaterial);
-	return count;
+	return (NewtonMesh*) ((dgMeshEffect*) mesh)->CreateVoronoiPartition (pointCount, pointStrideInBytes, pointCloud, internalMaterial);
 }
 
 NewtonMesh* NewtonMeshUnion (const NewtonMesh* mesh, const NewtonMesh* clipper, const dFloat* clipperMatrix)
