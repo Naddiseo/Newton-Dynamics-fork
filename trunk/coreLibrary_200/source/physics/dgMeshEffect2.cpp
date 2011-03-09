@@ -2062,9 +2062,28 @@ if (convexHull.GetCount()) {
 		index ++;
 	}
 
+	dgTree<dgList<dgDelaunayTetrahedralization::dgListNode*>, dgInt32> delanayNodes (GetAllocator());	
+	for (dgDelaunayTetrahedralization::dgListNode* node = delaunayTetrahedras.GetFirst(); node; node = node->GetNext()) {
+		dgConvexHull4dTetraherum& tetra = node->GetInfo();
+
+		for (dgInt32 i = 0; i < 3; i ++) {
+			dgTree<dgList<dgDelaunayTetrahedralization::dgListNode*>, dgInt32>::dgTreeNode* header = delanayNodes.Find(tetra.m_faces[0].m_index[i]);
+			if (!header) {
+				dgList<dgDelaunayTetrahedralization::dgListNode*> list (GetAllocator());
+				header = delanayNodes.Insert(list, tetra.m_faces[0].m_index[i]);
+			}
+			header->GetInfo().Append (node);
+		}
+
+		dgTree<dgList<dgDelaunayTetrahedralization::dgListNode*>, dgInt32>::dgTreeNode* header = delanayNodes.Find(tetra.m_faces[0].m_otherVertex);
+		if (!header) {
+			dgList<dgDelaunayTetrahedralization::dgListNode*> list (GetAllocator());
+			header = delanayNodes.Insert(list, tetra.m_faces[0].m_otherVertex);
+		}
+		header->GetInfo().Append (node);
+	}
 
 	delete tree;
-
 
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgControlFP (controlWorld, _MCW_PC);
