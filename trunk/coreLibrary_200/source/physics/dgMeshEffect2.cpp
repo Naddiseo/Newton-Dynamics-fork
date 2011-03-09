@@ -1976,16 +1976,20 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 		dgFloat32 z = dgFloor (pointCloud[i * stride + 2] * quantizeFactor) * invQuantizeFactor;
 		dgVector p (x, y, z, dgFloat32 (0.0f));
 		dgHugeVector p1 (p);
-		dgMeshEffectSolidTree* root = tree;
-		do {
-			dgGoogol test (root->m_normal % (p1 - root->m_point));
-			if (test.GetAproximateValue() > dgFloat32 (0.0f)) {
-				break;
+		
+		bool pointSide = true;
+		for (dgMeshEffectSolidTree* ptr = tree; ptr; ) {
+			dgGoogol test (ptr->m_normal % (p1 - ptr->m_point));
+			if (test.GetAproximateValue() <= dgFloat32 (0.0f)) {
+				pointSide = true;
+				ptr = ptr->m_back;
+			} else {
+				pointSide = false;
+				ptr = ptr->m_front;
 			}
-			root = root->m_back;
-		} while (root);
+		}
 
-		if (!root) {
+		if (pointSide) {
 			pool[count] = p;
 			count ++;
 		}
@@ -2082,8 +2086,6 @@ if (convexHull.GetCount()) {
 		index ++;
 	}
 
-static int xxx;
-
 	dgTree<dgList<dgInt32>, dgInt32>::Iterator iter (delanayNodes);
 	for (iter.Begin(); iter; iter ++) {
 		dgTree<dgList<dgInt32>, dgInt32>::dgTreeNode* const nodeNode = iter.GetNode();
@@ -2111,10 +2113,57 @@ static int xxx;
 			count ++;
 			_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
 		}
-xxx ++;
-		dgConvexHull3d hull (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
+
+//		dgConvexHull3d hull (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
+		dgMeshEffect convexMesh (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
 
 
+//		dgMeshEffect clipper (*clipMesh);
+//		dgMeshEffect* leftMeshSource;
+//		dgMeshEffect* rightMeshSource;
+//		dgMeshEffect* leftMeshClipper;
+//		dgMeshEffect* rightMeshClipper;
+//		dgMeshEffect* result;
+//		clipper.TransformMesh (matrix);
+//		result = NULL;
+		dgMeshEffect* leftConvexMesh = NULL;
+		dgMeshEffect* rightConvexMesh = NULL;
+//		leftMeshClipper = NULL;
+//		rightMeshClipper = NULL;
+
+		convexMesh.ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
+		if (leftConvexMesh && rightConvexMesh) {
+/*
+			clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper);
+			if (leftMeshSource && rightMeshSource) {
+				result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+
+				result->BeginPolygon();
+
+				result->MergeFaces(leftMeshSource);
+				result->MergeFaces(leftMeshClipper);
+
+				result->EndPolygon();
+			}
+*/
+		}
+/*
+		if (leftMeshClipper) {
+			delete leftMeshClipper;
+		}
+
+		if (rightMeshClipper) {
+			delete rightMeshClipper;
+		}
+
+		if (leftMeshSource) {
+			delete leftMeshSource;
+		}
+
+		if (rightMeshSource) {
+			delete rightMeshSource;
+		}
+*/
 	}
 
 	delete tree;

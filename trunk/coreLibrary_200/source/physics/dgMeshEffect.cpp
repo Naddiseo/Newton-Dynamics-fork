@@ -3281,7 +3281,8 @@ void dgMeshEffect::DestroySolidTree (dgMeshEffectSolidTree* tree)
 	delete tree;
 }
 
-void dgMeshEffect::ClipMesh (const dgMeshEffect* clipMesh, dgMeshEffect** left, dgMeshEffect** right) const
+//void dgMeshEffect::ClipMesh (const dgMeshEffect* clipMesh, dgMeshEffect** left, dgMeshEffect** right) const
+void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** left, dgMeshEffect** right) const
 {
 _ASSERTE (0);
 /*
@@ -3424,14 +3425,17 @@ _ASSERTE (0);
 */
 }
 
+void dgMeshEffect::ClipMesh (const dgMeshEffect* const clipMesh, dgMeshEffect** left, dgMeshEffect** right) const
+{
+	const dgMeshEffectSolidTree* const clipper = clipMesh->CreateSolidTree();
+	_ASSERTE (clipper);
+	ClipMesh (clipper, left, right);
+	delete clipper;
+}
 
 
-bool dgMeshEffect::CheckIntersection (
-									  const dgMeshEffect* const meshA, 
-									  const dgMeshEffectSolidTree* const solidTreeA,
-									  const dgMeshEffect* const meshB, 
-									  const dgMeshEffectSolidTree* const solidTreeB,
-									  dgFloat32 scale)
+bool dgMeshEffect::CheckIntersection (const dgMeshEffect* const meshA, const dgMeshEffectSolidTree* const solidTreeA,
+									  const dgMeshEffect* const meshB, const dgMeshEffectSolidTree* const solidTreeB, dgFloat32 scale)
 {
 	return (meshA->CheckIntersection (solidTreeB, scale) || meshB->CheckIntersection (solidTreeA, scale));
 }
