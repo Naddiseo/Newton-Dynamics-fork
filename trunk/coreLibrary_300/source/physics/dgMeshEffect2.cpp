@@ -2082,7 +2082,6 @@ if (convexHull.GetCount()) {
 		index ++;
 	}
 
-static int xxx;
 
 	dgTree<dgList<dgInt32>, dgInt32>::Iterator iter (delanayNodes);
 	for (iter.Begin(); iter; iter ++) {
@@ -2111,10 +2110,7 @@ static int xxx;
 			count ++;
 			_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
 		}
-xxx ++;
 		dgConvexHull3d hull (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
-
-
 	}
 
 	delete tree;
