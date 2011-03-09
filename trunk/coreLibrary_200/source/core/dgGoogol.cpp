@@ -255,3 +255,16 @@ dgGoogol dgGoogol::operator* (const dgGoogol &A) const
 	tmp.PackFloat ();
 	return tmp;
 }
+
+
+dgGoogol dgGoogol::operator+= (const dgGoogol &A)
+{
+	*this = *this + A;
+	return *this;
+}
+
+dgGoogol dgGoogol::operator-= (const dgGoogol &A)
+{
+	*this = *this - A;
+	return *this;
+}

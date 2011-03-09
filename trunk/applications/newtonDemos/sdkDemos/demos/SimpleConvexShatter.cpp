@@ -603,7 +603,7 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, Primitiv
 	// Create the array of convex pieces from the mesh
 	NewtonMesh* convexParts[1024];
 	int interior = LoadTexture("KAMEN-stup.tga");
-	int convexPartsCount = NewtonMeshVoronoiDecomposition (mesh, convexParts, sizeof (convexParts)/sizeof (convexParts[0]), interior);
+	int convexPartsCount = NewtonMeshVoronoiDecomposition (mesh, convexParts, sizeof (convexParts)/sizeof (convexParts[0]), count, sizeof (dVector), &points[0].m_x, interior);
 
 
 
