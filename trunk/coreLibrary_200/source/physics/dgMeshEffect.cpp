@@ -734,6 +734,7 @@ void dgMeshEffect::EnumerateAttributeArray (dgVertexAtribute* const attib)
 	dgPolyhedra::Iterator iter (*this);	
 	for(iter.Begin(); iter; iter ++){
 		dgEdge* const edge = &(*iter);
+		_ASSERTE (index < GetCount());
 		attib[index] = m_attib[dgInt32 (edge->m_userData)];
 		edge->m_userData = dgUnsigned64 (index);
 		index ++;

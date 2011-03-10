@@ -2082,11 +2082,12 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 		}
 
 		dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
+//		convexMesh->CalculateNormals(dgFloat32 (45.0f * 3.1416f / 180.0f));
+
 		dgMeshEffect* leftConvexMesh = NULL;
 		dgMeshEffect* rightConvexMesh = NULL;
 		dgMeshEffect* leftMeshClipper = NULL;
 		dgMeshEffect* rightMeshClipper = NULL;
-
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
@@ -2117,16 +2118,19 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 			delete rightMeshClipper;
 		}
 
+
+convexMesh->CalculateNormals(dgFloat32 (45.0f * 3.1416f / 180.0f));
+
 dgVector xxx (0, 0, 0, 0);
 for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 	xxx += convexMesh->m_points[i];
 }
-xxx = xxx.Scale (1.05f / convexMesh->m_pointCount);
+xxx = xxx.Scale (0.2f / convexMesh->m_pointCount);
 for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 	convexMesh->m_points[i] += xxx;
 }
 for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
-//	convexMesh->m_attib[i].m_vertex += xxx;
+	convexMesh->m_attib[i].m_vertex += xxx;
 }
 
 
