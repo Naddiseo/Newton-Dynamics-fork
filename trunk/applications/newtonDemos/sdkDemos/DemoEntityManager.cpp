@@ -505,7 +505,7 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
 	// set just one directional light
-	GLfloat lightColor[] = { 1.0f, 1.0f, 1.0f, 0.0 };
+	GLfloat lightColor[] = { 0.8f, 0.8f, 0.8f, 0.0 };
 	GLfloat lightAmbientColor[] = { 0.3f, 0.3f, 0.3f, 0.0 };
 	GLfloat lightPosition[] = { 500.0f, 200.0f, 500.0f, 0.0 };
 
