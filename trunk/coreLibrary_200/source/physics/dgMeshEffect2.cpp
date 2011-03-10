@@ -2114,40 +2114,35 @@ if (convexHull.GetCount()) {
 			_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
 		}
 
-//		dgConvexHull3d hull (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
 		dgMeshEffect convexMesh (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
-
-
-//		dgMeshEffect clipper (*clipMesh);
-//		dgMeshEffect* leftMeshSource;
-//		dgMeshEffect* rightMeshSource;
-//		dgMeshEffect* leftMeshClipper;
-//		dgMeshEffect* rightMeshClipper;
-//		dgMeshEffect* result;
-//		clipper.TransformMesh (matrix);
-//		result = NULL;
+		dgMeshEffect* result = NULL;
 		dgMeshEffect* leftConvexMesh = NULL;
 		dgMeshEffect* rightConvexMesh = NULL;
-//		leftMeshClipper = NULL;
-//		rightMeshClipper = NULL;
+		dgMeshEffect* leftMeshClipper = NULL;
+		dgMeshEffect* rightMeshClipper = NULL;
 
 		convexMesh.ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
 		if (leftConvexMesh && rightConvexMesh) {
-/*
-			clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper);
-			if (leftMeshSource && rightMeshSource) {
+			ClipMesh (&convexMesh, &leftMeshClipper, &rightMeshClipper);
+			if (leftMeshClipper && rightMeshClipper) {
+
 				result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
 				result->BeginPolygon();
-
-				result->MergeFaces(leftMeshSource);
+				result->MergeFaces(leftConvexMesh);
 				result->MergeFaces(leftMeshClipper);
-
 				result->EndPolygon();
 			}
-*/
 		}
-/*
+
+		if (leftConvexMesh) {
+			delete leftConvexMesh;
+		}
+
+		if (rightConvexMesh) {
+			delete rightConvexMesh;
+		}
+
 		if (leftMeshClipper) {
 			delete leftMeshClipper;
 		}
@@ -2156,21 +2151,16 @@ if (convexHull.GetCount()) {
 			delete rightMeshClipper;
 		}
 
-		if (leftMeshSource) {
-			delete leftMeshSource;
-		}
 
-		if (rightMeshSource) {
-			delete rightMeshSource;
-		}
-*/
 	}
 
-	delete tree;
 
+
+	
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgControlFP (controlWorld, _MCW_PC);
 #endif
 
+	delete tree;
 	return NULL;
 }

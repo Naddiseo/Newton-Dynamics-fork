@@ -207,8 +207,8 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void AddPoint(const dgFloat32* vertexList, dgInt32 material);
 	void FixCylindricalMapping (dgVertexAtribute* attib) const;
 
-	void MergeFaces (dgMeshEffect* source);
-	void ReverseMergeFaces (dgMeshEffect* source);
+	void MergeFaces (dgMeshEffect* const source);
+	void ReverseMergeFaces (dgMeshEffect* const source);
 	dgVertexAtribute InterpolateEdge (dgEdge* const edge, dgFloat32 param) const;
 	dgVertexAtribute InterpolateVertex (const dgVector& point, dgEdge* const face) const;
 	

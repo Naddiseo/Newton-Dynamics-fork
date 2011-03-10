@@ -2708,7 +2708,7 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& 
 
 
 
-void dgMeshEffect::MergeFaces (dgMeshEffect* source)
+void dgMeshEffect::MergeFaces (dgMeshEffect* const source)
 {
 _ASSERTE (0);
  /*
@@ -2742,7 +2742,7 @@ _ASSERTE (0);
 }
 
 
-void dgMeshEffect::ReverseMergeFaces (dgMeshEffect* source)
+void dgMeshEffect::ReverseMergeFaces (dgMeshEffect* const source)
 {
 _ASSERTE (0);
  /*
