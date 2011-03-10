@@ -2606,6 +2606,8 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& 
 	return attribute;
 
 #else
+
+	//	this should use Googol extended precition floats
 	const dgVector& point = srcPoint;
 
 	dgVertexAtribute attribute;
@@ -2623,7 +2625,6 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& 
 		ptr = ptr->m_next;
 		const dgEdge* edge2 = ptr;
 		do {
-		_ASSERTE (0);
 			const dgVector& q2 = m_points[ptr->m_incidentVertex];
 
 			dgVector p10 (q1 - q0);
@@ -3247,10 +3248,6 @@ void dgMeshEffect::ClipMesh (const dgMatrix& matrix, const dgMeshEffect* clipMes
 
 void dgMeshEffect::AddCGSFace (const dgMeshEffect& reference, dgEdge* const refFace, dgInt32 count, dgMeshTreeCSGFace** const faces, const dgMeshTreeCSGPointsPool& pointsPool)
 {
-_ASSERTE (0);
- /*
-
-	dgInt32 mark;
 	dgInt8 masks[DG_MESH_EFFECT_POINT_SPLITED];
 	dgInt32	index[DG_MESH_EFFECT_POINT_SPLITED];
 	dgVector pool[DG_MESH_EFFECT_POINT_SPLITED];
@@ -3269,14 +3266,11 @@ _ASSERTE (0);
 	dgPolyhedra polygon(GetAllocator());
 	polygon.BeginFace();
 	for (dgInt32 i = 0; i < count; i ++) {
-		dgInt32 indexCount;
 		dgMeshTreeCSGFace* const face = faces[i]; 
-		dgMeshTreeCSGFace::CSGLinearEdge* ptr;
-		dgMeshTreeCSGFace::CSGLinearEdge* edge;
 
-		edge = face->m_face;
-		ptr = face->m_face;
-		indexCount = 0;
+		dgMeshTreeCSGFace::CSGLinearEdge* const edge = face->m_face;
+		dgMeshTreeCSGFace::CSGLinearEdge* ptr = face->m_face;
+		dgInt32 indexCount = 0;
 		do {
 			const dgBigVector& p0 = pointsPool.m_points[ptr->m_index];
 			if (!masks[ptr->m_index]) {
@@ -3297,15 +3291,11 @@ _ASSERTE (0);
 	dgPolyhedra leftOversOut(GetAllocator());
 	polygon.ConvexPartition (&pool[0].m_x, sizeof (dgVector), &leftOversOut);
 
-	mark = polygon.IncLRU();
+	dgInt32 mark = polygon.IncLRU();
 	dgPolyhedra::Iterator iter (polygon);
 	for (iter.Begin(); iter; iter ++){
-		dgInt32 faceIndexCount;
-		dgEdge* face;
-
-
-		faceIndexCount = 0;
-		face = &(*iter);
+		dgInt32 faceIndexCount = 0;
+		dgEdge* const face = &(*iter);
 		if ((face->m_mark != mark) && (face->m_incidentFace > 0)) {
 			dgEdge* ptr;
 			ptr = face;
@@ -3323,7 +3313,6 @@ _ASSERTE (0);
 			//dgTrace (("\n"));
 		}
 	}
-*/
 }
 
 
