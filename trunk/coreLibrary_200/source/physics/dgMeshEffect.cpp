@@ -2993,14 +2993,10 @@ void dgMeshEffect::ClipFace (const dgHugeVector& normal, const dgHugeVector& ori
 
 void dgMeshEffect::CopyCGSFace (const dgMeshEffect& reference, dgEdge* const face)
 {
-_ASSERTE (0);
- /*
-	dgEdge* ptr;
-	dgInt32 count;
-	dgVertexAtribute points[128];
+	dgVertexAtribute points[DG_MESH_EFFECT_POINT_SPLITED];
 
-	count = 0;
-	ptr = face;
+	dgInt32 count = 0;
+	dgEdge* ptr = face;
 	do {
 		points[count] = reference.m_attib[ptr->m_userData];
 		count ++;
@@ -3008,7 +3004,6 @@ _ASSERTE (0);
 	} while (ptr != face);
 
 	AddPolygon(count, &points[0].m_vertex.m_x, sizeof (dgVertexAtribute), points[0].m_material);
-*/
 }
 
 
