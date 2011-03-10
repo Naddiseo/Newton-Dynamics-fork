@@ -599,7 +599,7 @@ static NewtonMesh* CreateConvexVonoroiMesh (NewtonMesh* const mesh, int interior
 static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, PrimitiveType type)
 {
 	// create a collision primitive
-	dVector size (1.0f, 2.0f, 2.0f);
+	dVector size (2.0f, 2.0f, 1.0f);
 	NewtonWorld* const world = scene->GetNewton();
 	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, type, 0);
 

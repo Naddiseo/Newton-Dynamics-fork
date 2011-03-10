@@ -506,7 +506,7 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 
 	// set just one directional light
 	GLfloat lightColor[] = { 1.0f, 1.0f, 1.0f, 0.0 };
-	GLfloat lightAmbientColor[] = { 0.7f, 0.7f, 0.7f, 0.0 };
+	GLfloat lightAmbientColor[] = { 0.0f, 0.0f, 0.0f, 0.0 };
 	GLfloat lightPosition[] = { 500.0f, 200.0f, 500.0f, 0.0 };
 
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);

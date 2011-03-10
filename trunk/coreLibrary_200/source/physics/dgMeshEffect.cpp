@@ -1040,6 +1040,7 @@ void dgMeshEffect::CalculateNormals (dgFloat32 angleInRadians)
 			dgEdge* ptr = edge;
 			do {
 				int index = dgInt32 (ptr->m_userData);
+				_ASSERTE (index < GetCount());
 				dgVertexAtribute& attrib = attribArray[index];
 				faceNormal[index] = normal;
 				attrib.m_normal.m_x = normal.m_x;
@@ -1077,6 +1078,7 @@ void dgMeshEffect::CalculateNormals (dgFloat32 angleInRadians)
 		dgEdge* edge = &(*iter);
 		if (edge->m_incidentFace > 0) {
 			int edgeIndex = dgInt32 (edge->m_userData);
+			_ASSERTE (edgeIndex < GetCount());
 			dgVertexAtribute& attrib = attribArray[edgeIndex];
 
 			dgVector normal (attrib.m_normal.m_x, attrib.m_normal.m_y, attrib.m_normal.m_z, dgFloat32 (0.0f));
