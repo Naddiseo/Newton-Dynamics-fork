@@ -1996,8 +1996,12 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 	}
 
 	dgStack<dgInt32> indexList(count);
+	dgStack<dgInt32> indexMap(count);
 	count = dgVertexListToIndexList(&pool[0].m_x, sizeof (dgVector), sizeof (dgVector), 0, count, &indexList[0], dgFloat32 (1.0e-5f));	
-		
+	for (dgInt32 i = 0; i < count; i ++) {
+		indexMap[indexList[i]] = i;
+	}
+
 
 	dgDelaunayTetrahedralization delaunayTetrahedras (GetAllocator(), &pool[0].m_x, count, sizeof (dgVector), 0.0f);
 	delaunayTetrahedras.RemoveUpperHull ();
@@ -2051,20 +2055,24 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 		int count = 0;
 		dgVector pointArray[128];
 		dgList<dgInt32>& list = nodeNode->GetInfo();
+
+		dgInt32 index = nodeNode->GetKey();
 		for (dgList<dgInt32>::dgListNode* ptr = list.GetFirst(); ptr; ptr = ptr->GetNext()) {
 			dgInt32 i = ptr->GetInfo();
-			dgConvexHull4dTetraherum* const tetrahedrum = &tetradrumNode[i]->GetInfo();
-			for (dgInt32 j = 0; j < 4; j ++) {
-				if (!tetrahedrum->m_faces[j].m_twin) {
-					dgBigVector p0 (delaunayTetrahedras.GetVertex(tetrahedrum->m_faces[j].m_index[0]));
-					dgBigVector p1 (delaunayTetrahedras.GetVertex(tetrahedrum->m_faces[j].m_index[1]));
-					dgBigVector p2 (delaunayTetrahedras.GetVertex(tetrahedrum->m_faces[j].m_index[2]));
-					dgBigVector n ((p1 - p0) * (p2 - p0));
-					n = n.Scale (dgRsqrt (n % n));
-					dgVector normal (dgFloat32 (n.m_x), dgFloat32 (n.m_y), dgFloat32  (n.m_z), dgFloat32 (0.0f));
-					pointArray[count] = voronoiPoints[i] + normal.Scale (perimeterConvexBound);
-					count ++;
-					_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
+			if (indexMap[index] < m_pointCount) {
+				dgConvexHull4dTetraherum* const tetrahedrum = &tetradrumNode[i]->GetInfo();
+				for (dgInt32 j = 0; j < 4; j ++) {
+					if (!tetrahedrum->m_faces[j].m_twin) {
+						dgBigVector p0 (delaunayTetrahedras.GetVertex(tetrahedrum->m_faces[j].m_index[0]));
+						dgBigVector p1 (delaunayTetrahedras.GetVertex(tetrahedrum->m_faces[j].m_index[1]));
+						dgBigVector p2 (delaunayTetrahedras.GetVertex(tetrahedrum->m_faces[j].m_index[2]));
+						dgBigVector n ((p1 - p0) * (p2 - p0));
+						n = n.Scale (dgRsqrt (n % n));
+						dgVector normal (dgFloat32 (n.m_x), dgFloat32 (n.m_y), dgFloat32  (n.m_z), dgFloat32 (0.0f));
+						pointArray[count] = voronoiPoints[i] + normal.Scale (perimeterConvexBound);
+						count ++;
+						_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
+					}
 				}
 			}
 
@@ -2073,13 +2081,12 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 			_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
 		}
 
-		//dgMeshEffect convexMesh (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
-		//dgMeshEffect* result = NULL;
 		dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
 		dgMeshEffect* leftConvexMesh = NULL;
 		dgMeshEffect* rightConvexMesh = NULL;
 		dgMeshEffect* leftMeshClipper = NULL;
 		dgMeshEffect* rightMeshClipper = NULL;
+
 
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
 		if (leftConvexMesh && rightConvexMesh) {
@@ -2110,6 +2117,19 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 		if (rightMeshClipper) {
 			delete rightMeshClipper;
 		}
+
+dgVector xxx (0, 0, 0, 0);
+for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
+	xxx += convexMesh->m_points[i];
+}
+xxx = xxx.Scale (0.2f / convexMesh->m_pointCount);
+for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
+	convexMesh->m_points[i] += xxx;
+}
+for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
+	convexMesh->m_attib[i].m_vertex += xxx;
+}
+
 
 		for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 			convexMesh->m_points[i].m_w = layer;

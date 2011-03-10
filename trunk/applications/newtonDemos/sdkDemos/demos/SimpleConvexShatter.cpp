@@ -594,6 +594,10 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, Primitiv
 		dFloat x = RandomVariable(size.m_x);
 		dFloat y = RandomVariable(size.m_y);
 		dFloat z = RandomVariable(size.m_z);
+//x = 0;
+//y = 0;
+//z = 0;
+
 		if ((x <= size.m_x) && (x >= -size.m_x) && (y <= size.m_y) && (y >= -size.m_y) && (z <= size.m_z) && (z >= -size.m_z)){
 			points[count] = dVector (x, y, z);
 			count ++;
@@ -604,7 +608,12 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, Primitiv
 	int interior = LoadTexture("KAMEN-stup.tga");
 	NewtonMesh* const convexParts = NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interior);
 
-
+dScene xxxx(world);
+dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
+dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
+dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(meshNode);
+modelMesh->ReplaceMesh (convexParts);
+xxxx.Serialize("xxx.xml");
 
 
 	// make sure the assets are released before leaving the function
