@@ -1976,16 +1976,20 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 		dgFloat32 z = dgFloor (pointCloud[i * stride + 2] * quantizeFactor) * invQuantizeFactor;
 		dgVector p (x, y, z, dgFloat32 (0.0f));
 		dgHugeVector p1 (p);
-		dgMeshEffectSolidTree* root = tree;
-		do {
-			dgGoogol test (root->m_normal % (p1 - root->m_point));
-			if (test.GetAproximateValue() > dgFloat32 (0.0f)) {
-				break;
+		
+		bool pointSide = true;
+		for (dgMeshEffectSolidTree* ptr = tree; ptr; ) {
+			dgGoogol test (ptr->m_normal % (p1 - ptr->m_point));
+			if (test.GetAproximateValue() <= dgFloat32 (0.0f)) {
+				pointSide = true;
+				ptr = ptr->m_back;
+			} else {
+				pointSide = false;
+				ptr = ptr->m_front;
 			}
-			root = root->m_back;
-		} while (root);
+		}
 
-		if (!root) {
+		if (pointSide) {
 			pool[count] = p;
 			count ++;
 		}
@@ -2082,7 +2086,6 @@ if (convexHull.GetCount()) {
 		index ++;
 	}
 
-
 	dgTree<dgList<dgInt32>, dgInt32>::Iterator iter (delanayNodes);
 	for (iter.Begin(); iter; iter ++) {
 		dgTree<dgList<dgInt32>, dgInt32>::dgTreeNode* const nodeNode = iter.GetNode();
@@ -2110,14 +2113,57 @@ if (convexHull.GetCount()) {
 			count ++;
 			_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
 		}
-		dgConvexHull3d hull (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
+
+		//dgMeshEffect convexMesh (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
+		//dgMeshEffect* result = NULL;
+		dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
+		dgMeshEffect* leftConvexMesh = NULL;
+		dgMeshEffect* rightConvexMesh = NULL;
+		dgMeshEffect* leftMeshClipper = NULL;
+		dgMeshEffect* rightMeshClipper = NULL;
+
+		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
+		if (leftConvexMesh && rightConvexMesh) {
+//			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
+//			if (leftMeshClipper && rightMeshClipper) {
+//				convexMesh->Release();
+//				convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+
+//				convexMesh->BeginPolygon();
+//				convexMesh->MergeFaces(leftConvexMesh);
+//				convexMesh->MergeFaces(leftMeshClipper);
+//				convexMesh->EndPolygon();
+//			}
+		}
+
+		if (leftConvexMesh) {
+			delete leftConvexMesh;
+		}
+
+		if (rightConvexMesh) {
+			delete rightConvexMesh;
+		}
+
+		if (leftMeshClipper) {
+			delete leftMeshClipper;
+		}
+
+		if (rightMeshClipper) {
+			delete rightMeshClipper;
+		}
+
+
+		convexMesh->Release();
+
 	}
 
-	delete tree;
 
+
+	
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgControlFP (controlWorld, _MCW_PC);
 #endif
 
+	delete tree;
 	return NULL;
 }
