@@ -2904,72 +2904,89 @@ void dgMeshEffect::ClipFace (const dgHugeVector& normal, const dgHugeVector& ori
 */
 #endif
 			
-		dgInt32 count = 0;
-		dgInt32 side[DG_MESH_EFFECT_POINT_SPLITED];
-		dgInt32 faceIndex[DG_MESH_EFFECT_POINT_SPLITED];
-		dgInt32 nextIndex[DG_MESH_EFFECT_POINT_SPLITED];
-		const dgMeshTreeCSGFace::CSGLinearEdge* ptr = src->m_face;
-		do {
-			faceIndex[count] = ptr->m_index;
-			nextIndex[count] = count + 1;
-			count ++;
-			ptr = ptr->m_next;
-		} while (ptr != src->m_face);
-		nextIndex[count - 1] = 0;
+	dgInt32 count = 0;
+	dgInt32 side[DG_MESH_EFFECT_POINT_SPLITED];
+	dgInt32 faceIndex[DG_MESH_EFFECT_POINT_SPLITED];
+	dgInt32 nextIndex[DG_MESH_EFFECT_POINT_SPLITED];
+	const dgMeshTreeCSGFace::CSGLinearEdge* ptr = src->m_face;
+	do {
+		faceIndex[count] = ptr->m_index;
+		nextIndex[count] = count + 1;
+		count ++;
+		ptr = ptr->m_next;
+	} while (ptr != src->m_face);
+	nextIndex[count - 1] = 0;
 
-		dgInt32 newIndex = count;
-		dgInt32 i0 = count - 1;
-		
-		dgInt32 indexP0 = faceIndex[i0];
-		dgGoogol test0 = normal % (dgHugeVector (pointPool.m_points[indexP0]) - origin);
-		for (dgInt32 i = 0; i < count; i ++) {
-			dgInt32 indexP1 = faceIndex[i];
-			dgGoogol test1 = normal % (dgHugeVector (pointPool.m_points[indexP1]) - origin);
-			if (test1.GetAproximateValue() < dgFloat32 (0.0f)) {
-				side[i] = -1;
-			} else if (test1.GetAproximateValue() > dgFloat32 (0.0f)) {
-				side[i] = 1;
-			} else {
-				side[i] = 0;
-			}
-
-			if ((test0.GetAproximateValue() * test1.GetAproximateValue() < dgFloat32 (0.0f))) {
-				dgGoogol den;
-				dgBigVector dp (pointPool.m_points[indexP1] - pointPool.m_points[indexP0]);
-				den = normal % dgHugeVector (dp);
-				dgFloat64 invden = -test0.GetAproximateValue() / den.GetAproximateValue();
-				dgInt32 index = pointPool.AddPoint(pointPool.m_points[indexP0] + dp.Scale (invden));
-				
-				_ASSERTE (side[i] != 0);
-				side[newIndex] = 0;
-				faceIndex[newIndex] = index;
-				nextIndex[newIndex] = i;
-				nextIndex[i0] = newIndex;
-				newIndex ++;
-			}
-			indexP0 = indexP1;
-			test0 = test1; 
-			i0 = i;
+	dgInt32 newIndex = count;
+	dgInt32 i0 = count - 1;
+	
+	dgInt32 indexP0 = faceIndex[i0];
+	dgGoogol test0 = normal % (dgHugeVector (pointPool.m_points[indexP0]) - origin);
+	for (dgInt32 i = 0; i < count; i ++) {
+		dgInt32 indexP1 = faceIndex[i];
+		dgGoogol test1 = normal % (dgHugeVector (pointPool.m_points[indexP1]) - origin);
+		if (test1.GetAproximateValue() < dgFloat32 (0.0f)) {
+			side[i] = -1;
+		} else if (test1.GetAproximateValue() > dgFloat32 (0.0f)) {
+			side[i] = 1;
+		} else {
+			side[i] = 0;
 		}
 
-//		const dgMeshTreeCSGFace::CSGLinearEdge* prev = src->m_face; 
-/*		
-//		dgInt32 index = 0;
-		dgInt32 indexP0 = src->m_face->m_index;
-		dgGoogol test0 = normal % (dgHugeVector (pointPool.m_points[indexP0]) - origin);
+		if ((test0.GetAproximateValue() * test1.GetAproximateValue() < dgFloat32 (0.0f))) {
+			dgGoogol den;
+			dgBigVector dp (pointPool.m_points[indexP1] - pointPool.m_points[indexP0]);
+			den = normal % dgHugeVector (dp);
+			dgFloat64 invden = -test0.GetAproximateValue() / den.GetAproximateValue();
+			dgInt32 index = pointPool.AddPoint(pointPool.m_points[indexP0] + dp.Scale (invden));
+			
+			_ASSERTE (side[i] != 0);
+			side[newIndex] = 0;
+			faceIndex[newIndex] = index;
+			nextIndex[newIndex] = i;
+			nextIndex[i0] = newIndex;
+			newIndex ++;
+		}
+		indexP0 = indexP1;
+		test0 = test1; 
+		i0 = i;
+	}
 
-		const dgMeshTreeCSGFace::CSGLinearEdge* ptr = src->m_face->m_next;
-		do {
-			dgInt32 indexP1 = ptr->m_index;
-			dgGoogol test1 = normal % (dgHugeVector (pointPool.m_points[indexP1]) - origin);
-			if ((test0.GetAproximateValue() * test1.GetAproximateValue() < dgFloat32 (0.0f))) {
-				_ASSERTE (0);
+	dgInt32 hasBackface = 0;
+	dgInt32 hasFrontface = 0;
+	for (dgInt32 i = 0; i < newIndex; i ++) {
+		if (side[i] < 0) {
+			hasBackface = 1;
+		}
+		if (side[i] > 0) {
+			hasFrontface = 1;
+		}
+	}
+	if (hasBackface && hasFrontface) {
+		dgMeshTreeCSGFace* meshFace = new (GetAllocator()) dgMeshTreeCSGFace(GetAllocator());
+		for (dgInt32 i = 0; i < newIndex; i ++) {
+			if (side[i] <= 0) {
+				meshFace->AddPoint (faceIndex[i]);
 			}
+		} 
+		*left = meshFace; 
 
-			test0 = test1;
-			ptr = ptr->m_next;
-		} while (ptr != src->m_face->m_next);
-*/
+		meshFace = new (GetAllocator()) dgMeshTreeCSGFace(GetAllocator());
+		for (dgInt32 i = 0; i < newIndex; i ++) {
+			if (side[i] >= 0) {
+				meshFace->AddPoint (faceIndex[i]);
+			}
+		} 
+		*right = meshFace; 
+	} else if (hasBackface){
+		*left = src; 
+		*right = NULL;
+		src->AddRef();
+	} else {
+		*left = NULL; 
+		*right = src;
+		src->AddRef();
+	}
 }
 
 
