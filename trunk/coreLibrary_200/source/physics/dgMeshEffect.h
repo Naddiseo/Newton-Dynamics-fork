@@ -316,16 +316,6 @@ class dgMeshEffectSolidTree
 
 	void BuildPlane (const dgMeshEffect& mesh, dgEdge* const face, dgHugeVector& normal, dgHugeVector& point) const
 	{
-
-//	dgBigPlane MakePlane (const dgMeshEffect& mesh, dgEdge* face) const
-//	{
-//		dgBigVector origin (mesh.m_points[face->m_incidentVertex]);
-//		dgBigVector normal (mesh.FaceNormal (face, &mesh.m_points[0][0], sizeof (dgVector)));
-//
-//		normal = normal.Scale (1.0f / sqrt (normal % normal));
-//		return dgBigPlane (normal, - (normal % origin));
-//	}
-
 		point = dgHugeVector(dgBigVector (mesh.m_points[face->m_incidentVertex]));
 		dgEdge* edge = face;
 		//dgHugeVector p0 (dgBigVector (&pool[edge->m_incidentVertex * stride]));
@@ -336,7 +326,7 @@ class dgMeshEffectSolidTree
 		dgHugeVector p1 (dgBigVector (mesh.m_points[edge->m_incidentVertex]));
 		dgHugeVector e1 (p1 - p0);
 		for (edge = edge->m_next; edge != face; edge = edge->m_next) {
-			//			dgBigVector p2 (&pool[edge->m_incidentVertex * stride]);
+			//dgBigVector p2 (&pool[edge->m_incidentVertex * stride]);
 			dgHugeVector p2 (dgBigVector (mesh.m_points[edge->m_incidentVertex]));
 			dgHugeVector e2 (p2 - p0);
 			normal += e1 * e2;

@@ -2595,22 +2595,15 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& 
 
 void dgMeshEffect::MergeFaces (dgMeshEffect* const source)
 {
-_ASSERTE (0);
- /*
-	dgInt32 mark;
-
-	mark = source->IncLRU();
+	dgInt32 mark = source->IncLRU();
 	dgPolyhedra::Iterator iter (*source);
 	for(iter.Begin(); iter; iter ++){
-		dgEdge* edge;
-		edge = &(*iter);
+		dgEdge* const edge = &(*iter);
 		if ((edge->m_incidentFace > 0) && (edge->m_mark < mark)) {
-			dgInt32 count;
-			dgEdge * ptr;
-			dgVertexAtribute face[128];
+			dgVertexAtribute face[DG_MESH_EFFECT_POINT_SPLITED];
 
-			count = 0;
-			ptr = edge;
+			dgInt32 count = 0;
+			dgEdge* ptr = edge;
 			do {
 				ptr->m_mark = mark;
 				face[count] = source->m_attib[ptr->m_userData];
@@ -2623,7 +2616,6 @@ _ASSERTE (0);
 			AddPolygon(count, &face[0].m_vertex.m_x, sizeof (dgVertexAtribute), face[0].m_material);
 		}
 	}
-*/
 }
 
 

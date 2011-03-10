@@ -1999,61 +1999,15 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 	count = dgVertexListToIndexList(&pool[0].m_x, sizeof (dgVector), sizeof (dgVector), 0, count, &indexList[0], dgFloat32 (1.0e-5f));	
 		
 
-
 	dgDelaunayTetrahedralization delaunayTetrahedras (GetAllocator(), &pool[0].m_x, count, sizeof (dgVector), 0.0f);
 	delaunayTetrahedras.RemoveUpperHull ();
 
+	dgVector minBox;
+	dgVector maxBox;
+	CalculateAABB (minBox, maxBox);
+	maxBox -= minBox;
+	dgFloat32 perimeterConvexBound = dgFloat32 (16.0f) * dgSqrt (maxBox % maxBox);
 
-
-
-/*
-dgCollision* compound = NULL;
-Tetrahedralization convexHull (tmpMesh);
-if (convexHull.GetCount()) {
-
-	dgInt32 count = 0;
-	dgStack<dgCollision*> collisionArray(convexHull.GetCount());
-
-	for (dgConvexHull4d::dgListNode* node = convexHull.GetFirst(); node; node = node->GetNext()) {
-		dgVector vertexPool[4];
-		dgConvexHull4dTetraherum* const tetra = &node->GetInfo();
-		const dgConvexHull4dTetraherum::dgTetrahedrumFace& face0 = tetra->m_faces[0];
-
-		const dgBigVector& p0 (convexHull.GetVertex(face0.m_index[0]));
-		const dgBigVector& p1 (convexHull.GetVertex(face0.m_index[1]));
-		const dgBigVector& p2 (convexHull.GetVertex(face0.m_index[2]));
-		const dgBigVector& p3 (convexHull.GetVertex(face0.m_otherVertex));
-
-		vertexPool[0] = dgVector (dgFloat32 (p0.m_x), dgFloat32 (p0.m_y), dgFloat32 (p0.m_z), dgFloat32 (0.0f));
-		vertexPool[1] = dgVector (dgFloat32 (p1.m_x), dgFloat32 (p1.m_y), dgFloat32 (p1.m_z), dgFloat32 (0.0f));
-		vertexPool[2] = dgVector (dgFloat32 (p2.m_x), dgFloat32 (p2.m_y), dgFloat32 (p2.m_z), dgFloat32 (0.0f));
-		vertexPool[3] = dgVector (dgFloat32 (p3.m_x), dgFloat32 (p3.m_y), dgFloat32 (p3.m_z), dgFloat32 (0.0f));
-
-		dgVector origin (vertexPool[0] + vertexPool[1] + vertexPool[2] + vertexPool[3]);
-		origin = origin.Scale (0.25f);
-		dgFloat32 xxx = 0.9f;
-		vertexPool[0] = (vertexPool[0] - origin).Scale (xxx) + origin;
-		vertexPool[1] = (vertexPool[1] - origin).Scale (xxx) + origin;
-		vertexPool[2] = (vertexPool[2] - origin).Scale (xxx) + origin;
-		vertexPool[3] = (vertexPool[3] - origin).Scale (xxx) + origin;
-
-		dgCollision* collision = world->CreateConvexHull(4, &vertexPool[0].m_x, sizeof (dgVector), dgFloat32 (0.0f), childrenID);
-		if (collision) {
-			collisionArray[count] = collision;
-			count ++;
-		}
-	}
-
-	compound = world->CreateCollisionCompound(count, &collisionArray[0]);
-	for (dgInt32 i = 0; i < count; i ++) {
-		world->ReleaseCollision(collisionArray[i]);
-	}
-}
-*/
-
-
-
-	dgFloat32 lengPadding (500.0f);
 	dgInt32 tetraCount = delaunayTetrahedras.GetCount();
 	dgStack<dgVector> voronoiPoints(tetraCount);
 	dgStack<dgDelaunayTetrahedralization::dgListNode*> tetradrumNode(tetraCount);
@@ -2086,6 +2040,11 @@ if (convexHull.GetCount()) {
 		index ++;
 	}
 
+
+	dgMeshEffect* const voronoiPartion = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+	voronoiPartion->BeginPolygon();
+	dgFloat32 layer = dgFloat32 (0.0f);
+
 	dgTree<dgList<dgInt32>, dgInt32>::Iterator iter (delanayNodes);
 	for (iter.Begin(); iter; iter ++) {
 		dgTree<dgList<dgInt32>, dgInt32>::dgTreeNode* const nodeNode = iter.GetNode();
@@ -2103,7 +2062,7 @@ if (convexHull.GetCount()) {
 					dgBigVector n ((p1 - p0) * (p2 - p0));
 					n = n.Scale (dgRsqrt (n % n));
 					dgVector normal (dgFloat32 (n.m_x), dgFloat32 (n.m_y), dgFloat32  (n.m_z), dgFloat32 (0.0f));
-					pointArray[count] = voronoiPoints[i] + normal.Scale (lengPadding);
+					pointArray[count] = voronoiPoints[i] + normal.Scale (perimeterConvexBound);
 					count ++;
 					_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
 				}
@@ -2126,13 +2085,13 @@ if (convexHull.GetCount()) {
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
 			if (leftMeshClipper && rightMeshClipper) {
-//				convexMesh->Release();
-//				convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+				convexMesh->Release();
+				convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
-//				convexMesh->BeginPolygon();
-//				convexMesh->MergeFaces(leftConvexMesh);
-//				convexMesh->MergeFaces(leftMeshClipper);
-//				convexMesh->EndPolygon();
+				convexMesh->BeginPolygon();
+				convexMesh->MergeFaces(leftConvexMesh);
+				convexMesh->MergeFaces(leftMeshClipper);
+				convexMesh->EndPolygon();
 			}
 		}
 
@@ -2152,12 +2111,19 @@ if (convexHull.GetCount()) {
 			delete rightMeshClipper;
 		}
 
+		for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
+			convexMesh->m_points[i].m_w = layer;
+		}
+		for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
+			convexMesh->m_attib[i].m_vertex.m_w = layer;
+		}
+		voronoiPartion->MergeFaces(convexMesh);
+		layer += dgFloat32 (1.0f);
 
 		convexMesh->Release();
-
 	}
 
-
+	voronoiPartion->EndPolygon();
 
 	
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
@@ -2165,5 +2131,5 @@ if (convexHull.GetCount()) {
 #endif
 
 	delete tree;
-	return NULL;
+	return voronoiPartion;
 }
