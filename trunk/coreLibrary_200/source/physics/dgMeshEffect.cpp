@@ -3364,9 +3364,11 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	leftMesh->BeginPolygon();
 	rightMesh->BeginPolygon(); 
 
+
+int static xxx;
+xxx ++;
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
-
 	for (iter.Begin(); iter; iter ++){
 		dgEdge* const face = &(*iter);
 
@@ -3399,6 +3401,9 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 				faceOnStack[0] = meshFace;
 				meshFace->AddRef();
 
+xxx ++;
+if (xxx == 252)
+xxx *=1;
 				while (stack) {
 
 					//dgMeshEffectSolidTree* root;

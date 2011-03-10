@@ -2114,25 +2114,26 @@ if (convexHull.GetCount()) {
 			_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
 		}
 
-		dgMeshEffect convexMesh (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
-		dgMeshEffect* result = NULL;
+		//dgMeshEffect convexMesh (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
+		//dgMeshEffect* result = NULL;
+		dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
 		dgMeshEffect* leftConvexMesh = NULL;
 		dgMeshEffect* rightConvexMesh = NULL;
 		dgMeshEffect* leftMeshClipper = NULL;
 		dgMeshEffect* rightMeshClipper = NULL;
 
-		convexMesh.ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
+		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
 		if (leftConvexMesh && rightConvexMesh) {
-			ClipMesh (&convexMesh, &leftMeshClipper, &rightMeshClipper);
-			if (leftMeshClipper && rightMeshClipper) {
+//			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
+//			if (leftMeshClipper && rightMeshClipper) {
+//				convexMesh->Release();
+//				convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
-				result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
-
-				result->BeginPolygon();
-				result->MergeFaces(leftConvexMesh);
-				result->MergeFaces(leftMeshClipper);
-				result->EndPolygon();
-			}
+//				convexMesh->BeginPolygon();
+//				convexMesh->MergeFaces(leftConvexMesh);
+//				convexMesh->MergeFaces(leftMeshClipper);
+//				convexMesh->EndPolygon();
+//			}
 		}
 
 		if (leftConvexMesh) {
@@ -2151,6 +2152,8 @@ if (convexHull.GetCount()) {
 			delete rightMeshClipper;
 		}
 
+
+		convexMesh->Release();
 
 	}
 
