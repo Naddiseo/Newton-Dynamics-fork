@@ -2607,7 +2607,7 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& 
 
 #else
 
-	//	this should use Googol extended precition floats
+	//	this should use Googol extended precision floats
 	const dgVector& point = srcPoint;
 
 	dgVertexAtribute attribute;
@@ -2781,130 +2781,6 @@ _ASSERTE (0);
 
 void dgMeshEffect::ClipFace (const dgHugeVector& normal, const dgHugeVector& origin, dgMeshTreeCSGFace* const src, dgMeshTreeCSGFace** left, dgMeshTreeCSGFace** const right, dgMeshTreeCSGPointsPool& pointPool) const
 {
-#if 0
-//	dgInt32 indexP0;
-//	dgFloat64 test0;
-//	dgInt32 backFaceCount;
-//	dgInt32 frontFaceCount;
-//	dgMeshTreeCSGFace::CSGLinearEdge* ptr;
-//	dgMeshTreeCSGFace::CSGLinearEdge* last;
-	dgInt32 backFace[DG_MESH_EFFECT_POINT_SPLITED];
-//	dgInt32 frontFace[DG_MESH_EFFECT_POINT_SPLITED];
-
-	dgInt32 backFaceCount = 0;
-	dgInt32 frontFaceCount = 0;
-
-	dgInt32 indexP0 = src->m_face->m_index;
-	dgMeshTreeCSGFace::CSGLinearEdge* ptr = src->m_face->m_next; 
-	dgMeshTreeCSGFace::CSGLinearEdge* last = ptr;
-
-//	test0 = plane.Evalue(pointPool.m_points[indexP0]);
-	dgGoogol test0 = normal % (dgHugeVector (pointPool.m_points[indexP0]) - origin);
-	do {
-//		dgInt32 index;
-//		dgInt32 indexP1;
-//		dgFloat64 test1;
-
-		dgInt32 index = 0;
-		dgInt32 indexP1 = ptr->m_index;
-//		test1 = plane.Evalue(pointPool.m_points[indexP1]);
-		dgGoogol test1 = normal % (dgHugeVector (pointPool.m_points[indexP1]) - origin);
-
-		if (test0.GetAproximateValue() >= dgFloat64 (0.0f)) {
-
-			frontFace[frontFaceCount] = indexP0;
-			frontFaceCount += 1;
-			_ASSERTE (frontFaceCount < DG_MESH_EFFECT_POINT_SPLITED);
-			if (test0 > dgFloat64 (0.0f) && (test1 < dgFloat64 (0.0f))) {
-/*
-				dgFloat64 den;
-
-				dgBigVector dp (pointPool.m_points[indexP1] - pointPool.m_points[indexP0]);
-				den = plane % dp;
-				den = -test0 / den;
-
-				index = pointPool.AddPoint(pointPool.m_points[indexP0] + dp.Scale (den));
-				frontFace[frontFaceCount] = index;
-
-				frontFaceCount ++;
-				_ASSERTE (frontFaceCount < DG_MESH_EFFECT_POINT_SPLITED);
-			}
-*/
-		} else if (test1.GetAproximateValue() > dgFloat64 (0.0f)) {
-/*
-			dgFloat64 den;
-
-			dgBigVector dp (pointPool.m_points[indexP1] - pointPool.m_points[indexP0]);
-			den = plane % dp;
-			den = -test0 / den;
-
-			index = pointPool.AddPoint(pointPool.m_points[indexP0] + dp.Scale (den));
-			frontFace[frontFaceCount] = index;
-
-			frontFaceCount ++;
-			_ASSERTE (frontFaceCount < DG_MESH_EFFECT_POINT_SPLITED);
-*/
-		}
-
-
-		if (test0.GetAproximateValue() <= dgFloat64 (0.0f)) {
-
-			backFace[backFaceCount] = indexP0;;
-			backFaceCount ++;
-			_ASSERTE (backFaceCount < DG_MESH_EFFECT_POINT_SPLITED);
-			if (index) {
-				backFace[backFaceCount] = index;
-				backFaceCount += 1;
-				_ASSERTE (backFaceCount < DG_MESH_EFFECT_POINT_SPLITED);
-			}
-		} else if (index) {
-			backFace[backFaceCount] = index;
-			backFaceCount += 1;
-			_ASSERTE (backFaceCount < DG_MESH_EFFECT_POINT_SPLITED);
-		}
-
-		test0 = test1;
-		indexP0 = indexP1;
-
-		ptr = ptr->m_next;
-	} while (ptr != last);
-
-//	_ASSERTE (!backFaceCount || (backFaceCount >= 3));
-//	_ASSERTE (!frontFaceCount || (frontFaceCount >= 3));
-/*
-	if ((backFaceCount >= 3) && (frontFaceCount >= 3)) {
-		dgMeshTreeCSGFace *meshFace;
-
-		_ASSERTE (backFaceCount >= 3);
-		_ASSERTE (frontFaceCount >= 3);
-
-		meshFace = new (GetAllocator()) dgMeshTreeCSGFace(GetAllocator());
-		for (dgInt32 i = 0; i < backFaceCount; i ++) {
-			meshFace->AddPoint (backFace[i]);
-		} 
-		*left = meshFace; 
-
-		meshFace = new (GetAllocator()) dgMeshTreeCSGFace(GetAllocator());
-		for (dgInt32 i = 0; i < frontFaceCount; i ++) {
-			meshFace->AddPoint (frontFace[i]);
-		} 
-		*right = meshFace; 
-
-	} else {
-		if (backFaceCount >= 3) {
-			*left = src; 
-			*right = NULL;
-			src->AddRef();
-		} else {
-			_ASSERTE (frontFaceCount >= 3);
-			*left = NULL; 
-			*right = src;
-			src->AddRef();
-		}
-	}
-*/
-#endif
-			
 	dgInt32 count = 0;
 	dgInt32 side[DG_MESH_EFFECT_POINT_SPLITED];
 	dgInt32 faceIndex[DG_MESH_EFFECT_POINT_SPLITED];
@@ -2965,18 +2841,22 @@ void dgMeshEffect::ClipFace (const dgHugeVector& normal, const dgHugeVector& ori
 	}
 	if (hasBackface && hasFrontface) {
 		dgMeshTreeCSGFace* meshFace = new (GetAllocator()) dgMeshTreeCSGFace(GetAllocator());
+		dgInt32 index = 0;
 		for (dgInt32 i = 0; i < newIndex; i ++) {
-			if (side[i] <= 0) {
-				meshFace->AddPoint (faceIndex[i]);
+			if (side[index] <= 0) {
+				meshFace->AddPoint (faceIndex[index]);
 			}
+			index = nextIndex[index];
 		} 
 		*left = meshFace; 
 
 		meshFace = new (GetAllocator()) dgMeshTreeCSGFace(GetAllocator());
+		index = 0;
 		for (dgInt32 i = 0; i < newIndex; i ++) {
-			if (side[i] >= 0) {
-				meshFace->AddPoint (faceIndex[i]);
+			if (side[index] >= 0) {
+				meshFace->AddPoint (faceIndex[index]);
 			}
+			index = nextIndex[index];
 		} 
 		*right = meshFace; 
 	} else if (hasBackface){
@@ -3402,7 +3282,7 @@ xxx ++;
 				meshFace->AddRef();
 
 xxx ++;
-if (xxx == 252)
+if (xxx == 315)
 xxx *=1;
 				while (stack) {
 
