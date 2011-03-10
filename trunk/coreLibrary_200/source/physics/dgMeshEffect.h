@@ -200,12 +200,12 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void Init (bool preAllocaBuffers);
 	dgVector GetOrigin ()const;
 	dgInt32 CalculateMaxAttributes () const;
-	void EnumerateAttributeArray (dgVertexAtribute* attib);
-	void ApplyAttributeArray (dgVertexAtribute* attib);
+	void EnumerateAttributeArray (dgVertexAtribute* const attib);
+	void ApplyAttributeArray (dgVertexAtribute* const attib);
 	void AddVertex(const dgVector& vertex);
 	void AddAtribute (const dgVertexAtribute& attib);
 	void AddPoint(const dgFloat32* vertexList, dgInt32 material);
-	void FixCylindricalMapping (dgVertexAtribute* attib) const;
+	void FixCylindricalMapping (dgVertexAtribute* const attib) const;
 
 	void MergeFaces (dgMeshEffect* const source);
 	void ReverseMergeFaces (dgMeshEffect* const source);

@@ -728,7 +728,7 @@ void dgMeshEffect::CalculateAABB (dgVector& minBox, dgVector& maxBox) const
 	maxBox = maxP;
 }
 
-void dgMeshEffect::EnumerateAttributeArray (dgVertexAtribute* attib)
+void dgMeshEffect::EnumerateAttributeArray (dgVertexAtribute* const attib)
 {
 	dgInt32 index = 0;
 	dgPolyhedra::Iterator iter (*this);	
@@ -740,7 +740,7 @@ void dgMeshEffect::EnumerateAttributeArray (dgVertexAtribute* attib)
 	}
 }
 
-void dgMeshEffect::ApplyAttributeArray (dgVertexAtribute* attib)
+void dgMeshEffect::ApplyAttributeArray (dgVertexAtribute* const attib)
 {
 	dgStack<dgInt32>indexMap (GetCount());
 
