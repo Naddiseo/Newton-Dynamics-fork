@@ -54,7 +54,7 @@ class dgMeshTreeCSGPointsPool
 	{
 		m_points[m_count] = point;
 		m_count ++;
-		_ASSERTE (m_count < DG_MESH_EFFECT_POINT_SPLITED);
+		_ASSERTE (m_count < sizeof (m_points)/sizeof (m_points[0]));
 		return (m_count - 1);
 	}
 
@@ -2492,46 +2492,26 @@ dgEdge* dgMeshEffect::InsertEdgeVertex (dgEdge* const edge, dgFloat32 param)
 
 dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& srcPoint, dgEdge* const face) const
 {
+	//this should use Googol extended precision floats, because some face coming from Voronoi decomposition and booleans
+	//clipping has extreme aspect ratios, for now just use float64
+	const dgBigVector point (srcPoint);
 
-#if 0
-	dgFloat32 tol;
-	dgEdge* edge0;
-	dgEdge* edge1;
-	dgEdge* edge2;
-	dgEdge* ptr;
 	dgVertexAtribute attribute;
-
-	dgBigVector point (srcPoint);
-	attribute.m_vertex.m_x = dgFloat32 (0.0f);
-
-	tol = dgFloat32 (1.0e-4f);
+	memset (&attribute, 0, sizeof (attribute));
+	dgFloat64 tol = dgFloat32 (1.0e-4f);
 	for (dgInt32 i = 0; i < 4; i ++) {
-		ptr = face;
-		edge0 = ptr;
+		dgEdge* ptr = face;
+		dgEdge* const edge0 = ptr;
 		dgBigVector q0 (m_points[ptr->m_incidentVertex]);
 
 		ptr = ptr->m_next;
-		edge1 = ptr;
+		const dgEdge* edge1 = ptr;
 		dgBigVector q1 (m_points[ptr->m_incidentVertex]);
 
 		ptr = ptr->m_next;
-		edge2 = ptr;
+		const dgEdge* edge2 = ptr;
 		do {
-			dgFloat64 va;
-			dgFloat64 vb;
-			dgFloat64 vc;
-			dgFloat64 den;
-			dgFloat64 alpha0;
-			dgFloat64 alpha1;
-			dgFloat64 alpha2;
-			dgFloat64 alpha3;
-			dgFloat64 alpha4;
-			dgFloat64 alpha5;
-			dgFloat64 alpha6;
-			dgFloat64 minError;
-			dgFloat64 maxError;
-
-			dgBigVector q2 (m_points[ptr->m_incidentVertex]);
+			const dgBigVector q2 (m_points[ptr->m_incidentVertex]);
 
 			dgBigVector p10 (q1 - q0);
 			dgBigVector p20 (q2 - q0);
@@ -2539,121 +2519,27 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& 
 			dgBigVector p_p1 (point - q1);
 			dgBigVector p_p2 (point - q2);
 
-			alpha1 = p10 % p_p0;
-			alpha2 = p20 % p_p0;
-			alpha3 = p10 % p_p1;
-			alpha4 = p20 % p_p1;
-			alpha5 = p10 % p_p2;
-			alpha6 = p20 % p_p2;
+			dgFloat64 alpha1 = p10 % p_p0;
+			dgFloat64 alpha2 = p20 % p_p0;
+			dgFloat64 alpha3 = p10 % p_p1;
+			dgFloat64 alpha4 = p20 % p_p1;
+			dgFloat64 alpha5 = p10 % p_p2;
+			dgFloat64 alpha6 = p20 % p_p2;
 
-			vc = alpha1 * alpha4 - alpha3 * alpha2;
-			vb = alpha5 * alpha2 - alpha1 * alpha6;
-			va = alpha3 * alpha6 - alpha5 * alpha4;
-			den = va + vb + vc;
-			minError = den * (-tol);
-			maxError = den * (dgFloat64 (1.0f) + tol);
+			dgFloat64 vc = alpha1 * alpha4 - alpha3 * alpha2;
+			dgFloat64 vb = alpha5 * alpha2 - alpha1 * alpha6;
+			dgFloat64 va = alpha3 * alpha6 - alpha5 * alpha4;
+			dgFloat64 den = va + vb + vc;
+			dgFloat64 minError = den * (-tol);
+			dgFloat64 maxError = den * (dgFloat32 (1.0f) + tol);
 			if ((va > minError) && (vb > minError) && (vc > minError) && (va < maxError) && (vb < maxError) && (vc < maxError)) {
 				edge2 = ptr;
 
 				den = dgFloat64 (1.0f) / (va + vb + vc);
 
-				alpha0 = va * den;
-				alpha1 = vb * den;
-				alpha2 = vc * den;
-
-				const dgVertexAtribute& attr0 = m_attib[edge0->m_userData];
-				const dgVertexAtribute& attr1 = m_attib[edge1->m_userData];
-				const dgVertexAtribute& attr2 = m_attib[edge2->m_userData];
-				dgVector normal (attr0.m_normal.m_x * alpha0 + attr1.m_normal.m_x * alpha1 + attr2.m_normal.m_x * alpha2,
-								 attr0.m_normal.m_y * alpha0 + attr1.m_normal.m_y * alpha1 + attr2.m_normal.m_y * alpha2,
-								 attr0.m_normal.m_z * alpha0 + attr1.m_normal.m_z * alpha1 + attr2.m_normal.m_z * alpha2, dgFloat32 (0.0f));
-				normal = normal.Scale (dgRsqrt (normal % normal));
-
-#ifdef _DEBUG
-				dgVector testPoint (attr0.m_vertex.m_x * alpha0 + attr1.m_vertex.m_x * alpha1 + attr2.m_vertex.m_x * alpha2,
-									attr0.m_vertex.m_y * alpha0 + attr1.m_vertex.m_y * alpha1 + attr2.m_vertex.m_y * alpha2,
-									attr0.m_vertex.m_z * alpha0 + attr1.m_vertex.m_z * alpha1 + attr2.m_vertex.m_z * alpha2, dgFloat32 (0.0f));
-				_ASSERTE (dgAbsf (testPoint.m_x - point.m_x) < dgFloat32 (1.0e-1f));
-				_ASSERTE (dgAbsf (testPoint.m_y - point.m_y) < dgFloat32 (1.0e-1f));
-				_ASSERTE (dgAbsf (testPoint.m_z - point.m_z) < dgFloat32 (1.0e-1f));
-#endif
-
-
-				attribute.m_vertex.m_x = point.m_x;
-				attribute.m_vertex.m_y = point.m_y;
-				attribute.m_vertex.m_z = point.m_z;
-				attribute.m_normal.m_x = normal.m_x;
-				attribute.m_normal.m_y = normal.m_y;
-				attribute.m_normal.m_z = normal.m_z;
-				attribute.m_u = attr0.m_u * alpha0 +  attr1.m_u * alpha1 + attr2.m_u * alpha2;
-				attribute.m_v = attr0.m_v * alpha0 +  attr1.m_v * alpha1 + attr2.m_v * alpha2;
-				attribute.m_material = attr0.m_material;
-				_ASSERTE (attr0.m_material == attr1.m_material);
-				_ASSERTE (attr0.m_material == attr2.m_material);
-				return attribute; 
-			}
-
-			q1 = q2;
-			edge1 = ptr;
-
-			ptr = ptr->m_next;
-		} while (ptr != face);
-		tol *= dgFloat32 (2.0f);
-	}
-
-	// this should never happens
-	_ASSERTE (0);
-	return attribute;
-
-#else
-
-	//	this should use Googol extended precision floats
-	const dgVector& point = srcPoint;
-
-	dgVertexAtribute attribute;
-	memset (&attribute, 0, sizeof (attribute));
-	dgFloat32 tol = dgFloat32 (1.0e-4f);
-	for (dgInt32 i = 0; i < 4; i ++) {
-		dgEdge* ptr = face;
-		dgEdge* const edge0 = ptr;
-		const dgVector& q0 = m_points[ptr->m_incidentVertex];
-
-		ptr = ptr->m_next;
-		const dgEdge* edge1 = ptr;
-		dgVector q1 (m_points[ptr->m_incidentVertex]);
-
-		ptr = ptr->m_next;
-		const dgEdge* edge2 = ptr;
-		do {
-			const dgVector& q2 = m_points[ptr->m_incidentVertex];
-
-			dgVector p10 (q1 - q0);
-			dgVector p20 (q2 - q0);
-			dgVector p_p0 (point - q0);
-			dgVector p_p1 (point - q1);
-			dgVector p_p2 (point - q2);
-
-			dgFloat32 alpha1 = p10 % p_p0;
-			dgFloat32 alpha2 = p20 % p_p0;
-			dgFloat32 alpha3 = p10 % p_p1;
-			dgFloat32 alpha4 = p20 % p_p1;
-			dgFloat32 alpha5 = p10 % p_p2;
-			dgFloat32 alpha6 = p20 % p_p2;
-
-			dgFloat32 vc = alpha1 * alpha4 - alpha3 * alpha2;
-			dgFloat32 vb = alpha5 * alpha2 - alpha1 * alpha6;
-			dgFloat32 va = alpha3 * alpha6 - alpha5 * alpha4;
-			dgFloat32 den = va + vb + vc;
-			dgFloat32 minError = den * (-tol);
-			dgFloat32 maxError = den * (dgFloat32 (1.0f) + tol);
-			if ((va > minError) && (vb > minError) && (vc > minError) && (va < maxError) && (vb < maxError) && (vc < maxError)) {
-				edge2 = ptr;
-
-				den = dgFloat32 (1.0f) / (va + vb + vc);
-
-				dgFloat32 alpha0 = va * den;
-				dgFloat32 alpha1 = vb * den;
-				dgFloat32 alpha2 = vc * den;
+				dgFloat32 alpha0 = dgFloat32 (va * den);
+				dgFloat32 alpha1 = dgFloat32 (vb * den);
+				dgFloat32 alpha2 = dgFloat32 (vc * den);
 
 				const dgVertexAtribute& attr0 = m_attib[edge0->m_userData];
 				const dgVertexAtribute& attr1 = m_attib[edge1->m_userData];
@@ -2667,15 +2553,15 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& 
 				dgVector testPoint (attr0.m_vertex.m_x * alpha0 + attr1.m_vertex.m_x * alpha1 + attr2.m_vertex.m_x * alpha2,
 									attr0.m_vertex.m_y * alpha0 + attr1.m_vertex.m_y * alpha1 + attr2.m_vertex.m_y * alpha2,
 									attr0.m_vertex.m_z * alpha0 + attr1.m_vertex.m_z * alpha1 + attr2.m_vertex.m_z * alpha2, dgFloat32 (0.0f));
-								_ASSERTE (dgAbsf (testPoint.m_x - point.m_x) < dgFloat32 (1.0e-1f));
-				_ASSERTE (dgAbsf (testPoint.m_y - point.m_y) < dgFloat32 (1.0e-1f));
-				_ASSERTE (dgAbsf (testPoint.m_z - point.m_z) < dgFloat32 (1.0e-1f));
+				_ASSERTE (dgAbsf (testPoint.m_x - dgFloat32 (point.m_x)) < dgFloat32 (1.0e-1f));
+				_ASSERTE (dgAbsf (testPoint.m_y - dgFloat32 (point.m_y)) < dgFloat32 (1.0e-1f));
+				_ASSERTE (dgAbsf (testPoint.m_z - dgFloat32 (point.m_z)) < dgFloat32 (1.0e-1f));
 	#endif
 
 
-				attribute.m_vertex.m_x = point.m_x;
-				attribute.m_vertex.m_y = point.m_y;
-				attribute.m_vertex.m_z = point.m_z;
+				attribute.m_vertex.m_x = dgFloat32 (point.m_x);
+				attribute.m_vertex.m_y = dgFloat32 (point.m_y);
+				attribute.m_vertex.m_z = dgFloat32 (point.m_z);
 				attribute.m_normal.m_x = normal.m_x;
 				attribute.m_normal.m_y = normal.m_y;
 				attribute.m_normal.m_z = normal.m_z;
@@ -2701,7 +2587,6 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& 
 	// this should never happens
 	_ASSERTE (0);
 	return attribute;
-#endif
 
 }
 
@@ -3244,9 +3129,6 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	leftMesh->BeginPolygon();
 	rightMesh->BeginPolygon(); 
 
-
-int static xxx;
-xxx ++;
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
 	for (iter.Begin(); iter; iter ++){
@@ -3281,9 +3163,6 @@ xxx ++;
 				faceOnStack[0] = meshFace;
 				meshFace->AddRef();
 
-xxx ++;
-if (xxx == 315)
-xxx *=1;
 				while (stack) {
 
 					//dgMeshEffectSolidTree* root;

@@ -2124,8 +2124,8 @@ if (convexHull.GetCount()) {
 
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
 		if (leftConvexMesh && rightConvexMesh) {
-//			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
-//			if (leftMeshClipper && rightMeshClipper) {
+			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
+			if (leftMeshClipper && rightMeshClipper) {
 //				convexMesh->Release();
 //				convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
@@ -2133,7 +2133,7 @@ if (convexHull.GetCount()) {
 //				convexMesh->MergeFaces(leftConvexMesh);
 //				convexMesh->MergeFaces(leftMeshClipper);
 //				convexMesh->EndPolygon();
-//			}
+			}
 		}
 
 		if (leftConvexMesh) {
