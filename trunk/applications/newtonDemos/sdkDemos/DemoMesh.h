@@ -43,6 +43,7 @@ class DemoMesh: public dList<DemoSubMesh>, virtual public dClassInfo
 {
 	public:
 	DemoMesh(const char* const name);
+	DemoMesh(NewtonMesh* const mesh);
 	DemoMesh(const dScene* const scene, dScene::dTreeNode* const meshNode);
 	DemoMesh(const char* name, const NewtonCollision* const collision, const char* const texture0, const char* const texture1, const char* const texture2);
 
@@ -56,6 +57,8 @@ class DemoMesh: public dList<DemoSubMesh>, virtual public dClassInfo
 
 	protected:
 	virtual ~DemoMesh();
+
+
 
 	dAddRtti(dClassInfo);
 

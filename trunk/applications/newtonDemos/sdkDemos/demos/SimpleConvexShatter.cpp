@@ -571,6 +571,29 @@ void PrefabSimpleDestruction(SceneManager& system)
 
 #endif
 
+static NewtonMesh* CreateConvexVonoroiMesh (NewtonMesh* const mesh, int interiorMaterial)
+{
+
+	dVector size;
+	dMatrix matrix(GetIdentityMatrix()); 
+	NewtonMeshCalculateOOBB(mesh, &matrix[0][0], &size.m_x, &size.m_y, &size.m_z);
+
+	// pepper the inside of the BBox box of the mesh with random points
+	int count = 0;
+	dVector points[10];
+	do {
+		dFloat x = RandomVariable(size.m_x);
+		dFloat y = RandomVariable(size.m_y);
+		dFloat z = RandomVariable(size.m_z);
+		if ((x <= size.m_x) && (x >= -size.m_x) && (y <= size.m_y) && (y >= -size.m_y) && (z <= size.m_z) && (z >= -size.m_z)){
+			points[count] = dVector (x, y, z);
+			count ++;
+		}
+	} while (count < 10);
+
+	return NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interiorMaterial);
+}
+
 
 
 static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, PrimitiveType type)
@@ -594,10 +617,6 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, Primitiv
 		dFloat x = RandomVariable(size.m_x);
 		dFloat y = RandomVariable(size.m_y);
 		dFloat z = RandomVariable(size.m_z);
-//x = 0;
-//y = 0;
-//z = 0;
-
 		if ((x <= size.m_x) && (x >= -size.m_x) && (y <= size.m_y) && (y >= -size.m_y) && (z <= size.m_z) && (z >= -size.m_z)){
 			points[count] = dVector (x, y, z);
 			count ++;
@@ -608,13 +627,23 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, Primitiv
 	int interior = LoadTexture("KAMEN-stup.tga");
 	NewtonMesh* const convexParts = NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interior);
 
-dScene xxxx(world);
-dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
-dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
-dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(meshNode);
-modelMesh->ReplaceMesh (convexParts);
-xxxx.Serialize("xxx.xml");
+//dScene xxxx(world);
+//dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
+//dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
+//dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(meshNode);
+//modelMesh->ReplaceMesh (convexParts);
+//xxxx.Serialize("xxx.xml");
 
+	DemoEntity* const entity = new DemoEntity(NULL);
+	entity->SetMatrix(*scene, dQuaternion(), dVector (0, 5, 0, 0));
+	entity->InterpolateMatrix (*scene, 1.0f);
+	
+	
+	scene->Append (entity);
+	DemoMesh* const mesh1 = new DemoMesh(convexParts);
+	entity->SetMesh(mesh1);
+	mesh1->Release();
+	
 
 	// make sure the assets are released before leaving the function
 	if (convexParts) {
