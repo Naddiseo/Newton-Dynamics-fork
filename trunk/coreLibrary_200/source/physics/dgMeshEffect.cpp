@@ -160,44 +160,34 @@ class dgMeshTreeCSGFace: public dgRefCounter
 
 	void InsertVertex (const dgMeshTreeCSGFace* const vertices, const dgMeshTreeCSGPointsPool& pool) 
 	{
-
-		xxxxxxx
-		CSGLinearEdge* points;
-
-		points = vertices->m_face;
+		CSGLinearEdge* points = vertices->m_face;
 		do {
-			dgFloat64 smallDist;
-			CSGLinearEdge* edge;
-			CSGLinearEdge* closestEdge; 
+			CSGLinearEdge* closestEdge = NULL; 
+			dgFloat64 smallDist (dgFloat64 (1.0e10f));
+			const dgHugeVector& p = pool.m_points[points->m_index];
 
-			closestEdge = NULL;
-			smallDist = dgFloat64 (1.0e10f);
-			const dgBigVector& p = pool.m_points[points->m_index];
-
-			edge = m_face;
+			CSGLinearEdge* edge = m_face;
 			do {
-				dgFloat64 t;
-				const dgBigVector& p0 = pool.m_points[edge->m_index];
-				const dgBigVector& p1 = pool.m_points[edge->m_next->m_index];
-
-				dgBigVector dp0 (p - p0);
-				dgBigVector dp  (p1 - p0);
-				t = (dp0 % dp) / (dp % dp);
-				if ((t > dgFloat64 (1.0e-7)) && (t < dgFloat64 (1.0 - 1.0e-7))) {
-					dgFloat64 dist2;
-					dgBigVector dist (dp0 - dp.Scale(t));
-					dist2 = dist % dist;
-					if (dist2 < smallDist) {
-						smallDist = dist2;
+				const dgHugeVector& p0 = pool.m_points[edge->m_index];
+				const dgHugeVector& p1 = pool.m_points[edge->m_next->m_index];
+				dgHugeVector dp0 (p - p0);
+				dgHugeVector dp  (p1 - p0);
+				dgFloat64 t = (dp0 % dp).GetAproximateValue() / (dp % dp).GetAproximateValue();
+//				if ((t > dgFloat64 (1.0e-7)) && (t < dgFloat64 (1.0 - 1.0e-7))) {
+				if ((t > dgFloat64 (0.0)) && (t < dgFloat64 (1.0f))) {
+					dgHugeVector dist (dp0 - dp.Scale(t));
+					dgGoogol dist2 = (dist % dist);
+					dgFloat64 val (dist2.GetAproximateValue());
+					if (val < smallDist) {
+						smallDist = val;
 						closestEdge = edge;
 					}
 				}
 				edge = edge->m_next;
 			} while (edge != m_face);
 
-			if (smallDist < dgFloat64 (1.0e-7f)) {
-				CSGLinearEdge* edge;
-				edge = new (m_allocator) CSGLinearEdge (points->m_index);
+			if (smallDist < dgFloat64 (1.0e-20f)) {
+				CSGLinearEdge* const edge = new (m_allocator) CSGLinearEdge (points->m_index);
 				edge->m_next = closestEdge->m_next;
 				closestEdge->m_next = edge;
 			}
@@ -3122,12 +3112,6 @@ void dgMeshEffect::ClipMesh (const dgMatrix& matrix, const dgMeshEffect* clipMes
 
 void dgMeshEffect::AddCGSFace (const dgMeshEffect& reference, dgEdge* const refFace, dgInt32 count, dgMeshTreeCSGFace** const faces, const dgMeshTreeCSGPointsPool& pointsPool)
 {
-
-static int xxx;
-xxx ++;
-if (xxx == 378)
-xxx *=1;
-
 	dgInt8 masks[DG_MESH_EFFECT_POINT_SPLITED];
 	dgInt32	index[DG_MESH_EFFECT_POINT_SPLITED];
 	dgVector pool[DG_MESH_EFFECT_POINT_SPLITED];
@@ -3213,10 +3197,9 @@ dgMeshEffectSolidTree* dgMeshEffect::CreateSolidTree() const
 					} while (ptr != face);
 
 					if (!tree) {
-						dgFloat32 mag2;
-						dgVector normal (FaceNormal (face, &m_points[0][0], sizeof (dgVector)));
-						mag2 = normal % normal;
-						if (mag2 > dgFloat32 (1.0e-6f)) {
+						dgBigVector normal (FaceNormal (face, &m_points[0][0], sizeof (dgVector)));
+						dgFloat64 mag2 = normal % normal;
+						if (mag2 > dgFloat32 (1.0e-10f)) {
 							tree = new (GetAllocator()) dgMeshEffectSolidTree (*this, face);
 						}
 					} else {
@@ -3238,7 +3221,6 @@ void dgMeshEffect::DestroySolidTree (dgMeshEffectSolidTree* tree)
 //void dgMeshEffect::ClipMesh (const dgMeshEffect* clipMesh, dgMeshEffect** left, dgMeshEffect** right) const
 void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** left, dgMeshEffect** right) const
 {
-
 	dgMeshEffect* leftMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 	dgMeshEffect* rightMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
@@ -3263,26 +3245,22 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 					dgInt32 index;
 					index = points.AddPoint (m_points[ptr->m_incidentVertex]);
 					meshFace->AddPoint (index);
-					//dgTrace (("%f %f %f\n", dgFloat32 (points.m_points[index].m_x), dgFloat32 (points.m_points[index].m_y), dgFloat32 (points.m_points[index].m_z)));
 
 					ptr->m_mark = mark;
 					ptr = ptr->m_next;
 				} while (ptr != face);
-				//dgTrace (("\n"));
 
 				dgMeshTreeCSGFace* backList[DG_MESH_EFFECT_POLYGON_SPLITED];
 				dgMeshTreeCSGFace* frontList[DG_MESH_EFFECT_POLYGON_SPLITED];
 				dgMeshTreeCSGFace* faceOnStack[DG_MESH_EFFECT_BOLLEAN_STACK];
 				const dgMeshEffectSolidTree* stackPool[DG_MESH_EFFECT_BOLLEAN_STACK];
 				dgInt32 stack = 1;
+
+
 				stackPool[0] = clipper;
 				faceOnStack[0] = meshFace;
 				meshFace->AddRef();
-
 				while (stack) {
-
-					//dgMeshEffectSolidTree* root;
-					//dgMeshTreeCSGFace* rootFace; 
 					dgMeshTreeCSGFace* leftFace; 
 					dgMeshTreeCSGFace* rightFace;
 
