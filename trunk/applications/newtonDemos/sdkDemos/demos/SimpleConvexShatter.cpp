@@ -591,7 +591,8 @@ static NewtonMesh* CreateConvexVonoroiMesh (NewtonMesh* const mesh, int interior
 		}
 	} while (count < 10);
 
-	return NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interiorMaterial);
+	dMatrix textureMatrix (GetIdentityMatrix());
+	return NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interiorMaterial, &textureMatrix[0][0]);
 }
 
 
@@ -625,7 +626,8 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, Primitiv
 
 	// Create the array of convex pieces from the mesh
 	int interior = LoadTexture("KAMEN-stup.tga");
-	NewtonMesh* const convexParts = NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interior);
+	dMatrix textureMatrix (GetIdentityMatrix());
+	NewtonMesh* const convexParts = NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interior, &textureMatrix[0][0]);
 
 //dScene xxxx(world);
 //dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());

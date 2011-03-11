@@ -1948,7 +1948,7 @@ for (iter.Begin(); iter; iter ++)
 }
 
 
-dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial) const
+dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const
 {
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);

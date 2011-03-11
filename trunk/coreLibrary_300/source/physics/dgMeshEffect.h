@@ -163,7 +163,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	dgCollision* CreateConvexApproximationCollision(dgWorld* const world, dgInt32 maxCount, dgInt32 shapeId, dgInt32 childrenID) const;
 	dgCollision* CreateConvexCollision(dgFloat32 tolerance, dgInt32 shapeID, const dgMatrix& matrix = dgGetIdentityMatrix()) const;
 	
-	dgMeshEffect* CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial) const;
+	dgMeshEffect* CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
 
 	void PlaneClipMesh (const dgPlane& plane, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource);
 
@@ -200,12 +200,12 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void Init (bool preAllocaBuffers);
 	dgVector GetOrigin ()const;
 	dgInt32 CalculateMaxAttributes () const;
-	void EnumerateAttributeArray (dgVertexAtribute* attib);
-	void ApplyAttributeArray (dgVertexAtribute* attib);
+	void EnumerateAttributeArray (dgVertexAtribute* const attib);
+	void ApplyAttributeArray (dgVertexAtribute* const attib);
 	void AddVertex(const dgVector& vertex);
 	void AddAtribute (const dgVertexAtribute& attib);
 	void AddPoint(const dgFloat32* vertexList, dgInt32 material);
-	void FixCylindricalMapping (dgVertexAtribute* attib) const;
+	void FixCylindricalMapping (dgVertexAtribute* const attib) const;
 
 	void MergeFaces (dgMeshEffect* const source);
 	void ReverseMergeFaces (dgMeshEffect* const source);
