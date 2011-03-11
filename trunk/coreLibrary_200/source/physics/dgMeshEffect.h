@@ -88,6 +88,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void CalculateNormals (dgFloat32 angleInRadians);
 	void SphericalMapping (dgInt32 material);
 	void BoxMapping (dgInt32 front, dgInt32 side, dgInt32 top);
+	void UniformBoxMapping (dgInt32 material, const dgMatrix& textruMatrix);
 	void CylindricalMapping (dgInt32 cylinderMaterial, dgInt32 capMaterial);
 
 	dgEdge* InsertEdgeVertex (dgEdge* const edge, dgFloat32 param);

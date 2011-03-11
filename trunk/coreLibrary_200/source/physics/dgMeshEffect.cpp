@@ -950,7 +950,6 @@ void dgMeshEffect::CylindricalMapping (dgInt32 cylinderMaterial, dgInt32 capMate
 
 void dgMeshEffect::BoxMapping (dgInt32 front, dgInt32 side, dgInt32 top)
 {
-	dgInt32 mark;
 	dgVector minVal;
 	dgVector maxVal;
 	dgInt32 materialArray[3];
@@ -966,12 +965,10 @@ void dgMeshEffect::BoxMapping (dgInt32 front, dgInt32 side, dgInt32 top)
 	materialArray[1] = side;
 	materialArray[2] = top;
 
-
-	mark = IncLRU();
+	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);	
 	for(iter.Begin(); iter; iter ++){
-		dgEdge* edge;
-		edge = &(*iter);
+		dgEdge* const edge = &(*iter);
 		if (edge->m_mark < mark){
 			dgInt32 index;
 			dgFloat32 maxProjection;
@@ -1001,11 +998,10 @@ void dgMeshEffect::BoxMapping (dgInt32 front, dgInt32 side, dgInt32 top)
 
 			dgInt32 u = (index + 1) % 3;
 			dgInt32 v = (u + 1) % 3;
-			dgEdge* ptr;
-			ptr = edge;
 			if (index == 1) {
 				Swap (u, v);
 			}
+			dgEdge* ptr = edge;
 			do {
 				dgVertexAtribute& attrib = attribArray[dgInt32 (ptr->m_userData)];
 				dgVector p (scale.CompProduct(m_points[ptr->m_incidentVertex] - minVal));
@@ -1017,6 +1013,58 @@ void dgMeshEffect::BoxMapping (dgInt32 front, dgInt32 side, dgInt32 top)
 
 				ptr = ptr->m_next;
 			}while (ptr !=  edge);
+		}
+	}
+
+	ApplyAttributeArray (&attribArray[0]);
+}
+
+void dgMeshEffect::UniformBoxMapping (dgInt32 material, const dgMatrix& textureMatrix)
+{
+	dgStack<dgVertexAtribute>attribArray (GetCount());
+	EnumerateAttributeArray (&attribArray[0]);
+
+	for (dgInt32 i = 0; i < 3; i ++) {
+		dgInt32 mark = IncLRU();
+		dgMatrix rotationMatrix (dgGetIdentityMatrix());
+		if (i == 1) {
+			rotationMatrix = dgYawMatrix(dgFloat32 (90.0f * 3.1416f / 180.0f));
+		} else if (i == 2) {
+			rotationMatrix = dgPitchMatrix(dgFloat32 (90.0f * 3.1416f / 180.0f));
+		}
+
+
+
+		dgPolyhedra::Iterator iter (*this);	
+		for(iter.Begin(); iter; iter ++){
+			dgEdge* const edge = &(*iter);
+			if (edge->m_mark < mark){
+				const dgVector& p0 = m_points[edge->m_incidentVertex];
+				const dgVector& p1 = m_points[edge->m_next->m_incidentVertex];
+				const dgVector& p2 = m_points[edge->m_prev->m_incidentVertex];
+
+				edge->m_mark = mark;
+				edge->m_next->m_mark = mark;
+				edge->m_prev->m_mark = mark;
+
+				dgVector e0 (p1 - p0);
+				dgVector e1 (p2 - p0);
+				dgVector n (e0 * e1);
+				n = rotationMatrix.RotateVector(n.Scale (dgRsqrt (n % n)));
+				if ((dgAbsf (n.m_z) >= dgAbsf (n.m_x)) && (dgAbsf (n.m_z) >= dgAbsf (n.m_y))) {
+					dgEdge* ptr = edge;
+					do {
+						dgVertexAtribute& attrib = attribArray[dgInt32 (ptr->m_userData)];
+						dgVector p (textureMatrix.TransformVector(rotationMatrix.RotateVector(m_points[ptr->m_incidentVertex])));
+						attrib.m_u0 = p.m_x;
+						attrib.m_v0 = p.m_y;
+						attrib.m_u1 = dgFloat32 (0.0f);
+						attrib.m_v1 = dgFloat32 (0.0f);
+						attrib.m_material = material;
+						ptr = ptr->m_next;
+					}while (ptr !=  edge);
+				}
+			}
 		}
 	}
 
