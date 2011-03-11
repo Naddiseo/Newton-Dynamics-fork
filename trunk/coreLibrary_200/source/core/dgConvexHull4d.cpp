@@ -61,8 +61,13 @@ dgConvexHull4dTetraherum::dgTetrahedrumPlane::dgTetrahedrumPlane (const dgBigVec
 	:dgBigVector (p1.Sub4(p0).CrossProduct4 (p2.Sub4(p0), p3.Sub4(p0)))
 {
 	dgBigVector& me = *this;
-	_ASSERTE (me.DotProduct4(me) > dgFloat64 (1.0e-64f));
-	dgFloat64 invMag2 = dgFloat64 (1.0f) / sqrt (me.DotProduct4(me));
+//	_ASSERTE (me.DotProduct4(me) > dgFloat64 (1.0e-64f));
+	dgFloat64 invMag2 = dgFloat32 (0.0f);
+	if (me.DotProduct4(me) > dgFloat64 (1.0e-64f)) {
+		invMag2 = dgFloat64 (1.0f) / sqrt (me.DotProduct4(me));
+	} else {
+		invMag2 = dgFloat32 (0.0f);
+	}
 	me.m_x *= invMag2;
 	me.m_y *= invMag2;
 	me.m_z *= invMag2;

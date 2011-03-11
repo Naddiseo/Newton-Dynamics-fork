@@ -1980,7 +1980,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 		bool pointSide = true;
 		for (dgMeshEffectSolidTree* ptr = tree; ptr; ) {
 			dgGoogol test (ptr->m_normal % (p1 - ptr->m_point));
-			if (test.GetAproximateValue() <= dgFloat32 (0.0f)) {
+			if (test.GetAproximateValue() < dgFloat32 (0.01f)) {
 				pointSide = true;
 				ptr = ptr->m_back;
 			} else {
@@ -2131,7 +2131,7 @@ for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 	convexMesh->m_points[i] += xxx;
 }
 for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
-//	convexMesh->m_attib[i].m_vertex += xxx;
+	convexMesh->m_attib[i].m_vertex += xxx;
 }
 
 

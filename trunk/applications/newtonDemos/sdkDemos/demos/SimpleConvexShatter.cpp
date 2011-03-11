@@ -600,7 +600,7 @@ static NewtonMesh* CreateConvexVonoroiMesh (NewtonMesh* const mesh, int interior
 static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, PrimitiveType type)
 {
 	// create a collision primitive
-	dVector size (2.0f, 2.0f, 1.0f);
+	dVector size (2.0f, 2.0f, 2.0f);
 	NewtonWorld* const world = scene->GetNewton();
 	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, type, 0);
 
@@ -622,7 +622,9 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, Primitiv
 			points[count] = dVector (x, y, z);
 			count ++;
 		}
-	} while (count < 10);
+	} while (count < 1);
+
+//count = 0;
 
 	// Create the array of convex pieces from the mesh
 	int interior = LoadTexture("KAMEN-stup.tga");
@@ -632,12 +634,14 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, Primitiv
 	textureMatrix[1][1] = 1.0f / size.m_y;
 	NewtonMesh* const convexParts = NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interior, &textureMatrix[0][0]);
 
-//dScene xxxx(world);
-//dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
-//dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
-//dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(meshNode);
-//modelMesh->ReplaceMesh (convexParts);
-//xxxx.Serialize("xxx.xml");
+#if 0
+dScene xxxx(world);
+dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
+dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
+dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(meshNode);
+modelMesh->ReplaceMesh (convexParts);
+xxxx.Serialize("xxx.xml");
+#endif
 
 	DemoEntity* const entity = new DemoEntity(NULL);
 	entity->SetMatrix(*scene, dQuaternion(), dVector (0, 5, 0, 0));
@@ -673,7 +677,8 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	//CreateLevelMesh (scene, "sponza.xml", false);
 
 	// create a shattered mesh array
-	CreateSimpleVoronoiShatter (scene, _BOX_PRIMITIVE);
+//	CreateSimpleVoronoiShatter (scene, _BOX_PRIMITIVE);
+	CreateSimpleVoronoiShatter (scene, _RANDOM_CONVEX_HULL_PRIMITIVE);
 
 	// place camera into position
 	dQuaternion rot;

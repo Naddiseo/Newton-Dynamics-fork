@@ -1297,9 +1297,15 @@ void dgMeshEffect::EndPolygon ()
 			dgEdge* edge = AddFace (3, index, userdata);
 			if (!edge) {
 				_ASSERTE ((m_pointCount + 3) <= m_maxPointCount);
+
+				m_points[m_pointCount + 0] = m_points[index[0]];
+				m_points[m_pointCount + 1] = m_points[index[1]];
+				m_points[m_pointCount + 2] = m_points[index[2]];
+
 				index[0] = m_pointCount + 0;
 				index[1] = m_pointCount + 1;
 				index[2] = m_pointCount + 2;
+
 				m_pointCount += 3;
 				edge = AddFace (3, index, userdata);
 				_ASSERTE (edge);

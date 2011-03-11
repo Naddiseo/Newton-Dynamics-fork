@@ -69,10 +69,12 @@ dgDelaunayTetrahedralization::dgDelaunayTetrahedralization(dgMemoryAllocator* co
 					q.m_y += dgFloat64 (1.0e-3f);
 					q.m_z += dgFloat64 (1.0e-3f);
 					index = AddVertex(q);
+					_ASSERTE (index != -1);
 				}
 				_ASSERTE (index != -1);
-				//m_points[index] = points[i];
+				m_points[index] = points[i];
 				m_points[index].m_index = i;
+				
 			}
 		}
 	}
