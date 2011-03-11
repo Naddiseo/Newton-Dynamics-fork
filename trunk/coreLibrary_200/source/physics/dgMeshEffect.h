@@ -439,11 +439,12 @@ class dgMeshEffectSolidTree
 */
 					}
 
-/*					
+					
 					if (!root->m_front) {
-						root->m_front = new (mesh.GetAllocator())dgMeshEffectSolidTree (plane);
+						root->m_front = new (mesh.GetAllocator())dgMeshEffectSolidTree (normal, point);
 					} else {
-
+						_ASSERTE (0);
+/*
 						dgFloat64 test0;
 						dgBigVector p0 (tmp.GetLast()->GetInfo());
 						CSGConvexCurve& frontFace = faces[stack];
@@ -485,9 +486,9 @@ class dgMeshEffectSolidTree
 						pool[stack] = root->m_front;
 						stack ++;
 						_ASSERTE (stack < (sizeof (pool)/sizeof (pool[0])));
+*/
 					}
 
-*/
 				} else {
 
 					if (minDist.GetAproximateValue() < dgFloat64 (0.0f)) {
