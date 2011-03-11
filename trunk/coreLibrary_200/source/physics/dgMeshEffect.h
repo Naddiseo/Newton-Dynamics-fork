@@ -163,8 +163,8 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 
 	dgCollision* CreateConvexApproximationCollision(dgWorld* const world, dgInt32 maxCount, dgInt32 shapeId, dgInt32 childrenID) const;
 	dgCollision* CreateConvexCollision(dgFloat32 tolerance, dgInt32 shapeID, const dgMatrix& matrix = dgGetIdentityMatrix()) const;
-	
-	dgMeshEffect* CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix);
+
+	dgMeshEffect* CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
 
 	void PlaneClipMesh (const dgPlane& plane, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource);
 
@@ -327,7 +327,7 @@ class dgMeshEffectSolidTree
 
 		dgHugeVector p1 (dgBigVector (mesh.m_points[edge->m_incidentVertex]));
 		dgHugeVector e1 (p1 - p0);
-		_ASSERTE (edge->m_next->m_next->m_next == edge);
+//		_ASSERTE (edge->m_next->m_next->m_next == edge);
 		for (edge = edge->m_next; edge != face; edge = edge->m_next) {
 			dgHugeVector p2 (dgBigVector (mesh.m_points[edge->m_incidentVertex]));
 			dgHugeVector e2 (p2 - p0);

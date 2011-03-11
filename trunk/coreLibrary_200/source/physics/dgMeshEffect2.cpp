@@ -1948,8 +1948,7 @@ for (iter.Begin(); iter; iter ++)
 }
 
 
-//dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
-dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix)
+dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
 {
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);
@@ -1957,7 +1956,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 #endif
 
 
-	Triangulate();
+//	Triangulate();
 
 	dgMeshEffectSolidTree* const tree = CreateSolidTree();
 	_ASSERTE (tree);
@@ -2160,7 +2159,7 @@ dgVector xxx (0, 0, 0, 0);
 for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 	xxx += convexMesh->m_points[i];
 }
-xxx = xxx.Scale (0.4f / convexMesh->m_pointCount);
+xxx = xxx.Scale (1.0f / convexMesh->m_pointCount);
 for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 	convexMesh->m_points[i] += xxx;
 }
