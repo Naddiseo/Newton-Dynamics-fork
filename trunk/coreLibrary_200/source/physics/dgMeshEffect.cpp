@@ -3118,6 +3118,15 @@ void dgMeshEffect::DestroySolidTree (dgMeshEffectSolidTree* tree)
 //void dgMeshEffect::ClipMesh (const dgMeshEffect* clipMesh, dgMeshEffect** left, dgMeshEffect** right) const
 void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** left, dgMeshEffect** right) const
 {
+
+static int xxx;
+dgTrace (("%d\n", xxx));
+if (xxx == 19)
+xxx *= 1;
+
+xxx ++;
+_ASSERTE (_heapchk() == _HEAPOK);
+
 	dgMeshEffect* leftMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 	dgMeshEffect* rightMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
@@ -3223,10 +3232,12 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 			}
 		}
 	}
-
+_ASSERTE (_heapchk() == _HEAPOK);
 
 	leftMesh->EndPolygon();
 	rightMesh->EndPolygon(); 
+
+_ASSERTE (_heapchk() == _HEAPOK);
 
 	if (!leftMesh->GetCount()) {
 		leftMesh->Release();
@@ -3240,6 +3251,10 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 
 	*left = leftMesh;
 	*right = rightMesh;
+
+
+
+
 }
 
 void dgMeshEffect::ClipMesh (const dgMeshEffect* const clipMesh, dgMeshEffect** left, dgMeshEffect** right) const
