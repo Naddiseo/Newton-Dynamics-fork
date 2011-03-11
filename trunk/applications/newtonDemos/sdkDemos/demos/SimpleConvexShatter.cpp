@@ -622,7 +622,7 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, Primitiv
 			points[count] = dVector (x, y, z);
 			count ++;
 		}
-	} while (count < 1);
+	} while (count < 10);
 
 //count = 0;
 

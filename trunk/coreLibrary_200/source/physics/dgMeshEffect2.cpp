@@ -2159,7 +2159,7 @@ dgVector xxx (0, 0, 0, 0);
 for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 	xxx += convexMesh->m_points[i];
 }
-xxx = xxx.Scale (1.0f / convexMesh->m_pointCount);
+xxx = xxx.Scale (0.5f / convexMesh->m_pointCount);
 for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 	convexMesh->m_points[i] += xxx;
 }
