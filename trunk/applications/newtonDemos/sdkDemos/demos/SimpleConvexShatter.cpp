@@ -96,7 +96,7 @@ class DebriAtom
 	NewtonCollision* m_collision;
 	dVector m_centerOfMass;
 	dVector m_momentOfInirtia;
-	dFloat m_mass;
+	dFloat m_massFraction;
 };
 
 class DebriEffect: public dList<DebriAtom> 
@@ -126,9 +126,9 @@ class DebriEffect: public dList<DebriAtom>
 				count ++;
 			}
 //		} while (count < 10);
-		} while (count < 2);
+		} while (count < 3);
 
-		// create a texture matrix, for appling the material's UV to all internal faces
+		// create a texture matrix, for applying the material's UV to all internal faces
 		dMatrix textureMatrix (GetIdentityMatrix());
 		textureMatrix[0][0] = 1.0f / size.m_x;
 		textureMatrix[1][1] = 1.0f / size.m_y;
@@ -136,7 +136,14 @@ class DebriEffect: public dList<DebriAtom>
 		// now we call create we decompose the mesh into several convex pieces 
 		NewtonMesh* const debriMeshPieces = NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interiorMaterial, &textureMatrix[0][0]);
 
-		// now we iterate over each pieces and for each one we create collision Mesh and a Visual Mesh
+
+		// Get the volume of the original mesh
+		NewtonCollision* const collision = NewtonCreateConvexHullFromMesh (m_world, mesh, 0.0f, 0);
+		dFloat volume = NewtonConvexCollisionCalculateVolume (collision);
+		NewtonReleaseCollision(m_world, collision);
+
+
+		// now we iterate over each pieces and for each one we create a visual entity and a rigid body
 		NewtonMesh* nextDebri;
 		for (NewtonMesh* debri = NewtonMeshCreateFirstSingleSegment (debriMeshPieces); debri; debri = nextDebri) {
 			nextDebri = NewtonMeshCreateNextSingleSegment (debriMeshPieces, debri); 
@@ -145,6 +152,9 @@ class DebriEffect: public dList<DebriAtom>
 			atom.m_mesh = new DemoMesh(debri);
 			atom.m_collision = NewtonCreateConvexHullFromMesh (m_world, debri, 0.0f, 0);
 
+			NewtonConvexCollisionCalculateInertialMatrix (atom.m_collision, &atom.m_momentOfInirtia[0], &atom.m_centerOfMass[0]);	
+			dFloat debriVolume = NewtonConvexCollisionCalculateVolume (atom.m_collision);
+			atom.m_massFraction = debriVolume / volume;
 
 			NewtonMeshDestroy(debri);
 		}
@@ -193,6 +203,7 @@ class SimpleShatterEffectEntity: public DemoEntity
 
 	void SimulationLister(DemoEntityManager* const scene, DemoEntityManager::dListNode* const mynode, dFloat timeStep)
 	{
+
 		// see if the net force on the body comes fr a high impact collision
 		dVector netForce (0.0f, -m_myweight, 0.0f) ;
 		for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(m_myBody); joint; joint = NewtonBodyGetNextContactJoint(m_myBody, joint)) {
@@ -209,10 +220,68 @@ class SimpleShatterEffectEntity: public DemoEntity
 
 		dFloat mag2 = netForce % netForce ;
 
-		// if the force is bigger than 4 Gravities, It is considered a collsion force
-		float maxForce = 4.0f * m_myweight;
+		// if the force is bigger than 4 Gravities, It is considered a collision force
+		float maxForce = 6.0f * m_myweight;
+
+
 		if (mag2 > (maxForce * maxForce)) {
 			NewtonWorld* world = NewtonBodyGetWorld(m_myBody);
+
+			dFloat Ixx; 
+			dFloat Iyy; 
+			dFloat Izz; 
+			dFloat mass; 
+			NewtonBodyGetMassMatrix(m_myBody, &mass, &Ixx, &Iyy, &Izz);
+
+			dMatrix matrix (GetCurrentMatrix());
+			dQuaternion rotation (matrix);
+			for (DebriEffect::dListNode* node = m_effect.GetFirst(); node; node = node->GetNext()) {
+				DebriAtom& atom = node->GetInfo();
+
+				DemoEntity* const entity = new DemoEntity (NULL);
+				entity->SetMesh (atom.m_mesh);
+				entity->SetMatrix(*scene, rotation, matrix.m_posit);
+				entity->InterpolateMatrix (*scene, 1.0f);
+				scene->Append(entity);
+
+				int materialId = 0;
+
+				dFloat debriMass = mass * atom.m_massFraction;
+				dFloat Ixx = debriMass * atom.m_momentOfInirtia.m_x;
+				dFloat Iyy = debriMass * atom.m_momentOfInirtia.m_y;
+				dFloat Izz = debriMass * atom.m_momentOfInirtia.m_z;
+
+				//create the rigid body
+				NewtonBody* const rigidBody = NewtonCreateBody (world, atom.m_collision, &matrix[0][0]);
+
+				// set the correct center of gravity for this body
+				NewtonBodySetCentreOfMass (rigidBody, &atom.m_centerOfMass[0]);
+
+				// set the mass matrix
+				NewtonBodySetMassMatrix (rigidBody, debriMass, Ixx, Iyy, Izz);
+
+				// activate 
+				//	NewtonBodyCoriolisForcesMode (blockBoxBody, 1);
+
+				// save the pointer to the graphic object with the body.
+				NewtonBodySetUserData (rigidBody, entity);
+
+				// assign the wood id
+				NewtonBodySetMaterialGroupID (rigidBody, materialId);
+
+				//  set continue collision mode
+				//	NewtonBodySetContinuousCollisionMode (rigidBody, continueCollisionMode);
+
+				// set a destructor for this rigid body
+				NewtonBodySetDestructorCallback (rigidBody, PhysicsBodyDestructor);
+
+				// set the transform call back function
+				NewtonBodySetTransformCallback (rigidBody, DemoEntity::SetTransformCallback);
+
+				// set the force and torque call back function
+				NewtonBodySetForceAndTorqueCallback (rigidBody, PhysicsApplyGravityForce);
+			}
+
 			NewtonDestroyBody(world, m_myBody);
 			scene->RemoveEntity	(mynode);
 		}
@@ -314,7 +383,7 @@ static void AddColumnsLayer (
 
 
 
-static void Stonehenge (DemoEntityManager* const scene, dVector location, int levels)
+static void Stonehenge (DemoEntityManager* const scene, dVector location, int levels, int xCount, int zCount, float separation)
 {
 	NewtonWorld* const world = scene->GetNewton();
 
@@ -357,19 +426,29 @@ static void Stonehenge (DemoEntityManager* const scene, dVector location, int le
 
 	// create the visual top mesh
 	DemoMesh* const visualTopMesh = new DemoMesh(topNewtonMesh);
-	
 
-	for (int i = 0; i < levels; i ++) {
-		// add a column layer
-		dVector posit (location.m_x, FindFloor (world, location.m_x, location.m_z) + meshBounds.m_x, location.m_z);
-		AddColumnsLayer (scene, visualColumnMesh, verticalColumnCollision, columnDebris, posit, topSize - 1.0f);
 
-		// add the top
-		float x = (-0.5f) * (topSize - 1.0f) + location.m_x;
-		float z = (-0.5f) * (topSize - 1.0f) + location.m_z;
+	//create and array of entities all reusing the same effect
+	for (int i = 0; i < zCount; i ++) {
+		for (int j = 0; j < xCount; j ++) {
+			float x = (float (i) - 0.5f) * separation + location.m_x;
+			float z = (float (j) - 0.5f) * separation + location.m_z;
 
-		posit = dVector (location.m_x, FindFloor (world, x, z) + size.m_y * 0.5f, location.m_z);
-		AddTopLayer (scene, visualTopMesh, topSlabCollision, topDebris, posit);
+			for (int i = 0; i < levels; i ++) {
+				// add a column layer
+//				dVector posit (location.m_x, FindFloor (world, location.m_x, location.m_z) + meshBounds.m_x, location.m_z);
+				dVector posit (x, FindFloor (world, x, z) + meshBounds.m_x, z);
+				AddColumnsLayer (scene, visualColumnMesh, verticalColumnCollision, columnDebris, posit, topSize - 1.0f);
+
+				// add the top
+				float xColum = (-0.5f) * (topSize - 1.0f) + x;
+				float zColum = (-0.5f) * (topSize - 1.0f) + z;
+
+//				posit = dVector (location.m_x, FindFloor (world, x, z) + size.m_y * 0.5f, location.m_z);
+				posit = dVector (x, FindFloor (world, xColum, zColum) + size.m_y * 0.5f, z);
+				AddTopLayer (scene, visualTopMesh, topSlabCollision, topDebris, posit);
+			}
+		}
 	}
 
 	// make sure we release reference to all assets
@@ -399,7 +478,8 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	//CreateLevelMesh (scene, "sponza.xml", false);
 
 	// create a shattered mesh array
-	Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 1);
+	Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 5, 2, 2, 20.0f);
+
 
 	// place camera into position
 	dQuaternion rot;

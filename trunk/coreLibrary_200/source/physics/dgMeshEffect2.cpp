@@ -2154,7 +2154,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 
 
 
-
+/*
 dgVector xxx (0, 0, 0, 0);
 for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 	xxx += convexMesh->m_points[i];
@@ -2166,7 +2166,7 @@ for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 	convexMesh->m_attib[i].m_vertex += xxx;
 }
-
+*/
 
 		for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 			convexMesh->m_points[i].m_w = layer;
