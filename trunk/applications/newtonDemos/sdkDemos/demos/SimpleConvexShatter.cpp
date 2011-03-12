@@ -20,583 +20,8 @@
 #include "../PhysicsUtils.h"
 
 
-#if 0
-#include "SkyBox.h"
-#include "dList.h"
-#include "dTree.h"
-#include "dHeap.h"
-#include "TargaToOpenGl.h"
-#include "RenderPrimitive.h"
-#include "../OGLMesh.h"
-#include "../SceneManager.h"
-#include "../PhysicsUtils.h"
-#include "../toolBox/MousePick.h"
-#include "../toolBox/OpenGlUtil.h"
-#include "../toolBox/DebugDisplay.h"
-
-#define DEBRI_ID  1	
-
-class PrefFabDebriElement
-{
-	public:
-	dFloat m_Ixx;
-	dFloat m_Iyy;
-	dFloat m_Izz;
-	dFloat m_mass;
-	dVector m_com;
-
-	OGLMesh* m_mesh;
-	NewtonCollision* m_shape;
-};
-
-class PrefFabDebriList: public dList<PrefFabDebriElement> 
-{
-	public:
-	PrefFabDebriList()
-	{
-
-	}
-
-	~PrefFabDebriList()
-	{
-	}
-
-	void Destroy (const NewtonWorld* newtonWorld)
-	{
-		for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
-			NewtonReleaseCollision(newtonWorld, node->GetInfo().m_shape);
-			node->GetInfo().m_mesh->Release();
-		}
-	}
-};
-
-class PrefFabDebrisDatabase: public dTree<PrefFabDebriList, NewtonCollision*>
-{
-	public:
-	void LoadDestructionCutterMesh (const NewtonWorld* world)
-	{
-		GLuint tex;
-		dFloat width; 
-		dFloat breadth; 
-
-		dMatrix plane (GetIdentityMatrix());
-		dMatrix texMatrix (GetIdentityMatrix());
-
-		width = 10.0f;
-		breadth = 10.0f;
-
-		tex = LoadTexture ("destructionDetail.tga");
-		texMatrix[1][1] = 4.0f /breadth;
-		texMatrix[2][2] = 4.0f /breadth;
-		m_meshClipper = NewtonMeshCreatePlane (world, &plane[0][0], width, breadth, tex, &texMatrix[0][0], &texMatrix[0][0]);
-	}
-
-	void Destroy (const NewtonWorld* newtonWorld)
-	{
-		NewtonMeshDestroy(m_meshClipper);
-
-		while (GetRoot()) {
-			GetRoot()->GetInfo().Destroy(newtonWorld);
-			Remove(GetRoot());
-		}
-	}
-
-
-	void SetBreakValue (const NewtonBody* body, dFloat impulse) 
-	{
-		NewtonCollision* shape;
-
-		// set the max force value that this shape can take before the DestroyBodycallback is called 
-		shape = NewtonBodyGetCollision(body);
-		if (NewtonCollisionGetMaxBreakImpactImpulse(shape) > 1.0e6f) {
-//			dFloat mass;
-//			dFloat Ixx;
-//			dFloat Iyy;
-//			dFloat Izz;
-//			dFloat breakImpulse;
-
-			// set the max force as a factor of the body weight
-//			NewtonBodyGetMassMatrix(body, &mass, &Ixx, &Iyy, &Izz);
-
-			// break if the impact is higher than speed m/s
-//			breakImpulse = speed * mass;
-			NewtonCollisionSetMaxBreakImpactImpulse(shape, impulse);
-		}
-	}
-
-
-	void BuildPrefabDebris (const NewtonBody* body, dFloat impulseValue)
-	{
-_ASSERTE (0);
-/*
-		NewtonWorld* world;
-		NewtonCollision* collision;
-		RenderPrimitive* srcPrimitive;
-
-		// only add new collision shape
-
-		collision = NewtonBodyGetCollision(body);
-		if (!prefabDebrisDatabase.Find(collision)) {
-
-			SetBreakValue (body, impulseValue);
-
-			// Get the world;
-			world = NewtonBodyGetWorld (body);
-
-			// get the visual primitive
-			srcPrimitive = (RenderPrimitive*) NewtonBodyGetUserData (body);
-
-			// Recursive break the Mesh into a series of smaller meshes to resemble the debri
-			dDownHeap<NewtonMesh*, dFloat> heap (64);
-
-			heap.Push(srcPrimitive->m_specialEffect, 1.0f);
-			while ((heap.GetCount() < 10) && (heap.Value(0) > 0.2f)) {
-				dFloat x;
-				dFloat y;
-				dFloat z;
-				NewtonMesh* meshA;
-				NewtonMesh* meshB;
-				NewtonMesh* worseMesh;
-				dMatrix planeMatrix;
-
-				// get the mesh with the longest axis
-				worseMesh = heap[0]; 
-				heap.Pop();
-
-				// calculate the plane equation along teh longe axis
-				NewtonMeshCalculateOOBB (worseMesh, &planeMatrix[0][0], &x, &y, &z);
-				
-				// randomize the clip plane a little
-				dVector posit = planeMatrix.m_posit + planeMatrix.m_front.Scale (x * RandomVariable(0.5f));
-				planeMatrix = planeMatrix * dYawMatrix(3.1416f * RandomVariable(1.0f));
-				planeMatrix = planeMatrix * dRollMatrix(3.1416f * RandomVariable(1.0f));
-				planeMatrix.m_posit = posit;
-
-
-				// try to split this mesh along the plane equation
-				meshA = NULL;
-				meshB = NULL;
-				NewtonMeshClip (worseMesh, m_meshClipper, &planeMatrix[0][0], &meshA, &meshB);
-				if (meshA && meshB) {
-					// is the mesh was successfully clipped add the two child mesh to the heap
-					if (!(NewtonMeshIsOpenMesh(meshA) || NewtonMeshIsOpenMesh(meshB))) { 
-						NewtonMeshCalculateOOBB (meshA, &planeMatrix[0][0], &x, &y, &z);
-						heap.Push (meshA, x);
-
-						NewtonMeshCalculateOOBB (meshB, &planeMatrix[0][0], &x, &y, &z);
-						heap.Push (meshB, x);
-
-						// delete the parent mesh if this si no the original mesh
-						if (worseMesh != srcPrimitive->m_specialEffect) {
-							NewtonMeshDestroy(worseMesh);
-						}
-
-					} else {
-						// if the split utility generate degenerated meshes 
-						// then delete the two degenerating child and add the parent to the heap with a low cost
-						NewtonMeshDestroy(meshA);
-						NewtonMeshDestroy(meshB);
-						heap.Push(worseMesh, 0.0f);
-					}
-				} else {
-					// if the clipper fail to clip the mesh then add the mesh to the heap with a low cost
-					heap.Push(worseMesh, 0.0f);
-				}
-			}
-
-			// get the effect mesh that is use to create the debris pieces
-			dFloat Ixx;
-			dFloat Iyy;
-			dFloat Izz;
-			dFloat mass;
-			dFloat volume;
-			dFloat density;
-			PrefFabDebriList* prefaceDrebriComponets;
-
-			prefaceDrebriComponets = &prefabDebrisDatabase.Insert (collision)->GetInfo();
-
-			NewtonBodyGetMassMatrix (body, &mass, &Ixx, &Iyy, &Izz);
-			volume = NewtonConvexCollisionCalculateVolume (collision);
-
-			density = mass / volume;
-			for (int i = 0; i < heap.GetCount(); i ++) {
-				dFloat shapeVolume;
-				NewtonMesh* mesh;
-				OGLMesh* visualMesh;
-				dVector inertia;
-				dVector origin;
-
-
-				// add a new debris entry
-				PrefFabDebriElement& debriPiece = prefaceDrebriComponets->Append()->GetInfo();
-
-				mesh = heap[i];
-				visualMesh = new OGLMesh(dMesh::D_STATIC_MESH);
-				visualMesh->BuildFromMesh (mesh);
-
-				debriPiece.m_mesh = visualMesh;
-				debriPiece.m_shape = NewtonCreateConvexHullFromMesh (world, mesh, 0.1f, DEBRI_ID);
-
-				// calculate the moment of inertia and the relative center of mass of the solid
-				shapeVolume = NewtonConvexCollisionCalculateVolume (debriPiece.m_shape);
-				NewtonConvexCollisionCalculateInertialMatrix (debriPiece.m_shape, &inertia[0], &origin[0]);	
-
-				debriPiece.m_mass = shapeVolume * density;
-				debriPiece.m_Ixx = debriPiece.m_mass * inertia[0];
-				debriPiece.m_Iyy = debriPiece.m_mass * inertia[1];
-				debriPiece.m_Izz = debriPiece.m_mass * inertia[2];
-				debriPiece.m_com = origin;
-
-				NewtonMeshDestroy (mesh);
-			}
-		}
-*/
-	}
-
-	NewtonMesh* m_meshClipper;
-	static PrefFabDebrisDatabase prefabDebrisDatabase;	
-};
-
-PrefFabDebrisDatabase PrefFabDebrisDatabase::prefabDebrisDatabase;	
-
-
-// destroy the clipper Mesh
-static void DestroyWorldCallback(const NewtonWorld* newtonWorld)
-{
-	PrefFabDebrisDatabase::prefabDebrisDatabase.Destroy(newtonWorld);
-}
-
-
-static void DestroyThisBodyCallback (const NewtonBody* body, const NewtonJoint* contactJoint)
-{
-	PrefFabDebrisDatabase::dTreeNode *debrisPiecesNode;
-
-	// find a the strongest force 
-	debrisPiecesNode = PrefFabDebrisDatabase::prefabDebrisDatabase.Find(NewtonBodyGetCollision(body));
-	if (debrisPiecesNode) {
-		dMatrix matrix;
-		NewtonWorld* world;
-		SceneManager* system;
-		NewtonBody* rigidBody;
-		dVector veloc;
-		dVector omega;
-
-
-		// Get the world;
-		world = NewtonBodyGetWorld (body);
-		system = (SceneManager*) NewtonWorldGetUserData(world);
-
-		NewtonBodyGetOmega(body, &omega[0]);
-		NewtonBodyGetVelocity(body, &veloc[0]);
-		NewtonBodyGetMatrix (body, &matrix[0][0]);
-
-		veloc = veloc.Scale (0.25f);
-		omega = omega.Scale (0.25f);
-
-		for (PrefFabDebriList::dListNode* node = debrisPiecesNode->GetInfo().GetFirst(); node; node = node->GetNext()) {
-			OGLMesh* meshInstance;
-			NewtonCollision* collision;
-			RenderPrimitive* primitive;
-			PrefFabDebriElement& debriData = node->GetInfo();
-		
-			// make a visual object
-			meshInstance = debriData.m_mesh;
-
-			// create a visual geometry
-			primitive = new RenderPrimitive (matrix, meshInstance);
-
-			// save the graphics system
-			system->AddModel (primitive);
-
-			collision = debriData.m_shape;
-
-			// calculate the moment of inertia and the relative center of mass of the solid
-			//create the rigid body
-			rigidBody = NewtonCreateBody (world, collision);
-
-			// set the correct center of gravity for this body
-			NewtonBodySetCentreOfMass (rigidBody, &debriData.m_com[0]);
-
-			// set the mass matrix
-			NewtonBodySetMassMatrix (rigidBody, debriData.m_mass, debriData.m_Ixx, debriData.m_Iyy, debriData.m_Izz);
-
-			// save the pointer to the graphic object with the body.
-			NewtonBodySetUserData (rigidBody, primitive);
-
-			// assign the wood id
-			//	NewtonBodySetMaterialGroupID (rigidBody, NewtonBodyGetMaterialGroupID(source));
-
-			// set continue collision mode
-			NewtonBodySetContinuousCollisionMode (rigidBody, 1);
-
-			// set a destructor for this rigid body
-			NewtonBodySetDestructorCallback (rigidBody, PhysicsBodyDestructor);
-
-			// set the transform call back function
-			NewtonBodySetTransformCallback (rigidBody, PhysicsSetTransform);
-
-			// set the force and torque call back function
-			NewtonBodySetForceAndTorqueCallback (rigidBody, PhysicsApplyGravityForce);
-
-			// set the matrix for both the rigid body and the graphic body
-			NewtonBodySetMatrix (rigidBody, &matrix[0][0]);
-			PhysicsSetTransform (rigidBody, &matrix[0][0], 0);
-
-			dVector debriOmega (omega);
-			dVector debriVeloc (veloc + omega * matrix.RotateVector(debriData.m_com));
-
-			// for now so that I can see the body
-//debriVeloc = dVector (0, 0, 0, 0);
-//debriVeloc.Scale (0.25f);
-//debriVeloc.Omega
-//omega = dVector (0, 0, 0, 0);
-
-			NewtonBodySetOmega(rigidBody, &debriOmega[0]);
-			NewtonBodySetVelocity(rigidBody, &debriVeloc[0]);
-		}
-
-		RenderPrimitive* srcPrimitive;
-		srcPrimitive = (RenderPrimitive*) NewtonBodyGetUserData (body);
-
-		// remove the old visual from graphics world
-		delete srcPrimitive;
-		system->Remove(srcPrimitive);
-
-		// finally destroy this body;
-		NewtonDestroyBody(world, body);
-
-	}
-}
-
-
-static void SetDemoCallbacks (SceneManager& system)
-{
-	system.m_control = Keyboard;
-	system.m_autoSleep = AutoSleep;
-	system.m_showIslands = SetShowIslands;
-	system.m_showContacts = SetShowContacts; 
-	system.m_setMeshCollision = SetShowMeshCollision;
-}
-
-
-static void BuildFloorAndSceneRoot (SceneManager& system)
-{
-	NewtonWorld* world;
-	RenderPrimitive* floor;
-	NewtonBody* floorBody;
-	NewtonCollision* floorCollision;
-	OGLMesh* meshInstance;
-
-	world = system.m_world;
-	// /////////////////////////////////////////////////////////////////////
-	//
-	// create the sky box,
-	system.AddModel (new SkyBox ());
-
-
-	// create the the floor graphic objects
-	dVector floorSize (100.0f, 2.0f, 100.0f);
-	dMatrix location (GetIdentityMatrix());
-	location.m_posit.m_y = -5.0f; 
-
-	// create a box for floor 
-	floorCollision = NewtonCreateBox (world, floorSize.m_x, floorSize.m_y, floorSize.m_z, 0, NULL); 
-
-	//	meshInstance = OGLMesh::MakeBox (world, size.m_x, size.m_y, size.m_z, "GrassAndDirt.tga");
-	meshInstance = new OGLMesh (floorCollision, "GrassAndDirt.tga", "metal_30.tga", "metal_30.tga");
-	floor = new RenderPrimitive (location, meshInstance);
-	system.AddModel (floor);
-	meshInstance->Release();
-
-	// create the the floor collision, and body with default values
-	floorBody = NewtonCreateBody (world, floorCollision);
-	NewtonReleaseCollision (world, floorCollision);
-
-
-	// set the transformation for this rigid body
-	NewtonBodySetMatrix (floorBody, &location[0][0]);
-
-	// save the pointer to the graphic object with the body.
-	NewtonBodySetUserData (floorBody, floor);
-
-	// set a destructor for this rigid body
-	NewtonBodySetDestructorCallback (floorBody, PhysicsBodyDestructor);
-
-
-	// get the default material ID
-	int defaultID;
-	defaultID = NewtonMaterialGetDefaultGroupID (world);
-
-	// set default material properties
-	NewtonMaterialSetDefaultSoftness (world, defaultID, defaultID, 0.05f);
-	NewtonMaterialSetDefaultElasticity (world, defaultID, defaultID, 0.4f);
-	NewtonMaterialSetDefaultCollidable (world, defaultID, defaultID, 1);
-	NewtonMaterialSetDefaultFriction (world, defaultID, defaultID, 1.0f, 0.5f);
-	NewtonMaterialSetCollisionCallback (world, defaultID, defaultID, NULL, NULL, GenericContactProcess); 
-
-	//	NewtonMaterialSetSurfaceThickness(world, materialID, materialID, 0.1f);
-	NewtonMaterialSetSurfaceThickness(world, defaultID, defaultID, 0.0f);
-
-	// set the island update callback
-	NewtonSetIslandUpdateEvent (world, PhysicsIslandUpdate);
-
-	// save the callback
-	SetDemoCallbacks (system);
-
-	InitEyePoint (dVector (1.0f, 0.0f, 0.0f), dVector (-40.0f, 10.0f, 0.0f));
-}
-
-
-//static void UnstableStruture (SceneManager& system, dVector location, int high)
-static void BreakableStruture (SceneManager& system, dVector location, int high)
-{
-	dFloat plankMass;
-	dFloat columnMass;
-
-	// /////////////////////////////////////////////////////////////////////
-	//
-	// Build a parking lot type structure
-
-	dVector columnBoxSize (3.0f, 1.0f, 1.0f);
-	//	dVector columnBoxSize (3.0f, 3.0f, 1.0f);
-	dVector plankBoxSize (6.0f, 1.0f, 6.0f);
-
-	// create the stack
-	dMatrix baseMatrix (GetIdentityMatrix());
-
-	// get the floor position in from o the camera
-	baseMatrix.m_posit = location;
-	baseMatrix.m_posit.m_y += columnBoxSize.m_x;
-
-	// set realistic (extremes in this case for 24 bits precision) masses for the different components
-	// note how the newton engine handle different masses ratios without compromising stability, 
-	// we recommend the application keep this ration under 100 for contacts and 50 for joints 
-	columnMass = 1.0f;
-	plankMass = 20.0f;
-	//	 plankMass = 1.0f;
-
-	// create a material carrier to to cou collision wit ethsi obejted
-	int defaultMaterialID;
-	defaultMaterialID = NewtonMaterialGetDefaultGroupID (system.m_world);
-
-	dMatrix columAlignment (dRollMatrix(3.1416f * 0.5f));
-	for (int i = 0; i < high; i ++) { 
-
-		NewtonBody* body;
-		RenderPrimitive* primitive;
-
-		dMatrix matrix(columAlignment * baseMatrix);
-
-
-		// add the 4 column
-		matrix.m_posit.m_x -=  (columnBoxSize.m_z - plankBoxSize.m_x) * 0.5f;
-		matrix.m_posit.m_z -=  (columnBoxSize.m_z - plankBoxSize.m_z) * 0.5f;
-		body = CreateGenericSolid (system.m_world, &system, columnMass, matrix, columnBoxSize, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
-		primitive = (RenderPrimitive*) NewtonBodyGetUserData (body);
-		PrefFabDebrisDatabase::prefabDebrisDatabase.BuildPrefabDebris (body, 30.0f);
-		ConvexCastPlacement (body);
-
-		matrix.m_posit.m_x += columnBoxSize.m_z - plankBoxSize.m_x;
-		body = CreateGenericSolid (system.m_world, &system, columnMass, matrix, columnBoxSize, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
-		primitive = (RenderPrimitive*) NewtonBodyGetUserData (body);
-		PrefFabDebrisDatabase::prefabDebrisDatabase.BuildPrefabDebris (body, 30.0f);
-		ConvexCastPlacement (body);
-
-		matrix.m_posit.m_z += columnBoxSize.m_z - plankBoxSize.m_z;		
-		body = CreateGenericSolid (system.m_world, &system, columnMass, matrix, columnBoxSize, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
-		primitive = (RenderPrimitive*) NewtonBodyGetUserData (body);
-		PrefFabDebrisDatabase::prefabDebrisDatabase.BuildPrefabDebris (body, 30.0f);
-		ConvexCastPlacement (body);
-
-		matrix.m_posit.m_x -= columnBoxSize.m_z - plankBoxSize.m_x;
-		body = CreateGenericSolid (system.m_world, &system, columnMass, matrix, columnBoxSize, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
-		primitive = (RenderPrimitive*) NewtonBodyGetUserData (body);
-		PrefFabDebrisDatabase::prefabDebrisDatabase.BuildPrefabDebris (body, 30.0f);
-		ConvexCastPlacement (body);
-
-		// add a plank
-		dVector size (plankBoxSize);
-		size.m_x *= 0.85f;
-		size.m_z *= 0.85f;
-		body = CreateGenericSolid (system.m_world, &system, plankMass, baseMatrix, size, _BOX_PRIMITIVE, defaultMaterialID);
-		primitive = (RenderPrimitive*) NewtonBodyGetUserData (body);
-		PrefFabDebrisDatabase::prefabDebrisDatabase.BuildPrefabDebris (body, 80.0f);
-		ConvexCastPlacement (body);
-
-		// set up for another level
-		baseMatrix.m_posit.m_y += (columnBoxSize.m_x + plankBoxSize.m_y);
-	}
 
 /*
-	dFloat mass;
-	NewtonBody* body;
-	PrimitiveType type = _BOX_PRIMITIVE;
-	dVector size (1.0f, 2.0f, 1.0f);
-	dMatrix matrix (GetIdentityMatrix());
-
-	mass = 10.0f;
-	matrix.m_posit = location;
-	matrix.m_posit.m_y = FindFloor (system.m_world, matrix.m_posit.m_x, matrix.m_posit.m_z) + baseMatrix.m_posit.m_y + 35.0f; 
-//	body = CreateGenericSolid (system.m_world, &system, mass, matrix, size, type, defaultMaterialID);
-*/
-}
-
-
-
-void PrefabSimpleDestruction(SceneManager& system)
-{
-	NewtonWorld* world;
-	world = system.m_world;
-
-	// create the sky box and the floor,
-	BuildFloorAndSceneRoot (system);
-
-	// save the system wit the world
-	NewtonWorldSetUserData(system.m_world, &system);
-
-	// Set a world destruction callback so that we can destroy all assets created for special effects
-	NewtonWorldSetDestructorCallBack (system.m_world, DestroyWorldCallback);
-
-	// Set a Function callback for when a Convex Body collision is destroyed if the force exceeded the Max break value
-	NewtonSetDestroyBodyByExeciveForce (system.m_world, DestroyThisBodyCallback); 
-
-	// this will load a assets to create destruction special effects 
-	PrefFabDebrisDatabase::prefabDebrisDatabase.LoadDestructionCutterMesh (system.m_world);
-
-	BreakableStruture (system, dVector (-10.0f, 0.0f, -10.0f, 0.0f), 2);
-	BreakableStruture (system, dVector ( 10.0f, 0.0f, -10.0f, 0.0f), 1);
-	BreakableStruture (system, dVector (-10.0f, 0.0f,  10.0f, 0.0f), 3);
-	BreakableStruture (system, dVector ( 10.0f, 0.0f,  10.0f, 0.0f), 3);
-}
-
-#endif
-
-static NewtonMesh* CreateConvexVonoroiMesh (NewtonMesh* const mesh, int interiorMaterial)
-{
-
-	dVector size;
-	dMatrix matrix(GetIdentityMatrix()); 
-	NewtonMeshCalculateOOBB(mesh, &matrix[0][0], &size.m_x, &size.m_y, &size.m_z);
-
-	// pepper the inside of the BBox box of the mesh with random points
-	int count = 0;
-	dVector points[10];
-	do {
-		dFloat x = RandomVariable(size.m_x);
-		dFloat y = RandomVariable(size.m_y);
-		dFloat z = RandomVariable(size.m_z);
-		if ((x <= size.m_x) && (x >= -size.m_x) && (y <= size.m_y) && (y >= -size.m_y) && (z <= size.m_z) && (z >= -size.m_z)){
-			points[count] = dVector (x, y, z);
-			count ++;
-		}
-	} while (count < 10);
-
-	dMatrix textureMatrix (GetIdentityMatrix());
-	return NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interiorMaterial, &textureMatrix[0][0]);
-}
-
-
-
 static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, PrimitiveType type)
 {
 	// create a collision primitive
@@ -661,6 +86,261 @@ xxxx.Serialize("xxx.xml");
 	NewtonMeshDestroy (mesh);
 	NewtonReleaseCollision(world, collision);
 }
+*/
+
+
+class DebriAtom
+{
+	public:
+	DemoMesh* m_mesh;
+	NewtonCollision* m_collision;
+	dVector m_centerOfMass;
+	dVector m_momentOfInirtia;
+	dFloat m_mass;
+};
+
+class DebriEffect: public dList<DebriAtom> 
+{
+	public:
+
+	DebriEffect(NewtonWorld* const world, NewtonMesh* const mesh, int interiorMaterial)
+		:dList(), m_world (world)
+	{
+		// first we populate the bounding Box area with few random point to get some interior subdivisions.
+		// the subdivision are local to the point placement, by placing these points visual ally with a 3d tool
+		// and have precise control of how the debris are created.
+		// the number of pieces is equal to the number of point inside the Mesh plus the number of point on the mesh 
+		dVector size;
+		dMatrix matrix(GetIdentityMatrix()); 
+		NewtonMeshCalculateOOBB(mesh, &matrix[0][0], &size.m_x, &size.m_y, &size.m_z);
+
+		// pepper the inside of the BBox box of the mesh with random points
+		int count = 0;
+		dVector points[10];
+		do {
+			dFloat x = RandomVariable(size.m_x);
+			dFloat y = RandomVariable(size.m_y);
+			dFloat z = RandomVariable(size.m_z);
+			if ((x <= size.m_x) && (x >= -size.m_x) && (y <= size.m_y) && (y >= -size.m_y) && (z <= size.m_z) && (z >= -size.m_z)){
+				points[count] = dVector (x, y, z);
+				count ++;
+			}
+//		} while (count < 10);
+		} while (count < 2);
+
+		// create a texture matrix, for appling the material's UV to all internal faces
+		dMatrix textureMatrix (GetIdentityMatrix());
+		textureMatrix[0][0] = 1.0f / size.m_x;
+		textureMatrix[1][1] = 1.0f / size.m_y;
+
+		// now we call create we decompose the mesh into several convex pieces 
+		NewtonMesh* const debriMeshPieces = NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interiorMaterial, &textureMatrix[0][0]);
+
+		// now we iterate over each pieces and for each one we create collision Mesh and a Visual Mesh
+		NewtonMesh* nextDebri;
+		for (NewtonMesh* debri = NewtonMeshCreateFirstSingleSegment (debriMeshPieces); debri; debri = nextDebri) {
+			nextDebri = NewtonMeshCreateNextSingleSegment (debriMeshPieces, debri); 
+
+			DebriAtom& atom = Append()->GetInfo();
+			atom.m_mesh = new DemoMesh(debri);
+			atom.m_collision = NewtonCreateConvexHullFromMesh (m_world, debri, 0.0f, 0);
+
+
+			NewtonMeshDestroy(debri);
+		}
+
+		NewtonMeshDestroy(debriMeshPieces);
+	}
+
+	DebriEffect (const DebriEffect& list)
+		:dList(), m_world(list.m_world)
+	{
+		for (dListNode* node = list.GetFirst(); node; node = node->GetNext()) {
+			DebriAtom& atom = Append(node->GetInfo())->GetInfo();
+			atom.m_mesh->AddRef();
+			NewtonAddCollisionReference (atom.m_collision); 
+		}
+	}
+
+	~DebriEffect()
+	{
+		for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
+			DebriAtom& atom = node->GetInfo();
+			NewtonReleaseCollision (m_world, atom.m_collision);
+			atom.m_mesh->Release();
+		}
+	}
+
+	NewtonWorld* m_world;
+};
+
+
+
+class SimpleShatterEffectEntity: public DemoEntity
+{
+	public:
+	SimpleShatterEffectEntity (DemoMesh* const mesh, const DebriEffect& columnDebris)
+		:DemoEntity (NULL), m_effect(columnDebris)
+	{
+		SetMesh(mesh);
+	}
+	DebriEffect m_effect;
+};
+
+
+static void AddTopLayer (
+	DemoEntityManager* const scene, 
+	DemoMesh* const visualMesh, 
+	NewtonCollision* const collision,
+	const DebriEffect& shatterEffect, 
+	dVector location)
+{
+	dQuaternion rotation;
+	SimpleShatterEffectEntity* const entity = new SimpleShatterEffectEntity (visualMesh, shatterEffect);
+	entity->SetMatrix(*scene, rotation, location);
+	entity->InterpolateMatrix (*scene, 1.0f);
+	scene->Append(entity);
+
+	dVector origin;
+	dVector inertia;
+	NewtonConvexCollisionCalculateInertialMatrix (collision, &inertia[0], &origin[0]);	
+
+float mass = 10.0f;
+int materialId = 0;
+
+	dFloat Ixx = mass * inertia[0];
+	dFloat Iyy = mass * inertia[1];
+	dFloat Izz = mass * inertia[2];
+
+	//create the rigid body
+	dMatrix matrix (GetIdentityMatrix());
+	matrix.m_posit = location;
+
+	NewtonWorld* const world = scene->GetNewton();
+	NewtonBody* const rigidBody = NewtonCreateBody (world, collision, &matrix[0][0]);
+
+	// set the correct center of gravity for this body
+	NewtonBodySetCentreOfMass (rigidBody, &origin[0]);
+
+	// set the mass matrix
+	NewtonBodySetMassMatrix (rigidBody, mass, Ixx, Iyy, Izz);
+
+	// activate 
+	//	NewtonBodyCoriolisForcesMode (blockBoxBody, 1);
+
+	// save the pointer to the graphic object with the body.
+	NewtonBodySetUserData (rigidBody, entity);
+
+	// assign the wood id
+	NewtonBodySetMaterialGroupID (rigidBody, materialId);
+
+	//  set continue collision mode
+	//	NewtonBodySetContinuousCollisionMode (rigidBody, continueCollisionMode);
+
+	// set a destructor for this rigid body
+	NewtonBodySetDestructorCallback (rigidBody, PhysicsBodyDestructor);
+
+	// set the transform call back function
+	NewtonBodySetTransformCallback (rigidBody, DemoEntity::SetTransformCallback);
+
+	// set the force and torque call back function
+	NewtonBodySetForceAndTorqueCallback (rigidBody, PhysicsApplyGravityForce);
+
+//	return rigidBody;
+}
+
+
+static void AddColumnsLayer (
+	DemoEntityManager* const scene, 
+	DemoMesh* const visualMesh, 
+	NewtonCollision* const collision,
+	const DebriEffect& shatterEffect, 
+	dVector location, 
+	float separation)
+{
+	//create and array of entities all reusing the same effect
+	for (int i = 0; i < 2; i ++) {
+		for (int j = 0; j < 2; j ++) {
+			float x = (float (i) - 0.5f) * separation + location.m_x;
+			float z = (float (j) - 0.5f) * separation + location.m_z;
+			dQuaternion rotation;
+			dVector position (x, location.m_y, z, 1.0f);
+			AddTopLayer (scene, visualMesh, collision, shatterEffect, position);
+		}
+	}
+}
+
+
+
+static void Stonehenge (DemoEntityManager* const scene, dVector location, int levels)
+{
+	NewtonWorld* const world = scene->GetNewton();
+
+
+	// Create the vertical column effect
+	dVector size (1.0f, 4.0f, 1.0f);
+//	NewtonCollision* const verticalColumnCollision = CreateConvexCollision (world, GetIdentityMatrix(), size, _RANDOM_CONVEX_HULL_PRIMITIVE, 0);
+	NewtonCollision* const verticalColumnCollision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
+
+	// create a newton mesh from the collision primitive
+	NewtonMesh* const verticalColumnNewtonMesh = NewtonMeshCreateFromCollision(verticalColumnCollision);
+
+	// apply a material map
+	int columnMaterial = LoadTexture("KAMEN-stup.tga");
+	NewtonMeshApplyBoxMapping(verticalColumnNewtonMesh, columnMaterial, columnMaterial, columnMaterial);
+
+	// shatter this mesh into pieces
+	DebriEffect columnDebris (world, verticalColumnNewtonMesh, columnMaterial);
+
+	// create the visual Mesh
+	DemoMesh* const visualColumnMesh = new DemoMesh(verticalColumnNewtonMesh);
+
+	// calculate the floor position for this objects
+	dVector meshBounds;
+	dMatrix matrix (GetIdentityMatrix());
+	NewtonMeshCalculateOOBB(verticalColumnNewtonMesh, &matrix[0][0], &meshBounds.m_x, &meshBounds.m_y, &meshBounds.m_z);
+
+
+	// now calculate the top mesh
+	float topSize = 10.0f;
+//	size = dVector (topSize, 0.2f, topSize, 0.0f);
+	size = dVector (topSize, 0.5f, topSize, 0.0f);
+	NewtonCollision* const topSlabCollision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
+	NewtonMesh* const topNewtonMesh = NewtonMeshCreateFromCollision(topSlabCollision);
+	int topMaterial = LoadTexture("reljef.tga");
+	NewtonMeshApplyBoxMapping(topNewtonMesh, columnMaterial, topMaterial, columnMaterial);
+
+	// create a newton mesh from the collision primitive
+	DebriEffect topDebris (world, topNewtonMesh, columnMaterial);
+
+	// create the visual top mesh
+	DemoMesh* const visualTopMesh = new DemoMesh(topNewtonMesh);
+	
+
+	for (int i = 0; i < levels; i ++) {
+		// add a column layer
+		dVector posit (location.m_x, FindFloor (world, location.m_x, location.m_z) + meshBounds.m_x, location.m_z);
+		AddColumnsLayer (scene, visualColumnMesh, verticalColumnCollision, columnDebris, posit, topSize - 1.0f);
+
+		// add the top
+		float x = (-0.5f) * (topSize - 1.0f) + location.m_x;
+		float z = (-0.5f) * (topSize - 1.0f) + location.m_z;
+
+		posit = dVector (location.m_x, FindFloor (world, x, z) + size.m_y * 0.5f, location.m_z);
+		AddTopLayer (scene, visualTopMesh, topSlabCollision, topDebris, posit);
+	}
+
+	// make sure we release reference to all assets
+
+	visualTopMesh->Release();
+	NewtonMeshDestroy (topNewtonMesh);
+	NewtonReleaseCollision(world, topSlabCollision);
+
+
+	visualColumnMesh->Release();
+	NewtonMeshDestroy (verticalColumnNewtonMesh);
+	NewtonReleaseCollision(world, verticalColumnCollision);
+}
 
 
 
@@ -677,8 +357,7 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	//CreateLevelMesh (scene, "sponza.xml", false);
 
 	// create a shattered mesh array
-//	CreateSimpleVoronoiShatter (scene, _BOX_PRIMITIVE);
-	CreateSimpleVoronoiShatter (scene, _RANDOM_CONVEX_HULL_PRIMITIVE);
+	Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 1);
 
 	// place camera into position
 	dQuaternion rot;
