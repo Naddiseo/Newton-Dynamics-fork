@@ -467,6 +467,13 @@ void DemoEntityManager::UpdatePhysics()
 					UpdateCamera (timestepInSecunds);
 					// update teh world
 					NewtonUpdate (m_world, timestepInSecunds);
+
+					for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
+						DemoEntity* const entity = node->GetInfo();
+						entity->SimulationLister(this, node, timestepInSecunds);
+					}
+
+					
 				}
 				m_reEntrantUpdate = false;
 			}

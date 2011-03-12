@@ -34,6 +34,28 @@ static void DeSerializeFile (void* serializeHandle, void* buffer, int size)
 #endif
 
 
+dVector ForceBetweenBody (NewtonBody* const body0, NewtonBody* const body1)
+{
+	dVector forceAcc (0.0f, 0.0f, 0.0f, 0.0f);
+	for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(body0); joint; joint = NewtonBodyGetNextContactJoint(body0, joint)) {
+		if ((NewtonJointGetBody0(joint) == body0) || (NewtonJointGetBody0(joint) == body1)) {
+			for (void* contact = NewtonContactJointGetFirstContact (joint); contact; contact = NewtonContactJointGetNextContact (joint, contact)) {
+				dVector point;
+				dVector normal;	
+				float forceMag;
+				NewtonMaterial* const material = NewtonContactGetMaterial (contact);
+				NewtonMaterialGetContactPositionAndNormal (material, &point.m_x, &normal.m_x);
+				NewtonMaterialGetContactForce(material, &forceMag);
+				forceAcc += normal.Scale (forceMag);
+			}
+			break;
+		}
+	}
+	return forceAcc;
+}
+
+
+
 static dFloat RayCastPlacement (const NewtonBody* body, const dFloat* normal, int collisionID, void* userData, dFloat intersetParam)
 {
 	dFloat* paramPtr;
@@ -715,7 +737,7 @@ void  PhysicsApplyGravityForce (const NewtonBody* body, dFloat timestep, int thr
 
 
 	NewtonBodyGetMassMatrix (body, &mass, &Ixx, &Iyy, &Izz);
-	dVector force (0.0f, -mass * 10.0f, 0.0f);
+	dVector force (0.0f, mass * DEMO_GRAVITY, 0.0f);
 	NewtonBodySetForce (body, &force.m_x);
 }
 

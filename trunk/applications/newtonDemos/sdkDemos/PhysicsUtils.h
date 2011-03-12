@@ -13,6 +13,8 @@
 #define __PHYSICS_UTIL__
 
 
+#define DEMO_GRAVITY  -10.0f
+
 
 enum PrimitiveType
 {

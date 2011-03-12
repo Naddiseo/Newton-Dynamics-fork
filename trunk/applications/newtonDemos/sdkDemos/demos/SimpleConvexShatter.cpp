@@ -180,11 +180,41 @@ class SimpleShatterEffectEntity: public DemoEntity
 {
 	public:
 	SimpleShatterEffectEntity (DemoMesh* const mesh, const DebriEffect& columnDebris)
-		:DemoEntity (NULL), m_effect(columnDebris)
+		:DemoEntity (NULL), m_effect(columnDebris), m_myBody(NULL)
 	{
 		SetMesh(mesh);
 	}
+
+	void SimulationLister(DemoEntityManager* const scene, DemoEntityManager::dListNode* const mynode, dFloat timeStep)
+	{
+		// see if the net force on the body comes fr a high impact collision
+		dVector netForce (0.0f, -m_myweight, 0.0f) ;
+		for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(m_myBody); joint; joint = NewtonBodyGetNextContactJoint(m_myBody, joint)) {
+			for (void* contact = NewtonContactJointGetFirstContact (joint); contact; contact = NewtonContactJointGetNextContact (joint, contact)) {
+				//dVector point;
+				//dVector normal;	
+				dVector contactForce;
+				NewtonMaterial* const material = NewtonContactGetMaterial (contact);
+				//NewtonMaterialGetContactPositionAndNormal (material, &point.m_x, &normal.m_x);
+				NewtonMaterialGetContactForce(material, &contactForce[0]);
+				netForce += contactForce;
+			}
+		}
+
+		dFloat mag2 = netForce % netForce ;
+
+		float maxForce = 3.0f * m_myweight;
+		if (mag2 > (maxForce * maxForce)) {
+			mag2 *= 1.0f;
+
+		}
+
+
+	};
+
 	DebriEffect m_effect;
+	NewtonBody* m_myBody;
+	dFloat m_myweight; 
 };
 
 
@@ -218,6 +248,10 @@ int materialId = 0;
 
 	NewtonWorld* const world = scene->GetNewton();
 	NewtonBody* const rigidBody = NewtonCreateBody (world, collision, &matrix[0][0]);
+
+
+	entity->m_myBody = rigidBody;
+	entity->m_myweight = dAbs (mass * DEMO_GRAVITY);
 
 	// set the correct center of gravity for this body
 	NewtonBodySetCentreOfMass (rigidBody, &origin[0]);

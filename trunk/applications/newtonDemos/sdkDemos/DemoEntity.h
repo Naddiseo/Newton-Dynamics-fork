@@ -33,6 +33,7 @@ public:
 	virtual void SetMatrix(DemoEntityManager& world, const dQuaternion& rotation, const dVector& position);
 
 	virtual void Render(dFloat timeStep) const;
+	virtual void SimulationLister(DemoEntityManager* const scene, DemoEntityManager::dListNode* const mynode, dFloat timeStep){};
 
 	void InterpolateMatrix (DemoEntityManager& world, dFloat param);
 

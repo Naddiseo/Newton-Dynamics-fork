@@ -16,25 +16,6 @@
 #include <DebugDisplay.h>
 
 
-dVector ForceBeteenBody (NewtonBody* const body0, NewtonBody* const body1)
-{
-	dVector forceAcc (0.0f, 0.0f, 0.0f, 0.0f);
-	for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(body0); joint; joint = NewtonBodyGetNextContactJoint(body0, joint)) {
-		if ((NewtonJointGetBody0(joint) == body0) || (NewtonJointGetBody0(joint) == body1)) {
-			for (void* contact = NewtonContactJointGetFirstContact (joint); contact; contact = NewtonContactJointGetNextContact (joint, contact)) {
-				dVector point;
-				dVector normal;	
-				float forceMag;
-				NewtonMaterial* const material = NewtonContactGetMaterial (contact);
-				NewtonMaterialGetContactPositionAndNormal (material, &point.m_x, &normal.m_x);
-				NewtonMaterialGetContactForce(material, &forceMag);
-				forceAcc += normal.Scale (forceMag);
-			}
-			break;
-		}
-	}
-	return forceAcc;
-}
 
 
 
