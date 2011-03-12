@@ -221,7 +221,7 @@ class SimpleShatterEffectEntity: public DemoEntity
 		dFloat mag2 = netForce % netForce ;
 
 		// if the force is bigger than 4 Gravities, It is considered a collision force
-		float maxForce = 6.0f * m_myweight;
+		float maxForce = 10.0f * m_myweight;
 
 
 		if (mag2 > (maxForce * maxForce)) {
@@ -478,7 +478,7 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	//CreateLevelMesh (scene, "sponza.xml", false);
 
 	// create a shattered mesh array
-	Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 5, 2, 2, 20.0f);
+	Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 5, 2, 2, 30.0f);
 
 
 	// place camera into position
