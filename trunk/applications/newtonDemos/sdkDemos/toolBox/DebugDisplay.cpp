@@ -34,7 +34,7 @@ void RenderContactPoints (NewtonWorld* const world)
 				dVector point;
 				dVector normal;	
 				NewtonMaterial* const material = NewtonContactGetMaterial (contact);
-				NewtonMaterialGetContactPositionAndNormal (material, &point.m_x, &normal.m_x);
+				NewtonMaterialGetContactPositionAndNormal (material, body, &point.m_x, &normal.m_x);
 
 				// if we are display debug info we need to block other threads from writing the data at the same time
 				dVector p0 (point + normal.Scale (length));
@@ -55,7 +55,7 @@ void RenderContactPoints (NewtonWorld* const world)
 				dVector point;
 				dVector normal;	
 				NewtonMaterial* const material = NewtonContactGetMaterial (contact);
-				NewtonMaterialGetContactPositionAndNormal (material, &point.m_x, &normal.m_x);
+				NewtonMaterialGetContactPositionAndNormal (material, body, &point.m_x, &normal.m_x);
 
 				// if we are display debug info we need to block other threads from writing the data at the same time
 				glVertex3f (point.m_x, point.m_y, point.m_z);

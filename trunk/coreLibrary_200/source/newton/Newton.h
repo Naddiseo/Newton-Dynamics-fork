@@ -449,9 +449,9 @@ extern "C" {
 	NEWTON_API unsigned NewtonMaterialGetContactFaceAttribute (const NewtonMaterial* material);
 	NEWTON_API unsigned NewtonMaterialGetBodyCollisionID (const NewtonMaterial* material, const NewtonBody* body);
 	NEWTON_API dFloat NewtonMaterialGetContactNormalSpeed (const NewtonMaterial* material);
-	NEWTON_API void NewtonMaterialGetContactForce (const NewtonMaterial* material, dFloat* force);
-	NEWTON_API void NewtonMaterialGetContactPositionAndNormal (const NewtonMaterial* material, dFloat* posit, dFloat* normal);
-	NEWTON_API void NewtonMaterialGetContactTangentDirections (const NewtonMaterial* material, dFloat* dir0, dFloat* dir1);
+	NEWTON_API void NewtonMaterialGetContactForce (const NewtonMaterial* material, NewtonBody* const body, dFloat* force);
+	NEWTON_API void NewtonMaterialGetContactPositionAndNormal (const NewtonMaterial* material, NewtonBody* const body, dFloat* posit, dFloat* normal);
+	NEWTON_API void NewtonMaterialGetContactTangentDirections (const NewtonMaterial* material, NewtonBody* const body, dFloat* dir0, dFloat* dir1);
 	NEWTON_API dFloat NewtonMaterialGetContactTangentSpeed (const NewtonMaterial* material, int index);
 	
 	NEWTON_API void NewtonMaterialSetContactSoftness (const NewtonMaterial* material, dFloat softness);

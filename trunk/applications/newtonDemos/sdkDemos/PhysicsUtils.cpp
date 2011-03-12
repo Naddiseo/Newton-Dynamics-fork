@@ -36,22 +36,23 @@ static void DeSerializeFile (void* serializeHandle, void* buffer, int size)
 
 dVector ForceBetweenBody (NewtonBody* const body0, NewtonBody* const body1)
 {
-	dVector forceAcc (0.0f, 0.0f, 0.0f, 0.0f);
+	dVector reactionforce (0.0f, 0.0f, 0.0f, 0.0f);
 	for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(body0); joint; joint = NewtonBodyGetNextContactJoint(body0, joint)) {
 		if ((NewtonJointGetBody0(joint) == body0) || (NewtonJointGetBody0(joint) == body1)) {
 			for (void* contact = NewtonContactJointGetFirstContact (joint); contact; contact = NewtonContactJointGetNextContact (joint, contact)) {
 				dVector point;
 				dVector normal;	
-				float forceMag;
+				dVector contactForce;
 				NewtonMaterial* const material = NewtonContactGetMaterial (contact);
-				NewtonMaterialGetContactPositionAndNormal (material, &point.m_x, &normal.m_x);
-				NewtonMaterialGetContactForce(material, &forceMag);
-				forceAcc += normal.Scale (forceMag);
+				NewtonMaterialGetContactPositionAndNormal (material, body0, &point.m_x, &normal.m_x);
+				NewtonMaterialGetContactForce(material, body0, &contactForce[0]);
+				//forceAcc += normal.Scale (forceMag);
+				reactionforce += contactForce;
 			}
 			break;
 		}
 	}
-	return forceAcc;
+	return reactionforce;
 }
 
 
@@ -778,6 +779,7 @@ void GenericContactProcess (const NewtonJoint* contactJoint, dFloat timestep, in
 	}
 #endif
 
+	NewtonBody* const body = NewtonJointGetBody0(contactJoint);
 	for (void* contact = NewtonContactJointGetFirstContact (contactJoint); contact; contact = NewtonContactJointGetNextContact (contactJoint, contact)) {
 		dFloat speed;
 		dVector point;
@@ -789,9 +791,9 @@ void GenericContactProcess (const NewtonJoint* contactJoint, dFloat timestep, in
 
 		material = NewtonContactGetMaterial (contact);
 
-		NewtonMaterialGetContactForce (material, &force.m_x);
-		NewtonMaterialGetContactPositionAndNormal (material, &point.m_x, &normal.m_x);
-		NewtonMaterialGetContactTangentDirections (material, &dir0.m_x, &dir1.m_x);
+		NewtonMaterialGetContactForce (material, body, &force.m_x);
+		NewtonMaterialGetContactPositionAndNormal (material, body, &point.m_x, &normal.m_x);
+		NewtonMaterialGetContactTangentDirections (material, body, &dir0.m_x, &dir1.m_x);
 		speed = NewtonMaterialGetContactNormalSpeed(material);
 
 

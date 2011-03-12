@@ -468,9 +468,14 @@ void DemoEntityManager::UpdatePhysics()
 					// update teh world
 					NewtonUpdate (m_world, timestepInSecunds);
 
-					for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
+					dListNode* nextNode;
+					for (dListNode* node = GetFirst(); node; node = nextNode) {
+						nextNode = node->GetNext();
+
 						DemoEntity* const entity = node->GetInfo();
+						entity->AddRef();
 						entity->SimulationLister(this, node, timestepInSecunds);
+						entity->Release();
 					}
 
 					

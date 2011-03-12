@@ -2023,7 +2023,7 @@ dFloat NewtonMaterialGetContactTangentSpeed(const NewtonMaterial* const material
 // Remarks: This function can only be called from a material callback event handle.
 // 
 // See also: NewtonMaterialSetCollisionCallback
-void NewtonMaterialGetContactPositionAndNormal(const NewtonMaterial* const materialHandle, dFloat* const positPtr, dFloat* const normalPtr)
+void NewtonMaterialGetContactPositionAndNormal(const NewtonMaterial* const materialHandle, NewtonBody* const body, dFloat* const positPtr, dFloat* const normalPtr)
 {
 	TRACE_FUNTION(__FUNCTION__);
 	dgContactMaterial* const material = (dgContactMaterial*) materialHandle;
@@ -2035,6 +2035,12 @@ void NewtonMaterialGetContactPositionAndNormal(const NewtonMaterial* const mater
 	normalPtr[0] = material->m_normal.m_x;
 	normalPtr[1] = material->m_normal.m_y;
 	normalPtr[2] = material->m_normal.m_z;
+
+	if ((dgBody*)body != material->m_body0) {
+		normalPtr[0] *= dgFloat32 (-1.0f);
+		normalPtr[1] *= dgFloat32 (-1.0f);
+		normalPtr[2] *= dgFloat32 (-1.0f);
+	}
 }
 
 
@@ -2055,7 +2061,7 @@ void NewtonMaterialGetContactPositionAndNormal(const NewtonMaterial* const mater
 // Remarks: This function can only be called from a material callback event handler.
 // 
 // See also: NewtonMaterialSetCollisionCallback
-void NewtonMaterialGetContactForce(const NewtonMaterial* const materialHandle, dFloat* const forcePtr)
+void NewtonMaterialGetContactForce(const NewtonMaterial* const materialHandle, NewtonBody* const body, dFloat* const forcePtr)
 {
 
 	TRACE_FUNTION(__FUNCTION__);
@@ -2068,6 +2074,12 @@ void NewtonMaterialGetContactForce(const NewtonMaterial* const materialHandle, d
 	forcePtr[0] = force.m_x;
 	forcePtr[1] = force.m_y;
 	forcePtr[2] = force.m_z;
+
+	if ((dgBody*)body != material->m_body0) {
+		forcePtr[0] *= dgFloat32 (-1.0f);
+		forcePtr[1] *= dgFloat32 (-1.0f);
+		forcePtr[2] *= dgFloat32 (-1.0f);
+	}
 }
 
 
@@ -2085,9 +2097,8 @@ void NewtonMaterialGetContactForce(const NewtonMaterial* const materialHandle, d
 // Remarks: This function can only be called from a material callback event handler.
 // 
 // See also: NewtonMaterialSetCollisionCallback
-void NewtonMaterialGetContactTangentDirections(const NewtonMaterial* const materialHandle, dFloat* const dir0, dFloat* const dir1)
+void NewtonMaterialGetContactTangentDirections(const NewtonMaterial* const materialHandle, NewtonBody* const body, dFloat* const dir0, dFloat* const dir1)
 {
-
 	TRACE_FUNTION(__FUNCTION__);
 	dgContactMaterial* const material = (dgContactMaterial*) materialHandle;
 
@@ -2098,6 +2109,16 @@ void NewtonMaterialGetContactTangentDirections(const NewtonMaterial* const mater
 	dir1[0] = material->m_dir1.m_x;
 	dir1[1] = material->m_dir1.m_y;
 	dir1[2] = material->m_dir1.m_z;
+
+	if ((dgBody*)body != material->m_body0) {
+		dir0[0] *= dgFloat32 (-1.0f);
+		dir0[1] *= dgFloat32 (-1.0f);
+		dir0[2] *= dgFloat32 (-1.0f);
+
+		dir1[0] *= dgFloat32 (-1.0f);
+		dir1[1] *= dgFloat32 (-1.0f);
+		dir1[2] *= dgFloat32 (-1.0f);
+	}
 }
 
 

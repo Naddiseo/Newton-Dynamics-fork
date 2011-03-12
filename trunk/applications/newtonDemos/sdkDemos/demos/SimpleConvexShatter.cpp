@@ -185,6 +185,12 @@ class SimpleShatterEffectEntity: public DemoEntity
 		SetMesh(mesh);
 	}
 
+	~SimpleShatterEffectEntity ()
+	{
+
+	}
+
+
 	void SimulationLister(DemoEntityManager* const scene, DemoEntityManager::dListNode* const mynode, dFloat timeStep)
 	{
 		// see if the net force on the body comes fr a high impact collision
@@ -196,17 +202,19 @@ class SimpleShatterEffectEntity: public DemoEntity
 				dVector contactForce;
 				NewtonMaterial* const material = NewtonContactGetMaterial (contact);
 				//NewtonMaterialGetContactPositionAndNormal (material, &point.m_x, &normal.m_x);
-				NewtonMaterialGetContactForce(material, &contactForce[0]);
+				NewtonMaterialGetContactForce(material, m_myBody, &contactForce[0]);
 				netForce += contactForce;
 			}
 		}
 
 		dFloat mag2 = netForce % netForce ;
 
-		float maxForce = 3.0f * m_myweight;
+		// if the force is bigger than 4 Gravities, It is considered a collsion force
+		float maxForce = 4.0f * m_myweight;
 		if (mag2 > (maxForce * maxForce)) {
-			mag2 *= 1.0f;
-
+			NewtonWorld* world = NewtonBodyGetWorld(m_myBody);
+			NewtonDestroyBody(world, m_myBody);
+			scene->RemoveEntity	(mynode);
 		}
 
 
