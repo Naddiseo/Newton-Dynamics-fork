@@ -21,6 +21,7 @@ enum ControlCommand
 	_mousePick,
 	_mouseMove,
 	_mouseRelease,
+	_shotCannonBall,
 };
 
 

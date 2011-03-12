@@ -23,11 +23,13 @@ DemoEntityManager::DemoEntityManager(QWidget* const parent, QGLFormat& format)
 	,m_physicsUpdate(true) 
 	,m_reEntrantUpdate (false)
 	,m_microsecunds (0)
+	,m_cannonBallRate(0)
 	,m_profiler (620 * 0 / 8 + 45, 40)
 	,m_font()
 	,m_navegationQueueLock(0)
 	,m_navegationQueueCount(0)
 	,m_timerId(0)
+	,m_meshBallMesh(NULL)
 {
 	// Create the main Camera
 	m_camera = new DemoCamera();
@@ -51,6 +53,10 @@ DemoEntityManager::~DemoEntityManager(void)
 #ifdef _MAC_VER	
 	killTimer(m_timerId);
 #endif
+
+	if (m_meshBallMesh) {
+		m_meshBallMesh->Release();
+	}
 
 	delete m_camera;
 
@@ -342,6 +348,8 @@ void DemoEntityManager::UpdateCamera (float timestep)
 {
 	// somehow this does not works with QT
 	//GetKeyAsynState(100);
+
+	m_cannonBallRate -= int (timestep * 1000000.0f);
 	Lock (m_navegationQueueLock);
 	{
 		newtonDemos* const mainWindow = (newtonDemos*) parent();
@@ -397,8 +405,35 @@ void DemoEntityManager::UpdateCamera (float timestep)
 					}
 					break;
 				}
+
+				case _shotCannonBall:
+				{
+					 if (m_cannonBallRate <= 0) {
+						m_cannonBallRate = int (0.25f * 1000000.0f);
+
+						if (!m_meshBallMesh) {
+							NewtonCollision* const ball = NewtonCreateSphere (m_world, 0.25f, 0.25f, 0.25f, 0, NULL);
+							m_meshBallMesh = new DemoMesh("ball", ball, "base_road.tga", "base_road.tga", "base_road.tga");
+							NewtonReleaseCollision(m_world, ball);
+						}
+
+						dMatrix matrix (GetIdentityMatrix());
+						matrix.m_posit = targetMatrix.m_posit;
+
+						dVector veloc (targetMatrix.m_front.Scale (40.0f));
+						NewtonCollision* const ballCollision = NewtonCreateSphere (m_world, 0.25f, 0.25f, 0.25f, 0, NULL);
+						NewtonBody* const body = CreateSimpleSolid (this, m_meshBallMesh, 10.0f, matrix, ballCollision, 0);
+						NewtonReleaseCollision(m_world, ballCollision);
+
+						NewtonBodySetVelocity(body, &veloc[0]);
+					}
+
+					break;
+				}
+				
 			}			
-		}
+
+ 		}
 
 		dMatrix matrix (dRollMatrix(m_cameraPitch) * dYawMatrix(m_cameraYaw));
 		dQuaternion rot (matrix);
@@ -507,7 +542,7 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 	// set just one directional light
 	GLfloat lightColor[] = { 0.8f, 0.8f, 0.8f, 0.0 };
 	GLfloat lightAmbientColor[] = { 0.3f, 0.3f, 0.3f, 0.0 };
-	GLfloat lightPosition[] = { 500.0f, 200.0f, 500.0f, 0.0 };
+	GLfloat lightPosition[] = { -500.0f, 200.0f, 500.0f, 0.0 };
 
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbientColor);
@@ -524,7 +559,7 @@ void DemoEntityManager::paintEvent(QPaintEvent* ev)
 	// render all entities
 	dFloat timestep = dGetElapsedSeconds();	
 	for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
-		DemoEntity* entity = node->GetInfo();
+		DemoEntity* const entity = node->GetInfo();
 		glPushMatrix();	
 		entity->Render(timestep);
 		glPopMatrix();

@@ -17,7 +17,7 @@
 #include "dHeightResolutionTimer.h"
 
 
-
+class DemoMesh;
 class DemoEntity;
 class DemoCamera;
 
@@ -74,6 +74,8 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 	unsigned64 m_microsecunds;
 
 
+
+	int m_cannonBallRate;
 	int m_showProfiler[8]; 
 	dRuntimeProfiler m_profiler;
 
@@ -86,6 +88,8 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 
 	float m_cameraYaw;
 	float m_cameraPitch;
+
+	DemoMesh* m_meshBallMesh;
 };
 
 

@@ -22,11 +22,11 @@
 
 //#define DEFAULT_SCENE	0						// friction test
 //#define DEFAULT_SCENE	1						// closest distance
-//#define DEFAULT_SCENE	2						// Box stacks
+#define DEFAULT_SCENE	2						// Box stacks
 //#define DEFAULT_SCENE	3						// simple level mesh collision
 //#define DEFAULT_SCENE	4						// optimized level mesh collision
 //#define DEFAULT_SCENE	5						// Scene Collision
-#define DEFAULT_SCENE	6						// Simple convex Shatter
+//#define DEFAULT_SCENE	6						// Simple convex Shatter
 
 
 
@@ -449,6 +449,10 @@ void newtonDemos::keyPressEvent (QKeyEvent *keyEvent)
 
 		case Qt::Key_D:
 			m_canvas->QueueCommand(_moveRight);
+			break;
+
+		case Qt::Key_Space:
+			m_canvas->QueueCommand(_shotCannonBall);
 			break;
 
 		default:;
