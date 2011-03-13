@@ -706,11 +706,11 @@ inline dgInt32 dgInterlockedExchange(dgInt32* const ptr, dgInt32 value)
 	#endif
 
 	#if (defined (_LINUX_VER))
-		__sync_fetch_and_add ((int32_t*)Addend, 1 );
+		return __sync_fetch_and_add ((int32_t*)ptr, value );
 	#endif
 
 	#if (defined (_MAC_VER))
-		OSAtomicAdd32 (1, (int32_t*)Addend);
+		return OSAtomicAdd32 (value, (int32_t*)ptr);
 	#endif
 }
 
