@@ -19,7 +19,7 @@
 #include "../DemoCamera.h"
 #include "../PhysicsUtils.h"
 
-
+#define NUMBER_OF_ITERNAL_PARTS 5
 
 #if 0
 static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
@@ -125,7 +125,7 @@ class DebriEffect: public dList<DebriAtom>
 
 		// pepper the inside of the BBox box of the mesh with random points
 		int count = 0;
-		dVector points[10];
+		dVector points[NUMBER_OF_ITERNAL_PARTS];
 		do {
 			dFloat x = RandomVariable(size.m_x);
 			dFloat y = RandomVariable(size.m_y);
@@ -134,8 +134,7 @@ class DebriEffect: public dList<DebriAtom>
 				points[count] = dVector (x, y, z);
 				count ++;
 			}
-		} while (count < 10);
-//		} while (count < 3);
+		} while (count < NUMBER_OF_ITERNAL_PARTS);
 
 		// create a texture matrix, for applying the material's UV to all internal faces
 		dMatrix textureMatrix (GetIdentityMatrix());
