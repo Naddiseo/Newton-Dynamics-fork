@@ -8548,10 +8548,12 @@ NewtonMesh* NewtonMeshCreateFirstSingleSegment (const NewtonMesh* const mesh)
 	dgPolyhedra segment(effectMesh->GetAllocator());
 
 	effectMesh->BeginConectedSurface();
-	effectMesh->GetConectedSurface (segment);
-	solid = new (effectMesh->GetAllocator()) dgMeshEffect(segment, *((dgMeshEffect*)mesh));
-
-	return (NewtonMesh*)solid;
+	if (effectMesh->GetConectedSurface (segment)) {
+		solid = new (effectMesh->GetAllocator()) dgMeshEffect(segment, *((dgMeshEffect*)mesh));
+		return (NewtonMesh*)solid;
+	} else {
+		return NULL;
+	}
 }
 
 NewtonMesh* NewtonMeshCreateNextSingleSegment (const NewtonMesh* const mesh, const NewtonMesh *segment)
