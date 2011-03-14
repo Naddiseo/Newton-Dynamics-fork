@@ -1327,6 +1327,7 @@ void dgMeshEffect::EndPolygon ()
 	}
 #endif
 
+
 	dgInt32 triangCount = m_pointCount / 3;
 	m_pointCount = dgVertexListToIndexList (&m_points[0].m_x, sizeof (dgVector), sizeof (dgVector), 0, m_pointCount, &indexMap[0], DG_VERTEXLIST_INDEXLIST_TOL);
 	m_atribCount = dgVertexListToIndexList (&m_attib[0].m_vertex.m_x, sizeof (dgVertexAtribute), sizeof (dgVertexAtribute) - sizeof (dgInt32), sizeof (dgInt32), m_atribCount, &attrIndexMap[0], DG_VERTEXLIST_INDEXLIST_TOL);
@@ -2700,7 +2701,7 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& 
 
 
 
-void dgMeshEffect::MergeFaces (dgMeshEffect* const source)
+void dgMeshEffect::MergeFaces (const dgMeshEffect* const source)
 {
 	dgInt32 mark = source->IncLRU();
 	dgPolyhedra::Iterator iter (*source);
@@ -3229,6 +3230,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
+
 	for (iter.Begin(); iter; iter ++){
 		dgEdge* const face = &(*iter);
 

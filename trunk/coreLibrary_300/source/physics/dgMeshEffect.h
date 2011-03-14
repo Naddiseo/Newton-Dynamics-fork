@@ -39,8 +39,8 @@ class dgMeshTreeCSGPointsPool;
 //#define DG_MESH_EFFECT_PLANE_TOLERANCE		(dgFloat64 (1.0e-5f))
 #define DG_MESH_EFFECT_FLAT_CUT_BORDER_EDGE	0x01
 #define DG_MESH_EFFECT_QUANTIZE_FLOAT(x)	(x)
-#define DG_VERTEXLIST_INDEXLIST_TOL			(dgFloat32 (1.0e-6f))
-
+//#define DG_VERTEXLIST_INDEXLIST_TOL			(dgFloat32 (1.0e-6f))
+#define DG_VERTEXLIST_INDEXLIST_TOL			(dgFloat32 (0.0f))
 
 
 
@@ -208,7 +208,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void AddPoint(const dgFloat32* vertexList, dgInt32 material);
 	void FixCylindricalMapping (dgVertexAtribute* const attib) const;
 
-	void MergeFaces (dgMeshEffect* const source);
+	void MergeFaces (const dgMeshEffect* const source);
 	void ReverseMergeFaces (dgMeshEffect* const source);
 	dgVertexAtribute InterpolateEdge (dgEdge* const edge, dgFloat32 param) const;
 	dgVertexAtribute InterpolateVertex (const dgVector& point, dgEdge* const face) const;
