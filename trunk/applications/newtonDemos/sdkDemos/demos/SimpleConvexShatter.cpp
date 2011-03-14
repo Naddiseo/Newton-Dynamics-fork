@@ -150,20 +150,20 @@ class DebriEffect: public dList<DebriAtom>
 		dFloat volume = NewtonConvexCollisionCalculateVolume (collision);
 		NewtonReleaseCollision(m_world, collision);
 
-
 		// now we iterate over each pieces and for each one we create a visual entity and a rigid body
 		NewtonMesh* nextDebri;
 		for (NewtonMesh* debri = NewtonMeshCreateFirstSingleSegment (debriMeshPieces); debri; debri = nextDebri) {
 			nextDebri = NewtonMeshCreateNextSingleSegment (debriMeshPieces, debri); 
 
-			DebriAtom& atom = Append()->GetInfo();
-			atom.m_mesh = new DemoMesh(debri);
-			atom.m_collision = NewtonCreateConvexHullFromMesh (m_world, debri, 0.0f, 0);
-
-			NewtonConvexCollisionCalculateInertialMatrix (atom.m_collision, &atom.m_momentOfInirtia[0], &atom.m_centerOfMass[0]);	
-			dFloat debriVolume = NewtonConvexCollisionCalculateVolume (atom.m_collision);
-			atom.m_massFraction = debriVolume / volume;
-
+			NewtonCollision* const collision = NewtonCreateConvexHullFromMesh (m_world, debri, 0.0f, 0);
+			if (collision) {
+				DebriAtom& atom = Append()->GetInfo();
+				atom.m_mesh = new DemoMesh(debri);
+				atom.m_collision = collision;
+				NewtonConvexCollisionCalculateInertialMatrix (atom.m_collision, &atom.m_momentOfInirtia[0], &atom.m_centerOfMass[0]);	
+				dFloat debriVolume = NewtonConvexCollisionCalculateVolume (atom.m_collision);
+				atom.m_massFraction = debriVolume / volume;
+			}
 			NewtonMeshDestroy(debri);
 		}
 

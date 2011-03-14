@@ -2046,14 +2046,11 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 		index ++;
 	}
 
-//static int xxx;
+
 
 	dgMeshEffect* const voronoiPartion = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 	voronoiPartion->BeginPolygon();
 	dgFloat32 layer = dgFloat32 (0.0f);
-
-//voronoiPartion->MergeFaces(this);
-//layer += 1.0f;
 
 	dgTree<dgList<dgInt32>, dgInt32>::Iterator iter (delanayNodes);
 	for (iter.Begin(); iter; iter ++) {
@@ -2102,9 +2099,6 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 		dgMeshEffect* rightConvexMesh = NULL;
 		dgMeshEffect* leftMeshClipper = NULL;
 		dgMeshEffect* rightMeshClipper = NULL;
-
-//xxx ++;
-//if (xxx == 7)
 
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
 		if (leftConvexMesh && rightConvexMesh) {
