@@ -367,8 +367,6 @@ class dgMeshEffectSolidTree
 				CSGConvexCurve& curve = faces[stack];
 				_ASSERTE (curve.CheckConvex(normal, point));
 
-
-
 				dgGoogol minDist (dgFloat64 (0.0f));
 				dgGoogol maxDist (dgFloat64 (0.0f));
 				for (CSGConvexCurve::dgListNode* node = curve.GetFirst(); node; node = node->GetNext()) {
@@ -382,7 +380,6 @@ class dgMeshEffectSolidTree
 				} 
 
 				if ((minDist.GetAproximateValue() < dgFloat64 (0.0f)) && (maxDist.GetAproximateValue() > dgFloat64 (0.0f))) {
-					_ASSERTE (0);
 					CSGConvexCurve tmp(mesh.GetAllocator());
 					for (CSGConvexCurve::dgListNode* node = curve.GetFirst(); node; node = node->GetNext()) {
 						tmp.Append(node->GetInfo());
@@ -392,37 +389,29 @@ class dgMeshEffectSolidTree
 					if (!root->m_back) {
 						root->m_back = new (mesh.GetAllocator()) dgMeshEffectSolidTree (normal, point);
 					} else {
-						_ASSERTE (0);
-/*
-						dgFloat64 test0;
-						dgBigVector p0 (tmp.GetLast()->GetInfo());
+						dgHugeVector p0 (tmp.GetLast()->GetInfo());
 						CSGConvexCurve& backFace = faces[stack];
 					
 						backFace.SetAllocator(mesh.GetAllocator());
-						test0 = root->m_plane.Evalue(p0);
+						dgGoogol test0 = root->m_normal % (p0 - root->m_point);
 						for (CSGConvexCurve::dgListNode* node = tmp.GetFirst(); node; node = node->GetNext()) {
-							dgFloat64 test1;
 
-							dgBigVector p1 (node->GetInfo());
-							test1 = root->m_plane.Evalue(p1);
-							if (test0 <= dgFloat64 (0.0f)) {
+							dgHugeVector p1 (node->GetInfo());
+							dgGoogol test1 = root->m_normal % (p1 - root->m_point);
+							if (test0.GetAproximateValue() <= dgFloat64 (0.0f)) {
+
 								backFace.Append(p0);
-								if (test0 < dgFloat64 (0.0f) && (test1 > dgFloat64 (0.0f))) {
-									dgFloat64 den;
-
-									dgBigVector dp (p1 - p0);
-									den = root->m_plane % dp;
-									dgBigVector p (p0 + dp.Scale (-test0 / den));
-
+								if (test1.GetAproximateValue() > dgFloat64 (0.0f)) {
+									dgHugeVector dp (p1 - p0);
+									dgGoogol den = root->m_normal % dp;
+									dgHugeVector p (p0 + dp.Scale (-test0.GetAproximateValue() / den.GetAproximateValue()));
 									backFace.Append(p);
 								}
-							} else if (test1 < dgFloat64 (0.0f)) {
-								dgFloat64 den;
 
-								dgBigVector dp (p1 - p0);
-								den = root->m_plane % dp;
-								dgBigVector p (p0 + dp.Scale (-test0 / den));
-
+							} else if (test1.GetAproximateValue() < dgFloat64 (0.0f)) {
+								dgHugeVector dp (p1 - p0);
+								dgGoogol den = root->m_normal % dp;
+								dgHugeVector p (p0 + dp.Scale (-test0.GetAproximateValue() / den.GetAproximateValue()));
 								backFace.Append(p);
 							}
 
@@ -436,43 +425,33 @@ class dgMeshEffectSolidTree
 						pool[stack] = root->m_back;
 						stack ++;
 						_ASSERTE (stack < (sizeof (pool)/sizeof (pool[0])));
-*/
 					}
-
 					
 					if (!root->m_front) {
 						root->m_front = new (mesh.GetAllocator())dgMeshEffectSolidTree (normal, point);
 					} else {
-						_ASSERTE (0);
-/*
-						dgFloat64 test0;
-						dgBigVector p0 (tmp.GetLast()->GetInfo());
+						dgHugeVector p0 (tmp.GetLast()->GetInfo());
 						CSGConvexCurve& frontFace = faces[stack];
 
 						frontFace.SetAllocator(mesh.GetAllocator());
-						test0 = root->m_plane.Evalue(p0);
+						dgGoogol test0 = root->m_normal % (p0 - root->m_point);
+
 						for (CSGConvexCurve::dgListNode* node = tmp.GetFirst(); node; node = node->GetNext()) {
-							dgFloat64 test1;
+							dgHugeVector p1 (node->GetInfo());
+							dgGoogol test1 = root->m_normal % (p1 - root->m_point);
+							if (test0.GetAproximateValue() >= dgFloat64 (0.0f)) {
 
-							dgBigVector p1 (node->GetInfo());
-							test1 = root->m_plane.Evalue(p1);
-							if (test0 >= dgFloat64 (0.0f)) {
 								frontFace.Append(p0);
-								if (test0 > dgFloat64 (0.0f) && (test1 < dgFloat32 (0.0f))) {
-									dgFloat64 den;
-
-									dgBigVector dp (p1 - p0);
-									den = root->m_plane % dp;
-									dgBigVector p (p0 + dp.Scale (-test0 / den));
+								if (test1.GetAproximateValue() < dgFloat32 (0.0f)) {
+									dgHugeVector dp (p1 - p0);
+									dgGoogol den = root->m_normal % dp;
+									dgHugeVector p (p0 + dp.Scale (-test0.GetAproximateValue() / den.GetAproximateValue()));
 									frontFace.Append(p);
 								}
-							} else if (test1 > dgFloat64 (0.0f)) {
-								dgFloat64 den;
-
-								dgBigVector dp (p1 - p0);
-								den = root->m_plane % dp;
-								dgBigVector p (p0 + dp.Scale (-test0 / den));
-
+							} else if (test1.GetAproximateValue() > dgFloat64 (0.0f)) {
+								dgHugeVector dp (p1 - p0);
+								dgGoogol den = root->m_normal % dp;
+								dgHugeVector p (p0 + dp.Scale (-test0.GetAproximateValue() / den.GetAproximateValue()));
 								frontFace.Append(p);
 							}
 
@@ -486,7 +465,6 @@ class dgMeshEffectSolidTree
 						pool[stack] = root->m_front;
 						stack ++;
 						_ASSERTE (stack < (sizeof (pool)/sizeof (pool[0])));
-*/
 					}
 
 				} else {

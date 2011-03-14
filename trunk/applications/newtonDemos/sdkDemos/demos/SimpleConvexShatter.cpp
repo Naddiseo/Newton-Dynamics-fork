@@ -125,16 +125,15 @@ class DebriEffect: public dList<DebriAtom>
 
 		// pepper the inside of the BBox box of the mesh with random points
 		int count = 0;
-		dVector points[NUMBER_OF_ITERNAL_PARTS];
-		do {
-			dFloat x = RandomVariable(size.m_x);
+		dVector points[NUMBER_OF_ITERNAL_PARTS + 1];
+		while (count < NUMBER_OF_ITERNAL_PARTS) {			dFloat x = RandomVariable(size.m_x);
 			dFloat y = RandomVariable(size.m_y);
 			dFloat z = RandomVariable(size.m_z);
 			if ((x <= size.m_x) && (x >= -size.m_x) && (y <= size.m_y) && (y >= -size.m_y) && (z <= size.m_z) && (z >= -size.m_z)){
 				points[count] = dVector (x, y, z);
 				count ++;
 			}
-		} while (count < NUMBER_OF_ITERNAL_PARTS);
+		} 
 
 		// create a texture matrix, for applying the material's UV to all internal faces
 		dMatrix textureMatrix (GetIdentityMatrix());
@@ -229,7 +228,7 @@ class SimpleShatterEffectEntity: public DemoEntity
 		dFloat mag2 = netForce % netForce ;
 
 		// if the force is bigger than 4 Gravities, It is considered a collision force
-		float maxForce = 10.0f * m_myweight;
+		float maxForce = 20.0f * m_myweight;
 
 
 		if (mag2 > (maxForce * maxForce)) {
@@ -419,6 +418,8 @@ static void Stonehenge (DemoEntityManager* const scene, dVector location, int le
 //	size = dVector (topSize, 0.2f, topSize, 0.0f);
 	size = dVector (topSize, 0.5f, topSize, 0.0f);
 	NewtonCollision* const topSlabCollision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
+//	NewtonCollision* const topSlabCollision = CreateConvexCollision (world, GetIdentityMatrix(), size, _RANDOM_CONVEX_HULL_PRIMITIVE, 0);
+	
 	NewtonMesh* const topNewtonMesh = NewtonMeshCreateFromCollision(topSlabCollision);
 	int topMaterial = LoadTexture("reljef.tga");
 	NewtonMeshApplyBoxMapping(topNewtonMesh, columnMaterial, topMaterial, columnMaterial);
@@ -480,7 +481,7 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	//CreateLevelMesh (scene, "sponza.xml", false);
 
 	// create a shattered mesh array
-	Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 5, 2, 2, 30.0f);
+	Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 3, 2, 2, 30.0f);
 // CreateSimpleVoronoiShatter (scene);
 
 

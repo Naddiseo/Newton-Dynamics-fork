@@ -2012,7 +2012,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 	dgVector maxBox;
 	CalculateAABB (minBox, maxBox);
 	maxBox -= minBox;
-	dgFloat32 perimeterConvexBound = dgFloat32 (16.0f) * dgSqrt (maxBox % maxBox);
+	dgFloat32 perimeterConvexBound = dgFloat32 (8.0f) * dgSqrt (maxBox % maxBox);
 
 	dgInt32 tetraCount = delaunayTetrahedras.GetCount();
 	dgStack<dgVector> voronoiPoints(tetraCount);

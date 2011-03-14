@@ -2012,7 +2012,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 	dgVector maxBox;
 	CalculateAABB (minBox, maxBox);
 	maxBox -= minBox;
-	dgFloat32 perimeterConvexBound = dgFloat32 (16.0f) * dgSqrt (maxBox % maxBox);
+	dgFloat32 perimeterConvexBound = dgFloat32 (8.0f) * dgSqrt (maxBox % maxBox);
 
 	dgInt32 tetraCount = delaunayTetrahedras.GetCount();
 	dgStack<dgVector> voronoiPoints(tetraCount);
@@ -2045,6 +2045,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 
 		index ++;
 	}
+
 
 
 	dgMeshEffect* const voronoiPartion = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
@@ -2098,6 +2099,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 		dgMeshEffect* rightConvexMesh = NULL;
 		dgMeshEffect* leftMeshClipper = NULL;
 		dgMeshEffect* rightMeshClipper = NULL;
+
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
@@ -2111,6 +2113,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 				convexMesh->EndPolygon();
 			}
 		}
+
 
 		if (leftConvexMesh) {
 			delete leftConvexMesh;
@@ -2148,6 +2151,8 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 		for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 			convexMesh->m_attib[i].m_vertex.m_w = layer;
 		}
+
+//if (xxx == 7)
 		voronoiPartion->MergeFaces(convexMesh);
 		layer += dgFloat32 (1.0f);
 
