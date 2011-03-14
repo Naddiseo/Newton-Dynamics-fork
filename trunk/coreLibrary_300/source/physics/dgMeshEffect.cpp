@@ -1246,7 +1246,7 @@ void dgMeshEffect::AddPolygon (dgInt32 count, const dgFloat32* vertexList, dgInt
 	}
 */
 
-	if (count >= 3) {
+	if (count > 3) {
 		dgPolyhedra polygon (GetAllocator());
 		dgInt32 indexList[256];
 		_ASSERTE (count < sizeof (indexList)/sizeof(indexList[0]));
