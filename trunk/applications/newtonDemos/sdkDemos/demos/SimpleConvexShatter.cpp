@@ -21,13 +21,16 @@
 
 
 
-/*
-static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, PrimitiveType type)
+#if 1
+static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 {
 	// create a collision primitive
-	dVector size (2.0f, 2.0f, 2.0f);
+//	dVector size (2.0f, 2.0f, 2.0f);
+	dVector size = dVector (10.0f, 0.5f, 10.0f, 0.0f);
 	NewtonWorld* const world = scene->GetNewton();
-	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, type, 0);
+//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, type, 0);
+	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
+	
 
 	// create a newton mesh from the collision primitive
 	NewtonMesh* const mesh = NewtonMeshCreateFromCollision(collision);
@@ -49,6 +52,12 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, Primitiv
 		}
 	} while (count < 10);
 
+points[0] =	dVector (-0.95387375f, 0.051684085f, -1.3675097f);
+points[1] = dVector (0.027149497f, -0.038374674f, 0.47796631f);
+points[2] = dVector (0.24927004f, -0.015358878f, -0.45922884f);
+count = 3;
+
+
 //count = 0;
 
 	// Create the array of convex pieces from the mesh
@@ -59,7 +68,7 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene, Primitiv
 	textureMatrix[1][1] = 1.0f / size.m_y;
 	NewtonMesh* const convexParts = NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interior, &textureMatrix[0][0]);
 
-#if 0
+#if 1
 dScene xxxx(world);
 dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
 dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
@@ -86,7 +95,7 @@ xxxx.Serialize("xxx.xml");
 	NewtonMeshDestroy (mesh);
 	NewtonReleaseCollision(world, collision);
 }
-*/
+#endif
 
 
 class DebriAtom
@@ -361,13 +370,7 @@ int materialId = 0;
 }
 
 
-static void AddColumnsLayer (
-	DemoEntityManager* const scene, 
-	DemoMesh* const visualMesh, 
-	NewtonCollision* const collision,
-	const DebriEffect& shatterEffect, 
-	dVector location, 
-	float separation)
+static void AddColumnsLayer (DemoEntityManager* const scene, DemoMesh* const visualMesh, NewtonCollision* const collision, const DebriEffect& shatterEffect, dVector location, float separation)
 {
 	//create and array of entities all reusing the same effect
 	for (int i = 0; i < 2; i ++) {
@@ -424,6 +427,8 @@ static void Stonehenge (DemoEntityManager* const scene, dVector location, int le
 	// create a newton mesh from the collision primitive
 	DebriEffect topDebris (world, topNewtonMesh, columnMaterial);
 
+DebriEffect topDebris1 (world, topNewtonMesh, columnMaterial);
+
 	// create the visual top mesh
 	DemoMesh* const visualTopMesh = new DemoMesh(topNewtonMesh);
 
@@ -478,7 +483,10 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	//CreateLevelMesh (scene, "sponza.xml", false);
 
 	// create a shattered mesh array
-	Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 5, 2, 2, 30.0f);
+//	Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 5, 2, 2, 30.0f);
+//Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 1, 1, 1, 30.0f);
+
+ CreateSimpleVoronoiShatter (scene);
 
 
 	// place camera into position

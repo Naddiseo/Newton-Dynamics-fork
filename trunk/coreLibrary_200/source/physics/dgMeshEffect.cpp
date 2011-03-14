@@ -2700,7 +2700,7 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& 
 
 
 
-void dgMeshEffect::MergeFaces (dgMeshEffect* const source)
+void dgMeshEffect::MergeFaces (const dgMeshEffect* const source)
 {
 	dgInt32 mark = source->IncLRU();
 	dgPolyhedra::Iterator iter (*source);
