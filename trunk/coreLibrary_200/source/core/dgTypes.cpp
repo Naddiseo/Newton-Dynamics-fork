@@ -280,8 +280,9 @@ namespace InternalGeoUtil
 			minDist = 1.0e-3;
 		}
 	
-		dgFloat64 tol = tolerance * minDist + 1.0e-4;
-		tol = tolerance + 1.0e-4;
+//		dgFloat64 tol = tolerance * minDist + 1.0e-4;
+//		tol = tolerance + 1.0e-4;
+		dgFloat64 tol = tolerance * minDist + 1.0e-8f;
 		dgFloat64 sweptWindow = 2.0 * tol;
 		sweptWindow += 1.0e-4;
 	
@@ -384,9 +385,8 @@ namespace InternalGeoUtil
 						bool test = true;
 						dgInt32 t = 0;
 						for (; test && (t < floatSize); t ++) {
-							//dgFloat32 val;
 							dgFloat64 val = dgAbsf (vertexList[m + t + 2] - vertexList[k + t + 2]);
-							test = test && (val < tol);
+							test = test && (val <= tol);
 						}
 						for (; test && (t < floatSize + unsignedSize); t ++) {
 							dgUnsigned32 val0 = *(dgUnsigned32 *)&vertexList[m + t + 2];

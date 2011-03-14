@@ -2046,14 +2046,14 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 		index ++;
 	}
 
-static int xxx;
+//static int xxx;
 
 	dgMeshEffect* const voronoiPartion = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 	voronoiPartion->BeginPolygon();
 	dgFloat32 layer = dgFloat32 (0.0f);
 
-voronoiPartion->MergeFaces(this);
-layer += 1.0f;
+//voronoiPartion->MergeFaces(this);
+//layer += 1.0f;
 
 	dgTree<dgList<dgInt32>, dgInt32>::Iterator iter (delanayNodes);
 	for (iter.Begin(); iter; iter ++) {
@@ -2103,9 +2103,9 @@ layer += 1.0f;
 		dgMeshEffect* leftMeshClipper = NULL;
 		dgMeshEffect* rightMeshClipper = NULL;
 
-xxx ++;
+//xxx ++;
+//if (xxx == 7)
 
-/*
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
@@ -2119,7 +2119,7 @@ xxx ++;
 				convexMesh->EndPolygon();
 			}
 		}
-*/
+
 
 		if (leftConvexMesh) {
 			delete leftConvexMesh;
@@ -2137,7 +2137,7 @@ xxx ++;
 			delete rightMeshClipper;
 		}
 
-/*
+#if 0
 dgVector xxx (0, 0, 0, 0);
 for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 	xxx += convexMesh->m_points[i];
@@ -2149,7 +2149,7 @@ for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 	convexMesh->m_attib[i].m_vertex += xxx;
 }
-*/
+#endif
 
 		for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 			convexMesh->m_points[i].m_w = layer;
@@ -2158,7 +2158,7 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 			convexMesh->m_attib[i].m_vertex.m_w = layer;
 		}
 
-if (xxx == 7)
+//if (xxx == 7)
 		voronoiPartion->MergeFaces(convexMesh);
 		layer += dgFloat32 (1.0f);
 

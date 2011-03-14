@@ -39,8 +39,8 @@ class dgMeshTreeCSGPointsPool;
 //#define DG_MESH_EFFECT_PLANE_TOLERANCE		(dgFloat64 (1.0e-5f))
 #define DG_MESH_EFFECT_FLAT_CUT_BORDER_EDGE	0x01
 #define DG_MESH_EFFECT_QUANTIZE_FLOAT(x)	(x)
-#define DG_VERTEXLIST_INDEXLIST_TOL			(dgFloat32 (1.0e-6f))
-
+//#define DG_VERTEXLIST_INDEXLIST_TOL			(dgFloat32 (1.0e-6f))
+#define DG_VERTEXLIST_INDEXLIST_TOL			(dgFloat32 (0.0f))
 
 
 

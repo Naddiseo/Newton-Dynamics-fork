@@ -21,7 +21,7 @@
 
 
 
-#if 1
+#if 0
 static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 {
 	// create a collision primitive
@@ -52,10 +52,10 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 		}
 	} while (count < 10);
 
-points[0] =	dVector (-0.95387375f, 0.051684085f, -1.3675097f);
-points[1] = dVector (0.027149497f, -0.038374674f, 0.47796631f);
-points[2] = dVector (0.24927004f, -0.015358878f, -0.45922884f);
-count = 3;
+//points[0] =	dVector (-0.95387375f, 0.051684085f, -1.3675097f);
+//points[1] = dVector (0.027149497f, -0.038374674f, 0.47796631f);
+//points[2] = dVector (0.24927004f, -0.015358878f, -0.45922884f);
+//count = 3;
 
 
 //count = 0;
@@ -68,7 +68,7 @@ count = 3;
 	textureMatrix[1][1] = 1.0f / size.m_y;
 	NewtonMesh* const convexParts = NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interior, &textureMatrix[0][0]);
 
-#if 1
+#if 0
 dScene xxxx(world);
 dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
 dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
@@ -134,8 +134,8 @@ class DebriEffect: public dList<DebriAtom>
 				points[count] = dVector (x, y, z);
 				count ++;
 			}
-//		} while (count < 10);
-		} while (count < 3);
+		} while (count < 10);
+//		} while (count < 3);
 
 		// create a texture matrix, for applying the material's UV to all internal faces
 		dMatrix textureMatrix (GetIdentityMatrix());
@@ -427,8 +427,6 @@ static void Stonehenge (DemoEntityManager* const scene, dVector location, int le
 	// create a newton mesh from the collision primitive
 	DebriEffect topDebris (world, topNewtonMesh, columnMaterial);
 
-DebriEffect topDebris1 (world, topNewtonMesh, columnMaterial);
-
 	// create the visual top mesh
 	DemoMesh* const visualTopMesh = new DemoMesh(topNewtonMesh);
 
@@ -483,10 +481,8 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	//CreateLevelMesh (scene, "sponza.xml", false);
 
 	// create a shattered mesh array
-//	Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 5, 2, 2, 30.0f);
-//Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 1, 1, 1, 30.0f);
-
- CreateSimpleVoronoiShatter (scene);
+	Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 5, 2, 2, 30.0f);
+// CreateSimpleVoronoiShatter (scene);
 
 
 	// place camera into position
