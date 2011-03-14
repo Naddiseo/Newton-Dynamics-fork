@@ -411,49 +411,27 @@ namespace InternalGeoUtil
 
 
 
-	static dgInt32 QuickSortVertices (
-		dgFloat32* const vertList, 
-		dgInt32 stride,
-		dgInt32 floatSize,
-		dgInt32 unsignedSize,
-		dgInt32 vertexCount, 
-		dgFloat32 tolerance)
+	static dgInt32 QuickSortVertices (dgFloat32* const vertList, dgInt32 stride, dgInt32 floatSize, dgInt32 unsignedSize, dgInt32 vertexCount, dgFloat32 tolerance)
 	{
-		dgInt32 i;
-		dgInt32 axis;
-		dgInt32 count;
-		dgInt32 count0;
-		dgInt32 count1;
-		dgFloat32 x;
-		dgFloat32 y;
-		dgFloat32 z;
-		dgFloat32 x0;
-		dgFloat32 y0;
-		dgFloat32 z0;
-		dgFloat32 xd;
-		dgFloat32 yd;
-		dgFloat32 zd;
-		dgFloat32 axisVal;
-
 #ifdef __USE_DOUBLE_PRECISION__
 		dgInt64* indexPtr;
 #else
 		dgInt32* indexPtr;
 #endif
 	
-		count = 0;
+		dgInt32 count = 0;
 		if (vertexCount > (3 * 1024 * 32)) {
-			x = dgFloat32 (0.0f);
-			y = dgFloat32 (0.0f);
-			z = dgFloat32 (0.0f);
-			xd = dgFloat32 (0.0f);
-			yd = dgFloat32 (0.0f);
-			zd = dgFloat32 (0.0f);
+			dgFloat32 x = dgFloat32 (0.0f);
+			dgFloat32 y = dgFloat32 (0.0f);
+			dgFloat32 z = dgFloat32 (0.0f);
+			dgFloat32 xd = dgFloat32 (0.0f);
+			dgFloat32 yd = dgFloat32 (0.0f);
+			dgFloat32 zd = dgFloat32 (0.0f);
 			
-			for (i = 0; i < vertexCount; i ++) {
-				x0 = vertList[i * stride + 2];
-				y0 = vertList[i * stride + 3];
-				z0 = vertList[i * stride + 4];
+			for (dgInt32 i = 0; i < vertexCount; i ++) {
+				dgFloat32 x0 = vertList[i * stride + 2];
+				dgFloat32 y0 = vertList[i * stride + 3];
+				dgFloat32 z0 = vertList[i * stride + 4];
 				x += x0;
 				y += y0;
 				z += z0;
@@ -466,8 +444,8 @@ namespace InternalGeoUtil
 			yd = vertexCount * yd - y * y;
 			zd = vertexCount * zd - z * z;
 
-			axis = 2;
-			axisVal = x / vertexCount;
+			dgInt32 axis = 2;
+			dgFloat32 axisVal = x / vertexCount;
 			if ((yd > xd) && (yd > zd)) {
 				axis = 3;
 				axisVal = y / vertexCount;
@@ -483,7 +461,7 @@ namespace InternalGeoUtil
 				for ( ;vertList[i0 * stride + axis] < axisVal; i0 ++); 
 				for ( ;vertList[i1 * stride + axis] > axisVal; i1 --);
 				if (i0 <= i1) {
-					for (i = 0; i < stride; i ++) {
+					for (dgInt32 i = 0; i < stride; i ++) {
 						Swap (vertList[i0 * stride + i], vertList[i1 * stride + i]);
 					}
 					i0 ++; 
@@ -492,12 +470,12 @@ namespace InternalGeoUtil
 			} while (i0 <= i1);
 			_ASSERTE (i0 < vertexCount);
 
-			count0 = QuickSortVertices (&vertList[ 0 * stride], stride, floatSize, unsignedSize, i0, tolerance);
-			count1 = QuickSortVertices (&vertList[i0 * stride], stride, floatSize, unsignedSize, vertexCount - i0, tolerance);
+			dgInt32 count0 = QuickSortVertices (&vertList[ 0 * stride], stride, floatSize, unsignedSize, i0, tolerance);
+			dgInt32 count1 = QuickSortVertices (&vertList[i0 * stride], stride, floatSize, unsignedSize, vertexCount - i0, tolerance);
 			
 			count = count0 + count1;
 
-			for (i = 0; i < count1; i ++) {
+			for (dgInt32 i = 0; i < count1; i ++) {
 				memcpy (&vertList[(count0 + i) * stride + 2], &vertList[(i0 + i) * stride + 2], (stride - 2) * sizeof (dgFloat32));
 			}
 
@@ -508,7 +486,7 @@ namespace InternalGeoUtil
 					indexPtr = (dgInt32*)vertList;
 			#endif
 
-			for (i = i0; i < vertexCount; i ++) {
+			for (dgInt32 i = i0; i < vertexCount; i ++) {
 				indexPtr[i * stride] += count0;
 			}
 
