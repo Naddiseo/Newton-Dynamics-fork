@@ -817,9 +817,7 @@ NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& srcMa
 
 	NewtonCollision* collision = NULL;
 
-	#define STEPS_HULL 16
-	#define SAMPLE_COUNT 5000
-	dVector cloud [SAMPLE_COUNT];
+	
 
 	switch (type) 
 	{
@@ -882,9 +880,9 @@ NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& srcMa
 
 		case _RANDOM_CONVEX_HULL_PRIMITIVE:
 		{
-			int i;			
-			int count;
 			// Create a clouds of random point around the origin
+			#define SAMPLE_COUNT 5000
+			dVector cloud [SAMPLE_COUNT];
 
 			// make sure that at least the top and bottom are present
 			cloud [0] = dVector ( size.m_x * 0.5f, -0.3f,  0.0f);
@@ -893,10 +891,10 @@ NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& srcMa
 			cloud [3] = dVector (-size.m_x * 0.5f, -0.3f,  0.0f);
 			cloud [4] = dVector (-size.m_x * 0.5f,  0.3f,  0.3f);
 			cloud [5] = dVector (-size.m_x * 0.5f,  0.3f, -0.3f);
-			count = 5;
+			int count = 5;
 
 			// populate the cloud with pseudo Gaussian random points
-			for (i = 6; i < SAMPLE_COUNT; i ++) {
+			for (int i = 6; i < SAMPLE_COUNT; i ++) {
 				cloud [i].m_x = RandomVariable(size.m_x);
 				cloud [i].m_y = RandomVariable(size.m_y);
 				cloud [i].m_z = RandomVariable(size.m_z);
@@ -908,27 +906,23 @@ NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& srcMa
 
 		case _REGULAR_CONVEX_HULL_PRIMITIVE:
 		{
-			int i;			
-			int count;
 			// Create a clouds of random point around the origin
+			//#define STEPS_HULL 16
+			#define STEPS_HULL 4
 
-			dInt32 j;
-			dFloat x;
-			dFloat height;
-			dFloat radius;
-
-			count = 0;
-			radius = size.m_y;
-			height = size.m_x * 0.999f;
-			x = - height * 0.5f;
+			dVector cloud [STEPS_HULL * 4 + 256];
+			int count = 0;
+			dFloat radius = size.m_y;
+			dFloat height = size.m_x * 0.999f;
+			dFloat x = - height * 0.5f;
 			dMatrix rotation (dPitchMatrix(2.0f * 3.141592f / STEPS_HULL));
-			for (i = 0; i < 4; i ++) {
+			for (int i = 0; i < 4; i ++) {
 				dFloat pad;
 				pad = ((i == 1) || (i == 2)) * 0.25f * radius;
 				dVector p (x, 0.0f, radius + pad);
 				x += 0.3333f * height;
 				dMatrix acc (GetIdentityMatrix());
-				for (j = 0; j < STEPS_HULL; j ++) {
+				for (int j = 0; j < STEPS_HULL; j ++) {
 					cloud[count] = acc.RotateVector(p);
 					acc = acc * rotation;
 					count ++;
