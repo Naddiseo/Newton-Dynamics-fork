@@ -19,17 +19,21 @@
 #include "../DemoCamera.h"
 #include "../PhysicsUtils.h"
 
-#define NUMBER_OF_ITERNAL_PARTS 2
+#define NUMBER_OF_ITERNAL_PARTS 0
 
-#if 0
+#if 1
 static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 {
 	// create a collision primitive
 //	dVector size (2.0f, 2.0f, 2.0f);
-	dVector size = dVector (10.0f, 0.5f, 10.0f, 0.0f);
+//	dVector size = dVector (10.0f, 0.5f, 10.0f, 0.0f);
+	dVector size = dVector (5.0f, 5.0f, 5.0f, 0.0f);
 	NewtonWorld* const world = scene->GetNewton();
-//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, type, 0);
-	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
+
+//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
+	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _REGULAR_CONVEX_HULL_PRIMITIVE, 0);
+//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _RANDOM_CONVEX_HULL_PRIMITIVE, 0);
+	
 	
 
 	// create a newton mesh from the collision primitive
@@ -41,8 +45,8 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 
 	// pepper the bing box of the mesh with random points
 	int count = 0;
-	dVector points[10];
-	do {
+	dVector points[NUMBER_OF_ITERNAL_PARTS + 1];
+	while (count < NUMBER_OF_ITERNAL_PARTS) {
 		dFloat x = RandomVariable(size.m_x);
 		dFloat y = RandomVariable(size.m_y);
 		dFloat z = RandomVariable(size.m_z);
@@ -50,7 +54,7 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 			points[count] = dVector (x, y, z);
 			count ++;
 		}
-	} while (count < 10);
+	} 
 
 //points[0] =	dVector (-0.95387375f, 0.051684085f, -1.3675097f);
 //points[1] = dVector (0.027149497f, -0.038374674f, 0.47796631f);
@@ -68,7 +72,7 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 	textureMatrix[1][1] = 1.0f / size.m_y;
 	NewtonMesh* const convexParts = NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interior, &textureMatrix[0][0]);
 
-#if 0
+#if 1
 dScene xxxx(world);
 dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
 dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
@@ -78,7 +82,7 @@ xxxx.Serialize("xxx.xml");
 #endif
 
 	DemoEntity* const entity = new DemoEntity(NULL);
-	entity->SetMatrix(*scene, dQuaternion(), dVector (0, 5, 0, 0));
+	entity->SetMatrix(*scene, dQuaternion(), dVector (0, 10, 0, 0));
 	entity->InterpolateMatrix (*scene, 1.0f);
 	
 	
@@ -506,8 +510,8 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	//CreateLevelMesh (scene, "sponza.xml", false);
 
 	// create a shattered mesh array
-	Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 3, 2, 2, 30.0f);
-// CreateSimpleVoronoiShatter (scene);
+//	Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 3, 2, 2, 30.0f);
+ CreateSimpleVoronoiShatter (scene);
 
 
 	// place camera into position
