@@ -83,7 +83,7 @@ dMaterialNodeInfo::~dMaterialNodeInfo(void)
 
 
 
-void dMaterialNodeInfo::Serialize (TiXmlElement* rootNode) const
+void dMaterialNodeInfo::Serialize (TiXmlElement* const rootNode) const
 {
 	SerialiseBase(dNodeInfo, rootNode);
 
@@ -123,7 +123,7 @@ void dMaterialNodeInfo::Serialize (TiXmlElement* rootNode) const
 	opacity->SetDoubleAttribute ("float", m_opacity);
 }
 
-bool dMaterialNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber) 
+bool dMaterialNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 
@@ -158,7 +158,7 @@ bool dMaterialNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber)
 }
 
 
-void dMaterialNodeInfo::SerializeBinary (FILE* file) 
+void dMaterialNodeInfo::SerializeBinary (FILE* const file) 
 {
 	fprintf (file, "%s\n%s\n", GetClassName(), GetName());
 

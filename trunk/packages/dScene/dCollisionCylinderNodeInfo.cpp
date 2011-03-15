@@ -99,7 +99,7 @@ void dCollisionCylinderNodeInfo::CalculateInertiaGeometry (dScene* world, dVecto
 }
 
 
-void dCollisionCylinderNodeInfo::Serialize (TiXmlElement* rootNode) const
+void dCollisionCylinderNodeInfo::Serialize (TiXmlElement* const rootNode) const
 {
 	SerialiseBase(dCollisionNodeInfo, rootNode);
 
@@ -109,7 +109,7 @@ void dCollisionCylinderNodeInfo::Serialize (TiXmlElement* rootNode) const
 	dataNode->SetDoubleAttribute("height", double (m_height));
 }
 
-bool dCollisionCylinderNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber) 
+bool dCollisionCylinderNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
 	DeserialiseBase(dCollisionNodeInfo, rootNode, revisionNumber);
 
@@ -120,7 +120,7 @@ bool dCollisionCylinderNodeInfo::Deserialize (TiXmlElement* rootNode, int revisi
 }
 
 
-void dCollisionCylinderNodeInfo::SerializeBinary (FILE* file) 
+void dCollisionCylinderNodeInfo::SerializeBinary (FILE* const file) 
 {
 _ASSERTE (0);
 	fprintf (file, "%s\n%s\n", GetClassName(), GetName());

@@ -29,23 +29,23 @@ class TiXmlElement;
 class dSceneGraph: public dTree<dGraphNode, unsigned>
 {
 	public:
-	dSceneGraph(dNodeInfo* rootInfo);
+	dSceneGraph(dNodeInfo* const rootInfo);
 	dSceneGraph(const dSceneGraph& me);
 	~dSceneGraph(void);
 
 	dTreeNode* GetRootNode() const;
-	dTreeNode* AddNode (dNodeInfo* info, dTreeNode* parent);
-	void DeleteNode (dTreeNode* node);
+	dTreeNode* AddNode (dNodeInfo* const info, dTreeNode* parent);
+	void DeleteNode (dTreeNode* const node);
 
-	void AddEdge (dTreeNode* node1, dTreeNode* node2);
-	void DeleteEdge (dTreeNode* node1, dTreeNode* node2);
+	void AddEdge (dTreeNode* const node1, dTreeNode* const node2);
+	void DeleteEdge (dTreeNode* const node1, dTreeNode* const node2);
 
-	void UnlinkEdge (dTreeNode* node1, dTreeNode* node2);
-	bool HasLinkToRoot (dTreeNode* node); 
+	void UnlinkEdge (dTreeNode* const node1, dTreeNode* const node2);
+	bool HasLinkToRoot (dTreeNode* const node); 
 
-	void Serialize (TiXmlElement* parentNode) const;
-	bool Deserialize (TiXmlElement* parentNode, int revision);
-	void SerializeBinary (FILE* file);
+	void Serialize (TiXmlElement* const parentNode) const;
+	bool Deserialize (TiXmlElement* const parentNode, int revision);
+	void SerializeBinary (FILE* const file);
 
 	int GetLRU();
 

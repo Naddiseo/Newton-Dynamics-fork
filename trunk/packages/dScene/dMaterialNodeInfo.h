@@ -61,9 +61,9 @@ class dMaterialNodeInfo: public dNodeInfo
 	virtual dFloat GetOpacity() const {return m_opacity;}
 
 	protected:
-	virtual void SerializeBinary (FILE* file);
-	virtual void Serialize (TiXmlElement* rootNode) const; 
-	virtual bool Deserialize (TiXmlElement* rootNode, int revisionNumber);
+	virtual void SerializeBinary (FILE* const file);
+	virtual void Serialize (TiXmlElement* const rootNode) const; 
+	virtual bool Deserialize (TiXmlElement* const rootNode, int revisionNumber);
 
 	dVector m_ambientColor;
 	dVector m_diffuseColor;

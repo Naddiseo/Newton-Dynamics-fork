@@ -79,7 +79,7 @@ dFloat dCameraNodeInfo::GetCameraRoll() const
 }
 
 
-void dCameraNodeInfo::Serialize (TiXmlElement* rootNode) const
+void dCameraNodeInfo::Serialize (TiXmlElement* const rootNode) const
 {
 	SerialiseBase(dNodeInfo, rootNode);
 
@@ -136,7 +136,7 @@ void dCameraNodeInfo::Serialize (TiXmlElement* rootNode) const
 */
 }
 
-bool dCameraNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber) 
+bool dCameraNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 	double x;
@@ -185,7 +185,7 @@ bool dCameraNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber)
 	return true;
 }
 
-void dCameraNodeInfo::SerializeBinary (FILE* file) 
+void dCameraNodeInfo::SerializeBinary (FILE* const file) 
 {
 	_ASSERTE (0);
 /*

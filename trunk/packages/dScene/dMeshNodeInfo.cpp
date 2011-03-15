@@ -171,7 +171,7 @@ void dMeshNodeInfo::RemoveUnusedVertices(dScene* const world, dScene::dTreeNode*
 }
 
 
-void dMeshNodeInfo::Serialize (TiXmlElement* rootNode) const
+void dMeshNodeInfo::Serialize (TiXmlElement* const rootNode) const
 {
 
  	SerialiseBase(dGeometryNodeInfo, rootNode);
@@ -339,7 +339,7 @@ void dMeshNodeInfo::Serialize (TiXmlElement* rootNode) const
 	delete[] buffer;
 }
 
-bool dMeshNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber) 
+bool dMeshNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
 	DeserialiseBase(dGeometryNodeInfo, rootNode, revisionNumber);
 
@@ -428,7 +428,7 @@ bool dMeshNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber)
 }
 
 
-void dMeshNodeInfo::SerializeBinary (FILE* file) 
+void dMeshNodeInfo::SerializeBinary (FILE* const file) 
 {
 	_ASSERTE (0);
 /*

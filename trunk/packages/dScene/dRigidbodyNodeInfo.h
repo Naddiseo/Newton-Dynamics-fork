@@ -67,9 +67,9 @@ class dRigidbodyNodeInfo: public dNodeInfo
 
 	virtual NewtonBody* CreateNewtonBody (NewtonWorld* const world, dScene* const scene, dScene::dTreeNode* const myNode) const;
 	protected:
-	virtual void SerializeBinary (FILE* file);
-	virtual void Serialize (TiXmlElement* rootNode) const; 
-	virtual bool Deserialize (TiXmlElement* rootNode, int revisionNumber);
+	virtual void SerializeBinary (FILE* const file);
+	virtual void Serialize (TiXmlElement* const rootNode) const; 
+	virtual bool Deserialize (TiXmlElement* const rootNode, int revisionNumber);
 	
 	dVector m_centerOfMass;
 	dVector m_massMatrix;

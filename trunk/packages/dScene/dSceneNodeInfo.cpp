@@ -170,7 +170,7 @@ dFloat dSceneNodeInfo::RayCast (const dVector& p0, const dVector& p1) const
 }
 
 
-void dSceneNodeInfo::Serialize (TiXmlElement* rootNode) const
+void dSceneNodeInfo::Serialize (TiXmlElement* const rootNode) const
 {
 	SerialiseBase(dNodeInfo, rootNode);
 
@@ -196,7 +196,7 @@ void dSceneNodeInfo::Serialize (TiXmlElement* rootNode) const
 	matrix->SetAttribute("stretchAxis", tmp);
 }
 
-bool dSceneNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber) 
+bool dSceneNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 
@@ -213,7 +213,7 @@ bool dSceneNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber)
 }
 
 
-void dSceneNodeInfo::SerializeBinary (FILE* file) 
+void dSceneNodeInfo::SerializeBinary (FILE* const file) 
 {
 	fprintf (file, "%s\n%s\n", GetClassName(), GetName());
 	_ASSERTE (0);

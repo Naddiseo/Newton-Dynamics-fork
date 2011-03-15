@@ -50,7 +50,7 @@ void dGraphNode::SetNode(dNodeInfo* newInfo)
 	m_nodeInfo->AddRef();
 }
 
-dSceneGraph::dSceneGraph(dNodeInfo* rootInfo)
+dSceneGraph::dSceneGraph(dNodeInfo* const rootInfo)
 	:dTree<dGraphNode, unsigned>(), m_lru (0)
 {
 	m_rootNode = AddNode (rootInfo, NULL);
@@ -121,7 +121,7 @@ dSceneGraph::dTreeNode* dSceneGraph::GetRootNode() const
 	return m_rootNode;
 }
 
-bool dSceneGraph::HasLinkToRoot (dTreeNode* node)
+bool dSceneGraph::HasLinkToRoot (dTreeNode* const node)
 {
 	int stack;
 	char parentEdge[D_GRAPH_MAX_STACK_DEPTH];
@@ -135,7 +135,7 @@ bool dSceneGraph::HasLinkToRoot (dTreeNode* node)
 
 	while (stack) {
 		stack --;
-		node = pool[stack];
+		dTreeNode* const node = pool[stack];
 		if (node == m_rootNode) {
 			return true;
 		}
@@ -182,7 +182,7 @@ bool dSceneGraph::HasLinkToRoot (dTreeNode* node)
 	return false;
 }
 
-dSceneGraph::dTreeNode* dSceneGraph::AddNode (dNodeInfo* info, dTreeNode* parent)
+dSceneGraph::dTreeNode* dSceneGraph::AddNode (dNodeInfo* const info, dTreeNode* parent)
 {
 	dTreeNode* child = Insert(info->GetUniqueID());
 	dGraphNode& node = child->GetInfo();
@@ -222,7 +222,7 @@ void dSceneGraph::AddEdge (dTreeNode* parent, dTreeNode* child)
 	}
 }
 
-void dSceneGraph::UnlinkEdge (dTreeNode* node1, dTreeNode* node2)
+void dSceneGraph::UnlinkEdge (dTreeNode* const node1, dTreeNode* const node2)
 {
 _ASSERTE (0);
 /*
@@ -250,7 +250,7 @@ _ASSERTE (0);
 */
 }
 
-void dSceneGraph::DeleteEdge (dTreeNode* node1, dTreeNode* node2)
+void dSceneGraph::DeleteEdge (dTreeNode* const node1, dTreeNode* const node2)
 {
 	dGraphNode& info1 = node1->GetInfo();
 	dGraphNode& info2 = node2->GetInfo();
@@ -298,7 +298,7 @@ void dSceneGraph::DeleteEdge (dTreeNode* node1, dTreeNode* node2)
 	}
 }
 
-void dSceneGraph::DeleteNode (dTreeNode* node)
+void dSceneGraph::DeleteNode (dTreeNode* const node)
 {
 	dList<dTreeNode*> conectedNodes;
 	dTree<dTreeNode*, unsigned> deleteList;
@@ -414,7 +414,7 @@ void dSceneGraph::DeleteNode (dTreeNode* node)
 }
 
 
-void dSceneGraph::Serialize (TiXmlElement* rootNode) const
+void dSceneGraph::Serialize (TiXmlElement* const rootNode) const
 {
 	// save scenes nodes
 	TiXmlElement* nodes = new TiXmlElement ("nodes");
@@ -482,7 +482,7 @@ void dSceneGraph::Serialize (TiXmlElement* rootNode) const
 	}
 }
 
-bool dSceneGraph::Deserialize (TiXmlElement* rootNode, int revision)
+bool dSceneGraph::Deserialize (TiXmlElement* const rootNode, int revision)
 {
 	Cleanup();
 	int count;
@@ -554,7 +554,7 @@ bool dSceneGraph::Deserialize (TiXmlElement* rootNode, int revision)
 	return true;
 }
 
-void dSceneGraph::SerializeBinary (FILE* file)
+void dSceneGraph::SerializeBinary (FILE* const file)
 {
 _ASSERTE (0);
 /*

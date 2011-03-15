@@ -89,7 +89,7 @@ void dCollisionSphereNodeInfo::CalculateInertiaGeometry (dScene* world, dVector&
 }
 
 
-void dCollisionSphereNodeInfo::Serialize (TiXmlElement* rootNode) const
+void dCollisionSphereNodeInfo::Serialize (TiXmlElement* const rootNode) const
 {
 	SerialiseBase(dCollisionNodeInfo, rootNode);
 
@@ -100,7 +100,7 @@ void dCollisionSphereNodeInfo::Serialize (TiXmlElement* rootNode) const
 	dataNode->SetAttribute("float4", tmp);
 }
 
-bool dCollisionSphereNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber) 
+bool dCollisionSphereNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
 	DeserialiseBase(dCollisionNodeInfo, rootNode, revisionNumber);
 
@@ -111,7 +111,7 @@ bool dCollisionSphereNodeInfo::Deserialize (TiXmlElement* rootNode, int revision
 }
 
 
-void dCollisionSphereNodeInfo::SerializeBinary (FILE* file) 
+void dCollisionSphereNodeInfo::SerializeBinary (FILE* const file) 
 {
 _ASSERTE (0);
 	fprintf (file, "%s\n%s\n", GetClassName(), GetName());

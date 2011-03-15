@@ -106,7 +106,7 @@ const dVector& dRigidbodyNodeInfo::GetVelocity () const
 
 
 
-void dRigidbodyNodeInfo::Serialize (TiXmlElement* rootNode) const
+void dRigidbodyNodeInfo::Serialize (TiXmlElement* const rootNode) const
 {
 	SerialiseBase(dNodeInfo, rootNode);
 
@@ -141,7 +141,7 @@ void dRigidbodyNodeInfo::Serialize (TiXmlElement* rootNode) const
 	dataNode->SetAttribute("float4", tmp);
 }
 
-bool dRigidbodyNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber) 
+bool dRigidbodyNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 
@@ -164,7 +164,7 @@ bool dRigidbodyNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber
 }
 
 
-void dRigidbodyNodeInfo::SerializeBinary (FILE* file) 
+void dRigidbodyNodeInfo::SerializeBinary (FILE* const file) 
 {
 _ASSERTE (0);
 	fprintf (file, "%s\n%s\n", GetClassName(), GetName());

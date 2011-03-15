@@ -65,7 +65,7 @@ dFloat dBoneNodeInfo::RayCast (const dVector& p0, const dVector& p1) const
 
 
 
-void dBoneNodeInfo::SerializeBinary (FILE* file) 
+void dBoneNodeInfo::SerializeBinary (FILE* const file) 
 {
 	fprintf (file, "%s\n%s\n", GetClassName(), GetName());
 	_ASSERTE (0);
@@ -288,7 +288,7 @@ void dBoneNodeInfo::DrawOOBBGizmo (dScene* world, dScene::dTreeNode* myNode) con
 */
 
 
-void dBoneNodeInfo::Serialize (TiXmlElement* rootNode) const
+void dBoneNodeInfo::Serialize (TiXmlElement* const rootNode) const
 {
 	SerialiseBase(dSceneNodeInfo, rootNode);
 
@@ -299,7 +299,7 @@ void dBoneNodeInfo::Serialize (TiXmlElement* rootNode) const
 }
 
 
-bool dBoneNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber) 
+bool dBoneNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
 	DeserialiseBase(dSceneNodeInfo, rootNode, revisionNumber);
 
@@ -309,6 +309,6 @@ bool dBoneNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber)
 	return true;
 }
 
-void dBoneNodeInfo::SerializeBinary (FILE* file)
+void dBoneNodeInfo::SerializeBinary (FILE* const file)
 {
 }

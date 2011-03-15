@@ -60,9 +60,9 @@ class dCollisionChamferCylinderNodeInfo: public dCollisionNodeInfo
 	virtual void DrawGizmoHandle(dScene* world, const dMatrix& coordinaSystem, dGizmoMode mode, dGizmoHandle handle, const dVector& color, dFloat size) const;
 
 	protected:
-	virtual void SerializeBinary (FILE* file);
-	virtual void Serialize (TiXmlElement* rootNode) const; 
-	virtual bool Deserialize (TiXmlElement* rootNode, int revisionNumber);
+	virtual void SerializeBinary (FILE* const file);
+	virtual void Serialize (TiXmlElement* const rootNode) const; 
+	virtual bool Deserialize (TiXmlElement* const rootNode, int revisionNumber);
 	NewtonCollision* CreateNewtonCollision (NewtonWorld* const world, dScene* const scene, dScene::dTreeNode* const myNode) const;
 
 	dFloat m_radius;

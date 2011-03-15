@@ -124,7 +124,7 @@ void dCollisionConvexHullNodeInfo::CalculateInertiaGeometry (dScene* world, dVec
 }
 
 
-void dCollisionConvexHullNodeInfo::Serialize (TiXmlElement* rootNode) const
+void dCollisionConvexHullNodeInfo::Serialize (TiXmlElement* const rootNode) const
 {
 	SerialiseBase(dCollisionNodeInfo, rootNode);
 
@@ -139,7 +139,7 @@ void dCollisionConvexHullNodeInfo::Serialize (TiXmlElement* rootNode) const
 	}
 }
 
-bool dCollisionConvexHullNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber) 
+bool dCollisionConvexHullNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
 	DeserialiseBase(dCollisionNodeInfo, rootNode, revisionNumber);
 
@@ -157,7 +157,7 @@ bool dCollisionConvexHullNodeInfo::Deserialize (TiXmlElement* rootNode, int revi
 }
 
 
-void dCollisionConvexHullNodeInfo::SerializeBinary (FILE* file) 
+void dCollisionConvexHullNodeInfo::SerializeBinary (FILE* const file) 
 {
 _ASSERTE (0);
 	fprintf (file, "%s\n%s\n", GetClassName(), GetName());

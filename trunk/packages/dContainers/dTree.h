@@ -134,17 +134,17 @@ class dTree
 			return (dTreeNode* )dRedBackNode::m_parent;
 		}
 
-		void SetLeft (dTreeNode* node)
+		void SetLeft (dTreeNode* const node)
 		{
 			dRedBackNode::m_left = node;
 		}
 
-		void SetRight (dTreeNode* node)
+		void SetRight (dTreeNode* const node)
 		{
 			dRedBackNode::m_right = node;
 		}
 
-		void SetParent (dTreeNode* node)
+		void SetParent (dTreeNode* const node)
 		{
 			dRedBackNode::m_parent = node;
 		}
@@ -192,7 +192,7 @@ class dTree
 			m_ptr = m_tree->Maximum();
 		}
 
-		void Set (dTreeNode* node)
+		void Set (dTreeNode* const node)
 		{
 			m_ptr = node;
 		}
@@ -273,16 +273,16 @@ class dTree
 	dTreeNode* Insert (KEY key);
 	dTreeNode* Insert (const OBJECT &element, KEY key);
 	dTreeNode* Insert (const OBJECT &element, KEY key, bool& elementWasInTree);
-	dTreeNode* Insert (dTreeNode* node, KEY key);
+	dTreeNode* Insert (dTreeNode* const node, KEY key);
 
 	dTreeNode* Replace (OBJECT &element, KEY key);
 	dTreeNode* ReplaceKey (KEY oldKey, KEY newKey);
-	dTreeNode* ReplaceKey (dTreeNode* node, KEY key);
+	dTreeNode* ReplaceKey (dTreeNode* const node, KEY key);
 
-	void Unlink (dTreeNode* node);
+	void Unlink (dTreeNode* const node);
 
 	void Remove (KEY key);
-	void Remove (dTreeNode* node);
+	void Remove (dTreeNode* const node);
 	void RemoveAll (); 
 
 	bool SanityCheck () const;

@@ -57,14 +57,14 @@ void dTextureNodeInfo::SetPathName (const char* path)
 }
 
 
-void dTextureNodeInfo::Serialize (TiXmlElement* rootNode) const
+void dTextureNodeInfo::Serialize (TiXmlElement* const rootNode) const
 {
 	SerialiseBase(dNodeInfo, rootNode);
 
 	rootNode->SetAttribute("path", m_path);
 }
 
-bool dTextureNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber) 
+bool dTextureNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 
@@ -73,7 +73,7 @@ bool dTextureNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber)
 	return true;
 }
 
-void dTextureNodeInfo::SerializeBinary (FILE* file) 
+void dTextureNodeInfo::SerializeBinary (FILE* const file) 
 {
 	fprintf (file, "%s\n%s\n", GetClassName(), GetName());
 

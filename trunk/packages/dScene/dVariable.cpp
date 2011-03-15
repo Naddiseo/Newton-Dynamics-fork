@@ -152,7 +152,7 @@ dVariable* dVariableList::CreateVariable (const char* name)
 }
 
 
-void dVariableList::Serialize(TiXmlElement* rootNode) const
+void dVariableList::Serialize(TiXmlElement* const rootNode) const
 {
 	if (GetCount()) {
 		TiXmlElement* dataNode = new TiXmlElement ("variables");

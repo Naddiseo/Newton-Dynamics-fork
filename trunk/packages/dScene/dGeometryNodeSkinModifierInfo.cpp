@@ -181,7 +181,7 @@ void dGeometryNodeSkinModifierInfo::SkinMesh(dScene::dTreeNode* skinNode, dScene
 	}
 }
 
-void dGeometryNodeSkinModifierInfo::Serialize (TiXmlElement* rootNode) const
+void dGeometryNodeSkinModifierInfo::Serialize (TiXmlElement* const rootNode) const
 {
 	SerialiseBase(dGeometryNodeModifierInfo, rootNode);
 
@@ -255,7 +255,7 @@ void dGeometryNodeSkinModifierInfo::Serialize (TiXmlElement* rootNode) const
 	delete[] buffer;
 }
 
-bool dGeometryNodeSkinModifierInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber)
+bool dGeometryNodeSkinModifierInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber)
 {
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 

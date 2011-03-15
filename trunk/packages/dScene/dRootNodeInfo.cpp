@@ -39,18 +39,18 @@ dRootNodeInfo::~dRootNodeInfo(void)
 
 
 
-void dRootNodeInfo::Serialize (TiXmlElement* rootNode) const
+void dRootNodeInfo::Serialize (TiXmlElement* const rootNode) const
 {
 	SerialiseBase(dNodeInfo, rootNode);
 }
 
-bool dRootNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber) 
+bool dRootNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 	return true;
 }
 
-void dRootNodeInfo::SerializeBinary (FILE* file) 
+void dRootNodeInfo::SerializeBinary (FILE* const file) 
 {
 	fprintf (file, "%s\n%s\n", GetClassName(), GetName());
 }

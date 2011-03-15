@@ -119,7 +119,7 @@ void dCollisionNodeInfo::CalculateGeometryProperies (NewtonCollision* shape, dVe
 }
 
 
-bool dCollisionNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber) 
+bool dCollisionNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 
@@ -139,7 +139,7 @@ bool dCollisionNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber
 
 
 
-void dCollisionNodeInfo::Serialize (TiXmlElement* rootNode) const
+void dCollisionNodeInfo::Serialize (TiXmlElement* const rootNode) const
 {
 	SerialiseBase(dNodeInfo, rootNode);
 
@@ -164,7 +164,7 @@ void dCollisionNodeInfo::Serialize (TiXmlElement* rootNode) const
 
 
 
-void dCollisionNodeInfo::SerializeBinary (FILE* file) 
+void dCollisionNodeInfo::SerializeBinary (FILE* const file) 
 {
 _ASSERTE (0);
 	fprintf (file, "%s\n%s\n", GetClassName(), GetName());

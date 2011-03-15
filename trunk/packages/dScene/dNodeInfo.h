@@ -118,9 +118,9 @@ class dNodeInfo: public dClassInfo, public dVariableList
 	virtual const char* GetName () const;
 	virtual void SetName (const char* name);
 	
-	virtual void SerializeBinary (FILE* file) const;
-	virtual void Serialize (TiXmlElement* rootNode) const; 
-	virtual bool Deserialize (TiXmlElement* rootNode, int revisionNumber);
+	virtual void SerializeBinary (FILE* const file) const;
+	virtual void Serialize (TiXmlElement* const rootNode) const; 
+	virtual bool Deserialize (TiXmlElement* const rootNode, int revisionNumber);
 
 	// draw scene in wire frame mode
 	virtual void DrawWireFrame(dScene* const world, dScene::dTreeNode* const myNode, const dVector& color) const{};

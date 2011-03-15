@@ -137,19 +137,19 @@ dVariable* dNodeInfo::CreateVariable (const char* name)
 
 
 
-void dNodeInfo::SerializeBinary (FILE* file) const
+void dNodeInfo::SerializeBinary (FILE* const file) const
 {
 	_ASSERTE (0);
 }
 
-void dNodeInfo::Serialize (TiXmlElement* rootNode) const
+void dNodeInfo::Serialize (TiXmlElement* const rootNode) const
 {
 	rootNode->SetAttribute("name", m_name);
 	dVariableList::Serialize(rootNode);
 }
 
 
-bool dNodeInfo::Deserialize (TiXmlElement* rootNode, int revisionNumber)
+bool dNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber)
 {
 	SetName (rootNode->Attribute("name"));
 	dVariableList::Deserialize(rootNode);
