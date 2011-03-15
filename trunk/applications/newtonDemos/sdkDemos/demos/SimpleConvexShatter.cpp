@@ -19,7 +19,7 @@
 #include "../DemoCamera.h"
 #include "../PhysicsUtils.h"
 
-#define NUMBER_OF_ITERNAL_PARTS 5
+#define NUMBER_OF_ITERNAL_PARTS 2
 
 #if 0
 static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
@@ -232,13 +232,24 @@ class SimpleShatterEffectEntity: public DemoEntity
 
 
 		if (mag2 > (maxForce * maxForce)) {
-			NewtonWorld* world = NewtonBodyGetWorld(m_myBody);
+			NewtonWorld* const world = NewtonBodyGetWorld(m_myBody);
 
 			dFloat Ixx; 
 			dFloat Iyy; 
 			dFloat Izz; 
 			dFloat mass; 
 			NewtonBodyGetMassMatrix(m_myBody, &mass, &Ixx, &Iyy, &Izz);
+
+			dVector com;
+			dVector veloc;
+			dVector omega;
+			dMatrix bodyMatrix;
+
+			NewtonBodyGetVelocity(m_myBody, &veloc[0]);
+			NewtonBodyGetVelocity(m_myBody, &omega[0]);
+			NewtonBodyGetCentreOfMass(m_myBody, &omega[0]);
+			NewtonBodyGetMatrix(m_myBody, &bodyMatrix[0][0]);
+			com = bodyMatrix.TransformVector (com);
 
 			dMatrix matrix (GetCurrentMatrix());
 			dQuaternion rotation (matrix);
@@ -263,6 +274,20 @@ class SimpleShatterEffectEntity: public DemoEntity
 
 				// set the correct center of gravity for this body
 				NewtonBodySetCentreOfMass (rigidBody, &atom.m_centerOfMass[0]);
+
+				// calculate the center of mas of the debris
+				dVector center (matrix.TransformVector(atom.m_centerOfMass));
+
+				// calculate debris initial velocity
+				dVector v (veloc + omega * (center - com));
+
+				// set initial velocity
+				NewtonBodySetVelocity(rigidBody, &v[0]);
+				NewtonBodySetOmega(rigidBody, &omega[0]);
+
+				// set the  debrie center of mass
+				NewtonBodySetCentreOfMass (rigidBody, &atom.m_centerOfMass[0]);
+
 
 				// set the mass matrix
 				NewtonBodySetMassMatrix (rigidBody, debriMass, Ixx, Iyy, Izz);
