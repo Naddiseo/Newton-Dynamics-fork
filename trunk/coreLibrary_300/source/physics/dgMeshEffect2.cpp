@@ -2158,10 +2158,19 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 			convexMesh->m_attib[i].m_vertex.m_w = layer;
 		}
 
+int xxxx = 0;
+if (convexMesh->HasOpenEdges())
+xxxx = 1;
+
+
+if (xxxx)
 		voronoiPartion->MergeFaces(convexMesh);
 		layer += dgFloat32 (1.0f);
 
 		convexMesh->Release();
+
+if (xxxx)
+break;
 	}
 
 	voronoiPartion->EndPolygon();

@@ -380,6 +380,7 @@ class dgMeshEffectSolidTree
 						maxDist = dist;
 					} 
 				} 
+_ASSERTE (0);
 maxDist = dgGoogol (dgFloat64 (0.0f));
 
 				if ((minDist.GetAproximateValue() < dgFloat64 (0.0f)) && (maxDist.GetAproximateValue() > dgFloat64 (0.0f))) {
