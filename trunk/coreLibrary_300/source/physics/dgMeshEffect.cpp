@@ -522,8 +522,6 @@ void dgMeshEffect::Triangulate  ()
 		}
 	}
 	EndFace();
-
-	WeldTJoints ();
 }
 
 void dgMeshEffect::ConvertToPolygons ()
@@ -2900,6 +2898,7 @@ dgMeshEffect* dgMeshEffect::Union (const dgMatrix& matrix, const dgMeshEffect* c
 			result->MergeFaces(rightMeshSource);
 			result->MergeFaces(rightMeshClipper);
 			result->EndPolygon();
+			result->WeldTJoints();
 		}
 	}
 
@@ -2949,11 +2948,10 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 			result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
 			result->BeginPolygon();
-
 			result->MergeFaces(rightMeshSource);
 			result->ReverseMergeFaces(leftMeshClipper);
-
 			result->EndPolygon();
+			result->WeldTJoints();
 		}
 	}
 
@@ -3000,13 +2998,11 @@ dgMeshEffect* dgMeshEffect::Intersection (const dgMatrix& matrix, const dgMeshEf
 		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper);
 		if (leftMeshSource && rightMeshSource) {
 			result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
-
 			result->BeginPolygon();
-
 			result->MergeFaces(leftMeshSource);
 			result->MergeFaces(leftMeshClipper);
-
 			result->EndPolygon();
+			result->WeldTJoints();
 		}
 	}
 
@@ -3080,6 +3076,9 @@ void dgMeshEffect::ClipMesh (const dgMatrix& matrix, const dgMeshEffect* clipMes
 
 				leftMesh->EndPolygon();
 				rightMesh->EndPolygon();
+
+				leftMesh->WeldTJoints();
+				rightMesh->WeldTJoints();
 
 				*left = leftMesh;
 				*right = rightMesh;
@@ -3328,6 +3327,9 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	leftMesh->EndPolygon();
 	rightMesh->EndPolygon(); 
 
+	leftMesh->WeldTJoints();
+	rightMesh->WeldTJoints();
+
 	if (!leftMesh->GetCount()) {
 		leftMesh->Release();
 		leftMesh = NULL;
@@ -3340,10 +3342,6 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 
 	*left = leftMesh;
 	*right = rightMesh;
-
-
-
-
 }
 
 void dgMeshEffect::ClipMesh (const dgMeshEffect* const clipMesh, dgMeshEffect** left, dgMeshEffect** right) const

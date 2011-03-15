@@ -223,6 +223,8 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 //	void ClipFace (const dgBigPlane& plane, dgMeshTreeCSGFace* src, dgMeshTreeCSGFace** left, dgMeshTreeCSGFace** right,	dgMeshTreeCSGPointsPool& pointPool) const;
 	void ClipFace (const dgHugeVector& normal, const dgHugeVector& origin, dgMeshTreeCSGFace* const src, dgMeshTreeCSGFace** left, dgMeshTreeCSGFace** const right, dgMeshTreeCSGPointsPool& pointPool) const;
 
+	dgMeshEffect* CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
+
 	bool CheckSingleMesh() const;
 
 
