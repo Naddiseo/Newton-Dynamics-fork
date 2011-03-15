@@ -2152,7 +2152,6 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 			convexMesh->m_attib[i].m_vertex.m_w = layer;
 		}
 
-//if (xxx == 7)
 		voronoiPartion->MergeFaces(convexMesh);
 		layer += dgFloat32 (1.0f);
 
