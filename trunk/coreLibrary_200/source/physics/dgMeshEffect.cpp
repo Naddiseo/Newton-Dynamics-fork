@@ -2491,25 +2491,20 @@ void dgMeshEffect::GetIndirectVertexStreams(
 	dgInt32 uvStrideInByte0, dgFloat32* uv0, dgInt32* uvIndices0, dgInt32* uvCount0,
 	dgInt32 uvStrideInByte1, dgFloat32* uv1, dgInt32* uvIndices1, dgInt32* uvCount1)
 {
-
 	GetVertexStreams (vetexStrideInByte, vertex, normalStrideInByte, normal, uvStrideInByte0, uv0, uvStrideInByte1, uv1);
 
 	*vertexCount = dgVertexListToIndexList(vertex, vetexStrideInByte, vetexStrideInByte, 0, m_atribCount, vertexIndices, dgFloat32 (0.0f));
 	*normalCount = dgVertexListToIndexList(normal, normalStrideInByte, normalStrideInByte, 0, m_atribCount, normalIndices, dgFloat32 (0.0f));
 
-	dgInt32 count;
-	dgInt32 stride;
-	dgTriplex* tmpUV;
-	
-	tmpUV = (dgTriplex*) GetAllocator()->MallocLow (dgInt32 (sizeof (dgTriplex) * m_atribCount));
-
-	stride = dgInt32 (uvStrideInByte1 /sizeof (dgFloat32));
+	dgTriplex* const tmpUV = (dgTriplex*) GetAllocator()->MallocLow (dgInt32 (sizeof (dgTriplex) * m_atribCount));
+	dgInt32 stride = dgInt32 (uvStrideInByte1 /sizeof (dgFloat32));
 	for (dgInt32 i = 0; i < m_atribCount; i ++){
 		tmpUV[i].m_x = uv1[i * stride + 0];
 		tmpUV[i].m_y = uv1[i * stride + 1];
 		tmpUV[i].m_z = dgFloat32 (0.0f);
 	}
-	count = dgVertexListToIndexList(&tmpUV[0].m_x, sizeof (dgTriplex), sizeof (dgTriplex), 0, m_atribCount, uvIndices1, dgFloat32 (0.0f));
+
+	dgInt32 count = dgVertexListToIndexList(&tmpUV[0].m_x, sizeof (dgTriplex), sizeof (dgTriplex), 0, m_atribCount, uvIndices1, dgFloat32 (0.0f));
 	for (dgInt32 i = 0; i < count; i ++){
 		uv1[i * stride + 0] = tmpUV[i].m_x;
 		uv1[i * stride + 1] = tmpUV[i].m_y;
@@ -2529,49 +2524,33 @@ void dgMeshEffect::GetIndirectVertexStreams(
 	}
 	*uvCount0 = count;
 
-
 	GetAllocator()->FreeLow (tmpUV);
 }
 
 dgMeshEffect::dgIndexArray* dgMeshEffect::MaterialGeometryBegin()
 {
-	_ASSERTE (0);
-	return 0;
-	/*
-
-	dgInt32 mark;
-	dgInt32 count;
-	dgInt32 materialCount;
 	dgInt32 materials[256];
 	dgInt32 streamIndexMap[256];
-	dgIndexArray* array; 
 
-	count = 0;
-	materialCount = 0;
+	dgInt32 count = 0;
+	dgInt32 materialCount = 0;
 	
-	array = (dgIndexArray*) GetAllocator()->MallocLow (dgInt32 (4 * sizeof (dgInt32) * GetCount() + sizeof (dgIndexArray) + 2048));
+	dgIndexArray* const array = (dgIndexArray*) GetAllocator()->MallocLow (dgInt32 (4 * sizeof (dgInt32) * GetCount() + sizeof (dgIndexArray) + 2048));
 	array->m_indexList = (dgInt32*)&array[1];
 	
-	mark = IncLRU();
+	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);	
 	memset(streamIndexMap, 0, sizeof (streamIndexMap));
 	for(iter.Begin(); iter; iter ++){
-
-		dgEdge* edge;
-		edge = &(*iter);
+		dgEdge* const edge = &(*iter);
 		if ((edge->m_incidentFace >= 0) && (edge->m_mark != mark)) {
-			dgEdge* ptr;
-			dgInt32 hashValue;
-			dgInt32 index0;
-			dgInt32 index1;
-
-			ptr = edge;
+			dgEdge* ptr = edge;
 			ptr->m_mark = mark;
-			index0 = dgInt32 (ptr->m_userData);
+			dgInt32 index0 = dgInt32 (ptr->m_userData);
 
 			ptr = ptr->m_next;
 			ptr->m_mark = mark;
-			index1 = dgInt32 (ptr->m_userData);
+			dgInt32 index1 = dgInt32 (ptr->m_userData);
 
 			ptr = ptr->m_next;
 			do {
@@ -2583,7 +2562,7 @@ dgMeshEffect::dgIndexArray* dgMeshEffect::MaterialGeometryBegin()
 				array->m_indexList[count * 4 + 3] = m_attib[dgInt32 (edge->m_userData)].m_material;
 				index1 = dgInt32 (ptr->m_userData);
 
-				hashValue = array->m_indexList[count * 4 + 3] & 0xff;
+				dgInt32 hashValue = array->m_indexList[count * 4 + 3] & 0xff;
 				streamIndexMap[hashValue] ++;
 				materials[hashValue] = array->m_indexList[count * 4 + 3];
 				count ++;
@@ -2608,7 +2587,7 @@ dgMeshEffect::dgIndexArray* dgMeshEffect::MaterialGeometryBegin()
 	array->m_materialCount = count;
 
 	return array;
-*/
+
 }
 
 void dgMeshEffect::MaterialGeomteryEnd(dgIndexArray* handle)
