@@ -23,25 +23,31 @@
 void dIntArrayToString (const int* const array, int count, char* const string, int maxSixeInBytes)
 {
 	char* ptr = string;
-	sprintf (string, " ");
-	for (int i = 0; i < count; i ++) {
-		sprintf (ptr, "%d ", array[i]);
-		ptr += strlen (ptr);
-		_ASSERTE ((ptr - string) < maxSixeInBytes);
+	string[0] = 0;
+	if (count) {
+		sprintf (string, " ");
+		for (int i = 0; i < count; i ++) {
+			sprintf (ptr, "%d ", array[i]);
+			ptr += strlen (ptr);
+			_ASSERTE ((ptr - string) < maxSixeInBytes);
+		}
+		string[ptr - string - 1] = 0;
 	}
-	string[ptr - string - 1] = 0;
 }
 
 void dFloatArrayToString (const dFloat* const array, int count, char* const string, int maxSixeInBytes)
 {
 	char* ptr = string;
-	sprintf (string, " ");
-	for (int i = 0; i < count; i ++) {
-		sprintf (ptr, "%f ", array[i]);
-		ptr += strlen (ptr);
-		_ASSERTE ((ptr - string) < maxSixeInBytes);
+	string[0] = 0;
+	if (count) {
+		sprintf (string, " ");
+		for (int i = 0; i < count; i ++) {
+			sprintf (ptr, "%f ", array[i]);
+			ptr += strlen (ptr);
+			_ASSERTE ((ptr - string) < maxSixeInBytes);
+		}
+		string[ptr - string - 1] = 0;
 	}
-	string[ptr - string - 1] = 0;
 }
 
 void dStringToIntArray (const char* const string, int* const array, int maxCount)
