@@ -27,7 +27,7 @@
 #include "dgMeshEffectSolidTree.h"
 
 // create a convex hull
-dgMeshEffect::dgMeshEffect (dgMemoryAllocator* const allocator, const dgFloat32* const vertexCloud, dgInt32 count, dgInt32 strideInByte, dgFloat32 distTol)
+dgMeshEffect::dgMeshEffect (dgMemoryAllocator* const allocator, const dgFloat64* const vertexCloud, dgInt32 count, dgInt32 strideInByte, dgFloat64 distTol)
 	:dgPolyhedra(allocator)
 {
 	_ASSERTE (0);
@@ -1958,7 +1958,7 @@ for (iter.Begin(); iter; iter ++)
 */
 }
 
-dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const
+dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat64* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const
 {
 	dgMeshEffect copy (*this);
 	copy.Triangulate();
@@ -1966,8 +1966,11 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 }
 
 
-dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
+dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat64* const pointCloud, dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
 {
+_ASSERTE (0);
+return NULL;
+/*
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);
 	dgControlFP (_PC_53, _MCW_PC);
@@ -2193,4 +2196,5 @@ break;
 
 	delete tree;
 	return voronoiPartion;
+*/
 }
