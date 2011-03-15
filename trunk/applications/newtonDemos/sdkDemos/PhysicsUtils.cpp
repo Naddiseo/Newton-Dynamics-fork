@@ -908,7 +908,7 @@ NewtonCollision* CreateConvexCollision (NewtonWorld* world, const dMatrix& srcMa
 		{
 			// Create a clouds of random point around the origin
 			//#define STEPS_HULL 16
-			#define STEPS_HULL 4
+			#define STEPS_HULL 6
 
 			dVector cloud [STEPS_HULL * 4 + 256];
 			int count = 0;

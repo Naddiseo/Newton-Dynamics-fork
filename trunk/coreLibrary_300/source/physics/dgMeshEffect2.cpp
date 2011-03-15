@@ -2052,8 +2052,18 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 	voronoiPartion->BeginPolygon();
 	dgFloat32 layer = dgFloat32 (0.0f);
 
+//voronoiPartion->MergeFaces(this);
+//layer ++;
+//static int xxx;
+
+
 	dgTree<dgList<dgInt32>, dgInt32>::Iterator iter (delanayNodes);
 	for (iter.Begin(); iter; iter ++) {
+
+//xxx ++;
+//if (xxx == 3)
+//xxx *=1;
+
 
 		dgTree<dgList<dgInt32>, dgInt32>::dgTreeNode* const nodeNode = iter.GetNode();
 		int count = 0;
@@ -2089,7 +2099,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 		}
 
 
-		dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (0.0f));
+		dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgVector), dgFloat32 (1.0e-3f));
 
 
 		convexMesh->CalculateNormals(dgFloat32 (45.0f * 3.1416f / 180.0f));
@@ -2151,6 +2161,7 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 		for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 			convexMesh->m_attib[i].m_vertex.m_w = layer;
 		}
+
 
 		voronoiPartion->MergeFaces(convexMesh);
 		layer += dgFloat32 (1.0f);
