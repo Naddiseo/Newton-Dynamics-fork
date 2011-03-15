@@ -8093,8 +8093,8 @@ NewtonMesh* NewtonMeshCreate(const NewtonWorld* newtonWorld)
 {
 	TRACE_FUNTION(__FUNCTION__);
 
-	Newton* world = (Newton *) newtonWorld;
-	dgMeshEffect* mesh = new (world->dgWorld::GetAllocator()) dgMeshEffect (world->dgWorld::GetAllocator(), true);
+	Newton* const world = (Newton *) newtonWorld;
+	dgMeshEffect*const  mesh = new (world->dgWorld::GetAllocator()) dgMeshEffect (world->dgWorld::GetAllocator(), true);
 	return (NewtonMesh*) mesh;
 }
 

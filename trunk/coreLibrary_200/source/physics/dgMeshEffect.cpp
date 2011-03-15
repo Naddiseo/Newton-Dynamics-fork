@@ -906,8 +906,6 @@ dgMeshEffect::~dgMeshEffect(void)
 
 void dgMeshEffect::Init(bool preAllocaBuffers)
 {
-	_ASSERTE (0);
-/*
 	m_isFlagFace = 0;
 	m_pointCount = 0;
 	m_atribCount = 0;
@@ -917,10 +915,9 @@ void dgMeshEffect::Init(bool preAllocaBuffers)
 	m_points = NULL;
 	m_attib = NULL;
 	if (preAllocaBuffers) {
-		m_points = (dgVector*) GetAllocator()->MallocLow(dgInt32 (m_maxPointCount * sizeof(dgVector)));
+		m_points = (dgBigVector*) GetAllocator()->MallocLow(dgInt32 (m_maxPointCount * sizeof(dgBigVector)));
 		m_attib = (dgVertexAtribute*) GetAllocator()->MallocLow(dgInt32 (m_maxAtribCount * sizeof(dgVertexAtribute)));
 	}
-*/
 }
 
 
