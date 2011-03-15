@@ -22,9 +22,8 @@
 
 void dIntArrayToString (const int* const array, int count, char* const string, int maxSixeInBytes)
 {
-	char* ptr = string;
-	string[0] = 0;
 	if (count) {
+		char* ptr = string;
 		sprintf (string, " ");
 		for (int i = 0; i < count; i ++) {
 			sprintf (ptr, "%d ", array[i]);
@@ -37,9 +36,8 @@ void dIntArrayToString (const int* const array, int count, char* const string, i
 
 void dFloatArrayToString (const dFloat* const array, int count, char* const string, int maxSixeInBytes)
 {
-	char* ptr = string;
-	string[0] = 0;
 	if (count) {
+		char* ptr = string;
 		sprintf (string, " ");
 		for (int i = 0; i < count; i ++) {
 			sprintf (ptr, "%f ", array[i]);
