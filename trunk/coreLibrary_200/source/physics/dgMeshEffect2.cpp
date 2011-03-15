@@ -24,12 +24,14 @@
 #include "dgWorld.h"
 #include "dgMeshEffect.h"
 #include "dgCollisionConvexHull.h"
-
+#include "dgMeshEffectSolidTree.h"
 
 // create a convex hull
 dgMeshEffect::dgMeshEffect (dgMemoryAllocator* const allocator, const dgFloat32* const vertexCloud, dgInt32 count, dgInt32 strideInByte, dgFloat32 distTol)
 	:dgPolyhedra(allocator)
 {
+	_ASSERTE (0);
+/*
 	Init(true);
 	if (count >= 4) {
 		dgConvexHull3d convexHull (allocator, vertexCloud, strideInByte, count, distTol);
@@ -73,6 +75,7 @@ dgMeshEffect::dgMeshEffect (dgMemoryAllocator* const allocator, const dgFloat32*
 				&uv.m_x, sizeof (dgVector), &normalIndexListPool[0]);
 		}
 	}
+*/
 }
 
 
@@ -1084,6 +1087,8 @@ public:
 
 #else
 
+
+/*
 class Tetrahedralization: public dgDelaunayTetrahedralization
 {
 	class dgIndexMapPair
@@ -1876,6 +1881,8 @@ class Tetrahedralization: public dgDelaunayTetrahedralization
 	dgMissingEdges m_missinEdges;
 	dgArray<dgIndexMapPair> m_indexMap;
 };
+*/
+
 
 #endif
 
@@ -1883,6 +1890,9 @@ class Tetrahedralization: public dgDelaunayTetrahedralization
 
 dgCollision* dgMeshEffect::CreateConvexApproximationCollision(dgWorld* const world, dgInt32 maxCount, dgInt32 shapeId, dgInt32 childrenID) const
 {
+_ASSERTE (0);
+return NULL;
+/*
 	dgMeshEffect tmpMesh (*this);
 	tmpMesh.WeldTJoints();
 
@@ -1945,6 +1955,7 @@ for (iter.Begin(); iter; iter ++)
 	}
 
 	return compound;
+*/
 }
 
 dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const
