@@ -556,7 +556,7 @@ void dgCollisionCompoundBreakable::dgDebriGraph::AddNode (
 		solid->GetVertexStreams (sizeof (dgVector), &vertex[0].m_x, sizeof (dgVector), &normal[0].m_x, sizeof (dgVector), &uv0[0].m_x, sizeof (dgVector), &uv1[0].m_x);
 		
 		// extract the materials index array for mesh
-		geometryHandle = solid->MaterialGeomteryBegin();
+		geometryHandle = solid->MaterialGeometryBegin();
 
 		data.m_mesh->m_IsVisible = 0;
 		vertexCount = flatArray.m_count;

@@ -275,12 +275,6 @@ inline dgEdge* dgPolyhedra::AddFace (dgInt32 v0, dgInt32 v1, dgInt32 v2)
 	return AddFace (3, vertex, NULL);
 }
 
-inline void dgPolyhedra::EndFace ()
-{
-	_ASSERTE (0);
-//	InternalPolyhedra::MatchTwins (this);
-//	InternalPolyhedra::CloseOpenBounds (this);
-}
 
 
 inline dgInt32 dgPolyhedra::IncLRU() const

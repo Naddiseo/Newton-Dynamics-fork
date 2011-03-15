@@ -2533,7 +2533,7 @@ void dgMeshEffect::GetIndirectVertexStreams(
 	GetAllocator()->FreeLow (tmpUV);
 }
 
-dgMeshEffect::dgIndexArray* dgMeshEffect::MaterialGeomteryBegin()
+dgMeshEffect::dgIndexArray* dgMeshEffect::MaterialGeometryBegin()
 {
 	_ASSERTE (0);
 	return 0;

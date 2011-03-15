@@ -155,7 +155,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 
 	
 
-	dgIndexArray* MaterialGeomteryBegin();
+	dgIndexArray* MaterialGeometryBegin();
 	void MaterialGeomteryEnd(dgIndexArray* handle);
 	dgInt32 GetFirstMaterial (dgIndexArray* Handle);
 	dgInt32 GetNextMaterial (dgIndexArray* handle, dgInt32 materialHandle);

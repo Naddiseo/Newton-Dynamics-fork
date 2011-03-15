@@ -8467,7 +8467,7 @@ void* NewtonMeshBeginHandle (const NewtonMesh* const mesh)
 	meshEffect = (dgMeshEffect*) mesh;
 
 	TRACE_FUNTION(__FUNCTION__);
-	return meshEffect->MaterialGeomteryBegin();
+	return meshEffect->MaterialGeometryBegin();
 }
 
 void NewtonMeshEndHandle (const NewtonMesh* const mesh, void* const handle)
