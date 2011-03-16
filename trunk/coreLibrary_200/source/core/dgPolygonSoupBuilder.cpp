@@ -711,7 +711,7 @@ dgInt32 dgPolygonSoupDatabaseBuilder::FilterFace (dgInt32 count, dgInt32* const 
 	if (count >= 3) {
 		dgInt32 j0 = count - 2;  
 		dgInt32 j1 = count - 1;  
-		dgBigVector normal (polyhedra.FaceNormal (edge, &m_vertexPoints[0].m_x, sizeof (dgTriplex)));
+		dgBigVector normal (polyhedra.FaceNormal (edge, &m_vertexPoints[0].m_x, sizeof (dgBigVector)));
 		for (dgInt32 j2 = 0; j2 < count; j2 ++) { 
 			dgBigVector p0 (&m_vertexPoints[pool[j0]].m_x);
 			dgBigVector p1 (&m_vertexPoints[pool[j1]].m_x);
