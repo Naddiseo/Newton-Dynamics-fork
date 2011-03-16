@@ -107,7 +107,7 @@ void dgPolygonSoupDatabaseBuilder::AddMesh (const dgFloat32* const vertex, dgInt
 	dgInt32 faces[256];
 	dgInt32 pool[2048];
 
-	m_vertexPoints[m_vertexCount + vertexCount].m_x = dgFloat32 (0.0f);
+	m_vertexPoints[m_vertexCount + vertexCount].m_x = dgFloat64 (0.0f);
 	dgBigVector* const vertexPool = &m_vertexPoints[m_vertexCount];
 
 	worldMatrix.TransformTriplex (&vertexPool[0].m_x, sizeof (dgBigVector), vertex, strideInBytes, vertexCount);
@@ -417,10 +417,10 @@ _ASSERTE (polygonIndex == m_indexCount);
 
 void dgPolygonSoupDatabaseBuilder::End(bool optimize)
 {
-	_ASSERTE (0);
-/*
 	Optimize(optimize);
 
+	_ASSERTE (0);
+/*
 	// build the normal array and adjacency array
 	// calculate all face the normals
 	dgInt32 indexCount = 0;
@@ -833,7 +833,7 @@ dgInt32 dgPolygonSoupDatabaseBuilder::AddConvexFace (dgInt32 count, dgInt32* con
 			}
 		}
 
-		dgBigVector normal (polyhedra.FaceNormal (edge, &m_vertexPoints[0].m_x, sizeof (dgTriplex)));
+		dgBigVector normal (polyhedra.FaceNormal (edge, &m_vertexPoints[0].m_x, sizeof (dgBigVector)));
 		dgFloat64 mag2 = normal % normal;
 		if (mag2 < dgFloat32 (1.0e-8f)) {
 			return 0;

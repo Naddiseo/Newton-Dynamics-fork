@@ -3888,33 +3888,22 @@ void dgPolyhedra::EndFace ()
 
 dgBigVector dgPolyhedra::FaceNormal (dgEdge* const face, const dgFloat64* const pool, dgInt32 strideInBytes) const
 {
-	_ASSERTE (0);
-	return dgBigVector(0,0,0,0);
-/*
-	return InternalPolyhedra::BigFaceNormal (face, pool, dgInt32 (strideInBytes / sizeof (dgFloat32)));
+	dgInt32 stride = strideInBytes / sizeof (dgFloat64);
+	dgEdge* edge = face;
+	dgBigVector p0 (&pool[edge->m_incidentVertex * stride]);
+	edge = edge->m_next;
+	dgBigVector p1 (&pool[edge->m_incidentVertex * stride]);
+	dgBigVector e1 (p1 - p0);
 
-	static dgBigVector BigFaceNormal (dgEdge *face, const dgFloat32* const pool, dgInt32 stride) 
-	{
-		dgEdge *edge;
-		dgBigVector normal (0, 0, 0, 0);
-
-		edge = face;
-		dgBigVector p0 (&pool[edge->m_incidentVertex * stride]);
-		edge = edge->m_next;
-		dgBigVector p1 (&pool[edge->m_incidentVertex * stride]);
-		dgBigVector e1 (p1 - p0);
-		for (edge = edge->m_next; edge != face; edge = edge->m_next) {
-			dgBigVector p2 (&pool[edge->m_incidentVertex * stride]);
-			dgBigVector e2 (p2 - p0);
-			normal += e1 * e2;
-			e1 = e2;
-		} 
-
-		return normal;
-	}
-*/
+	dgBigVector normal (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+	for (edge = edge->m_next; edge != face; edge = edge->m_next) {
+		dgBigVector p2 (&pool[edge->m_incidentVertex * stride]);
+		dgBigVector e2 (p2 - p0);
+		normal += e1 * e2;
+		e1 = e2;
+	} 
+	return normal;
 }
-
 
 
 void dgPolyhedra::DeleteEdge (dgEdge* const edge)
