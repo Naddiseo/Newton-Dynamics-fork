@@ -50,6 +50,30 @@ void GetMinMax (dgVector &minOut, dgVector &maxOut, const dgFloat32* const verte
 }
 
 
+void GetMinMax (dgBigVector &minOut, dgBigVector &maxOut, const dgFloat64* const vertexArray, dgInt32 vCount, dgInt32 strideInBytes)
+{
+	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat64));
+	const dgFloat64* vArray = vertexArray + stride;
+
+	_ASSERTE (stride >= 3);
+	minOut = dgBigVector (vertexArray[0], vertexArray[1], vertexArray[2], dgFloat64 (0.0f)); 
+	maxOut = dgBigVector (vertexArray[0], vertexArray[1], vertexArray[2], dgFloat64 (0.0f)); 
+
+	for (dgInt32 i = 1; i < vCount; i ++) {
+		minOut.m_x = GetMin (minOut.m_x, vArray[0]);
+		minOut.m_y = GetMin (minOut.m_y, vArray[1]);
+		minOut.m_z = GetMin (minOut.m_z, vArray[2]);
+
+		maxOut.m_x = GetMax (maxOut.m_x, vArray[0]);
+		maxOut.m_y = GetMax (maxOut.m_y, vArray[1]);
+		maxOut.m_z = GetMax (maxOut.m_z, vArray[2]);
+
+		vArray += stride;
+	}
+}
+
+
+
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 
 	#if (_MSC_VER >= 1400) && defined (DG_BUILD_SIMD_CODE)

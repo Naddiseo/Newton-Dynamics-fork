@@ -1420,15 +1420,13 @@ _ASSERTE (0);
 
 void dgMeshEffect::BoxMapping (dgInt32 front, dgInt32 side, dgInt32 top)
 {
-	_ASSERTE (0);
-/*
-	dgVector minVal;
-	dgVector maxVal;
+	dgBigVector minVal;
+	dgBigVector maxVal;
 	dgInt32 materialArray[3];
 
-	GetMinMax (minVal, maxVal, &m_points[0][0], m_pointCount, sizeof (dgVector));
-	dgVector dist (maxVal - minVal);
-	dgVector scale (dgFloat32 (1.0f)/ dist[0], dgFloat32 (1.0f)/ dist[1], dgFloat32 (1.0f)/ dist[2], dgFloat32 (0.0f));
+	GetMinMax (minVal, maxVal, &m_points[0][0], m_pointCount, sizeof (dgBigVector));
+	dgBigVector dist (maxVal - minVal);
+	dgBigVector scale (dgFloat64 (1.0f)/ dist[0], dgFloat64 (1.0f)/ dist[1], dgFloat64 (1.0f)/ dist[2], dgFloat64 (0.0f));
 
 	dgStack<dgVertexAtribute>attribArray (GetCount());
 	EnumerateAttributeArray (&attribArray[0]);
@@ -1442,26 +1440,23 @@ void dgMeshEffect::BoxMapping (dgInt32 front, dgInt32 side, dgInt32 top)
 	for(iter.Begin(); iter; iter ++){
 		dgEdge* const edge = &(*iter);
 		if (edge->m_mark < mark){
-			dgInt32 index;
-			dgFloat32 maxProjection;
-			const dgVector& p0 = m_points[edge->m_incidentVertex];
-			const dgVector& p1 = m_points[edge->m_next->m_incidentVertex];
-			const dgVector& p2 = m_points[edge->m_prev->m_incidentVertex];
+			const dgBigVector& p0 = m_points[edge->m_incidentVertex];
+			const dgBigVector& p1 = m_points[edge->m_next->m_incidentVertex];
+			const dgBigVector& p2 = m_points[edge->m_prev->m_incidentVertex];
 
 			edge->m_mark = mark;
 			edge->m_next->m_mark = mark;
 			edge->m_prev->m_mark = mark;
 
-			dgVector e0 (p1 - p0);
-			dgVector e1 (p2 - p0);
-			dgVector n (e0 * e1);
+			dgBigVector e0 (p1 - p0);
+			dgBigVector e1 (p2 - p0);
+			dgBigVector n (e0 * e1);
 			
-			index = 0;
-			maxProjection = dgFloat32 (0.0f);
+			dgInt32 index = 0;
+			dgFloat64 maxProjection = dgFloat32 (0.0f);
 
 			for (dgInt32 i = 0; i < 3; i ++) {
-				dgFloat32 proj;
-				proj = dgAbsf (n[i]);
+				dgFloat64 proj = fabs (n[i]);
 				if (proj > maxProjection) {
 					index = i;
 					maxProjection = proj;
@@ -1476,7 +1471,7 @@ void dgMeshEffect::BoxMapping (dgInt32 front, dgInt32 side, dgInt32 top)
 			dgEdge* ptr = edge;
 			do {
 				dgVertexAtribute& attrib = attribArray[dgInt32 (ptr->m_userData)];
-				dgVector p (scale.CompProduct(m_points[ptr->m_incidentVertex] - minVal));
+				dgBigVector p (scale.CompProduct(m_points[ptr->m_incidentVertex] - minVal));
 				attrib.m_u0 = p[u];
 				attrib.m_v0 = p[v];
 				attrib.m_u1 = p[u];
@@ -1489,7 +1484,6 @@ void dgMeshEffect::BoxMapping (dgInt32 front, dgInt32 side, dgInt32 top)
 	}
 
 	ApplyAttributeArray (&attribArray[0]);
-*/
 }
 
 void dgMeshEffect::UniformBoxMapping (dgInt32 material, const dgMatrix& textureMatrix)

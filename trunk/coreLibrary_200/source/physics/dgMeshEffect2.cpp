@@ -1958,7 +1958,7 @@ for (iter.Begin(); iter; iter ++)
 */
 }
 
-dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat64* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const
+dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const
 {
 	dgMeshEffect copy (*this);
 	copy.Triangulate();
@@ -1966,7 +1966,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 }
 
 
-dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat64* const pointCloud, dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
+dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
 {
 _ASSERTE (0);
 return NULL;
