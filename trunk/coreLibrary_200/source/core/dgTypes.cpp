@@ -557,7 +557,7 @@ dgInt32 dgVertexListToIndexList (dgFloat32* const vertList, dgInt32 strideInByte
 	dgStack<dgFloat64> pool(vertexCount * stride);
 
 	dgInt32 floatCount = floatSizeInBytes / sizeof (dgFloat32);
-	dgInt32 intCount = floatSizeInBytes / sizeof (dgInt32);
+	dgInt32 intCount = unsignedSizeInBytes / sizeof (dgInt32);
 
 	dgFloat64* const data = &pool[0];
 	for (dgInt32 i = 0; i < vertexCount; i ++) {
