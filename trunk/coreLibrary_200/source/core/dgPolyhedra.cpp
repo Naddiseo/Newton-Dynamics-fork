@@ -4294,6 +4294,9 @@ void dgPolyhedra::OptimizeTriangulation (const dgFloat64* const vertex, dgInt32 
 
 void dgPolyhedra::Triangulate (const dgFloat64* const vertex, dgInt32 strideInBytes, dgPolyhedra* const leftOver)
 {
+
+static int xxx;
+
 	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat64));
 
 	dgInt32 count = GetCount() / 2;
@@ -4321,6 +4324,10 @@ void dgPolyhedra::Triangulate (const dgFloat64* const vertex, dgInt32 strideInBy
 		} while (ptr != thisEdge);
 
 		if (count > 3) {
+xxx ++;
+if (xxx == 4)
+xxx *=1;
+
 			dgEdge* const edge = TriangulateFace (thisEdge, vertex, stride, heap, NULL);
 			heap.Flush ();
 
