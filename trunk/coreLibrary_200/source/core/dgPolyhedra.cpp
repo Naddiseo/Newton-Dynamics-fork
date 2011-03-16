@@ -4382,9 +4382,6 @@ void dgPolyhedra::EndFace ()
 {
 	dgPolyhedra::Iterator iter (*this);
 
-#ifdef _DEBUG
-	bool ret = true;
-#endif
 	// Connect all twin edge
 	for (iter.Begin(); iter; iter ++) {
 		dgEdge* const edge = &(*iter);
@@ -4393,12 +4390,8 @@ void dgPolyhedra::EndFace ()
 			if (edge->m_twin) {
 				edge->m_twin->m_twin = edge; 
 			}
-#ifdef _DEBUG
-			ret &= (edge->m_twin != NULL);
-#endif
 		}
 	}
-	_ASSERTE (ret);
 
 #ifdef __ENABLE_SANITY_CHECK 
 	_ASSERTE (polyhedra->SanityCheck());
@@ -4435,8 +4428,6 @@ void dgPolyhedra::EndFace ()
 #ifdef __ENABLE_SANITY_CHECK 
 	_ASSERTE (polyhedra->SanityCheck ());
 #endif
-
-
 }
 
 

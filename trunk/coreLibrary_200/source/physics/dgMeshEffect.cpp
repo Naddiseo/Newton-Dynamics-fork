@@ -1939,9 +1939,7 @@ void dgMeshEffect::BuildFromVertexListIndexList(
 
 
 	dgStack<dgInt32>attrIndexMap(m_atribCount);
-//	m_atribCount = dgVertexListToIndexList (&m_attib[0].m_vertex.m_x, sizeof (dgVertexAtribute), sizeof (dgVertexAtribute) - sizeof (dgInt32), sizeof (dgInt32), m_atribCount, &attrIndexMap[0], DG_VERTEXLIST_INDEXLIST_TOL);
 	m_atribCount = dgVertexListToIndexList (&m_attib[0].m_vertex.m_x, sizeof (dgVertexAtribute), sizeof (dgVertexAtribute) / sizeof (dgFloat64), m_atribCount, &attrIndexMap[0], DG_VERTEXLIST_INDEXLIST_TOL);
-
 
 	bool hasFaces = true;
 	dgStack<dgInt8> faceMark (faceCount);

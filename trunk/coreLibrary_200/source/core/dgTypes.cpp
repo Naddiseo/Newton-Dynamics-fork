@@ -390,8 +390,7 @@ static dgInt32 SortVertices (dgFloat64* const vertexList,  dgInt32 stride, dgInt
 static dgInt32 QuickSortVertices (dgFloat64* const vertList, dgInt32 stride, dgInt32 compareCount, dgInt32 vertexCount, dgFloat64 tolerance)
 {
 	dgInt32 count = 0;
-//	if (vertexCount > (3 * 1024 * 32)) {
-if (vertexCount > (10)) {
+	if (vertexCount > (3 * 1024 * 32)) {
 		dgFloat64 x = dgFloat32 (0.0f);
 		dgFloat64 y = dgFloat32 (0.0f);
 		dgFloat64 z = dgFloat32 (0.0f);
@@ -467,7 +466,7 @@ if (vertexCount > (10)) {
 
 
 
-//dgInt32 dgVertexListToIndexList (dgFloat32* const vertList, dgInt32 strideInBytes, dgInt32 floatSizeInBytes,  dgInt32 unsignedSizeInBytes, dgInt32 vertexCount, dgInt32* const indexList, dgFloat32 tolerance)
+
 dgInt32 dgVertexListToIndexList (dgFloat64* const vertList, dgInt32 strideInBytes, dgInt32 compareCount, dgInt32 vertexCount, dgInt32* const indexListOut, dgFloat64 tolerance)
 {
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
@@ -539,34 +538,28 @@ dgInt32 dgVertexListToIndexList (dgFloat32* const vertList, dgInt32 strideInByte
 {
 	dgInt32 stride = strideInBytes / sizeof (dgFloat32);
 
+	_ASSERTE (!unsignedSizeInBytes);
 	dgStack<dgFloat64> pool(vertexCount * stride);
 
 	dgInt32 floatCount = floatSizeInBytes / sizeof (dgFloat32);
-	dgInt32 intCount = unsignedSizeInBytes / sizeof (dgInt32);
+//	dgInt32 intCount = unsignedSizeInBytes / sizeof (dgInt32);
 
 	dgFloat64* const data = &pool[0];
 	for (dgInt32 i = 0; i < vertexCount; i ++) {
 
 		dgFloat64* const dst = &data[i * stride];
 		dgFloat32* const src = &vertList[i * stride];
-		for (dgInt32 j = 0; j < floatCount; j ++) {
+		for (dgInt32 j = 0; j < stride; j ++) {
 			dst[j] = src[j];
-		}
-		for (dgInt32 j = 0; j < intCount; j ++) {
-			dst[j + floatCount] = dgFloat64 (src[j + floatCount]);
 		}
 	}
 
-	dgInt32 count = dgVertexListToIndexList (data, stride * sizeof (dgFloat64), floatCount + intCount, vertexCount, indexList, dgFloat64 (tolerance));
-
+	dgInt32 count = dgVertexListToIndexList (data, stride * sizeof (dgFloat64), floatCount, vertexCount, indexList, dgFloat64 (tolerance));
 	for (dgInt32 i = 0; i < count; i ++) {
 		dgFloat64* const src = &data[i * stride];
 		dgFloat32* const dst = &vertList[i * stride];
-		for (dgInt32 j = 0; j < floatCount; j ++) {
+		for (dgInt32 j = 0; j < stride; j ++) {
 			src[j] = dst[j];
-		}
-		for (dgInt32 j = 0; j < intCount; j ++) {
-			src[j + floatCount] = dgInt32 (dst[j + floatCount]);
 		}
 	}
 	
