@@ -47,14 +47,9 @@ class dgPolySoupFilterAllocator: public dgPolyhedra
 
 	dgInt32 AddFilterFace (dgUnsigned32 count, dgInt32* const pool)
 	{
-		_ASSERTE (0);
-		return 1;
-/*
-		bool reduction;
-
 		BeginFace();
 		_ASSERTE (count);
-		reduction = true;
+		bool reduction = true;
 		while (reduction && !AddFace (dgInt32 (count), pool)) {
 			reduction = false;
 			if (count >3) {
@@ -77,7 +72,6 @@ class dgPolySoupFilterAllocator: public dgPolyhedra
 
 		_ASSERTE (reduction);
 		return reduction ? dgInt32 (count) : 0;
-*/
 	}
 };
 
