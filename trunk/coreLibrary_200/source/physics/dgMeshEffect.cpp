@@ -868,6 +868,8 @@ dgMeshEffect::dgMeshEffect(dgCollision* const collision)
 		collision->DebugCollision (matrix, (OnDebugCollisionMeshCallback) dgMeshEffectBuilder::GetShapeFromCollision, &builder);
 	}
 
+_ASSERTE (0);
+
 	dgStack<dgInt32>indexList (builder.m_vertexCount);
 	dgVertexListToIndexList (&builder.m_vertex[0].m_x, sizeof (dgVector), sizeof (dgVector), 0, builder.m_vertexCount, &indexList[0], DG_VERTEXLIST_INDEXLIST_TOL);	
 
@@ -924,6 +926,10 @@ void dgMeshEffect::Triangulate  ()
 	dgPolyhedra::Iterator iter (*this);
 	for (iter.Begin(); iter; iter ++){
 		dgEdge* const face = &(*iter);
+
+dgBigVector xxx (FaceNormal(face, &m_points[0].m_x, sizeof (dgBigVector)));
+_ASSERTE ((xxx % xxx) > 1.0e-1f);
+
 		if ((face->m_mark != mark) && (face->m_incidentFace > 0)) {
 			dgInt32	index[DG_MESH_EFFECT_POINT_SPLITED];
 
