@@ -575,8 +575,13 @@ union dgDoubleInt
 
 void dgApi GetMinMax (dgVector &Min, dgVector &Max, const dgFloat32* const vArray, dgInt32 vCount, dgInt32 StrideInBytes);
 
-dgInt32 dgApi dgVertexListToIndexList (dgFloat32* const vertexList, dgInt32 strideInBytes, dgInt32 floatSizeInBytes,
-				       dgInt32 unsignedSizeInBytes, dgInt32 vertexCount, dgInt32* const indexListOut, dgFloat32 tolerance = dgEPSILON);
+dgInt32 dgVertexListToIndexList (dgFloat32* const vertexList, dgInt32 strideInBytes, dgInt32 floatSizeInBytes,
+								 dgInt32 unsignedSizeInBytes, dgInt32 vertexCount, dgInt32* const indexListOut, dgFloat32 tolerance = dgEPSILON);
+
+#ifndef __USE_DOUBLE_PRECISION__
+dgInt32 dgVertexListToIndexList (dgFloat64* const vertexList, dgInt32 strideInBytes, dgInt32 compareCount, dgInt32 vertexCount, dgInt32* const indexListOut, dgFloat64 tolerance = dgEPSILON);
+#endif
+
 
 enum dgCpuClass
 {

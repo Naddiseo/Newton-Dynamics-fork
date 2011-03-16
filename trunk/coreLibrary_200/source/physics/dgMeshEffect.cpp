@@ -1629,22 +1629,18 @@ void dgMeshEffect::CalculateNormals (dgFloat64 angleInRadians)
 
 void dgMeshEffect::BeginPolygon ()
 {
-_ASSERTE (0);
-/*
 	m_pointCount = 0;
 	m_atribCount = 0;
 	RemoveAll();
 	BeginFace();
-*/
 }
 
 
 void dgMeshEffect::AddAtribute (const dgVertexAtribute& attib)
 {
 	if (m_atribCount >= m_maxAtribCount) {
-		dgVertexAtribute* attibArray;
 		m_maxAtribCount *= 2;
-		attibArray = (dgVertexAtribute*) GetAllocator()->MallocLow(dgInt32 (m_maxAtribCount * sizeof(dgVertexAtribute)));
+		dgVertexAtribute* const attibArray = (dgVertexAtribute*) GetAllocator()->MallocLow(dgInt32 (m_maxAtribCount * sizeof(dgVertexAtribute)));
 		memcpy (attibArray, m_attib, m_atribCount * sizeof(dgVertexAtribute));
 		GetAllocator()->FreeLow(m_attib);
 		m_attib = attibArray;
@@ -1659,23 +1655,19 @@ void dgMeshEffect::AddAtribute (const dgVertexAtribute& attib)
 
 void dgMeshEffect::AddVertex(const dgBigVector& vertex)
 {
-	_ASSERTE (0);
-/*
 	if (m_pointCount >= m_maxPointCount) {
-		dgVector* points;
 		m_maxPointCount *= 2;
-		points = (dgVector*) GetAllocator()->MallocLow(dgInt32 (m_maxPointCount * sizeof(dgVector)));
-		memcpy (points, m_points, m_pointCount * sizeof(dgVector));
+		dgBigVector* const points = (dgBigVector*) GetAllocator()->MallocLow(dgInt32 (m_maxPointCount * sizeof(dgBigVector)));
+		memcpy (points, m_points, m_pointCount * sizeof(dgBigVector));
 		GetAllocator()->FreeLow(m_points);
 		m_points = points;
 	}
-
+	
 	m_points[m_pointCount].m_x = DG_MESH_EFFECT_QUANTIZE_FLOAT(vertex[0]);
 	m_points[m_pointCount].m_y = DG_MESH_EFFECT_QUANTIZE_FLOAT(vertex[1]);
 	m_points[m_pointCount].m_z = DG_MESH_EFFECT_QUANTIZE_FLOAT(vertex[2]);
 	m_points[m_pointCount].m_w = vertex.m_w;
 	m_pointCount ++;
-*/
 }
 
 
@@ -1892,8 +1884,6 @@ void dgMeshEffect::BuildFromVertexListIndexList(
 	const dgFloat32* const uv0, dgInt32  uv0StrideInBytes, const dgInt32* const uv0Index,
 	const dgFloat32* const uv1, dgInt32  uv1StrideInBytes, const dgInt32* const uv1Index)
 {
-	_ASSERTE (0);
-/*
 	BeginPolygon ();
 
 	// calculate vertex Count
@@ -1911,7 +1901,7 @@ void dgMeshEffect::BuildFromVertexListIndexList(
 	dgInt32 vertexStride = dgInt32 (vertexStrideInBytes / sizeof (dgFloat32));
 	for (int i = 0; i < vertexCount; i ++) {
 		int index = i * vertexStride;
-		AddVertex (dgVector (vertex[index + 0], vertex[index + 1], vertex[index + 2], vertex[index + 3]));
+		AddVertex (dgBigVector (vertex[index + 0], vertex[index + 1], vertex[index + 2], vertex[index + 3]));
 		layerCountBase += (vertex[index + 3]) > dgFloat32(layerCountBase);
 	}
 
@@ -1929,9 +1919,9 @@ void dgMeshEffect::BuildFromVertexListIndexList(
 			point.m_vertex = m_points[index];
 			
 			index = normalIndex[(acc + i)] * normalStride;
-			point.m_normal.m_x =  normal[index + 0];
-			point.m_normal.m_y =  normal[index + 1];
-			point.m_normal.m_z =  normal[index + 2];
+			point.m_normal_x =  normal[index + 0];
+			point.m_normal_y =  normal[index + 1];
+			point.m_normal_z =  normal[index + 2];
 
 			index = uv0Index[(acc + i)] * uv0Stride;
 			point.m_u0 = uv0[index + 0];
@@ -1947,12 +1937,11 @@ void dgMeshEffect::BuildFromVertexListIndexList(
 		acc += indexCount;
 	}
 
- 
-//	dgStack<dgInt32>indexMap(m_pointCount);
-//	m_pointCount = dgVertexListToIndexList (&m_points[0].m_x, sizeof (dgVector), sizeof (dgTriplex), 0, m_pointCount, &indexMap[0], DG_VERTEXLIST_INDEXLIST_TOL);
 
 	dgStack<dgInt32>attrIndexMap(m_atribCount);
-	m_atribCount = dgVertexListToIndexList (&m_attib[0].m_vertex.m_x, sizeof (dgVertexAtribute), sizeof (dgVertexAtribute) - sizeof (dgInt32), sizeof (dgInt32), m_atribCount, &attrIndexMap[0], DG_VERTEXLIST_INDEXLIST_TOL);
+//	m_atribCount = dgVertexListToIndexList (&m_attib[0].m_vertex.m_x, sizeof (dgVertexAtribute), sizeof (dgVertexAtribute) - sizeof (dgInt32), sizeof (dgInt32), m_atribCount, &attrIndexMap[0], DG_VERTEXLIST_INDEXLIST_TOL);
+	m_atribCount = dgVertexListToIndexList (&m_attib[0].m_vertex.m_x, sizeof (dgVertexAtribute), sizeof (dgVertexAtribute) / sizeof (dgFloat64), m_atribCount, &attrIndexMap[0], DG_VERTEXLIST_INDEXLIST_TOL);
+
 
 	bool hasFaces = true;
 	dgStack<dgInt8> faceMark (faceCount);
@@ -2001,14 +1990,13 @@ void dgMeshEffect::BuildFromVertexListIndexList(
 			layerCount ++;
 			for (int i = 0; i < vertexCount; i ++) {
 				int index = i * vertexStride;
-				AddVertex (dgVector (vertex[index + 0], vertex[index + 1], vertex[index + 2], dgFloat32 (layerCount + layerCountBase)));
+				AddVertex (dgBigVector (vertex[index + 0], vertex[index + 1], vertex[index + 2], dgFloat64 (layerCount + layerCountBase)));
 			}
 		}
 	}
 
 	EndFace();
 	PackVertexArrays ();
-*/
 }
 
 

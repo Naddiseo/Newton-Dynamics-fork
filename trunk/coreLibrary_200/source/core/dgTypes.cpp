@@ -205,298 +205,296 @@ void dgApi GetMinMax (dgVector &minOut, dgVector &maxOut, const dgFloat32* const
 #endif
 
 
-namespace InternalGeoUtil
+static inline dgInt32 dgApi cmp_vertex (const dgFloat32* const v1, const dgFloat32* const v2, dgInt32 firstSortAxis)
 {
-	static inline dgInt32 dgApi cmp_vertex (const dgFloat32* const v1, const dgFloat32* const v2, dgInt32 firstSortAxis)
-	{
-		if (v1[firstSortAxis] < v2[firstSortAxis]) {
-			return -1;
-		}
-
-		if (v1[firstSortAxis] > v2[firstSortAxis]){
-			return 1;
-		}
-
-		return 0;
+	if (v1[firstSortAxis] < v2[firstSortAxis]) {
+		return -1;
 	}
-	
-	static dgInt32 SortVertices (dgFloat32* const vertexList,  dgInt32 stride, dgInt32 floatSize, dgInt32 unsignedSize, dgInt32 vertexCount, dgFloat32 tolerance)
-	{
+
+	if (v1[firstSortAxis] > v2[firstSortAxis]){
+		return 1;
+	}
+
+	return 0;
+}
+
+static dgInt32 SortVertices (dgFloat32* const vertexList,  dgInt32 stride, dgInt32 floatSize, dgInt32 unsignedSize, dgInt32 vertexCount, dgFloat32 tolerance)
+{
 #ifdef __USE_DOUBLE_PRECISION__
-		dgInt64* indexPtr;
+	dgInt64* indexPtr;
 #else
-		dgInt32* indexPtr;
+	dgInt32* indexPtr;
 #endif
 
-		dgFloat64 xc = 0;
-		dgFloat64 yc = 0;
-		dgFloat64 zc = 0;
-		dgFloat64 x2c = 0;
-		dgFloat64 y2c = 0;
-		dgFloat64 z2c = 0;
+	dgFloat64 xc = 0;
+	dgFloat64 yc = 0;
+	dgFloat64 zc = 0;
+	dgFloat64 x2c = 0;
+	dgFloat64 y2c = 0;
+	dgFloat64 z2c = 0;
 
-		dgBigVector minP (1e10, 1e10, 1e10, 0);
-		dgBigVector maxP (-1e10, -1e10, -1e10, 0);
-		dgInt32 k = 0;
-		for (dgInt32 i = 0; i < vertexCount; i ++) {
-			dgFloat64 x  = vertexList[k + 2];
-			dgFloat64 y  = vertexList[k + 3];
-			dgFloat64 z  = vertexList[k + 4];
-			k += stride;
+	dgBigVector minP (1e10, 1e10, 1e10, 0);
+	dgBigVector maxP (-1e10, -1e10, -1e10, 0);
+	dgInt32 k = 0;
+	for (dgInt32 i = 0; i < vertexCount; i ++) {
+		dgFloat64 x  = vertexList[k + 2];
+		dgFloat64 y  = vertexList[k + 3];
+		dgFloat64 z  = vertexList[k + 4];
+		k += stride;
 
-			xc += x;
-			yc += y;
-			zc += z;
-			x2c += x * x;
-			y2c += y * y; 
-			z2c += z * z;
-	
-			if (x < minP.m_x) {
-				minP.m_x = x; 
-			}
-			if (y < minP.m_y) {
-				minP.m_y = y; 
-			}
-	
-			if (z < minP.m_z) {
-				minP.m_z = z; 
-			}
-	
-			if (x > maxP.m_x) {
-				maxP.m_x = x; 
-			}
-			if (y > maxP.m_y) {
-				maxP.m_y = y; 
-			}
-	
-			if (z > maxP.m_z) {
-				maxP.m_z = z; 
-			}
+		xc += x;
+		yc += y;
+		zc += z;
+		x2c += x * x;
+		y2c += y * y; 
+		z2c += z * z;
+
+		if (x < minP.m_x) {
+			minP.m_x = x; 
 		}
-	
-		dgBigVector del (maxP - minP);
-		dgFloat64 minDist = GetMin (del.m_x, del.m_y, del.m_z);
-		if (minDist < 1.0e-3) {
-			minDist = 1.0e-3;
+		if (y < minP.m_y) {
+			minP.m_y = y; 
 		}
-	
+
+		if (z < minP.m_z) {
+			minP.m_z = z; 
+		}
+
+		if (x > maxP.m_x) {
+			maxP.m_x = x; 
+		}
+		if (y > maxP.m_y) {
+			maxP.m_y = y; 
+		}
+
+		if (z > maxP.m_z) {
+			maxP.m_z = z; 
+		}
+	}
+
+	dgBigVector del (maxP - minP);
+	dgFloat64 minDist = GetMin (del.m_x, del.m_y, del.m_z);
+	if (minDist < 1.0e-3) {
+		minDist = 1.0e-3;
+	}
+
 //		dgFloat64 tol = tolerance * minDist + 1.0e-4;
 //		tol = tolerance + 1.0e-4;
-		dgFloat64 tol = tolerance * minDist + 1.0e-8f;
-		dgFloat64 sweptWindow = 2.0 * tol;
-		sweptWindow += 1.0e-4;
-	
-		x2c = vertexCount * x2c - xc * xc;
-		y2c = vertexCount * y2c - yc * yc;
-		z2c = vertexCount * z2c - zc * zc;
+	dgFloat64 tol = tolerance * minDist + 1.0e-8f;
+	dgFloat64 sweptWindow = 2.0 * tol;
+	sweptWindow += 1.0e-4;
 
-		dgInt32 firstSortAxis = 2;
-		if ((y2c >= x2c) && (y2c >= z2c)) {
-			firstSortAxis = 3;
-		} else if ((z2c >= x2c) && (z2c >= y2c)) {
-			firstSortAxis = 4;
-		}
+	x2c = vertexCount * x2c - xc * xc;
+	y2c = vertexCount * y2c - yc * yc;
+	z2c = vertexCount * z2c - zc * zc;
+
+	dgInt32 firstSortAxis = 2;
+	if ((y2c >= x2c) && (y2c >= z2c)) {
+		firstSortAxis = 3;
+	} else if ((z2c >= x2c) && (z2c >= y2c)) {
+		firstSortAxis = 4;
+	}
 
 
-		dgInt32 stack[1024][2];
-		stack[0][0] = 0;
-		stack[0][1] = vertexCount - 1;
-		dgInt32 stackIndex = 1;
-		while (stackIndex) {
-			stackIndex --;
-			dgInt32 lo = stack[stackIndex][0];
-			dgInt32 hi = stack[stackIndex][1];
-			if ((hi - lo) > 8) {
-				dgInt32 i = lo;
-				dgInt32 j = hi;
-				dgFloat32 val[64]; 
-				memcpy (val, &vertexList[((lo + hi) >> 1) * stride], stride * sizeof (dgFloat32));
-				do {    
-					while (cmp_vertex (&vertexList[i * stride], val, firstSortAxis) < 0) i ++;
-					while (cmp_vertex (&vertexList[j * stride], val, firstSortAxis) > 0) j --;
+	dgInt32 stack[1024][2];
+	stack[0][0] = 0;
+	stack[0][1] = vertexCount - 1;
+	dgInt32 stackIndex = 1;
+	while (stackIndex) {
+		stackIndex --;
+		dgInt32 lo = stack[stackIndex][0];
+		dgInt32 hi = stack[stackIndex][1];
+		if ((hi - lo) > 8) {
+			dgInt32 i = lo;
+			dgInt32 j = hi;
+			dgFloat32 val[64]; 
+			memcpy (val, &vertexList[((lo + hi) >> 1) * stride], stride * sizeof (dgFloat32));
+			do {    
+				while (cmp_vertex (&vertexList[i * stride], val, firstSortAxis) < 0) i ++;
+				while (cmp_vertex (&vertexList[j * stride], val, firstSortAxis) > 0) j --;
 
-					if (i <= j)	{
-						dgFloat32 tmp[64]; 
-						//dgIsland tmp (m_islandArray[i]);
-						memcpy (tmp, &vertexList[i * stride], stride * sizeof (dgFloat32));
-						memcpy (&vertexList[i * stride], &vertexList[j * stride], stride * sizeof (dgFloat32)); 
-						memcpy (&vertexList[j * stride], tmp, stride * sizeof (dgFloat32)); 
-						i++; 
-						j--;
-					}
-				} while (i <= j);
-
-				if (i < hi) {
-					stack[stackIndex][0] = i;
-					stack[stackIndex][1] = hi;
-					stackIndex ++;
-				}
-				if (lo < j) {
-					stack[stackIndex][0] = lo;
-					stack[stackIndex][1] = j;
-					stackIndex ++;
-				}
-				_ASSERTE (stackIndex < sizeof (stack) / (2 * sizeof (stack[0][0])));
-			} else {
-				for (dgInt32 i = lo + 1; i <= hi ; i++) {
-					dgInt32 j;
+				if (i <= j)	{
 					dgFloat32 tmp[64]; 
 					//dgIsland tmp (m_islandArray[i]);
 					memcpy (tmp, &vertexList[i * stride], stride * sizeof (dgFloat32));
-					for (j = i; j && (cmp_vertex (&vertexList[(j - 1) * stride], tmp, firstSortAxis) > 0); j --) {
-						//m_islandArray[j] = m_islandArray[j - 1];
-						memcpy (&vertexList[j * stride], &vertexList[(j - 1)* stride], stride * sizeof (dgFloat32));
-					}
-					//m_islandArray[j] = tmp;
+					memcpy (&vertexList[i * stride], &vertexList[j * stride], stride * sizeof (dgFloat32)); 
 					memcpy (&vertexList[j * stride], tmp, stride * sizeof (dgFloat32)); 
+					i++; 
+					j--;
 				}
+			} while (i <= j);
+
+			if (i < hi) {
+				stack[stackIndex][0] = i;
+				stack[stackIndex][1] = hi;
+				stackIndex ++;
+			}
+			if (lo < j) {
+				stack[stackIndex][0] = lo;
+				stack[stackIndex][1] = j;
+				stackIndex ++;
+			}
+			_ASSERTE (stackIndex < sizeof (stack) / (2 * sizeof (stack[0][0])));
+		} else {
+			for (dgInt32 i = lo + 1; i <= hi ; i++) {
+				dgInt32 j;
+				dgFloat32 tmp[64]; 
+				//dgIsland tmp (m_islandArray[i]);
+				memcpy (tmp, &vertexList[i * stride], stride * sizeof (dgFloat32));
+				for (j = i; j && (cmp_vertex (&vertexList[(j - 1) * stride], tmp, firstSortAxis) > 0); j --) {
+					//m_islandArray[j] = m_islandArray[j - 1];
+					memcpy (&vertexList[j * stride], &vertexList[(j - 1)* stride], stride * sizeof (dgFloat32));
+				}
+				//m_islandArray[j] = tmp;
+				memcpy (&vertexList[j * stride], tmp, stride * sizeof (dgFloat32)); 
 			}
 		}
+	}
 
 
 #ifdef _DEBUG
-		for (dgInt32 i = 0; i < (vertexCount - 1); i ++) {
-			_ASSERTE (cmp_vertex (&vertexList[i * stride], &vertexList[(i + 1) * stride], firstSortAxis) <= 0);
-		}
-#endif
-
-		dgInt32 count = 0;
-#ifdef __USE_DOUBLE_PRECISION__
-		_ASSERTE (0);
-		indexPtr = (dgInt64*)vertexList;
-#else
-		indexPtr = (dgInt32*)vertexList;
-#endif
-		for (dgInt32 i = 0; i < vertexCount; i ++) {
-			dgInt32 m = i * stride;
-			dgInt32 index = dgInt32 (indexPtr[m + 0]);
-			if (index == dgInt32 (0xffffffff)) {
-				dgFloat64 swept = vertexList[m + firstSortAxis] + sweptWindow;
-				dgInt32 k = i * stride + stride;
-				for (dgInt32 i1 = i + 1; i1 < vertexCount; i1 ++) {
-
-					index = dgInt32 (indexPtr[k + 0]);
-					if (index == dgInt32 (0xffffffff)) {
-						dgFloat64 val = vertexList[k + firstSortAxis];
-						if (val >= swept) {
-							break;
-						}
-
-						bool test = true;
-						dgInt32 t = 0;
-						for (; test && (t < floatSize); t ++) {
-							dgFloat64 val = dgAbsf (vertexList[m + t + 2] - vertexList[k + t + 2]);
-							test = test && (val <= tol);
-						}
-						for (; test && (t < floatSize + unsignedSize); t ++) {
-							dgUnsigned32 val0 = *(dgUnsigned32 *)&vertexList[m + t + 2];
-							dgUnsigned32 val1 = *(dgUnsigned32 *)&vertexList[k + t + 2];
-							test = t && (val0 == val1);
-						}
-						if (test) {
-							indexPtr[k + 0] = count;
-						}
-					}
-					k += stride;
-				}
-
-				memcpy (&vertexList[count * stride + 2], &vertexList[m + 2], (stride - 2) * sizeof (dgFloat32));
-				indexPtr[m + 0] = count;
-				count ++;
-			}
-		}
-				
-		return count;
+	for (dgInt32 i = 0; i < (vertexCount - 1); i ++) {
+		_ASSERTE (cmp_vertex (&vertexList[i * stride], &vertexList[(i + 1) * stride], firstSortAxis) <= 0);
 	}
-
-
-
-	static dgInt32 QuickSortVertices (dgFloat32* const vertList, dgInt32 stride, dgInt32 floatSize, dgInt32 unsignedSize, dgInt32 vertexCount, dgFloat32 tolerance)
-	{
-#ifdef __USE_DOUBLE_PRECISION__
-		dgInt64* indexPtr;
-#else
-		dgInt32* indexPtr;
 #endif
-	
-		dgInt32 count = 0;
-		if (vertexCount > (3 * 1024 * 32)) {
-			dgFloat32 x = dgFloat32 (0.0f);
-			dgFloat32 y = dgFloat32 (0.0f);
-			dgFloat32 z = dgFloat32 (0.0f);
-			dgFloat32 xd = dgFloat32 (0.0f);
-			dgFloat32 yd = dgFloat32 (0.0f);
-			dgFloat32 zd = dgFloat32 (0.0f);
-			
-			for (dgInt32 i = 0; i < vertexCount; i ++) {
-				dgFloat32 x0 = vertList[i * stride + 2];
-				dgFloat32 y0 = vertList[i * stride + 3];
-				dgFloat32 z0 = vertList[i * stride + 4];
-				x += x0;
-				y += y0;
-				z += z0;
-				xd += x0 * x0;
-				yd += y0 * y0;
-				zd += z0 * z0;
-			}
 
-			xd = vertexCount * xd - x * x;
-			yd = vertexCount * yd - y * y;
-			zd = vertexCount * zd - z * z;
+	dgInt32 count = 0;
+#ifdef __USE_DOUBLE_PRECISION__
+	_ASSERTE (0);
+	indexPtr = (dgInt64*)vertexList;
+#else
+	indexPtr = (dgInt32*)vertexList;
+#endif
+	for (dgInt32 i = 0; i < vertexCount; i ++) {
+		dgInt32 m = i * stride;
+		dgInt32 index = dgInt32 (indexPtr[m + 0]);
+		if (index == dgInt32 (0xffffffff)) {
+			dgFloat64 swept = vertexList[m + firstSortAxis] + sweptWindow;
+			dgInt32 k = i * stride + stride;
+			for (dgInt32 i1 = i + 1; i1 < vertexCount; i1 ++) {
 
-			dgInt32 axis = 2;
-			dgFloat32 axisVal = x / vertexCount;
-			if ((yd > xd) && (yd > zd)) {
-				axis = 3;
-				axisVal = y / vertexCount;
-			}
-			if ((zd > xd) && (zd > yd)) {
-				axis = 4;
-				axisVal = z / vertexCount;
-			}
-
-			dgInt32 i0 = 0;
-			dgInt32 i1 = vertexCount - 1;
-			do {    
-				for ( ;vertList[i0 * stride + axis] < axisVal; i0 ++); 
-				for ( ;vertList[i1 * stride + axis] > axisVal; i1 --);
-				if (i0 <= i1) {
-					for (dgInt32 i = 0; i < stride; i ++) {
-						Swap (vertList[i0 * stride + i], vertList[i1 * stride + i]);
+				index = dgInt32 (indexPtr[k + 0]);
+				if (index == dgInt32 (0xffffffff)) {
+					dgFloat64 val = vertexList[k + firstSortAxis];
+					if (val >= swept) {
+						break;
 					}
-					i0 ++; 
-					i1 --;
+
+					bool test = true;
+					dgInt32 t = 0;
+					for (; test && (t < floatSize); t ++) {
+						dgFloat64 val = dgAbsf (vertexList[m + t + 2] - vertexList[k + t + 2]);
+						test = test && (val <= tol);
+					}
+					for (; test && (t < floatSize + unsignedSize); t ++) {
+						dgUnsigned32 val0 = *(dgUnsigned32 *)&vertexList[m + t + 2];
+						dgUnsigned32 val1 = *(dgUnsigned32 *)&vertexList[k + t + 2];
+						test = t && (val0 == val1);
+					}
+					if (test) {
+						indexPtr[k + 0] = count;
+					}
 				}
-			} while (i0 <= i1);
-			_ASSERTE (i0 < vertexCount);
-
-			dgInt32 count0 = QuickSortVertices (&vertList[ 0 * stride], stride, floatSize, unsignedSize, i0, tolerance);
-			dgInt32 count1 = QuickSortVertices (&vertList[i0 * stride], stride, floatSize, unsignedSize, vertexCount - i0, tolerance);
-			
-			count = count0 + count1;
-
-			for (dgInt32 i = 0; i < count1; i ++) {
-				memcpy (&vertList[(count0 + i) * stride + 2], &vertList[(i0 + i) * stride + 2], (stride - 2) * sizeof (dgFloat32));
+				k += stride;
 			}
 
-
-			#ifdef __USE_DOUBLE_PRECISION__
-					indexPtr = (dgInt64*)vertList;
-			#else
-					indexPtr = (dgInt32*)vertList;
-			#endif
-
-			for (dgInt32 i = i0; i < vertexCount; i ++) {
-				indexPtr[i * stride] += count0;
-			}
-
-		} else {
-			count = SortVertices (vertList, stride, floatSize, unsignedSize, vertexCount, tolerance);
+			memcpy (&vertexList[count * stride + 2], &vertexList[m + 2], (stride - 2) * sizeof (dgFloat32));
+			indexPtr[m + 0] = count;
+			count ++;
 		}
-
-		return count;
 	}
+			
+	return count;
 }
+
+
+
+static dgInt32 QuickSortVertices (dgFloat32* const vertList, dgInt32 stride, dgInt32 floatSize, dgInt32 unsignedSize, dgInt32 vertexCount, dgFloat32 tolerance)
+{
+#ifdef __USE_DOUBLE_PRECISION__
+	dgInt64* indexPtr;
+#else
+	dgInt32* indexPtr;
+#endif
+
+	dgInt32 count = 0;
+	if (vertexCount > (3 * 1024 * 32)) {
+		dgFloat32 x = dgFloat32 (0.0f);
+		dgFloat32 y = dgFloat32 (0.0f);
+		dgFloat32 z = dgFloat32 (0.0f);
+		dgFloat32 xd = dgFloat32 (0.0f);
+		dgFloat32 yd = dgFloat32 (0.0f);
+		dgFloat32 zd = dgFloat32 (0.0f);
+		
+		for (dgInt32 i = 0; i < vertexCount; i ++) {
+			dgFloat32 x0 = vertList[i * stride + 2];
+			dgFloat32 y0 = vertList[i * stride + 3];
+			dgFloat32 z0 = vertList[i * stride + 4];
+			x += x0;
+			y += y0;
+			z += z0;
+			xd += x0 * x0;
+			yd += y0 * y0;
+			zd += z0 * z0;
+		}
+
+		xd = vertexCount * xd - x * x;
+		yd = vertexCount * yd - y * y;
+		zd = vertexCount * zd - z * z;
+
+		dgInt32 axis = 2;
+		dgFloat32 axisVal = x / vertexCount;
+		if ((yd > xd) && (yd > zd)) {
+			axis = 3;
+			axisVal = y / vertexCount;
+		}
+		if ((zd > xd) && (zd > yd)) {
+			axis = 4;
+			axisVal = z / vertexCount;
+		}
+
+		dgInt32 i0 = 0;
+		dgInt32 i1 = vertexCount - 1;
+		do {    
+			for ( ;vertList[i0 * stride + axis] < axisVal; i0 ++); 
+			for ( ;vertList[i1 * stride + axis] > axisVal; i1 --);
+			if (i0 <= i1) {
+				for (dgInt32 i = 0; i < stride; i ++) {
+					Swap (vertList[i0 * stride + i], vertList[i1 * stride + i]);
+				}
+				i0 ++; 
+				i1 --;
+			}
+		} while (i0 <= i1);
+		_ASSERTE (i0 < vertexCount);
+
+		dgInt32 count0 = QuickSortVertices (&vertList[ 0 * stride], stride, floatSize, unsignedSize, i0, tolerance);
+		dgInt32 count1 = QuickSortVertices (&vertList[i0 * stride], stride, floatSize, unsignedSize, vertexCount - i0, tolerance);
+		
+		count = count0 + count1;
+
+		for (dgInt32 i = 0; i < count1; i ++) {
+			memcpy (&vertList[(count0 + i) * stride + 2], &vertList[(i0 + i) * stride + 2], (stride - 2) * sizeof (dgFloat32));
+		}
+
+
+		#ifdef __USE_DOUBLE_PRECISION__
+				indexPtr = (dgInt64*)vertList;
+		#else
+				indexPtr = (dgInt32*)vertList;
+		#endif
+
+		for (dgInt32 i = i0; i < vertexCount; i ++) {
+			indexPtr[i * stride] += count0;
+		}
+
+	} else {
+		count = SortVertices (vertList, stride, floatSize, unsignedSize, vertexCount, tolerance);
+	}
+
+	return count;
+}
+
 
 
 
@@ -543,7 +541,7 @@ dgInt32 dgApi dgVertexListToIndexList (dgFloat32* const vertList, dgInt32 stride
 	
 	dgInt32 floatSize = dgInt32 (floatSizeInBytes / sizeof (dgFloat32));
 	dgInt32 unsignedSize = dgInt32 (unsignedSizeInBytes / sizeof (dgUnsigned32));
-	dgInt32 count = InternalGeoUtil::QuickSortVertices (tmpVertexList, stride + 2, floatSize, unsignedSize, vertexCount, tolerance);
+	dgInt32 count = QuickSortVertices (tmpVertexList, stride + 2, floatSize, unsignedSize, vertexCount, tolerance);
 
 	k = 0;
 	m = 0;
@@ -569,4 +567,12 @@ dgInt32 dgApi dgVertexListToIndexList (dgFloat32* const vertList, dgInt32 stride
 
 	return count;
 }
+
+#ifndef __USE_DOUBLE_PRECISION__
+dgInt32 dgVertexListToIndexList (dgFloat64* const vertexList, dgInt32 strideInBytes, dgInt32 compareCount, dgInt32 vertexCount, dgInt32* const indexListOut, dgFloat64 tolerance)
+{
+	_ASSERTE (0);
+	return 0;
+}
+#endif
 
