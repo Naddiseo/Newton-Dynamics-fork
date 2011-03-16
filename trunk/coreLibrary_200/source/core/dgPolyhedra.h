@@ -112,6 +112,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	void DeleteEdge (dgEdge* const edge);
 	void DeleteEdge (dgInt32 v0, dgInt32 v1);
 	
+	bool FlipEdge (dgEdge* const edge);
 	dgBigVector FaceNormal (dgEdge* const face, const dgFloat64* const vertex, dgInt32 strideInBytes) const;
 
 	void BeginConectedSurface() const;
@@ -150,7 +151,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	dgBigVector BigFaceNormal (dgEdge* const face, const dgFloat64* const pool, dgInt32 strideInBytes) const;
 
 
-	bool FlipEdge (dgEdge* const edge);
+	
 	dgEdge* SpliteEdge (dgInt32 newIndex, dgEdge* const edge);
 	dgEdge* SpliteEdgeAndTriangulate (dgInt32 newIndex, dgEdge* const edge);
 
@@ -207,7 +208,10 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	//	dgEdge* GetBadEdge (dgList<dgEdge*>& faceList  const dgFloat64* const pool, dgInt32 strideInBytes) const; 
 
 	private:
+	void RefineTriangulation (const dgFloat64* const vertex, dgInt32 stride);
+	void RefineTriangulation (const dgFloat64* const vertex, dgInt32 stride, dgBigVector* const normal, dgInt32 perimeterCount, dgEdge** const perimeter);
 	void OptimizeTriangulation (const dgFloat64* const vertex, dgInt32 strideInBytes);
+	void MarkAdjacentCoplanarFaces (dgPolyhedra& polyhedraOut, dgEdge* const face, const dgFloat64* const pool, dgInt32 strideInBytes);
 	dgEdge* FindEarTip (dgEdge* const face, const dgFloat64* const pool, dgInt32 stride, dgDownHeap<dgEdge*, dgFloat64>& heap, const dgBigVector &normal) const;
 	dgEdge* TriangulateFace (dgEdge* face, const dgFloat64* const pool, dgInt32 stride, dgDownHeap<dgEdge*, dgFloat64>& heap, dgBigVector* const faceNormalOut);
 	

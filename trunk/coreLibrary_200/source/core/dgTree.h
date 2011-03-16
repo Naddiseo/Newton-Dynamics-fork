@@ -835,7 +835,6 @@ void dgTree<OBJECT, KEY>::SwapInfo (dgTree<OBJECT, KEY>& tree)
 {
 	Swap (m_head, tree.m_head);
 	Swap (m_count, tree.m_count);
-	
 }
 
 //template<class OBJECT, class KEY> dgInt32 dgTree<OBJECT,KEY>::m_size = 0;
