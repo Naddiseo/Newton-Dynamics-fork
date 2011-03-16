@@ -402,8 +402,6 @@ void dgPolygonSoupDatabaseBuilder::End(bool optimize)
 {
 	Optimize(optimize);
 
-	_ASSERTE (0);
-/*
 	// build the normal array and adjacency array
 	// calculate all face the normals
 	dgInt32 indexCount = 0;
@@ -431,8 +429,7 @@ void dgPolygonSoupDatabaseBuilder::End(bool optimize)
 	}
 	// compress normals array
 	m_normalIndex[m_faceCount] = 0;
-	m_normalCount = dgVertexListToIndexList(&m_normalPoints[0].m_x, sizeof (dgTriplex), sizeof (dgTriplex), 0, m_faceCount, &m_normalIndex[0], dgFloat32 (1.0e-4f));
-*/
+	m_normalCount = dgVertexListToIndexList(&m_normalPoints[0].m_x, sizeof (dgBigVector), 3, m_faceCount, &m_normalIndex[0], dgFloat32 (1.0e-4f));
 }
 
 void dgPolygonSoupDatabaseBuilder::Optimize(bool optimize)
