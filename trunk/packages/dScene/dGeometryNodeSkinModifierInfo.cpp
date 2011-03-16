@@ -263,30 +263,13 @@ bool dGeometryNodeSkinModifierInfo::Deserialize (TiXmlElement* const rootNode, i
 	vertexCount->Attribute("count", &m_vertexCount);
 
 	TiXmlElement* const matrixNode = (TiXmlElement*) rootNode->FirstChild ("bindingMatrix");
-	dBigVector tmp[4];
-	dStringToFloatArray (matrixNode->Attribute("float16"), &tmp[0][0], 16);
-	for (int i = 0; i < 4; i ++) {
-		for (int j = 0; j < 4; j ++) {
-			m_shapeBindMatrix[i][j] = dFloat(tmp[i][j]);
-		}
-	}
+	dStringToFloatArray (matrixNode->Attribute("float16"), &m_shapeBindMatrix[0][0], 16);
 
 	TiXmlElement* const bindMatrices = (TiXmlElement*) rootNode->FirstChild ("bonesBindMatrices");
 	bindMatrices->Attribute("count", &m_boneCount);
 
 	m_boneBindingMatrix = new dMatrix[m_boneCount];
-	dBigVector* const tmp1 = new dBigVector[4 * m_boneCount];
-	dStringToFloatArray (bindMatrices->Attribute("float16"), &tmp1[0][0], 16 * m_boneCount);
-	for (int k = 0; k < 4; k ++) {
-		dBigVector* const matrix = &tmp1[k * 4];
-		for (int i = 0; i < 4; i ++) {
-			for (int j = 0; j < 4; j ++) {
-				m_boneBindingMatrix[k][i][j] = dFloat(matrix[i * 4][j]);
-			}
-		}
-	}
-	delete[] tmp1;
-
+	dStringToFloatArray (bindMatrices->Attribute("float16"), &m_boneBindingMatrix[0][0][0], 16 * m_boneCount);
 
 	int weightCount = 0; 
 	TiXmlElement* const vertexWeight = (TiXmlElement*) rootNode->FirstChild ("vertexWeights");
@@ -303,12 +286,7 @@ bool dGeometryNodeSkinModifierInfo::Deserialize (TiXmlElement* const rootNode, i
 	dStringToIntArray (bIndices->Attribute("indices"), boneIndex, weightCount);
 
 	TiXmlElement* const vWeights = (TiXmlElement*) vertexWeight->FirstChild ("weights");
-	dFloat64* const tmp2 = new dFloat64[weightCount];
-	dStringToFloatArray (vWeights->Attribute("floats"), tmp2, weightCount);
-	for (int i = 0; i < weightCount; i ++) {
-		weights[i] = dFloat(tmp2[i]);
-	}
-	delete[] tmp2;
+	dStringToFloatArray (vWeights->Attribute("floats"), &weights[0], weightCount);
 
 	m_vertexWeights = new dVector[m_vertexCount];
 	m_boneWeightIndex = new dBoneWeightIndex[m_vertexCount];

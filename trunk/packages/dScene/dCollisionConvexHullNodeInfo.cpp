@@ -149,13 +149,8 @@ bool dCollisionConvexHullNodeInfo::Deserialize (TiXmlElement* const rootNode, in
 			delete[] m_vertexCloud;
 		}
 		dataNode->Attribute("count", &m_count);
-//		m_vertexCloud = new dBigVector [m_count];
-		dBigVector* const tmp = new dBigVector[m_count];
-		dStringToFloatArray (dataNode->Attribute("float4"), &tmp[0][0], 4 * m_count);
-		for (int i = 0; i < m_count; i ++) {
-			m_vertexCloud[i] = dVector (dFloat (tmp[i].m_x), dFloat (tmp[i].m_y), dFloat (tmp[i].m_z), dFloat (0.0f));
-		}
-		delete[] tmp;
+		m_vertexCloud = new dVector [m_count];
+		dStringToFloatArray (dataNode->Attribute("float4"), &m_vertexCloud[0][0], 4 * m_count);
 	}
 
 	return true;

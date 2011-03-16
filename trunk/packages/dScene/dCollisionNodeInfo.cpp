@@ -127,25 +127,13 @@ bool dCollisionNodeInfo::Deserialize (TiXmlElement* const rootNode, int revision
 
 	TiXmlElement* childNode = (TiXmlElement*) rootNode->FirstChild ("offsetMatrix");
 
-	dBigVector tmp[4];
-	dStringToFloatArray (childNode->Attribute("float16"), &tmp[0][0], 16);
-	for (int i = 0; i < 4; i ++) {
-		for (int j = 0; j < 4; j ++) {
-			m_matrix[i][j] = dFloat(tmp[i][j]);
-		}
-	}
+	dStringToFloatArray (childNode->Attribute("float16"), &m_matrix[0][0], 16);
 
 	childNode = (TiXmlElement*) rootNode->FirstChild ("geometricInertia");
-	dStringToFloatArray (childNode->Attribute("float4"), &tmp[0][0], 4);
-	for (int j = 0; j < 4; j ++) {
-		m_geometricInertia[j] = dFloat(tmp[0][j]);
-	}
+	dStringToFloatArray (childNode->Attribute("float4"), &m_geometricInertia[0], 4);
 
 	childNode = (TiXmlElement*) rootNode->FirstChild ("geometricCenterAndVolume");
-	dStringToFloatArray (childNode->Attribute("float4"), &tmp[0][0], 4);
-	for (int j = 0; j < 4; j ++) {
-		m_geometricCenterAndVolume[j] = dFloat(tmp[0][j]);
-	}
+	dStringToFloatArray (childNode->Attribute("float4"), &m_geometricCenterAndVolume[0], 4);
 
 	return true;
 }

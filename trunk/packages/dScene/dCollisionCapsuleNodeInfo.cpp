@@ -114,12 +114,8 @@ bool dCollisionCapsuleNodeInfo::Deserialize (TiXmlElement* const rootNode, int r
 	DeserialiseBase(dCollisionNodeInfo, rootNode, revisionNumber);
 
 	TiXmlElement* const dataNode = (TiXmlElement*) rootNode->FirstChild ("size");
-	dFloat64 radius;
-	dFloat64 height;
-	dStringToFloatArray (dataNode->Attribute("radius"), &radius, 1);
-	dStringToFloatArray (dataNode->Attribute("height"), &height, 1);
-	m_radius = dFloat (radius);
-	m_height = dFloat (height);
+	dStringToFloatArray (dataNode->Attribute("radius"), &m_radius, 1);
+	dStringToFloatArray (dataNode->Attribute("height"), &m_height, 1);
 	return true;
 }
 

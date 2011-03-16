@@ -101,9 +101,7 @@ bool dCollisionBoxNodeInfo::Deserialize (TiXmlElement* const rootNode, int revis
 	DeserialiseBase(dCollisionNodeInfo, rootNode, revisionNumber);
 
 	TiXmlElement* const dataNode = (TiXmlElement*) rootNode->FirstChild ("size");
-	dFloat64 tmp[4];
-	dStringToFloatArray (dataNode->Attribute("float4"), tmp, 4);
-	m_size = dVector (dFloat (tmp[0]), dFloat (tmp[1]), dFloat (tmp[2]), dFloat (tmp[3]));
+	dStringToFloatArray (dataNode->Attribute("float4"), &m_size[0], 4);
 	return true;
 }
 
