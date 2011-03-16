@@ -221,7 +221,6 @@ static inline dgInt32 cmp_vertex (const dgFloat64* const v1, const dgFloat64* co
 
 static dgInt32 SortVertices (dgFloat64* const vertexList,  dgInt32 stride, dgInt32 compareCount, dgInt32 vertexCount, dgFloat64 tolerance)
 {
-//	
 	dgFloat64 xc = 0;
 	dgFloat64 yc = 0;
 	dgFloat64 zc = 0;
@@ -350,45 +349,34 @@ static dgInt32 SortVertices (dgFloat64* const vertexList,  dgInt32 stride, dgInt
 #endif
 
 	dgInt32 count = 0;
-	dgInt64* const indexPtr = (dgInt64*)vertexList;
-
 	for (dgInt32 i = 0; i < vertexCount; i ++) {
 		dgInt32 m = i * stride;
-		dgInt32 index = dgInt32 (indexPtr[m + 0]);
+		dgInt32 index = dgInt32 (vertexList[m + 0]);
 		if (index == dgInt32 (0xffffffff)) {
 			dgFloat64 swept = vertexList[m + firstSortAxis] + sweptWindow;
 			dgInt32 k = i * stride + stride;
 			for (dgInt32 i1 = i + 1; i1 < vertexCount; i1 ++) {
 
-				index = dgInt32 (indexPtr[k + 0]);
+				index = dgInt32 (vertexList[k + 0]);
 				if (index == dgInt32 (0xffffffff)) {
 					dgFloat64 val = vertexList[k + firstSortAxis];
 					if (val >= swept) {
 						break;
 					}
-					_ASSERTE (0);
-/*
 					bool test = true;
-					dgInt32 t = 0;
-					for (; test && (t < floatSize); t ++) {
-						dgFloat64 val = dgAbsf (vertexList[m + t + 2] - vertexList[k + t + 2]);
+					for (dgInt32 t = 0; test && (t < compareCount); t ++) {
+						dgFloat64 val = fabs (vertexList[m + t + 2] - vertexList[k + t + 2]);
 						test = test && (val <= tol);
 					}
-					for (; test && (t < floatSize + unsignedSize); t ++) {
-						dgUnsigned32 val0 = *(dgUnsigned32 *)&vertexList[m + t + 2];
-						dgUnsigned32 val1 = *(dgUnsigned32 *)&vertexList[k + t + 2];
-						test = t && (val0 == val1);
-					}
 					if (test) {
-						indexPtr[k + 0] = count;
+						vertexList[k + 0] = dgFloat64 (count);
 					}
-*/
 				}
 				k += stride;
 			}
 
-			memcpy (&vertexList[count * stride + 2], &vertexList[m + 2], (stride - 2) * sizeof (dgFloat32));
-			indexPtr[m + 0] = count;
+			memcpy (&vertexList[count * stride + 2], &vertexList[m + 2], (stride - 2) * sizeof (dgFloat64));
+			vertexList[m + 0] = dgFloat64 (count);
 			count ++;
 		}
 	}
@@ -401,9 +389,6 @@ static dgInt32 SortVertices (dgFloat64* const vertexList,  dgInt32 stride, dgInt
 //static dgInt32 QuickSortVertices (dgFloat32* const vertList, dgInt32 stride, dgInt32 floatSize, dgInt32 unsignedSize, dgInt32 vertexCount, dgFloat32 tolerance)
 static dgInt32 QuickSortVertices (dgFloat64* const vertList, dgInt32 stride, dgInt32 compareCount, dgInt32 vertexCount, dgFloat64 tolerance)
 {
-
-	dgInt64* indexPtr;
-
 	dgInt32 count = 0;
 //	if (vertexCount > (3 * 1024 * 32)) {
 if (vertexCount > (10)) {
@@ -466,9 +451,10 @@ if (vertexCount > (10)) {
 		}
 
 
-		indexPtr = (dgInt64*)vertList;
+//		dgFloat64* const indexPtr = (dgInt64*)vertList;
 		for (dgInt32 i = i0; i < vertexCount; i ++) {
-			indexPtr[i * stride] += count0;
+//			indexPtr[i * stride] += count0;
+			vertList[i * stride] += dgFloat64 (count0);
 		}
 
 	} else {
@@ -508,9 +494,8 @@ dgInt32 dgVertexListToIndexList (dgFloat64* const vertList, dgInt32 strideInByte
 	dgInt32 k = 0;
 	dgInt32 m = 0;
 	for (dgInt32 i = 0; i < vertexCount; i ++) {
-		memcpy (&tmpVertexList[m + 2], &tmpVertexList[k], stride * sizeof (dgFloat64));
-		tmpVertexList[m + 0] = 0;
-		tmpVertexList[m + 0] = tmpVertexList[m + 0] - 1;
+		memcpy (&tmpVertexList[m + 2], &vertList[k], stride * sizeof (dgFloat64));
+		tmpVertexList[m + 0] = dgFloat64 (- 1.0f);
 		tmpVertexList[m + 1] = i;
 		k += stride;
 		m += stride2;
