@@ -344,34 +344,30 @@ bool dMeshNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumbe
 	DeserialiseBase(dGeometryNodeInfo, rootNode, revisionNumber);
 
 	// load all the vertexData
-	TiXmlElement* pointElement = (TiXmlElement*) rootNode->FirstChild ("points");
+	TiXmlElement* const pointElement = (TiXmlElement*) rootNode->FirstChild ("points");
 
 	int positionCount;
-	float* positions;
-	TiXmlElement* positionsElement = (TiXmlElement*) pointElement->FirstChild ("position");
+	TiXmlElement* const positionsElement = (TiXmlElement*) pointElement->FirstChild ("position");
 	positionsElement->Attribute("float4", &positionCount);
-	positions = new dFloat[4 * positionCount];
+	float* const positions = new dFloat[4 * positionCount];
 	dStringToFloatArray (positionsElement->Attribute("floats"), positions, 4 * positionCount);
 
 	int normalCount;
-	float* normals;
 	TiXmlElement* normalsElement = (TiXmlElement*) pointElement->FirstChild ("normal");
 	normalsElement->Attribute("float3", &normalCount);
-	normals = new dFloat[3 * normalCount];
+	float* const normals = new dFloat[3 * normalCount];
 	dStringToFloatArray (normalsElement->Attribute("floats"), normals, 3 * normalCount);
 
 	int uv0Count;
-	float* uv0;
 	TiXmlElement* uv0Element = (TiXmlElement*) pointElement->FirstChild ("uv0");
 	uv0Element->Attribute("float2", &uv0Count);
-	uv0 = new dFloat[2 * uv0Count];
+	float* const uv0 = new dFloat[2 * uv0Count];
 	dStringToFloatArray (uv0Element->Attribute("floats"), uv0, 2 * uv0Count);
 
 	int uv1Count;
-	float* uv1;
 	TiXmlElement* uv1Element = (TiXmlElement*) pointElement->FirstChild ("uv1");
 	uv1Element->Attribute("float2", &uv1Count);
-	uv1 = new dFloat[2 * uv1Count];
+	float* const uv1 = new dFloat[2 * uv1Count];
 	dStringToFloatArray (uv1Element->Attribute("floats"), uv1, 2 * uv1Count);
 
 	//load face informations
@@ -379,10 +375,10 @@ bool dMeshNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumbe
 
 	int faceCount;
 	polygonsElement->Attribute("count", &faceCount);
-	int* faceIndexCount = new int[faceCount];
+	int* const faceIndexCount = new int[faceCount];
 	dStringToIntArray (polygonsElement->Attribute("faceIndexCount"), faceIndexCount, faceCount);
 
-	int* faceMaterials = new int [faceCount]; 
+	int* const faceMaterials = new int [faceCount]; 
 	TiXmlElement* materialElement = (TiXmlElement*) polygonsElement->FirstChild ("faceMaterial");
 	dStringToIntArray (materialElement->Attribute("index"), faceMaterials, faceCount);
 
@@ -391,20 +387,20 @@ bool dMeshNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumbe
 		indexCount += faceIndexCount[i];
 	}
 
-	int* positionVertexIndex = new int [indexCount]; 
-	TiXmlElement* positionVertexIndexElement = (TiXmlElement*) polygonsElement->FirstChild ("position");
+	int* const positionVertexIndex = new int [indexCount]; 
+	TiXmlElement* const positionVertexIndexElement = (TiXmlElement*) polygonsElement->FirstChild ("position");
 	dStringToIntArray (positionVertexIndexElement->Attribute("index"), positionVertexIndex, indexCount);
 
-	int* normalVertexIndex = new int [indexCount]; 
-	TiXmlElement* normalVertexIndexElement = (TiXmlElement*) polygonsElement->FirstChild ("normal");
+	int* const normalVertexIndex = new int [indexCount]; 
+	TiXmlElement* const normalVertexIndexElement = (TiXmlElement*) polygonsElement->FirstChild ("normal");
 	dStringToIntArray (normalVertexIndexElement->Attribute("index"), normalVertexIndex, indexCount);
 
-	int* uv0VertexIndex = new int [indexCount]; 
-	TiXmlElement* uv0VertexIndexElement = (TiXmlElement*) polygonsElement->FirstChild ("uv0");
+	int* const uv0VertexIndex = new int [indexCount]; 
+	TiXmlElement* const uv0VertexIndexElement = (TiXmlElement*) polygonsElement->FirstChild ("uv0");
 	dStringToIntArray (uv0VertexIndexElement->Attribute("index"), uv0VertexIndex, indexCount);
 
-	int* uv1VertexIndex = new int [indexCount]; 
-	TiXmlElement* uv1VertexIndexElement = (TiXmlElement*) polygonsElement->FirstChild ("uv1");
+	int* const uv1VertexIndex = new int [indexCount]; 
+	TiXmlElement* const uv1VertexIndexElement = (TiXmlElement*) polygonsElement->FirstChild ("uv1");
 	dStringToIntArray (uv1VertexIndexElement->Attribute("index"), uv1VertexIndex, indexCount);
 
 	BuildFromVertexListIndexList(faceCount, faceIndexCount, faceMaterials, 

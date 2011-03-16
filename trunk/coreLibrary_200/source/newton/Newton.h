@@ -51,7 +51,7 @@
 	#define dFloat float
 #endif
 
-
+	#define dFloat64 double
 
 #ifdef __cplusplus 
 extern "C" {
