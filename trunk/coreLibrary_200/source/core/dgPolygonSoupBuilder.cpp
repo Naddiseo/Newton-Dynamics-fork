@@ -166,13 +166,11 @@ void dgPolygonSoupDatabaseBuilder::SingleFaceFixup()
 
 void dgPolygonSoupDatabaseBuilder::EndAndOptimize(bool optimize)
 {
-	_ASSERTE (0);
-/*
 	if (m_faceCount) {
 		dgStack<dgInt32> indexMapPool (m_indexCount + m_vertexCount);
 
 		dgInt32* const indexMap = &indexMapPool[0];
-		m_vertexCount = dgVertexListToIndexList (&m_vertexPoints[0].m_x, sizeof (dgTriplex), sizeof (dgTriplex), 0, m_vertexCount, &indexMap[0], dgFloat32 (1.0e-4f));
+		m_vertexCount = dgVertexListToIndexList (&m_vertexPoints[0].m_x, sizeof (dgBigVector), 3, m_vertexCount, &indexMap[0], dgFloat32 (1.0e-4f));
 
 		dgInt32 k = 0;
 		for (dgInt32 i = 0; i < m_faceCount; i ++) {
@@ -192,7 +190,6 @@ void dgPolygonSoupDatabaseBuilder::EndAndOptimize(bool optimize)
 			OptimizeByIndividualFaces();
 		}
 	}
-*/
 }
 
 
@@ -424,18 +421,18 @@ void dgPolygonSoupDatabaseBuilder::End(bool optimize)
 	// build the normal array and adjacency array
 	// calculate all face the normals
 	dgInt32 indexCount = 0;
-	m_normalPoints[m_faceCount].m_x = dgFloat32 (0.0f);
+	m_normalPoints[m_faceCount].m_x = dgFloat64 (0.0f);
 	for (dgInt32 i = 0; i < m_faceCount; i ++) {
 		dgInt32 faceIndexCount = m_faceVertexCount[i];
 
 		dgInt32* const ptr = &m_vertexIndex[indexCount + 1];
-		dgVector v0 (&m_vertexPoints[ptr[0]].m_x);
-		dgVector v1 (&m_vertexPoints[ptr[1]].m_x);
-		dgVector e0 (v1 - v0);
-		dgVector normal (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+		dgBigVector v0 (&m_vertexPoints[ptr[0]].m_x);
+		dgBigVector v1 (&m_vertexPoints[ptr[1]].m_x);
+		dgBigVector e0 (v1 - v0);
+		dgBigVector normal (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 		for (dgInt32 j = 2; j < faceIndexCount - 1; j ++) {
-			dgVector v2 (&m_vertexPoints[ptr[j]].m_x);
-			dgVector e1 (v2 - v0);
+			dgBigVector v2 (&m_vertexPoints[ptr[j]].m_x);
+			dgBigVector e1 (v2 - v0);
 			normal += e0 * e1;
 			e0 = e1;
 		}
@@ -454,10 +451,10 @@ void dgPolygonSoupDatabaseBuilder::End(bool optimize)
 
 void dgPolygonSoupDatabaseBuilder::Optimize(bool optimize)
 {
-	_ASSERTE (0);
-/*
 	#define DG_PATITION_SIZE (1024 * 4)
 	if (optimize && (m_faceCount > DG_PATITION_SIZE)) {
+_ASSERTE (0);
+/*
 		dgBigVector median (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 		dgBigVector varian (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 
@@ -587,11 +584,10 @@ void dgPolygonSoupDatabaseBuilder::Optimize(bool optimize)
 		} else {
 			EndAndOptimize(false);
 		}
-
+*/
 	} else {
 		EndAndOptimize(optimize);
 	}
-*/
 }
 
 

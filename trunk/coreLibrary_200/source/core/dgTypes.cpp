@@ -480,6 +480,7 @@ dgInt32 dgVertexListToIndexList (dgFloat64* const vertList, dgInt32 strideInByte
 	if (compareCount < 3) {
 		return 0;
 	}
+	_ASSERTE (compareCount <= (strideInBytes / sizeof (dgFloat64)));
 	_ASSERT (strideInBytes == dgInt32 (sizeof (dgFloat64) * (strideInBytes / sizeof (dgFloat64))));
 
 	dgInt32 stride = strideInBytes / dgInt32 (sizeof (dgFloat64));
@@ -500,11 +501,7 @@ dgInt32 dgVertexListToIndexList (dgFloat64* const vertList, dgInt32 strideInByte
 		m += stride2;
 	}
 	
-//	dgInt32 floatSize = dgInt32 (floatSizeInBytes / sizeof (dgFloat64));
-//	dgInt32 unsignedSize = dgInt32 (unsignedSizeInBytes / sizeof (dgUnsigned32));
-//	dgInt32 count = QuickSortVertices (tmpVertexList, stride + 2, floatSize, unsignedSize, vertexCount, tolerance);
 	dgInt32 count = QuickSortVertices (tmpVertexList, stride2, compareCount, vertexCount, tolerance);
-
 
 	k = 0;
 	m = 0;
