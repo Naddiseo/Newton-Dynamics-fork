@@ -1968,9 +1968,6 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 
 dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
 {
-_ASSERTE (0);
-return NULL;
-/*
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);
 	dgControlFP (_PC_53, _MCW_PC);
@@ -1979,6 +1976,9 @@ return NULL;
 	dgMeshEffectSolidTree* const tree = CreateSolidTree();
 	_ASSERTE (tree);
 
+_ASSERTE (0);
+return NULL;
+/*
 	dgStack<dgVector> pool(pointsCount + m_pointCount);
 
 	for (dgInt32 i = 0; i < m_pointCount; i ++) {

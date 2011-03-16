@@ -833,19 +833,16 @@ dgMeshEffect::dgMeshEffect(dgPolyhedra& mesh, const dgMeshEffect& source)
 dgMeshEffect::dgMeshEffect(const dgMeshEffect& source)
 	:dgPolyhedra (source) 
 {
-	_ASSERTE (0);
-/*
 	m_isFlagFace = source.m_isFlagFace;
 	m_pointCount = source.m_pointCount;
 	m_maxPointCount = source.m_maxPointCount;
-	m_points = (dgVector*) GetAllocator()->MallocLow(dgInt32 (m_maxPointCount * sizeof(dgVector)));
-	memcpy (m_points, source.m_points, m_pointCount * sizeof(dgVector));
+	m_points = (dgBigVector*) GetAllocator()->MallocLow(dgInt32 (m_maxPointCount * sizeof(dgBigVector)));
+	memcpy (m_points, source.m_points, m_pointCount * sizeof(dgBigVector));
 
 	m_atribCount = source.m_atribCount;
 	m_maxAtribCount = source.m_maxAtribCount;
 	m_attib = (dgVertexAtribute*) GetAllocator()->MallocLow(dgInt32 (m_maxAtribCount * sizeof(dgVertexAtribute)));
 	memcpy (m_attib, source.m_attib, m_atribCount * sizeof(dgVertexAtribute));
-*/
 }
 
 
@@ -920,8 +917,6 @@ void dgMeshEffect::Init(bool preAllocaBuffers)
 
 void dgMeshEffect::Triangulate  ()
 {
-	_ASSERTE (0);
-/*
 	dgPolyhedra polygon(GetAllocator());
 
 	dgInt32 mark = IncLRU();
@@ -936,7 +931,7 @@ void dgMeshEffect::Triangulate  ()
 			dgInt32 indexCount = 0;
 			do {
 				dgInt32 attribIndex = dgInt32 (ptr->m_userData);
-				m_attib[attribIndex].m_vertex.m_w = dgFloat32 (ptr->m_incidentVertex);
+				m_attib[attribIndex].m_vertex.m_w = dgFloat64 (ptr->m_incidentVertex);
 				ptr->m_mark = mark;
 				index[indexCount] = attribIndex;
 				indexCount ++;
@@ -979,7 +974,6 @@ void dgMeshEffect::Triangulate  ()
 		}
 	}
 	EndFace();
-*/
 }
 
 void dgMeshEffect::ConvertToPolygons ()

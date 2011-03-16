@@ -25,7 +25,9 @@
 #include "dgStdafx.h"
 #include "dgList.h"
 #include "dgTree.h"
+#include "dgHeap.h"
 #include "dgDebug.h"
+
 
 
 
@@ -98,6 +100,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	dgEdge* AddFace (dgInt32 count, const dgInt32* const index);
 	dgEdge* AddFace (dgInt32 count, const dgInt32* const index, const dgInt64* const userdata);
 	void EndFace ();
+	void DeleteFace(dgEdge* const edge);
 
 	dgInt32 IncLRU() const;
 	void SetLRU(dgInt32 lru) const;
@@ -105,6 +108,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	dgEdge* FindEdge (dgInt32 v0, dgInt32 v1) const;
 	dgTreeNode* FindEdgeNode (dgInt32 v0, dgInt32 v1) const;
 
+	dgEdge* AddHalfEdge (dgInt32 v0, dgInt32 v1);
 	void DeleteEdge (dgEdge* const edge);
 	void DeleteEdge (dgInt32 v0, dgInt32 v1);
 	
@@ -126,7 +130,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 
 	// create an edge and add it to the tree. 
 	// the edge is not linked to the existing edge list
-	dgEdge* AddHalfEdge (dgInt32 v0, dgInt32 v1);
+	
 
 	// create a complete edge and add it to the tree
 	//	the new edge is linked to the existing edge list
@@ -136,7 +140,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	void DeleteEdge (dgEdge* const edge);
 
 	void DeleteAllFace();
-	void DeleteFace(dgEdge* const edge);
+
 	
 
   	dgInt32 GetMaxIndex() const;
@@ -203,6 +207,12 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	//	dgEdge* GetBadEdge (dgList<dgEdge*>& faceList  const dgFloat64* const pool, dgInt32 strideInBytes) const; 
 
 	private:
+	void OptimizeTriangulation (const dgFloat64* const vertex, dgInt32 strideInBytes);
+	dgEdge* FindEarTip (dgEdge* const face, const dgFloat64* const pool, dgInt32 stride, dgDownHeap<dgEdge*, dgFloat64>& heap, const dgBigVector &normal) const;
+	dgEdge* TriangulateFace (dgEdge* face, const dgFloat64* const pool, dgInt32 stride, dgDownHeap<dgEdge*, dgFloat64>& heap, dgBigVector* const faceNormalOut);
+	
+	
+
 	mutable dgInt32 m_baseMark;
 	mutable dgInt32 m_edgeMark;
 	mutable dgInt32 m_faceSecuence;
