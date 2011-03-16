@@ -852,8 +852,6 @@ dgMeshEffect::dgMeshEffect(const dgMeshEffect& source)
 dgMeshEffect::dgMeshEffect(dgCollision* const collision)
 	:dgPolyhedra (collision->GetAllocator()) 
 {
-	_ASSERTE (0);
-/*
 	dgMeshEffectBuilder builder;
 
 	if (collision->IsType (dgCollision::dgCollisionCompound_RTTI)) {
@@ -864,7 +862,7 @@ dgMeshEffect::dgMeshEffect(dgCollision* const collision)
 		dgCollisionInfo::dgCoumpountCollisionData& data = collisionInfo.m_compoundCollision;
 		for (dgInt32 i = 0; i < data.m_chidrenCount; i ++) {
 			builder.m_brush = i;
-			dgCollision* childShape = data.m_chidren[i];
+			dgCollision* const childShape = data.m_chidren[i];
 			childShape->DebugCollision (matrix, (OnDebugCollisionMeshCallback) dgMeshEffectBuilder::GetShapeFromCollision, &builder);
 		}
 
@@ -892,7 +890,6 @@ dgMeshEffect::dgMeshEffect(dgCollision* const collision)
 								 &normalUV.m_x, sizeof (dgVector), &m_normalUVIndex[0]);
 
 	CalculateNormals(dgFloat32 (45.0f * 3.1416f/180.0f));
-*/
 }
 
 
@@ -1206,11 +1203,9 @@ void dgMeshEffect::EnumerateAttributeArray (dgVertexAtribute* const attib)
 
 void dgMeshEffect::ApplyAttributeArray (dgVertexAtribute* const attib)
 {
-	_ASSERTE (0);
-/*
 	dgStack<dgInt32>indexMap (GetCount());
 
-	m_atribCount = dgVertexListToIndexList (&attib[0].m_vertex.m_x, sizeof (dgVertexAtribute), sizeof (dgVertexAtribute) - sizeof (dgInt32), sizeof (dgInt32), GetCount(), &indexMap[0], DG_VERTEXLIST_INDEXLIST_TOL);
+	m_atribCount = dgVertexListToIndexList (&attib[0].m_vertex.m_x, sizeof (dgVertexAtribute), sizeof (dgVertexAtribute) / sizeof(dgFloat64), GetCount(), &indexMap[0], DG_VERTEXLIST_INDEXLIST_TOL);
 	m_maxAtribCount = m_atribCount;
 
 	GetAllocator()->FreeLow (m_attib);
@@ -1225,7 +1220,6 @@ void dgMeshEffect::ApplyAttributeArray (dgVertexAtribute* const attib)
 		_ASSERTE (index < m_atribCount);
 		edge->m_userData = dgUnsigned64 (index);
 	}
-*/
 }
 
 dgBigVector dgMeshEffect::GetOrigin ()const
@@ -1555,20 +1549,17 @@ void dgMeshEffect::UniformBoxMapping (dgInt32 material, const dgMatrix& textureM
 
 void dgMeshEffect::CalculateNormals (dgFloat64 angleInRadians)
 {
-	_ASSERTE (0);
-/*
-	dgStack<dgVector>faceNormal (GetCount());
+	dgStack<dgBigVector>faceNormal (GetCount());
 	dgStack<dgVertexAtribute>attribArray (GetCount());
 	EnumerateAttributeArray (&attribArray[0]);
 
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);	
 	for(iter.Begin(); iter; iter ++){
-		dgEdge* edge;
-		edge = &(*iter);
+		dgEdge* const edge = &(*iter);
 		if ((edge->m_mark < mark) && (edge->m_incidentFace > 0)) {
-			dgVector normal (FaceNormal (edge, &m_points[0].m_x, sizeof (m_points[0])));
-			normal = normal.Scale (dgFloat32 (1.0f) / (dgSqrt (normal % normal) + dgFloat32(1.0e-16f)));
+			dgBigVector normal (FaceNormal (edge, &m_points[0].m_x, sizeof (m_points[0])));
+			normal = normal.Scale (dgFloat32 (1.0f) / (sqrt(normal % normal) + dgFloat32(1.0e-16f)));
 
 			dgEdge* ptr = edge;
 			do {
@@ -1576,9 +1567,9 @@ void dgMeshEffect::CalculateNormals (dgFloat64 angleInRadians)
 				_ASSERTE (index < GetCount());
 				dgVertexAtribute& attrib = attribArray[index];
 				faceNormal[index] = normal;
-				attrib.m_normal.m_x = normal.m_x;
-				attrib.m_normal.m_y = normal.m_y;
-				attrib.m_normal.m_z = normal.m_z;
+				attrib.m_normal_x = normal.m_x;
+				attrib.m_normal_y = normal.m_y;
+				attrib.m_normal_z = normal.m_z;
 
 				ptr->m_mark = mark;
 				ptr = ptr->m_next;
@@ -1592,38 +1583,37 @@ void dgMeshEffect::CalculateNormals (dgFloat64 angleInRadians)
 	for(iter.Begin(); iter; iter ++){
 		dgEdge* edge = &(*iter);
 		if (edge->m_incidentFace > 0) {
-			dgEdge* twin = edge->m_twin->m_prev;
+			dgEdge* const twin = edge->m_twin->m_prev;
 			if (twin->m_incidentFace > 0) {
 				int edgeIndex = dgInt32 (edge->m_userData);
 				int twinIndex = dgInt32 (twin->m_userData);
-				dgFloat32 test = faceNormal[edgeIndex] % faceNormal[twinIndex];
+				dgFloat64 test = faceNormal[edgeIndex] % faceNormal[twinIndex];
 				if (test >= smoothValue) {
 					dgVertexAtribute& attrib = attribArray[edgeIndex];
-					attrib.m_normal.m_x += faceNormal[twinIndex].m_x;
-					attrib.m_normal.m_y += faceNormal[twinIndex].m_y;
-					attrib.m_normal.m_z += faceNormal[twinIndex].m_z;
+					attrib.m_normal_x += faceNormal[twinIndex].m_x;
+					attrib.m_normal_y += faceNormal[twinIndex].m_y;
+					attrib.m_normal_z += faceNormal[twinIndex].m_z;
 				}
 			}
 		}
 	}
 
 	for(iter.Begin(); iter; iter ++){
-		dgEdge* edge = &(*iter);
+		dgEdge* const edge = &(*iter);
 		if (edge->m_incidentFace > 0) {
 			int edgeIndex = dgInt32 (edge->m_userData);
 			_ASSERTE (edgeIndex < GetCount());
 			dgVertexAtribute& attrib = attribArray[edgeIndex];
 
-			dgVector normal (attrib.m_normal.m_x, attrib.m_normal.m_y, attrib.m_normal.m_z, dgFloat32 (0.0f));
-			normal = normal.Scale (dgFloat32 (1.0f) / (dgSqrt (normal % normal) + dgFloat32(1.0e-16f)));
-			attrib.m_normal.m_x = normal.m_x;
-			attrib.m_normal.m_y = normal.m_y;
-			attrib.m_normal.m_z = normal.m_z;
+			dgBigVector normal (attrib.m_normal_x, attrib.m_normal_y, attrib.m_normal_z, dgFloat32 (0.0f));
+			normal = normal.Scale (dgFloat32 (1.0f) / (sqrt (normal % normal) + dgFloat32(1.0e-16f)));
+			attrib.m_normal_x = normal.m_x;
+			attrib.m_normal_y = normal.m_y;
+			attrib.m_normal_z = normal.m_z;
 		}
 	}
 
 	ApplyAttributeArray (&attribArray[0]);
-*/
 }
 
 

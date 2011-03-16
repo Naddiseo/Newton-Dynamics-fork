@@ -8039,9 +8039,8 @@ NewtonMesh* NewtonMeshCreateFromCollision(const NewtonCollision* const collision
 {
 	TRACE_FUNTION(__FUNCTION__);
 
-	dgCollision* shape = (dgCollision*) collision;
-	dgMeshEffect* mesh = new (shape->GetAllocator()) dgMeshEffect (shape);
-
+	dgCollision* const shape = (dgCollision*) collision;
+	dgMeshEffect* const mesh = new (shape->GetAllocator()) dgMeshEffect (shape);
 	return (NewtonMesh*) mesh;
 }
 
