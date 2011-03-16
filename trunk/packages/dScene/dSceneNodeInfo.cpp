@@ -198,9 +198,6 @@ void dSceneNodeInfo::Serialize (TiXmlElement* const rootNode) const
 
 bool dSceneNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
-	_ASSERTE (0);
-	return false;
-/*
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 
 	TiXmlElement* tcolor = (TiXmlElement*) rootNode->FirstChild ("color");
@@ -213,7 +210,6 @@ bool dSceneNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumb
 	dStringToFloatArray (transformNode->Attribute("stretchAxis"), &m_eigenScaleAxis[0][0], 16);
 
 	return true;
-*/
 }
 
 
