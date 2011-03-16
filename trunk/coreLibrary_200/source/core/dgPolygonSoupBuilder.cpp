@@ -110,15 +110,13 @@ void dgPolygonSoupDatabaseBuilder::Begin()
 void dgPolygonSoupDatabaseBuilder::AddMesh (const dgFloat32* const vertex, dgInt32 vertexCount, dgInt32 strideInBytes, dgInt32 faceCount,	
 	const dgInt32* const faceArray, const dgInt32* const indexArray, const dgInt32* const faceTagsData, const dgMatrix& worldMatrix) 
 {
-	_ASSERTE (0);
-/*
 	dgInt32 faces[256];
 	dgInt32 pool[2048];
 
 	m_vertexPoints[m_vertexCount + vertexCount].m_x = dgFloat32 (0.0f);
-	dgTriplex* const vertexPool = &m_vertexPoints[m_vertexCount];
+	dgBigVector* const vertexPool = &m_vertexPoints[m_vertexCount];
 
-	worldMatrix.TransformTriplex (vertexPool, sizeof (dgTriplex), (void*)vertex, strideInBytes, vertexCount);
+	worldMatrix.TransformTriplex (&vertexPool[0].m_x, sizeof (dgBigVector), vertex, strideInBytes, vertexCount);
 
 	dgInt32 totalIndexCount = faceCount;
 	for (dgInt32 i = 0; i < faceCount; i ++) {
@@ -154,7 +152,6 @@ void dgPolygonSoupDatabaseBuilder::AddMesh (const dgFloat32* const vertex, dgInt
 		}
 	}
 	m_vertexCount += vertexCount;
-*/
 }
 
 

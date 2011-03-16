@@ -49,29 +49,18 @@ dgMatrix::dgMatrix (
 	const dgQuaternion &rotation, 
 	const dgVector &position)
 {
-	dgFloat32 x2;
-	dgFloat32 y2;
-	dgFloat32 z2;
-	dgFloat32 w2;
-	dgFloat32 xy;
-	dgFloat32 xz;
-	dgFloat32 xw;
-	dgFloat32 yz;
-	dgFloat32 yw;
-	dgFloat32 zw;
-
-	x2 = dgFloat32 (2.0f) * rotation.m_q1 * rotation.m_q1;
-	y2 = dgFloat32 (2.0f) * rotation.m_q2 * rotation.m_q2;
-	z2 = dgFloat32 (2.0f) * rotation.m_q3 * rotation.m_q3;
-	w2 = dgFloat32 (2.0f) * rotation.m_q0 * rotation.m_q0;
+	dgFloat32 x2 = dgFloat32 (2.0f) * rotation.m_q1 * rotation.m_q1;
+	dgFloat32 y2 = dgFloat32 (2.0f) * rotation.m_q2 * rotation.m_q2;
+	dgFloat32 z2 = dgFloat32 (2.0f) * rotation.m_q3 * rotation.m_q3;
+	dgFloat32 w2 = dgFloat32 (2.0f) * rotation.m_q0 * rotation.m_q0;
 	_ASSERTE (dgAbsf (w2 + x2 + y2 + z2 - dgFloat32(2.0f)) <dgFloat32 (1.0e-3f));
 
-	xy = dgFloat32 (2.0f) * rotation.m_q1 * rotation.m_q2;
-	xz = dgFloat32 (2.0f) * rotation.m_q1 * rotation.m_q3;
-	xw = dgFloat32 (2.0f) * rotation.m_q1 * rotation.m_q0;
-	yz = dgFloat32 (2.0f) * rotation.m_q2 * rotation.m_q3;
-	yw = dgFloat32 (2.0f) * rotation.m_q2 * rotation.m_q0;
-	zw = dgFloat32 (2.0f) * rotation.m_q3 * rotation.m_q0;
+	dgFloat32 xy = dgFloat32 (2.0f) * rotation.m_q1 * rotation.m_q2;
+	dgFloat32 xz = dgFloat32 (2.0f) * rotation.m_q1 * rotation.m_q3;
+	dgFloat32 xw = dgFloat32 (2.0f) * rotation.m_q1 * rotation.m_q0;
+	dgFloat32 yz = dgFloat32 (2.0f) * rotation.m_q2 * rotation.m_q3;
+	dgFloat32 yw = dgFloat32 (2.0f) * rotation.m_q2 * rotation.m_q0;
+	dgFloat32 zw = dgFloat32 (2.0f) * rotation.m_q3 * rotation.m_q0;
 
 	m_front = dgVector (dgFloat32(1.0f) - y2 - z2, xy + zw,                   xz - yw				    , dgFloat32(0.0f));
 	m_up    = dgVector (xy - zw,                   dgFloat32(1.0f) - x2 - z2, yz + xw					, dgFloat32(0.0f));
@@ -107,46 +96,67 @@ dgMatrix dgMatrix::operator* (const dgMatrix &B) const
 
 
 
-void dgMatrix::TransformTriplex (
-	void* const dstPtr, 
-	dgInt32 dstStrideInBytes,
-	const void* const srcPtr, 
-	dgInt32 srcStrideInBytes, 
-	dgInt32 count) const
+void dgMatrix::TransformTriplex (dgFloat32* const dst, dgInt32 dstStrideInBytes, const dgFloat32* const src, dgInt32 srcStrideInBytes, dgInt32 count) const
 {
-   dgInt32 i;
-   dgFloat32 x;
-   dgFloat32 y;
-   dgFloat32 z;
-	dgFloat32* dst;
-	dgFloat32* src;
+	dgInt32 dstStride = dstStrideInBytes /sizeof (dgFloat32);
+	dgInt32 srcStride = srcStrideInBytes / sizeof (dgFloat32);
 
-	dst = (dgFloat32*) dstPtr;
-	src = (dgFloat32*) srcPtr;
+	dgInt32 dstIndex = 0;
+	dgInt32 srcIndex = 0;
+	for (dgInt32 i = 0 ; i < count; i ++ ) {
+		dgFloat32 x = src[srcIndex + 0];
+		dgFloat32 y = src[srcIndex + 1];
+		dgFloat32 z = src[srcIndex + 2];
+		srcIndex += srcStride;
+		dst[dstIndex + 0] = x * m_front.m_x + y * m_up.m_x + z * m_right.m_x + m_posit.m_x;
+		dst[dstIndex + 1] = x * m_front.m_y + y * m_up.m_y + z * m_right.m_y + m_posit.m_y;
+		dst[dstIndex + 2] = x * m_front.m_z + y * m_up.m_z + z * m_right.m_z + m_posit.m_z;
+		dstIndex += dstStride;
+	}
+}
 
-	dstStrideInBytes /= sizeof (dgFloat32);
-	srcStrideInBytes /= sizeof (dgFloat32);
+void dgMatrix::TransformTriplex (dgFloat64* const dst, dgInt32 dstStrideInBytes, const dgFloat64* const src, dgInt32 srcStrideInBytes, dgInt32 count) const
+{
+	dgInt32 dstStride = dstStrideInBytes /sizeof (dgFloat64);
+	dgInt32 srcStride = srcStrideInBytes / sizeof (dgFloat64);
 
-	for (i = 0 ; i < count; i ++ ) {
-		x = src[0];
-		y = src[1];
-		z = src[2];
-		dst[0] = x * m_front.m_x + y * m_up.m_x + z * m_right.m_x + m_posit.m_x;
-		dst[1] = x * m_front.m_y + y * m_up.m_y + z * m_right.m_y + m_posit.m_y;
-		dst[2] = x * m_front.m_z + y * m_up.m_z + z * m_right.m_z + m_posit.m_z;
-		dst += dstStrideInBytes;
-		src += srcStrideInBytes;
+	dgInt32 dstIndex = 0;
+	dgInt32 srcIndex = 0;
+	for (dgInt32 i = 0 ; i < count; i ++ ) {
+		dgFloat64 x = src[srcIndex + 0];
+		dgFloat64 y = src[srcIndex + 1];
+		dgFloat64 z = src[srcIndex + 2];
+		srcIndex += srcStride;
+		dst[dstIndex + 0] = x * m_front.m_x + y * m_up.m_x + z * m_right.m_x + m_posit.m_x;
+		dst[dstIndex + 1] = x * m_front.m_y + y * m_up.m_y + z * m_right.m_y + m_posit.m_y;
+		dst[dstIndex + 2] = x * m_front.m_z + y * m_up.m_z + z * m_right.m_z + m_posit.m_z;
+		dstIndex += dstStride;
 	}
 }
 
 
-void dgMatrix::TransformBBox (
-	const dgVector& p0local, 
-	const dgVector& p1local, 
-	dgVector& p0, 
-	dgVector& p1) const
+void dgMatrix::TransformTriplex (dgFloat64* const dst, dgInt32 dstStrideInBytes, const dgFloat32* const src, dgInt32 srcStrideInBytes, dgInt32 count) const
 {
-	dgInt32 i;
+	dgInt32 dstStride = dstStrideInBytes /sizeof (dgFloat64);
+	dgInt32 srcStride = srcStrideInBytes / sizeof (dgFloat32);
+
+	dgInt32 dstIndex = 0;
+	dgInt32 srcIndex = 0;
+	for (dgInt32 i = 0 ; i < count; i ++ ) {
+		dgFloat64 x = src[srcIndex + 0];
+		dgFloat64 y = src[srcIndex + 1];
+		dgFloat64 z = src[srcIndex + 2];
+		srcIndex += srcStride;
+		dst[dstIndex + 0] = x * m_front.m_x + y * m_up.m_x + z * m_right.m_x + m_posit.m_x;
+		dst[dstIndex + 1] = x * m_front.m_y + y * m_up.m_y + z * m_right.m_y + m_posit.m_y;
+		dst[dstIndex + 2] = x * m_front.m_z + y * m_up.m_z + z * m_right.m_z + m_posit.m_z;
+		dstIndex += dstStride;
+	}
+}
+
+
+void dgMatrix::TransformBBox (const dgVector& p0local, const dgVector& p1local, dgVector& p0, dgVector& p1) const
+{
 	dgVector box[8];
 
 	box[0][0] = p0local[0];
@@ -189,11 +199,11 @@ void dgMatrix::TransformBBox (
 	box[7][2] = p1local[2];
 	box[7][3] = dgFloat32(1.0f);
 
-	TransformTriplex (box, sizeof (dgVector), box, sizeof (dgVector), 8);
+	TransformTriplex (&box[0].m_x, sizeof (dgVector), &box[0].m_x, sizeof (dgVector), 8);
 
 	p0 = box[0];
 	p1 = box[0];
-	for (i = 1; i < 8; i ++) {
+	for (dgInt32 i = 1; i < 8; i ++) {
 		p0.m_x = GetMin (p0.m_x, box[i].m_x);
 		p0.m_y = GetMin (p0.m_y, box[i].m_y);
 		p0.m_z = GetMin (p0.m_z, box[i].m_z);
@@ -208,30 +218,30 @@ void dgMatrix::TransformBBox (
 
 dgMatrix dgMatrix::Symetric3by3Inverse () const
 {
-	dgFloat32 x11;
-	dgFloat32 x12;
-	dgFloat32 x13;
-	dgFloat32 x22;
-	dgFloat32 x23;
-	dgFloat32 x33;
-	dgFloat64 det;
+//	dgFloat32 x11;
+//	dgFloat32 x12;
+//	dgFloat32 x13;
+//	dgFloat32 x22;
+//	dgFloat32 x23;
+//	dgFloat32 x33;
+//	dgFloat64 det;
 
 	const dgMatrix& mat = *this;
-	det = mat[0][0] * mat[1][1] * mat[2][2] + 
-			mat[0][1] * mat[1][2] * mat[0][2] * dgFloat32 (2.0f) -
-			mat[0][2] * mat[1][1] * mat[0][2] -
-			mat[0][1] * mat[0][1] * mat[2][2] -
-			mat[0][0] * mat[1][2] * mat[1][2];
+	dgFloat32 det = mat[0][0] * mat[1][1] * mat[2][2] + 
+					mat[0][1] * mat[1][2] * mat[0][2] * dgFloat32 (2.0f) -
+					mat[0][2] * mat[1][1] * mat[0][2] -
+					mat[0][1] * mat[0][1] * mat[2][2] -
+					mat[0][0] * mat[1][2] * mat[1][2];
 
 	det = dgFloat32 (1.0f) / det;
 
-	x11 = (dgFloat32)(det * (mat[1][1] * mat[2][2] - mat[1][2] * mat[1][2]));  
-	x22 = (dgFloat32)(det * (mat[0][0] * mat[2][2] - mat[0][2] * mat[0][2]));  
-	x33 = (dgFloat32)(det * (mat[0][0] * mat[1][1] - mat[0][1] * mat[0][1]));  
+	dgFloat32 x11 = (dgFloat32)(det * (mat[1][1] * mat[2][2] - mat[1][2] * mat[1][2]));  
+	dgFloat32 x22 = (dgFloat32)(det * (mat[0][0] * mat[2][2] - mat[0][2] * mat[0][2]));  
+	dgFloat32 x33 = (dgFloat32)(det * (mat[0][0] * mat[1][1] - mat[0][1] * mat[0][1]));  
 
-	x12 = (dgFloat32)(det * (mat[1][2] * mat[2][0] - mat[1][0] * mat[2][2]));  
-	x13 = (dgFloat32)(det * (mat[1][0] * mat[2][1] - mat[1][1] * mat[2][0]));  
-	x23 = (dgFloat32)(det * (mat[0][1] * mat[2][0] - mat[0][0] * mat[2][1]));  
+	dgFloat32 x12 = (dgFloat32)(det * (mat[1][2] * mat[2][0] - mat[1][0] * mat[2][2]));  
+	dgFloat32 x13 = (dgFloat32)(det * (mat[1][0] * mat[2][1] - mat[1][1] * mat[2][0]));  
+	dgFloat32 x23 = (dgFloat32)(det * (mat[0][1] * mat[2][0] - mat[0][0] * mat[2][1]));  
 
 
 #ifdef _DEBUG
@@ -253,19 +263,10 @@ dgMatrix dgMatrix::Symetric3by3Inverse () const
 }
 
 
-static inline void ROT(
-	dgMatrix &a,
-	dgInt32 i,
-	dgInt32 j,
-	dgInt32 k,
-	dgInt32 l, 
-	dgFloat32 s,
-	dgFloat32 tau) 
+static inline void ROT(dgMatrix &a, dgInt32 i, dgInt32 j, dgInt32 k, dgInt32 l, dgFloat32 s, dgFloat32 tau) 
 {
-	dgFloat32 g;
-	dgFloat32 h;
-	g = a[i][j]; 
-	h = a[k][l]; 
+	dgFloat32 g = a[i][j]; 
+	dgFloat32 h = a[k][l]; 
 	a[i][j] = g - s * (h + g * tau); 
 	a[k][l] = h + s * (g - h * tau);
 }
@@ -274,17 +275,17 @@ static inline void ROT(
 // Jacobian method for computing the eigenvectors of a symmetric matrix
 void dgMatrix::EigenVectors (dgVector &eigenValues)
 {
-	dgInt32 i;
-	dgInt32 nrot;
-	dgFloat32 t;
-	dgFloat32 s;
-	dgFloat32 h;
-	dgFloat32 g;
-	dgFloat32 c;
-	dgFloat32 sm;
-	dgFloat32 tau;
-	dgFloat32 theta;
-	dgFloat32 thresh;
+//	dgInt32 i;
+//	dgInt32 nrot;
+//	dgFloat32 t;
+//	dgFloat32 s;
+//	dgFloat32 h;
+//	dgFloat32 g;
+//	dgFloat32 c;
+//	dgFloat32 sm;
+//	dgFloat32 tau;
+//	dgFloat32 theta;
+//	dgFloat32 thresh;
 	dgFloat32 b[3];
 	dgFloat32 z[3];
 	dgFloat32 d[3];
@@ -304,9 +305,9 @@ void dgMatrix::EigenVectors (dgVector &eigenValues)
 	z[1] = dgFloat32 (0.0f);
 	z[2] = dgFloat32 (0.0f);
 
-	nrot = 0;
-	for (i = 0; i < 50; i++) {
-		sm = dgAbsf(mat[0][1]) + dgAbsf(mat[0][2]) + dgAbsf(mat[1][2]);
+	dgInt32 nrot = 0;
+	for (dgInt32 i = 0; i < 50; i++) {
+		dgFloat32 sm = dgAbsf(mat[0][1]) + dgAbsf(mat[0][2]) + dgAbsf(mat[1][2]);
 
 		if (sm < dgEPSILON * dgFloat32(1.0e-5f)) {
 			_ASSERTE (dgAbsf((eigenVectors.m_front % eigenVectors.m_front) - dgFloat32(1.0f)) < dgEPSILON);
@@ -324,31 +325,31 @@ void dgMatrix::EigenVectors (dgVector &eigenValues)
 			return;
 		}
 
+		dgFloat32 thresh = dgFloat32 (0.0f);
 		if (i < 3) {
 			thresh = (dgFloat32)(0.2f / 9.0f) * sm;
-		}	else {
-			thresh = dgFloat32 (0.0f);
 		}
 
 
 		// First row
-		g = dgFloat32 (100.0f) * dgAbsf(mat[0][1]);
+		dgFloat32 g = dgFloat32 (100.0f) * dgAbsf(mat[0][1]);
 		if ((i > 3) && (dgAbsf(d[0]) + g == dgAbsf(d[0])) && (dgAbsf(d[1]) + g == dgAbsf(d[1]))) {
 			mat[0][1] = dgFloat32 (0.0f);
 		} else if (dgAbsf(mat[0][1]) > thresh) {
-			h = d[1] - d[0];
+			dgFloat32 h = d[1] - d[0];
+			dgFloat32 t;
 			if (dgAbsf(h) + g == dgAbsf(h)) {
 				t = mat[0][1] / h;
 			} else {
-				theta = dgFloat32 (0.5f) * h / mat[0][1];
+				dgFloat32 theta = dgFloat32 (0.5f) * h / mat[0][1];
 				t = dgFloat32(1.0f) / (dgAbsf(theta) + dgSqrt(dgFloat32(1.0f) + theta * theta));
 				if (theta < dgFloat32 (0.0f)) {
 					t = -t;
 				}
 			}
-			c = dgFloat32(1.0f) / dgSqrt (dgFloat32 (1.0f) + t * t); 
-			s = t * c; 
-			tau = s / (dgFloat32(1.0f) + c); 
+			dgFloat32 c = dgFloat32(1.0f) / dgSqrt (dgFloat32 (1.0f) + t * t); 
+			dgFloat32 s = t * c; 
+			dgFloat32 tau = s / (dgFloat32(1.0f) + c); 
 			h = t * mat[0][1];
 			z[0] -= h; 
 			z[1] += h; 
@@ -369,19 +370,20 @@ void dgMatrix::EigenVectors (dgVector &eigenValues)
 		if ((i > 3) && (dgAbsf(d[0]) + g == dgAbsf(d[0])) && (dgAbsf(d[2]) + g == dgAbsf(d[2]))) {
 			mat[0][2] = dgFloat32 (0.0f);
 		} else if (dgAbsf(mat[0][2]) > thresh) {
-			h = d[2] - d[0];
+			dgFloat32 h = d[2] - d[0];
+			dgFloat32 t;
 			if (dgAbsf(h) + g == dgAbsf(h)) {
 				t = (mat[0][2]) / h;
 			}	else {
-				theta = dgFloat32 (0.5f) * h / mat[0][2];
+				dgFloat32 theta = dgFloat32 (0.5f) * h / mat[0][2];
 				t = dgFloat32(1.0f) / (dgAbsf(theta) + dgSqrt(dgFloat32(1.0f) + theta * theta));
 				if (theta < dgFloat32 (0.0f)) {
 					t = -t;
 				}
 			}
-			c = dgFloat32(1.0f) / dgSqrt(dgFloat32 (1.0f) + t * t); 
-			s = t * c; 
-			tau = s / (dgFloat32(1.0f) + c); 
+			dgFloat32 c = dgFloat32(1.0f) / dgSqrt(dgFloat32 (1.0f) + t * t); 
+			dgFloat32 s = t * c; 
+			dgFloat32 tau = s / (dgFloat32(1.0f) + c); 
 			h = t * mat[0][2];
 			z[0] -= h; 
 			z[2] += h; 
@@ -399,19 +401,20 @@ void dgMatrix::EigenVectors (dgVector &eigenValues)
 		if ((i > 3) && (dgAbsf(d[1]) + g == dgAbsf(d[1])) && (dgAbsf(d[2]) + g == dgAbsf(d[2]))) {
 			mat[1][2] = dgFloat32 (0.0f);
 		} else if (dgAbsf(mat[1][2]) > thresh) {
-			h = d[2] - d[1];
+			dgFloat32 h = d[2] - d[1];
+			dgFloat32 t;
 			if (dgAbsf(h) + g == dgAbsf(h)) {
 				t = mat[1][2] / h;
-			}	else {
-				theta = dgFloat32 (0.5f) * h / mat[1][2];
+			} else {
+				dgFloat32 theta = dgFloat32 (0.5f) * h / mat[1][2];
 				t = dgFloat32(1.0f) / (dgAbsf(theta) + dgSqrt(dgFloat32(1.0f) + theta * theta));
 				if (theta < dgFloat32 (0.0f)) {
 					t = -t;
 				}
 			}
-			c = dgFloat32(1.0f) / dgSqrt(dgFloat32 (1.0f) + t*t); 
-			s = t * c; 
-			tau = s / (dgFloat32(1.0f) + c); 
+			dgFloat32 c = dgFloat32(1.0f) / dgSqrt(dgFloat32 (1.0f) + t*t); 
+			dgFloat32 s = t * c; 
+			dgFloat32 tau = s / (dgFloat32(1.0f) + c); 
 
 			h = t * mat[1][2];
 			z[1] -= h; 
@@ -442,16 +445,16 @@ void dgMatrix::EigenVectors (dgVector &eigenValues)
 
 dgVector dgMatrix::CalcPitchYawRoll () const
 {
-	dgFloat32 yaw;
-	dgFloat32 roll;
-	dgFloat32 pitch;
+//	dgFloat32 yaw;
+//	dgFloat32 roll;
+//	dgFloat32 pitch;
 	const dgFloat32 minSin = dgFloat32(0.99995f);
 
 	const dgMatrix& matrix = *this;
 
-	roll = dgFloat32(0.0f);
-	pitch  = dgFloat32(0.0f);
-	yaw = dgAsin (-ClampValue (matrix[0][2], dgFloat32(-0.999999f), dgFloat32(0.999999f)));
+	dgFloat32 roll = dgFloat32(0.0f);
+	dgFloat32 pitch  = dgFloat32(0.0f);
+	dgFloat32 yaw = dgAsin (-ClampValue (matrix[0][2], dgFloat32(-0.999999f), dgFloat32(0.999999f)));
 
 	_ASSERTE (dgCheckFloat (yaw));
 	if (matrix[0][2] < minSin) {

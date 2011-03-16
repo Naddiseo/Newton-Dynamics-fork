@@ -216,7 +216,7 @@ void dgCollisionChamferCylinder::DebugCollision (const dgMatrix& matrixPtr, OnDe
 
 //	const dgMatrix &matrix = myBody.GetCollisionMatrix();
 	dgMatrix matrix (GetOffsetMatrix() * matrixPtr);
-	matrix.TransformTriplex (pool, sizeof (dgTriplex), pool, sizeof (dgTriplex), 24 * (12 + 1));
+	matrix.TransformTriplex (&pool[0].m_x, sizeof (dgTriplex), &pool[0].m_x, sizeof (dgTriplex), 24 * (12 + 1));
 
 	dgTriplex face[32];
 
