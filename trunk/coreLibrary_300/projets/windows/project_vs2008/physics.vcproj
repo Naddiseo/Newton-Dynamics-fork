@@ -1050,6 +1050,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\source\physics\dgMeshEffectSolidTree.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\source\physics\dgMeshEffectSolidTree.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\source\physics\dgMinkowskiConv.cpp"
 				>
 			</File>

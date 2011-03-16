@@ -161,7 +161,6 @@ void dgBodyMasterList::AttachConstraint(dgConstraint* const constraint,	dgBody* 
 	constraint->m_link0 = body0->m_masterNode->GetInfo().AddJoint (constraint, body1);
 	constraint->m_link1 = body1->m_masterNode->GetInfo().AddJoint (constraint, body0);
 
-
 // note this is in observation (to prevent bodies from not going to sleep  inside triggers		
 //	body0->m_equilibrium = body0->m_invMass.m_w ? false : true;
 //	body1->m_equilibrium = body1->m_invMass.m_w ? false : true;
@@ -174,7 +173,6 @@ void dgBodyMasterList::AttachConstraint(dgConstraint* const constraint,	dgBody* 
 
 void dgBodyMasterList::RemoveConstraint (dgConstraint* const constraint)
 {
-
 	m_constraintCount = m_constraintCount - 1;
 	_ASSERTE (((dgInt32)m_constraintCount) >= 0);
 
@@ -201,11 +199,6 @@ void dgBodyMasterList::SortMasterList()
 	GetFirst()->GetInfo().SortList();
 
 	for (dgListNode* node = GetFirst()->GetNext(); node; ) { 
-//		dgInt32 key1;
-//		dgBody* body1;
-//		dgListNode* prev;
-//		dgListNode* entry;
-
 		node->GetInfo().SortList();
 		dgBody* const body1 = node->GetInfo().GetBody();
 		

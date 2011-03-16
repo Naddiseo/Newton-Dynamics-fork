@@ -87,7 +87,7 @@ void dStringToFloatArray (const char* const string, dFloat* const array, int max
 		array[i] = val;
 	}
 }
-
+/*
 void dStringToFloat64Array (const char* const string, dFloat64* const array, int maxCount)
 {
 	const char* ptr = string;
@@ -107,7 +107,7 @@ void dStringToFloat64Array (const char* const string, dFloat64* const array, int
 		array[i] = val;
 	}
 }
-
+*/
 
 static int SortVertexArray (const void *A, const void *B) 
 {

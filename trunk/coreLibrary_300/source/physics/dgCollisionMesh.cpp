@@ -776,18 +776,6 @@ void dgCollisionMesh::dgCollisionConvexPolygon::BeamClipping (const dgCollisionC
 
 dgVector dgCollisionMesh::dgCollisionConvexPolygon::ClosestDistanceToTriangle (const dgVector& point, const dgVector& p0, const dgVector& p1, const dgVector& p2) const
 {
-//	dgFloat32 t;
-//	dgFloat32 s;
-//	dgFloat32 vc;
-//	dgFloat32 vb;
-//	dgFloat32 va;
-//	dgFloat32 den;
-//	dgFloat32 alpha1;
-//	dgFloat32 alpha2;
-//	dgFloat32 alpha3;
-//	dgFloat32 alpha4;
-//	dgFloat32 alpha5;
-//	dgFloat32 alpha6;
 
 	//	const dgVector p (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 	const dgVector p10 (p1 - p0);
@@ -1129,6 +1117,32 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersectionSim
 			count --;
 		}
 	}
+
+	#ifdef _DEBUG
+	if (count > 1) {
+		dgInt32 j;
+		j = count - 1;
+		for (dgInt32 i = 0; i < count; i ++) {
+			dgVector error (contactsOut[i] - contactsOut[j]);
+			_ASSERTE ((error % error) > dgFloat32 (1.0e-20f));
+			j = i;
+		}
+
+		if (count >= 3) {
+			dgVector n (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+			dgVector e0 (contactsOut[1] - contactsOut[0]);
+			for (dgInt32 i = 2; i < count; i ++) {
+				dgVector e1 (contactsOut[i] - contactsOut[0]);
+				n += e0 * e1;
+				e0 = e1;
+			} 
+			n = n.Scale (dgFloat32 (1.0f) / dgSqrt(n % n));
+			dgFloat32 val = n % normal;
+			_ASSERTE (val > dgFloat32 (0.9f));
+		}
+	}
+	#endif
+
 	return count;
 }
 

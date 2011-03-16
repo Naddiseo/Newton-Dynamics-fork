@@ -546,10 +546,7 @@ dgFloat32 dgCollisionConvex::GetBoxMaxRadius () const
 } 
 
 
-dgInt32 dgCollisionConvex::RayCastClosestFace (
-	dgVector* tetrahedrum, 
-	const dgVector& origin,
-	dgFloat32& pointDist) const
+dgInt32 dgCollisionConvex::RayCastClosestFace (dgVector* tetrahedrum, const dgVector& origin, dgFloat32& pointDist) const
 {
 	dgInt32 i;
 	dgInt32 j;
@@ -896,12 +893,11 @@ dgVector dgCollisionConvex::SupportVertex (const dgVector& direction) const
 			index = i + 4;
 		}
 	}
-	dgConvexSimplexEdge* edge = m_supportVertexStarCuadrant[index];
 
+	dgConvexSimplexEdge* edge = m_supportVertexStarCuadrant[index];
 	index = edge->m_vertex;
 	side0 = m_vertex[index] % dir;
 	dgConvexSimplexEdge* ptr = edge;
-
 	dgInt32 maxCount = 128;
 	do {
 		dgFloat32 side1 = m_vertex[ptr->m_twin->m_vertex] % dir;
@@ -979,10 +975,6 @@ dgVector dgCollisionConvex::SupportVertexSimd (const dgVector& direction) const
 
 bool dgCollisionConvex::SanityCheck(dgInt32 count, const dgVector& normal, dgVector* const contactsOut) const
 {
-//	dgInt32 i;
-//	dgInt32 j;
-//	dgFloat32 error;
-
 	if (count > 1) {
 		dgInt32 j = count - 1;
 		for (dgInt32 i = 0; i < count; i ++) {
@@ -1031,16 +1023,8 @@ bool dgCollisionConvex::SanityCheck(dgInt32 count, const dgVector& normal, dgVec
 
 
 
-dgInt32 dgCollisionConvex::SimplifyClipPolygon (
-	dgInt32 count, 
-	const dgVector& normal, 
-	dgVector* const polygon) const
+dgInt32 dgCollisionConvex::SimplifyClipPolygon (dgInt32 count, const dgVector& normal, dgVector* const polygon) const
 {
-//	dgInt32 i0;
-//	dgInt32 i1;
-//	dgInt32 i2;
-//	dgInt32 removeCount;
-//	dgFloat32 area;
 	dgInt8 mark[DG_MAX_VERTEX_CLIP_FACE * 8];
 	dgInt8 buffer[8 * DG_MAX_VERTEX_CLIP_FACE * (sizeof (dgInt32) + sizeof (dgFloat32))];
 
@@ -1096,12 +1080,7 @@ dgInt32 dgCollisionConvex::SimplifyClipPolygon (
 
 dgInt32 dgCollisionConvex::RectifyConvexSlice (dgInt32 count, const dgVector& normal, dgVector* const contactsOut) const
 {
-//	dgInt32 restart;
-//	dgInt32 tmpCount;
-//	DG_CONVEX_FIXUP_FACE *ptr;
-//	DG_CONVEX_FIXUP_FACE *poly;
 	DG_CONVEX_FIXUP_FACE linkFace[DG_CLIP_MAX_POINT_COUNT * 2];
-
 
 	_ASSERTE (count > 2);
 
@@ -1329,7 +1308,7 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersectionSimd (const dgVector& norma
 			ptr = ptr->m_twin->m_next;
 		} while (ptr != edge);
 
-
+#ifdef _DEBUG
 		if (!firstEdge) {
 			// we may have a local minimal in the convex hull do to a big flat face
 			for (dgInt32 i = 0; i < m_edgeCount; i ++) {
@@ -1363,17 +1342,11 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersectionSimd (const dgVector& norma
 				}
 			}
 		}
+#endif
 	}
 
 	dgInt32 count = 0;
-
 	if (firstEdge) {
-		//		hullFixup = 0;
-//		_ASSERTE (side0 >= dgFloat32 (0.0f));
-//		_ASSERTE ((side1 = plane.Evalue (m_vertex[firstEdge->m_vertex])) >= dgFloat32 (0.0f));
-//		_ASSERTE ((side1 = plane.Evalue (m_vertex[firstEdge->m_twin->m_vertex])) < dgFloat32 (0.0f));
-//		_ASSERTE (dgAbsf (side0 - plane.Evalue (m_vertex[firstEdge->m_vertex])) < dgFloat32 (1.0e-5f));
-
 		dgInt32 maxCount = 0;
 		dgConvexSimplexEdge* ptr = firstEdge;
 		do {
@@ -1495,16 +1468,6 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersectionSimd (const dgVector& norma
 
 dgInt32 dgCollisionConvex::CalculatePlaneIntersection (const dgVector& normal, const dgVector& origin, dgVector* const contactsOut) const
 {
-//	dgInt32 count;
-//	dgInt32 maxCount;
-//	dgFloat32 t;
-//	dgFloat32 side0;
-//	dgFloat32 side1;
-//	dgConvexSimplexEdge *ptr;
-//	dgConvexSimplexEdge *ptr1;
-//	dgConvexSimplexEdge *edge;
-//	dgConvexSimplexEdge *firstEdge;
-
 	dgConvexSimplexEdge* edge = &m_simplex[0];
 	dgPlane plane (normal, - (normal % origin));
 
@@ -1529,6 +1492,7 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersection (const dgVector& normal, c
 			ptr = ptr->m_twin->m_next;
 		} while (ptr != edge);
 
+#ifdef _DEBUG
 		if (!firstEdge) {
 			// we may have a local minimal in the convex hull do to a big flat face
 			for (dgInt32 i = 0; i < m_edgeCount; i ++) {
@@ -1536,12 +1500,13 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersection (const dgVector& normal, c
 				side0 = plane.Evalue (m_vertex[ptr->m_vertex]);
 				side1 = plane.Evalue (m_vertex[ptr->m_twin->m_vertex]);
 				if ((side1 < dgFloat32 (0.0f)) && (side0 > dgFloat32 (0.0f))){
+					_ASSERTE (0);
 					firstEdge = ptr;
 					break;
 				}
 			}
 		}
-
+#endif
 	} else if (side0 < dgFloat32 (0.0f)) {
 		dgConvexSimplexEdge* ptr = edge;
 		do {
@@ -1560,7 +1525,7 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersection (const dgVector& normal, c
 			}
 			ptr = ptr->m_twin->m_next;
 		} while (ptr != edge);
-
+#ifdef _DEBUG
 		if (!firstEdge) {
 			// we may have a local minimal in the convex hull do to a big flat face
 			for (dgInt32 i = 0; i < m_edgeCount; i ++) {
@@ -1568,11 +1533,13 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersection (const dgVector& normal, c
 				side0 = plane.Evalue (m_vertex[ptr->m_vertex]);
 				dgFloat32 side1 = plane.Evalue (m_vertex[ptr->m_twin->m_vertex]);
 				if ((side1 < dgFloat32 (0.0f)) && (side0 > dgFloat32 (0.0f))){
+					_ASSERTE (0);
 					firstEdge = ptr;
 					break;
 				}
 			}
 		}
+#endif
 	}
 
 	dgInt32 count = 0;
@@ -1654,15 +1621,8 @@ dgInt32 dgCollisionConvex::CalculatePlaneIntersection (const dgVector& normal, c
 }
 
 
-dgFloat32 dgCollisionConvex::RayCast (
-	const dgVector& localP0, 
-	const dgVector& localP1, 
-	dgContactPoint& contactOut, 
-	OnRayPrecastAction preFilter, 
-	const dgBody* const body,	
-	void* const userData) const
+dgFloat32 dgCollisionConvex::RayCast (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body,	void* const userData) const
 {
-	dgFloat32 interset;
 	#define DG_LEN  (0.01f)
 	#define DG_AREA (DG_LEN * DG_LEN)
 	#define DG_VOL  (DG_AREA * DG_LEN)
@@ -1671,7 +1631,7 @@ dgFloat32 dgCollisionConvex::RayCast (
 		return dgFloat32 (1.2f);
 	}
 
-	interset = dgFloat32 (1.2f);
+	dgFloat32 interset = dgFloat32 (1.2f);
 	if (RayHitBox (localP0, localP1)) {
 		if ((m_collsionId != m_convexHullCollision) || (((dgCollisionConvexHull*) this)->m_faceCount > 48)) {
 			dgInt32 i;
@@ -1900,13 +1860,7 @@ dgFloat32 dgCollisionConvex::RayCast (
 }
 
 
-dgFloat32 dgCollisionConvex::RayCastSimd (
-	const dgVector& localP0, 
-	const dgVector& localP1, 
-	dgContactPoint& contactOut, 
-	OnRayPrecastAction preFilter, 
-	const dgBody* const body,	
-	void* const userData) const
+dgFloat32 dgCollisionConvex::RayCastSimd (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body,	void* const userData) const
 {
 	return RayCast (localP0, localP1, contactOut, preFilter, body, userData);
 }

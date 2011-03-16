@@ -37,14 +37,7 @@ struct dgPlaneLocation: public dgPlane
 };
 
 
-dgCollisionConvexHull::dgCollisionConvexHull(
-	dgMemoryAllocator* allocator, 
-	dgUnsigned32 signature, 
-	dgInt32 count, 
-	dgInt32 strideInBytes, 
-	dgFloat32 tolerance,
-	const dgFloat32* vertexArray, 
-	const dgMatrix& matrix)
+dgCollisionConvexHull::dgCollisionConvexHull(dgMemoryAllocator* const allocator, dgUnsigned32 signature, dgInt32 count, dgInt32 strideInBytes, dgFloat32 tolerance, const dgFloat32* vertexArray, const dgMatrix& matrix)
 	:dgCollisionConvex(allocator, signature, matrix, m_convexHullCollision)
 {
 	m_faceCount = 0;
@@ -62,22 +55,16 @@ dgCollisionConvexHull::dgCollisionConvexHull(
 	dgPlaneLocation planesArray[1024];
 	const dgConvexSimplexEdge* const* faceArray = m_faceArray;
 	for (dgInt32 i = 0; i < m_faceCount; i ++) {
-		dgInt32 i0;
-		dgInt32 i1;
-		dgInt32 i2;
-		dgInt32 add;
-
-
 		const dgConvexSimplexEdge* const face = faceArray[i];
 
-		i0 = face->m_prev->m_vertex;
-		i1 = face->m_vertex;
-		i2 = face->m_next->m_vertex;
+		dgInt32 i0 = face->m_prev->m_vertex;
+		dgInt32 i1 = face->m_vertex;
+		dgInt32 i2 = face->m_next->m_vertex;
 		const dgVector& p0 = m_vertex[i0];
 
 		dgVector normal ((m_vertex[i1] - p0) * (m_vertex[i2] - p0));
 		normal = normal.Scale (dgFloat32 (1.0f) / dgSqrt (normal % normal));
-		add = 1;
+		dgInt32 add = 1;
 		for (dgInt32 j = 0; j < 3; j ++) {
 			if (dgAbsf (normal[j]) > dgFloat32 (0.98f)) {
 				add = 0;

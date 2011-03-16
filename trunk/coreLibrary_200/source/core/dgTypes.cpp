@@ -27,7 +27,7 @@
 #include "dgStack.h"
 
 
-void dgApi GetMinMax (dgVector &minOut, dgVector &maxOut, const dgFloat32* const vertexArray, dgInt32 vCount, dgInt32 strideInBytes)
+void GetMinMax (dgVector &minOut, dgVector &maxOut, const dgFloat32* const vertexArray, dgInt32 vCount, dgInt32 strideInBytes)
 {
 	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat32));
 	const dgFloat32* vArray = vertexArray + stride;

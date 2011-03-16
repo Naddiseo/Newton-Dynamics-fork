@@ -191,13 +191,9 @@ dgVector dgCollisionBox::SupportVertex (const dgVector& dir) const
 
 void dgCollisionBox::CalcAABB (const dgMatrix &matrix, dgVector &p0, dgVector &p1) const
 {
-	dgFloat32 x;
-	dgFloat32 y;
-	dgFloat32 z;
-
-	x = m_size[0].m_x * dgAbsf(matrix[0][0]) + m_size[0].m_y * dgAbsf(matrix[1][0]) + m_size[0].m_z * dgAbsf(matrix[2][0]) + DG_MAX_COLLISION_PADDING;  
-	y = m_size[0].m_x * dgAbsf(matrix[0][1]) + m_size[0].m_y * dgAbsf(matrix[1][1]) + m_size[0].m_z * dgAbsf(matrix[2][1]) + DG_MAX_COLLISION_PADDING;  
-	z = m_size[0].m_x * dgAbsf(matrix[0][2]) + m_size[0].m_y * dgAbsf(matrix[1][2]) + m_size[0].m_z * dgAbsf(matrix[2][2]) + DG_MAX_COLLISION_PADDING;  
+	dgFloat32 x = m_size[0].m_x * dgAbsf(matrix[0][0]) + m_size[0].m_y * dgAbsf(matrix[1][0]) + m_size[0].m_z * dgAbsf(matrix[2][0]) + DG_MAX_COLLISION_PADDING;  
+	dgFloat32 y = m_size[0].m_x * dgAbsf(matrix[0][1]) + m_size[0].m_y * dgAbsf(matrix[1][1]) + m_size[0].m_z * dgAbsf(matrix[2][1]) + DG_MAX_COLLISION_PADDING;  
+	dgFloat32 z = m_size[0].m_x * dgAbsf(matrix[0][2]) + m_size[0].m_y * dgAbsf(matrix[1][2]) + m_size[0].m_z * dgAbsf(matrix[2][2]) + DG_MAX_COLLISION_PADDING;  
 
 	p0.m_x = matrix[3][0] - x;
 	p1.m_x = matrix[3][0] + x;
@@ -249,15 +245,8 @@ void dgCollisionBox::CalcAABBSimd (const dgMatrix &matrix, dgVector &p0, dgVecto
 }
 
 
-dgFloat32 dgCollisionBox::RayCast (
-	const dgVector& localP0, 
-	const dgVector& localP1, 
-	dgContactPoint& contactOut, 
-	OnRayPrecastAction preFilter,
-	const dgBody* const body,	
-	void* const userData) const
+dgFloat32 dgCollisionBox::RayCast (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
 {
-
 	if (PREFILTER_RAYCAST (preFilter, body, this, userData)) {
 		return dgFloat32 (1.2f);
 	}
@@ -379,26 +368,18 @@ dgFloat32 dgCollisionBox::RayCast (
 #endif
 }
 
-dgFloat32 dgCollisionBox::RayCastSimd (
-	const dgVector& localP0, 
-	const dgVector& localP1, 
-	dgContactPoint& contactOut, 
-	OnRayPrecastAction preFilter,
-	const dgBody* const body,	
-	void* const userData) const
+dgFloat32 dgCollisionBox::RayCastSimd (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
 {
 	return RayCast (localP0, localP1, contactOut, preFilter, body, userData);
 }
 
 
-
 dgFloat32 dgCollisionBox::CalculateMassProperties (dgVector& inertia, dgVector& crossInertia, dgVector& centerOfMass) const
 {
-	dgFloat32 volume;
 //	volume = dgCollisionConvex::CalculateMassProperties (inertia, crossInertia, centerOfMass);
 
 	centerOfMass = GetOffsetMatrix().m_posit;
-	volume = dgFloat32 (8.0f) * m_size[0].m_x * m_size[0].m_y * m_size[0].m_z; 
+	dgFloat32 volume = dgFloat32 (8.0f) * m_size[0].m_x * m_size[0].m_y * m_size[0].m_z; 
 
 	dgVector II (dgFloat32 (1.0f / 3.0f) * volume * (m_size[0].m_y * m_size[0].m_y + m_size[0].m_z * m_size[0].m_z),
 				 dgFloat32 (1.0f / 3.0f) * volume * (m_size[0].m_x * m_size[0].m_x + m_size[0].m_z * m_size[0].m_z),
@@ -443,25 +424,13 @@ dgFloat32 dgCollisionBox::GetBreakImpulse() const
 
 dgInt32 dgCollisionBox::CalculatePlaneIntersection (const dgVector& normal, const dgVector& point, dgVector* const contactsOut) const
 {
-	dgInt32 i;
-	dgInt32 count;
-	dgInt32 index0;
-	dgFloat32 t;
-	dgFloat32 side0;
-	dgFloat32 side1;
-	dgConvexSimplexEdge *ptr;
-	dgConvexSimplexEdge *ptr1;
-	dgConvexSimplexEdge *edge;
-	dgConvexSimplexEdge *firstEdge;
-	
 	dgFloat32 test[8];
-
 	dgPlane plane (normal, - (normal % point));
 
-	edge = NULL;
-	side1 = dgFloat32 (1.0e20f);
-	for (i = 0; i < 8; i ++) {
-		side0 = plane.Evalue (m_vertex[i]);
+	dgConvexSimplexEdge* edge = NULL;
+	dgFloat32 side1 = dgFloat32 (1.0e20f);
+	for (dgInt32 i = 0; i < 8; i ++) {
+		dgFloat32 side0 = plane.Evalue (m_vertex[i]);
 		test[i] = side0;
 		if (side0 > dgFloat32 (0.0f)) {
 			if (side0 < side1) {
@@ -471,16 +440,16 @@ dgInt32 dgCollisionBox::CalculatePlaneIntersection (const dgVector& normal, cons
 		}
 	}
 
-	count = 0;
+	dgInt32 count = 0;
 	if (edge) {
 		_ASSERTE (test[edge->m_vertex] > dgFloat32 (0.0f));
 
-		ptr = edge;
-		firstEdge = NULL;
-		side0 = test[edge->m_vertex];
+		dgConvexSimplexEdge* ptr = edge;
+		dgConvexSimplexEdge* firstEdge = NULL;
+		dgFloat32 side0 = test[edge->m_vertex];
 		do {
 			_ASSERTE (m_vertex[ptr->m_twin->m_vertex].m_w == dgFloat32 (1.0f));
-			side1 = test[ptr->m_twin->m_vertex];
+			dgFloat32 side1 = test[ptr->m_twin->m_vertex];
 			if (side1 < side0) {
 				if (side1 < dgFloat32 (0.0f)) {
 					firstEdge = ptr;
@@ -500,7 +469,7 @@ dgInt32 dgCollisionBox::CalculatePlaneIntersection (const dgVector& normal, cons
 			do {
 				dgVector dp (m_vertex[ptr->m_twin->m_vertex] - m_vertex[ptr->m_vertex]);
 
-				t = plane % dp;
+				dgFloat32 t = plane % dp;
 				if (t >= dgFloat32 (-1.e-24f)) {
 					t = dgFloat32 (0.0f);
 				} else {
@@ -518,8 +487,9 @@ dgInt32 dgCollisionBox::CalculatePlaneIntersection (const dgVector& normal, cons
 				contactsOut[count] = m_vertex[ptr->m_vertex] - dp.Scale (t);
 				count ++;
 
-				for (ptr1 = ptr->m_next; ptr1 != ptr; ptr1 = ptr1->m_next) {
-					index0 = ptr1->m_twin->m_vertex;
+				dgConvexSimplexEdge* ptr1 = ptr1 = ptr->m_next;
+				for (; ptr1 != ptr; ptr1 = ptr1->m_next) {
+					dgInt32 index0 = ptr1->m_twin->m_vertex;
 					if (test[index0] >= dgFloat32 (0.0f)) {
 						_ASSERTE (test[ptr1->m_vertex] <= dgFloat32 (0.0f));
 						break;

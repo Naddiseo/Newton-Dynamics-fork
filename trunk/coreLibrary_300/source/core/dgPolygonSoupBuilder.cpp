@@ -47,6 +47,9 @@ class dgPolySoupFilterAllocator: public dgPolyhedra
 
 	dgInt32 AddFilterFace (dgUnsigned32 count, dgInt32* const pool)
 	{
+		_ASSERTE (0);
+		return 1;
+/*
 		bool reduction;
 
 		BeginFace();
@@ -74,6 +77,7 @@ class dgPolySoupFilterAllocator: public dgPolyhedra
 
 		_ASSERTE (reduction);
 		return reduction ? dgInt32 (count) : 0;
+*/
 	}
 };
 
@@ -256,6 +260,8 @@ void dgPolygonSoupDatabaseBuilder::OptimizeByGroupID()
 
 void dgPolygonSoupDatabaseBuilder::OptimizeByGroupID (dgPolygonSoupDatabaseBuilder& source, dgInt32 faceNumber, dgInt32 faceIndexNumber, dgPolygonSoupDatabaseBuilder& leftOver) 
 {
+	_ASSERTE (0);
+/*
 	dgInt32 indexPool[1024 * 1];
 	dgInt32 atributeData[1024 * 1];
 	dgTriplex vertexPool[1024 * 1];
@@ -360,6 +366,7 @@ void dgPolygonSoupDatabaseBuilder::OptimizeByGroupID (dgPolygonSoupDatabaseBuild
 			AddMesh (&vertexPool[0].m_x, indexCount, sizeof (dgTriplex), 1, &indexCount, indexPool, atributeData, dgGetIdentityMatrix());
 		}
 	}
+*/
 }
 
 
@@ -608,6 +615,9 @@ void dgPolygonSoupDatabaseBuilder::Optimize(bool optimize)
 
 dgInt32 dgPolygonSoupDatabaseBuilder::FilterFace (dgInt32 count, dgInt32 pool[])
 {
+_ASSERTE (0);
+return 0;
+/*
 	dgPolySoupFilterAllocator polyhedra(m_allocator);
 
 	count = polyhedra.AddFilterFace (dgUnsigned32 (count), pool);
@@ -759,12 +769,16 @@ dgInt32 dgPolygonSoupDatabaseBuilder::FilterFace (dgInt32 count, dgInt32 pool[])
 #endif
 
 	return (count >= 3) ? count : 0;
-
+*/
 }
 
 
 dgInt32 dgPolygonSoupDatabaseBuilder::AddConvexFace (dgInt32 count, dgInt32* const  pool, dgInt32* const facesArray)
 {
+_ASSERTE (0);
+return 0;
+/*
+
 	dgPolySoupFilterAllocator polyhedra(m_allocator);
 
 	count = polyhedra.AddFilterFace(dgUnsigned32 (count), pool);
@@ -937,4 +951,5 @@ dgInt32 dgPolygonSoupDatabaseBuilder::AddConvexFace (dgInt32 count, dgInt32* con
 	}
 
 	return facesCount;
+*/
 }

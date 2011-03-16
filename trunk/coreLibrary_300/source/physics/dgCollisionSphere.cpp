@@ -72,8 +72,6 @@ void dgCollisionSphere::Init (dgFloat32 radius, dgMemoryAllocator* allocator)
 
 	if (!m_shapeRefCount) {
 
-		//dgInt32 count;
-		//dgInt32 vertexCount;
 		dgInt32 indexList[256];
 		dgVector tmpVectex[256];
 
@@ -99,16 +97,15 @@ void dgCollisionSphere::Init (dgFloat32 radius, dgMemoryAllocator* allocator)
 		dgInt32 vertexCount = dgVertexListToIndexList (&tmpVectex[0].m_x, sizeof (dgVector), 3 * sizeof (dgFloat32), 0, count, indexList, 0.001f); 
 
 		_ASSERTE (vertexCount == DG_SPHERE_VERTEX_COUNT);
-		for (i = 0; i < vertexCount; i ++) {
+		for (dgInt32 i = 0; i < vertexCount; i ++) {
 			m_unitSphere[i] = tmpVectex[i];
 		}
 
 		dgPolyhedra polyhedra(m_allocator);
 
 		polyhedra.BeginFace();
-		for (i = 0; i < count; i += 3) {
-			dgEdge * edge;
-			edge = polyhedra.AddFace (indexList[i],  indexList[i + 1], indexList[i + 2]);
+		for (dgInt32 i = 0; i < count; i += 3) {
+			dgEdge* const edge = polyhedra.AddFace (indexList[i],  indexList[i + 1], indexList[i + 2]);
 			_ASSERTE (edge);
 		}
 		polyhedra.EndFace();

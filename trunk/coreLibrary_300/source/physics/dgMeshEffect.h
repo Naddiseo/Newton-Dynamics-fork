@@ -24,7 +24,9 @@
 
 #include <dgRefCounter.h>
 
+class dgWorld;
 class dgCollision;
+class dgMeshEffect;
 class dgMeshTreeCSGFace;
 class dgMeshEffectSolidTree;
 class dgMeshTreeCSGEdgePool;
@@ -35,12 +37,10 @@ class dgMeshTreeCSGPointsPool;
 #define DG_MESH_EFFECT_BOLLEAN_STACK		128
 #define DG_MESH_EFFECT_POINT_SPLITED		512
 #define DG_MESH_EFFECT_POLYGON_SPLITED		256
-//#define DG_MESH_EFFECT_TRIANGLE_MIN_AREA	(dgFloat32 (1.0e-9f))
-//#define DG_MESH_EFFECT_PLANE_TOLERANCE		(dgFloat64 (1.0e-5f))
 #define DG_MESH_EFFECT_FLAT_CUT_BORDER_EDGE	0x01
 #define DG_MESH_EFFECT_QUANTIZE_FLOAT(x)	(x)
-//#define DG_VERTEXLIST_INDEXLIST_TOL			(dgFloat32 (1.0e-6f))
-#define DG_VERTEXLIST_INDEXLIST_TOL			(dgFloat32 (0.0f))
+#define DG_VERTEXLIST_INDEXLIST_TOL			(dgFloat64 (0.0f))
+
 
 
 
@@ -51,13 +51,15 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 
 	struct dgVertexAtribute 
 	{
-		dgVector m_vertex;
-		dgTriplex m_normal;
-		dgFloat32 m_u0;
-		dgFloat32 m_v0;
-		dgFloat32 m_u1;
-		dgFloat32 m_v1;
-		dgInt32 m_material;
+		dgBigVector m_vertex;
+		dgFloat64 m_normal_x;
+		dgFloat64 m_normal_y;
+		dgFloat64 m_normal_z;
+		dgFloat64 m_u0;
+		dgFloat64 m_v0;
+		dgFloat64 m_u1;
+		dgFloat64 m_v1;
+		dgFloat64 m_material;
 	};
 
 	struct dgIndexArray 
@@ -76,7 +78,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	dgMeshEffect(dgPolyhedra& mesh, const dgMeshEffect& source);
 	
 	// Create a convex hull Mesh form point cloud
-	dgMeshEffect (dgMemoryAllocator* const allocator, const dgFloat32* const vertexCloud, dgInt32 count, dgInt32 strideInByte, dgFloat32 distTol);
+	dgMeshEffect (dgMemoryAllocator* const allocator, const dgFloat64* const vertexCloud, dgInt32 count, dgInt32 strideInByte, dgFloat64 distTol);
 
 	// create a planar Mesh
 	dgMeshEffect(dgMemoryAllocator* const allocator, const dgMatrix& planeMatrix, dgFloat32 witdth, dgFloat32 breadth, dgInt32 material, const dgMatrix& textureMatrix0, const dgMatrix& textureMatrix1);
@@ -85,24 +87,24 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	dgMatrix CalculateOOBB (dgVector& size) const;
 	void CalculateAABB (dgVector& min, dgVector& max) const;
 
-	void CalculateNormals (dgFloat32 angleInRadians);
+	void CalculateNormals (dgFloat64 angleInRadians);
 	void SphericalMapping (dgInt32 material);
 	void BoxMapping (dgInt32 front, dgInt32 side, dgInt32 top);
 	void UniformBoxMapping (dgInt32 material, const dgMatrix& textruMatrix);
 	void CylindricalMapping (dgInt32 cylinderMaterial, dgInt32 capMaterial);
 
-	dgEdge* InsertEdgeVertex (dgEdge* const edge, dgFloat32 param);
+	dgEdge* InsertEdgeVertex (dgEdge* const edge, dgFloat64 param);
 
 	dgMeshEffect* Union (const dgMatrix& matrix, const dgMeshEffect* clip) const;
 	dgMeshEffect* Difference (const dgMatrix& matrix, const dgMeshEffect* clip) const;
 	dgMeshEffect* Intersection (const dgMatrix& matrix, const dgMeshEffect* clip) const;
 	void ClipMesh (const dgMatrix& matrix, const dgMeshEffect* clip, dgMeshEffect** top, dgMeshEffect** bottom) const;
 
-	bool CheckIntersection (const dgMeshEffectSolidTree* const solidTree, dgFloat32 scale) const;
+	bool CheckIntersection (const dgMeshEffectSolidTree* const solidTree, dgFloat64 scale) const;
 	dgMeshEffectSolidTree* CreateSolidTree() const;
-	static void DestroySolidTree (dgMeshEffectSolidTree* tree);
+	static void DestroySolidTree (dgMeshEffectSolidTree* const tree);
 	static bool CheckIntersection (const dgMeshEffect* const meshA, const dgMeshEffectSolidTree* const solidTreeA,
-								   const dgMeshEffect* const meshB, const dgMeshEffectSolidTree* const solidTreeB, dgFloat32 scale);
+								   const dgMeshEffect* const meshB, const dgMeshEffectSolidTree* const solidTreeB, dgFloat64 scale);
 
 	void Triangulate ();
 	void ConvertToPolygons ();
@@ -110,7 +112,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void RemoveUnusedVertices(dgInt32* const vertexRemapTable);
 	
 	void BeginPolygon ();
-	void AddPolygon (dgInt32 count, const dgFloat32* vertexList, dgInt32 stride, dgInt32 material);
+	void AddPolygon (dgInt32 count, const dgFloat64* const vertexList, dgInt32 stride, dgInt32 material);
 	void EndPolygon ();
 
 	void PackVertexArrays ();
@@ -124,14 +126,14 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 
 	dgInt32 GetVertexCount() const;
 	dgInt32 GetVertexStrideInByte() const {return sizeof (dgVector);}
-	dgFloat32* GetVertexPool () const {return &m_points[0].m_x;}
+	dgFloat64* GetVertexPool () const {return &m_points[0].m_x;}
 
 	dgInt32 GetPropertiesCount() const;
-	dgInt32 GetPropertiesStrideInByte() const {return sizeof (dgVertexAtribute);}
-	dgFloat32* GetAttributePool() const {return &m_attib->m_vertex.m_x;}
-	dgFloat32* GetNormalPool() const {return &m_attib->m_normal.m_x;}
-	dgFloat32* GetUV0Pool() const {return &m_attib->m_u0;}
-	dgFloat32* GetUV1Pool() const {return &m_attib->m_u1;}
+	dgInt32 GetPropertiesStrideInByte() const;
+	dgFloat64* GetAttributePool() const;
+	dgFloat64* GetNormalPool() const;
+	dgFloat64* GetUV0Pool() const;
+	dgFloat64* GetUV1Pool() const;
 
 	dgEdge* ConectVertex (dgEdge* const e0, dgEdge* const e1);
 
@@ -142,17 +144,21 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void WeldTJoints ();
 	bool SeparateDuplicateLoops (dgEdge* const edge);
 	bool HasOpenEdges () const;
-	dgFloat32 CalculateVolume () const;
+	dgFloat64 CalculateVolume () const;
 
-	void GetVertexStreams (dgInt32 vetexStrideInByte, dgFloat32* vertex, dgInt32 normalStrideInByte, dgFloat32* normal, dgInt32 uvStrideInByte0, dgFloat32* uv0, dgInt32 uvStrideInByte1, dgFloat32* uv1);
-	void GetIndirectVertexStreams(dgInt32 vetexStrideInByte, dgFloat32* vertex, dgInt32* vertexIndices, dgInt32* vertexCount,
-								  dgInt32 normalStrideInByte, dgFloat32* normal, dgInt32* normalIndices, dgInt32* normalCount,
-								  dgInt32 uvStrideInByte0, dgFloat32* uv0, dgInt32* uvIndices0, dgInt32* uvCount0,
-								  dgInt32 uvStrideInByte1, dgFloat32* uv1, dgInt32* uvIndices1, dgInt32* uvCount1);
+	void GetVertexStreams (dgInt32 vetexStrideInByte, dgFloat64* const vertex, 
+						   dgInt32 normalStrideInByte, dgFloat64* const normal, 
+						   dgInt32 uvStrideInByte0, dgFloat64* const uv0, 
+						   dgInt32 uvStrideInByte1, dgFloat64* const uv1);
 
+	void GetIndirectVertexStreams(dgInt32 vetexStrideInByte, dgFloat64* const vertex, dgInt32* const vertexIndices, dgInt32* const vertexCount,
+								  dgInt32 normalStrideInByte, dgFloat64* const normal, dgInt32* const normalIndices, dgInt32* const normalCount,
+								  dgInt32 uvStrideInByte0, dgFloat64* const uv0, dgInt32* const uvIndices0, dgInt32* const uvCount0,
+								  dgInt32 uvStrideInByte1, dgFloat64* const uv1, dgInt32* const uvIndices1, dgInt32* const uvCount1);
 	
 
-	dgIndexArray* MaterialGeomteryBegin();
+
+	dgIndexArray* MaterialGeometryBegin();
 	void MaterialGeomteryEnd(dgIndexArray* handle);
 	dgInt32 GetFirstMaterial (dgIndexArray* Handle);
 	dgInt32 GetNextMaterial (dgIndexArray* handle, dgInt32 materialHandle);
@@ -162,9 +168,9 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void GetMaterialGetIndexStreamShort (dgIndexArray* handle, dgInt32 materialHandle, dgInt16* index);
 
 	dgCollision* CreateConvexApproximationCollision(dgWorld* const world, dgInt32 maxCount, dgInt32 shapeId, dgInt32 childrenID) const;
-	dgCollision* CreateConvexCollision(dgFloat32 tolerance, dgInt32 shapeID, const dgMatrix& matrix = dgGetIdentityMatrix()) const;
+	dgCollision* CreateConvexCollision(dgFloat64 tolerance, dgInt32 shapeID, const dgMatrix& matrix = dgGetIdentityMatrix()) const;
 
-	dgMeshEffect* CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
+	dgMeshEffect* CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat64* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
 
 	void PlaneClipMesh (const dgPlane& plane, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource);
 
@@ -199,18 +205,18 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	private:
 
 	void Init (bool preAllocaBuffers);
-	dgVector GetOrigin ()const;
+	dgBigVector GetOrigin ()const;
 	dgInt32 CalculateMaxAttributes () const;
 	void EnumerateAttributeArray (dgVertexAtribute* const attib);
 	void ApplyAttributeArray (dgVertexAtribute* const attib);
-	void AddVertex(const dgVector& vertex);
+	void AddVertex(const dgBigVector& vertex);
 	void AddAtribute (const dgVertexAtribute& attib);
-	void AddPoint(const dgFloat32* vertexList, dgInt32 material);
+	void AddPoint(const dgFloat64* vertexList, dgInt32 material);
 	void FixCylindricalMapping (dgVertexAtribute* const attib) const;
 
 	void MergeFaces (const dgMeshEffect* const source);
 	void ReverseMergeFaces (dgMeshEffect* const source);
-	dgVertexAtribute InterpolateEdge (dgEdge* const edge, dgFloat32 param) const;
+	dgVertexAtribute InterpolateEdge (dgEdge* const edge, dgFloat64 param) const;
 	dgVertexAtribute InterpolateVertex (const dgVector& point, dgEdge* const face) const;
 	
 	void ClipMesh (const dgMeshEffect* clipMesh, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
@@ -223,7 +229,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 //	void ClipFace (const dgBigPlane& plane, dgMeshTreeCSGFace* src, dgMeshTreeCSGFace** left, dgMeshTreeCSGFace** right,	dgMeshTreeCSGPointsPool& pointPool) const;
 	void ClipFace (const dgHugeVector& normal, const dgHugeVector& origin, dgMeshTreeCSGFace* const src, dgMeshTreeCSGFace** left, dgMeshTreeCSGFace** const right, dgMeshTreeCSGPointsPool& pointPool) const;
 
-	dgMeshEffect* CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
+	dgMeshEffect* CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat64* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
 
 	bool CheckSingleMesh() const;
 
@@ -235,7 +241,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	dgInt32 m_atribCount;
 	dgInt32 m_maxAtribCount;
 
-	dgVector* m_points;
+	dgBigVector* m_points;
 	dgVertexAtribute* m_attib;
 
 	
@@ -244,288 +250,62 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	friend class dgMeshEffectSolidTree;
 };
 
-class dgMeshEffectSolidTree
-{
-	public:
-
-	class CSGConvexCurve: public dgList<dgHugeVector>
-	{
-		public:
-
-		CSGConvexCurve ()
-			:dgList<dgHugeVector>(NULL)
-		{
-
-		}
-
-		CSGConvexCurve (dgMemoryAllocator* const allocator)
-			:dgList<dgHugeVector>(allocator)
-		{
-		}
-
-		//bool CheckConvex(const dgBigVector& plane) const
-		bool CheckConvex(const dgHugeVector& normal, const dgHugeVector& point) const
-		{
-//			dgBigVector p1 (GetLast()->GetInfo());
-//			dgBigVector p0 (GetLast()->GetPrev()->GetInfo());
-//			dgBigVector e0 (p0 - p1);
-//			for (CSGConvexCurve::dgListNode* node = GetFirst(); node; node = node->GetNext()) {
-//				dgFloat64 convex;
-//				dgBigVector p2 (node->GetInfo());
-//				dgBigVector e1 (p2 - p1);
-//
-//				dgBigVector n (e1 * e0);
-//				convex = n % plane;
-//				if (convex < dgFloat64 (-1.0e5f)) {
-//					return false;
-//				}
-//				p1 = p2;
-//				e0 = e1.Scale (-1.0f);
-//			}
-
-			return true;
-		}
-	};
-
-	DG_CLASS_ALLOCATOR(allocator)
-
-	dgMeshEffectSolidTree (const dgMeshEffect& mesh, dgEdge* const face)
-	{
-		BuildPlane (mesh, face, m_normal, m_point);
-//		normal = normal.Scale (1.0f / sqrt (normal % normal));
-//		m_plane = dgBigPlane (normal, - (normal % origin));
-		m_front = NULL;
-		m_back = NULL;
-	}
-
-	dgMeshEffectSolidTree (const dgHugeVector& normal, const dgHugeVector& point)
-		:m_point (point), m_normal (normal)
-	{
-		m_front = NULL;
-		m_back = NULL;
-	}
-
-
-	~dgMeshEffectSolidTree()
-	{
-		if (m_front)	{
-			delete m_front; 
-		}
-
-		if (m_back)	{
-			delete m_back;
-		}
-	}
-
-	void BuildPlane (const dgMeshEffect& mesh, dgEdge* const face, dgHugeVector& normal, dgHugeVector& point) const
-	{
-		point = dgHugeVector(dgBigVector (mesh.m_points[face->m_incidentVertex]));
-
-		dgEdge* edge = face;
-		normal = dgHugeVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
-
-		dgHugeVector p0 (dgBigVector (mesh.m_points[edge->m_incidentVertex]));
-		edge = edge->m_next;
-
-		dgHugeVector p1 (dgBigVector (mesh.m_points[edge->m_incidentVertex]));
-		dgHugeVector e1 (p1 - p0);
-//		_ASSERTE (edge->m_next->m_next->m_next == edge);
-		for (edge = edge->m_next; edge != face; edge = edge->m_next) {
-			dgHugeVector p2 (dgBigVector (mesh.m_points[edge->m_incidentVertex]));
-			dgHugeVector e2 (p2 - p0);
-			normal += e1 * e2;
-			e1 = e2;
-		} 
-	}
-	
-
-	void AddFace (const dgMeshEffect& mesh, dgEdge* const face)
-	{
-		dgBigVector normal (mesh.FaceNormal (face, &mesh.m_points[0][0], sizeof (dgVector)));
-		dgFloat64 mag2 = normal % normal;
-
-		if (mag2 > dgFloat32 (1.0e-14f)) {
-
-			CSGConvexCurve faces[DG_MESH_EFFECT_BOLLEAN_STACK];
-			dgMeshEffectSolidTree* pool[DG_MESH_EFFECT_BOLLEAN_STACK];
-
-			dgHugeVector point;
-			dgHugeVector normal;
-			BuildPlane (mesh, face, normal, point);
-
-			dgEdge* ptr = face;
-			faces[0].SetAllocator(mesh.GetAllocator());
-			do {
-				faces[0].Append(dgBigVector (mesh.m_points[ptr->m_incidentVertex]));
-				ptr = ptr->m_next;
-			} while (ptr != face);
-
-			dgInt32 stack = 1;
-			pool[0] = this;
-			while (stack) {
-
-				stack --;
-				dgMeshEffectSolidTree* const root = pool[stack];
-				CSGConvexCurve& curve = faces[stack];
-				_ASSERTE (curve.CheckConvex(normal, point));
-
-				dgGoogol minDist (dgFloat64 (0.0f));
-				dgGoogol maxDist (dgFloat64 (0.0f));
-				for (CSGConvexCurve::dgListNode* node = curve.GetFirst(); node; node = node->GetNext()) {
-					dgGoogol dist = root->m_normal % (node->GetInfo() - root->m_point);
-					if (dist.GetAproximateValue() < dgFloat32 (0.0f)) {
-						minDist = dist;
-					}
-					if (dist.GetAproximateValue() > dgFloat32 (0.0f)) {
-						maxDist = dist;
-					} 
-				} 
-_ASSERTE (0);
-maxDist = dgGoogol (dgFloat64 (0.0f));
-
-				if ((minDist.GetAproximateValue() < dgFloat64 (0.0f)) && (maxDist.GetAproximateValue() > dgFloat64 (0.0f))) {
-					CSGConvexCurve tmp(mesh.GetAllocator());
-					for (CSGConvexCurve::dgListNode* node = curve.GetFirst(); node; node = node->GetNext()) {
-						tmp.Append(node->GetInfo());
-					}
-					curve.RemoveAll();
-				
-					if (!root->m_back) {
-						root->m_back = new (mesh.GetAllocator()) dgMeshEffectSolidTree (normal, point);
-					} else {
-						dgHugeVector p0 (tmp.GetLast()->GetInfo());
-						CSGConvexCurve& backFace = faces[stack];
-					
-						backFace.SetAllocator(mesh.GetAllocator());
-						dgGoogol test0 = root->m_normal % (p0 - root->m_point);
-						for (CSGConvexCurve::dgListNode* node = tmp.GetFirst(); node; node = node->GetNext()) {
-
-							dgHugeVector p1 (node->GetInfo());
-							dgGoogol test1 = root->m_normal % (p1 - root->m_point);
-							if (test0.GetAproximateValue() <= dgFloat64 (0.0f)) {
-
-								backFace.Append(p0);
-								if (test1.GetAproximateValue() > dgFloat64 (0.0f)) {
-									dgHugeVector dp (p1 - p0);
-									dgGoogol den = root->m_normal % dp;
-									dgHugeVector p (p0 + dp.Scale (-test0.GetAproximateValue() / den.GetAproximateValue()));
-									backFace.Append(p);
-								}
-
-							} else if (test1.GetAproximateValue() < dgFloat64 (0.0f)) {
-								dgHugeVector dp (p1 - p0);
-								dgGoogol den = root->m_normal % dp;
-								dgHugeVector p (p0 + dp.Scale (-test0.GetAproximateValue() / den.GetAproximateValue()));
-								backFace.Append(p);
-							}
-
-							test0 = test1;
-							p0 = p1;
-						}
-
-						// check Here because the clipper can generate a point and lines
-						_ASSERTE (!backFace.GetCount() || (backFace.GetCount() >= 3));
-
-						pool[stack] = root->m_back;
-						stack ++;
-						_ASSERTE (stack < (sizeof (pool)/sizeof (pool[0])));
-					}
-
-					if (!root->m_front) {
-						root->m_front = new (mesh.GetAllocator())dgMeshEffectSolidTree (normal, point);
-					} else {
-						dgHugeVector p0 (tmp.GetLast()->GetInfo());
-						CSGConvexCurve& frontFace = faces[stack];
-
-						frontFace.SetAllocator(mesh.GetAllocator());
-						dgGoogol test0 = root->m_normal % (p0 - root->m_point);
-
-						for (CSGConvexCurve::dgListNode* node = tmp.GetFirst(); node; node = node->GetNext()) {
-							dgHugeVector p1 (node->GetInfo());
-							dgGoogol test1 = root->m_normal % (p1 - root->m_point);
-							if (test0.GetAproximateValue() >= dgFloat64 (0.0f)) {
-
-								frontFace.Append(p0);
-								if (test1.GetAproximateValue() < dgFloat32 (0.0f)) {
-									dgHugeVector dp (p1 - p0);
-									dgGoogol den = root->m_normal % dp;
-									dgHugeVector p (p0 + dp.Scale (-test0.GetAproximateValue() / den.GetAproximateValue()));
-									frontFace.Append(p);
-								}
-							} else if (test1.GetAproximateValue() > dgFloat64 (0.0f)) {
-								dgHugeVector dp (p1 - p0);
-								dgGoogol den = root->m_normal % dp;
-								dgHugeVector p (p0 + dp.Scale (-test0.GetAproximateValue() / den.GetAproximateValue()));
-								frontFace.Append(p);
-							}
-
-							test0 = test1;
-							p0 = p1;
-						}
-
-						// check Here because the clipper can generate a point and lines
-						_ASSERTE (!frontFace.GetCount() || (frontFace.GetCount() >= 3));
-
-						pool[stack] = root->m_front;
-						stack ++;
-						_ASSERTE (stack < (sizeof (pool)/sizeof (pool[0])));
-					}
-
-				} else {
-
-					if (minDist.GetAproximateValue() < dgFloat64 (0.0f)) {
-						if (!root->m_back) {
-							root->m_back = new (mesh.GetAllocator())dgMeshEffectSolidTree (normal, point);
-						} else {
-							pool[stack] = root->m_back;
-							stack ++;
-							_ASSERTE (stack < (sizeof (pool)/sizeof (pool[0])));
-						}
-						
-					} else if (maxDist.GetAproximateValue() > dgFloat64 (0.0f)) {
-						if (!root->m_front) {
-							root->m_front = new (mesh.GetAllocator())dgMeshEffectSolidTree (normal, point);
-						} else {
-							pool[stack] = root->m_front;
-							stack ++;
-							_ASSERTE (stack < (sizeof (pool)/sizeof (pool[0])));
-						}
-					}
-				}
-			}
-		}
-	}
-
-	dgHugeVector m_point;
-	dgHugeVector m_normal;
-	dgMeshEffectSolidTree* m_back;
-	dgMeshEffectSolidTree* m_front;
-};
 
 
 inline dgInt32 dgMeshEffect::GetVertexCount() const
-{
+		{
 	return m_pointCount;
-}
+		}
 
 inline dgInt32 dgMeshEffect::GetPropertiesCount() const
-{
+		{
 	return m_atribCount;
-}
+		}
 
 inline dgInt32 dgMeshEffect::GetMaterialID (dgIndexArray* handle, dgInt32 materialHandle)
-{
+		{
 	return handle->m_materials[materialHandle];
-}
+		}
 
 inline dgInt32 dgMeshEffect::GetMaterialIndexCount (dgIndexArray* handle, dgInt32 materialHandle)
-{
+	{
 	return handle->m_materialsIndexCount[materialHandle];
-}
+	}
 
 inline dgMeshEffect::dgVertexAtribute& dgMeshEffect::GetAttribute (dgInt32 index) const 
-{
+	{
 	return m_attib[index];
+	}
+
+inline dgInt32 dgMeshEffect::GetPropertiesStrideInByte() const 
+	{
+	return sizeof (dgVertexAtribute);
+	}
+	
+inline dgFloat64* dgMeshEffect::GetAttributePool() const 
+	{
+	return &m_attib->m_vertex.m_x;
+							}
+
+inline dgFloat64* dgMeshEffect::GetNormalPool() const 
+{
+	return &m_attib->m_normal_x;
 }
+
+inline dgFloat64* dgMeshEffect::GetUV0Pool() const 
+{
+	return &m_attib->m_u0;
+}
+
+inline dgFloat64* dgMeshEffect::GetUV1Pool() const 
+{
+	return &m_attib->m_u1;
+}
+
+inline bool dgMeshEffect::CheckIntersection (const dgMeshEffect* const meshA, const dgMeshEffectSolidTree* const solidTreeA, const dgMeshEffect* const meshB, const dgMeshEffectSolidTree* const solidTreeB, dgFloat64 scale)
+{
+	return (meshA->CheckIntersection (solidTreeB, scale) || meshB->CheckIntersection (solidTreeA, scale));
+}
+
 
 #endif

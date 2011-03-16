@@ -27,7 +27,7 @@
 #include "dgPolyhedra.h"
 #include "dgSmallDeterminant.h"
 
-
+#if 0
 namespace InternalPolyhedra
 {
 	const dgFloat64 DG_MIN_EDGE_ASPECT_RATIO = dgFloat64 (0.02f);
@@ -231,78 +231,6 @@ namespace InternalPolyhedra
 		node = polyhedra->GetNodeFromInfo(*edge);
 		_ASSERTE (node);
 		polyhedra->Remove (node);
-	}
-
-	static bool MatchTwins (dgPolyhedra *polyhedra) 
-	{
-		bool ret;
-		dgEdge *edge;
-		dgPolyhedra::Iterator iter (*polyhedra);
-
-		ret = true;
-
-		// Connect all twin edge
-		for (iter.Begin(); iter; iter ++) {
-			edge = &(*iter);
-			if (!edge->m_twin) {
-				edge->m_twin = polyhedra->FindEdge (edge->m_next->m_incidentVertex, edge->m_incidentVertex);
-				if (edge->m_twin) {
-					edge->m_twin->m_twin = edge; 
-				}
-				ret &= (edge->m_twin != NULL);
-			}
-		}
-
-#ifdef __ENABLE_SANITY_CHECK 
-		_ASSERTE (!ret || polyhedra->SanityCheck());
-#endif
-		return ret;
-	}
-
-	static void CloseOpenBounds (dgPolyhedra *polyhedra)
-	{
-		dgInt32 i;
-		dgInt32 edgeCount;
-		bool state;
-		dgEdge *ptr;
-		dgEdge *edge;
-		dgEdge** edgeArray;
-		dgPolyhedra::dgTreeNode *node;
-		dgStack<dgEdge*> edgeArrayPool(polyhedra->GetCount() * 2 + 100);
-
-		dgPolyhedra::Iterator iter (*polyhedra);
-
-		edgeCount = 0;
-		edgeArray = &edgeArrayPool[0];
-		for (iter.Begin(); iter; iter ++) {
-			edge = &(*iter);
-			if (!edge->m_twin) {
-				dgPolyhedra::dgPairKey code (edge->m_next->m_incidentVertex, edge->m_incidentVertex);
-				dgEdge tmpEdge (edge->m_next->m_incidentVertex, -1);
-				tmpEdge.m_incidentFace = -1; 
-				node = polyhedra->Insert (tmpEdge, code.GetVal(), state); 
-				_ASSERTE (!state);
-				edge->m_twin = &node->GetInfo();
-				edge->m_twin->m_twin = edge; 
-				edgeArray[edgeCount] = edge->m_twin;
-				edgeCount ++;
-			}
-		}
-
-		for (i = 0; i < edgeCount; i ++) {
-			edge = edgeArray[i];
-			_ASSERTE (!edge->m_prev);
-			for (ptr = edge->m_twin; ptr->m_next; ptr = ptr->m_next->m_twin)
-			{
-
-			}
-			ptr->m_next = edge;
-			edge->m_prev = ptr;
-		}
-
-#ifdef __ENABLE_SANITY_CHECK 
-		_ASSERTE (polyhedra->SanityCheck ());
-#endif
 	}
 
 	static void NormalizeVertex (dgInt32 count, dgTriplex* const target, const dgFloat32* const source, dgInt32 stride)
@@ -1650,65 +1578,9 @@ void dgPolyhedraDescriptor::Update (const dgPolyhedra& srcPolyhedra)
 
 
 
-dgPolyhedra::dgPolyhedra (dgMemoryAllocator* const allocator)
-:dgTree <dgEdge, dgInt64>(allocator)
-{
-	m_edgeMark = 0;
-	m_baseMark	= 0;
-	m_faceSecuence = 0;
-}
-
-dgPolyhedra::dgPolyhedra (const dgPolyhedra &polyhedra)
-	:dgTree <dgEdge, dgInt64>(polyhedra.GetAllocator())
-{
-	m_edgeMark = 0;
-	m_baseMark	= 0;
-	m_faceSecuence = 0;
-
-	dgStack<dgInt32> indexPool (1024 * 16);
-	dgStack<dgUnsigned64> userPool (1024 * 16);
-	dgInt32* const index = &indexPool[0];
-	dgUnsigned64* const user = &userPool[0];
-
-	BeginFace ();
-	Iterator iter(polyhedra);
-	for (iter.Begin(); iter; iter ++) {
-		dgEdge* const edge = &(*iter);
-		if (edge->m_incidentFace < 0) {
-			continue;
-		}
-
-		if (!FindEdge(edge->m_incidentVertex, edge->m_twin->m_incidentVertex))	{
-			dgInt32 indexCount = 0;
-			dgEdge* ptr = edge;
-			do {
-				user[indexCount] = ptr->m_userData;
-				index[indexCount] = ptr->m_incidentVertex;
-				indexCount ++;
-				ptr = ptr->m_next;
-			} while (ptr != edge);
-
-			dgEdge* const face = AddFace (indexCount, index, (dgInt64*) user);
-			ptr = face;
-			do {
-				ptr->m_incidentFace = edge->m_incidentFace;
-				ptr = ptr->m_next;
-			} while (ptr != face);
-		}
-	}
-	EndFace();
-
-	m_faceSecuence = polyhedra.m_faceSecuence;
-
-#ifdef __ENABLE_SANITY_CHECK 
-	_ASSERTE (SanityCheck());
-#endif
-}
 
 
-dgPolyhedra::~dgPolyhedra ()
-{
-}
+
 
 void dgPolyhedra::DeleteAllFace()
 {
@@ -1815,122 +1687,9 @@ bool dgPolyhedra::SanityCheck () const
 
 
 
-void dgPolyhedra::BeginFace ()
-{
-}
-
-void dgPolyhedra::EndFace ()
-{
-	InternalPolyhedra::MatchTwins (this);
-	InternalPolyhedra::CloseOpenBounds (this);
-}
 
 
-dgEdge* dgPolyhedra::AddFace (dgInt32 v0, dgInt32 v1, dgInt32 v2)
-{
-	dgInt32 vertex[3];
 
-	vertex [0] = v0;
-	vertex [1] = v1;
-	vertex [2] = v2;
-	return AddFace (3, vertex, NULL);
-}
-
-dgEdge* dgPolyhedra::AddFace ( dgInt32 count, const dgInt32* const index, const dgInt64* const userdata)
-{
-	class IntersectionFilter
-	{
-		public:
-		IntersectionFilter ()
-		{
-			m_count = 0;
-		}
-
-		bool Insert (dgInt32 dummy, dgInt64 value)
-		{
-			dgInt32 i;				
-			for (i = 0 ; i < m_count; i ++) {
-				if (m_array[i] == value) {
-					return false;
-				}
-			}
-			m_array[i] = value;
-			m_count ++;
-			return true;
-		}
-
-		dgInt32 m_count;
-		dgInt64 m_array[2048];
-	};
-	//	dgTree<dgUnsigned32, dgInt64> selfIntersectingFaceFilter;
-	IntersectionFilter selfIntersectingFaceFilter;
-
-	dgInt32 dummyValues = 0;
-	dgInt32 i0 = index[count-1];
-	for (dgInt32 i = 0; i < count; i ++) {
-		dgInt32 i1 = index[i];
-		dgPairKey code0 (i0, i1);
-
-		if (!selfIntersectingFaceFilter.Insert (dummyValues, code0.GetVal())) {
-			return NULL;
-		}
-
-		dgPairKey code1 (i1, i0);
-		if (!selfIntersectingFaceFilter.Insert (dummyValues, code1.GetVal())) {
-			return NULL;
-		}
-
-
-		if (i0 == i1) {
-			return NULL;
-		}
-		if (FindEdge (i0, i1)) {
-			return NULL;
-		}
-		i0 = i1;
-	}
-
-	m_faceSecuence ++;
-
-	i0 = index[count-1];
-	dgInt32 i1 = index[0];
-	dgUnsigned64 udata0 = 0;
-	dgUnsigned64 udata1 = 0;
-	if (userdata) {
-		udata0 = dgUnsigned64 (userdata[count-1]);
-		udata1 = dgUnsigned64 (userdata[0]);
-	} 
-
-	bool state;
-	dgPairKey code (i0, i1);
-	dgEdge tmpEdge (i0, m_faceSecuence, udata0);
-	dgTreeNode* node = Insert (tmpEdge, code.GetVal(), state); 
-	_ASSERTE (!state);
-	dgEdge* edge0 = &node->GetInfo();
-	dgEdge* const first = edge0;
-
-	for (dgInt32 i = 1; i < count; i ++) {
-		i0 = i1;
-		i1 = index[i];
-		udata0 = udata1;
-		udata1 = dgUnsigned64 (userdata ? userdata[i] : 0);
-
-		dgPairKey code (i0, i1);
-		dgEdge tmpEdge (i0, m_faceSecuence, udata0);
-		node = Insert (tmpEdge, code.GetVal(), state); 
-		_ASSERTE (!state);
-
-		dgEdge* const edge1 = &node->GetInfo();
-		edge0->m_next = edge1;
-		edge1->m_prev = edge0;
-		edge0 = edge1;
-	}
-
-	first->m_prev = edge0;
-	edge0->m_next = first;
-
-	return first->m_next;
-}
 
 
 
@@ -1979,21 +1738,7 @@ dgEdge *dgPolyhedra::FindVertexNode (dgInt32 v) const
 	return edge;
 }
 
-dgPolyhedra::dgTreeNode* dgPolyhedra::FindEdgeNode (dgInt32 i0, dgInt32 i1) const
-{
-	dgPairKey key (i0, i1);
-	return Find (key.GetVal());
-}
 
-dgEdge *dgPolyhedra::FindEdge (dgInt32 i0, dgInt32 i1) const
-{
-	//	dgTreeNode *node;
-	//	dgPairKey key (i0, i1);
-	//	node = Find (key.GetVal());
-	//	return node ? &node->GetInfo() : NULL;
-	dgTreeNode* const node = FindEdgeNode (i0, i1);
-	return node ? &node->GetInfo() : NULL;
-}
 
 
 
@@ -2009,37 +1754,8 @@ dgEdge* dgPolyhedra::AddHalfEdge (dgInt32 v0, dgInt32 v1)
 }
 
 
-void dgPolyhedra::DeleteEdge (dgEdge* const edge)
-{
-
-	dgEdge *const twin = edge->m_twin;
-
-	edge->m_prev->m_next = twin->m_next;
-	twin->m_next->m_prev = edge->m_prev;
-	edge->m_next->m_prev = twin->m_prev;
-	twin->m_prev->m_next = edge->m_next;
-
-	dgTreeNode *const nodeA = GetNodeFromInfo (*edge);
-	dgTreeNode *const nodeB = GetNodeFromInfo (*twin);
-
-	_ASSERTE (&nodeA->GetInfo() == edge);
-	_ASSERTE (&nodeB->GetInfo() == twin);
-
-	Remove (nodeA);
-	Remove (nodeB);
-}
 
 
-void dgPolyhedra::DeleteEdge (dgInt32 v0, dgInt32 v1)
-{
-	dgPairKey pairKey (v0, v1);
-	dgTreeNode* const node = Find(pairKey.GetVal());
-	dgEdge* const edge = node ? &node->GetInfo() : NULL;
-	if (!edge) {
-		return;
-	}
-	DeleteEdge (edge);
-}
 
 
 dgEdge *dgPolyhedra::CollapseEdge(dgEdge* const edge)
@@ -2868,75 +2584,6 @@ desc.Update(*this);
 */
 
 
-bool dgPolyhedra::GetConectedSurface (dgPolyhedra &polyhedra) const
-{
-//	dgInt32 mark;
-//	dgInt32 index;
-//	dgInt32 count;
-//	dgEdge *ptr;
-//	dgEdge *edge;
-//	dgEdge **stack;
-
-	if (!GetCount()) {
-		return false;
-	}
-
-	dgEdge* edge = NULL;
-	Iterator iter(*this);
-	for (iter.Begin (); iter; iter ++) {
-		edge = &(*iter);
-		if ((edge->m_mark < m_baseMark) && (edge->m_incidentFace > 0)) {
-			break;
-		}
-	}
-
-	if (!iter) {
-		return false;
-	}
-
-	dgInt32 faceIndex[4096];
-	dgInt64 faceDataIndex[4096];
-	dgStack<dgEdge*> stackPool (GetCount()); 
-	dgEdge** const stack = &stackPool[0];
-
-	dgInt32 mark = IncLRU();
-
-	polyhedra.BeginFace ();
-	stack[0] = edge;
-	dgInt32 index = 1;
-	while (index) {
-		index --;
-		dgEdge* const edge = stack[index];
-
-		if (edge->m_mark == mark) {
-			continue;
-		}
-
-		dgInt32 count = 0;
-		dgEdge* ptr = edge;
-		do {
-			ptr->m_mark = mark;
-			faceIndex[count] = ptr->m_incidentVertex;
-			faceDataIndex[count] = dgInt64 (ptr->m_userData);
-			count ++;
-			_ASSERTE (count < (sizeof (faceIndex)/sizeof(faceIndex[0])));
-
-			if ((ptr->m_twin->m_incidentFace > 0) && (ptr->m_twin->m_mark != mark)) {
-				stack[index] = ptr->m_twin;
-				index ++;
-				_ASSERTE (index < GetCount());
-			}
-
-			ptr = ptr->m_next;
-		} while (ptr != edge);
-
-		polyhedra.AddFace (count, &faceIndex[0], &faceDataIndex[0]);
-	}
-
-	polyhedra.EndFace ();
-
-	return true;
-}
 
 /*
 void dgPolyhedra::Merge (
@@ -4571,8 +4218,304 @@ void dgPolyhedra::ConvexPartition (const dgFloat32* const vertex, dgInt32 stride
 		}
 	}
 }
+#endif
 
 
 
+dgPolyhedra::dgPolyhedra (dgMemoryAllocator* const allocator)
+	:dgTree <dgEdge, dgInt64>(allocator)
+	,m_baseMark(0)
+	,m_edgeMark(0)
+	,m_faceSecuence(0)
+{
+}
+
+dgPolyhedra::dgPolyhedra (const dgPolyhedra &polyhedra)
+	:dgTree <dgEdge, dgInt64>(polyhedra.GetAllocator())
+	,m_baseMark(0)
+	,m_edgeMark(0)
+	,m_faceSecuence(0)
+{
+	dgStack<dgInt32> indexPool (1024 * 16);
+	dgStack<dgUnsigned64> userPool (1024 * 16);
+	dgInt32* const index = &indexPool[0];
+	dgUnsigned64* const user = &userPool[0];
+
+	BeginFace ();
+	Iterator iter(polyhedra);
+	for (iter.Begin(); iter; iter ++) {
+		dgEdge* const edge = &(*iter);
+		if (edge->m_incidentFace < 0) {
+			continue;
+		}
+
+		if (!FindEdge(edge->m_incidentVertex, edge->m_twin->m_incidentVertex))	{
+			dgInt32 indexCount = 0;
+			dgEdge* ptr = edge;
+			do {
+				user[indexCount] = ptr->m_userData;
+				index[indexCount] = ptr->m_incidentVertex;
+				indexCount ++;
+				ptr = ptr->m_next;
+			} while (ptr != edge);
+
+			dgEdge* const face = AddFace (indexCount, index, (dgInt64*) user);
+			ptr = face;
+			do {
+				ptr->m_incidentFace = edge->m_incidentFace;
+				ptr = ptr->m_next;
+			} while (ptr != face);
+		}
+	}
+	EndFace();
+
+	m_faceSecuence = polyhedra.m_faceSecuence;
+
+#ifdef __ENABLE_SANITY_CHECK 
+	_ASSERTE (SanityCheck());
+#endif
+}
+
+dgPolyhedra::~dgPolyhedra ()
+{
+}
 
 
+dgEdge* dgPolyhedra::AddFace ( dgInt32 count, const dgInt32* const index, const dgInt64* const userdata)
+{
+	class IntersectionFilter
+	{
+		public:
+		IntersectionFilter ()
+		{
+			m_count = 0;
+		}
+
+		bool Insert (dgInt32 dummy, dgInt64 value)
+		{
+			dgInt32 i;				
+			for (i = 0 ; i < m_count; i ++) {
+				if (m_array[i] == value) {
+					return false;
+				}
+			}
+			m_array[i] = value;
+			m_count ++;
+			return true;
+		}
+
+		dgInt32 m_count;
+		dgInt64 m_array[2048];
+	};
+
+	IntersectionFilter selfIntersectingFaceFilter;
+
+	dgInt32 dummyValues = 0;
+	dgInt32 i0 = index[count-1];
+	for (dgInt32 i = 0; i < count; i ++) {
+		dgInt32 i1 = index[i];
+		dgPairKey code0 (i0, i1);
+
+		if (!selfIntersectingFaceFilter.Insert (dummyValues, code0.GetVal())) {
+			return NULL;
+		}
+
+		dgPairKey code1 (i1, i0);
+		if (!selfIntersectingFaceFilter.Insert (dummyValues, code1.GetVal())) {
+			return NULL;
+		}
+
+
+		if (i0 == i1) {
+			return NULL;
+		}
+		if (FindEdge (i0, i1)) {
+			return NULL;
+		}
+		i0 = i1;
+	}
+
+	m_faceSecuence ++;
+
+	i0 = index[count-1];
+	dgInt32 i1 = index[0];
+	dgUnsigned64 udata0 = 0;
+	dgUnsigned64 udata1 = 0;
+	if (userdata) {
+		udata0 = dgUnsigned64 (userdata[count-1]);
+		udata1 = dgUnsigned64 (userdata[0]);
+	} 
+
+	bool state;
+	dgPairKey code (i0, i1);
+	dgEdge tmpEdge (i0, m_faceSecuence, udata0);
+	dgTreeNode* node = Insert (tmpEdge, code.GetVal(), state); 
+	_ASSERTE (!state);
+	dgEdge* edge0 = &node->GetInfo();
+	dgEdge* const first = edge0;
+
+	for (dgInt32 i = 1; i < count; i ++) {
+		i0 = i1;
+		i1 = index[i];
+		udata0 = udata1;
+		udata1 = dgUnsigned64 (userdata ? userdata[i] : 0);
+
+		dgPairKey code (i0, i1);
+		dgEdge tmpEdge (i0, m_faceSecuence, udata0);
+		node = Insert (tmpEdge, code.GetVal(), state); 
+		_ASSERTE (!state);
+
+		dgEdge* const edge1 = &node->GetInfo();
+		edge0->m_next = edge1;
+		edge1->m_prev = edge0;
+		edge0 = edge1;
+	}
+
+	first->m_prev = edge0;
+	edge0->m_next = first;
+
+	return first->m_next;
+}
+
+
+void dgPolyhedra::EndFace ()
+{
+	dgPolyhedra::Iterator iter (*this);
+
+	// Connect all twin edge
+	for (iter.Begin(); iter; iter ++) {
+		dgEdge* const edge = &(*iter);
+		if (!edge->m_twin) {
+			edge->m_twin = FindEdge (edge->m_next->m_incidentVertex, edge->m_incidentVertex);
+			if (edge->m_twin) {
+				edge->m_twin->m_twin = edge; 
+			}
+		}
+	}
+
+#ifdef __ENABLE_SANITY_CHECK 
+	_ASSERTE (polyhedra->SanityCheck());
+#endif
+	dgStack<dgEdge*> edgeArrayPool(GetCount() * 2 + 256);
+
+	dgInt32 edgeCount = 0;
+	dgEdge** const edgeArray = &edgeArrayPool[0];
+	for (iter.Begin(); iter; iter ++) {
+		dgEdge* const edge = &(*iter);
+		if (!edge->m_twin) {
+			bool state;
+			dgPolyhedra::dgPairKey code (edge->m_next->m_incidentVertex, edge->m_incidentVertex);
+			dgEdge tmpEdge (edge->m_next->m_incidentVertex, -1);
+			tmpEdge.m_incidentFace = -1; 
+			dgPolyhedra::dgTreeNode* const node = Insert (tmpEdge, code.GetVal(), state); 
+			_ASSERTE (!state);
+			edge->m_twin = &node->GetInfo();
+			edge->m_twin->m_twin = edge; 
+			edgeArray[edgeCount] = edge->m_twin;
+			edgeCount ++;
+		}
+	}
+
+	for (dgInt32 i = 0; i < edgeCount; i ++) {
+		dgEdge* const edge = edgeArray[i];
+		_ASSERTE (!edge->m_prev);
+		dgEdge *ptr = ptr = edge->m_twin;
+		for (; ptr->m_next; ptr = ptr->m_next->m_twin){}
+		ptr->m_next = edge;
+		edge->m_prev = ptr;
+	}
+
+#ifdef __ENABLE_SANITY_CHECK 
+	_ASSERTE (polyhedra->SanityCheck ());
+#endif
+}
+
+
+
+void dgPolyhedra::DeleteEdge (dgEdge* const edge)
+{
+	dgEdge *const twin = edge->m_twin;
+
+	edge->m_prev->m_next = twin->m_next;
+	twin->m_next->m_prev = edge->m_prev;
+	edge->m_next->m_prev = twin->m_prev;
+	twin->m_prev->m_next = edge->m_next;
+
+	dgTreeNode *const nodeA = GetNodeFromInfo (*edge);
+	dgTreeNode *const nodeB = GetNodeFromInfo (*twin);
+
+	_ASSERTE (&nodeA->GetInfo() == edge);
+	_ASSERTE (&nodeB->GetInfo() == twin);
+
+	Remove (nodeA);
+	Remove (nodeB);
+}
+
+
+
+bool dgPolyhedra::GetConectedSurface (dgPolyhedra &polyhedra) const
+{
+_ASSERTE (0);
+return false;
+/*
+	if (!GetCount()) {
+		return false;
+	}
+
+	dgEdge* edge = NULL;
+	Iterator iter(*this);
+	for (iter.Begin (); iter; iter ++) {
+		edge = &(*iter);
+		if ((edge->m_mark < m_baseMark) && (edge->m_incidentFace > 0)) {
+			break;
+		}
+	}
+
+	if (!iter) {
+		return false;
+	}
+
+	dgInt32 faceIndex[4096];
+	dgInt64 faceDataIndex[4096];
+	dgStack<dgEdge*> stackPool (GetCount()); 
+	dgEdge** const stack = &stackPool[0];
+
+	dgInt32 mark = IncLRU();
+
+	polyhedra.BeginFace ();
+	stack[0] = edge;
+	dgInt32 index = 1;
+	while (index) {
+		index --;
+		dgEdge* const edge = stack[index];
+
+		if (edge->m_mark == mark) {
+			continue;
+		}
+
+		dgInt32 count = 0;
+		dgEdge* ptr = edge;
+		do {
+			ptr->m_mark = mark;
+			faceIndex[count] = ptr->m_incidentVertex;
+			faceDataIndex[count] = dgInt64 (ptr->m_userData);
+			count ++;
+			_ASSERTE (count < (sizeof (faceIndex)/sizeof(faceIndex[0])));
+
+			if ((ptr->m_twin->m_incidentFace > 0) && (ptr->m_twin->m_mark != mark)) {
+				stack[index] = ptr->m_twin;
+				index ++;
+				_ASSERTE (index < GetCount());
+			}
+
+			ptr = ptr->m_next;
+		} while (ptr != edge);
+
+		polyhedra.AddFace (count, &faceIndex[0], &faceDataIndex[0]);
+	}
+
+	polyhedra.EndFace ();
+
+	return true;
+*/
+}

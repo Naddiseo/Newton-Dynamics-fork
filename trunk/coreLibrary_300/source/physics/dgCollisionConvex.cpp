@@ -277,6 +277,8 @@ dgFloat32 dgCollisionConvex::GetDiscretedAngleStep (dgFloat32 radius) const
 
 bool dgCollisionConvex::SanityCheck (dgPolyhedra& hull) const
 {
+	_ASSERTE (0);
+/*
 	dgEdge * edge;
 	dgEdge * ptr;
 	dgEdge * neiborg;
@@ -304,7 +306,7 @@ bool dgCollisionConvex::SanityCheck (dgPolyhedra& hull) const
 			ptr = ptr->m_next;
 		} while (ptr != edge);
 	}
-
+*/
 	return true;
 }
 

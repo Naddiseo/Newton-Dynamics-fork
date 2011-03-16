@@ -37,7 +37,7 @@ struct dgPlaneLocation: public dgPlane
 };
 
 
-dgCollisionConvexHull::dgCollisionConvexHull(dgMemoryAllocator* allocator, dgUnsigned32 signature, dgInt32 count, dgInt32 strideInBytes, dgFloat32 tolerance, const dgFloat32* vertexArray, const dgMatrix& matrix)
+dgCollisionConvexHull::dgCollisionConvexHull(dgMemoryAllocator* const allocator, dgUnsigned32 signature, dgInt32 count, dgInt32 strideInBytes, dgFloat32 tolerance, const dgFloat32* vertexArray, const dgMatrix& matrix)
 	:dgCollisionConvex(allocator, signature, matrix, m_convexHullCollision)
 {
 	m_faceCount = 0;

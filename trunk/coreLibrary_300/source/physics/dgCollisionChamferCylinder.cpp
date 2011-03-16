@@ -355,11 +355,6 @@ dgFloat32 dgCollisionChamferCylinder::RayCast (const dgVector& q0, const dgVecto
 
 dgFloat32 dgCollisionChamferCylinder::RayCastSimd (const dgVector& q0, const dgVector& q1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
 {
-//	dgFloat32 t;
-//	dgFloat32 y;
-//	dgFloat32 z;
-//	dgFloat32 t1;
-
 	if (PREFILTER_RAYCAST (preFilter, body, this, userData)) {
 		return dgFloat32 (1.2f);
 	}

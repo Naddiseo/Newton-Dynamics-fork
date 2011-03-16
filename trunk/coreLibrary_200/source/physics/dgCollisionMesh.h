@@ -89,6 +89,7 @@ class dgCollisionMeshRayHitDesc
 }DG_GCC_VECTOR_ALIGMENT;
 
 
+
 class dgCollisionMesh: public dgCollision  
 {
 	public:
@@ -139,13 +140,13 @@ class dgCollisionMesh: public dgCollision
 		virtual void CalculateInertia (dgVector& inertia, dgVector& origin) const;
 
 
-		void BeamClipping (const dgCollisionConvex* hull, const dgMatrix& matrix, dgFloat32 size);
-		void BeamClippingSimd (const dgCollisionConvex* hull, const dgMatrix& matrix, dgFloat32 size);
-		dgInt32 QuickTest (const dgCollisionConvex* hull, const dgMatrix& matrix);
-		dgInt32 QuickTestSimd (const dgCollisionConvex* hull, const dgMatrix& matrix);
-		dgInt32 QuickTestContinue (const dgCollisionConvex* hull, const dgMatrix& matrix);
-		dgInt32 QuickTestContinueSimd (const dgCollisionConvex* hull, const dgMatrix& matrix);
-		dgInt32 ClipContacts (dgInt32 count, dgContactPoint contactOut[], const dgMatrix& globalMatrix) const;
+		void BeamClipping (const dgCollisionConvex* const hull, const dgMatrix& matrix, dgFloat32 size);
+		void BeamClippingSimd (const dgCollisionConvex* const hull, const dgMatrix& matrix, dgFloat32 size);
+		dgInt32 QuickTest (const dgCollisionConvex* const hull, const dgMatrix& matrix);
+		dgInt32 QuickTestSimd (const dgCollisionConvex* const hull, const dgMatrix& matrix);
+		dgInt32 QuickTestContinue (const dgCollisionConvex* const hull, const dgMatrix& matrix);
+		dgInt32 QuickTestContinueSimd (const dgCollisionConvex* const hull, const dgMatrix& matrix);
+		dgInt32 ClipContacts (dgInt32 count, dgContactPoint* const contactOut, const dgMatrix& globalMatrix) const;
 
 		dgVector ClosestDistanceToTriangle (const dgVector& point, const dgVector& p0, const dgVector& p1, const dgVector& p2) const;
 		bool PointToPolygonDistance (const dgVector& point, dgFloat32 radius, dgVector& out);
