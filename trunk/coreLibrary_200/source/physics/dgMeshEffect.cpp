@@ -1695,11 +1695,9 @@ void dgMeshEffect::AddPoint(const dgFloat64* vertex, dgInt32 material)
 
 void dgMeshEffect::PackVertexArrays ()
 {
-	_ASSERTE (0);
-/*
 	if (m_maxPointCount > m_pointCount) {
-		dgVector* const points = (dgVector*) GetAllocator()->MallocLow(dgInt32 (m_pointCount * sizeof(dgVector)));
-		memcpy (points, m_points, m_pointCount * sizeof(dgVector));
+		dgBigVector* const points = (dgBigVector*) GetAllocator()->MallocLow(dgInt32 (m_pointCount * sizeof(dgBigVector)));
+		memcpy (points, m_points, m_pointCount * sizeof(dgBigVector));
 		GetAllocator()->FreeLow(m_points);
 		m_points = points;
 		m_maxPointCount = m_pointCount;
@@ -1713,7 +1711,6 @@ void dgMeshEffect::PackVertexArrays ()
 		m_attib = attibArray;
 		m_maxAtribCount = m_atribCount;
 	}
-*/
 };
 
 
