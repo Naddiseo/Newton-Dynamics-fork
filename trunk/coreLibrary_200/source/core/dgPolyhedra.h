@@ -114,6 +114,11 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	bool GetConectedSurface (dgPolyhedra &polyhedra) const;
 	void EndConectedSurface() const;
 
+	void DeleteDegenerateFaces (const dgFloat64* const pool, dgInt32 dstStrideInBytes, dgFloat64 minArea);
+
+	void Optimize (const dgFloat64* const pool, dgInt32 strideInBytes, dgFloat64 tol);
+	void Triangulate (const dgFloat64* const vertex, dgInt32 strideInBytes, dgPolyhedra* const leftOversOut);
+	void ConvexPartition (const dgFloat64* const vertex, dgInt32 strideInBytes, dgPolyhedra* const leftOversOut);
 
 /*
 	bool SanityCheck() const;
@@ -132,7 +137,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 
 	void DeleteAllFace();
 	void DeleteFace(dgEdge* const edge);
-	void DeleteDegenerateFaces (const dgFloat64* const pool, dgInt32 dstStrideInBytes, dgFloat64 minArea);
+	
 
   	dgInt32 GetMaxIndex() const;
   	dgInt32 GetFaceCount() const;
@@ -150,8 +155,8 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	
 
 	
-	void Triangulate (const dgFloat64* const vertex, dgInt32 strideInBytes, dgPolyhedra* const leftOversOut);
-	void ConvexPartition (const dgFloat64* const vertex, dgInt32 strideInBytes, dgPolyhedra* const leftOversOut);
+	
+	
 	dgSphere CalculateSphere (const dgFloat64* const vertex, dgInt32 strideInBytes, const dgMatrix* const basis = NULL) const;
 
 	dgInt32 PackVertex (dgFloat64* const destArray, const dgFloat64* const unpackArray, dgInt32 strideInBytes);
@@ -169,9 +174,6 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	void GetCoplanarFaces (dgList<dgEdge*>& faceList, dgEdge* startFace, const dgFloat64* const pool, dgInt32 hisStrideInBytes, dgFloat64 normalDeviation) const;
 	void GetOpenFaces (dgList<dgEdge*>& faceList) const;
 
-	// reduce number of unnecessary edges in a polyhedra
-	// note: the polyhedra must be a triangular polyhedra
-	void Optimize (const dgFloat64* const pool, dgInt32 strideInBytes, dgFloat64 tol);
 	
 
 	void CollapseDegenerateFaces (dgPolyhedraDescriptor &desc, const dgFloat64* const pool, dgInt32 strideInBytes, dgFloat64 area);

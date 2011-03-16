@@ -764,9 +764,6 @@ return 0;
 
 dgInt32 dgPolygonSoupDatabaseBuilder::AddConvexFace (dgInt32 count, dgInt32* const pool, dgInt32* const facesArray)
 {
-_ASSERTE (0);
-return  0;
-/*
 	dgPolySoupFilterAllocator polyhedra(m_allocator);
 
 	count = polyhedra.AddFilterFace(dgUnsigned32 (count), pool);
@@ -939,5 +936,4 @@ return  0;
 	}
 
 	return facesCount;
-*/
 }
