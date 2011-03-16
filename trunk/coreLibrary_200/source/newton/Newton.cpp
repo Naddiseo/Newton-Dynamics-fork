@@ -8334,11 +8334,7 @@ void NewtonMeshBuildFromVertexListIndexList(const NewtonMesh* const mesh,
 	const dFloat* const uv0, int uv0StrideInBytes, const int* const uv0Index,
 	const dFloat* const uv1, int uv1StrideInBytes, const int* const uv1Index)
 {
-	_ASSERTE (0);
-
-/*
-	dgMeshEffect* meshEffect;
-	meshEffect = (dgMeshEffect*) mesh;
+	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 
 	TRACE_FUNTION(__FUNCTION__);
 	meshEffect->BuildFromVertexListIndexList(faceCount, faceIndexCount, faceMaterialIndex, 
@@ -8346,7 +8342,6 @@ void NewtonMeshBuildFromVertexListIndexList(const NewtonMesh* const mesh,
 											 normal, normalStrideInBytes, normalIndex,
 											 uv0, uv0StrideInBytes, uv0Index,
 											 uv1, uv1StrideInBytes, uv1Index);
-*/
 }
 
 

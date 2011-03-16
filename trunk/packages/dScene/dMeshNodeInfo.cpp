@@ -341,9 +341,6 @@ void dMeshNodeInfo::Serialize (TiXmlElement* const rootNode) const
 
 bool dMeshNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
-	_ASSERTE (0);
-	return false;
-/*
 	DeserialiseBase(dGeometryNodeInfo, rootNode, revisionNumber);
 
 	// load all the vertexData
@@ -352,25 +349,25 @@ bool dMeshNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumbe
 	int positionCount;
 	TiXmlElement* const positionsElement = (TiXmlElement*) pointElement->FirstChild ("position");
 	positionsElement->Attribute("float4", &positionCount);
-	dFloat64* const positions = new dFloat64[4 * positionCount];
+	dFloat* const positions = new dFloat[4 * positionCount];
 	dStringToFloatArray (positionsElement->Attribute("floats"), positions, 4 * positionCount);
 
 	int normalCount;
 	TiXmlElement* normalsElement = (TiXmlElement*) pointElement->FirstChild ("normal");
 	normalsElement->Attribute("float3", &normalCount);
-	float* const normals = new dFloat[3 * normalCount];
+	dFloat* const normals = new dFloat[3 * normalCount];
 	dStringToFloatArray (normalsElement->Attribute("floats"), normals, 3 * normalCount);
 
 	int uv0Count;
 	TiXmlElement* uv0Element = (TiXmlElement*) pointElement->FirstChild ("uv0");
 	uv0Element->Attribute("float2", &uv0Count);
-	float* const uv0 = new dFloat[2 * uv0Count];
+	dFloat* const uv0 = new dFloat[2 * uv0Count];
 	dStringToFloatArray (uv0Element->Attribute("floats"), uv0, 2 * uv0Count);
 
 	int uv1Count;
 	TiXmlElement* uv1Element = (TiXmlElement*) pointElement->FirstChild ("uv1");
 	uv1Element->Attribute("float2", &uv1Count);
-	float* const uv1 = new dFloat[2 * uv1Count];
+	dFloat* const uv1 = new dFloat[2 * uv1Count];
 	dStringToFloatArray (uv1Element->Attribute("floats"), uv1, 2 * uv1Count);
 
 	//load face informations
@@ -424,7 +421,6 @@ bool dMeshNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumbe
 	delete normals;	
 	delete positions;	
 	return true;
-*/
 }
 
 

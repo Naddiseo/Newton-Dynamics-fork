@@ -118,10 +118,10 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void PackVertexArrays ();
 
 	void BuildFromVertexListIndexList(dgInt32 faceCount, const dgInt32 * const faceIndexCount, const dgInt32 * const faceMaterialIndex, 
-		const dgFloat64* const vertex, dgInt32  vertexStrideInBytes, const dgInt32 * const vertexIndex,
-		const dgFloat64* const normal, dgInt32  normalStrideInBytes, const dgInt32 * const normalIndex,
-		const dgFloat64* const uv0, dgInt32  uv0StrideInBytes, const dgInt32 * const uv0Index,
-		const dgFloat64* const uv1, dgInt32  uv1StrideInBytes, const dgInt32 * const uv1Index);
+		const dgFloat32* const vertex, dgInt32  vertexStrideInBytes, const dgInt32 * const vertexIndex,
+		const dgFloat32* const normal, dgInt32  normalStrideInBytes, const dgInt32 * const normalIndex,
+		const dgFloat32* const uv0, dgInt32  uv0StrideInBytes, const dgInt32 * const uv0Index,
+		const dgFloat32* const uv1, dgInt32  uv1StrideInBytes, const dgInt32 * const uv1Index);
 
 
 	dgInt32 GetVertexCount() const;
