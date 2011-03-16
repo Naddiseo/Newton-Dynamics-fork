@@ -30,8 +30,8 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 	dVector size = dVector (5.0f, 5.0f, 5.0f, 0.0f);
 	NewtonWorld* const world = scene->GetNewton();
 
-//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
-	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _REGULAR_CONVEX_HULL_PRIMITIVE, 0);
+	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
+//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _REGULAR_CONVEX_HULL_PRIMITIVE, 0);
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _RANDOM_CONVEX_HULL_PRIMITIVE, 0);
 	
 	

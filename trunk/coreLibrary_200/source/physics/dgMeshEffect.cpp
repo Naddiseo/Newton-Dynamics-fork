@@ -3687,10 +3687,6 @@ void dgMeshEffect::AddCGSFace (const dgMeshEffect& reference, dgEdge* const refF
 
 dgMeshEffectSolidTree* dgMeshEffect::CreateSolidTree() const
 {
-	_ASSERTE (0);
-	return 0;
-	/*
-
 	dgMeshEffectSolidTree* tree = NULL;
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator srcIter (*this);
@@ -3720,7 +3716,6 @@ dgMeshEffectSolidTree* dgMeshEffect::CreateSolidTree() const
 	}
 	_ASSERTE (tree);
 	return tree;
-*/
 }
 
 void dgMeshEffect::DestroySolidTree (dgMeshEffectSolidTree* const tree)

@@ -39,27 +39,22 @@ dgMeshEffectSolidTree::CSGConvexCurve::CSGConvexCurve (dgMemoryAllocator* const 
 //bool CheckConvex(const dgBigVector& plane) const
 bool dgMeshEffectSolidTree::CSGConvexCurve::CheckConvex(const dgHugeVector& normal, const dgHugeVector& point) const
 {
-_ASSERTE (0);
-return false;
-/*
-	dgBigVector p1 (GetLast()->GetInfo());
-	dgBigVector p0 (GetLast()->GetPrev()->GetInfo());
-	dgBigVector e0 (p0 - p1);
+	dgHugeVector p1 (GetLast()->GetInfo());
+	dgHugeVector p0 (GetLast()->GetPrev()->GetInfo());
+	dgHugeVector e0 (p0 - p1);
 	for (CSGConvexCurve::dgListNode* node = GetFirst(); node; node = node->GetNext()) {
-		dgFloat64 convex;
-		dgBigVector p2 (node->GetInfo());
-		dgBigVector e1 (p2 - p1);
+		dgHugeVector p2 (node->GetInfo());
+		dgHugeVector e1 (p2 - p1);
 
-		dgBigVector n (e1 * e0);
-		convex = n % plane;
-		if (convex < dgFloat64 (-1.0e5f)) {
+		dgHugeVector n (e1 * e0);
+		dgGoogol convex = n % normal;
+		if (convex.GetAproximateValue() < dgFloat64 (-1.0e10f)) {
 			return false;
 		}
 		p1 = p2;
-		e0 = e1.Scale (-1.0f);
+		e0 = e1.Scale (dgGoogol(-1.0f));
 	}
 	return true;
-*/
 };
 
 
@@ -97,7 +92,7 @@ dgMeshEffectSolidTree::~dgMeshEffectSolidTree()
 
 void dgMeshEffectSolidTree::BuildPlane (const dgMeshEffect& mesh, dgEdge* const face, dgHugeVector& normal, dgHugeVector& point) const
 {
-	point = dgHugeVector(dgBigVector (mesh.m_points[face->m_incidentVertex]));
+	point = dgHugeVector(mesh.m_points[face->m_incidentVertex]);
 
 	dgEdge* edge = face;
 	normal = dgHugeVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
@@ -119,9 +114,7 @@ void dgMeshEffectSolidTree::BuildPlane (const dgMeshEffect& mesh, dgEdge* const 
 
 void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const face)
 {
-	_ASSERTE(0);
-/*
-	dgBigVector normal (mesh.FaceNormal (face, &mesh.m_points[0][0], sizeof (dgVector)));
+	dgBigVector normal (mesh.FaceNormal (face, &mesh.m_points[0][0], sizeof (dgBigVector)));
 	dgFloat64 mag2 = normal % normal;
 
 	if (mag2 > dgFloat32 (1.0e-14f)) {
@@ -160,8 +153,8 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 					maxDist = dist;
 				} 
 			} 
-			_ASSERTE (0);
-			maxDist = dgGoogol (dgFloat64 (0.0f));
+_ASSERTE (0);
+maxDist = dgGoogol (dgFloat64 (0.0f));
 
 			if ((minDist.GetAproximateValue() < dgFloat64 (0.0f)) && (maxDist.GetAproximateValue() > dgFloat64 (0.0f))) {
 				CSGConvexCurve tmp(mesh.GetAllocator());
@@ -274,7 +267,6 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 			}
 		}
 	}
-*/
 }
 
 
