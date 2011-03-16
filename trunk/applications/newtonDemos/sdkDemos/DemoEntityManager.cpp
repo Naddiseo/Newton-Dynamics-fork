@@ -282,7 +282,7 @@ void DemoEntityManager::LoadVisualScene(dScene* const scene, EntityDictionary& d
 	for (dScene::dTreeNode* node = scene->GetFirstNode (); node; node = scene->GetNextNode (node)) {
 		dNodeInfo* info = scene->GetInfoFromNode(node);
 		if (info->GetTypeId() == dMeshNodeInfo::GetRttiType()) {
-			DemoMesh* mesh = new DemoMesh(scene, node);
+			DemoMesh* const mesh = new DemoMesh(scene, node);
 			meshDictionary.Insert(mesh, node);
 		}
 	}

@@ -146,10 +146,10 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	bool HasOpenEdges () const;
 	dgFloat64 CalculateVolume () const;
 
-	void GetVertexStreams (dgInt32 vetexStrideInByte, dgFloat64* const vertex, 
-						   dgInt32 normalStrideInByte, dgFloat64* const normal, 
-						   dgInt32 uvStrideInByte0, dgFloat64* const uv0, 
-						   dgInt32 uvStrideInByte1, dgFloat64* const uv1);
+	void GetVertexStreams (dgInt32 vetexStrideInByte, dgFloat32* const vertex, 
+						   dgInt32 normalStrideInByte, dgFloat32* const normal, 
+						   dgInt32 uvStrideInByte0, dgFloat32* const uv0, 
+						   dgInt32 uvStrideInByte1, dgFloat32* const uv1);
 
 	void GetIndirectVertexStreams(dgInt32 vetexStrideInByte, dgFloat64* const vertex, dgInt32* const vertexIndices, dgInt32* const vertexCount,
 								  dgInt32 normalStrideInByte, dgFloat64* const normal, dgInt32* const normalIndices, dgInt32* const normalCount,

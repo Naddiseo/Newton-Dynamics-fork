@@ -125,40 +125,36 @@ void dMaterialNodeInfo::Serialize (TiXmlElement* const rootNode) const
 
 bool dMaterialNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
-	_ASSERTE (0);
-	return false;
-/*
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 
 	rootNode->Attribute("id", &m_id);
 
-	TiXmlElement* ambient = (TiXmlElement*) rootNode->FirstChild ("ambient");
+	TiXmlElement* const ambient = (TiXmlElement*) rootNode->FirstChild ("ambient");
 	ambient->Attribute("textureId", &m_ambientTexId);
 	dStringToFloatArray (ambient->Attribute("color"), &m_ambientColor[0], 4);
 
-	TiXmlElement* diffuse = (TiXmlElement*) rootNode->FirstChild ("diffuse");
+	TiXmlElement* const diffuse = (TiXmlElement*) rootNode->FirstChild ("diffuse");
 	diffuse->Attribute("textureId", &m_diffuseTexId);
 	dStringToFloatArray (diffuse->Attribute("color"), &m_diffuseColor[0], 4);
 
-	TiXmlElement* specular = (TiXmlElement*) rootNode->FirstChild ("specular");
+	TiXmlElement* const specular = (TiXmlElement*) rootNode->FirstChild ("specular");
 	specular->Attribute("textureId", &m_specularTexId);
 	dStringToFloatArray (specular->Attribute("color"), &m_specularColor[0], 4);
 
-	TiXmlElement* emissive = (TiXmlElement*) rootNode->FirstChild ("emissive");
+	TiXmlElement* const emissive = (TiXmlElement*) rootNode->FirstChild ("emissive");
 	emissive->Attribute("textureId", &m_emissiveTexId);
 	dStringToFloatArray (emissive->Attribute("color"), &m_emissiveColor[0], 4);
 
-	TiXmlElement* shininess = (TiXmlElement*) rootNode->FirstChild ("shininess");
+	TiXmlElement* const shininess = (TiXmlElement*) rootNode->FirstChild ("shininess");
 	double value;
 	shininess->Attribute("float", &value);
 	m_shininess = dFloat (value);
 	
-	TiXmlElement* opacity = (TiXmlElement*) rootNode->FirstChild ("opacity");
+	TiXmlElement* const opacity = (TiXmlElement*) rootNode->FirstChild ("opacity");
 	opacity->Attribute("float", &value);
 	m_opacity = dFloat (value);
 
 	return true;
-*/
 }
 
 

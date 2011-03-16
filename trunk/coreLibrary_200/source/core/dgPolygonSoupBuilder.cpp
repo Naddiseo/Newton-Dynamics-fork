@@ -110,6 +110,8 @@ void dgPolygonSoupDatabaseBuilder::Begin()
 void dgPolygonSoupDatabaseBuilder::AddMesh (const dgFloat32* const vertex, dgInt32 vertexCount, dgInt32 strideInBytes, dgInt32 faceCount,	
 	const dgInt32* const faceArray, const dgInt32* const indexArray, const dgInt32* const faceTagsData, const dgMatrix& worldMatrix) 
 {
+	_ASSERTE (0);
+/*
 	dgInt32 faces[256];
 	dgInt32 pool[2048];
 
@@ -152,6 +154,7 @@ void dgPolygonSoupDatabaseBuilder::AddMesh (const dgFloat32* const vertex, dgInt
 		}
 	}
 	m_vertexCount += vertexCount;
+*/
 }
 
 
@@ -172,6 +175,8 @@ void dgPolygonSoupDatabaseBuilder::SingleFaceFixup()
 
 void dgPolygonSoupDatabaseBuilder::EndAndOptimize(bool optimize)
 {
+	_ASSERTE (0);
+/*
 	if (m_faceCount) {
 		dgStack<dgInt32> indexMapPool (m_indexCount + m_vertexCount);
 
@@ -196,6 +201,7 @@ void dgPolygonSoupDatabaseBuilder::EndAndOptimize(bool optimize)
 			OptimizeByIndividualFaces();
 		}
 	}
+*/
 }
 
 
@@ -420,6 +426,8 @@ _ASSERTE (polygonIndex == m_indexCount);
 
 void dgPolygonSoupDatabaseBuilder::End(bool optimize)
 {
+	_ASSERTE (0);
+/*
 	Optimize(optimize);
 
 	// build the normal array and adjacency array
@@ -450,20 +458,15 @@ void dgPolygonSoupDatabaseBuilder::End(bool optimize)
 	// compress normals array
 	m_normalIndex[m_faceCount] = 0;
 	m_normalCount = dgVertexListToIndexList(&m_normalPoints[0].m_x, sizeof (dgTriplex), sizeof (dgTriplex), 0, m_faceCount, &m_normalIndex[0], dgFloat32 (1.0e-4f));
+*/
 }
 
 void dgPolygonSoupDatabaseBuilder::Optimize(bool optimize)
 {
+	_ASSERTE (0);
+/*
 	#define DG_PATITION_SIZE (1024 * 4)
 	if (optimize && (m_faceCount > DG_PATITION_SIZE)) {
-
-//		dgFloat64 x = dgFloat32 (0.0f);
-//		dgFloat64 y = dgFloat32 (0.0f);
-//		dgFloat64 z = dgFloat32 (0.0f);
-//		dgFloat64 xd = dgFloat32 (0.0f);
-//		dgFloat64 yd = dgFloat32 (0.0f);
-//		dgFloat64 zd = dgFloat32 (0.0f);
-
 		dgBigVector median (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 		dgBigVector varian (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 
@@ -486,18 +489,6 @@ void dgPolygonSoupDatabaseBuilder::Optimize(bool optimize)
 				p1.m_z = GetMax (p1.m_z, dgFloat64 (m_vertexPoints[k].m_z));
 			}
 
-			//dgBigVector spand (p1 - p0);
-			//dgBigVector center (p1 + p0);
-			//spand = spand.Scale (dgFloat64 (0.5f));
-			//center = center.Scale (dgFloat64 (0.5f));
-			//spand = spand.CompProduct (spand.CompProduct(spand));
-			//x += center.m_x;
-			//y += center.m_y;
-			//z += center.m_z;
-			//xd += center.m_x * center.m_x + spand.m_x * (dgFloat64 (1.0f / 12.0f));
-			//yd += center.m_y * center.m_y + spand.m_y * (dgFloat64 (1.0f / 12.0f));
-			//zd += center.m_z * center.m_z + spand.m_z * (dgFloat64 (1.0f / 12.0f));
-
 			dgBigVector p ((p0 + p1).Scale (0.5f));
 			median += p;
 			varian += p.CompProduct (p);
@@ -517,7 +508,7 @@ void dgPolygonSoupDatabaseBuilder::Optimize(bool optimize)
 		dgBigVector center = median.Scale (dgFloat32 (1.0f) / dgFloat32 (m_faceCount));
 		dgFloat64 axisVal = center[axis];
 
-/*
+#if 0
 		dgInt32 axis = 0;
 		dgFloat64 axisVal = x / m_faceCount;
 		if ((yd > xd) && (yd > zd)) {
@@ -528,7 +519,7 @@ void dgPolygonSoupDatabaseBuilder::Optimize(bool optimize)
 			axis = 2;
 			axisVal = z / m_faceCount;
 		}
-*/
+#endif
 
 		dgPolygonSoupDatabaseBuilder left(m_allocator);
 		dgPolygonSoupDatabaseBuilder right(m_allocator);
@@ -609,6 +600,7 @@ void dgPolygonSoupDatabaseBuilder::Optimize(bool optimize)
 	} else {
 		EndAndOptimize(optimize);
 	}
+*/
 }
 
 
@@ -773,12 +765,11 @@ return 0;
 }
 
 
-dgInt32 dgPolygonSoupDatabaseBuilder::AddConvexFace (dgInt32 count, dgInt32* const  pool, dgInt32* const facesArray)
+dgInt32 dgPolygonSoupDatabaseBuilder::AddConvexFace (dgInt32 count, dgInt32* const pool, dgInt32* const facesArray)
 {
 _ASSERTE (0);
-return 0;
+return  0;
 /*
-
 	dgPolySoupFilterAllocator polyhedra(m_allocator);
 
 	count = polyhedra.AddFilterFace(dgUnsigned32 (count), pool);

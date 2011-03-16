@@ -72,10 +72,10 @@ class dgPolygonSoupDatabaseBuilder
 //	void WriteDebugOutput (const char* name);
 
 	public:
-	struct VertexArray: public dgArray<dgTriplex>
+	struct VertexArray: public dgArray<dgBigVector>
 	{
 		VertexArray(dgMemoryAllocator* const allocator)
-			:dgArray<dgTriplex>(1024 * 256, allocator)
+			:dgArray<dgBigVector>(1024 * 256, allocator)
 		{
 		}
 	};

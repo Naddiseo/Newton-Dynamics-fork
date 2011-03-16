@@ -1573,7 +1573,8 @@ dgFloat32 dgAABBPolygonSoup::CalculateFaceMaxSize (dgTriplex* const vertex, dgIn
 
 void dgAABBPolygonSoup::Create (const dgPolygonSoupDatabaseBuilder& builder, bool optimizedBuild)
 {
-//	_ASSERTE (builder.m_faceCount >= 1);
+	_ASSERTE (0);
+/*
 	if (builder.m_faceCount == 0) {
 		return;
 	}
@@ -1668,5 +1669,6 @@ void dgAABBPolygonSoup::Create (const dgPolygonSoupDatabaseBuilder& builder, boo
 	dgVector p1;
 	GetAABB (p0, p1);
 	ForAllSectors (p0, p1, CalculateAllFaceEdgeNormals, this);
+*/
 }
 

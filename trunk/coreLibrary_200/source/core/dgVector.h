@@ -77,6 +77,7 @@ class dgTemplateVector
 	T m_w;
 };
 
+class dgBigVector;
 
 DG_MSC_VECTOR_ALIGMENT
 class dgVector: public dgTemplateVector<dgFloat32>
@@ -89,6 +90,7 @@ class dgVector: public dgTemplateVector<dgFloat32>
 	dgVector (const dgTemplateVector<dgFloat32>& v);
 	dgVector (const dgFloat32 *ptr);
 	dgVector (dgFloat32 x, dgFloat32 y, dgFloat32 z, dgFloat32 w); 
+	dgVector (const dgBigVector& copy); 
 
 	dgFloat32 DotProductSimd (const dgVector& A) const;
 	dgVector CrossProductSimd (const dgVector &A) const;
@@ -302,6 +304,12 @@ DG_INLINE dgVector::dgVector (const dgTemplateVector<dgFloat32>& v)
 
 DG_INLINE dgVector::dgVector (const dgFloat32 *ptr)
 	:dgTemplateVector<dgFloat32>(ptr)
+{
+	_ASSERTE (dgCheckVector ((*this)));
+}
+
+DG_INLINE dgVector::dgVector (const dgBigVector& copy)
+	:dgTemplateVector<dgFloat32>(dgFloat32 (copy.m_x), dgFloat32 (copy.m_y), dgFloat32 (copy.m_z), dgFloat32 (copy.m_w))
 {
 	_ASSERTE (dgCheckVector ((*this)));
 }

@@ -2466,38 +2466,34 @@ dgInt32 GetTotalFaceCount() const;
 
 
 
-void dgMeshEffect::GetVertexStreams (dgInt32 vetexStrideInByte, dgFloat64* const vertex, 
-									 dgInt32 normalStrideInByte, dgFloat64* const normal, 
-									 dgInt32 uvStrideInByte0, dgFloat64* const uv0, 
-									 dgInt32 uvStrideInByte1, dgFloat64* const uv1)
+void dgMeshEffect::GetVertexStreams (dgInt32 vetexStrideInByte, dgFloat32* const vertex, 
+									 dgInt32 normalStrideInByte, dgFloat32* const normal, 
+									 dgInt32 uvStrideInByte0, dgFloat32* const uv0, 
+									 dgInt32 uvStrideInByte1, dgFloat32* const uv1)
 {
-	_ASSERTE (0);
-/*
 	uvStrideInByte0 /= sizeof (dgFloat32);
 	uvStrideInByte1 /= sizeof (dgFloat32);
 	vetexStrideInByte /= sizeof (dgFloat32);
 	normalStrideInByte /= sizeof (dgFloat32);
-	for (dgInt32 i =0; i < m_atribCount; i ++)	{
-		dgInt32 j;
-		j = i * vetexStrideInByte;
-		vertex[j + 0] = m_attib[i].m_vertex.m_x;
-		vertex[j + 1] = m_attib[i].m_vertex.m_y;
-		vertex[j + 2] = m_attib[i].m_vertex.m_z;
+	for (dgInt32 i = 0; i < m_atribCount; i ++)	{
+		dgInt32 j = i * vetexStrideInByte;
+		vertex[j + 0] = dgFloat32 (m_attib[i].m_vertex.m_x);
+		vertex[j + 1] = dgFloat32 (m_attib[i].m_vertex.m_y);
+		vertex[j + 2] = dgFloat32 (m_attib[i].m_vertex.m_z);
 
 		j = i * normalStrideInByte;
-		normal[j + 0] = m_attib[i].m_normal.m_x;
-		normal[j + 1] = m_attib[i].m_normal.m_y;
-		normal[j + 2] = m_attib[i].m_normal.m_z;
+		normal[j + 0] = dgFloat32 (m_attib[i].m_normal_x);
+		normal[j + 1] = dgFloat32 (m_attib[i].m_normal_y);
+		normal[j + 2] = dgFloat32 (m_attib[i].m_normal_z);
 
 		j = i * uvStrideInByte1;
-		uv1[j + 0] = m_attib[i].m_u1;
-		uv1[j + 1] = m_attib[i].m_v1;
+		uv1[j + 0] = dgFloat32 (m_attib[i].m_u1);
+		uv1[j + 1] = dgFloat32 (m_attib[i].m_v1);
 
 		j = i * uvStrideInByte0;
-		uv0[j + 0] = m_attib[i].m_u0;
-		uv0[j + 1] = m_attib[i].m_v0;
+		uv0[j + 0] = dgFloat32 (m_attib[i].m_u0);
+		uv0[j + 1] = dgFloat32 (m_attib[i].m_v0);
 	}
-*/
 }
 
 
@@ -2547,9 +2543,6 @@ void dgMeshEffect::GetIndirectVertexStreams(
 
 dgMeshEffect::dgIndexArray* dgMeshEffect::MaterialGeometryBegin()
 {
-	_ASSERTE (0);
-	return NULL;
-/*
 	dgInt32 materials[256];
 	dgInt32 streamIndexMap[256];
 
@@ -2580,7 +2573,7 @@ dgMeshEffect::dgIndexArray* dgMeshEffect::MaterialGeometryBegin()
 				array->m_indexList[count * 4 + 0] = index0;
 				array->m_indexList[count * 4 + 1] = index1;
 				array->m_indexList[count * 4 + 2] = dgInt32 (ptr->m_userData);
-				array->m_indexList[count * 4 + 3] = m_attib[dgInt32 (edge->m_userData)].m_material;
+				array->m_indexList[count * 4 + 3] = dgInt32 (m_attib[dgInt32 (edge->m_userData)].m_material);
 				index1 = dgInt32 (ptr->m_userData);
 
 				dgInt32 hashValue = array->m_indexList[count * 4 + 3] & 0xff;
@@ -2608,7 +2601,6 @@ dgMeshEffect::dgIndexArray* dgMeshEffect::MaterialGeometryBegin()
 	array->m_materialCount = count;
 
 	return array;
-*/
 }
 
 void dgMeshEffect::MaterialGeomteryEnd(dgIndexArray* handle)
