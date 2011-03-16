@@ -205,7 +205,8 @@ void dgApi GetMinMax (dgVector &minOut, dgVector &maxOut, const dgFloat32* const
 #endif
 
 
-static inline dgInt32 dgApi cmp_vertex (const dgFloat32* const v1, const dgFloat32* const v2, dgInt32 firstSortAxis)
+
+static inline dgInt32 cmp_vertex (const dgFloat64* const v1, const dgFloat64* const v2, dgInt32 firstSortAxis)
 {
 	if (v1[firstSortAxis] < v2[firstSortAxis]) {
 		return -1;
@@ -218,14 +219,9 @@ static inline dgInt32 dgApi cmp_vertex (const dgFloat32* const v1, const dgFloat
 	return 0;
 }
 
-static dgInt32 SortVertices (dgFloat32* const vertexList,  dgInt32 stride, dgInt32 floatSize, dgInt32 unsignedSize, dgInt32 vertexCount, dgFloat32 tolerance)
+static dgInt32 SortVertices (dgFloat64* const vertexList,  dgInt32 stride, dgInt32 compareCount, dgInt32 vertexCount, dgFloat64 tolerance)
 {
-#ifdef __USE_DOUBLE_PRECISION__
-	dgInt64* indexPtr;
-#else
-	dgInt32* indexPtr;
-#endif
-
+//	
 	dgFloat64 xc = 0;
 	dgFloat64 yc = 0;
 	dgFloat64 zc = 0;
@@ -278,9 +274,7 @@ static dgInt32 SortVertices (dgFloat32* const vertexList,  dgInt32 stride, dgInt
 		minDist = 1.0e-3;
 	}
 
-//		dgFloat64 tol = tolerance * minDist + 1.0e-4;
-//		tol = tolerance + 1.0e-4;
-	dgFloat64 tol = tolerance * minDist + 1.0e-8f;
+	dgFloat64 tol = tolerance * minDist + 1.0e-12f;
 	dgFloat64 sweptWindow = 2.0 * tol;
 	sweptWindow += 1.0e-4;
 
@@ -307,18 +301,17 @@ static dgInt32 SortVertices (dgFloat32* const vertexList,  dgInt32 stride, dgInt
 		if ((hi - lo) > 8) {
 			dgInt32 i = lo;
 			dgInt32 j = hi;
-			dgFloat32 val[64]; 
-			memcpy (val, &vertexList[((lo + hi) >> 1) * stride], stride * sizeof (dgFloat32));
+			dgFloat64 val[64]; 
+			memcpy (val, &vertexList[((lo + hi) >> 1) * stride], stride * sizeof (dgFloat64));
 			do {    
 				while (cmp_vertex (&vertexList[i * stride], val, firstSortAxis) < 0) i ++;
 				while (cmp_vertex (&vertexList[j * stride], val, firstSortAxis) > 0) j --;
 
 				if (i <= j)	{
-					dgFloat32 tmp[64]; 
-					//dgIsland tmp (m_islandArray[i]);
-					memcpy (tmp, &vertexList[i * stride], stride * sizeof (dgFloat32));
-					memcpy (&vertexList[i * stride], &vertexList[j * stride], stride * sizeof (dgFloat32)); 
-					memcpy (&vertexList[j * stride], tmp, stride * sizeof (dgFloat32)); 
+					dgFloat64 tmp[64]; 
+					memcpy (tmp, &vertexList[i * stride], stride * sizeof (dgFloat64));
+					memcpy (&vertexList[i * stride], &vertexList[j * stride], stride * sizeof (dgFloat64)); 
+					memcpy (&vertexList[j * stride], tmp, stride * sizeof (dgFloat64)); 
 					i++; 
 					j--;
 				}
@@ -337,16 +330,14 @@ static dgInt32 SortVertices (dgFloat32* const vertexList,  dgInt32 stride, dgInt
 			_ASSERTE (stackIndex < sizeof (stack) / (2 * sizeof (stack[0][0])));
 		} else {
 			for (dgInt32 i = lo + 1; i <= hi ; i++) {
-				dgInt32 j;
-				dgFloat32 tmp[64]; 
-				//dgIsland tmp (m_islandArray[i]);
-				memcpy (tmp, &vertexList[i * stride], stride * sizeof (dgFloat32));
-				for (j = i; j && (cmp_vertex (&vertexList[(j - 1) * stride], tmp, firstSortAxis) > 0); j --) {
-					//m_islandArray[j] = m_islandArray[j - 1];
-					memcpy (&vertexList[j * stride], &vertexList[(j - 1)* stride], stride * sizeof (dgFloat32));
+				dgFloat64 tmp[64]; 
+				memcpy (tmp, &vertexList[i * stride], stride * sizeof (dgFloat64));
+
+				dgInt32 j = i;
+				for (; j && (cmp_vertex (&vertexList[(j - 1) * stride], tmp, firstSortAxis) > 0); j --) {
+					memcpy (&vertexList[j * stride], &vertexList[(j - 1)* stride], stride * sizeof (dgFloat64));
 				}
-				//m_islandArray[j] = tmp;
-				memcpy (&vertexList[j * stride], tmp, stride * sizeof (dgFloat32)); 
+				memcpy (&vertexList[j * stride], tmp, stride * sizeof (dgFloat64)); 
 			}
 		}
 	}
@@ -359,12 +350,8 @@ static dgInt32 SortVertices (dgFloat32* const vertexList,  dgInt32 stride, dgInt
 #endif
 
 	dgInt32 count = 0;
-#ifdef __USE_DOUBLE_PRECISION__
-	_ASSERTE (0);
-	indexPtr = (dgInt64*)vertexList;
-#else
-	indexPtr = (dgInt32*)vertexList;
-#endif
+	dgInt64* const indexPtr = (dgInt64*)vertexList;
+
 	for (dgInt32 i = 0; i < vertexCount; i ++) {
 		dgInt32 m = i * stride;
 		dgInt32 index = dgInt32 (indexPtr[m + 0]);
@@ -379,7 +366,8 @@ static dgInt32 SortVertices (dgFloat32* const vertexList,  dgInt32 stride, dgInt
 					if (val >= swept) {
 						break;
 					}
-
+					_ASSERTE (0);
+/*
 					bool test = true;
 					dgInt32 t = 0;
 					for (; test && (t < floatSize); t ++) {
@@ -394,6 +382,7 @@ static dgInt32 SortVertices (dgFloat32* const vertexList,  dgInt32 stride, dgInt
 					if (test) {
 						indexPtr[k + 0] = count;
 					}
+*/
 				}
 				k += stride;
 			}
@@ -409,27 +398,26 @@ static dgInt32 SortVertices (dgFloat32* const vertexList,  dgInt32 stride, dgInt
 
 
 
-static dgInt32 QuickSortVertices (dgFloat32* const vertList, dgInt32 stride, dgInt32 floatSize, dgInt32 unsignedSize, dgInt32 vertexCount, dgFloat32 tolerance)
+//static dgInt32 QuickSortVertices (dgFloat32* const vertList, dgInt32 stride, dgInt32 floatSize, dgInt32 unsignedSize, dgInt32 vertexCount, dgFloat32 tolerance)
+static dgInt32 QuickSortVertices (dgFloat64* const vertList, dgInt32 stride, dgInt32 compareCount, dgInt32 vertexCount, dgFloat64 tolerance)
 {
-#ifdef __USE_DOUBLE_PRECISION__
+
 	dgInt64* indexPtr;
-#else
-	dgInt32* indexPtr;
-#endif
 
 	dgInt32 count = 0;
-	if (vertexCount > (3 * 1024 * 32)) {
-		dgFloat32 x = dgFloat32 (0.0f);
-		dgFloat32 y = dgFloat32 (0.0f);
-		dgFloat32 z = dgFloat32 (0.0f);
-		dgFloat32 xd = dgFloat32 (0.0f);
-		dgFloat32 yd = dgFloat32 (0.0f);
-		dgFloat32 zd = dgFloat32 (0.0f);
+//	if (vertexCount > (3 * 1024 * 32)) {
+if (vertexCount > (10)) {
+		dgFloat64 x = dgFloat32 (0.0f);
+		dgFloat64 y = dgFloat32 (0.0f);
+		dgFloat64 z = dgFloat32 (0.0f);
+		dgFloat64 xd = dgFloat32 (0.0f);
+		dgFloat64 yd = dgFloat32 (0.0f);
+		dgFloat64 zd = dgFloat32 (0.0f);
 		
 		for (dgInt32 i = 0; i < vertexCount; i ++) {
-			dgFloat32 x0 = vertList[i * stride + 2];
-			dgFloat32 y0 = vertList[i * stride + 3];
-			dgFloat32 z0 = vertList[i * stride + 4];
+			dgFloat64 x0 = vertList[i * stride + 2];
+			dgFloat64 y0 = vertList[i * stride + 3];
+			dgFloat64 z0 = vertList[i * stride + 4];
 			x += x0;
 			y += y0;
 			z += z0;
@@ -443,7 +431,7 @@ static dgInt32 QuickSortVertices (dgFloat32* const vertList, dgInt32 stride, dgI
 		zd = vertexCount * zd - z * z;
 
 		dgInt32 axis = 2;
-		dgFloat32 axisVal = x / vertexCount;
+		dgFloat64 axisVal = x / vertexCount;
 		if ((yd > xd) && (yd > zd)) {
 			axis = 3;
 			axisVal = y / vertexCount;
@@ -468,28 +456,23 @@ static dgInt32 QuickSortVertices (dgFloat32* const vertList, dgInt32 stride, dgI
 		} while (i0 <= i1);
 		_ASSERTE (i0 < vertexCount);
 
-		dgInt32 count0 = QuickSortVertices (&vertList[ 0 * stride], stride, floatSize, unsignedSize, i0, tolerance);
-		dgInt32 count1 = QuickSortVertices (&vertList[i0 * stride], stride, floatSize, unsignedSize, vertexCount - i0, tolerance);
+		dgInt32 count0 = QuickSortVertices (&vertList[ 0 * stride], stride, compareCount, i0, tolerance);
+		dgInt32 count1 = QuickSortVertices (&vertList[i0 * stride], stride, compareCount, vertexCount - i0, tolerance);
 		
 		count = count0 + count1;
 
 		for (dgInt32 i = 0; i < count1; i ++) {
-			memcpy (&vertList[(count0 + i) * stride + 2], &vertList[(i0 + i) * stride + 2], (stride - 2) * sizeof (dgFloat32));
+			memcpy (&vertList[(count0 + i) * stride + 2], &vertList[(i0 + i) * stride + 2], (stride - 2) * sizeof (dgFloat64));
 		}
 
 
-		#ifdef __USE_DOUBLE_PRECISION__
-				indexPtr = (dgInt64*)vertList;
-		#else
-				indexPtr = (dgInt32*)vertList;
-		#endif
-
+		indexPtr = (dgInt64*)vertList;
 		for (dgInt32 i = i0; i < vertexCount; i ++) {
 			indexPtr[i * stride] += count0;
 		}
 
 	} else {
-		count = SortVertices (vertList, stride, floatSize, unsignedSize, vertexCount, tolerance);
+		count = SortVertices (vertList, stride, compareCount, vertexCount, tolerance);
 	}
 
 	return count;
@@ -498,66 +481,62 @@ static dgInt32 QuickSortVertices (dgFloat32* const vertList, dgInt32 stride, dgI
 
 
 
-dgInt32 dgVertexListToIndexList (dgFloat32* const vertList, dgInt32 strideInBytes, dgInt32 floatSizeInBytes,  dgInt32 unsignedSizeInBytes, dgInt32 vertexCount, dgInt32* const indexList, dgFloat32 tolerance)
+//dgInt32 dgVertexListToIndexList (dgFloat32* const vertList, dgInt32 strideInBytes, dgInt32 floatSizeInBytes,  dgInt32 unsignedSizeInBytes, dgInt32 vertexCount, dgInt32* const indexList, dgFloat32 tolerance)
+dgInt32 dgVertexListToIndexList (dgFloat64* const vertList, dgInt32 strideInBytes, dgInt32 compareCount, dgInt32 vertexCount, dgInt32* const indexListOut, dgFloat64 tolerance)
 {
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);
 	dgControlFP (_PC_53, _MCW_PC);
 #endif
 
-	if (strideInBytes < dgInt32 (sizeof (dgTriplex))) {
+	if (strideInBytes < 3 * dgInt32 (sizeof (dgFloat64))) {
 		return 0;
 	}
-	if ((floatSizeInBytes + unsignedSizeInBytes) < dgInt32(sizeof (dgTriplex))) {
+	if (compareCount < 3) {
 		return 0;
 	}
+	_ASSERT (strideInBytes == dgInt32 (sizeof (dgFloat64) * (strideInBytes / sizeof (dgFloat64))));
 
-	if ((floatSizeInBytes + unsignedSizeInBytes) > strideInBytes) {
-		return 0;
-	}
-
-	dgInt32 stride = strideInBytes / dgInt32 (sizeof (dgFloat32));
+	dgInt32 stride = strideInBytes / dgInt32 (sizeof (dgFloat64));
 	dgInt32 stride2 = stride + 2;
 
-	dgStack<dgFloat32>pool (stride2  * vertexCount);
-	dgFloat32* const tmpVertexList = &pool[0];
+	dgStack<dgFloat64>pool (stride2  * vertexCount);
+	dgFloat64* const tmpVertexList = &pool[0];
 
-#ifdef __USE_DOUBLE_PRECISION__
-	dgInt64* const indexPtr = (dgInt64*)tmpVertexList;
-#else
-	dgInt32* const indexPtr = (dgInt32*)tmpVertexList;
-#endif
+//	dgInt64* const indexPtr = (dgInt64*)tmpVertexList;
 
 	dgInt32 k = 0;
 	dgInt32 m = 0;
 	for (dgInt32 i = 0; i < vertexCount; i ++) {
-		memcpy (&indexPtr [m + 2], &vertList[k], stride * sizeof (dgFloat32));
-		indexPtr[m + 0] = 0;
-		indexPtr[m + 0] = indexPtr[m + 0] - 1;
-		indexPtr[m + 1] = i;
+		memcpy (&tmpVertexList[m + 2], &tmpVertexList[k], stride * sizeof (dgFloat64));
+		tmpVertexList[m + 0] = 0;
+		tmpVertexList[m + 0] = tmpVertexList[m + 0] - 1;
+		tmpVertexList[m + 1] = i;
 		k += stride;
 		m += stride2;
 	}
 	
-	dgInt32 floatSize = dgInt32 (floatSizeInBytes / sizeof (dgFloat32));
-	dgInt32 unsignedSize = dgInt32 (unsignedSizeInBytes / sizeof (dgUnsigned32));
-	dgInt32 count = QuickSortVertices (tmpVertexList, stride + 2, floatSize, unsignedSize, vertexCount, tolerance);
+//	dgInt32 floatSize = dgInt32 (floatSizeInBytes / sizeof (dgFloat64));
+//	dgInt32 unsignedSize = dgInt32 (unsignedSizeInBytes / sizeof (dgUnsigned32));
+//	dgInt32 count = QuickSortVertices (tmpVertexList, stride + 2, floatSize, unsignedSize, vertexCount, tolerance);
+	dgInt32 count = QuickSortVertices (tmpVertexList, stride2, compareCount, vertexCount, tolerance);
+
 
 	k = 0;
 	m = 0;
 	for (dgInt32 i = 0; i < count; i ++) {
 		k = i * stride;
 		m = i * stride2;
-		memcpy (&vertList[k], &indexPtr [m + 2], stride * sizeof (dgFloat32));
+		memcpy (&vertList[k], &tmpVertexList[m + 2], stride * sizeof (dgFloat64));
 		k += stride;
 		m += stride2;
 	}
 
 	m = 0;
 	for (dgInt32 i = 0; i < vertexCount; i ++) {
-		dgInt32 i1 = dgInt32 (indexPtr [m + 1]);
-		dgInt32 index = dgInt32 (indexPtr [m + 0]);
-		indexList[i1] = dgInt32 (index);
+		dgInt32 i1 = dgInt32 (tmpVertexList [m + 1]);
+		dgInt32 index = dgInt32 (tmpVertexList [m + 0]);
+		indexListOut[i1] = index;
 		m += stride2;
 	}
 
@@ -568,11 +547,11 @@ dgInt32 dgVertexListToIndexList (dgFloat32* const vertList, dgInt32 strideInByte
 	return count;
 }
 
-#ifndef __USE_DOUBLE_PRECISION__
-dgInt32 dgVertexListToIndexList (dgFloat64* const vertexList, dgInt32 strideInBytes, dgInt32 compareCount, dgInt32 vertexCount, dgInt32* const indexListOut, dgFloat64 tolerance)
+
+
+
+dgInt32 dgVertexListToIndexList (dgFloat32* const vertList, dgInt32 strideInBytes, dgInt32 floatSizeInBytes,  dgInt32 unsignedSizeInBytes, dgInt32 vertexCount, dgInt32* const indexList, dgFloat32 tolerance)
 {
 	_ASSERTE (0);
 	return 0;
 }
-#endif
-
