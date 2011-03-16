@@ -368,30 +368,18 @@ void dgPolygonSoupDatabaseBuilder::OptimizeByGroupID (dgPolygonSoupDatabaseBuild
 
 void dgPolygonSoupDatabaseBuilder::OptimizeByIndividualFaces()
 {
-	dgInt32 polygonIndex;
-	dgInt32 newFaceCount; 
-	dgInt32 newIndexCount; 
+	dgInt32* const faceArray = &m_faceVertexCount[0];
+	dgInt32* const indexArray = &m_vertexIndex[0];
 
-	dgInt32* faceArray;
-	dgInt32* indexArray;
-	dgInt32* oldFaceArray;
-	dgInt32* oldIndexArray;
+	dgInt32* const oldFaceArray = &m_faceVertexCount[0];
+	dgInt32* const oldIndexArray = &m_vertexIndex[0];
 
-	faceArray = &m_faceVertexCount[0];
-	indexArray = &m_vertexIndex[0];
-
-	oldFaceArray = &m_faceVertexCount[0];
-	oldIndexArray = &m_vertexIndex[0];
-
-	polygonIndex = 0;
-	newFaceCount = 0;
-	newIndexCount = 0;
+	dgInt32 polygonIndex = 0;
+	dgInt32 newFaceCount = 0;
+	dgInt32 newIndexCount = 0;
 	for (dgInt32 i = 0; i < m_faceCount; i ++) {
-		dgInt32 count;
-		dgInt32 oldCount;
-
-		oldCount = oldFaceArray[i];
-		count = FilterFace (oldCount - 1, &oldIndexArray[polygonIndex + 1]);
+		dgInt32 oldCount = oldFaceArray[i];
+		dgInt32 count = FilterFace (oldCount - 1, &oldIndexArray[polygonIndex + 1]);
 		if (count) {
 			faceArray[newFaceCount] = count + 1;
 			for (dgInt32 j = 0; j < count + 1; j ++) {
@@ -402,9 +390,7 @@ void dgPolygonSoupDatabaseBuilder::OptimizeByIndividualFaces()
 		}
 		polygonIndex += oldCount;
 	}
-
-_ASSERTE (polygonIndex == m_indexCount);
-
+	_ASSERTE (polygonIndex == m_indexCount);
 	m_faceCount = newFaceCount;
 	m_indexCount = newIndexCount;
 }
@@ -592,11 +578,8 @@ _ASSERTE (0);
 
 
 
-dgInt32 dgPolygonSoupDatabaseBuilder::FilterFace (dgInt32 count, dgInt32 pool[])
+dgInt32 dgPolygonSoupDatabaseBuilder::FilterFace (dgInt32 count, dgInt32* const pool)
 {
-_ASSERTE (0);
-return 0;
-/*
 	dgPolySoupFilterAllocator polyhedra(m_allocator);
 
 	count = polyhedra.AddFilterFace (dgUnsigned32 (count), pool);
@@ -616,12 +599,11 @@ return 0;
 		if (count >= 3) {
 			dgEdge* ptr = edge;
 
-			dgVector p0 (&m_vertexPoints[ptr->m_incidentVertex].m_x);
+			dgBigVector p0 (&m_vertexPoints[ptr->m_incidentVertex].m_x);
 			do {
-				dgFloat32 mag2;
-				dgVector p1 (&m_vertexPoints[ptr->m_next->m_incidentVertex].m_x);
-				dgVector e0 (p1 - p0);
-				mag2 = e0 % e0;
+				dgBigVector p1 (&m_vertexPoints[ptr->m_next->m_incidentVertex].m_x);
+				dgBigVector e0 (p1 - p0);
+				dgFloat64 mag2 = e0 % e0;
 				if (mag2 < dgFloat32 (1.0e-6f)) {
 					count --;
 					flag = true;
@@ -639,7 +621,7 @@ return 0;
 	}
 	if (count >= 3) {
 		flag = true;
-		dgVector normal (polyhedra.FaceNormal (edge, &m_vertexPoints[0].m_x, sizeof (dgTriplex)));
+		dgBigVector normal (polyhedra.FaceNormal (edge, &m_vertexPoints[0].m_x, sizeof (dgBigVector)));
 
 		_ASSERTE ((normal % normal) > dgFloat32 (1.0e-10f)); 
 		normal = normal.Scale (dgRsqrt (normal % normal + dgFloat32 (1.0e-20f)));
@@ -649,17 +631,16 @@ return 0;
 			if (count >= 3) {
 				dgEdge* ptr = edge;
 
-				dgVector p0 (&m_vertexPoints[ptr->m_prev->m_incidentVertex].m_x);
-				dgVector p1 (&m_vertexPoints[ptr->m_incidentVertex].m_x);
-				dgVector e0 (p1 - p0);
+				dgBigVector p0 (&m_vertexPoints[ptr->m_prev->m_incidentVertex].m_x);
+				dgBigVector p1 (&m_vertexPoints[ptr->m_incidentVertex].m_x);
+				dgBigVector e0 (p1 - p0);
 				e0 = e0.Scale (dgRsqrt (e0 % e0 + dgFloat32(1.0e-10f)));
 				do {
-					dgFloat32 mag2;
-					dgVector p2 (&m_vertexPoints[ptr->m_next->m_incidentVertex].m_x);
-					dgVector e1 (p2 - p1);
+					dgBigVector p2 (&m_vertexPoints[ptr->m_next->m_incidentVertex].m_x);
+					dgBigVector e1 (p2 - p1);
 
 					e1 = e1.Scale (dgRsqrt (e1 % e1 + dgFloat32(1.0e-10f)));
-					mag2 = e1 % e0;
+					dgFloat64 mag2 = e1 % e0;
 					if (mag2 > dgFloat32 (0.9999f)) {
 						count --;
 						flag = true;
@@ -671,7 +652,7 @@ return 0;
 						break;
 					}
 
-					dgVector n (e0 * e1);
+					dgBigVector n (e0 * e1);
 					mag2 = n % normal;
 					if (mag2 < dgFloat32 (1.0e-5f)) {
 						count --;
@@ -694,22 +675,21 @@ return 0;
 
 	dgEdge* first = edge;
 	if (count >= 3) {
-		dgFloat32 best = dgFloat32 (2.0f);
+		dgFloat64 best = dgFloat32 (2.0f);
 		dgEdge* ptr = edge;
 
-		dgVector p0 (&m_vertexPoints[ptr->m_incidentVertex].m_x);
-		dgVector p1 (&m_vertexPoints[ptr->m_next->m_incidentVertex].m_x);
-		dgVector e0 (p1 - p0);
+		dgBigVector p0 (&m_vertexPoints[ptr->m_incidentVertex].m_x);
+		dgBigVector p1 (&m_vertexPoints[ptr->m_next->m_incidentVertex].m_x);
+		dgBigVector e0 (p1 - p0);
 		e0 = e0.Scale (dgRsqrt (e0 % e0 + dgFloat32(1.0e-10f)));
 		do {
-			dgFloat32 mag2;
-			dgVector p2 (&m_vertexPoints[ptr->m_next->m_next->m_incidentVertex].m_x);
-			dgVector e1 (p2 - p1);
+			dgBigVector p2 (&m_vertexPoints[ptr->m_next->m_next->m_incidentVertex].m_x);
+			dgBigVector e1 (p2 - p1);
 
 			e1 = e1.Scale (dgRsqrt (e1 % e1 + dgFloat32(1.0e-10f)));
-			mag2 = e1 % e0;
-			if (dgAbsf (mag2) < best) {
-				best = dgAbsf (mag2);
+			dgFloat64 mag2 = fabs (e1 % e0);
+			if (mag2 < best) {
+				best = mag2;
 				first = ptr;
 			}
 
@@ -731,15 +711,15 @@ return 0;
 	if (count >= 3) {
 		dgInt32 j0 = count - 2;  
 		dgInt32 j1 = count - 1;  
-		dgVector normal (polyhedra.FaceNormal (edge, &m_vertexPoints[0].m_x, sizeof (dgTriplex)));
+		dgBigVector normal (polyhedra.FaceNormal (edge, &m_vertexPoints[0].m_x, sizeof (dgTriplex)));
 		for (dgInt32 j2 = 0; j2 < count; j2 ++) { 
-			dgVector p0 (&m_vertexPoints[pool[j0]].m_x);
-			dgVector p1 (&m_vertexPoints[pool[j1]].m_x);
-			dgVector p2 (&m_vertexPoints[pool[j2]].m_x);
-			dgVector e0 ((p0 - p1));
-			dgVector e1 ((p2 - p1));
+			dgBigVector p0 (&m_vertexPoints[pool[j0]].m_x);
+			dgBigVector p1 (&m_vertexPoints[pool[j1]].m_x);
+			dgBigVector p2 (&m_vertexPoints[pool[j2]].m_x);
+			dgBigVector e0 ((p0 - p1));
+			dgBigVector e1 ((p2 - p1));
 
-			dgVector n (e1 * e0);
+			dgBigVector n (e1 * e0);
 			_ASSERTE ((n % normal) > dgFloat32 (0.0f));
 			j0 = j1;
 			j1 = j2;
@@ -748,7 +728,6 @@ return 0;
 #endif
 
 	return (count >= 3) ? count : 0;
-*/
 }
 
 
