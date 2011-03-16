@@ -30,12 +30,12 @@ class dTextureNodeInfo: public dNodeInfo
 
 	dTextureNodeInfo(); 
 	dTextureNodeInfo(dScene* const world); 
-	dTextureNodeInfo(const char* pathName);
+	dTextureNodeInfo(const char* const pathName);
 	virtual ~dTextureNodeInfo(void);
 
 	virtual int GetId () const {return m_id;}
 	virtual const char* GetPathName () const {return m_path;}
-	virtual void SetPathName (const char* path);
+	virtual void SetPathName (const char* const path);
 
 	int GetInternalId() const {return m_internalUsage;}
 	void SetInternalId(int id) {m_internalUsage = id;}

@@ -35,7 +35,7 @@ dTextureNodeInfo::dTextureNodeInfo(dScene* const world)
 	SetName ("texture");
 }
 
-dTextureNodeInfo::dTextureNodeInfo(const char* pathName)
+dTextureNodeInfo::dTextureNodeInfo(const char* const pathName)
 	:dNodeInfo (), m_internalUsage(-1) 
 {
 	SetName ("texture");
@@ -49,7 +49,7 @@ dTextureNodeInfo::~dTextureNodeInfo(void)
 	}
 }
 
-void dTextureNodeInfo::SetPathName (const char* path)
+void dTextureNodeInfo::SetPathName (const char* const path)
 {
 	const char* ptr = dGetNameFromPath (path);
 	strncpy (m_path, ptr, sizeof (m_path));
