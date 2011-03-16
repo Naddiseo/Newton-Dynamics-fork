@@ -34,7 +34,7 @@ dMeshNodeInfo::dMeshNodeInfo()
 
 }
 
-dMeshNodeInfo::dMeshNodeInfo(dScene* world)
+dMeshNodeInfo::dMeshNodeInfo(dScene* const world)
 	:dGeometryNodeInfo (world), m_mesh (NewtonMeshCreate(world->GetNewtonWorld()))
 {
 }
@@ -341,6 +341,9 @@ void dMeshNodeInfo::Serialize (TiXmlElement* const rootNode) const
 
 bool dMeshNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
+	_ASSERTE (0);
+	return false;
+/*
 	DeserialiseBase(dGeometryNodeInfo, rootNode, revisionNumber);
 
 	// load all the vertexData
@@ -349,7 +352,7 @@ bool dMeshNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumbe
 	int positionCount;
 	TiXmlElement* const positionsElement = (TiXmlElement*) pointElement->FirstChild ("position");
 	positionsElement->Attribute("float4", &positionCount);
-	float* const positions = new dFloat[4 * positionCount];
+	dFloat64* const positions = new dFloat64[4 * positionCount];
 	dStringToFloatArray (positionsElement->Attribute("floats"), positions, 4 * positionCount);
 
 	int normalCount;
@@ -421,6 +424,7 @@ bool dMeshNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumbe
 	delete normals;	
 	delete positions;	
 	return true;
+*/
 }
 
 

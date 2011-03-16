@@ -303,8 +303,10 @@ bool dBoneNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumbe
 {
 	DeserialiseBase(dSceneNodeInfo, rootNode, revisionNumber);
 
-	TiXmlElement* boneData = (TiXmlElement*) rootNode->FirstChild ("boneData");
-	dStringToFloatArray (boneData->Attribute("length"), &m_lengh, 1);
+	TiXmlElement* const boneData = (TiXmlElement*) rootNode->FirstChild ("boneData");
+	dFloat64 lengh;
+	dStringToFloatArray (boneData->Attribute("length"), &lengh, 1);
+	m_lengh = dFloat (lengh);
 
 	return true;
 }

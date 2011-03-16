@@ -25,7 +25,7 @@
 
 D_IMPLEMENT_CLASS_NODE(dCollisionConvexHullNodeInfo);
 
-dCollisionConvexHullNodeInfo::dCollisionConvexHullNodeInfo(dScene* world) 
+dCollisionConvexHullNodeInfo::dCollisionConvexHullNodeInfo(dScene* const world) 
 	:dCollisionNodeInfo (), m_count(0), m_vertexCloud(NULL)
 {
 	SetName ("convexHull collision");
@@ -46,7 +46,7 @@ dCollisionConvexHullNodeInfo::dCollisionConvexHullNodeInfo(const dCollisionConve
 	}
 }
 
-dCollisionConvexHullNodeInfo::dCollisionConvexHullNodeInfo(NewtonCollision* hull)
+dCollisionConvexHullNodeInfo::dCollisionConvexHullNodeInfo(NewtonCollision* const hull)
 	:dCollisionNodeInfo () 
 {
 	NewtonCollisionInfoRecord record;
@@ -60,7 +60,7 @@ dCollisionConvexHullNodeInfo::dCollisionConvexHullNodeInfo(NewtonCollision* hull
 	m_vertexCloud = new dVector [m_count];
 	int stride = record.m_convexHull.m_vertexStrideInBytes / sizeof (dFloat);
 	for (int i = 0; i < m_count; i ++) {
-		m_vertexCloud [i] = dVector (record.m_convexHull.m_vertex[i * stride + 0], record.m_convexHull.m_vertex[i * stride + 1], record.m_convexHull.m_vertex[i * stride + 2], 0.0f);
+		m_vertexCloud[i] = dVector (record.m_convexHull.m_vertex[i * stride + 0], record.m_convexHull.m_vertex[i * stride + 1], record.m_convexHull.m_vertex[i * stride + 2], 0.0f);
 	}
 	SetTransform (offsetMatrix);
 	SetShapeId (record.m_collisionUserID);
@@ -143,14 +143,19 @@ bool dCollisionConvexHullNodeInfo::Deserialize (TiXmlElement* const rootNode, in
 {
 	DeserialiseBase(dCollisionNodeInfo, rootNode, revisionNumber);
 
-	TiXmlElement* dataNode = (TiXmlElement*) rootNode->FirstChild ("pointCloud");
+	TiXmlElement* const dataNode = (TiXmlElement*) rootNode->FirstChild ("pointCloud");
 	if (dataNode) {
 		if (m_vertexCloud) {
 			delete[] m_vertexCloud;
 		}
 		dataNode->Attribute("count", &m_count);
-		m_vertexCloud = new dVector [m_count];
-		dStringToFloatArray (dataNode->Attribute("float4"), &m_vertexCloud[0][0], 4 * m_count);
+//		m_vertexCloud = new dBigVector [m_count];
+		dBigVector* const tmp = new dBigVector[m_count];
+		dStringToFloatArray (dataNode->Attribute("float4"), &tmp[0][0], 4 * m_count);
+		for (int i = 0; i < m_count; i ++) {
+			m_vertexCloud[i] = dVector (dFloat (tmp[i].m_x), dFloat (tmp[i].m_y), dFloat (tmp[i].m_z), dFloat (0.0f));
+		}
+		delete[] tmp;
 	}
 
 	return true;

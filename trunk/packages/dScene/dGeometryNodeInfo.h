@@ -27,7 +27,7 @@ class dGeometryNodeInfo: public dNodeInfo
 	D_DEFINE_CLASS_NODE(dGeometryNodeInfo,dNodeInfo)
 
 	dGeometryNodeInfo();
-	dGeometryNodeInfo(dScene* world);
+	dGeometryNodeInfo(dScene* const world);
 	dGeometryNodeInfo(const dGeometryNodeInfo& me);
 	virtual ~dGeometryNodeInfo(void);
 

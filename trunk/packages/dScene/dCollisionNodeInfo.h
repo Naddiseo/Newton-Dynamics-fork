@@ -28,7 +28,7 @@ class dCollisionNodeInfo: public dNodeInfo
 	D_DEFINE_CLASS_NODE(dCollisionNodeInfo,dNodeInfo)
 
 	dCollisionNodeInfo();
-	dCollisionNodeInfo(dScene* world);
+	dCollisionNodeInfo(dScene* const world);
 	virtual ~dCollisionNodeInfo(void);
 
 	virtual dMatrix GetTransform () const;

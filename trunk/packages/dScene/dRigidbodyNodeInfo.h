@@ -30,7 +30,7 @@ class dRigidbodyNodeInfo: public dNodeInfo
 	D_DEFINE_CLASS_NODE(dRigidbodyNodeInfo,dNodeInfo)
 
 	dRigidbodyNodeInfo();
-	dRigidbodyNodeInfo(dScene* world);
+	dRigidbodyNodeInfo(dScene* const world);
 	virtual ~dRigidbodyNodeInfo(void);
 
 	virtual void BakeTransform (const dMatrix& transform);

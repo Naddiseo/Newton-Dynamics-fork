@@ -29,7 +29,7 @@ dTextureNodeInfo::dTextureNodeInfo()
 
 }
 
-dTextureNodeInfo::dTextureNodeInfo(dScene* world)
+dTextureNodeInfo::dTextureNodeInfo(dScene* const world)
 	:dNodeInfo (), m_id (0), m_internalUsage(-1) 
 {
 	SetName ("texture");

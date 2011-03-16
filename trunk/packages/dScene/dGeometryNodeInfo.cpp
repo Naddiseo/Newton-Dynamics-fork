@@ -31,7 +31,7 @@ dGeometryNodeInfo::dGeometryNodeInfo()
 {
 }
 
-dGeometryNodeInfo::dGeometryNodeInfo(dScene* world)
+dGeometryNodeInfo::dGeometryNodeInfo(dScene* const world)
 	:dNodeInfo (), m_matrix (GetIdentityMatrix())
 {
 }
@@ -111,8 +111,14 @@ bool dGeometryNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionN
 {
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 
-	TiXmlElement* matrixNode = (TiXmlElement*) rootNode->FirstChild ("pivotMatrix");
-	dStringToFloatArray (matrixNode->Attribute("float16"), &m_matrix[0][0], 16);
+	TiXmlElement* const matrixNode = (TiXmlElement*) rootNode->FirstChild ("pivotMatrix");
+	dBigVector tmp[4];
+	dStringToFloatArray (matrixNode->Attribute("float16"), &tmp[0][0], 16);
+	for (int i = 0; i < 4; i ++) {
+		for (int j = 0; j < 4; j ++) {
+			m_matrix[i][j] = dFloat(tmp[i][j]);
+		}
+	}
 
 	return false;
 }

@@ -41,7 +41,7 @@ class dGeometryNodeSkinModifierInfo: public dGeometryNodeModifierInfo
 	D_DEFINE_CLASS_NODE(dGeometryNodeSkinModifierInfo,dGeometryNodeModifierInfo)
 
 	dGeometryNodeSkinModifierInfo();
-	dGeometryNodeSkinModifierInfo(dScene* world);
+	dGeometryNodeSkinModifierInfo(dScene* const world);
 	dGeometryNodeSkinModifierInfo(const dGeometryNodeSkinModifierInfo& me);
 	virtual ~dGeometryNodeSkinModifierInfo(void);
 

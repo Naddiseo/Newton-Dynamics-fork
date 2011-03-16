@@ -37,7 +37,7 @@ class dMeshNodeInfo: public dGeometryNodeInfo
 	D_DEFINE_CLASS_NODE(dMeshNodeInfo,dGeometryNodeInfo)
 
 	dMeshNodeInfo();
-	dMeshNodeInfo(dScene* world);
+	dMeshNodeInfo(dScene* const world);
 	dMeshNodeInfo(NewtonMesh* mesh);
 	dMeshNodeInfo(const dMeshNodeInfo& me);
 	virtual ~dMeshNodeInfo(void);

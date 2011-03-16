@@ -28,7 +28,7 @@ class dCollisionBoxNodeInfo: public dCollisionNodeInfo
 	D_DEFINE_CLASS_NODE(dCollisionBoxNodeInfo,dCollisionNodeInfo)
 
 	dCollisionBoxNodeInfo();
-	dCollisionBoxNodeInfo(dScene* world);
+	dCollisionBoxNodeInfo(dScene* const world);
 	dCollisionBoxNodeInfo(NewtonCollision* box);
 	virtual ~dCollisionBoxNodeInfo(void);
 

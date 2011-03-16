@@ -25,7 +25,7 @@
 
 D_IMPLEMENT_CLASS_NODE(dCollisionNodeInfo);
 
-dCollisionNodeInfo::dCollisionNodeInfo(dScene* world) 
+dCollisionNodeInfo::dCollisionNodeInfo(dScene* const world) 
 	:dNodeInfo (), 
 	m_matrix (GetIdentityMatrix()),
 	m_geometricInertia(0.0f, 0.0f, 0.0f, 0.0f),
@@ -126,13 +126,26 @@ bool dCollisionNodeInfo::Deserialize (TiXmlElement* const rootNode, int revision
 	rootNode->Attribute("shapeId", &m_shapeID);
 
 	TiXmlElement* childNode = (TiXmlElement*) rootNode->FirstChild ("offsetMatrix");
-	dStringToFloatArray (childNode->Attribute("float16"), &m_matrix[0][0], 16);
+
+	dBigVector tmp[4];
+	dStringToFloatArray (childNode->Attribute("float16"), &tmp[0][0], 16);
+	for (int i = 0; i < 4; i ++) {
+		for (int j = 0; j < 4; j ++) {
+			m_matrix[i][j] = dFloat(tmp[i][j]);
+		}
+	}
 
 	childNode = (TiXmlElement*) rootNode->FirstChild ("geometricInertia");
-	dStringToFloatArray (childNode->Attribute("float4"), &m_geometricInertia[0], 4);
+	dStringToFloatArray (childNode->Attribute("float4"), &tmp[0][0], 4);
+	for (int j = 0; j < 4; j ++) {
+		m_geometricInertia[j] = dFloat(tmp[0][j]);
+	}
 
 	childNode = (TiXmlElement*) rootNode->FirstChild ("geometricCenterAndVolume");
-	dStringToFloatArray (childNode->Attribute("float4"), &m_geometricCenterAndVolume[0], 4);
+	dStringToFloatArray (childNode->Attribute("float4"), &tmp[0][0], 4);
+	for (int j = 0; j < 4; j ++) {
+		m_geometricCenterAndVolume[j] = dFloat(tmp[0][j]);
+	}
 
 	return true;
 }

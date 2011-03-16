@@ -28,7 +28,7 @@ class dCollisionSphereNodeInfo: public dCollisionNodeInfo
 	D_DEFINE_CLASS_NODE(dCollisionSphereNodeInfo,dCollisionNodeInfo)
 
 	dCollisionSphereNodeInfo();
-	dCollisionSphereNodeInfo(dScene* world);
+	dCollisionSphereNodeInfo(dScene* const world);
 	dCollisionSphereNodeInfo(NewtonCollision* sphere);
 	virtual ~dCollisionSphereNodeInfo(void);
 

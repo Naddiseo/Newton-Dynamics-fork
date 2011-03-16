@@ -29,7 +29,7 @@ class dTextureNodeInfo: public dNodeInfo
 	D_DEFINE_CLASS_NODE(dTextureNodeInfo,dNodeInfo)
 
 	dTextureNodeInfo(); 
-	dTextureNodeInfo(dScene* world); 
+	dTextureNodeInfo(dScene* const world); 
 	dTextureNodeInfo(const char* pathName);
 	virtual ~dTextureNodeInfo(void);
 

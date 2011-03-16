@@ -29,7 +29,7 @@ dGeometryNodeModifierInfo::dGeometryNodeModifierInfo()
 {
 }
 
-dGeometryNodeModifierInfo::dGeometryNodeModifierInfo(dScene* world)
+dGeometryNodeModifierInfo::dGeometryNodeModifierInfo(dScene* const world)
 	:dNodeInfo ()
 {
 }

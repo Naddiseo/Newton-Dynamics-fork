@@ -28,7 +28,7 @@ class dCollisionCapsuleNodeInfo: public dCollisionNodeInfo
 	D_DEFINE_CLASS_NODE(dCollisionCapsuleNodeInfo,dCollisionNodeInfo)
 
 	dCollisionCapsuleNodeInfo();
-	dCollisionCapsuleNodeInfo(dScene* world);
+	dCollisionCapsuleNodeInfo(dScene* const world);
 	dCollisionCapsuleNodeInfo(NewtonCollision* capsule);
 	virtual ~dCollisionCapsuleNodeInfo(void);
 

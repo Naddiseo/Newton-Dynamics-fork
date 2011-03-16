@@ -68,7 +68,7 @@ void dStringToIntArray (const char* const string, int* const array, int maxCount
 	}
 }
 
-void dStringToFloatArray (const char* const string, dFloat* const array, int maxCount)
+void dStringToFloatArray (const char* const string, dFloat64* const array, int maxCount)
 {
 	const char* ptr = string;
 	for (int i = 0; i < maxCount; i ++) {
@@ -83,7 +83,7 @@ void dStringToFloatArray (const char* const string, dFloat* const array, int max
 			j ++;
 		}
 		value[j] = 0;
-		dFloat val = dFloat (atof (value));
+		dFloat64 val = dFloat64 (atof (value));
 		array[i] = val;
 	}
 }

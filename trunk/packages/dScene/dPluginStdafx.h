@@ -139,7 +139,7 @@
 
 
 void dStringToIntArray (const char* const string, int* const array, int maxCount);
-void dStringToFloatArray (const char* const string, dFloat* const array, int maxCount);
+void dStringToFloatArray (const char* const string, dFloat64* const array, int maxCount);
 void dIntArrayToString (const int* const array, int count, char* const string, int maxSixeInBytes);
 void dFloatArrayToString (const dFloat* const array, int count, char* const string, int maxSixeInBytes);
 

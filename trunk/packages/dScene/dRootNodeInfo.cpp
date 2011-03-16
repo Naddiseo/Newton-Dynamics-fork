@@ -23,7 +23,7 @@
 
 D_IMPLEMENT_CLASS_NODE(dRootNodeInfo);
 
-dRootNodeInfo::dRootNodeInfo(dScene* world) 
+dRootNodeInfo::dRootNodeInfo(dScene* const world) 
 {
 	SetName ("rootNode");
 }

@@ -25,7 +25,7 @@
 
 D_IMPLEMENT_CLASS_NODE(dCollisionCompoundNodeInfo);
 
-dCollisionCompoundNodeInfo::dCollisionCompoundNodeInfo(dScene* world) 
+dCollisionCompoundNodeInfo::dCollisionCompoundNodeInfo(dScene* const world) 
 	:dCollisionNodeInfo ()
 {
 	SetName ("compound collision");

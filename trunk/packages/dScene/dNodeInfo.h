@@ -34,7 +34,7 @@ class dNodeInfo;
 	{														\
 		return new className(*this);						\
 	}														\
-	virtual dNodeInfo* MetaFunction(dScene* world) const	\
+	virtual dNodeInfo* MetaFunction(dScene* const world) const	\
 	{														\
 		return new className(world);						\
 	}														\
@@ -112,7 +112,7 @@ class dNodeInfo: public dClassInfo, public dVariableList
 	virtual dNodeInfo* MakeCopy () const;
 	virtual const char* GetClassName () const;		
 	virtual const char* GetBaseClassName ()	const;
-	virtual dNodeInfo* MetaFunction(dScene* world) const;
+	virtual dNodeInfo* MetaFunction(dScene* const world) const;
 	
 
 	virtual const char* GetName () const;

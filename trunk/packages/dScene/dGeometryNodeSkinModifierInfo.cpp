@@ -38,7 +38,7 @@ dGeometryNodeSkinModifierInfo::dGeometryNodeSkinModifierInfo()
 	SetName ("Skin Modifier");
 }
 
-dGeometryNodeSkinModifierInfo::dGeometryNodeSkinModifierInfo(dScene* world)
+dGeometryNodeSkinModifierInfo::dGeometryNodeSkinModifierInfo(dScene* const world)
 	:dGeometryNodeModifierInfo (),
 	 m_boneCount(0),
 	 m_vertexCount(0),
@@ -259,34 +259,56 @@ bool dGeometryNodeSkinModifierInfo::Deserialize (TiXmlElement* const rootNode, i
 {
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 
-	TiXmlElement* vertexCount = (TiXmlElement*) rootNode->FirstChild ("vertexCount");
+	TiXmlElement* const vertexCount = (TiXmlElement*) rootNode->FirstChild ("vertexCount");
 	vertexCount->Attribute("count", &m_vertexCount);
 
-	TiXmlElement* matrixNode = (TiXmlElement*) rootNode->FirstChild ("bindingMatrix");
-	dStringToFloatArray (matrixNode->Attribute("float16"), &m_shapeBindMatrix[0][0], 16);
+	TiXmlElement* const matrixNode = (TiXmlElement*) rootNode->FirstChild ("bindingMatrix");
+	dBigVector tmp[4];
+	dStringToFloatArray (matrixNode->Attribute("float16"), &tmp[0][0], 16);
+	for (int i = 0; i < 4; i ++) {
+		for (int j = 0; j < 4; j ++) {
+			m_shapeBindMatrix[i][j] = dFloat(tmp[i][j]);
+		}
+	}
 
-	TiXmlElement* bindMatrices = (TiXmlElement*) rootNode->FirstChild ("bonesBindMatrices");
+	TiXmlElement* const bindMatrices = (TiXmlElement*) rootNode->FirstChild ("bonesBindMatrices");
 	bindMatrices->Attribute("count", &m_boneCount);
 
 	m_boneBindingMatrix = new dMatrix[m_boneCount];
-	dStringToFloatArray (bindMatrices->Attribute("float16"), &m_boneBindingMatrix[0][0][0], 16 * m_boneCount);
+	dBigVector* const tmp1 = new dBigVector[4 * m_boneCount];
+	dStringToFloatArray (bindMatrices->Attribute("float16"), &tmp1[0][0], 16 * m_boneCount);
+	for (int k = 0; k < 4; k ++) {
+		dBigVector* const matrix = &tmp1[k * 4];
+		for (int i = 0; i < 4; i ++) {
+			for (int j = 0; j < 4; j ++) {
+				m_boneBindingMatrix[k][i][j] = dFloat(matrix[i * 4][j]);
+			}
+		}
+	}
+	delete[] tmp1;
+
 
 	int weightCount = 0; 
-	TiXmlElement* vertexWeight = (TiXmlElement*) rootNode->FirstChild ("vertexWeights");
+	TiXmlElement* const vertexWeight = (TiXmlElement*) rootNode->FirstChild ("vertexWeights");
 	vertexWeight->Attribute("count", &weightCount);
 
-	int* boneIndex = new int[weightCount];
-	int* vertexIndex = new int[weightCount];
-	dFloat* weights = new dFloat[weightCount];
+	int* const boneIndex = new int[weightCount];
+	int* const vertexIndex = new int[weightCount];
+	dFloat* const weights = new dFloat[weightCount];
 
-	TiXmlElement* vIndices = (TiXmlElement*) vertexWeight->FirstChild ("vertexIndices");
+	TiXmlElement* const vIndices = (TiXmlElement*) vertexWeight->FirstChild ("vertexIndices");
 	dStringToIntArray (vIndices->Attribute("indices"), vertexIndex, weightCount);
 
-	TiXmlElement* bIndices = (TiXmlElement*) vertexWeight->FirstChild ("boneIndices");
+	TiXmlElement* const bIndices = (TiXmlElement*) vertexWeight->FirstChild ("boneIndices");
 	dStringToIntArray (bIndices->Attribute("indices"), boneIndex, weightCount);
 
-	TiXmlElement* vWeights = (TiXmlElement*) vertexWeight->FirstChild ("weights");
-	dStringToFloatArray (vWeights->Attribute("floats"), weights, weightCount);
+	TiXmlElement* const vWeights = (TiXmlElement*) vertexWeight->FirstChild ("weights");
+	dFloat64* const tmp2 = new dFloat64[weightCount];
+	dStringToFloatArray (vWeights->Attribute("floats"), tmp2, weightCount);
+	for (int i = 0; i < weightCount; i ++) {
+		weights[i] = dFloat(tmp2[i]);
+	}
+	delete[] tmp2;
 
 	m_vertexWeights = new dVector[m_vertexCount];
 	m_boneWeightIndex = new dBoneWeightIndex[m_vertexCount];

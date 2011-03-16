@@ -66,7 +66,7 @@ dNodeInfo* dNodeInfo::MakeCopy () const
 	return new dNodeInfo();
 }
 
-dNodeInfo* dNodeInfo::MetaFunction(dScene* world) const
+dNodeInfo* dNodeInfo::MetaFunction(dScene* const world) const
 {
 	return MakeCopy();
 }

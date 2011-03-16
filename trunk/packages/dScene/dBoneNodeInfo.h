@@ -29,7 +29,7 @@ class dBoneNodeInfo: public dSceneNodeInfo
 	D_DEFINE_CLASS_NODE(dBoneNodeInfo,dSceneNodeInfo)
 
 	dBoneNodeInfo();
-	dBoneNodeInfo(dScene* world) {}
+	dBoneNodeInfo(dScene* const world) {}
 	virtual ~dBoneNodeInfo(void);
 
 //	virtual dMatrix GetTransform () const;

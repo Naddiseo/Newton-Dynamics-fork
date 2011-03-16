@@ -32,7 +32,7 @@ class dCameraNodeInfo: public dNodeInfo
 	D_DEFINE_CLASS_NODE(dCameraNodeInfo,dNodeInfo)
 
 	dCameraNodeInfo();
-	dCameraNodeInfo(dScene* world);
+	dCameraNodeInfo(dScene* const world);
 	dCameraNodeInfo(const dCameraNodeInfo& me);
 	
 	virtual ~dCameraNodeInfo(void);

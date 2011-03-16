@@ -41,7 +41,7 @@ dMaterialNodeInfo::dMaterialNodeInfo()
 	SetName ("material");
 }
 
-dMaterialNodeInfo::dMaterialNodeInfo(dScene* world)
+dMaterialNodeInfo::dMaterialNodeInfo(dScene* const world)
 	:dNodeInfo (), 
 	m_ambientColor (0.8f, 0.8f, 0.8f, 1.0f), 
 	m_diffuseColor(0.8f, 0.8f, 0.8f, 1.0f),
@@ -125,6 +125,9 @@ void dMaterialNodeInfo::Serialize (TiXmlElement* const rootNode) const
 
 bool dMaterialNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
+	_ASSERTE (0);
+	return false;
+/*
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 
 	rootNode->Attribute("id", &m_id);
@@ -155,6 +158,7 @@ bool dMaterialNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionN
 	m_opacity = dFloat (value);
 
 	return true;
+*/
 }
 
 

@@ -29,8 +29,8 @@ class dCollisionConvexHullNodeInfo: public dCollisionNodeInfo
 
 	dCollisionConvexHullNodeInfo();
 	dCollisionConvexHullNodeInfo(const dCollisionConvexHullNodeInfo& info);
-	dCollisionConvexHullNodeInfo(NewtonCollision* hull);
-	dCollisionConvexHullNodeInfo(dScene* world);
+	dCollisionConvexHullNodeInfo(NewtonCollision* const hull);
+	dCollisionConvexHullNodeInfo(dScene* const world);
 	virtual ~dCollisionConvexHullNodeInfo(void);
 
 	virtual int GetVertexCount() const;

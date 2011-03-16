@@ -26,7 +26,7 @@
 
 D_IMPLEMENT_CLASS_NODE(dRigidbodyNodeInfo);
 
-dRigidbodyNodeInfo::dRigidbodyNodeInfo(dScene* world) 
+dRigidbodyNodeInfo::dRigidbodyNodeInfo(dScene* const world) 
 	:dNodeInfo (), 
 	m_centerOfMass (0.0f, 0.0f, 0.0f, 0.0f),
 	m_massMatrix (0.0f, 0.0f, 0.0f, 0.0f),
@@ -143,6 +143,9 @@ void dRigidbodyNodeInfo::Serialize (TiXmlElement* const rootNode) const
 
 bool dRigidbodyNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
+	_ASSERTE (0);
+	return false;
+/*
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 
 	TiXmlElement* dataNode = (TiXmlElement*) rootNode->FirstChild ("centerOfMass");
@@ -161,6 +164,7 @@ bool dRigidbodyNodeInfo::Deserialize (TiXmlElement* const rootNode, int revision
 	dStringToFloatArray (dataNode->Attribute("float4"), &m_internalDamp[0], 4);
 
 	return true;
+*/
 }
 
 

@@ -28,7 +28,7 @@
 
 D_IMPLEMENT_CLASS_NODE(dSceneNodeInfo);
 
-dSceneNodeInfo::dSceneNodeInfo(dScene* world) 
+dSceneNodeInfo::dSceneNodeInfo(dScene* const world) 
 	:dNodeInfo (), 
 	m_position (0.0f, 0.0f, 0.0f, 1.0f),  // node location in global space
 	m_euler (0.0f, 0.0f, 0.0f, 1.0f),     // node orientation matrix R: x = pitch, y = yaw, z = roll, 
@@ -198,6 +198,9 @@ void dSceneNodeInfo::Serialize (TiXmlElement* const rootNode) const
 
 bool dSceneNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
+	_ASSERTE (0);
+	return false;
+/*
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 
 	TiXmlElement* tcolor = (TiXmlElement*) rootNode->FirstChild ("color");
@@ -210,6 +213,7 @@ bool dSceneNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumb
 	dStringToFloatArray (transformNode->Attribute("stretchAxis"), &m_eigenScaleAxis[0][0], 16);
 
 	return true;
+*/
 }
 
 

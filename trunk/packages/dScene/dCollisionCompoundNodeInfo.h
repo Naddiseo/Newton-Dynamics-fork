@@ -28,7 +28,7 @@ class dCollisionCompoundNodeInfo: public dCollisionNodeInfo
 	D_DEFINE_CLASS_NODE(dCollisionCompoundNodeInfo,dCollisionNodeInfo)
 
 	dCollisionCompoundNodeInfo();
-	dCollisionCompoundNodeInfo(dScene* world);
+	dCollisionCompoundNodeInfo(dScene* const world);
 	dCollisionCompoundNodeInfo(NewtonCollision* compound);
 	virtual ~dCollisionCompoundNodeInfo(void);
 

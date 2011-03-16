@@ -28,7 +28,7 @@ class dCollisionCylinderNodeInfo: public dCollisionNodeInfo
 	D_DEFINE_CLASS_NODE(dCollisionCylinderNodeInfo,dCollisionNodeInfo)
 
 	dCollisionCylinderNodeInfo();
-	dCollisionCylinderNodeInfo(dScene* world);
+	dCollisionCylinderNodeInfo(dScene* const world);
 	dCollisionCylinderNodeInfo(NewtonCollision* cylinder);
 	virtual ~dCollisionCylinderNodeInfo(void);
 

@@ -28,7 +28,7 @@ class dMaterialNodeInfo: public dNodeInfo
 	D_DEFINE_CLASS_NODE(dMaterialNodeInfo,dNodeInfo)
 
 	dMaterialNodeInfo();
-	dMaterialNodeInfo(dScene* world);
+	dMaterialNodeInfo(dScene* const world);
 	dMaterialNodeInfo(int id);
 	virtual ~dMaterialNodeInfo(void);
 

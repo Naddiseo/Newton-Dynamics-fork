@@ -25,7 +25,7 @@
 
 D_IMPLEMENT_CLASS_NODE(dCollisionSphereNodeInfo);
 
-dCollisionSphereNodeInfo::dCollisionSphereNodeInfo(dScene* world) 
+dCollisionSphereNodeInfo::dCollisionSphereNodeInfo(dScene* const world) 
 	:dCollisionNodeInfo (), m_radius (1.0f, 1.0f, 1.0f, 0.0f)
 {
 	SetName ("sphere collision");
@@ -104,9 +104,10 @@ bool dCollisionSphereNodeInfo::Deserialize (TiXmlElement* const rootNode, int re
 {
 	DeserialiseBase(dCollisionNodeInfo, rootNode, revisionNumber);
 
-	TiXmlElement* dataNode;
-	dataNode = (TiXmlElement*) rootNode->FirstChild ("radius");
-	dStringToFloatArray (dataNode->Attribute("float4"), &m_radius[0], 4);
+	TiXmlElement* const dataNode = (TiXmlElement*) rootNode->FirstChild ("radius");
+	dBigVector radius;
+	dStringToFloatArray (dataNode->Attribute("float4"), &radius[0], 4);
+	m_radius = dVector (dFloat (radius.m_x), dFloat (radius.m_y), dFloat (radius.m_z), dFloat (0.0f));
 	return true;
 }
 

@@ -25,7 +25,7 @@
 
 D_IMPLEMENT_CLASS_NODE(dCollisionBoxNodeInfo);
 
-dCollisionBoxNodeInfo::dCollisionBoxNodeInfo(dScene* world) 
+dCollisionBoxNodeInfo::dCollisionBoxNodeInfo(dScene* const world) 
 	:dCollisionNodeInfo (), m_size (1.0f, 1.0f, 1.0f, 0.0f)
 {
 	SetName ("box collision");
@@ -100,8 +100,10 @@ bool dCollisionBoxNodeInfo::Deserialize (TiXmlElement* const rootNode, int revis
 {
 	DeserialiseBase(dCollisionNodeInfo, rootNode, revisionNumber);
 
-	TiXmlElement* dataNode = (TiXmlElement*) rootNode->FirstChild ("size");
-	dStringToFloatArray (dataNode->Attribute("float4"), &m_size[0], 4);
+	TiXmlElement* const dataNode = (TiXmlElement*) rootNode->FirstChild ("size");
+	dFloat64 tmp[4];
+	dStringToFloatArray (dataNode->Attribute("float4"), tmp, 4);
+	m_size = dVector (dFloat (tmp[0]), dFloat (tmp[1]), dFloat (tmp[2]), dFloat (tmp[3]));
 	return true;
 }
 

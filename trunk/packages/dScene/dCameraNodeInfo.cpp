@@ -32,7 +32,7 @@ dCameraNodeInfo::dCameraNodeInfo()
 {
 }
 
-dCameraNodeInfo::dCameraNodeInfo(dScene* world)
+dCameraNodeInfo::dCameraNodeInfo(dScene* const world)
 	:dNodeInfo(), m_origin (0.0f, 0.0f, 0.0f, 0.0f), m_roll (30.0f * 3.141592f / 180.0f), m_yaw (30.0f * 3.141592f / 180.0f), m_viewportIndex(0)
 {
 }

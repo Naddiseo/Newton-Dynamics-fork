@@ -25,7 +25,7 @@
 
 D_IMPLEMENT_CLASS_NODE(dCollisionCapsuleNodeInfo);
 
-dCollisionCapsuleNodeInfo::dCollisionCapsuleNodeInfo(dScene* world) 
+dCollisionCapsuleNodeInfo::dCollisionCapsuleNodeInfo(dScene* const world) 
 	:dCollisionNodeInfo (), m_radius (0.5f), m_height(1.0f)
 {
 	SetName ("capsule collision");
@@ -113,9 +113,13 @@ bool dCollisionCapsuleNodeInfo::Deserialize (TiXmlElement* const rootNode, int r
 {
 	DeserialiseBase(dCollisionNodeInfo, rootNode, revisionNumber);
 
-	TiXmlElement* dataNode = (TiXmlElement*) rootNode->FirstChild ("size");
-	dStringToFloatArray (dataNode->Attribute("radius"), &m_radius, 1);
-	dStringToFloatArray (dataNode->Attribute("height"), &m_height, 1);
+	TiXmlElement* const dataNode = (TiXmlElement*) rootNode->FirstChild ("size");
+	dFloat64 radius;
+	dFloat64 height;
+	dStringToFloatArray (dataNode->Attribute("radius"), &radius, 1);
+	dStringToFloatArray (dataNode->Attribute("height"), &height, 1);
+	m_radius = dFloat (radius);
+	m_height = dFloat (height);
 	return true;
 }
 

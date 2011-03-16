@@ -28,7 +28,7 @@ class dRootNodeInfo: public dNodeInfo
 	D_DEFINE_CLASS_NODE(dRootNodeInfo,dNodeInfo)
 
 	dRootNodeInfo();
-	dRootNodeInfo(dScene* world);
+	dRootNodeInfo(dScene* const world);
 	virtual ~dRootNodeInfo(void);
 
 	virtual void SerializeBinary (FILE* const file);

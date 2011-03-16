@@ -29,7 +29,7 @@ class dSceneNodeInfo: public dNodeInfo
 	D_DEFINE_CLASS_NODE(dSceneNodeInfo,dNodeInfo)
 
 	dSceneNodeInfo();
-	dSceneNodeInfo(dScene* world);
+	dSceneNodeInfo(dScene* const world);
 	virtual ~dSceneNodeInfo(void);
 
 	virtual dMatrix GetTransform () const;
