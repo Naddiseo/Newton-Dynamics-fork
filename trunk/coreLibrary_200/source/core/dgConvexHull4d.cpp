@@ -194,7 +194,7 @@ dgBigVector dgConvexHull4dTetraherum::CircumSphereCenter (const dgHullVector* co
 	dgFloat64 invDen = dgFloat32 (1.0f) / (det.GetAproximateValue() * dgFloat32 (2.0f));
 
 	dgBigVector centerOut;
-	dgFloat32 sign = dgFloat32 (1.0f);
+	dgFloat64 sign = dgFloat64 (1.0f);
 	for (dgInt32 k = 0; k < 3; k ++) {
 		for (dgInt32 i = 0; i < 4; i ++) {
 			matrix[i][0] = dgGoogol (points[i][3]);
@@ -206,7 +206,7 @@ dgBigVector dgConvexHull4dTetraherum::CircumSphereCenter (const dgHullVector* co
 		}
 		dgGoogol det (Determinant4x4(matrix));
 		dgFloat64 val = det.GetAproximateValue() * sign;
-		sign *= dgFloat32 (-1.0f);
+		sign *= dgFloat64 (-1.0f);
 		centerOut[k] = val * invDen; 
 	}
 	centerOut[3] = dgFloat32 (0.0f);

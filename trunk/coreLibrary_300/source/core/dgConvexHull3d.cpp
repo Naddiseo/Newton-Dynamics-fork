@@ -112,7 +112,7 @@ dgConvexHull3d::dgConvexHull3d (dgMemoryAllocator* const allocator)
 }
 
 
-dgConvexHull3d::dgConvexHull3d(dgMemoryAllocator* const allocator, const dgFloat32* const vertexCloud, dgInt32 strideInByte, dgInt32 count, dgFloat32 distTol, dgInt32 maxVertexCount)
+dgConvexHull3d::dgConvexHull3d(dgMemoryAllocator* const allocator, const dgFloat64* const vertexCloud, dgInt32 strideInByte, dgInt32 count, dgFloat64 distTol, dgInt32 maxVertexCount)
 	:dgList<dgConvexHull3DFace>(allocator),  m_count (0), m_diag(), m_points(count, allocator) 
 {
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
@@ -136,12 +136,12 @@ dgConvexHull3d::dgConvexHull3d(dgMemoryAllocator* const allocator, const dgFloat
 		CalculateConvexHull (&treePool[0], &convexPoints[0], &points[0], count, distTol, maxVertexCount);
 
 		m_points[m_count].m_x = 0.0f;
-		dgVector* const points = &m_points[0];
+		dgBigVector* const points = &m_points[0];
 		const dgBigVector* const hullPoints = &convexPoints[0];
 		for (dgInt32 i = 0; i < m_count; i ++) {
-			points[i] = dgVector (dgFloat32 (hullPoints[i].m_x), dgFloat32 (hullPoints[i].m_y), dgFloat32 (hullPoints[i].m_z), dgFloat32 (0.0f));
+			points[i] = hullPoints[i];
+			_ASSERTE (points[i].m_w == dgFloat64 (0.0f));
 		}
-	
 	}
 
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
@@ -288,9 +288,9 @@ dgAABBPointTree3d* dgConvexHull3d::BuildTree (dgAABBPointTree3d* const parent, d
 
 
 
-dgInt32 dgConvexHull3d::InitVertexArray(dgBigVector* const convexPoints, dgBigVector* const points, const dgFloat32* const vertexCloud, dgInt32 strideInBytes, dgInt32 count, void* const memoryPool, dgInt32 maxMemSize)
+dgInt32 dgConvexHull3d::InitVertexArray(dgBigVector* const convexPoints, dgBigVector* const points, const dgFloat64* const vertexCloud, dgInt32 strideInBytes, dgInt32 count, void* const memoryPool, dgInt32 maxMemSize)
 {
-	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat32));
+	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat64));
 	for (dgInt32 i = 0; i < count; i ++) {
 		dgInt32 index = i * stride;
 		points[i] = dgBigVector (vertexCloud[index], vertexCloud[index + 1], vertexCloud[index + 2], dgFloat64 (0.0f));
@@ -644,9 +644,9 @@ bool dgConvexHull3d::Sanity() const
 	return true;
 }
 
-void dgConvexHull3d::CalculateConvexHull (dgAABBPointTree3d* vertexTree, dgBigVector* const hullVertexArray, dgBigVector* const points, dgInt32 count, dgFloat32 distTol, dgInt32 maxVertexCount)
+void dgConvexHull3d::CalculateConvexHull (dgAABBPointTree3d* vertexTree, dgBigVector* const hullVertexArray, dgBigVector* const points, dgInt32 count, dgFloat64 distTol, dgInt32 maxVertexCount)
 {
-	distTol = dgAbsf (distTol) * m_diag;
+	distTol = fabs (distTol) * m_diag;
 	dgListNode* const f0Node = AddFace (0, 1, 2);
 	dgListNode* const f1Node = AddFace (0, 2, 3);
 	dgListNode* const f2Node = AddFace (2, 1, 3);

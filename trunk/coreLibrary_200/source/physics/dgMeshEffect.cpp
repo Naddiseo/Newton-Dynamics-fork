@@ -1045,8 +1045,6 @@ void dgMeshEffect::ConvertToPolygons ()
 
 void dgMeshEffect::RemoveUnusedVertices(dgInt32* const vertexMap)
 {
-_ASSERTE (0);
-/*
 	dgPolyhedra polygon(GetAllocator());
 	dgStack<dgInt32>attrbMap(m_atribCount);
 
@@ -1056,21 +1054,19 @@ _ASSERTE (0);
 	int attribCount = 0;
 	int vertexCount = 0;
 
-	dgStack<dgVector>points (m_pointCount);
+	dgStack<dgBigVector>points (m_pointCount);
 	dgStack<dgVertexAtribute>atributes (m_atribCount);
 
 	int mark = IncLRU();
 	polygon.BeginFace();
 	dgPolyhedra::Iterator iter (*this);
 	for (iter.Begin(); iter; iter ++){
-		dgEdge* face;
-
-		face = &(*iter);
+		dgEdge* const face = &(*iter);
 		if ((face->m_mark != mark) && (face->m_incidentFace > 0)) {
-			dgEdge* ptr = face;
 			dgInt32	vertex[DG_MESH_EFFECT_POINT_SPLITED];
 			dgInt64	userData[DG_MESH_EFFECT_POINT_SPLITED];
 			int indexCount = 0;
+			dgEdge* ptr = face;
 			do {
 				ptr->m_mark = mark;
 
@@ -1099,7 +1095,7 @@ _ASSERTE (0);
 	polygon.EndFace();
 
 	m_pointCount = vertexCount;
-	memcpy (&m_points[0].m_x, &points[0].m_x, m_pointCount * sizeof (dgVector));
+	memcpy (&m_points[0].m_x, &points[0].m_x, m_pointCount * sizeof (dgBigVector));
 	 
 	m_atribCount = attribCount;
 	memcpy (&m_attib[0].m_vertex.m_x, &atributes[0].m_vertex.m_x, m_atribCount * sizeof (dgVertexAtribute));
@@ -1130,7 +1126,6 @@ _ASSERTE (0);
 	}
 	EndFace();
 	PackVertexArrays ();
-*/
 }
 
 dgMatrix dgMeshEffect::CalculateOOBB (dgBigVector& size) const
@@ -1160,15 +1155,14 @@ return dgGetIdentityMatrix();
 
 void dgMeshEffect::CalculateAABB (dgBigVector& minBox, dgBigVector& maxBox) const
 {
-/*
-	dgVector minP ( dgFloat32 (1.0e15f),  dgFloat32 (1.0e15f),  dgFloat32 (1.0e15f), dgFloat32 (0.0f)); 
-	dgVector maxP (-dgFloat32 (1.0e15f), -dgFloat32 (1.0e15f), -dgFloat32 (1.0e15f), dgFloat32 (0.0f)); 
+	dgBigVector minP ( dgFloat64 (1.0e15f),  dgFloat64 (1.0e15f),  dgFloat64 (1.0e15f), dgFloat64 (0.0f)); 
+	dgBigVector maxP (-dgFloat64 (1.0e15f), -dgFloat64 (1.0e15f), -dgFloat64 (1.0e15f), dgFloat64 (0.0f)); 
 
 	dgPolyhedra::Iterator iter (*this);
-	const dgVector* const points = &m_points[0];
+	const dgBigVector* const points = &m_points[0];
 	for (iter.Begin(); iter; iter ++){
 		dgEdge* const edge = &(*iter);
-		const dgVector& p (points[edge->m_incidentVertex]);
+		const dgBigVector& p (points[edge->m_incidentVertex]);
 
 		minP.m_x = GetMin (p.m_x, minP.m_x); 
 		minP.m_y = GetMin (p.m_y, minP.m_y); 
@@ -1181,7 +1175,6 @@ void dgMeshEffect::CalculateAABB (dgBigVector& minBox, dgBigVector& maxBox) cons
 
 	minBox = minP;
 	maxBox = maxP;
-*/
 }
 
 void dgMeshEffect::EnumerateAttributeArray (dgVertexAtribute* const attib)
@@ -1220,11 +1213,11 @@ void dgMeshEffect::ApplyAttributeArray (dgVertexAtribute* const attib)
 
 dgBigVector dgMeshEffect::GetOrigin ()const
 {
-	dgBigVector origin (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));	
+	dgBigVector origin (dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f));	
 	for (dgInt32 i = 0; i < m_pointCount; i ++) {
 		origin += m_points[i];
 	}	
-	return origin.Scale (dgFloat32 (1.0f) / m_pointCount);
+	return origin.Scale (dgFloat64 (1.0f) / m_pointCount);
 }
 
 
@@ -1696,9 +1689,7 @@ void dgMeshEffect::PackVertexArrays ()
 
 void dgMeshEffect::AddPolygon (dgInt32 count, const dgFloat64* const vertexList, dgInt32 strideIndBytes, dgInt32 material)
 {
-	_ASSERTE (0);
-/*
-	dgInt32 stride = dgInt32 (strideIndBytes / sizeof (dgFloat32));
+	dgInt32 stride = dgInt32 (strideIndBytes / sizeof (dgFloat64));
 
 	if (count > 3) {
 		dgPolyhedra polygon (GetAllocator());
@@ -1759,14 +1750,11 @@ void dgMeshEffect::AddPolygon (dgInt32 count, const dgFloat64* const vertexList,
 			AddPoint(vertexList + stride + stride, material);
 		}
 	}
-*/
 }
 
 
 void dgMeshEffect::EndPolygon ()
 {
-	_ASSERTE (0);
-/*
 	dgStack<dgInt32>indexMap(m_pointCount);
 	dgStack<dgInt32>attrIndexMap(m_atribCount);
 
@@ -1786,8 +1774,8 @@ void dgMeshEffect::EndPolygon ()
 
 
 	dgInt32 triangCount = m_pointCount / 3;
-	m_pointCount = dgVertexListToIndexList (&m_points[0].m_x, sizeof (dgVector), sizeof (dgVector), 0, m_pointCount, &indexMap[0], DG_VERTEXLIST_INDEXLIST_TOL);
-	m_atribCount = dgVertexListToIndexList (&m_attib[0].m_vertex.m_x, sizeof (dgVertexAtribute), sizeof (dgVertexAtribute) - sizeof (dgInt32), sizeof (dgInt32), m_atribCount, &attrIndexMap[0], DG_VERTEXLIST_INDEXLIST_TOL);
+	m_pointCount = dgVertexListToIndexList (&m_points[0].m_x, sizeof (dgBigVector), sizeof (dgBigVector)/sizeof (dgFloat64), m_pointCount, &indexMap[0], DG_VERTEXLIST_INDEXLIST_TOL);
+	m_atribCount = dgVertexListToIndexList (&m_attib[0].m_vertex.m_x, sizeof (dgVertexAtribute), sizeof (dgVertexAtribute)/sizeof (dgFloat64), m_atribCount, &attrIndexMap[0], DG_VERTEXLIST_INDEXLIST_TOL);
 
 	for (dgInt32 i = 0; i < triangCount; i ++) {
 		dgInt32 index[3];
@@ -1850,7 +1838,6 @@ void dgMeshEffect::EndPolygon ()
 		}
 	}
 #endif
-*/
 }
 
 
@@ -3197,9 +3184,6 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& 
 
 void dgMeshEffect::MergeFaces (const dgMeshEffect* const source)
 {
-	_ASSERTE (0);
-	/*
-
 	dgInt32 mark = source->IncLRU();
 	dgPolyhedra::Iterator iter (*source);
 	for(iter.Begin(); iter; iter ++){
@@ -3218,10 +3202,9 @@ void dgMeshEffect::MergeFaces (const dgMeshEffect* const source)
 			} while (ptr != edge);
 
 //			_ASSERTE (count == 3);
-			AddPolygon(count, &face[0].m_vertex.m_x, sizeof (dgVertexAtribute), face[0].m_material);
+			AddPolygon(count, &face[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgInt32 (face[0].m_material));
 		}
 	}
-*/
 }
 
 

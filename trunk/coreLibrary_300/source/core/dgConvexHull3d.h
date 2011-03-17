@@ -52,12 +52,12 @@ class dgConvexHull3DFace
 class dgConvexHull3d: public dgList<dgConvexHull3DFace>
 {
 	public:
-	dgConvexHull3d(dgMemoryAllocator* const allocator, const dgFloat32* const vertexCloud, dgInt32 strideInBytes, dgInt32 count, dgFloat32 distTol, dgInt32 maxVertexCount = 0x7fffffff);
+	dgConvexHull3d(dgMemoryAllocator* const allocator, const dgFloat64* const vertexCloud, dgInt32 strideInBytes, dgInt32 count, dgFloat64 distTol, dgInt32 maxVertexCount = 0x7fffffff);
 	virtual ~dgConvexHull3d();
 
 	dgInt32 GetVertexCount() const;
-	const dgVector* GetVertexPool() const;
-	const dgVector& GetVertex(dgInt32 i) const;
+	const dgBigVector* GetVertexPool() const;
+	const dgBigVector& GetVertex(dgInt32 i) const;
 	
 
 	protected:
@@ -65,9 +65,9 @@ class dgConvexHull3d: public dgList<dgConvexHull3DFace>
 
 	virtual dgListNode* AddFace (dgInt32 i0, dgInt32 i1, dgInt32 i2);
 	virtual void DeleteFace (dgListNode* const node) ;
-	virtual dgInt32 InitVertexArray(dgBigVector* const convexPoints, dgBigVector* const points, const dgFloat32* const vertexCloud, dgInt32 strideInBytes, dgInt32 count, void* const memoryPool, dgInt32 maxMemSize);
+	virtual dgInt32 InitVertexArray(dgBigVector* const convexPoints, dgBigVector* const points, const dgFloat64* const vertexCloud, dgInt32 strideInBytes, dgInt32 count, void* const memoryPool, dgInt32 maxMemSize);
 
-	void CalculateConvexHull (dgAABBPointTree3d* vertexTree, dgBigVector* const convexPoints, dgBigVector* const points, dgInt32 count, dgFloat32 distTol, dgInt32 maxVertexCount);
+	void CalculateConvexHull (dgAABBPointTree3d* vertexTree, dgBigVector* const convexPoints, dgBigVector* const points, dgInt32 count, dgFloat64 distTol, dgInt32 maxVertexCount);
 	dgInt32 BuildNormalList (dgBigVector* const normalArray) const;
 	dgInt32 SupportVertex (dgAABBPointTree3d** const tree, const dgBigVector* const points, const dgBigVector& dir) const;
 	dgFloat64 TetrahedrumVolume (const dgBigVector& p0, const dgBigVector& p1, const dgBigVector& p2, const dgBigVector& p3) const;
@@ -78,8 +78,8 @@ class dgConvexHull3d: public dgList<dgConvexHull3DFace>
 	bool Sanity() const;
 
 	dgInt32 m_count;
-	dgFloat32 m_diag;
-	dgArray<dgVector> m_points;
+	dgFloat64 m_diag;
+	dgArray<dgBigVector> m_points;
 };
 
 
@@ -88,14 +88,13 @@ inline dgInt32 dgConvexHull3d::GetVertexCount() const
 	return m_count;
 }
 
-inline const dgVector* dgConvexHull3d::GetVertexPool() const
+inline const dgBigVector* dgConvexHull3d::GetVertexPool() const
 {
 	return &m_points[0];
 }
 
-inline const dgVector& dgConvexHull3d::GetVertex(dgInt32 index) const
+inline const dgBigVector& dgConvexHull3d::GetVertex(dgInt32 index) const
 {
-//	return dgVector (dgFloat32 (m_points___[index].m_x), dgFloat32 (m_points___[index].m_y), dgFloat32 (m_points___[index].m_z), dgFloat32 (m_points___[index].m_w));
 	return m_points[index];
 }
 

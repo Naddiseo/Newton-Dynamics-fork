@@ -111,7 +111,7 @@ class dgConvexHull4d: public dgList<dgConvexHull4dTetraherum>
 	protected:
 	dgConvexHull4d(dgMemoryAllocator* const allocator);
 
-	void BuildHull (dgMemoryAllocator* const allocator, const dgBigVector* const vertexCloud, dgInt32 count, dgFloat32 distTol);
+	void BuildHull (dgMemoryAllocator* const allocator, const dgBigVector* const vertexCloud, dgInt32 count, dgFloat64 distTol);
 
 	virtual dgInt32 AddVertex (const dgBigVector& vertex);
 	virtual dgInt32 InitVertexArray(dgHullVector* const points, const dgBigVector* const vertexCloud, dgInt32 count, void* const memoryPool, dgInt32 maxMemSize);
@@ -125,7 +125,7 @@ class dgConvexHull4d: public dgList<dgConvexHull4dTetraherum>
 	dgInt32 SupportVertex (dgAABBPointTree4d** const tree, const dgHullVector* const points, const dgBigVector& dir) const;
 	void TessellateTriangle (dgInt32 level, const dgVector& p0, const dgVector& p1, const dgVector& p2, dgInt32& count, dgBigVector* const ouput, dgInt32& start) const;
 
-	void CalculateConvexHull (dgAABBPointTree4d* vertexTree, dgHullVector* const points, dgInt32 count, dgFloat32 distTol);
+	void CalculateConvexHull (dgAABBPointTree4d* vertexTree, dgHullVector* const points, dgInt32 count, dgFloat64 distTol);
 	void LinkSibling (dgListNode* node0, dgListNode* node1)	const;
 	bool Sanity() const;
 	static dgInt32 ConvexCompareVertex(const dgHullVector* const  A, const dgHullVector* const B, void* const context);
@@ -134,7 +134,7 @@ class dgConvexHull4d: public dgList<dgConvexHull4dTetraherum>
 
 	dgInt32 m_mark;
 	dgInt32 m_count;
-	dgFloat32 m_diag;
+	dgFloat64 m_diag;
 	dgArray<dgHullVector> m_points;
 };
 

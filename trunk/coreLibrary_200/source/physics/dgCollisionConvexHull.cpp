@@ -358,6 +358,8 @@ bool dgCollisionConvexHull::CheckConvex (dgPolyhedra& polyhedra1, const dgVector
 
 bool dgCollisionConvexHull::Create (dgInt32 count, dgInt32 strideInBytes, const dgFloat32* const vertexArray, dgFloat32 tolerance)
 {
+	_ASSERTE (0);
+/*
 	dgConvexHull3d convexHull (GetAllocator(), vertexArray, strideInBytes, count, tolerance);
 	if (!convexHull.GetCount()) {
 		return false;
@@ -484,7 +486,7 @@ bool dgCollisionConvexHull::Create (dgInt32 count, dgInt32 strideInBytes, const 
 	}
 	m_faceArray = (dgConvexSimplexEdge **) m_allocator->Malloc(dgInt32 (m_faceCount * sizeof(dgConvexSimplexEdge *)));
 	memcpy (m_faceArray, &faceArray[0], m_faceCount * sizeof(dgConvexSimplexEdge *));
-
+*/
 	return true;
 }
 
