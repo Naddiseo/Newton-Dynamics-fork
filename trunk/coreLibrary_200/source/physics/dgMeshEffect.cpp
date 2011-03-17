@@ -1463,8 +1463,8 @@ void dgMeshEffect::BoxMapping (dgInt32 front, dgInt32 side, dgInt32 top)
 				dgBigVector p (scale.CompProduct(m_points[ptr->m_incidentVertex] - minVal));
 				attrib.m_u0 = p[u];
 				attrib.m_v0 = p[v];
-				attrib.m_u1 = p[u];
-				attrib.m_v1 = p[v];
+				attrib.m_u1 = dgFloat64(0.0f);
+				attrib.m_v1 = dgFloat64(0.0f);
 				attrib.m_material = materialArray[index];
 
 				ptr = ptr->m_next;
@@ -1477,13 +1477,11 @@ void dgMeshEffect::BoxMapping (dgInt32 front, dgInt32 side, dgInt32 top)
 
 void dgMeshEffect::UniformBoxMapping (dgInt32 material, const dgMatrix& textureMatrix)
 {
-	_ASSERTE (0);
-/*
 	dgStack<dgVertexAtribute>attribArray (GetCount());
 	EnumerateAttributeArray (&attribArray[0]);
 
+	dgInt32 mark = IncLRU();
 	for (dgInt32 i = 0; i < 3; i ++) {
-		dgInt32 mark = IncLRU();
 		dgMatrix rotationMatrix (dgGetIdentityMatrix());
 		if (i == 1) {
 			rotationMatrix = dgYawMatrix(dgFloat32 (90.0f * 3.1416f / 180.0f));
@@ -1491,27 +1489,20 @@ void dgMeshEffect::UniformBoxMapping (dgInt32 material, const dgMatrix& textureM
 			rotationMatrix = dgPitchMatrix(dgFloat32 (90.0f * 3.1416f / 180.0f));
 		}
 
-
-
 		dgPolyhedra::Iterator iter (*this);	
+
 		for(iter.Begin(); iter; iter ++){
 			dgEdge* const edge = &(*iter);
 			if (edge->m_mark < mark){
-				const dgVector& p0 = m_points[edge->m_incidentVertex];
-				const dgVector& p1 = m_points[edge->m_next->m_incidentVertex];
-				const dgVector& p2 = m_points[edge->m_prev->m_incidentVertex];
-
-				edge->m_mark = mark;
-				edge->m_next->m_mark = mark;
-				edge->m_prev->m_mark = mark;
-
-				dgVector e0 (p1 - p0);
-				dgVector e1 (p2 - p0);
-				dgVector n (e0 * e1);
-				n = rotationMatrix.RotateVector(n.Scale (dgRsqrt (n % n)));
-				if ((dgAbsf (n.m_z) >= dgAbsf (n.m_x)) && (dgAbsf (n.m_z) >= dgAbsf (n.m_y))) {
+				dgBigVector n (FaceNormal(edge, &m_points[0].m_x, sizeof (dgBigVector)));
+				dgVector normal (rotationMatrix.RotateVector(dgVector (n.Scale (dgFloat64 (1.0f) / sqrt (n % n)))));
+				normal.m_x = dgAbsf (normal.m_x);
+				normal.m_y = dgAbsf (normal.m_y);
+				normal.m_z = dgAbsf (normal.m_z);
+				if ((normal.m_z >= (normal.m_x - dgFloat32 (1.0e-4f))) && (normal.m_z >= (normal.m_y - dgFloat32 (1.0e-4f)))) {
 					dgEdge* ptr = edge;
 					do {
+						ptr->m_mark = mark;
 						dgVertexAtribute& attrib = attribArray[dgInt32 (ptr->m_userData)];
 						dgVector p (textureMatrix.TransformVector(rotationMatrix.RotateVector(m_points[ptr->m_incidentVertex])));
 						attrib.m_u0 = p.m_x;
@@ -1527,7 +1518,6 @@ void dgMeshEffect::UniformBoxMapping (dgInt32 material, const dgMatrix& textureM
 	}
 
 	ApplyAttributeArray (&attribArray[0]);
-*/
 }
 
 void dgMeshEffect::CalculateNormals (dgFloat64 angleInRadians)
