@@ -3360,12 +3360,10 @@ dgBigVector dgPolyhedra::FaceNormal (dgEdge* const face, const dgFloat64* const 
 
 dgEdge* dgPolyhedra::AddHalfEdge (dgInt32 v0, dgInt32 v1)
 {
-	dgTreeNode *node;
-
-	dgPairKey  pairKey (v0, v1);
+	dgPairKey pairKey (v0, v1);
 	dgEdge tmpEdge (v0, -1);
 
-	node = Insert (tmpEdge, pairKey.GetVal()); 
+	dgTreeNode* node = Insert (tmpEdge, pairKey.GetVal()); 
 	return node ? &node->GetInfo() : NULL;
 }
 
@@ -4291,9 +4289,6 @@ void dgPolyhedra::OptimizeTriangulation (const dgFloat64* const vertex, dgInt32 
 
 void dgPolyhedra::Triangulate (const dgFloat64* const vertex, dgInt32 strideInBytes, dgPolyhedra* const leftOver)
 {
-
-static int xxx;
-
 	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat64));
 
 	dgInt32 count = GetCount() / 2;
