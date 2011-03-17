@@ -2025,7 +2025,9 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 	dgBigVector maxBox;
 	CalculateAABB (minBox, maxBox);
 	maxBox -= minBox;
-	dgFloat64 perimeterConvexBound = dgFloat32 (4.0f) * sqrt(maxBox % maxBox);
+	//dgFloat32 projectSizeFactor = 4.0f;
+	dgFloat32 projectSizeFactor = 1.0f;
+	dgFloat64 perimeterConvexBound = projectSizeFactor * sqrt(maxBox % maxBox);
 
 	dgInt32 tetraCount = delaunayTetrahedras.GetCount();
 	dgStack<dgBigVector> voronoiPoints(tetraCount);
@@ -2064,9 +2066,10 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 	voronoiPartion->BeginPolygon();
 	dgFloat64 layer = dgFloat64 (0.0f);
 
-//voronoiPartion->MergeFaces(this);
-//layer += dgFloat64 (1.0f);
+voronoiPartion->MergeFaces(this);
+layer += dgFloat64 (1.0f);
 
+static int xxxx;
 
 	dgTree<dgList<dgInt32>, dgInt32>::Iterator iter (delanayNodes);
 	for (iter.Begin(); iter; iter ++) {
@@ -2105,6 +2108,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 			_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
 		}
 
+xxxx ++;
 		dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgBigVector), dgFloat64 (1.0e-3f));
 
 		convexMesh->CalculateNormals(dgFloat64 (45.0f * 3.1416f / 180.0f));
@@ -2170,11 +2174,9 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 			convexMesh->m_attib[i].m_vertex.m_w = layer;
 		}
 
-//int xxxx = 0;
-//if (convexMesh->HasOpenEdges())
-//xxxx = 1;
 		_ASSERTE (!convexMesh->HasOpenEdges());
 
+if(xxxx == 4)
 		voronoiPartion->MergeFaces(convexMesh);
 		layer += dgFloat64 (1.0f);
 

@@ -47,7 +47,7 @@ dgDelaunayTetrahedralization::dgDelaunayTetrahedralization(dgMemoryAllocator* co
 
 	dgInt32 oldCount = count;
 	BuildHull (allocator, &pool[0], count, distTol);
-
+/*
 	if ((oldCount > m_count) && (m_count >= 4)) {
 		// add the rest of the point by incremental insertion with small perturbation
 		dgInt32 hullCount = m_count;
@@ -77,6 +77,16 @@ dgDelaunayTetrahedralization::dgDelaunayTetrahedralization(dgMemoryAllocator* co
 				
 			}
 		}
+	}
+*/
+	if (oldCount > m_count) {
+		// this is probably a regular convex solid, which will have a zero volume hull
+		// perturbate a point and try again
+		points[0].m_w += dgFloat64 (0.10f);
+		BuildHull (allocator, &pool[0], oldCount, distTol);
+		_ASSERTE (oldCount == m_count);
+		// restore the old point
+		points[0].m_w = points[0].m_x * points[0].m_x + points[0].m_y * points[0].m_y + points[0].m_z * points[0].m_z;
 	}
 
 #ifdef _DEBUG
