@@ -1534,11 +1534,9 @@ dgFloat32 dgAABBPolygonSoup::CalculateFaceMaxSize (dgTriplex* const vertex, dgIn
 
 void dgAABBPolygonSoup::Create (const dgPolygonSoupDatabaseBuilder& builder, bool optimizedBuild)
 {
-//	_ASSERTE (builder.m_faceCount >= 1);
 	if (builder.m_faceCount == 0) {
 		return;
 	}
-
 
 	m_strideInBytes = sizeof (dgTriplex);
 	m_indexCount = builder.m_indexCount * 2 + builder.m_faceCount;
@@ -1550,11 +1548,15 @@ void dgAABBPolygonSoup::Create (const dgPolygonSoupDatabaseBuilder& builder, boo
 	dgTriplex* const tmpVertexArray = (dgTriplex*)m_localVertex;
 	
 	for (dgInt32 i = 0; i < builder.m_vertexCount; i ++) {
-		tmpVertexArray[i] = builder.m_vertexPoints[i]; 
+		tmpVertexArray[i].m_x = dgFloat32 (builder.m_vertexPoints[i].m_x);
+		tmpVertexArray[i].m_y = dgFloat32 (builder.m_vertexPoints[i].m_y);
+		tmpVertexArray[i].m_z = dgFloat32 (builder.m_vertexPoints[i].m_z);
 	}
 
 	for (dgInt32 i = 0; i < builder.m_normalCount; i ++) {
-		tmpVertexArray[i + builder.m_vertexCount] = builder.m_normalPoints[i]; 
+		tmpVertexArray[i + builder.m_vertexCount].m_x = dgFloat32 (builder.m_normalPoints[i].m_x); 
+		tmpVertexArray[i + builder.m_vertexCount].m_y = dgFloat32 (builder.m_normalPoints[i].m_y); 
+		tmpVertexArray[i + builder.m_vertexCount].m_z = dgFloat32 (builder.m_normalPoints[i].m_z); 
 	}
 
 	dgInt32 polygonIndex = 0;
@@ -1614,10 +1616,9 @@ void dgAABBPolygonSoup::Create (const dgPolygonSoupDatabaseBuilder& builder, boo
 	extraVertexCount = dgVertexListToIndexList (&tmpVertexArray[builder.m_normalCount + builder.m_vertexCount].m_x, sizeof (dgTriplex), sizeof (dgTriplex), 0, extraVertexCount, &indexArray[0], dgFloat32 (1.0e-6f));
 
 	for (dgInt32 i = 0; i < m_nodesCount; i ++) {
-		dgInt32 j;
 		dgAABBTree& box = tree[i];
 
-		j = box.m_minIndex - builder.m_normalCount - builder.m_vertexCount;
+		dgInt32 j = box.m_minIndex - builder.m_normalCount - builder.m_vertexCount;
 		box.m_minIndex = indexArray[j] + builder.m_normalCount + builder.m_vertexCount;
 		j = box.m_maxIndex - builder.m_normalCount - builder.m_vertexCount;
 		box.m_maxIndex = indexArray[j] + builder.m_normalCount + builder.m_vertexCount;
