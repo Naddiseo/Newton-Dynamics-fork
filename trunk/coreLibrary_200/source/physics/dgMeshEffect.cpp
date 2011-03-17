@@ -1969,19 +1969,11 @@ dgInt32 dgMeshEffect::GetTotalFaceCount() const
 
 dgInt32 dgMeshEffect::GetTotalIndexCount() const
 {
-_ASSERTE (0);
-return 0;
-/*
-	dgInt32 count;
-	dgInt32 mark;
-	dgEdge *ptr;
-	dgEdge *edge;
 	Iterator iter (*this);
-
-	count = 0;
-	mark = IncLRU();
+	dgInt32 count = 0;
+	dgInt32 mark = IncLRU();
 	for (iter.Begin(); iter; iter ++) {
-		edge = &(*iter);
+		dgEdge* const edge = &(*iter);
 		if (edge->m_mark == mark) {
 			continue;
 		}
@@ -1990,7 +1982,7 @@ return 0;
 			continue;
 		}
 		
-		ptr = edge;
+		dgEdge* ptr = edge;
 		do {
 			count ++;
 			ptr->m_mark = mark;
@@ -1998,14 +1990,10 @@ return 0;
 		} while (ptr != edge);
 	}
 	return count;
-*/
 }
 
 void dgMeshEffect::GetFaces (dgInt32* const facesIndex, dgInt32* const materials, void** const faceNodeList) const
 {
-	_ASSERTE (0);
-	/*
-
 	Iterator iter (*this);
 
 	dgInt32 faces = 0;
@@ -2033,10 +2021,9 @@ void dgMeshEffect::GetFaces (dgInt32* const facesIndex, dgInt32* const materials
 		} while (ptr != edge);
 
 		facesIndex[faces] = faceCount;
-		materials[faces] = m_attib[dgInt32 (edge->m_userData)].m_material;
+		materials[faces] = dgInt32 (m_attib[dgInt32 (edge->m_userData)].m_material);
 		faces ++;
 	}
-*/
 }
 
 void* dgMeshEffect::GetFirstVertex ()
