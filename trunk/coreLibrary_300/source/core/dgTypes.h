@@ -227,6 +227,7 @@ class dgTriplex
 
 
 class dgVector;
+class dgBigVector;
 
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	#define dgApi __cdecl 	
