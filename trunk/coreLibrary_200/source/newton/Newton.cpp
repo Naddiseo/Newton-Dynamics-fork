@@ -8165,6 +8165,13 @@ void NewtonMeshClip (const NewtonMesh* const mesh, const NewtonMesh* const clipp
 	((dgMeshEffect*) mesh)->ClipMesh (matrix, (dgMeshEffect*)clipper, (dgMeshEffect**) topMesh, (dgMeshEffect**) bottomMesh);
 }
 
+NewtonMesh* NewtonMeshConvexDecomposition (const NewtonMesh* const mesh, int maxCount)
+{
+	TRACE_FUNTION(__FUNCTION__);
+//	dgMatrix& tetMatrix = *((dgMatrix*)textureMatrix);
+	return (NewtonMesh*) ((dgMeshEffect*) mesh)->CreateConvexApproximation (maxCount);
+}
+
 NewtonMesh* NewtonMeshVoronoiDecomposition (const NewtonMesh* const mesh, int pointCount, int pointStrideInBytes, const dFloat* const pointCloud, int internalMaterial, const dFloat* const textureMatrix)
 {
 	TRACE_FUNTION(__FUNCTION__);

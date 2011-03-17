@@ -1885,7 +1885,8 @@ class Tetrahedralization: public dgDelaunayTetrahedralization
 
 
 
-dgCollision* dgMeshEffect::CreateConvexApproximationCollision(dgWorld* const world, dgInt32 maxCount, dgInt32 shapeId, dgInt32 childrenID) const
+//dgCollision* dgMeshEffect::CreateConvexApproximationCollision(dgWorld* const world, dgInt32 maxCount, dgInt32 shapeId, dgInt32 childrenID) const
+dgMeshEffect* dgMeshEffect::CreateConvexApproximation(dgInt32 maxCount) const
 {
 _ASSERTE (0);
 return NULL;
