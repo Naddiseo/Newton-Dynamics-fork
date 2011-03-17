@@ -84,8 +84,8 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	dgMeshEffect(dgMemoryAllocator* const allocator, const dgMatrix& planeMatrix, dgFloat32 witdth, dgFloat32 breadth, dgInt32 material, const dgMatrix& textureMatrix0, const dgMatrix& textureMatrix1);
 	virtual ~dgMeshEffect(void);
 
-	dgMatrix CalculateOOBB (dgVector& size) const;
-	void CalculateAABB (dgVector& min, dgVector& max) const;
+	dgMatrix CalculateOOBB (dgBigVector& size) const;
+	void CalculateAABB (dgBigVector& min, dgBigVector& max) const;
 
 	void CalculateNormals (dgFloat64 angleInRadians);
 	void SphericalMapping (dgInt32 material);
@@ -155,8 +155,8 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 								  dgInt32 normalStrideInByte, dgFloat64* const normal, dgInt32* const normalIndices, dgInt32* const normalCount,
 								  dgInt32 uvStrideInByte0, dgFloat64* const uv0, dgInt32* const uvIndices0, dgInt32* const uvCount0,
 								  dgInt32 uvStrideInByte1, dgFloat64* const uv1, dgInt32* const uvIndices1, dgInt32* const uvCount1);
-	
 
+	
 
 	dgIndexArray* MaterialGeometryBegin();
 	void MaterialGeomteryEnd(dgIndexArray* handle);
@@ -253,39 +253,39 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 
 
 inline dgInt32 dgMeshEffect::GetVertexCount() const
-		{
+{
 	return m_pointCount;
-		}
+}
 
 inline dgInt32 dgMeshEffect::GetPropertiesCount() const
-		{
+{
 	return m_atribCount;
-		}
+}
 
 inline dgInt32 dgMeshEffect::GetMaterialID (dgIndexArray* handle, dgInt32 materialHandle)
-		{
+{
 	return handle->m_materials[materialHandle];
-		}
+}
 
 inline dgInt32 dgMeshEffect::GetMaterialIndexCount (dgIndexArray* handle, dgInt32 materialHandle)
-	{
+{
 	return handle->m_materialsIndexCount[materialHandle];
-	}
+}
 
 inline dgMeshEffect::dgVertexAtribute& dgMeshEffect::GetAttribute (dgInt32 index) const 
-	{
+{
 	return m_attib[index];
-	}
+}
 
 inline dgInt32 dgMeshEffect::GetPropertiesStrideInByte() const 
-	{
+{
 	return sizeof (dgVertexAtribute);
-	}
-	
+}
+
 inline dgFloat64* dgMeshEffect::GetAttributePool() const 
-	{
+{
 	return &m_attib->m_vertex.m_x;
-							}
+}
 
 inline dgFloat64* dgMeshEffect::GetNormalPool() const 
 {

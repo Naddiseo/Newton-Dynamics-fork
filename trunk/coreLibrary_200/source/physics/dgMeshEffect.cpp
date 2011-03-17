@@ -1133,7 +1133,7 @@ _ASSERTE (0);
 */
 }
 
-dgMatrix dgMeshEffect::CalculateOOBB (dgVector& size) const
+dgMatrix dgMeshEffect::CalculateOOBB (dgBigVector& size) const
 {
 _ASSERTE (0);
 return dgGetIdentityMatrix();
@@ -1158,7 +1158,7 @@ return dgGetIdentityMatrix();
 */
 }
 
-void dgMeshEffect::CalculateAABB (dgVector& minBox, dgVector& maxBox) const
+void dgMeshEffect::CalculateAABB (dgBigVector& minBox, dgBigVector& maxBox) const
 {
 /*
 	dgVector minP ( dgFloat32 (1.0e15f),  dgFloat32 (1.0e15f),  dgFloat32 (1.0e15f), dgFloat32 (0.0f)); 

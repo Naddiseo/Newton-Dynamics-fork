@@ -1976,10 +1976,8 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 	dgMeshEffectSolidTree* const tree = CreateSolidTree();
 	_ASSERTE (tree);
 
-_ASSERTE (0);
-return NULL;
-/*
-	dgStack<dgVector> pool(pointsCount + m_pointCount);
+	dgStack<dgBigVector> buffer(pointsCount + m_pointCount);
+	dgBigVector* const pool = &buffer[0];
 
 	for (dgInt32 i = 0; i < m_pointCount; i ++) {
 		pool[i] = m_points[i];
@@ -1987,14 +1985,14 @@ return NULL;
 
 
 	dgInt32 count = m_pointCount;
-	dgFloat32 quantizeFactor = dgFloat32 (16.0f);
-	dgFloat32 invQuantizeFactor = dgFloat32 (1.0f) / quantizeFactor;
+	dgFloat64 quantizeFactor = dgFloat64 (16.0f);
+	dgFloat64 invQuantizeFactor = dgFloat64 (1.0f) / quantizeFactor;
 	dgInt32 stride = pointStrideInBytes / sizeof (dgFloat32); 
 	for (dgInt32 i = 0; i < pointsCount; i ++) {
-		dgFloat32 x = dgFloor (pointCloud[i * stride + 0] * quantizeFactor) * invQuantizeFactor;
-		dgFloat32 y = dgFloor (pointCloud[i * stride + 1] * quantizeFactor) * invQuantizeFactor;
-		dgFloat32 z = dgFloor (pointCloud[i * stride + 2] * quantizeFactor) * invQuantizeFactor;
-		dgVector p (x, y, z, dgFloat32 (0.0f));
+		dgFloat64 x = floor (pointCloud[i * stride + 0] * quantizeFactor) * invQuantizeFactor;
+		dgFloat64 y = floor (pointCloud[i * stride + 1] * quantizeFactor) * invQuantizeFactor;
+		dgFloat64 z = floor (pointCloud[i * stride + 2] * quantizeFactor) * invQuantizeFactor;
+		dgBigVector p (x, y, z, dgFloat64 (0.0f));
 		dgHugeVector p1 (p);
 		
 		bool pointSide = true;
@@ -2015,23 +2013,23 @@ return NULL;
 		}
 	}
 
+
 	dgStack<dgInt32> indexList(count);
 	dgStack<dgInt32> indexMap(count);
-	count = dgVertexListToIndexList(&pool[0].m_x, sizeof (dgVector), sizeof (dgVector), 0, count, &indexList[0], dgFloat32 (1.0e-5f));	
+	count = dgVertexListToIndexList(&pool[0].m_x, sizeof (dgBigVector), 3, count, &indexList[0], dgFloat64 (1.0e-5f));	
 	for (dgInt32 i = 0; i < count; i ++) {
 		indexMap[indexList[i]] = i;
 	}
 
-
-	dgDelaunayTetrahedralization delaunayTetrahedras (GetAllocator(), &pool[0].m_x, count, sizeof (dgVector), 0.0f);
+	dgDelaunayTetrahedralization delaunayTetrahedras (GetAllocator(), &pool[0].m_x, count, sizeof (dgBigVector), 0.0f);
 	delaunayTetrahedras.RemoveUpperHull ();
 
-	dgVector minBox;
-	dgVector maxBox;
+	dgBigVector minBox;
+	dgBigVector maxBox;
 	CalculateAABB (minBox, maxBox);
 	maxBox -= minBox;
-	dgFloat32 perimeterConvexBound = dgFloat32 (8.0f) * dgSqrt (maxBox % maxBox);
-
+	dgFloat64 perimeterConvexBound = dgFloat32 (4.0f) * sqrt(maxBox % maxBox);
+/*
 	dgInt32 tetraCount = delaunayTetrahedras.GetCount();
 	dgStack<dgVector> voronoiPoints(tetraCount);
 	dgStack<dgDelaunayTetrahedralization::dgListNode*> tetradrumNode(tetraCount);
@@ -2189,12 +2187,12 @@ break;
 
 	voronoiPartion->EndPolygon();
 
-	
+*/	
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgControlFP (controlWorld, _MCW_PC);
 #endif
 
 	delete tree;
-	return voronoiPartion;
-*/
+//	return voronoiPartion;
+return NULL;
 }

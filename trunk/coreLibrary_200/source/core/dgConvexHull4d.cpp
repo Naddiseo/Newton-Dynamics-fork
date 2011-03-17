@@ -273,7 +273,7 @@ dgConvexHull4d::~dgConvexHull4d(void)
 {
 }
 
-void dgConvexHull4d::BuildHull (dgMemoryAllocator* const allocator, const dgBigVector* const vertexCloud, dgInt32 count, dgFloat32 distTol)
+void dgConvexHull4d::BuildHull (dgMemoryAllocator* const allocator, const dgBigVector* const vertexCloud, dgInt32 count, dgFloat64 distTol)
 {
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);
@@ -958,9 +958,9 @@ void dgConvexHull4d::InsertNewVertex(dgInt32 vertexIndex, dgListNode* const fron
 	}
 }
 
-void dgConvexHull4d::CalculateConvexHull (dgAABBPointTree4d* vertexTree, dgHullVector* const points, dgInt32 count, dgFloat32 distTol)
+void dgConvexHull4d::CalculateConvexHull (dgAABBPointTree4d* vertexTree, dgHullVector* const points, dgInt32 count, dgFloat64 distTol)
 {
-	distTol = dgAbsf (distTol) * m_diag;
+	distTol = fabs (distTol) * m_diag;
 	dgListNode* const nodes0 = AddFace (0, 1, 2, 3);
 	dgListNode* const nodes1 = AddFace (0, 1, 3, 2);
 	//	nodes[2] = AddFace (3, 2, 0, 4);
@@ -975,8 +975,6 @@ void dgConvexHull4d::CalculateConvexHull (dgAABBPointTree4d* vertexTree, dgHullV
 	LinkSibling (nodes0, nodes1);
 	LinkSibling (nodes0, nodes1);
 	LinkSibling (nodes0, nodes1);
-
-	
 
 	IncMark();
 	count -= 4;
@@ -996,7 +994,6 @@ void dgConvexHull4d::CalculateConvexHull (dgAABBPointTree4d* vertexTree, dgHullV
 
 		if ((dist > distTol) && (face->Evalue(hullVertexArray, p) > dgFloat64(0.0f))) {
 
-//			Swap (hullVertexArray[index], hullVertexArray[currentIndex]);
 			m_points[currentIndex] = p;
 			points[index].m_mark = 1;
 

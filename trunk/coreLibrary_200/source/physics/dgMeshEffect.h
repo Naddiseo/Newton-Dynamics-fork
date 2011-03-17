@@ -84,8 +84,8 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	dgMeshEffect(dgMemoryAllocator* const allocator, const dgMatrix& planeMatrix, dgFloat32 witdth, dgFloat32 breadth, dgInt32 material, const dgMatrix& textureMatrix0, const dgMatrix& textureMatrix1);
 	virtual ~dgMeshEffect(void);
 
-	dgMatrix CalculateOOBB (dgVector& size) const;
-	void CalculateAABB (dgVector& min, dgVector& max) const;
+	dgMatrix CalculateOOBB (dgBigVector& size) const;
+	void CalculateAABB (dgBigVector& min, dgBigVector& max) const;
 
 	void CalculateNormals (dgFloat64 angleInRadians);
 	void SphericalMapping (dgInt32 material);

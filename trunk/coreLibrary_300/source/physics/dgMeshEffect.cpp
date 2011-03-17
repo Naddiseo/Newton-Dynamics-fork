@@ -1133,7 +1133,7 @@ _ASSERTE (0);
 */
 }
 
-dgMatrix dgMeshEffect::CalculateOOBB (dgVector& size) const
+dgMatrix dgMeshEffect::CalculateOOBB (dgBigVector& size) const
 {
 _ASSERTE (0);
 return dgGetIdentityMatrix();
@@ -1158,7 +1158,7 @@ return dgGetIdentityMatrix();
 */
 }
 
-void dgMeshEffect::CalculateAABB (dgVector& minBox, dgVector& maxBox) const
+void dgMeshEffect::CalculateAABB (dgBigVector& minBox, dgBigVector& maxBox) const
 {
 /*
 	dgVector minP ( dgFloat32 (1.0e15f),  dgFloat32 (1.0e15f),  dgFloat32 (1.0e15f), dgFloat32 (0.0f)); 
@@ -1642,7 +1642,7 @@ void dgMeshEffect::AddVertex(const dgBigVector& vertex)
 		GetAllocator()->FreeLow(m_points);
 		m_points = points;
 	}
-
+	
 	m_points[m_pointCount].m_x = DG_MESH_EFFECT_QUANTIZE_FLOAT(vertex[0]);
 	m_points[m_pointCount].m_y = DG_MESH_EFFECT_QUANTIZE_FLOAT(vertex[1]);
 	m_points[m_pointCount].m_z = DG_MESH_EFFECT_QUANTIZE_FLOAT(vertex[2]);
@@ -1914,7 +1914,7 @@ void dgMeshEffect::BuildFromVertexListIndexList(
 		acc += indexCount;
 	}
 
- 
+
 	dgStack<dgInt32>attrIndexMap(m_atribCount);
 	m_atribCount = dgVertexListToIndexList (&m_attib[0].m_vertex.m_x, sizeof (dgVertexAtribute), sizeof (dgVertexAtribute) / sizeof (dgFloat64), m_atribCount, &attrIndexMap[0], DG_VERTEXLIST_INDEXLIST_TOL);
 
@@ -2455,7 +2455,7 @@ void dgMeshEffect::GetVertexStreams (dgInt32 vetexStrideInByte, dgFloat32* const
 	uvStrideInByte1 /= sizeof (dgFloat32);
 	vetexStrideInByte /= sizeof (dgFloat32);
 	normalStrideInByte /= sizeof (dgFloat32);
-	for (dgInt32 i =0; i < m_atribCount; i ++)	{
+	for (dgInt32 i = 0; i < m_atribCount; i ++)	{
 		dgInt32 j = i * vetexStrideInByte;
 		vertex[j + 0] = dgFloat32 (m_attib[i].m_vertex.m_x);
 		vertex[j + 1] = dgFloat32 (m_attib[i].m_vertex.m_y);

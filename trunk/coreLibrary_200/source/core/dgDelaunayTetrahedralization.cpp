@@ -26,7 +26,7 @@
 #include "dgDelaunayTetrahedralization.h"
 
 
-dgDelaunayTetrahedralization::dgDelaunayTetrahedralization(dgMemoryAllocator* const allocator, const dgFloat32* const vertexCloud, dgInt32 count, dgInt32 strideInByte, dgFloat32 distTol)
+dgDelaunayTetrahedralization::dgDelaunayTetrahedralization(dgMemoryAllocator* const allocator, const dgFloat64* const vertexCloud, dgInt32 count, dgInt32 strideInByte, dgFloat64 distTol)
 	:dgConvexHull4d(allocator)
 {
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
@@ -37,7 +37,7 @@ dgDelaunayTetrahedralization::dgDelaunayTetrahedralization(dgMemoryAllocator* co
 	dgStack<dgBigVector> pool(count);
 
 	dgBigVector* const points = &pool[0];
-	dgInt32 stride = dgInt32 (strideInByte / sizeof (dgFloat32));
+	dgInt32 stride = dgInt32 (strideInByte / sizeof (dgFloat64));
 	for (dgInt32 i = 0; i < count; i ++) {
 		volatile float x = float (vertexCloud[i * stride + 0]);
 		volatile float y = float (vertexCloud[i * stride + 1]);

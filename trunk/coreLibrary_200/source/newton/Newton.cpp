@@ -8077,29 +8077,16 @@ void NewtonMeshDestroy(const NewtonMesh* const mesh)
 
 void NewtonMeshCalculateOOBB(const NewtonMesh* const mesh, dFloat* const matrix, dFloat* const x, dFloat* const y, dFloat* const z)
 {
-	
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 
 	TRACE_FUNTION(__FUNCTION__);
-	dgVector size;
+	dgBigVector size;
 	dgMatrix alignMatrix (meshEffect->CalculateOOBB (size));
 
-//	dgMatrix permuation (dgGetIdentityMatrix());
-//	permuation[0][0] = dgFloat32 (0.0f);
-//	permuation[0][1] = dgFloat32 (1.0f);
-//	permuation[1][1] = dgFloat32 (0.0f);
-//	permuation[1][2] = dgFloat32 (1.0f);
-//	permuation[2][2] = dgFloat32 (0.0f);
-//	permuation[2][0] = dgFloat32 (1.0f);
-//	while ((size.m_x < size.m_y) || (size.m_x < size.m_z)) {
-//		alignMatrix = permuation * alignMatrix;
-//		size = permuation.UnrotateVector(size);
-//	}
-
 	*((dgMatrix *)matrix) = alignMatrix; 
-	*x = size.m_x;
-	*y = size.m_y;
-	*z = size.m_z;
+	*x = dgFloat32 (size.m_x);
+	*y = dgFloat32 (size.m_y);
+	*z = dgFloat32 (size.m_z);
 }
 
 void NewtonMeshCalculateVertexNormals(const NewtonMesh* const mesh, dFloat angleInRadians)
