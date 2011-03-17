@@ -166,10 +166,10 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	dgInt32 GetMaterialIndexCount (dgIndexArray* handle, dgInt32 materialHandle);
 	void GetMaterialGetIndexStream (dgIndexArray* handle, dgInt32 materialHandle, dgInt32* index);
 	void GetMaterialGetIndexStreamShort (dgIndexArray* handle, dgInt32 materialHandle, dgInt16* index);
-
-	dgCollision* CreateConvexApproximationCollision(dgWorld* const world, dgInt32 maxCount, dgInt32 shapeId, dgInt32 childrenID) const;
+	
 	dgCollision* CreateConvexCollision(dgFloat64 tolerance, dgInt32 shapeID, const dgMatrix& matrix = dgGetIdentityMatrix()) const;
 
+	dgMeshEffect* CreateConvexApproximation (dgInt32 maxCount) const;
 	dgMeshEffect* CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
 
 	void PlaneClipMesh (const dgPlane& plane, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource);

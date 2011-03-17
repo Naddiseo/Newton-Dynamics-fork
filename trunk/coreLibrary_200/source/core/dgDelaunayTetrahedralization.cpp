@@ -47,9 +47,11 @@ dgDelaunayTetrahedralization::dgDelaunayTetrahedralization(dgMemoryAllocator* co
 
 	dgInt32 oldCount = count;
 	BuildHull (allocator, &pool[0], count, distTol);
-/*
-	if ((oldCount > m_count) && (m_count >= 4)) {
-		// add the rest of the point by incremental insertion with small perturbation
+#if 1
+//	if ((oldCount > m_count) && (m_count >= 4)) {
+	if (oldCount > m_count) {
+		// this is probably a regular convex solid, which will have a zero volume hull
+		// add the rest of the points by incremental insertion with small perturbation
 		dgInt32 hullCount = m_count;
 		
 		for (dgInt32 i = 0; i < count; i ++) {
@@ -72,22 +74,26 @@ dgDelaunayTetrahedralization::dgDelaunayTetrahedralization(dgMemoryAllocator* co
 					_ASSERTE (index != -1);
 				}
 				_ASSERTE (index != -1);
-				m_points[index] = points[i];
+//				m_points[index] = points[i];
 				m_points[index].m_index = i;
-				
 			}
 		}
 	}
-*/
+#else
 	if (oldCount > m_count) {
 		// this is probably a regular convex solid, which will have a zero volume hull
 		// perturbate a point and try again
-		points[0].m_w += dgFloat64 (0.10f);
+		dgBigVector p (points[0]);
+		points[0].m_x += dgFloat64 (1.0e-0f);
+		points[0].m_y += dgFloat64 (1.0e-0f);
+		points[0].m_z += dgFloat64 (1.0e-0f);
+		points[0].m_w = points[0].m_x * points[0].m_x + points[0].m_y * points[0].m_y + points[0].m_z * points[0].m_z;
 		BuildHull (allocator, &pool[0], oldCount, distTol);
 		_ASSERTE (oldCount == m_count);
 		// restore the old point
-		points[0].m_w = points[0].m_x * points[0].m_x + points[0].m_y * points[0].m_y + points[0].m_z * points[0].m_z;
+		//points[0].m_w = points[0].m_x * points[0].m_x + points[0].m_y * points[0].m_y + points[0].m_z * points[0].m_z;
 	}
+#endif
 
 #ifdef _DEBUG
 	SortVertexArray ();

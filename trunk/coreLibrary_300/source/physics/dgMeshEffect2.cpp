@@ -1885,10 +1885,9 @@ class Tetrahedralization: public dgDelaunayTetrahedralization
 
 
 
-dgCollision* dgMeshEffect::CreateConvexApproximationCollision(dgWorld* const world, dgInt32 maxCount, dgInt32 shapeId, dgInt32 childrenID) const
+//dgCollision* dgMeshEffect::CreateConvexApproximationCollision(dgWorld* const world, dgInt32 maxCount, dgInt32 shapeId, dgInt32 childrenID) const
+dgMeshEffect* dgMeshEffect::CreateConvexApproximation(dgInt32 maxCount) const
 {
-_ASSERTE (0);
-return NULL;
 /*
 	dgMeshEffect tmpMesh (*this);
 	tmpMesh.WeldTJoints();
@@ -1953,6 +1952,68 @@ for (iter.Begin(); iter; iter ++)
 
 	return compound;
 */
+
+
+#if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
+	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);
+	dgControlFP (_PC_53, _MCW_PC);
+#endif
+
+
+	dgDelaunayTetrahedralization delaunayTetrahedras (GetAllocator(), &m_points[0].m_x, m_pointCount, sizeof (dgBigVector), 0.0f);
+	delaunayTetrahedras.RemoveUpperHull ();
+
+	dgMeshEffect* const voronoiPartion = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+	voronoiPartion->BeginPolygon();
+	dgFloat64 layer = dgFloat64 (0.0f);
+
+//voronoiPartion->MergeFaces(this);
+//layer += dgFloat64 (1.0f);
+
+static int xxxx;
+
+	for (dgConvexHull4d::dgListNode* node = delaunayTetrahedras.GetFirst(); node; node = node->GetNext()) {
+
+		dgConvexHull4dTetraherum* const tetra = &node->GetInfo();
+		const dgConvexHull4dTetraherum::dgTetrahedrumFace& face0 = tetra->m_faces[0];
+
+		dgBigVector pointArray[4];
+		pointArray[0] = delaunayTetrahedras.GetVertex(face0.m_index[0]);
+		pointArray[1] = delaunayTetrahedras.GetVertex(face0.m_index[1]);
+		pointArray[2] = delaunayTetrahedras.GetVertex(face0.m_index[2]);
+		pointArray[3] = delaunayTetrahedras.GetVertex(face0.m_otherVertex);
+
+		dgMeshEffect* const convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, 4, sizeof (dgBigVector), dgFloat64 (1.0e-3f));
+
+
+#if 1
+dgBigVector xxx (0, 0, 0, 0);
+for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
+	xxx += convexMesh->m_points[i];
+}
+xxx = xxx.Scale (0.2f / convexMesh->m_pointCount);
+for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
+	convexMesh->m_points[i] += xxx;
+}
+for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
+	convexMesh->m_attib[i].m_vertex += xxx;
+}
+#endif
+
+
+		voronoiPartion->MergeFaces(convexMesh);
+		layer += dgFloat64 (1.0f);
+
+		convexMesh->Release();
+	}
+
+	voronoiPartion->EndPolygon();
+	
+#if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
+	dgControlFP (controlWorld, _MCW_PC);
+#endif
+
+	return voronoiPartion;
 }
 
 dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const
@@ -2176,7 +2237,7 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 
 		_ASSERTE (!convexMesh->HasOpenEdges());
 
-if(xxxx == 4)
+//if(xxxx == 4)
 		voronoiPartion->MergeFaces(convexMesh);
 		layer += dgFloat64 (1.0f);
 

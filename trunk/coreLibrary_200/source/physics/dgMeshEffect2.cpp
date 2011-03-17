@@ -2237,7 +2237,7 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 
 		_ASSERTE (!convexMesh->HasOpenEdges());
 
-if(xxxx == 4)
+//if(xxxx == 4)
 		voronoiPartion->MergeFaces(convexMesh);
 		layer += dgFloat64 (1.0f);
 

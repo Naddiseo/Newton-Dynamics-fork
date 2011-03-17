@@ -70,8 +70,8 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 	dMatrix textureMatrix (GetIdentityMatrix());
 	textureMatrix[0][0] = 1.0f / size.m_x;
 	textureMatrix[1][1] = 1.0f / size.m_y;
-//	NewtonMesh* const convexParts = NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interior, &textureMatrix[0][0]);
-	NewtonMesh* const convexParts = NewtonMeshConvexDecomposition (mesh, 1000000);
+	NewtonMesh* const convexParts = NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interior, &textureMatrix[0][0]);
+//	NewtonMesh* const convexParts = NewtonMeshConvexDecomposition (mesh, 1000000);
 
 #if 1
 dScene xxxx(world);
