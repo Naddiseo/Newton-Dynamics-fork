@@ -325,7 +325,7 @@ void dgCollisionConvex::DebugCollision (const dgMatrix& matrixPtr, OnDebugCollis
 //	_ASSERTE (myBody.m_collision == this);
 //	dgMatrix matrix (GetOffsetMatrix() * myBody.m_matrix);
 	dgMatrix matrix (GetOffsetMatrix() * matrixPtr);
-	matrix.TransformTriplex (tmp, sizeof (dgVector), m_vertex, sizeof (dgVector), m_vertexCount);
+	matrix.TransformTriplex (&tmp[0].m_x, sizeof (dgVector), &m_vertex[0].m_x, sizeof (dgVector), m_vertexCount);
 
 	memset (mark, 0, sizeof (mark));
 	for (i = 0; i < m_edgeCount; i ++) {

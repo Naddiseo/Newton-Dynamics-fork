@@ -100,7 +100,6 @@ void dgCollisionSphere::Init (dgFloat32 radius, dgMemoryAllocator* allocator)
 		for (dgInt32 i = 0; i < vertexCount; i ++) {
 			m_unitSphere[i] = tmpVectex[i];
 		}
-
 		dgPolyhedra polyhedra(m_allocator);
 
 		polyhedra.BeginFace();
@@ -281,8 +280,7 @@ void dgCollisionSphere::DebugCollision (const dgMatrix& matrixPtr, OnDebugCollis
 
 //	const dgMatrix &matrix = myBody.GetCollisionMatrix();
 	dgMatrix matrix (GetOffsetMatrix() * matrixPtr);
-	matrix.TransformTriplex (pool, sizeof (dgTriplex), tmpVectex, sizeof (dgVector), count);
-
+	matrix.TransformTriplex (&pool[0].m_x, sizeof (dgTriplex), &tmpVectex[0].m_x, sizeof (dgVector), count);
 	for (i = 0; i < count; i += 3) {
 		callback (userData, 3, &pool[i].m_x, 0);
 	}

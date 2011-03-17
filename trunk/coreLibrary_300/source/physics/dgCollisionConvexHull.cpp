@@ -523,7 +523,7 @@ void dgCollisionConvexHull::DebugCollision (const dgMatrix& matrixPtr, OnDebugCo
 	
 	dgStack<dgTriplex> tmp (m_vertexCount);
 	dgMatrix matrix (GetOffsetMatrix() * matrixPtr);
-	matrix.TransformTriplex (&tmp[0], sizeof (dgTriplex), m_vertex, sizeof (dgVector), m_vertexCount);
+	matrix.TransformTriplex (&tmp[0].m_x, sizeof (dgTriplex), &m_vertex[0].m_x, sizeof (dgVector), m_vertexCount);
 
 	for (i = 0; i < m_faceCount; i ++) {
 		face = m_faceArray[i];

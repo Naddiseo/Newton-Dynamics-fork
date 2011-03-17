@@ -180,7 +180,7 @@ void dgCollisionCone::DebugCollision (const dgMatrix& matrixPtr, OnDebugCollisio
 
 //	const dgMatrix &matrix = myBody.GetCollisionMatrix();
 	dgMatrix matrix (GetOffsetMatrix() * matrixPtr);
-	matrix.TransformTriplex (pool, sizeof (dgTriplex), pool, sizeof (dgTriplex), NUMBER_OF_DEBUG_SEGMENTS + 1);
+	matrix.TransformTriplex (&pool[0].m_x, sizeof (dgTriplex), &pool[0].m_x, sizeof (dgTriplex), NUMBER_OF_DEBUG_SEGMENTS + 1);
 
 	j = NUMBER_OF_DEBUG_SEGMENTS - 1;
 	for (i = 0; i < NUMBER_OF_DEBUG_SEGMENTS; i ++) { 
