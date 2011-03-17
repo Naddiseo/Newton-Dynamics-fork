@@ -8039,9 +8039,8 @@ NewtonMesh* NewtonMeshCreateFromCollision(const NewtonCollision* const collision
 {
 	TRACE_FUNTION(__FUNCTION__);
 
-	dgCollision* shape = (dgCollision*) collision;
-	dgMeshEffect* mesh = new (shape->GetAllocator()) dgMeshEffect (shape);
-
+	dgCollision* const shape = (dgCollision*) collision;
+	dgMeshEffect* const mesh = new (shape->GetAllocator()) dgMeshEffect (shape);
 	return (NewtonMesh*) mesh;
 }
 
@@ -8181,13 +8180,9 @@ void NewtonMeshClip (const NewtonMesh* const mesh, const NewtonMesh* const clipp
 
 NewtonMesh* NewtonMeshVoronoiDecomposition (const NewtonMesh* const mesh, int pointCount, int pointStrideInBytes, const dFloat* const pointCloud, int internalMaterial, const dFloat* const textureMatrix)
 {
-	_ASSERTE (0);
-	return NULL;
-/*
 	TRACE_FUNTION(__FUNCTION__);
-	dgMatrix& matrix = *((dgMatrix*)textureMatrix);
-	return (NewtonMesh*) ((dgMeshEffect*) mesh)->CreateVoronoiPartition (pointCount, pointStrideInBytes, pointCloud, internalMaterial, matrix);
-*/
+	dgMatrix& tetMatrix = *((dgMatrix*)textureMatrix);
+	return (NewtonMesh*) ((dgMeshEffect*) mesh)->CreateVoronoiPartition (pointCount, pointStrideInBytes, pointCloud, internalMaterial, tetMatrix);
 }
 
 

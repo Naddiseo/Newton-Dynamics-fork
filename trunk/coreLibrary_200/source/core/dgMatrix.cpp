@@ -218,16 +218,8 @@ void dgMatrix::TransformBBox (const dgVector& p0local, const dgVector& p1local, 
 
 dgMatrix dgMatrix::Symetric3by3Inverse () const
 {
-//	dgFloat32 x11;
-//	dgFloat32 x12;
-//	dgFloat32 x13;
-//	dgFloat32 x22;
-//	dgFloat32 x23;
-//	dgFloat32 x33;
-//	dgFloat64 det;
-
 	const dgMatrix& mat = *this;
-	dgFloat32 det = mat[0][0] * mat[1][1] * mat[2][2] + 
+	dgFloat64 det = mat[0][0] * mat[1][1] * mat[2][2] + 
 					mat[0][1] * mat[1][2] * mat[0][2] * dgFloat32 (2.0f) -
 					mat[0][2] * mat[1][1] * mat[0][2] -
 					mat[0][1] * mat[0][1] * mat[2][2] -
@@ -275,17 +267,6 @@ static inline void ROT(dgMatrix &a, dgInt32 i, dgInt32 j, dgInt32 k, dgInt32 l, 
 // Jacobian method for computing the eigenvectors of a symmetric matrix
 void dgMatrix::EigenVectors (dgVector &eigenValues)
 {
-//	dgInt32 i;
-//	dgInt32 nrot;
-//	dgFloat32 t;
-//	dgFloat32 s;
-//	dgFloat32 h;
-//	dgFloat32 g;
-//	dgFloat32 c;
-//	dgFloat32 sm;
-//	dgFloat32 tau;
-//	dgFloat32 theta;
-//	dgFloat32 thresh;
 	dgFloat32 b[3];
 	dgFloat32 z[3];
 	dgFloat32 d[3];
@@ -445,9 +426,6 @@ void dgMatrix::EigenVectors (dgVector &eigenValues)
 
 dgVector dgMatrix::CalcPitchYawRoll () const
 {
-//	dgFloat32 yaw;
-//	dgFloat32 roll;
-//	dgFloat32 pitch;
 	const dgFloat32 minSin = dgFloat32(0.99995f);
 
 	const dgMatrix& matrix = *this;

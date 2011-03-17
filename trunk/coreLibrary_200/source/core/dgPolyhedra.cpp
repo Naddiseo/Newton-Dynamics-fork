@@ -4324,10 +4324,6 @@ static int xxx;
 		} while (ptr != thisEdge);
 
 		if (count > 3) {
-xxx ++;
-if (xxx == 4)
-xxx *=1;
-
 			dgEdge* const edge = TriangulateFace (thisEdge, vertex, stride, heap, NULL);
 			heap.Flush ();
 
