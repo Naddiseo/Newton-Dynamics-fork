@@ -2367,7 +2367,7 @@ dgInt32 dgContactSolver::CalculateContactAlternateMethod(dgMinkFace* const face,
 
 			} else {
 				const dgMatrix& matrix1 = m_proxy->m_referenceMatrix;
-				m_matrix.TransformTriplex(shape2, sizeof (dgVector), shape2, sizeof (dgVector), count2);
+				m_matrix.TransformTriplex(&shape2[0].m_x, sizeof (dgVector), &shape2[0].m_x, sizeof (dgVector), count2);
 				count = CalculateConvexShapeIntersection (matrix1, clipPlane, dgUnsigned32 (contacID), dist, count1, shape1, count2, shape2, contactOut, maxContacts);
 			}
 		}
@@ -2500,7 +2500,7 @@ dgInt32 dgContactSolver::CalculateContacts(dgMinkFace* const face, dgInt32 conta
 
 			} else {
 				const dgMatrix& matrix1 = m_proxy->m_referenceMatrix;
-				m_matrix.TransformTriplex(shape2, sizeof (dgVector), shape2, sizeof (dgVector), count2);
+				m_matrix.TransformTriplex(&shape2[0].m_x, sizeof (dgVector), &shape2[0].m_x, sizeof (dgVector), count2);
 				count = CalculateConvexShapeIntersection (matrix1, clipPlane, dgUnsigned32 (contacID), dist, count1, shape1, count2, shape2, contactOut, maxContacts);
 				if (!count) {
 					count = CalculateContactAlternateMethod(face, contacID, contactOut, maxContacts);
