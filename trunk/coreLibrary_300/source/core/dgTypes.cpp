@@ -50,6 +50,30 @@ void GetMinMax (dgVector &minOut, dgVector &maxOut, const dgFloat32* const verte
 }
 
 
+void GetMinMax (dgBigVector &minOut, dgBigVector &maxOut, const dgFloat64* const vertexArray, dgInt32 vCount, dgInt32 strideInBytes)
+{
+	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat64));
+	const dgFloat64* vArray = vertexArray + stride;
+
+	_ASSERTE (stride >= 3);
+	minOut = dgBigVector (vertexArray[0], vertexArray[1], vertexArray[2], dgFloat64 (0.0f)); 
+	maxOut = dgBigVector (vertexArray[0], vertexArray[1], vertexArray[2], dgFloat64 (0.0f)); 
+
+	for (dgInt32 i = 1; i < vCount; i ++) {
+		minOut.m_x = GetMin (minOut.m_x, vArray[0]);
+		minOut.m_y = GetMin (minOut.m_y, vArray[1]);
+		minOut.m_z = GetMin (minOut.m_z, vArray[2]);
+
+		maxOut.m_x = GetMax (maxOut.m_x, vArray[0]);
+		maxOut.m_y = GetMax (maxOut.m_y, vArray[1]);
+		maxOut.m_z = GetMax (maxOut.m_z, vArray[2]);
+
+		vArray += stride;
+	}
+}
+
+
+
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 
 	#if (_MSC_VER >= 1400) && defined (DG_BUILD_SIMD_CODE)
@@ -480,6 +504,7 @@ dgInt32 dgVertexListToIndexList (dgFloat64* const vertList, dgInt32 strideInByte
 	if (compareCount < 3) {
 		return 0;
 	}
+	_ASSERTE (compareCount <= dgInt32 (strideInBytes / sizeof (dgFloat64)));
 	_ASSERT (strideInBytes == dgInt32 (sizeof (dgFloat64) * (strideInBytes / sizeof (dgFloat64))));
 
 	dgInt32 stride = strideInBytes / dgInt32 (sizeof (dgFloat64));
@@ -495,16 +520,12 @@ dgInt32 dgVertexListToIndexList (dgFloat64* const vertList, dgInt32 strideInByte
 	for (dgInt32 i = 0; i < vertexCount; i ++) {
 		memcpy (&tmpVertexList[m + 2], &vertList[k], stride * sizeof (dgFloat64));
 		tmpVertexList[m + 0] = dgFloat64 (- 1.0f);
-		tmpVertexList[m + 1] = i;
+		tmpVertexList[m + 1] = dgFloat64 (i);
 		k += stride;
 		m += stride2;
 	}
 	
-//	dgInt32 floatSize = dgInt32 (floatSizeInBytes / sizeof (dgFloat64));
-//	dgInt32 unsignedSize = dgInt32 (unsignedSizeInBytes / sizeof (dgUnsigned32));
-//	dgInt32 count = QuickSortVertices (tmpVertexList, stride + 2, floatSize, unsignedSize, vertexCount, tolerance);
 	dgInt32 count = QuickSortVertices (tmpVertexList, stride2, compareCount, vertexCount, tolerance);
-
 
 	k = 0;
 	m = 0;
@@ -542,7 +563,6 @@ dgInt32 dgVertexListToIndexList (dgFloat32* const vertList, dgInt32 strideInByte
 	dgStack<dgFloat64> pool(vertexCount * stride);
 
 	dgInt32 floatCount = floatSizeInBytes / sizeof (dgFloat32);
-//	dgInt32 intCount = unsignedSizeInBytes / sizeof (dgInt32);
 
 	dgFloat64* const data = &pool[0];
 	for (dgInt32 i = 0; i < vertexCount; i ++) {
@@ -559,7 +579,7 @@ dgInt32 dgVertexListToIndexList (dgFloat32* const vertList, dgInt32 strideInByte
 		dgFloat64* const src = &data[i * stride];
 		dgFloat32* const dst = &vertList[i * stride];
 		for (dgInt32 j = 0; j < stride; j ++) {
-			src[j] = dst[j];
+			dst[j] = dgFloat32 (src[j]);
 		}
 	}
 	

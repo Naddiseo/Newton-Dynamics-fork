@@ -280,7 +280,7 @@ void dgCollisionCapsule::DebugCollision (const dgMatrix& matrixPtr, OnDebugColli
 	TesselateTriangle (POWER, -m_height[0], p1, p2, p5, count, tmpVectex);
 
 	dgMatrix matrix (GetOffsetMatrix() * matrixPtr);
-	matrix.TransformTriplex (pool, sizeof (dgTriplex), tmpVectex, sizeof (dgVector), count);
+	matrix.TransformTriplex (&pool[0].m_x, sizeof (dgTriplex), &tmpVectex[0].m_x, sizeof (dgVector), count);
 
 	
 	i0 = STEPS - 1;
