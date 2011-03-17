@@ -8277,7 +8277,7 @@ int NewtonMeshGetVertexStrideInByte(const NewtonMesh* const mesh)
 	return meshEffect->GetVertexStrideInByte();
 }
 
-dFloat* NewtonMeshGetVertexArray (const NewtonMesh* const mesh) 
+dFloat64* NewtonMeshGetVertexArray (const NewtonMesh* const mesh) 
 {
 	_ASSERTE (0);
 	return NULL;
@@ -8312,7 +8312,7 @@ int NewtonMeshGetPointStrideInByte (const NewtonMesh* const mesh)
 
 
 
-dFloat* NewtonMeshGetPointArray (const NewtonMesh* const mesh) 
+dFloat64* NewtonMeshGetPointArray (const NewtonMesh* const mesh) 
 {
 	_ASSERTE (0);
 	return NULL;
@@ -8326,7 +8326,7 @@ dFloat* NewtonMeshGetPointArray (const NewtonMesh* const mesh)
 }
 
 
-dFloat* NewtonMeshGetNormalArray (const NewtonMesh* const mesh)
+dFloat64* NewtonMeshGetNormalArray (const NewtonMesh* const mesh)
 {
 	_ASSERTE (0);
 	return NULL;
@@ -8339,7 +8339,7 @@ dFloat* NewtonMeshGetNormalArray (const NewtonMesh* const mesh)
 */
 }
 
-dFloat* NewtonMeshGetUV0Array (const NewtonMesh* const mesh)
+dFloat64* NewtonMeshGetUV0Array (const NewtonMesh* const mesh)
 {
 	_ASSERTE (0);
 	return NULL;
@@ -8352,7 +8352,7 @@ dFloat* NewtonMeshGetUV0Array (const NewtonMesh* const mesh)
 */
 }
 
-dFloat* NewtonMeshGetUV1Array (const NewtonMesh* const mesh)
+dFloat64* NewtonMeshGetUV1Array (const NewtonMesh* const mesh)
 {	_ASSERTE (0);
 return NULL;
 /*

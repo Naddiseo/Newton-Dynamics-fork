@@ -51,6 +51,7 @@
 	#define dFloat float
 #endif
 
+#define dFloat64 double
 
 
 #ifdef __cplusplus 
@@ -974,14 +975,14 @@ extern "C" {
 
 	NEWTON_API int NewtonMeshGetPointCount (const NewtonMesh* const mesh); 
 	NEWTON_API int NewtonMeshGetPointStrideInByte (const NewtonMesh* const mesh); 
-	NEWTON_API dFloat* NewtonMeshGetPointArray (const NewtonMesh* const mesh); 
-	NEWTON_API dFloat* NewtonMeshGetNormalArray (const NewtonMesh* const mesh); 
-	NEWTON_API dFloat* NewtonMeshGetUV0Array (const NewtonMesh* const mesh); 
-	NEWTON_API dFloat* NewtonMeshGetUV1Array (const NewtonMesh* const mesh); 
+	NEWTON_API dFloat64* NewtonMeshGetPointArray (const NewtonMesh* const mesh); 
+	NEWTON_API dFloat64* NewtonMeshGetNormalArray (const NewtonMesh* const mesh); 
+	NEWTON_API dFloat64* NewtonMeshGetUV0Array (const NewtonMesh* const mesh); 
+	NEWTON_API dFloat64* NewtonMeshGetUV1Array (const NewtonMesh* const mesh); 
 
 	NEWTON_API int NewtonMeshGetVertexCount (const NewtonMesh* const mesh); 
 	NEWTON_API int NewtonMeshGetVertexStrideInByte (const NewtonMesh* const mesh); 
-	NEWTON_API dFloat* NewtonMeshGetVertexArray (const NewtonMesh* const mesh); 
+	NEWTON_API dFloat64* NewtonMeshGetVertexArray (const NewtonMesh* const mesh); 
 
 
 	NEWTON_API void* NewtonMeshGetFirstVertex (const NewtonMesh* const mesh);
