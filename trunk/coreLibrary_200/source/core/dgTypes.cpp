@@ -520,7 +520,7 @@ dgInt32 dgVertexListToIndexList (dgFloat64* const vertList, dgInt32 strideInByte
 	for (dgInt32 i = 0; i < vertexCount; i ++) {
 		memcpy (&tmpVertexList[m + 2], &vertList[k], stride * sizeof (dgFloat64));
 		tmpVertexList[m + 0] = dgFloat64 (- 1.0f);
-		tmpVertexList[m + 1] = i;
+		tmpVertexList[m + 1] = dgFloat64 (i);
 		k += stride;
 		m += stride2;
 	}
@@ -563,7 +563,6 @@ dgInt32 dgVertexListToIndexList (dgFloat32* const vertList, dgInt32 strideInByte
 	dgStack<dgFloat64> pool(vertexCount * stride);
 
 	dgInt32 floatCount = floatSizeInBytes / sizeof (dgFloat32);
-//	dgInt32 intCount = unsignedSizeInBytes / sizeof (dgInt32);
 
 	dgFloat64* const data = &pool[0];
 	for (dgInt32 i = 0; i < vertexCount; i ++) {
@@ -580,7 +579,7 @@ dgInt32 dgVertexListToIndexList (dgFloat32* const vertList, dgInt32 strideInByte
 		dgFloat64* const src = &data[i * stride];
 		dgFloat32* const dst = &vertList[i * stride];
 		for (dgInt32 j = 0; j < stride; j ++) {
-			src[j] = dst[j];
+			dst[j] = dgFloat32 (src[j]);
 		}
 	}
 	

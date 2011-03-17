@@ -100,7 +100,6 @@ void dgCollisionSphere::Init (dgFloat32 radius, dgMemoryAllocator* allocator)
 		for (dgInt32 i = 0; i < vertexCount; i ++) {
 			m_unitSphere[i] = tmpVectex[i];
 		}
-
 		dgPolyhedra polyhedra(m_allocator);
 
 		polyhedra.BeginFace();
