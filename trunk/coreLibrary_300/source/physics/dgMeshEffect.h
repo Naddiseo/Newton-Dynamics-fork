@@ -125,8 +125,8 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 
 
 	dgInt32 GetVertexCount() const;
-	dgInt32 GetVertexStrideInByte() const {return sizeof (dgVector);}
-	dgFloat64* GetVertexPool () const {return &m_points[0].m_x;}
+	dgInt32 GetVertexStrideInByte() const;
+	dgFloat64* GetVertexPool () const;
 
 	dgInt32 GetPropertiesCount() const;
 	dgInt32 GetPropertiesStrideInByte() const;
@@ -305,6 +305,16 @@ inline dgFloat64* dgMeshEffect::GetUV1Pool() const
 inline bool dgMeshEffect::CheckIntersection (const dgMeshEffect* const meshA, const dgMeshEffectSolidTree* const solidTreeA, const dgMeshEffect* const meshB, const dgMeshEffectSolidTree* const solidTreeB, dgFloat64 scale)
 {
 	return (meshA->CheckIntersection (solidTreeB, scale) || meshB->CheckIntersection (solidTreeA, scale));
+}
+
+inline dgInt32 dgMeshEffect::GetVertexStrideInByte() const 
+{
+	return sizeof (dgBigVector);
+}
+
+inline dgFloat64* dgMeshEffect::GetVertexPool () const 
+{
+	return &m_points[0].m_x;
 }
 
 

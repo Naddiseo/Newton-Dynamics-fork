@@ -1449,35 +1449,6 @@ dgInt32 dgPolyhedra::GetMaxIndex() const
 }
 
 
-dgInt32 dgPolyhedra::GetFaceCount() const
-{
-	dgInt32 count;
-	dgInt32 mark;
-	dgEdge *ptr;
-	dgEdge *edge;
-	Iterator iter (*this);
-
-	count = 0;
-	mark = IncLRU();
-	for (iter.Begin(); iter; iter ++) {
-		edge = &(*iter);
-		if (edge->m_mark == mark) {
-			continue;
-		}
-
-		if (edge->m_incidentFace < 0) {
-			continue;
-		}
-
-		count ++;
-		ptr = edge;
-		do {
-			ptr->m_mark = mark;
-			ptr = ptr->m_next;
-		} while (ptr != edge);
-	}
-	return count;
-}
 
 dgInt32 dgPolyhedra::GetUnboundedFaceCount () const
 {
@@ -3162,6 +3133,32 @@ dgPolyhedra::dgPolyhedra (const dgPolyhedra &polyhedra)
 
 dgPolyhedra::~dgPolyhedra ()
 {
+}
+
+
+dgInt32 dgPolyhedra::GetFaceCount() const
+{
+	Iterator iter (*this);
+	dgInt32 count = 0;
+	dgInt32 mark = IncLRU();
+	for (iter.Begin(); iter; iter ++) {
+		dgEdge* const edge = &(*iter);
+		if (edge->m_mark == mark) {
+			continue;
+		}
+
+		if (edge->m_incidentFace < 0) {
+			continue;
+		}
+
+		count ++;
+		dgEdge* ptr = edge;
+		do {
+			ptr->m_mark = mark;
+			ptr = ptr->m_next;
+		} while (ptr != edge);
+	}
+	return count;
 }
 
 

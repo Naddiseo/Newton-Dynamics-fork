@@ -8269,32 +8269,23 @@ int NewtonMeshGetVertexCount(const NewtonMesh* const mesh)
 
 int NewtonMeshGetVertexStrideInByte(const NewtonMesh* const mesh)
 {
-	
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 
 	TRACE_FUNTION(__FUNCTION__);
-	//	return meshEffect->GetPropertiesCount();
 	return meshEffect->GetVertexStrideInByte();
 }
 
 dFloat64* NewtonMeshGetVertexArray (const NewtonMesh* const mesh) 
 {
-	_ASSERTE (0);
-	return NULL;
-/*
-	
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 
 	TRACE_FUNTION(__FUNCTION__);
-	//	return meshEffect->GetPropertiesCount();
 	return meshEffect->GetVertexPool (); 
-*/
 }
 
 
 int NewtonMeshGetPointCount (const NewtonMesh* const mesh)
 {
-	
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 
 	TRACE_FUNTION(__FUNCTION__);
@@ -8328,43 +8319,27 @@ dFloat64* NewtonMeshGetPointArray (const NewtonMesh* const mesh)
 
 dFloat64* NewtonMeshGetNormalArray (const NewtonMesh* const mesh)
 {
-	_ASSERTE (0);
-	return NULL;
-/*
-	
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 
 	TRACE_FUNTION(__FUNCTION__);
 	return meshEffect->GetNormalPool();
-*/
 }
 
 dFloat64* NewtonMeshGetUV0Array (const NewtonMesh* const mesh)
 {
-	_ASSERTE (0);
-	return NULL;
-/*
-	
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 
 	TRACE_FUNTION(__FUNCTION__);
 	return meshEffect->GetUV0Pool();
-*/
 }
 
 dFloat64* NewtonMeshGetUV1Array (const NewtonMesh* const mesh)
-{	_ASSERTE (0);
-return NULL;
-/*
-	
+{	
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 
 	TRACE_FUNTION(__FUNCTION__);
 	return meshEffect->GetUV1Pool();
-*/
 }
-
-
 
 
 

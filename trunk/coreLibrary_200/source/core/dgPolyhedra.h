@@ -102,6 +102,8 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	void EndFace ();
 	void DeleteFace(dgEdge* const edge);
 
+	dgInt32 GetFaceCount() const;
+
 	dgInt32 IncLRU() const;
 	void SetLRU(dgInt32 lru) const;
 
@@ -145,7 +147,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	
 
   	dgInt32 GetMaxIndex() const;
-  	dgInt32 GetFaceCount() const;
+  	
 	dgInt32 GetUnboundedFaceCount() const;
 	
 	dgBigVector BigFaceNormal (dgEdge* const face, const dgFloat64* const pool, dgInt32 strideInBytes) const;

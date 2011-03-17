@@ -71,15 +71,15 @@ class dgEdge
 	dgEdge* m_prev;
 	dgEdge* m_twin;
 	dgInt32 m_mark;
-}DG_GCC_VECTOR_ALIGMENT;
+} DG_GCC_VECTOR_ALIGMENT;
 
 
 class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 {
 	public:
 
-		struct dgPairKey
-		{
+	struct dgPairKey
+	{
 		dgPairKey ();
 		dgPairKey (dgInt64 val);
 		dgPairKey (dgInt32 v0, dgInt32 v1);
@@ -88,8 +88,8 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 		dgInt32 GetHighKey () const;
 
 		private:
-			dgUnsigned64 m_key;
-		};
+		dgUnsigned64 m_key;
+	};
 
 	dgPolyhedra (dgMemoryAllocator* const allocator);
 	dgPolyhedra (const dgPolyhedra &polyhedra);
@@ -101,6 +101,8 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	dgEdge* AddFace (dgInt32 count, const dgInt32* const index, const dgInt64* const userdata);
 	void EndFace ();
 	void DeleteFace(dgEdge* const edge);
+
+	dgInt32 GetFaceCount() const;
 
 	dgInt32 IncLRU() const;
 	void SetLRU(dgInt32 lru) const;
@@ -145,7 +147,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	
 
   	dgInt32 GetMaxIndex() const;
-  	dgInt32 GetFaceCount() const;
+  	
 	dgInt32 GetUnboundedFaceCount() const;
 	
 	dgBigVector BigFaceNormal (dgEdge* const face, const dgFloat64* const pool, dgInt32 strideInBytes) const;
@@ -159,7 +161,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	
 	
 
-
+	
 	
 	
 	dgSphere CalculateSphere (const dgFloat64* const vertex, dgInt32 strideInBytes, const dgMatrix* const basis = NULL) const;
@@ -167,7 +169,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	dgInt32 PackVertex (dgFloat64* const destArray, const dgFloat64* const unpackArray, dgInt32 strideInBytes);
 	void DeleteOverlapingFaces (const dgFloat64* const pool, dgInt32 strideInBytes, dgFloat64 distTol);
 
-
+	
 
 	void InvertWinding ();
 
@@ -198,7 +200,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	//			 before using this function
 	// note2: a index set to 0xffffffff indicate a run start
 	// return index count
-	//dgInt32 TriangleStrips (dgUnsigned32 outputBuffer[], dgInt32 maxBufferSize, dgInt32 vertexCacheSize = 12) const;
+	//	dgInt32 TriangleStrips (dgUnsigned32 outputBuffer[], dgInt32 maxBufferSize, dgInt32 vertexCacheSize = 12) const;
 	//	void OptimalTriangulation (const dgFloat64* const vertex, dgInt32 strideInBytes);
 	//	void Merge (dgPolyhedraDescriptor &desc, dgFloat64 myPool[], dgInt32 myStrideInBytes, const dgPolyhedra& he, const dgFloat64 hisPool[], dgInt32 hisStrideInBytes);
 	//	void CombineOpenFaces (const dgFloat64* const pool, dgInt32 strideInBytes, dgFloat64 distTol);

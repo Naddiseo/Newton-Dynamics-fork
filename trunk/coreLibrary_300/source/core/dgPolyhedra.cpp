@@ -1449,35 +1449,6 @@ dgInt32 dgPolyhedra::GetMaxIndex() const
 }
 
 
-dgInt32 dgPolyhedra::GetFaceCount() const
-{
-	dgInt32 count;
-	dgInt32 mark;
-	dgEdge *ptr;
-	dgEdge *edge;
-	Iterator iter (*this);
-
-	count = 0;
-	mark = IncLRU();
-	for (iter.Begin(); iter; iter ++) {
-		edge = &(*iter);
-		if (edge->m_mark == mark) {
-			continue;
-		}
-
-		if (edge->m_incidentFace < 0) {
-			continue;
-		}
-
-		count ++;
-		ptr = edge;
-		do {
-			ptr->m_mark = mark;
-			ptr = ptr->m_next;
-		} while (ptr != edge);
-	}
-	return count;
-}
 
 dgInt32 dgPolyhedra::GetUnboundedFaceCount () const
 {
@@ -3165,6 +3136,32 @@ dgPolyhedra::~dgPolyhedra ()
 }
 
 
+dgInt32 dgPolyhedra::GetFaceCount() const
+{
+	Iterator iter (*this);
+	dgInt32 count = 0;
+	dgInt32 mark = IncLRU();
+	for (iter.Begin(); iter; iter ++) {
+		dgEdge* const edge = &(*iter);
+		if (edge->m_mark == mark) {
+			continue;
+		}
+
+		if (edge->m_incidentFace < 0) {
+			continue;
+		}
+
+		count ++;
+		dgEdge* ptr = edge;
+		do {
+			ptr->m_mark = mark;
+			ptr = ptr->m_next;
+		} while (ptr != edge);
+	}
+	return count;
+}
+
+
 dgEdge* dgPolyhedra::AddFace ( dgInt32 count, const dgInt32* const index, const dgInt64* const userdata)
 {
 	class IntersectionFilter
@@ -4421,7 +4418,7 @@ void dgPolyhedra::ConvexPartition (const dgFloat64* const vertex, dgInt32 stride
 							edge = &flatFace.GetRoot()->GetInfo();
 							if (edge->m_incidentFace < 0) {
 								edge = edge->m_twin;
-}
+							}
 							_ASSERTE (edge->m_incidentFace > 0);
 
 							dgBigVector normal (BigFaceNormal (edge, vertex, stride));
@@ -4429,16 +4426,16 @@ void dgPolyhedra::ConvexPartition (const dgFloat64* const vertex, dgInt32 stride
 
 							edge = NULL;
 							dgPolyhedra::Iterator iter (flatFace);
-	for (iter.Begin(); iter; iter ++) {
+							for (iter.Begin(); iter; iter ++) {
 								edge = &(*iter);
-		if (edge->m_incidentFace < 0) {
+								if (edge->m_incidentFace < 0) {
 									break;
 								}
-		}
+							}
 							_ASSERTE (edge);
 
 							dgInt32 isConvex = 1;
-			dgEdge* ptr = edge;
+							dgEdge* ptr = edge;
 							dgInt32 mark = flatFace.IncLRU();
 
 							dgVector normal2 (dgFloat32 (normal.m_x), dgFloat32 (normal.m_y), dgFloat32 (normal.m_z), dgFloat32(0.0f));
@@ -4446,7 +4443,7 @@ void dgPolyhedra::ConvexPartition (const dgFloat64* const vertex, dgInt32 stride
 							dgVector p1 (&vertex[ptr->m_incidentVertex * stride]);
 							dgVector e0 (p1 - p0);
 							e0 = e0.Scale (dgFloat32 (1.0f) / (dgSqrt (e0 % e0) + dgFloat32 (1.0e-14f)));
-			do {
+							do {
 								dgVector p2 (&vertex[ptr->m_next->m_incidentVertex * stride]);
 								dgVector e1 (p2 - p1);
 								e1 = e1.Scale (dgFloat32 (1.0f) / (dgSqrt (e1 % e1) + dgFloat32 (1.0e-14f)));
@@ -4459,8 +4456,8 @@ void dgPolyhedra::ConvexPartition (const dgFloat64* const vertex, dgInt32 stride
 								ptr->m_mark = mark;
 								e0 = e1;
 								p1 = p2;
-				ptr = ptr->m_next;
-			} while (ptr != edge);
+								ptr = ptr->m_next;
+							} while (ptr != edge);
 
 							if (isConvex) {
 								dgPolyhedra::Iterator iter (flatFace);
@@ -4470,10 +4467,10 @@ void dgPolyhedra::ConvexPartition (const dgFloat64* const vertex, dgInt32 stride
 										if (ptr->m_mark < mark) {
 											isConvex = 0;
 											break;
-		}
-	}
-}
-}
+										}
+									}
+								}
+							}
 
 							if (isConvex) {
 								if (diagonalCount > 2) {
@@ -4492,33 +4489,33 @@ void dgPolyhedra::ConvexPartition (const dgFloat64* const vertex, dgInt32 stride
 												i = count;
 												isConvex = 0;
 												break ;
-		}
-				}
-			}
-		}
-		}
+											}
+										}
+									}
+								}
+							}
 
 							if (isConvex) {
 								for (dgInt32 j = 0; j < diagonalCount; j ++) {
 									dgEdge* const diagonal = diagonalsPool[j];
 									removeCount ++;
 									flatFace.DeleteEdge (diagonal);
-		}
+								}
 							} else {
 								for (dgInt32 j = 0; j < diagonalCount; j ++) {
 									dgEdge* const diagonal = diagonalsPool[j];
 									if (!IsEssensialDiagonal(diagonal, normal, vertex, stride)) {
 										removeCount ++;
 										flatFace.DeleteEdge (diagonal);
-		}
-		}
-	}
-	} 
+									}
+								}
+							}
+						}
 
 						dgInt32 mark = flatFace.IncLRU();
 						dgPolyhedra::Iterator iter (flatFace);
-	for (iter.Begin(); iter; iter ++) {
-		dgEdge* const edge = &(*iter);
+						for (iter.Begin(); iter; iter ++) {
+							dgEdge* const edge = &(*iter);
 							if (edge->m_mark != mark) {
 								if (edge->m_incidentFace > 0) {
 									dgEdge* ptr = edge;
@@ -4532,20 +4529,20 @@ void dgPolyhedra::ConvexPartition (const dgFloat64* const vertex, dgInt32 stride
 									} while (ptr != edge);
 									if (diagonalCount >= 3) {
 										buildConvex.AddFace (diagonalCount, polygon);
-			}
-		}
-	}
-		}
-	}
+									}
+								}
+							}
+						}
+					}
 					iter.Begin();
-	}
-}
+				}
+			}
 
 			buildConvex.EndFace();
 			_ASSERTE (polyhedra.GetCount() == 0);
 			polyhedra.SwapInfo(buildConvex);
 			return removeCount ? true : false;
 */
-			}
+		}
 	}
 }

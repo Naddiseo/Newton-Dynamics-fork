@@ -1964,11 +1964,7 @@ void dgMeshEffect::BuildFromVertexListIndexList(
 
 dgInt32 dgMeshEffect::GetTotalFaceCount() const
 {
-	_ASSERTE (0);
-	return 0;
-/*
 	return GetFaceCount();
-*/
 }
 
 dgInt32 dgMeshEffect::GetTotalIndexCount() const

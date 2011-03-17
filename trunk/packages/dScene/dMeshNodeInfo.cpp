@@ -173,22 +173,21 @@ void dMeshNodeInfo::RemoveUnusedVertices(dScene* const world, dScene::dTreeNode*
 
 void dMeshNodeInfo::Serialize (TiXmlElement* const rootNode) const
 {
-
  	SerialiseBase(dGeometryNodeInfo, rootNode);
 
 	TiXmlElement* pointElement = new TiXmlElement ("points");
 	rootNode->LinkEndChild(pointElement);
 
 	int bufferCount = max (NewtonMeshGetVertexCount(m_mesh), NewtonMeshGetPointCount(m_mesh));
-	char* buffer = new char[bufferCount * sizeof (dFloat) * 4 * 12];
-	dFloat* packVertex = new dFloat [4 * bufferCount];
+	char* const buffer = new char[bufferCount * sizeof (dFloat) * 4 * 12];
+	dFloat* const packVertex = new dFloat [4 * bufferCount];
 
 	int vertexCount = NewtonMeshGetVertexCount (m_mesh); 
 	int vertexStride = NewtonMeshGetVertexStrideInByte(m_mesh) / sizeof (dFloat64);
 	const dFloat64* const vertex = NewtonMeshGetVertexArray(m_mesh); 
 
 	// pack the vertex Array
-	int* vertexIndexList = new int [vertexCount];
+	int* const vertexIndexList = new int [vertexCount];
 	for (int i = 0; i < vertexCount; i ++) {
 		packVertex[i * 4 + 0] = dFloat(vertex[i * vertexStride + 0]);
 		packVertex[i * 4 + 1] = dFloat(vertex[i * vertexStride + 1]);
@@ -198,7 +197,7 @@ void dMeshNodeInfo::Serialize (TiXmlElement* const rootNode) const
 	}
 	dFloatArrayToString (packVertex, vertexCount * 4, buffer, vertexCount * sizeof (dFloat) * 4 * 12);
 	
-	TiXmlElement* position = new TiXmlElement ("position");
+	TiXmlElement* const position = new TiXmlElement ("position");
 	pointElement->LinkEndChild(position);
 	position->SetAttribute("float4", vertexCount);
 	position->SetAttribute("floats", buffer);
@@ -207,7 +206,7 @@ void dMeshNodeInfo::Serialize (TiXmlElement* const rootNode) const
 	int pointCount = NewtonMeshGetPointCount (m_mesh); 
 	int pointStride = NewtonMeshGetPointStrideInByte(m_mesh) / sizeof (dFloat64);
 	const dFloat64* const normals = NewtonMeshGetNormalArray(m_mesh); 
-	int* normalIndexList = new int [pointCount];
+	int* const normalIndexList = new int [pointCount];
 	for (int i = 0; i < pointCount; i ++) {
 		packVertex[i * 3 + 0] = dFloat(normals[i * pointStride + 0]);
 		packVertex[i * 3 + 1] = dFloat(normals[i * pointStride + 1]);
@@ -216,13 +215,13 @@ void dMeshNodeInfo::Serialize (TiXmlElement* const rootNode) const
 	int count = dPackVertexArray (packVertex, 3, 3 * sizeof (dFloat), pointCount, normalIndexList);
 	dFloatArrayToString (packVertex, count * 3, buffer, pointCount * sizeof (dFloat) * 3 * 12);
 
-	TiXmlElement* normal = new TiXmlElement ("normal");
+	TiXmlElement* const normal = new TiXmlElement ("normal");
 	pointElement->LinkEndChild(normal);
 	normal->SetAttribute("float3", count);
 	normal->SetAttribute("floats", buffer);
 
 	// pack the uv0 array
-	int* uv0IndexList = new int [pointCount];
+	int* const uv0IndexList = new int [pointCount];
 	const dFloat64* const uv0s = NewtonMeshGetUV0Array(m_mesh); 
 	for (int i = 0; i < pointCount; i ++) {
 		packVertex[i * 3 + 0] = dFloat(uv0s[i * pointStride + 0]);
@@ -242,7 +241,7 @@ void dMeshNodeInfo::Serialize (TiXmlElement* const rootNode) const
 	uv0->SetAttribute("floats", buffer);
 
 	// pack the uv1 array
-	int* uv1IndexList = new int [pointCount];
+	int* const uv1IndexList = new int [pointCount];
 	const dFloat64* const uv1s = NewtonMeshGetUV1Array(m_mesh); 
 	for (int i = 0; i < pointCount; i ++) {
 		packVertex[i * 3 + 0] = dFloat(uv1s[i * pointStride + 0]);
@@ -285,7 +284,6 @@ void dMeshNodeInfo::Serialize (TiXmlElement* const rootNode) const
 	faceMaterial->SetAttribute("index", buffer);
 
 	for (int i = 0; i < indexCount; i ++) {
-//		void* face = indexArray[i];
 		int index = NewtonMeshGetVertexIndex (m_mesh, indexArray[i]);
 		remapedIndexArray[i] = vertexIndexList[index];
 	}
@@ -296,7 +294,6 @@ void dMeshNodeInfo::Serialize (TiXmlElement* const rootNode) const
 
 
 	for (int i = 0; i < indexCount; i ++) {
-//		int index = indexArray[i];
 		int index = NewtonMeshGetPointIndex(m_mesh, indexArray[i]);
 		remapedIndexArray[i] = normalIndexList[index];
 	}
@@ -305,9 +302,7 @@ void dMeshNodeInfo::Serialize (TiXmlElement* const rootNode) const
 	polygons->LinkEndChild(normalIndex);
 	normalIndex->SetAttribute("index", buffer);
 
-
 	for (int i = 0; i < indexCount; i ++) {
-//		int index = indexArray[i];
 		int index = NewtonMeshGetPointIndex(m_mesh, indexArray[i]);
 		remapedIndexArray[i] = uv0IndexList[index];
 	}
@@ -316,9 +311,7 @@ void dMeshNodeInfo::Serialize (TiXmlElement* const rootNode) const
 	polygons->LinkEndChild(uv0Index);
 	uv0Index->SetAttribute("index", buffer);
 
-
 	for (int i = 0; i < indexCount; i ++) {
-//		int index = indexArray[i];
 		int index = NewtonMeshGetPointIndex(m_mesh, indexArray[i]);
 		remapedIndexArray[i] = uv1IndexList[index];
 	}
