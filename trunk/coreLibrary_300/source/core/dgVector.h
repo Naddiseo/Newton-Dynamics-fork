@@ -77,6 +77,7 @@ class dgTemplateVector
 	T m_w;
 };
 
+class dgBigVector;
 
 DG_MSC_VECTOR_ALIGMENT
 class dgVector: public dgTemplateVector<dgFloat32>
@@ -89,6 +90,7 @@ class dgVector: public dgTemplateVector<dgFloat32>
 	dgVector (const dgTemplateVector<dgFloat32>& v);
 	dgVector (const dgFloat32 *ptr);
 	dgVector (dgFloat32 x, dgFloat32 y, dgFloat32 z, dgFloat32 w); 
+         dgVector (const dgBigVector& copy); 
 
 //	dgVector operator= (const simd_type& val);
 	dgVector operator= (const simd_128& val);
@@ -309,21 +311,11 @@ DG_INLINE dgVector::dgVector (const dgFloat32 *ptr)
 	_ASSERTE (dgCheckVector ((*this)));
 }
 
-/*
-DG_INLINE dgVector::dgVector(const simd_type& val)
+DG_INLINE dgVector::dgVector (const dgBigVector& copy)
+	:dgTemplateVector<dgFloat32>(dgFloat32 (copy.m_x), dgFloat32 (copy.m_y), dgFloat32 (copy.m_z), dgFloat32 (copy.m_w))
 {
-	_ASSERTE ((dgUnsigned64(this) & 0x0f) == 0);
-	(simd_type&) *this = val;
 	_ASSERTE (dgCheckVector ((*this)));
 }
-
-DG_INLINE dgVector dgVector::operator= (const simd_type& val)
-{
-(simd_type&)*this = val;
-return *this;
-}
-
-*/
 
 DG_INLINE dgVector::dgVector(const simd_128& val)
 {
