@@ -3967,7 +3967,7 @@ void dgPolyhedra::MarkAdjacentCoplanarFaces (dgPolyhedra& polyhedraOut, dgEdge* 
 
 	dgInt32 deleteCount = 1;
 	deleteEdge[0] = face;
-	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat32));
+	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat64));
 
 	_ASSERTE (face->m_incidentFace > 0);
 
@@ -4224,7 +4224,7 @@ void dgPolyhedra::RefineTriangulation (const dgFloat64* const vertex, dgInt32 st
 	_ASSERTE (perimeterCount < sizeof (edgePerimeters) / sizeof (edgePerimeters[0]));
 	edgePerimeters[perimeterCount] = edgePerimeters[0];
 
-	dgBigVector normal (FaceNormal(edgePerimeters[0], vertex, dgInt32 (stride * sizeof (dgFloat32))));
+	dgBigVector normal (FaceNormal(edgePerimeters[0], vertex, dgInt32 (stride * sizeof (dgFloat64))));
 	if ((normal % normal) > dgFloat32 (1.0e-12f)) {
 		RefineTriangulation (vertex, stride, &normal, perimeterCount, edgePerimeters);
 	}

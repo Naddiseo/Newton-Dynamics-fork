@@ -3173,8 +3173,6 @@ void dgMeshEffect::MergeFaces (const dgMeshEffect* const source)
 				_ASSERTE (count < (sizeof (face) / sizeof (face[0])));
 				ptr = ptr->m_next;
 			} while (ptr != edge);
-
-//			_ASSERTE (count == 3);
 			AddPolygon(count, &face[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgInt32 (face[0].m_material));
 		}
 	}

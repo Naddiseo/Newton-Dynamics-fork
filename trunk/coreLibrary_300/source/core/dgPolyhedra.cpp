@@ -3360,12 +3360,10 @@ dgBigVector dgPolyhedra::FaceNormal (dgEdge* const face, const dgFloat64* const 
 
 dgEdge* dgPolyhedra::AddHalfEdge (dgInt32 v0, dgInt32 v1)
 {
-	dgTreeNode *node;
-
-	dgPairKey  pairKey (v0, v1);
+	dgPairKey pairKey (v0, v1);
 	dgEdge tmpEdge (v0, -1);
 
-	node = Insert (tmpEdge, pairKey.GetVal()); 
+	dgTreeNode* node = Insert (tmpEdge, pairKey.GetVal()); 
 	return node ? &node->GetInfo() : NULL;
 }
 
@@ -3969,7 +3967,7 @@ void dgPolyhedra::MarkAdjacentCoplanarFaces (dgPolyhedra& polyhedraOut, dgEdge* 
 
 	dgInt32 deleteCount = 1;
 	deleteEdge[0] = face;
-	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat32));
+	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat64));
 
 	_ASSERTE (face->m_incidentFace > 0);
 
@@ -4226,7 +4224,7 @@ void dgPolyhedra::RefineTriangulation (const dgFloat64* const vertex, dgInt32 st
 	_ASSERTE (perimeterCount < sizeof (edgePerimeters) / sizeof (edgePerimeters[0]));
 	edgePerimeters[perimeterCount] = edgePerimeters[0];
 
-	dgBigVector normal (FaceNormal(edgePerimeters[0], vertex, dgInt32 (stride * sizeof (dgFloat32))));
+	dgBigVector normal (FaceNormal(edgePerimeters[0], vertex, dgInt32 (stride * sizeof (dgFloat64))));
 	if ((normal % normal) > dgFloat32 (1.0e-12f)) {
 		RefineTriangulation (vertex, stride, &normal, perimeterCount, edgePerimeters);
 	}
@@ -4291,9 +4289,6 @@ void dgPolyhedra::OptimizeTriangulation (const dgFloat64* const vertex, dgInt32 
 
 void dgPolyhedra::Triangulate (const dgFloat64* const vertex, dgInt32 strideInBytes, dgPolyhedra* const leftOver)
 {
-
-static int xxx;
-
 	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat64));
 
 	dgInt32 count = GetCount() / 2;

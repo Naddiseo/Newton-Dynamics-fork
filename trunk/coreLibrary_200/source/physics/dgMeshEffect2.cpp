@@ -1957,8 +1957,8 @@ for (iter.Begin(); iter; iter ++)
 
 dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const
 {
-	dgMeshEffect copy (*this);
-	copy.Triangulate();
+//	dgMeshEffect copy (*this);
+//	copy.Triangulate();
 	return CreateVoronoiPartitionLow (pointsCount, pointStrideInBytes, pointCloud, interionMaterial, matrix);
 }
 
@@ -2182,7 +2182,6 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 	}
 
 	voronoiPartion->EndPolygon();
-
 	
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgControlFP (controlWorld, _MCW_PC);
