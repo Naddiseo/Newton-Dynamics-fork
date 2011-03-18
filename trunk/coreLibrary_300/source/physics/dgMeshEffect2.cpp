@@ -2157,6 +2157,7 @@ static int xxxx;
 							n = n.Scale (dgFloat64 (1.0f) / sqrt(n % n));
 							dgBigVector normal (dgFloat64 (n.m_x), dgFloat64 (n.m_y), dgFloat64  (n.m_z), dgFloat64 (0.0f));
 							pointArray[count] = voronoiPoints[i] + normal.Scale (perimeterConvexBound);
+
 							count ++;
 							_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
 						}
@@ -2169,8 +2170,18 @@ static int xxxx;
 			_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
 		}
 
+for (int i = 0; i < count; i ++)
+{
+	float x = dgFloat32 (pointArray[i].m_x);
+	float y = dgFloat32 (pointArray[i].m_y);
+	float z = dgFloat32 (pointArray[i].m_z);
+	pointArray[i].m_x = x;
+	pointArray[i].m_y = y;
+	pointArray[i].m_z = z;
+}
+
 xxxx ++;
-		dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgBigVector), dgFloat64 (1.0e-3f));
+		dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgBigVector), dgFloat64 (0.0f));
 
 		convexMesh->CalculateNormals(dgFloat64 (45.0f * 3.1416f / 180.0f));
 		convexMesh->UniformBoxMapping (interiorMaterial, textureProjectionMatrix);
@@ -2181,7 +2192,6 @@ xxxx ++;
 		dgMeshEffect* rightMeshClipper = NULL;
 
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
-
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
 			if (leftMeshClipper && rightMeshClipper) {
@@ -2234,13 +2244,12 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 			convexMesh->m_attib[i].m_vertex.m_w = layer;
 		}
 
-		_ASSERTE (!convexMesh->HasOpenEdges());
-
 //if(xxxx == 4)
 		voronoiPartion->MergeFaces(convexMesh);
 		layer += dgFloat64 (1.0f);
 
 		convexMesh->Release();
+break;
 	}
 
 	voronoiPartion->EndPolygon();
