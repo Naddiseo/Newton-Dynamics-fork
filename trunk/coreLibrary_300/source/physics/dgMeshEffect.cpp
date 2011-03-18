@@ -3680,18 +3680,12 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	leftMesh->BeginPolygon();
 	rightMesh->BeginPolygon(); 
 
-static int xxx;
-
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
 	for (iter.Begin(); iter; iter ++){
 		dgEdge* const face = &(*iter);
 
 		if (face->m_incidentFace > 0) {
-
-xxx ++;
-if (xxx == 2)
-xxx *=1;
 
 			if (face->m_mark != mark) {
 				dgMeshTreeCSGPointsPool points;

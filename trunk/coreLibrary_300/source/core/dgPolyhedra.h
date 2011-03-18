@@ -123,6 +123,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	bool GetConectedSurface (dgPolyhedra &polyhedra) const;
 	void EndConectedSurface() const;
 
+	void ChangeEdgeIncidentVertex (dgEdge* const edge, dgInt32 newIndex);	
 	void DeleteDegenerateFaces (const dgFloat64* const pool, dgInt32 dstStrideInBytes, dgFloat64 minArea);
 
 	void Optimize (const dgFloat64* const pool, dgInt32 strideInBytes, dgFloat64 tol);
@@ -169,11 +170,11 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	// this make impossible to triangulate the polyhedra
 	void GetBadEdges (dgList<dgEdge*>& faceList, const dgFloat64* const pool, dgInt32 strideInBytes) const; 
 
-	void ChangeEdgeIncidentVertex (dgEdge* const edge, dgInt32 newIndex);
+	
 	void GetCoplanarFaces (dgList<dgEdge*>& faceList, dgEdge* startFace, const dgFloat64* const pool, dgInt32 hisStrideInBytes, dgFloat64 normalDeviation) const;
 	void GetOpenFaces (dgList<dgEdge*>& faceList) const;
 	void CollapseDegenerateFaces (dgPolyhedraDescriptor &desc, const dgFloat64* const pool, dgInt32 strideInBytes, dgFloat64 area);
-	dgEdge* CollapseEdge(dgEdge* const edge);
+	
 
 
 	// this function assume the mesh is a legal mesh;
