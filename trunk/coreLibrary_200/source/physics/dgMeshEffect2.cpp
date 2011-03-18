@@ -2181,7 +2181,6 @@ xxxx ++;
 		dgMeshEffect* rightMeshClipper = NULL;
 
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
-
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
 			if (leftMeshClipper && rightMeshClipper) {
@@ -2193,7 +2192,7 @@ xxxx ++;
 				convexMesh->MergeFaces(leftMeshClipper);
 				convexMesh->EndPolygon();
 				convexMesh->WeldTJoints();
-//				_ASSERTE (!convexMesh->HasOpenEdges());
+				_ASSERTE (!convexMesh->HasOpenEdges());
 			}
 		}
 
