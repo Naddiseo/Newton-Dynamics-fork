@@ -2238,6 +2238,7 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 		layer += dgFloat64 (1.0f);
 
 		convexMesh->Release();
+break;
 	}
 
 	voronoiPartion->EndPolygon();
