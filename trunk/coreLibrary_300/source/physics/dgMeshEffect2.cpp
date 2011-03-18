@@ -2183,7 +2183,7 @@ xxxx ++;
 
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
 		if (leftConvexMesh && rightConvexMesh) {
-/*
+
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
 			if (leftMeshClipper && rightMeshClipper) {
 				convexMesh->Release();
@@ -2193,10 +2193,9 @@ xxxx ++;
 				convexMesh->MergeFaces(leftConvexMesh);
 				convexMesh->MergeFaces(leftMeshClipper);
 				convexMesh->EndPolygon();
-				convexMesh->WeldTJoints();
+//				convexMesh->WeldTJoints();
 				_ASSERTE (!convexMesh->HasOpenEdges());
 			}
-*/
 		}
 
 

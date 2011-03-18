@@ -3057,9 +3057,8 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& 
 	//this should use Googol extended precision floats, because some face coming from Voronoi decomposition and booleans
 	//clipping has extreme aspect ratios, for now just use float64
 	const dgBigVector point (srcPoint);
+
 	dgVertexAtribute attribute;
-	_ASSERTE (0);
-/*
 	memset (&attribute, 0, sizeof (attribute));
 	dgFloat64 tol = dgFloat32 (1.0e-4f);
 	for (dgInt32 i = 0; i < 4; i ++) {
@@ -3100,34 +3099,34 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& 
 
 				den = dgFloat64 (1.0f) / (va + vb + vc);
 
-				dgFloat32 alpha0 = dgFloat32 (va * den);
-				dgFloat32 alpha1 = dgFloat32 (vb * den);
-				dgFloat32 alpha2 = dgFloat32 (vc * den);
+				dgFloat64 alpha0 = dgFloat32 (va * den);
+				dgFloat64 alpha1 = dgFloat32 (vb * den);
+				dgFloat64 alpha2 = dgFloat32 (vc * den);
 
 				const dgVertexAtribute& attr0 = m_attib[edge0->m_userData];
 				const dgVertexAtribute& attr1 = m_attib[edge1->m_userData];
 				const dgVertexAtribute& attr2 = m_attib[edge2->m_userData];
-				dgVector normal (attr0.m_normal.m_x * alpha0 + attr1.m_normal.m_x * alpha1 + attr2.m_normal.m_x * alpha2,
-								attr0.m_normal.m_y * alpha0 + attr1.m_normal.m_y * alpha1 + attr2.m_normal.m_y * alpha2,
-								attr0.m_normal.m_z * alpha0 + attr1.m_normal.m_z * alpha1 + attr2.m_normal.m_z * alpha2, dgFloat32 (0.0f));
-				normal = normal.Scale (dgRsqrt (normal % normal));
+				dgBigVector normal (attr0.m_normal_x * alpha0 + attr1.m_normal_x * alpha1 + attr2.m_normal_x * alpha2,
+									attr0.m_normal_y * alpha0 + attr1.m_normal_y * alpha1 + attr2.m_normal_y * alpha2,
+									attr0.m_normal_z * alpha0 + attr1.m_normal_z * alpha1 + attr2.m_normal_z * alpha2, dgFloat32 (0.0f));
+				normal = normal.Scale (dgFloat64 (1.0f) / sqrt (normal % normal));
 
 	#ifdef _DEBUG
-				dgVector testPoint (attr0.m_vertex.m_x * alpha0 + attr1.m_vertex.m_x * alpha1 + attr2.m_vertex.m_x * alpha2,
-									attr0.m_vertex.m_y * alpha0 + attr1.m_vertex.m_y * alpha1 + attr2.m_vertex.m_y * alpha2,
-									attr0.m_vertex.m_z * alpha0 + attr1.m_vertex.m_z * alpha1 + attr2.m_vertex.m_z * alpha2, dgFloat32 (0.0f));
-				_ASSERTE (dgAbsf (testPoint.m_x - dgFloat32 (point.m_x)) < dgFloat32 (1.0e-1f));
-				_ASSERTE (dgAbsf (testPoint.m_y - dgFloat32 (point.m_y)) < dgFloat32 (1.0e-1f));
-				_ASSERTE (dgAbsf (testPoint.m_z - dgFloat32 (point.m_z)) < dgFloat32 (1.0e-1f));
+				dgBigVector testPoint (attr0.m_vertex.m_x * alpha0 + attr1.m_vertex.m_x * alpha1 + attr2.m_vertex.m_x * alpha2,
+									   attr0.m_vertex.m_y * alpha0 + attr1.m_vertex.m_y * alpha1 + attr2.m_vertex.m_y * alpha2,
+									   attr0.m_vertex.m_z * alpha0 + attr1.m_vertex.m_z * alpha1 + attr2.m_vertex.m_z * alpha2, dgFloat32 (0.0f));
+				_ASSERTE (fabs (testPoint.m_x - point.m_x) < dgFloat32 (1.0e-2f));
+				_ASSERTE (fabs (testPoint.m_y - point.m_y) < dgFloat32 (1.0e-2f));
+				_ASSERTE (fabs (testPoint.m_z - point.m_z) < dgFloat32 (1.0e-2f));
 	#endif
 
 
-				attribute.m_vertex.m_x = dgFloat32 (point.m_x);
-				attribute.m_vertex.m_y = dgFloat32 (point.m_y);
-				attribute.m_vertex.m_z = dgFloat32 (point.m_z);
-				attribute.m_normal.m_x = normal.m_x;
-				attribute.m_normal.m_y = normal.m_y;
-				attribute.m_normal.m_z = normal.m_z;
+				attribute.m_vertex.m_x = point.m_x;
+				attribute.m_vertex.m_y = point.m_y;
+				attribute.m_vertex.m_z = point.m_z;
+				attribute.m_normal_x = normal.m_x;
+				attribute.m_normal_y = normal.m_y;
+				attribute.m_normal_z = normal.m_z;
 				attribute.m_u0 = attr0.m_u0 * alpha0 +  attr1.m_u0 * alpha1 + attr2.m_u0 * alpha2;
 				attribute.m_v0 = attr0.m_v0 * alpha0 +  attr1.m_v0 * alpha1 + attr2.m_v0 * alpha2;
 				attribute.m_u1 = attr0.m_u1 * alpha0 +  attr1.m_u1 * alpha1 + attr2.m_u1 * alpha2;
@@ -3144,9 +3143,8 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& 
 
 			ptr = ptr->m_next;
 		} while (ptr != face);
-		tol *= dgFloat32 (2.0f);
+		tol *= dgFloat64 (2.0f);
 	}
-*/
 	// this should never happens
 	_ASSERTE (0);
 	return attribute;
