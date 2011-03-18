@@ -980,8 +980,6 @@ void dgMeshEffect::Triangulate  ()
 
 void dgMeshEffect::ConvertToPolygons ()
 {
-	_ASSERTE (0);
-/*
 	dgPolyhedra polygon(GetAllocator());
 
 	dgInt32 mark = IncLRU();
@@ -1040,7 +1038,6 @@ void dgMeshEffect::ConvertToPolygons ()
 	EndFace();
 
 	WeldTJoints ();
-*/
 }
 
 void dgMeshEffect::RemoveUnusedVertices(dgInt32* const vertexMap)
@@ -2955,13 +2952,11 @@ _ASSERTE (0);
 
 dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateEdge (dgEdge* const edge, dgFloat64 param) const
 {
-	_ASSERTE (0);
 	dgVertexAtribute attrEdge;
-/*
-	dgFloat32 t1 = param;
-	dgFloat32 t0 = dgFloat32 (1.0f) - t1;
-	_ASSERTE (t1 >= dgFloat32(0.0f));
-	_ASSERTE (t1 <= dgFloat32(1.0f));
+	dgFloat64 t1 = param;
+	dgFloat64 t0 = dgFloat64 (1.0f) - t1;
+	_ASSERTE (t1 >= dgFloat64(0.0f));
+	_ASSERTE (t1 <= dgFloat64(1.0f));
 
 	const dgVertexAtribute& attrEdge0 = m_attib[edge->m_userData];
 	const dgVertexAtribute& attrEdge1 = m_attib[edge->m_next->m_userData];
@@ -2970,15 +2965,14 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateEdge (dgEdge* const edge
 	attrEdge.m_vertex.m_y = attrEdge0.m_vertex.m_y * t0 + attrEdge1.m_vertex.m_y * t1;
 	attrEdge.m_vertex.m_z = attrEdge0.m_vertex.m_z * t0 + attrEdge1.m_vertex.m_z * t1;
 	attrEdge.m_vertex.m_w = dgFloat32(0.0f);
-	attrEdge.m_normal.m_x = attrEdge0.m_normal.m_x * t0 +  attrEdge1.m_normal.m_x * t1; 
-	attrEdge.m_normal.m_y = attrEdge0.m_normal.m_y * t0 +  attrEdge1.m_normal.m_y * t1; 
-	attrEdge.m_normal.m_z = attrEdge0.m_normal.m_z * t0 +  attrEdge1.m_normal.m_z * t1; 
+	attrEdge.m_normal_x = attrEdge0.m_normal_x * t0 +  attrEdge1.m_normal_x * t1; 
+	attrEdge.m_normal_y = attrEdge0.m_normal_y * t0 +  attrEdge1.m_normal_y * t1; 
+	attrEdge.m_normal_z = attrEdge0.m_normal_z * t0 +  attrEdge1.m_normal_z * t1; 
 	attrEdge.m_u0 = attrEdge0.m_u0 * t0 +  attrEdge1.m_u0 * t1;
 	attrEdge.m_v0 = attrEdge0.m_v0 * t0 +  attrEdge1.m_v0 * t1;
 	attrEdge.m_u1 = attrEdge0.m_u1 * t0 +  attrEdge1.m_u1 * t1;
 	attrEdge.m_v1 = attrEdge0.m_v1 * t0 +  attrEdge1.m_v1 * t1;
 	attrEdge.m_material = attrEdge0.m_material;
-*/
 	return attrEdge;
 }
 
@@ -3591,8 +3585,10 @@ void dgMeshEffect::AddCGSFace (const dgMeshEffect& reference, dgEdge* const refF
 			if (!masks[ptr->m_index]) {
 				masks[ptr->m_index] = 1;
 				pool[ptr->m_index] = pointsPool.m_points[ptr->m_index];;
+
+//				dgTrace (("%f %f %f\n", dgFloat32 (pool[ptr->m_index].m_x), dgFloat32 (pool[ptr->m_index].m_y), dgFloat32 (pool[ptr->m_index].m_z)));
 			}
-			//dgTrace (("%f %f %f\n", dgFloat32 (pool[ptr->m_index * 2].m_x), dgFloat32 (pool[ptr->m_index * 2].m_y), dgFloat32 (pool[ptr->m_index * 2].m_z)));
+			
 			index[indexCount] = ptr->m_index;
 			indexCount ++;
 
@@ -3600,7 +3596,7 @@ void dgMeshEffect::AddCGSFace (const dgMeshEffect& reference, dgEdge* const refF
 		} while (ptr != edge);
 		polygon.AddFace(indexCount, index);
 
-		//dgTrace (("\n"));
+//		dgTrace (("\n"));
 	}
 	polygon.EndFace();
 	dgPolyhedra leftOversOut(GetAllocator());
@@ -3678,6 +3674,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	leftMesh->BeginPolygon();
 	rightMesh->BeginPolygon(); 
 
+
+//static int xxxx;
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
 	for (iter.Begin(); iter; iter ++){
@@ -3686,6 +3684,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 		if (face->m_incidentFace > 0) {
 
 			if (face->m_mark != mark) {
+
+//xxxx ++;
 				dgMeshTreeCSGPointsPool points;
 				dgInt32 backCount = 0;
 				dgInt32 frontCount = 0;
@@ -3751,6 +3751,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 				}
 
 				if (backCount && frontCount) {
+//if ((xxxx == 2) || (xxxx == 7) || (xxxx == 10) || (xxxx > 1000))
 					leftMesh->AddCGSFace (*this, face, backCount, backList, points);
 					rightMesh->AddCGSFace (*this, face, frontCount, frontList, points);
 				} else {
@@ -3775,6 +3776,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	leftMesh->EndPolygon();
 	rightMesh->EndPolygon(); 
 
+//leftMesh->ConvertToPolygons();
+//rightMesh->ConvertToPolygons();
 //	leftMesh->WeldTJoints();
 //	rightMesh->WeldTJoints();
 
@@ -4446,19 +4449,14 @@ bool dgMeshEffect::SeparateDuplicateLoops (dgEdge* const face)
 
 void dgMeshEffect::WeldTJoints ()
 {
-_ASSERTE (0);
-	/*
-
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
 	for (iter.Begin(); iter; ) {
 		dgEdge* const face = &(*iter);
 		iter ++;
-
 		if (face->m_incidentFace < 0) {
 
 			while (SeparateDuplicateLoops (face));
-
 			for (bool found = true; found; ) {
 				found = false;
 				dgEdge* ptr = face;
@@ -4485,9 +4483,8 @@ _ASSERTE (0);
 
 				dgFloat64 num = p2p1 % p1p0;
 				dgFloat64 den = (p2p1 % p2p1) * (p1p0 % p1p0);
-
 				if ((num * num) > (den * dgFloat64 (0.999f))) {
-					if ((num < dgFloat32 (0.0f)) && !corner) {
+					if ((num < dgFloat64 (0.0f)) && !corner) {
 						corner = ptr;
 					}
 				} else {
@@ -4502,16 +4499,16 @@ _ASSERTE (0);
 
 				do {
 					dgEdge* next = NULL;
-					dgVector p0 (m_points[corner->m_incidentVertex]);
-					dgVector p1 (m_points[corner->m_next->m_incidentVertex]);
-					dgVector p2 (m_points[corner->m_prev->m_incidentVertex]);
+					const dgBigVector p0 = m_points[corner->m_incidentVertex];
+					const dgBigVector p1 = m_points[corner->m_next->m_incidentVertex];
+					const dgBigVector p2 = m_points[corner->m_prev->m_incidentVertex];
 
-					dgVector p1p0 (p1 - p0);
-					dgVector p2p0 (p2 - p0);
-					dgFloat32 dist10 = p1p0 % p1p0;
-					dgFloat32 dist20 = p2p0 % p2p0;
+					dgBigVector p1p0 (p1 - p0);
+					dgBigVector p2p0 (p2 - p0);
+					dgFloat64 dist10 = p1p0 % p1p0;
+					dgFloat64 dist20 = p2p0 % p2p0;
 					if (dist20 > dist10) {
-						dgFloat32 t = (p1p0 % p2p0) / dist20;
+						dgFloat64 t = (p1p0 % p2p0) / dist20;
 						_ASSERTE (t > dgFloat32 (0.0f));
 						_ASSERTE (t < dgFloat32 (1.0f));
 
@@ -4533,7 +4530,7 @@ _ASSERTE (0);
 					} else {
 						_ASSERTE (dist20 < dist10);
 
-						dgFloat32 t = (p1p0 % p2p0) / dist10;
+						dgFloat64 t = (p1p0 % p2p0) / dist10;
 						_ASSERTE (t > dgFloat32 (0.0f));
 						_ASSERTE (t < dgFloat32 (1.0f));
 
@@ -4545,7 +4542,7 @@ _ASSERTE (0);
 
 						corner->m_next->m_userData = corner->m_twin->m_userData;
 						corner->m_next->m_incidentFace = corner->m_twin->m_incidentFace;
-						dgVertexAtribute attrib (InterpolateEdge (corner->m_twin, dgFloat32 (1.0f) - t));
+						dgVertexAtribute attrib (InterpolateEdge (corner->m_twin, dgFloat64 (1.0f) - t));
 						attrib.m_vertex = m_points[corner->m_prev->m_incidentVertex];
 						AddAtribute(attrib);
 						corner->m_prev->m_incidentFace = corner->m_twin->m_incidentFace;
@@ -4558,7 +4555,6 @@ _ASSERTE (0);
 			}
 		}
 	}
-*/
 }
 
 

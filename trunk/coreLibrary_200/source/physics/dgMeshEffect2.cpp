@@ -2181,10 +2181,6 @@ xxxx ++;
 		dgMeshEffect* rightMeshClipper = NULL;
 
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
-//if (leftConvexMesh){
-//convexMesh = leftConvexMesh;
-//leftConvexMesh = NULL;
-//}
 
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
@@ -2196,6 +2192,7 @@ xxxx ++;
 				convexMesh->MergeFaces(leftConvexMesh);
 				convexMesh->MergeFaces(leftMeshClipper);
 				convexMesh->EndPolygon();
+				convexMesh->WeldTJoints();
 				_ASSERTE (!convexMesh->HasOpenEdges());
 			}
 		}
@@ -2244,8 +2241,6 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 		layer += dgFloat64 (1.0f);
 
 		convexMesh->Release();
-
-break;
 	}
 
 	voronoiPartion->EndPolygon();
