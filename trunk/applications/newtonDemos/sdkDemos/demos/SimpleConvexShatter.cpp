@@ -19,7 +19,7 @@
 #include "../DemoCamera.h"
 #include "../PhysicsUtils.h"
 
-#define NUMBER_OF_ITERNAL_PARTS 1
+#define NUMBER_OF_ITERNAL_PARTS 10
 
 #if 1
 static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)

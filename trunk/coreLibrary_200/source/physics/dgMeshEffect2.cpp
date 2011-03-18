@@ -2193,7 +2193,7 @@ xxxx ++;
 				convexMesh->MergeFaces(leftMeshClipper);
 				convexMesh->EndPolygon();
 				convexMesh->WeldTJoints();
-				_ASSERTE (!convexMesh->HasOpenEdges());
+//				_ASSERTE (!convexMesh->HasOpenEdges());
 			}
 		}
 
@@ -2233,8 +2233,6 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 		for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 			convexMesh->m_attib[i].m_vertex.m_w = layer;
 		}
-
-		_ASSERTE (!convexMesh->HasOpenEdges());
 
 //if(xxxx == 4)
 		voronoiPartion->MergeFaces(convexMesh);
