@@ -980,8 +980,6 @@ void dgMeshEffect::Triangulate  ()
 
 void dgMeshEffect::ConvertToPolygons ()
 {
-	_ASSERTE (0);
-/*
 	dgPolyhedra polygon(GetAllocator());
 
 	dgInt32 mark = IncLRU();
@@ -1040,7 +1038,6 @@ void dgMeshEffect::ConvertToPolygons ()
 	EndFace();
 
 	WeldTJoints ();
-*/
 }
 
 void dgMeshEffect::RemoveUnusedVertices(dgInt32* const vertexMap)
@@ -3678,6 +3675,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	leftMesh->BeginPolygon();
 	rightMesh->BeginPolygon(); 
 
+static int xxx;
+static int xxxx;
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
 	for (iter.Begin(); iter; iter ++){
@@ -3686,6 +3685,11 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 		if (face->m_incidentFace > 0) {
 
 			if (face->m_mark != mark) {
+
+xxxx ++;
+if ((xxxx == 2) || (xxxx == 7) || (xxxx == 8))
+xxxx *=1;
+
 				dgMeshTreeCSGPointsPool points;
 				dgInt32 backCount = 0;
 				dgInt32 frontCount = 0;
@@ -3751,8 +3755,10 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 				}
 
 				if (backCount && frontCount) {
+xxx ++;
+if (xxx >= 2)
 					leftMesh->AddCGSFace (*this, face, backCount, backList, points);
-					rightMesh->AddCGSFace (*this, face, frontCount, frontList, points);
+//					rightMesh->AddCGSFace (*this, face, frontCount, frontList, points);
 				} else {
 					if (backCount) {
 						leftMesh->CopyCGSFace (*this, face);
@@ -3775,6 +3781,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	leftMesh->EndPolygon();
 	rightMesh->EndPolygon(); 
 
+//leftMesh->ConvertToPolygons();
+//rightMesh->ConvertToPolygons();
 //	leftMesh->WeldTJoints();
 //	rightMesh->WeldTJoints();
 

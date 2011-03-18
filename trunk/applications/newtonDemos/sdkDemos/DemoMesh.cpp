@@ -412,8 +412,9 @@ DemoSubMesh* DemoMesh::AddSubMesh()
 void DemoMesh::Render ()
 {
 	if (m_optilizedDipalyList) {
-		glCallList(m_optilizedDipalyList);
+		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
+		glCallList(m_optilizedDipalyList);
 	} else {
 		glEnableClientState (GL_VERTEX_ARRAY);
 		glEnableClientState (GL_NORMAL_ARRAY);
