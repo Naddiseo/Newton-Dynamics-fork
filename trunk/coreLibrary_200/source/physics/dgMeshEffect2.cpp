@@ -2128,7 +2128,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 	dgFloat64 layer = dgFloat64 (0.0f);
 
 //voronoiPartion->MergeFaces(this);
-//layer += dgFloat64 (1.0f);
+layer += dgFloat64 (1.0f);
 
 static int xxxx;
 
@@ -2223,7 +2223,7 @@ xxxx ++;
 			delete rightMeshClipper;
 		}
 
-#if 1
+#if 0
 dgBigVector xxx (0, 0, 0, 0);
 for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 	xxx += convexMesh->m_points[i];
@@ -2244,11 +2244,13 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 			convexMesh->m_attib[i].m_vertex.m_w = layer;
 		}
 
-//if(xxxx == 4)
+if(xxxx == 5)
 		voronoiPartion->MergeFaces(convexMesh);
 		layer += dgFloat64 (1.0f);
 
 		convexMesh->Release();
+
+if(xxxx == 5)
 break;
 	}
 
