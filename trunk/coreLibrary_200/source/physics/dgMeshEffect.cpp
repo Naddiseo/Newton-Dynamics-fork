@@ -3588,8 +3588,10 @@ void dgMeshEffect::AddCGSFace (const dgMeshEffect& reference, dgEdge* const refF
 			if (!masks[ptr->m_index]) {
 				masks[ptr->m_index] = 1;
 				pool[ptr->m_index] = pointsPool.m_points[ptr->m_index];;
+
+				dgTrace (("%f %f %f\n", dgFloat32 (pool[ptr->m_index].m_x), dgFloat32 (pool[ptr->m_index].m_y), dgFloat32 (pool[ptr->m_index].m_z)));
 			}
-			//dgTrace (("%f %f %f\n", dgFloat32 (pool[ptr->m_index * 2].m_x), dgFloat32 (pool[ptr->m_index * 2].m_y), dgFloat32 (pool[ptr->m_index * 2].m_z)));
+			
 			index[indexCount] = ptr->m_index;
 			indexCount ++;
 
@@ -3597,7 +3599,7 @@ void dgMeshEffect::AddCGSFace (const dgMeshEffect& reference, dgEdge* const refF
 		} while (ptr != edge);
 		polygon.AddFace(indexCount, index);
 
-		//dgTrace (("\n"));
+		dgTrace (("\n"));
 	}
 	polygon.EndFace();
 	dgPolyhedra leftOversOut(GetAllocator());
@@ -3754,7 +3756,7 @@ xxxx ++;
 				if (backCount && frontCount) {
 if ((xxxx == 2) || (xxxx == 7) || (xxxx == 10) || (xxxx > 1000))
 					leftMesh->AddCGSFace (*this, face, backCount, backList, points);
-					rightMesh->AddCGSFace (*this, face, frontCount, frontList, points);
+//					rightMesh->AddCGSFace (*this, face, frontCount, frontList, points);
 				} else {
 					if (backCount) {
 						leftMesh->CopyCGSFace (*this, face);
