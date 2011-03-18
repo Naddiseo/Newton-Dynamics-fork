@@ -2138,10 +2138,6 @@ int dgMeshEffect::GetVertexIndexFromPoint (const void* point) const
 
 dgEdge* dgMeshEffect::ConectVertex (dgEdge* const e0, dgEdge* const e1)
 {
-	_ASSERTE (0);
-	return 0;
-	/*
-
 	dgEdge* const edge = AddHalfEdge(e1->m_incidentVertex, e0->m_incidentVertex);
 	dgEdge* const twin = AddHalfEdge(e0->m_incidentVertex, e1->m_incidentVertex);
 	_ASSERTE ((edge && twin) || !(edge || twin));
@@ -2169,7 +2165,6 @@ dgEdge* dgMeshEffect::ConectVertex (dgEdge* const e0, dgEdge* const e1)
 	}
 
 	return edge;
-*/
 }
 
 
@@ -3564,6 +3559,11 @@ void dgMeshEffect::AddCGSFace (const dgMeshEffect& reference, dgEdge* const refF
 	dgVertexAtribute points[DG_MESH_EFFECT_POINT_SPLITED];
 	memset (masks, 0, pointsPool.m_count * sizeof (masks[0]));
 
+static int xxx;
+xxx ++;
+if (xxx == 207)
+xxx *=1;
+
 	for (dgInt32 i = 0; i < (count - 1); i ++) {
 		dgMeshTreeCSGFace* const src = faces[i]; 
 		for (dgInt32 j = i + 1; j < count; j ++) {
@@ -3594,7 +3594,12 @@ void dgMeshEffect::AddCGSFace (const dgMeshEffect& reference, dgEdge* const refF
 
 			ptr = ptr->m_next;
 		} while (ptr != edge);
+#ifdef _DEBUG
+		dgEdge* const newFace = polygon.AddFace(indexCount, index);
+		_ASSERTE (newFace);
+#else
 		polygon.AddFace(indexCount, index);
+#endif
 
 //		dgTrace (("\n"));
 	}

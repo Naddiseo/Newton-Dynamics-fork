@@ -3594,7 +3594,12 @@ xxx *=1;
 
 			ptr = ptr->m_next;
 		} while (ptr != edge);
+#ifdef _DEBUG
+		dgEdge* const newFace = polygon.AddFace(indexCount, index);
+		_ASSERTE (newFace);
+#else
 		polygon.AddFace(indexCount, index);
+#endif
 
 //		dgTrace (("\n"));
 	}
