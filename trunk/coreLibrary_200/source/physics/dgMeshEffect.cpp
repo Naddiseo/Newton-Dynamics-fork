@@ -3675,7 +3675,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	leftMesh->BeginPolygon();
 	rightMesh->BeginPolygon(); 
 
-static int xxx;
+
 static int xxxx;
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
@@ -3687,9 +3687,6 @@ static int xxxx;
 			if (face->m_mark != mark) {
 
 xxxx ++;
-if ((xxxx == 2) || (xxxx == 7) || (xxxx == 8))
-xxxx *=1;
-
 				dgMeshTreeCSGPointsPool points;
 				dgInt32 backCount = 0;
 				dgInt32 frontCount = 0;
@@ -3755,10 +3752,9 @@ xxxx *=1;
 				}
 
 				if (backCount && frontCount) {
-xxx ++;
-if (xxx >= 2)
+if ((xxxx == 2) || (xxxx == 7) || (xxxx == 10) || (xxxx > 1000))
 					leftMesh->AddCGSFace (*this, face, backCount, backList, points);
-//					rightMesh->AddCGSFace (*this, face, frontCount, frontList, points);
+					rightMesh->AddCGSFace (*this, face, frontCount, frontList, points);
 				} else {
 					if (backCount) {
 						leftMesh->CopyCGSFace (*this, face);

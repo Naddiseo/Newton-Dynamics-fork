@@ -2181,10 +2181,10 @@ xxxx ++;
 		dgMeshEffect* rightMeshClipper = NULL;
 
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
-if (leftConvexMesh){
-convexMesh = leftConvexMesh;
-leftConvexMesh = NULL;
-}
+//if (leftConvexMesh){
+//convexMesh = leftConvexMesh;
+//leftConvexMesh = NULL;
+//}
 
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
