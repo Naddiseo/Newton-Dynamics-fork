@@ -2867,6 +2867,7 @@ NewtonCollision* NewtonCreateCompoundCollision(const NewtonWorld* const newtonWo
 // Neglecting to release references to collision primitives is a common cause of memory leaks.
 //
 // See also: NewtonCreateCompoundCollision
+/*
 NewtonCollision* NewtonCreateCompoundCollisionFromMesh(const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, int maxSubShapesCount, int shapeID, int subShapeID)
 {
 	TRACE_FUNTION(__FUNCTION__);
@@ -2876,7 +2877,7 @@ NewtonCollision* NewtonCreateCompoundCollisionFromMesh(const NewtonWorld* const 
 
 	return (NewtonCollision*) collision;
 
-/*
+
 	NewtonMesh* convexAproximation = NewtonMeshConvexApproximation (mesh, concavity);
 	dgList<NewtonCollision*> list(world->dgWorld::GetAllocator());
 
@@ -2906,8 +2907,8 @@ NewtonCollision* NewtonCreateCompoundCollisionFromMesh(const NewtonWorld* const 
 
 	NewtonMeshDestroy(convexAproximation);
 	return collision;
-*/
 }
+*/
 
 NEWTON_API NewtonCollision* NewtonCreateCompoundBreakable (const NewtonWorld* const newtonWorld, int meshCount, 
 														   const NewtonMesh** const solids, const int* const shapeIDArray, 
@@ -8163,6 +8164,13 @@ void NewtonMeshClip (const NewtonMesh* const mesh, const NewtonMesh* const clipp
 	dgMatrix& matrix = *((dgMatrix*)clipperMatrix);
 	
 	((dgMeshEffect*) mesh)->ClipMesh (matrix, (dgMeshEffect*)clipper, (dgMeshEffect**) topMesh, (dgMeshEffect**) bottomMesh);
+}
+
+NewtonMesh* NewtonMeshConvexDecomposition (const NewtonMesh* const mesh, int maxCount)
+{
+	TRACE_FUNTION(__FUNCTION__);
+//	dgMatrix& tetMatrix = *((dgMatrix*)textureMatrix);
+	return (NewtonMesh*) ((dgMeshEffect*) mesh)->CreateConvexApproximation (maxCount);
 }
 
 NewtonMesh* NewtonMeshVoronoiDecomposition (const NewtonMesh* const mesh, int pointCount, int pointStrideInBytes, const dFloat* const pointCloud, int internalMaterial, const dFloat* const textureMatrix)
