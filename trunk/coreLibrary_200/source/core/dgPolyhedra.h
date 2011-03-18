@@ -103,6 +103,8 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	void DeleteFace(dgEdge* const edge);
 
 	dgInt32 GetFaceCount() const;
+	dgInt32 GetEdgeCount() const;
+	dgInt32 GetLastVertexIndex() const;
 
 	dgInt32 IncLRU() const;
 	void SetLRU(dgInt32 lru) const;
@@ -158,19 +160,9 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	dgEdge* SpliteEdgeAndTriangulate (dgInt32 newIndex, dgEdge* const edge);
 
 	dgEdge* FindVertexNode (dgInt32 v0) const;
-	
-	
-
-	
-	
-	
 	dgSphere CalculateSphere (const dgFloat64* const vertex, dgInt32 strideInBytes, const dgMatrix* const basis = NULL) const;
-
 	dgInt32 PackVertex (dgFloat64* const destArray, const dgFloat64* const unpackArray, dgInt32 strideInBytes);
 	void DeleteOverlapingFaces (const dgFloat64* const pool, dgInt32 strideInBytes, dgFloat64 distTol);
-
-	
-
 	void InvertWinding ();
 
 	// find edges edge shared by two or more non adjacent faces
@@ -180,9 +172,6 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	void ChangeEdgeIncidentVertex (dgEdge* const edge, dgInt32 newIndex);
 	void GetCoplanarFaces (dgList<dgEdge*>& faceList, dgEdge* startFace, const dgFloat64* const pool, dgInt32 hisStrideInBytes, dgFloat64 normalDeviation) const;
 	void GetOpenFaces (dgList<dgEdge*>& faceList) const;
-
-	
-
 	void CollapseDegenerateFaces (dgPolyhedraDescriptor &desc, const dgFloat64* const pool, dgInt32 strideInBytes, dgFloat64 area);
 	dgEdge* CollapseEdge(dgEdge* const edge);
 
@@ -190,6 +179,8 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	// this function assume the mesh is a legal mesh;
 	dgInt32 TriangleList (dgUnsigned32 outputBuffer[], dgInt32 maxBufferSize, dgInt32 vertexCacheSize = 12) const;
 	void SwapInfo (dgPolyhedra& source);
+
+
 */
 
 	// this function ayend to create a better triangulation of a mesh
@@ -202,7 +193,6 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	// return index count
 	//	dgInt32 TriangleStrips (dgUnsigned32 outputBuffer[], dgInt32 maxBufferSize, dgInt32 vertexCacheSize = 12) const;
 	//	void OptimalTriangulation (const dgFloat64* const vertex, dgInt32 strideInBytes);
-	//	void Merge (dgPolyhedraDescriptor &desc, dgFloat64 myPool[], dgInt32 myStrideInBytes, const dgPolyhedra& he, const dgFloat64 hisPool[], dgInt32 hisStrideInBytes);
 	//	void CombineOpenFaces (const dgFloat64* const pool, dgInt32 strideInBytes, dgFloat64 distTol);
 	//	bool TriangulateFace (dgEdge* const face, const dgFloat64* const vertex, dgInt32 strideInBytes, dgBigVector& normalOut);
 	//	void OptimizeTriangulation (const dgFloat64* const vertex, dgInt32 strideInBytes);
@@ -293,6 +283,31 @@ inline dgEdge* dgPolyhedra::AddFace (dgInt32 v0, dgInt32 v1, dgInt32 v2)
 	return AddFace (3, vertex, NULL);
 }
 
+inline dgInt32 dgPolyhedra::GetEdgeCount() const
+{
+#ifdef _DEBUG
+	dgInt32 edgeCount = 0;
+	Iterator iter(*this);
+	for (iter.Begin(); iter; iter ++) {
+		edgeCount ++;
+	}
+	_ASSERTE (edgeCount == GetCount());;
+#endif
+	return GetCount();
+}
+
+inline dgInt32 dgPolyhedra::GetLastVertexIndex() const
+{
+	dgInt32 maxVertexIndex = -1;
+	Iterator iter(*this);
+	for (iter.Begin(); iter; iter ++) {
+		const dgEdge* const edge = &(*iter);
+		if (edge->m_incidentVertex > maxVertexIndex) {
+			maxVertexIndex = edge->m_incidentVertex;
+		}
+	}
+	return maxVertexIndex + 1;
+}
 
 
 inline dgInt32 dgPolyhedra::IncLRU() const
