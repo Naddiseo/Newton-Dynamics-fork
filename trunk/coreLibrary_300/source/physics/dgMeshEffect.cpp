@@ -3041,7 +3041,7 @@ dgEdge* dgMeshEffect::InsertEdgeVertex (dgEdge* const edge, dgFloat64 param)
 
 
 
-dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgVector& srcPoint, dgEdge* const face) const
+dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgBigVector& srcPoint, dgEdge* const face) const
 {
 	//this should use Googol extended precision floats, because some face coming from Voronoi decomposition and booleans
 	//clipping has extreme aspect ratios, for now just use float64
@@ -3618,7 +3618,7 @@ xxx *=1;
 			do {
 				ptr->m_mark = mark;
 
-				const dgVector& p = pool[ptr->m_incidentVertex];					
+				const dgBigVector& p = pool[ptr->m_incidentVertex];					
 				points[faceIndexCount] = reference.InterpolateVertex (p, refFace);
 
 				//dgTrace (("%f %f %f\n", p.m_x, p.m_y, p.m_z));

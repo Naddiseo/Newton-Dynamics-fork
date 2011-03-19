@@ -217,7 +217,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void MergeFaces (const dgMeshEffect* const source);
 	void ReverseMergeFaces (dgMeshEffect* const source);
 	dgVertexAtribute InterpolateEdge (dgEdge* const edge, dgFloat64 param) const;
-	dgVertexAtribute InterpolateVertex (const dgVector& point, dgEdge* const face) const;
+	dgVertexAtribute InterpolateVertex (const dgBigVector& point, dgEdge* const face) const;
 	
 	void ClipMesh (const dgMeshEffect* clipMesh, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
 	void ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
