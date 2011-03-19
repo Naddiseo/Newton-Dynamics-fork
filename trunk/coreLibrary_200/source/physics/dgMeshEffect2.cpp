@@ -2202,8 +2202,11 @@ xxxx ++;
 				convexMesh->MergeFaces(leftConvexMesh);
 				convexMesh->MergeFaces(leftMeshClipper);
 				convexMesh->EndPolygon();
+
+if(xxxx == 5){
 				convexMesh->WeldTJoints();
 				_ASSERTE (!convexMesh->HasOpenEdges());
+}
 			}
 		}
 
