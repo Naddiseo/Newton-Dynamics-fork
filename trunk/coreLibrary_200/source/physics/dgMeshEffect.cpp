@@ -1036,8 +1036,6 @@ void dgMeshEffect::ConvertToPolygons ()
 		}
 	}
 	EndFace();
-
-	RepairTJoints ();
 }
 
 void dgMeshEffect::RemoveUnusedVertices(dgInt32* const vertexMap)
@@ -1802,13 +1800,14 @@ void dgMeshEffect::EndPolygon ()
 			edge = AddFace (3, index, userdata);
 			_ASSERTE (edge);
 		}
-//		}
 	}
-
 	EndFace();
 
+	RepairTJoints ();
+
+
 #ifdef _DEBUG
-	dgPolyhedra::Iterator iter (*this);
+	dgPolyhedra::Iterator iter (*this);	
 	for (iter.Begin(); iter; iter ++){
 		dgEdge* const face = &(*iter);
 		if (face->m_incidentFace > 0) {
@@ -1818,7 +1817,6 @@ void dgMeshEffect::EndPolygon ()
 			dgBigVector e1 (p1 - p0);
 			dgBigVector e2 (p2 - p0);
 			dgBigVector n (e1 * e2);
-//			dgFloat64 mag2 = dgSqrt (n % n);
 //			_ASSERTE (mag2 > DG_MESH_EFFECT_TRIANGLE_MIN_AREA);
 			dgFloat64 mag2 = n % n;
 			_ASSERTE (mag2 > dgFloat32 (0.0f));
@@ -3339,7 +3337,6 @@ dgMeshEffect* dgMeshEffect::Union (const dgMatrix& matrix, const dgMeshEffect* c
 			result->MergeFaces(rightMeshSource);
 			result->MergeFaces(rightMeshClipper);
 			result->EndPolygon();
-			result->RepairTJoints();
 		}
 	}
 
@@ -3392,7 +3389,6 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 			result->MergeFaces(rightMeshSource);
 			result->ReverseMergeFaces(leftMeshClipper);
 			result->EndPolygon();
-			result->RepairTJoints();
 		}
 	}
 
@@ -3443,7 +3439,6 @@ dgMeshEffect* dgMeshEffect::Intersection (const dgMatrix& matrix, const dgMeshEf
 			result->MergeFaces(leftMeshSource);
 			result->MergeFaces(leftMeshClipper);
 			result->EndPolygon();
-			result->RepairTJoints();
 		}
 	}
 
@@ -3517,9 +3512,6 @@ void dgMeshEffect::ClipMesh (const dgMatrix& matrix, const dgMeshEffect* clipMes
 
 				leftMesh->EndPolygon();
 				rightMesh->EndPolygon();
-
-				leftMesh->RepairTJoints();
-				rightMesh->RepairTJoints();
 
 				*left = leftMesh;
 				*right = rightMesh;
@@ -3780,6 +3772,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 
 	leftMesh->EndPolygon();
 	rightMesh->EndPolygon(); 
+
 
 	if (!leftMesh->GetCount()) {
 		leftMesh->Release();
@@ -4421,6 +4414,53 @@ bool dgMeshEffect::HasOpenEdges () const
 	return false;
 }
 
+
+
+
+dgFloat64 dgMeshEffect::CalculateVolume () const
+{
+	_ASSERTE (0);
+	return 0;
+	/*
+
+	dgPolyhedraMassProperties localData;
+
+	dgInt32 mark = IncLRU();
+	dgPolyhedra::Iterator iter (*this);
+	for (iter.Begin(); iter; iter ++){
+		dgInt32 count;
+		dgEdge* ptr;
+		dgEdge* face;
+		dgVector points[256];
+		
+		face = &(*iter);
+		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
+			count = 0;
+			ptr = face;
+			do {
+				points[count] = m_points[ptr->m_incidentVertex];
+				count ++;
+				ptr->m_mark = mark;
+				ptr = ptr->m_next;
+			} while (ptr != face);
+			localData.AddCGFace (count, points);
+		}
+	}
+
+	dgFloat32 volume;
+	dgVector p0;
+	dgVector p1;
+	dgVector com;
+	dgVector inertia;
+	dgVector crossInertia;
+	volume = localData.MassProperties (com, inertia, crossInertia);
+	return volume;
+*/
+}
+
+
+
+
 bool dgMeshEffect::SeparateDuplicateLoops (dgEdge* const face)
 {
 	for (dgEdge* ptr0 = face; ptr0 != face->m_prev; ptr0 = ptr0->m_next) {
@@ -4447,6 +4487,7 @@ bool dgMeshEffect::SeparateDuplicateLoops (dgEdge* const face)
 	return false;
 }
 
+
 void dgMeshEffect::RepairTJoints ()
 {
 	dgInt32 mark = IncLRU();
@@ -4457,6 +4498,7 @@ void dgMeshEffect::RepairTJoints ()
 		if (face->m_incidentFace < 0) {
 
 			while (SeparateDuplicateLoops (face));
+
 			for (bool found = true; found; ) {
 				found = false;
 				dgEdge* ptr = face;
@@ -4556,47 +4598,3 @@ void dgMeshEffect::RepairTJoints ()
 		}
 	}
 }
-
-
-dgFloat64 dgMeshEffect::CalculateVolume () const
-{
-	_ASSERTE (0);
-	return 0;
-	/*
-
-	dgPolyhedraMassProperties localData;
-
-	dgInt32 mark = IncLRU();
-	dgPolyhedra::Iterator iter (*this);
-	for (iter.Begin(); iter; iter ++){
-		dgInt32 count;
-		dgEdge* ptr;
-		dgEdge* face;
-		dgVector points[256];
-		
-		face = &(*iter);
-		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
-			count = 0;
-			ptr = face;
-			do {
-				points[count] = m_points[ptr->m_incidentVertex];
-				count ++;
-				ptr->m_mark = mark;
-				ptr = ptr->m_next;
-			} while (ptr != face);
-			localData.AddCGFace (count, points);
-		}
-	}
-
-	dgFloat32 volume;
-	dgVector p0;
-	dgVector p1;
-	dgVector com;
-	dgVector inertia;
-	dgVector crossInertia;
-	volume = localData.MassProperties (com, inertia, crossInertia);
-	return volume;
-*/
-}
-
-

@@ -1890,7 +1890,6 @@ dgMeshEffect* dgMeshEffect::CreateConvexApproximation(dgInt32 maxCount) const
 {
 /*
 	dgMeshEffect tmpMesh (*this);
-	tmpMesh.RepairTJoints();
 
 _ASSERTE (!tmpMesh.HasOpenEdges ());
 tmpMesh.ConvertToPolygons();
@@ -2204,7 +2203,6 @@ xxxx ++;
 				convexMesh->EndPolygon();
 
 if(xxxx == 5){
-				convexMesh->RepairTJoints();
 				_ASSERTE (!convexMesh->HasOpenEdges());
 }
 			}
