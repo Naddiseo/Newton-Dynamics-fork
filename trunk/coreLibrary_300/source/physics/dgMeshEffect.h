@@ -141,7 +141,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	dgInt32 GetTotalIndexCount() const;
 	void GetFaces (dgInt32* const faceCount, dgInt32* const materials, void** const faceNodeList) const;
 
-	void WeldTJoints ();
+	void RepairTJoints ();
 	bool SeparateDuplicateLoops (dgEdge* const edge);
 	bool HasOpenEdges () const;
 	dgFloat64 CalculateVolume () const;
@@ -218,7 +218,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void ReverseMergeFaces (dgMeshEffect* const source);
 	dgVertexAtribute InterpolateEdge (dgEdge* const edge, dgFloat64 param) const;
 	dgVertexAtribute InterpolateVertex (const dgBigVector& point, dgEdge* const face) const;
-	
+
 	void ClipMesh (const dgMeshEffect* clipMesh, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
 	void ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
 	dgInt32 PlaneApplyCap (const dgMeshEffect* planeMesh, const dgPlane& normal);
@@ -226,7 +226,6 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 
 	void CopyCGSFace (const dgMeshEffect& reference, dgEdge* const face);
 	void AddCGSFace (const dgMeshEffect& reference, dgEdge* const refFace, dgInt32 count, dgMeshTreeCSGFace** const faces, const dgMeshTreeCSGPointsPool& points);
-//	void ClipFace (const dgBigPlane& plane, dgMeshTreeCSGFace* src, dgMeshTreeCSGFace** left, dgMeshTreeCSGFace** right,	dgMeshTreeCSGPointsPool& pointPool) const;
 	void ClipFace (const dgHugeVector& normal, const dgHugeVector& origin, dgMeshTreeCSGFace* const src, dgMeshTreeCSGFace** left, dgMeshTreeCSGFace** const right, dgMeshTreeCSGPointsPool& pointPool) const;
 
 	dgMeshEffect* CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;

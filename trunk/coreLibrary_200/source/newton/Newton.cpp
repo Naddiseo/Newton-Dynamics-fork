@@ -8151,7 +8151,7 @@ void NewtonMeshFixTJoints (const NewtonMesh* const mesh)
 {
 	TRACE_FUNTION(__FUNCTION__);
 
-	return ((dgMeshEffect*) mesh)->WeldTJoints();
+	return ((dgMeshEffect*) mesh)->RepairTJoints();
 }
 
 

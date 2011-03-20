@@ -96,7 +96,7 @@ void dMeshNodeInfo::ConvertToPolygons()
 {
 	NewtonMeshPolygonize(m_mesh);
 }
-void dMeshNodeInfo::WeldTJoints ()
+void dMeshNodeInfo::RepairTJoints ()
 {
 	NewtonMeshFixTJoints (m_mesh);
 }

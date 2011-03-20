@@ -625,6 +625,15 @@ DG_INLINE dgFloat32 dgAbsf(dgFloat32 x)
 }
 
 
+DG_INLINE dgInt32 dgFastInt (dgFloat64 x)
+{
+	dgInt32 i = dgInt32 (x);
+	if (dgFloat64 (i) > x) {
+		i --;
+	}
+	return i;
+}
+
 DG_INLINE dgInt32 dgFastInt (dgFloat32 x)
 {
 //#ifdef _MSC_VER

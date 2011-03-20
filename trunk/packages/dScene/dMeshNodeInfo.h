@@ -50,7 +50,7 @@ class dMeshNodeInfo: public dGeometryNodeInfo
 	virtual void ConvertToPolygons();
 	virtual void ConvertToTriangles();
 
-	virtual void WeldTJoints ();
+	virtual void RepairTJoints ();
 	virtual void RemoveUnusedVertices(dScene* const world, dScene::dTreeNode* const myNode);
 
 	virtual void SmoothNormals (dFloat angleInRadiants);

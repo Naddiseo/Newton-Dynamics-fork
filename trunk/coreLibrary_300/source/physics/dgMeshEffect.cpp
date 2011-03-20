@@ -1037,7 +1037,7 @@ void dgMeshEffect::ConvertToPolygons ()
 	}
 	EndFace();
 
-	WeldTJoints ();
+	RepairTJoints ();
 }
 
 void dgMeshEffect::RemoveUnusedVertices(dgInt32* const vertexMap)
@@ -1533,7 +1533,7 @@ void dgMeshEffect::CalculateNormals (dgFloat64 angleInRadians)
 
 			dgEdge* ptr = edge;
 			do {
-				int index = dgInt32 (ptr->m_userData);
+				dgInt32 index = dgInt32 (ptr->m_userData);
 				_ASSERTE (index < GetCount());
 				dgVertexAtribute& attrib = attribArray[index];
 				faceNormal[index] = normal;
@@ -1555,8 +1555,8 @@ void dgMeshEffect::CalculateNormals (dgFloat64 angleInRadians)
 		if (edge->m_incidentFace > 0) {
 			dgEdge* const twin = edge->m_twin->m_prev;
 			if (twin->m_incidentFace > 0) {
-				int edgeIndex = dgInt32 (edge->m_userData);
-				int twinIndex = dgInt32 (twin->m_userData);
+				dgInt32 edgeIndex = dgInt32 (edge->m_userData);
+				dgInt32 twinIndex = dgInt32 (twin->m_userData);
 				dgFloat64 test = faceNormal[edgeIndex] % faceNormal[twinIndex];
 				if (test >= smoothValue) {
 					dgVertexAtribute& attrib = attribArray[edgeIndex];
@@ -1571,7 +1571,7 @@ void dgMeshEffect::CalculateNormals (dgFloat64 angleInRadians)
 	for(iter.Begin(); iter; iter ++){
 		dgEdge* const edge = &(*iter);
 		if (edge->m_incidentFace > 0) {
-			int edgeIndex = dgInt32 (edge->m_userData);
+			dgInt32 edgeIndex = dgInt32 (edge->m_userData);
 			_ASSERTE (edgeIndex < GetCount());
 			dgVertexAtribute& attrib = attribArray[edgeIndex];
 
@@ -3160,7 +3160,7 @@ void dgMeshEffect::MergeFaces (const dgMeshEffect* const source)
 				_ASSERTE (count < (sizeof (face) / sizeof (face[0])));
 				ptr = ptr->m_next;
 			} while (ptr != edge);
-			AddPolygon(count, &face[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgInt32 (face[0].m_material));
+			AddPolygon(count, &face[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (face[0].m_material));
 		}
 	}
 }
@@ -3339,7 +3339,7 @@ dgMeshEffect* dgMeshEffect::Union (const dgMatrix& matrix, const dgMeshEffect* c
 			result->MergeFaces(rightMeshSource);
 			result->MergeFaces(rightMeshClipper);
 			result->EndPolygon();
-			result->WeldTJoints();
+			result->RepairTJoints();
 		}
 	}
 
@@ -3392,7 +3392,7 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 			result->MergeFaces(rightMeshSource);
 			result->ReverseMergeFaces(leftMeshClipper);
 			result->EndPolygon();
-			result->WeldTJoints();
+			result->RepairTJoints();
 		}
 	}
 
@@ -3443,7 +3443,7 @@ dgMeshEffect* dgMeshEffect::Intersection (const dgMatrix& matrix, const dgMeshEf
 			result->MergeFaces(leftMeshSource);
 			result->MergeFaces(leftMeshClipper);
 			result->EndPolygon();
-			result->WeldTJoints();
+			result->RepairTJoints();
 		}
 	}
 
@@ -3518,8 +3518,8 @@ void dgMeshEffect::ClipMesh (const dgMatrix& matrix, const dgMeshEffect* clipMes
 				leftMesh->EndPolygon();
 				rightMesh->EndPolygon();
 
-				leftMesh->WeldTJoints();
-				rightMesh->WeldTJoints();
+				leftMesh->RepairTJoints();
+				rightMesh->RepairTJoints();
 
 				*left = leftMesh;
 				*right = rightMesh;
@@ -3780,11 +3780,6 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 
 	leftMesh->EndPolygon();
 	rightMesh->EndPolygon(); 
-
-//leftMesh->ConvertToPolygons();
-//rightMesh->ConvertToPolygons();
-//	leftMesh->WeldTJoints();
-//	rightMesh->WeldTJoints();
 
 	if (!leftMesh->GetCount()) {
 		leftMesh->Release();
@@ -4452,7 +4447,7 @@ bool dgMeshEffect::SeparateDuplicateLoops (dgEdge* const face)
 	return false;
 }
 
-void dgMeshEffect::WeldTJoints ()
+void dgMeshEffect::RepairTJoints ()
 {
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
