@@ -2006,7 +2006,7 @@ void dgMeshEffect::GetFaces (dgInt32* const facesIndex, dgInt32* const materials
 		} while (ptr != edge);
 
 		facesIndex[faces] = faceCount;
-		materials[faces] = dgInt32 (m_attib[dgInt32 (edge->m_userData)].m_material);
+		materials[faces] = dgFastInt(m_attib[dgInt32 (edge->m_userData)].m_material);
 		faces ++;
 	}
 }
@@ -4477,6 +4477,7 @@ bool dgMeshEffect::SeparateDuplicateLoops (dgEdge* const face)
 
 				ptr11->m_next = ptr0;
 				ptr0->m_prev = ptr11;
+
 				return true;
 			}
 
@@ -4495,10 +4496,77 @@ void dgMeshEffect::RepairTJoints ()
 	for (iter.Begin(); iter; ) {
 		dgEdge* const face = &(*iter);
 		iter ++;
-		if (face->m_incidentFace < 0) {
+		if ((face->m_incidentFace < 0) && (face->m_mark != mark)) {
 
 			while (SeparateDuplicateLoops (face));
 
+/*
+int xxx = 0;
+dgEdge* xxxxx = face;
+do {
+	dgBigVector  val = m_points[xxxxx->m_incidentVertex];
+	if ((val.m_y < -1.5) && (val.m_y > -2.0) && (val.m_z < 0.0) && (val.m_x == 0.0f)){
+		xxx ++;
+		
+		if (xxx != 1000){
+			dgEdge* yyy = xxxxx;
+			do {
+				if (yyy->m_userData >= 0) {
+					//m_attib[yyy->m_userData].m_vertex.m_y = val.m_y - 1.0;
+
+					m_attib[yyy->m_userData].m_vertex.m_z = val.m_z - 1.0;
+				}
+				yyy = yyy->m_twin->m_next;
+			} while (yyy != xxxxx);
+		}
+	}
+	xxxxx = xxxxx->m_next;
+} while (xxxxx != face);
+*/
+//continue;
+break;
+
+			dgBigVector dir (dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f));
+			dgFloat64 lengh2 = dgFloat64 (0.0f);
+			dgEdge* ptr = face;
+			do {
+				dgBigVector dir1 (m_points[ptr->m_next->m_incidentVertex] - m_points[ptr->m_incidentVertex]);
+				dgFloat64 val = dir1 % dir1;
+				if (val > lengh2) {
+					lengh2 = val;
+					dir = dir1;
+				}
+				ptr = ptr->m_next;
+			} while (ptr != face);
+
+			_ASSERTE (lengh2 > dgFloat32 (0.0f));
+
+			dgEdge* firstEdge = NULL;
+			dgEdge* lastEdge = NULL;
+			dgFloat64 minVal = dgFloat64 (-1.0e10f);
+			dgFloat64 maxVal = dgFloat64 (-1.0e10f);
+			ptr = face;
+			do {
+				const dgBigVector& p = m_points[ptr->m_incidentVertex];
+				dgFloat64 val = p % dir;
+				if (val > maxVal) {
+					maxVal = val;
+					lastEdge = ptr;
+				}
+				val *= dgFloat64 (-1.0f);
+				if (val > minVal) {
+					minVal = val;
+					firstEdge = ptr;
+				}
+
+				ptr->m_mark = mark;
+				ptr = ptr->m_next;
+			} while (ptr != face);
+			
+			_ASSERTE (firstEdge);
+			_ASSERTE (lastEdge);
+			
+/*
 			for (bool found = true; found; ) {
 				found = false;
 				dgEdge* ptr = face;
@@ -4511,7 +4579,6 @@ void dgMeshEffect::RepairTJoints ()
 					ptr = ptr->m_next;
 				} while (ptr != face);
 			}
-
 			dgEdge* corner = NULL;
 			dgEdge* ptr = face;
 			bool isSliver = true;
@@ -4536,20 +4603,43 @@ void dgMeshEffect::RepairTJoints ()
 				ptr->m_mark = mark;
 				ptr = ptr->m_next;
 			} while (ptr != face);
+*/
 
-			if (isSliver && corner) {
+			bool isTJoint = true;
+			dgBigVector p0 (m_points[firstEdge->m_incidentVertex]);
+			dgBigVector p1 (m_points[lastEdge->m_incidentVertex]);
+			dgBigVector p1p0 (p1 - p0);
+			dgFloat64 den = p1p0 % p1p0;
+			ptr = firstEdge->m_next;
+			do {
+				dgBigVector p2 (m_points[ptr->m_incidentVertex]);
+				dgFloat64 num = (p2 - p0) % p1p0;
+				_ASSERTE (num >= dgFloat64 (0.0f));
+				_ASSERTE (num <= den);
+				dgBigVector q (p0 + p1p0.Scale (num / den));
+				dgBigVector dist (p2 - q);
+				dgFloat64 err2 = dist % dist;
+				isTJoint &= (err2 < (dgFloat64 (1.0e-4f) * dgFloat64 (1.0e-4f)));
+				ptr = ptr->m_next;
+			} while (isTJoint && (ptr != firstEdge));
 
+			if (isTJoint) {
+			//if (isSliver && corner) {
 				do {
 					dgEdge* next = NULL;
-					const dgBigVector p0 = m_points[corner->m_incidentVertex];
-					const dgBigVector p1 = m_points[corner->m_next->m_incidentVertex];
-					const dgBigVector p2 = m_points[corner->m_prev->m_incidentVertex];
+
+					const dgBigVector p0 = m_points[firstEdge->m_incidentVertex];
+					const dgBigVector p1 = m_points[firstEdge->m_next->m_incidentVertex];
+					const dgBigVector p2 = m_points[firstEdge->m_prev->m_incidentVertex];
 
 					dgBigVector p1p0 (p1 - p0);
 					dgBigVector p2p0 (p2 - p0);
 					dgFloat64 dist10 = p1p0 % p1p0;
 					dgFloat64 dist20 = p2p0 % p2p0;
+
 					if (dist20 > dist10) {
+						_ASSERTE (0);
+/*
 						dgFloat64 t = (p1p0 % p2p0) / dist20;
 						_ASSERTE (t > dgFloat32 (0.0f));
 						_ASSERTE (t < dgFloat32 (1.0f));
@@ -4569,31 +4659,71 @@ void dgMeshEffect::RepairTJoints ()
 						corner->m_next->m_incidentFace = corner->m_prev->m_twin->m_incidentFace;
 						corner->m_next->m_userData = dgUnsigned64 (m_atribCount - 1);
 						DeleteEdge(corner->m_prev);
+*/
 					} else {
+
 						_ASSERTE (dist20 < dist10);
 
 						dgFloat64 t = (p1p0 % p2p0) / dist10;
 						_ASSERTE (t > dgFloat32 (0.0f));
 						_ASSERTE (t < dgFloat32 (1.0f));
 
-						if (corner->m_next->m_next->m_next != corner) {
-							ConectVertex (corner->m_next, corner->m_prev);
-							next = corner->m_next->m_twin;
+						if (firstEdge->m_next->m_next->m_next != firstEdge) {
+							ConectVertex (firstEdge->m_next, firstEdge->m_prev);
+							next = firstEdge->m_next->m_twin;
 						}
-						_ASSERTE (corner->m_next->m_next->m_next  == corner);
+						_ASSERTE (firstEdge->m_next->m_next->m_next == firstEdge);
 
-						corner->m_next->m_userData = corner->m_twin->m_userData;
-						corner->m_next->m_incidentFace = corner->m_twin->m_incidentFace;
-						dgVertexAtribute attrib (InterpolateEdge (corner->m_twin, dgFloat64 (1.0f) - t));
-						attrib.m_vertex = m_points[corner->m_prev->m_incidentVertex];
+						#ifdef _DEBUG
+							dgEdge* tmp = firstEdge->m_twin;
+							do {
+								_ASSERTE (tmp->m_incidentFace > 0);
+							} while (tmp != firstEdge->m_twin); 
+						#endif
+
+						dgEdge* const begin = firstEdge->m_prev;
+						dgEdge* const last = firstEdge->m_next;
+						firstEdge->m_next->m_userData = firstEdge->m_twin->m_userData;
+						firstEdge->m_next->m_incidentFace = firstEdge->m_twin->m_incidentFace;
+						dgVertexAtribute attrib (InterpolateEdge (firstEdge->m_twin, dgFloat64 (1.0f) - t));
+						attrib.m_vertex = m_points[firstEdge->m_prev->m_incidentVertex];
 						AddAtribute(attrib);
-						corner->m_prev->m_incidentFace = corner->m_twin->m_incidentFace;
-						corner->m_prev->m_userData = dgUnsigned64 (m_atribCount - 1);
-						DeleteEdge(corner);
-					}
+						firstEdge->m_prev->m_incidentFace = firstEdge->m_twin->m_incidentFace;
+						firstEdge->m_prev->m_userData = dgUnsigned64 (m_atribCount - 1);
 
-					corner = next;
-				} while (corner);
+						if ((firstEdge == &(*iter)) || (firstEdge->m_twin == &(*iter))) {
+							iter.Begin();
+							_ASSERTE (firstEdge != &(*iter));
+							_ASSERTE (firstEdge->m_twin != &(*iter));
+						}
+						DeleteEdge(firstEdge);
+
+						for (dgEdge* ptr = begin->m_next->m_next; ptr != last; ptr = ptr->m_next) {
+							dgEdge* const e = AddHalfEdge (begin->m_incidentVertex, ptr->m_incidentVertex);
+							dgEdge* const t = AddHalfEdge (ptr->m_incidentVertex, begin->m_incidentVertex);
+							_ASSERTE (e);
+							_ASSERTE (t);
+							e->m_twin = t;
+							t->m_twin = e;
+
+							e->m_incidentFace = ptr->m_incidentFace;
+							t->m_incidentFace = ptr->m_incidentFace;
+
+							e->m_userData = last->m_next->m_userData;
+							t->m_userData = ptr->m_userData;
+
+							t->m_prev = ptr->m_prev;
+							ptr->m_prev->m_next = t;
+							e->m_next = ptr;
+							ptr->m_prev = e;
+							t->m_next = last->m_next;
+							e->m_prev = last;
+							last->m_next->m_prev = t;
+							last->m_next = e;
+						}
+					}
+					firstEdge = next;
+				} while (firstEdge);
 			}
 		}
 	}

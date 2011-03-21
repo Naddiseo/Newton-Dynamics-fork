@@ -2194,6 +2194,21 @@ xxxx ++;
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
 			if (leftMeshClipper && rightMeshClipper) {
+
+if (xxxx == 1){
+convexMesh->Release();
+convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+convexMesh->BeginPolygon();
+//convexMesh->MergeFaces(leftMeshClipper);
+convexMesh->MergeFaces(rightMeshClipper);
+convexMesh->EndPolygon();
+_ASSERTE (!convexMesh->HasOpenEdges());
+}
+
+
+
+
+/*
 				convexMesh->Release();
 				convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
@@ -2205,6 +2220,7 @@ xxxx ++;
 if(xxxx == 5){
 				_ASSERTE (!convexMesh->HasOpenEdges());
 }
+*/
 			}
 		}
 
@@ -2245,13 +2261,15 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 			convexMesh->m_attib[i].m_vertex.m_w = layer;
 		}
 
-if(xxxx == 5)
+//if(xxxx == 5)
+if(xxxx == 1)
 		voronoiPartion->MergeFaces(convexMesh);
 		layer += dgFloat64 (1.0f);
 
 		convexMesh->Release();
 
-if(xxxx == 5)
+//if(xxxx == 5)
+if(xxxx == 1)
 break;
 	}
 
