@@ -99,43 +99,49 @@ void dgMeshTreeCSGFace::InsertVertex (const dgMeshTreeCSGFace* const vertices, c
 //bool dgMeshTreeCSGFace::CheckConvex(const dgMeshEffect* mesh, dgEdge* face, const dgMeshTreeCSGPointsPool& pool) const
 bool dgMeshTreeCSGFace::CheckConvex(const dgMeshTreeCSGPointsPool& pool) const
 {
-	return false;
-	/*
-	CSGLinearEdge* ptr;
-	CSGLinearEdge* ptr1;
+	dgBigVector normal (dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f));
 
-	dgBigVector normal (mesh->BigFaceNormal (face, &mesh->GetVertexPool()->m_x, sizeof (dgVector)));
-	normal = normal.Scale (1.0f / sqrt (normal % normal));
+	CSGLinearEdge* ptr = m_face;
 
-	ptr = m_face;
 	dgBigVector p0 (pool.m_points[ptr->m_index]);
 	ptr = ptr->m_next;
 
 	dgBigVector p1 (pool.m_points[ptr->m_index]);
 	ptr = ptr->m_next;
 
-	ptr1 = ptr;
-	dgBigVector e0 (p0 - p1);
+	dgBigVector e0 (p1 - p0);
 	do {
-	dgFloat64 convex;
-	dgBigVector p2 (pool.m_points[ptr1->m_index]);
-	dgBigVector e1 (p2 - p1);
+		dgBigVector p2 (pool.m_points[ptr->m_index]);
+		dgBigVector e1 (p2 - p0);
+		normal += e1 * e0;
+		e0 = e1;
+		ptr = ptr->m_next;
+	} while (ptr != m_face);
 
-	dgBigVector n (e1 * e0);
-	convex = n % normal;
-	if (convex < dgFloat64 (0.0f)) {
-	return false;
+	if ((normal % normal) < dgFloat64 (1.0e-24f)) {
+		return false;
 	}
 
+	ptr = m_face;
+	p0 = pool.m_points[ptr->m_index];
+	ptr = ptr->m_next;
 
-	p1 = p2;
-	e0 = e1.Scale (-1.0f);
+	p1 = pool.m_points[ptr->m_index];
+	ptr = ptr->m_next;
 
+	e0 = p1 - p0;
+	do {
+		dgBigVector p2 (pool.m_points[ptr->m_index]);
+		dgBigVector e1 (p2 - p0);
+		dgBigVector normal1 (e1 * e0);
+		if ((normal1 % normal)<= dgFloat64(0.0f)) {
+			return false;
+		}
+		e0 = e1;
+		ptr = ptr->m_next;
+	} while (ptr != m_face);
 
-	ptr1 = ptr1->m_next;
-	} while (ptr1 != ptr);
-	*/
-	
+	return true;
 }
 
 
