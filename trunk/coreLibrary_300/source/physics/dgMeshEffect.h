@@ -38,8 +38,9 @@ class dgMeshTreeCSGPointsPool;
 #define DG_MESH_EFFECT_POINT_SPLITED		512
 #define DG_MESH_EFFECT_POLYGON_SPLITED		256
 #define DG_MESH_EFFECT_FLAT_CUT_BORDER_EDGE	0x01
-#define DG_MESH_EFFECT_QUANTIZE_FLOAT(x)	(x)
+
 #define DG_VERTEXLIST_INDEXLIST_TOL			(dgFloat64 (0.0f))
+
 
 
 
@@ -207,12 +208,15 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void Init (bool preAllocaBuffers);
 	dgBigVector GetOrigin ()const;
 	dgInt32 CalculateMaxAttributes () const;
+	dgFloat64 QuantizeCordinade(dgFloat64 val) const;
 	void EnumerateAttributeArray (dgVertexAtribute* const attib);
 	void ApplyAttributeArray (dgVertexAtribute* const attib);
 	void AddVertex(const dgBigVector& vertex);
 	void AddAtribute (const dgVertexAtribute& attib);
 	void AddPoint(const dgFloat64* vertexList, dgInt32 material);
 	void FixCylindricalMapping (dgVertexAtribute* const attib) const;
+
+	
 
 	void MergeFaces (const dgMeshEffect* const source);
 	void ReverseMergeFaces (dgMeshEffect* const source);
@@ -224,8 +228,6 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	dgInt32 PlaneApplyCap (const dgMeshEffect* planeMesh, const dgPlane& normal);
 	void PlaneClipMesh (const dgMeshEffect* planeMesh, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
 
-	void CopyCGSFace (const dgMeshEffect& reference, dgEdge* const face);
-	void AddCGSFace (const dgMeshEffect& reference, dgEdge* const refFace, dgInt32 count, dgMeshTreeCSGFace** const faces, const dgMeshTreeCSGPointsPool& points);
 	void ClipFace (const dgHugeVector& normal, const dgHugeVector& origin, dgMeshTreeCSGFace* const src, dgMeshTreeCSGFace** left, dgMeshTreeCSGFace** const right, dgMeshTreeCSGPointsPool& pointPool) const;
 
 	dgMeshEffect* CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
@@ -316,5 +318,14 @@ inline dgFloat64* dgMeshEffect::GetVertexPool () const
 	return &m_points[0].m_x;
 }
 
+
+inline dgFloat64 dgMeshEffect::QuantizeCordinade(dgFloat64 x) const
+{
+//	dgFloat64 scale = dgFloat64(1<<23);
+//	dgFloat64 den = (dgFloat64 (1.0f) / dgFloat64(1<<23));
+//	dgFloat64 y = floor (x * scale) * den; 
+//	return y; 
+	return x;
+}
 
 #endif

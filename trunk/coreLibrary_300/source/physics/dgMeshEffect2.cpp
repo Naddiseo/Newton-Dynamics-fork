@@ -2201,6 +2201,8 @@ convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 convexMesh->BeginPolygon();
 //convexMesh->MergeFaces(leftMeshClipper);
 convexMesh->MergeFaces(rightMeshClipper);
+//convexMesh->MergeFaces(leftConvexMesh);
+//convexMesh->MergeFaces(rightConvexMesh);
 convexMesh->EndPolygon();
 _ASSERTE (!convexMesh->HasOpenEdges());
 }
