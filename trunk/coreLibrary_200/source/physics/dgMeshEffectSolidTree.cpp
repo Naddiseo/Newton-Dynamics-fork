@@ -492,6 +492,23 @@ void dgMeshEffectSolidTree::ReconstructFace (dgMeshEffect& polygon, const dgMesh
 			
 		} 
 	}
+	if (outerEdgeCount > 1) {
+		dgInt32 mark = polygon.IncLRU();
+		for (iter.Begin(); iter; iter ++) {
+			dgEdge* const edge = &(*iter);
+			if ((edge->m_incidentFace < 0) && ((edge->m_mark != mark))){
+				outerEdgeCount ++;
+				dgEdge* ptr = edge;
+				do {
+					dgInt32 i = ptr->m_incidentVertex;
+					dgTrace (("%f %f %f\n", polygon.m_points[i].m_x, polygon.m_points[i].m_y, polygon.m_points[i].m_z ));
+					ptr->m_mark = mark;
+					ptr = ptr->m_next;
+				} while (ptr != edge);
+				dgTrace (("\n"));
+			} 
+		}
+	}
 	_ASSERTE (outerEdgeCount == 1);
 #endif
 }
