@@ -4493,124 +4493,17 @@ bool dgMeshEffect::SeparateDuplicateLoops (dgEdge* const face)
 
 void dgMeshEffect::RepairTJoints ()
 {
-
-
+return;
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
 
-
-/*
-static int xxxxxxxx = 0;
-if (xxxxxxxx)
-return;
-
-
 	for (iter.Begin(); iter; ) {
 		dgEdge* const face = &(*iter);
 		iter ++;
 		if ((face->m_incidentFace < 0) && (face->m_mark != mark)) {
-			dgEdge* edge = face;
-			edge->m_mark = mark;
-			do {
-				dgHugeVector p0 (m_points[edge->m_incidentVertex]);
-				dgHugeVector p1 (m_points[edge->m_next->m_incidentVertex]);
-				dgHugeVector dp (p1 - p0);
-				dgFloat64 den = (dp % dp).GetAproximateValue();
-				_ASSERTE (den > dgFloat32 (0.0f));
-				
-				dgEdge* point = edge->m_next->m_next;
-				do {
-					dgHugeVector p (m_points[point->m_incidentVertex]);
-					dgHugeVector dp0 (p - p0);
-					dgFloat64 num = (dp0 % dp).GetAproximateValue();
-					if ((num > dgFloat64 (0.0f)) && (num < den)) {
-						dgHugeVector dist (dp0 - dp.Scale(num/den));
-
-						dgGoogol dist2 = (dist % dist);
-						dgFloat64 val (dist2.GetAproximateValue());
-
-//						dgFloat64 smallDist (dgFloat64 (1.0e10f));
-						if (val < dgFloat64 (1.0e-8f)) {
-//							smallDist = val;
-//							closestEdge = edge;
-
-							xxxxxxxx++;
-
-							dgFloat64 a = m_points[point->m_incidentVertex].m_x + 1.0;
-							dgEdge* ptr = point; 
-							ptr = ptr->m_twin->m_next;
-							if (xxxxxxxx == 2)
-							do {
-								m_points[ptr->m_incidentVertex].m_x = a;	
-								//m_points[ptr->m_incidentVertex].m_y = 0;	
-								//m_points[ptr->m_incidentVertex].m_z = a;	
-								if (ptr->m_userData >= 0) {
-									m_attib[ptr->m_userData].m_vertex.m_x = a;	
-									//m_attib[ptr->m_userData].m_vertex.m_y = 0;	
-									//m_attib[ptr->m_userData].m_vertex.m_z = a;	
-									return;
-								}
-								ptr = ptr->m_twin->m_next;
-							} while (ptr != point);
-						
-						}
-					}
-					point = point->m_next;
-				} while (point != edge->m_prev);
-				edge = edge->m_next;
-			
-			} while (edge != face);
-		}
-	}
-return;
-*/
-
-static int xxxxx = 0;
-	for (iter.Begin(); iter; ) {
-		dgEdge* const face = &(*iter);
-		iter ++;
-		if ((face->m_incidentFace < 0) && (face->m_mark != mark)) {
-
-xxxxx ++;
-dgEdge* xxx = face;
-do {
-	dgTrace (("%d ", xxx->m_incidentVertex));
-	xxx = xxx->m_next;
-} while (xxx != face);
-dgTrace (("\n"));
-
 
 			// vertices project 
 			while (SeparateDuplicateLoops (face));
-
-xxx = face;
-do {
-	dgTrace (("%d ", xxx->m_incidentVertex));
-	xxx = xxx->m_next;
-} while (xxx != face);
-dgTrace (("\n\n"));
-
-if (xxxxx == 4){
-
-
-xxx = face;
-do {
-	dgFloat64 a = m_points[xxx->m_incidentVertex].m_z - 1.0;
-	dgEdge* ptr = xxx; 
-	do {
-		//m_points[xxx->m_incidentVertex].m_x = 0;	
-		//m_points[xxx->m_incidentVertex].m_y = 0;	
-		m_points[xxx->m_incidentVertex].m_z = a;	
-		if (xxx->m_userData >= 0) {
-			//m_attib[xxx->m_userData].m_vertex.m_x = 0;	
-			//m_attib[xxx->m_userData].m_vertex.m_y = 0;	
-			m_attib[xxx->m_userData].m_vertex.m_z = a;	
-		}
-		ptr = ptr->m_twin->m_next;
-	} while (ptr != xxx);
-	xxx = xxx->m_next;
-} while (xxx != face);
-}
 
 			dgBigVector dir (dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f));
 			dgFloat64 lengh2 = dgFloat64 (0.0f);
@@ -4785,7 +4678,7 @@ do {
 						if (restart) {
 							iter.Begin();
 						}
-/*
+
 						for (dgEdge* ptr = begin->m_next->m_next; ptr != last; ptr = ptr->m_next) {
 							dgEdge* const e = AddHalfEdge (begin->m_incidentVertex, ptr->m_incidentVertex);
 							dgEdge* const t = AddHalfEdge (ptr->m_incidentVertex, begin->m_incidentVertex);
@@ -4809,7 +4702,6 @@ do {
 							last->m_next->m_prev = t;
 							last->m_next = e;
 						}
-*/
 					}
 					firstEdge = next;
 				} while (firstEdge);
