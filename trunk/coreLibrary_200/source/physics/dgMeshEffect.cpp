@@ -3664,131 +3664,7 @@ void dgMeshEffect::DestroySolidTree (dgMeshEffectSolidTree* const tree)
 	delete tree;
 }
 
-//void dgMeshEffect::ClipMesh (const dgMeshEffect* clipMesh, dgMeshEffect** left, dgMeshEffect** right) const
-void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** left, dgMeshEffect** right) const
-{
-	dgMeshEffect* leftMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
-	dgMeshEffect* rightMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
-	leftMesh->BeginPolygon();
-	rightMesh->BeginPolygon(); 
-
-
-//static int xxxx;
-	dgInt32 mark = IncLRU();
-	dgPolyhedra::Iterator iter (*this);
-	for (iter.Begin(); iter; iter ++){
-		dgEdge* const face = &(*iter);
-
-		if (face->m_incidentFace > 0) {
-
-			if (face->m_mark != mark) {
-
-//xxxx ++;
-				dgMeshTreeCSGPointsPool points;
-				dgInt32 backCount = 0;
-				dgInt32 frontCount = 0;
-				dgMeshTreeCSGFace* const meshFace = new (GetAllocator()) dgMeshTreeCSGFace(GetAllocator());
-				dgEdge* ptr = face;
-
-				do {
-					dgInt32 index = points.AddPoint (m_points[ptr->m_incidentVertex]);
-					meshFace->AddPoint (index);
-
-					ptr->m_mark = mark;
-					ptr = ptr->m_next;
-				} while (ptr != face);
-
-				dgMeshTreeCSGFace* backList[DG_MESH_EFFECT_POLYGON_SPLITED];
-				dgMeshTreeCSGFace* frontList[DG_MESH_EFFECT_POLYGON_SPLITED];
-				dgMeshTreeCSGFace* faceOnStack[DG_MESH_EFFECT_BOLLEAN_STACK];
-				const dgMeshEffectSolidTree* stackPool[DG_MESH_EFFECT_BOLLEAN_STACK];
-				dgInt32 stack = 1;
-
-				stackPool[0] = clipper;
-				faceOnStack[0] = meshFace;
-				meshFace->AddRef();
-				while (stack) {
-					dgMeshTreeCSGFace* leftFace; 
-					dgMeshTreeCSGFace* rightFace;
-
-					stack --;
-					const dgMeshEffectSolidTree* const root = stackPool[stack];
-					dgMeshTreeCSGFace* const rootFace = faceOnStack[stack];
-
-					ClipFace (root->m_normal, root->m_point, rootFace, &leftFace, &rightFace, points);
-					rootFace->Release();
-
-					if (rightFace) {
-						_ASSERTE (rightFace->CheckConvex(this, face, points));
-
-						if (root->m_front) {
-							stackPool[stack] = root->m_front;
-							faceOnStack[stack] = rightFace;
-							stack ++;
-							_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
-						} else {
-							frontList[frontCount] = rightFace;
-							frontCount ++;
-							_ASSERTE (frontCount  < sizeof (frontList)/sizeof (frontList[0]));
-						}
-					}
-
-					if (leftFace) {
-						_ASSERTE (leftFace->CheckConvex(this, face, points));
-						if (root->m_back) {
-							stackPool[stack] = root->m_back;
-							faceOnStack[stack] = leftFace;
-							stack ++;
-							_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
-						} else {
-							backList[backCount] = leftFace;
-							backCount ++;
-							_ASSERTE (backCount < sizeof (backList)/sizeof (backList[0]));
-						}
-					}
-				}
-
-				if (backCount && frontCount) {
-//if ((xxxx == 2) || (xxxx == 7) || (xxxx == 10) || (xxxx > 1000))
-					leftMesh->AddCGSFace (*this, face, backCount, backList, points);
-					rightMesh->AddCGSFace (*this, face, frontCount, frontList, points);
-				} else {
-					if (backCount) {
-						leftMesh->CopyCGSFace (*this, face);
-					} else {
-						rightMesh->CopyCGSFace (*this, face);
-					}
-				}
-
-				for (dgInt32 i = 0; i < backCount; i ++) {
-					backList[i]->Release();
-				}
-				for (dgInt32 i = 0; i < frontCount; i ++) {
-					frontList[i]->Release();
-				}
-				meshFace->Release();
-			}
-		}
-	}
-
-	leftMesh->EndPolygon();
-	rightMesh->EndPolygon(); 
-
-
-	if (!leftMesh->GetCount()) {
-		leftMesh->Release();
-		leftMesh = NULL;
-	}
-
-	if (!rightMesh->GetCount()) {
-		rightMesh->Release();
-		rightMesh = NULL;
-	}
-
-	*left = leftMesh;
-	*right = rightMesh;
-}
 
 void dgMeshEffect::ClipMesh (const dgMeshEffect* const clipMesh, dgMeshEffect** left, dgMeshEffect** right) const
 {
@@ -4708,4 +4584,125 @@ return;
 			}
 		}
 	}
+}
+
+
+void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** left, dgMeshEffect** right) const
+{
+	dgMeshEffect* leftMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+	dgMeshEffect* rightMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+
+	leftMesh->BeginPolygon();
+	rightMesh->BeginPolygon(); 
+
+	dgInt32 mark = IncLRU();
+	dgPolyhedra::Iterator iter (*this);
+	for (iter.Begin(); iter; iter ++){
+		dgEdge* const face = &(*iter);
+
+		if (face->m_incidentFace > 0) {
+
+			if (face->m_mark != mark) {
+				dgMeshTreeCSGPointsPool points;
+				dgInt32 backCount = 0;
+				dgInt32 frontCount = 0;
+				dgMeshTreeCSGFace* const meshFace = new (GetAllocator()) dgMeshTreeCSGFace(GetAllocator());
+				dgEdge* ptr = face;
+
+				do {
+					dgInt32 index = points.AddPoint (m_points[ptr->m_incidentVertex]);
+					meshFace->AddPoint (index);
+
+					ptr->m_mark = mark;
+					ptr = ptr->m_next;
+				} while (ptr != face);
+
+				dgMeshTreeCSGFace* backList[DG_MESH_EFFECT_POLYGON_SPLITED];
+				dgMeshTreeCSGFace* frontList[DG_MESH_EFFECT_POLYGON_SPLITED];
+				dgMeshTreeCSGFace* faceOnStack[DG_MESH_EFFECT_BOLLEAN_STACK];
+				const dgMeshEffectSolidTree* stackPool[DG_MESH_EFFECT_BOLLEAN_STACK];
+				dgInt32 stack = 1;
+
+				stackPool[0] = clipper;
+				faceOnStack[0] = meshFace;
+				meshFace->AddRef();
+				while (stack) {
+					dgMeshTreeCSGFace* leftFace; 
+					dgMeshTreeCSGFace* rightFace;
+
+					stack --;
+					const dgMeshEffectSolidTree* const root = stackPool[stack];
+					dgMeshTreeCSGFace* const rootFace = faceOnStack[stack];
+
+					ClipFace (root->m_normal, root->m_point, rootFace, &leftFace, &rightFace, points);
+					rootFace->Release();
+
+					if (rightFace) {
+						_ASSERTE (rightFace->CheckConvex(this, face, points));
+
+						if (root->m_front) {
+							stackPool[stack] = root->m_front;
+							faceOnStack[stack] = rightFace;
+							stack ++;
+							_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
+						} else {
+							frontList[frontCount] = rightFace;
+							frontCount ++;
+							_ASSERTE (frontCount  < sizeof (frontList)/sizeof (frontList[0]));
+						}
+					}
+
+					if (leftFace) {
+						_ASSERTE (leftFace->CheckConvex(this, face, points));
+						if (root->m_back) {
+							stackPool[stack] = root->m_back;
+							faceOnStack[stack] = leftFace;
+							stack ++;
+							_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
+						} else {
+							backList[backCount] = leftFace;
+							backCount ++;
+							_ASSERTE (backCount < sizeof (backList)/sizeof (backList[0]));
+						}
+					}
+				}
+
+				if (backCount && frontCount) {
+					leftMesh->AddCGSFace (*this, face, backCount, backList, points);
+					rightMesh->AddCGSFace (*this, face, frontCount, frontList, points);
+				} else {
+					if (backCount) {
+						leftMesh->CopyCGSFace (*this, face);
+					} else {
+						rightMesh->CopyCGSFace (*this, face);
+					}
+				}
+
+				for (dgInt32 i = 0; i < backCount; i ++) {
+					backList[i]->Release();
+				}
+				for (dgInt32 i = 0; i < frontCount; i ++) {
+					frontList[i]->Release();
+				}
+				meshFace->Release();
+			}
+		}
+	}
+
+	leftMesh->EndPolygon();
+	rightMesh->EndPolygon(); 
+
+
+	if (!leftMesh->GetCount()) {
+		leftMesh->Release();
+		leftMesh = NULL;
+	}
+
+	if (!rightMesh->GetCount()) {
+		rightMesh->Release();
+		rightMesh = NULL;
+	}
+
+	*left = leftMesh;
+	*right = rightMesh;
 }
