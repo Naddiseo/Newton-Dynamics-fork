@@ -4559,6 +4559,7 @@ xxx *=1;
 					}
 				}
 				_ASSERTE (outerEdge);
+/*
 if (xxx == 2){
 dgEdge* xxx0 = face;
 do {
@@ -4576,9 +4577,8 @@ do {
 	xxx0 = xxx0->m_prev;
 } while (xxx0 != outerEdge);
 dgTrace (("\n"));
-
 }
-
+*/
 				dgInt32 loops = 0;
 				dgEdge* edge = face;
 				do {
@@ -4601,6 +4601,7 @@ dgTrace (("\n"));
 						dgFloat64 err = diff % diff;	
 						if (err < dgFloat64 (1.0e-16f)) {
 							outerEdgeLast = ptr;
+							dgEdge* last = ptr;
 							ptr = ptr->m_prev;
 							do {
 								const dgBigVector& q0 = flatFace.m_points[ptr->m_incidentVertex];
@@ -4611,7 +4612,7 @@ dgTrace (("\n"));
 									break;
 								}
 								ptr = ptr->m_prev;
-							} while (ptr != outerEdge);
+							} while (ptr != last);
 
 							break;
 						}
