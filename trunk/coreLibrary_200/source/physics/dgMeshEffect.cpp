@@ -3112,6 +3112,7 @@ void dgMeshEffect::ClipFace (const dgHugeVector& normal, const dgHugeVector& ori
 			index = nextIndex[index];
 		} 
 		*left = meshFace; 
+		_ASSERTE (meshFace->CheckConvex(pointPool));
 
 		meshFace = new (GetAllocator()) dgMeshTreeCSGFace(GetAllocator());
 		index = 0;
@@ -3122,6 +3123,8 @@ void dgMeshEffect::ClipFace (const dgHugeVector& normal, const dgHugeVector& ori
 			index = nextIndex[index];
 		} 
 		*right = meshFace; 
+		_ASSERTE (meshFace->CheckConvex(pointPool));
+
 	} else if (hasBackface){
 		*left = src; 
 		*right = NULL;
@@ -4516,7 +4519,7 @@ xxx0 *=1;
 				rootFace->Release();
 
 				if (rightFace) {
-					_ASSERTE (rightFace->CheckConvex(this, face, points));
+					//_ASSERTE (rightFace->CheckConvex(this, face, points));
 
 					if (root->m_front) {
 						stackPool[stack] = root->m_front;
@@ -4531,7 +4534,7 @@ xxx0 *=1;
 				}
 
 				if (leftFace) {
-					_ASSERTE (leftFace->CheckConvex(this, face, points));
+					//_ASSERTE (leftFace->CheckConvex(this, face, points));
 					if (root->m_back) {
 						stackPool[stack] = root->m_back;
 						faceOnStack[stack] = leftFace;

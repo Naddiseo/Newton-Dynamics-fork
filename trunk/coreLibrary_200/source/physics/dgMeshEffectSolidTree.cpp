@@ -95,8 +95,11 @@ void dgMeshTreeCSGFace::InsertVertex (const dgMeshTreeCSGFace* const vertices, c
 }
 
 
-bool dgMeshTreeCSGFace::CheckConvex(const dgMeshEffect* mesh, dgEdge* face, const dgMeshTreeCSGPointsPool& pool) const
+
+//bool dgMeshTreeCSGFace::CheckConvex(const dgMeshEffect* mesh, dgEdge* face, const dgMeshTreeCSGPointsPool& pool) const
+bool dgMeshTreeCSGFace::CheckConvex(const dgMeshTreeCSGPointsPool& pool) const
 {
+	return false;
 	/*
 	CSGLinearEdge* ptr;
 	CSGLinearEdge* ptr1;
@@ -132,7 +135,7 @@ bool dgMeshTreeCSGFace::CheckConvex(const dgMeshEffect* mesh, dgEdge* face, cons
 	ptr1 = ptr1->m_next;
 	} while (ptr1 != ptr);
 	*/
-	return true;
+	
 }
 
 

@@ -83,8 +83,10 @@ class dgMeshTreeCSGFace: public dgRefCounter
 	~dgMeshTreeCSGFace(); 
 
 	void AddPoint (dgInt32 index);
-	bool CheckConvex(const dgMeshEffect* mesh, dgEdge* face, const dgMeshTreeCSGPointsPool& pool) const;
+	bool CheckConvex(const dgMeshTreeCSGPointsPool& pool) const;
 	void InsertVertex (const dgMeshTreeCSGFace* const vertices, const dgMeshTreeCSGPointsPool& pool); 
+
+
 
 	CSGLinearEdge* m_face;
 	CSGLinearEdge* m_last;
