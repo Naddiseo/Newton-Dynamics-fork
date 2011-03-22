@@ -4608,6 +4608,21 @@ dgTrace (("\n"));
 
 					_ASSERTE (outerEdgeLast);
 					_ASSERTE (outerEdgefirst);
+					_ASSERTE (outerEdgeLast != outerEdgefirst);
+
+					dgBigVector p1p0 (p1 - p0);
+					dgFloat64 den (p1p0 % p1p0);
+					_ASSERTE (den > dgFloat32 (0.0f));
+					for (dgEdge* ptr = outerEdgefirst->m_next; ptr != outerEdgeLast; ptr = ptr->m_next) {
+						dgBigVector p (flatFace.m_points[ptr->m_incidentVertex]);
+						dgBigVector dp (p - p0);
+						dgFloat64 num = dp % p1p0;
+						_ASSERTE (num > dgFloat32 (0.0f));
+						_ASSERTE (num < den);
+						dgFloat64 t = num / den;
+						dgEdge* xxx = mesh.InsertEdgeVertex (edge, t);
+
+					}
 
 
 					edge = edge->m_next;
