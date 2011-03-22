@@ -4466,6 +4466,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 		edgeList.Insert(edge, edge);
 	}
 
+static int xxx;
+
 	bool hasLeftFaces = false;
 	bool hasRightFaces = false;
 	dgInt32 rightFaceId = 1 << 24;
@@ -4540,6 +4542,10 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 			}
 
 			if (leftCount && rightCount) {
+xxx ++;
+if (xxx == 2)
+xxx *=1;
+
 				dgMeshEffect flatFace(GetAllocator(), true);
 				clipper->ReconstructFace (flatFace, points, rightCount, rightList, rightFaceId, leftCount, leftList, leftFaceId);
 
@@ -4553,8 +4559,17 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 					}
 				}
 				_ASSERTE (outerEdge);
-/*
-dgEdge* xxx0 = outerEdge;
+if (xxx == 2){
+dgEdge* xxx0 = face;
+do {
+	dgInt32 i = xxx0->m_incidentVertex;
+	dgTrace (("%f %f %f\n", mesh.m_points[i].m_x, mesh.m_points[i].m_y, mesh.m_points[i].m_z ));
+	xxx0 = xxx0->m_next;
+} while (xxx0 != face);
+dgTrace (("\n"));
+
+
+xxx0 = outerEdge;
 do {
 	dgInt32 i = xxx0->m_incidentVertex;
 	dgTrace (("%f %f %f\n", flatFace.m_points[i].m_x, flatFace.m_points[i].m_y, flatFace.m_points[i].m_z ));
@@ -4562,22 +4577,23 @@ do {
 } while (xxx0 != outerEdge);
 dgTrace (("\n"));
 
-xxx0 = face;
-do {
-	dgInt32 i = xxx0->m_incidentVertex;
-	dgTrace (("%f %f %f\n", mesh.m_points[i].m_x, mesh.m_points[i].m_y, mesh.m_points[i].m_z ));
-	xxx0 = xxx0->m_next;
-} while (xxx0 != face);
-dgTrace (("\n"));
-*/
+}
 
+				dgInt32 loops = 0;
 				dgEdge* edge = face;
 				do {
+					loops ++;
+					edge = edge->m_next;
+				} while (edge != face);
+
+
+				edge = face;
+				for (dgInt32 i = 0; i < loops; i ++) {
 					dgEdge* outerEdgefirst = NULL; 
 					dgEdge* outerEdgeLast = NULL; 
 
-					const dgBigVector& p0 = mesh.m_points[edge->m_incidentVertex];
-					const dgBigVector& p1 = mesh.m_points[edge->m_next->m_incidentVertex];
+					dgBigVector p0 (mesh.m_points[edge->m_incidentVertex]);
+					dgBigVector p1 (mesh.m_points[edge->m_next->m_incidentVertex]);
 					dgEdge* ptr = outerEdge;
 					do {
 						const dgBigVector& q0 = flatFace.m_points[ptr->m_incidentVertex];
@@ -4606,52 +4622,47 @@ dgTrace (("\n"));
 					_ASSERTE (outerEdgefirst);
 					_ASSERTE (outerEdgeLast != outerEdgefirst);
 
-					dgBigVector p1p0 (p1 - p0);
-					dgFloat64 den (p1p0 % p1p0);
-					_ASSERTE (den > dgFloat32 (0.0f));
-					for (dgEdge* ptr = outerEdgefirst->m_next; ptr != outerEdgeLast; ptr = ptr->m_next) {
-						dgBigVector p (flatFace.m_points[ptr->m_incidentVertex]);
-						dgBigVector dp (p - p0);
-						dgFloat64 num = dp % p1p0;
-						_ASSERTE (num > dgFloat32 (0.0f));
-						_ASSERTE (num < den);
-						dgFloat64 t = num / den;
-						dgEdge* xxx = mesh.InsertEdgeVertex (edge, t);
+					if (outerEdgefirst->m_next != outerEdgeLast) {
+						dgBigVector p1p0 (p1 - p0);
+						dgFloat64 den (p1p0 % p1p0);
+						_ASSERTE (den > dgFloat32 (0.0f));
+						edgeList.Remove(edge->m_twin);
 
+						dgEdge* const start = edge->m_prev; 
+						dgEdge* const end = edge->m_next; 
+						for (dgEdge* ptr = outerEdgefirst->m_next; ptr != outerEdgeLast; ptr = ptr->m_next) {
+							dgBigVector p (flatFace.m_points[ptr->m_incidentVertex]);
+							dgBigVector dp (p - p0);
+							dgFloat64 num = dp % p1p0;
+							_ASSERTE (num > dgFloat32 (0.0f));
+							_ASSERTE (num < den);
+							dgFloat64 t = num / den;
+							edge = mesh.InsertEdgeVertex (edge, t);
+							edge = edge->m_next;
+
+
+
+							p0 = mesh.m_points[edge->m_incidentVertex];
+							p1p0 = p1 - p0;
+							dgFloat64 den (p1p0 % p1p0);
+							_ASSERTE (den > dgFloat32 (0.0f));
+						}
+
+						for (dgEdge* ptr = start->m_next; ptr != end; ptr = ptr->m_next) {
+							edgeList.Insert(ptr->m_twin, ptr->m_twin);
+						}
 					}
 
-
 					edge = edge->m_next;
-				} while (edge != face);
-
-
-//				leftMesh->AddCGSFace (*this, face, backCount, backList, points);
-//				rightMesh->AddCGSFace (*this, face, frontCount, frontList, points);
-
-				/*
-				dgInt32 mark = polygon.IncLRU();
-				dgPolyhedra::Iterator iter (polygon);
-				for (iter.Begin(); iter; iter ++){
-				dgInt32 faceIndexCount = 0;
-				dgEdge* const face = &(*iter);
-				if ((face->m_mark != mark) && (face->m_incidentFace > 0)) {
-				dgEdge* ptr;
-				ptr = face;
-				do {
-				ptr->m_mark = mark;
-
-				const dgBigVector& p = pool[ptr->m_incidentVertex];					
-				points[faceIndexCount] = reference.InterpolateVertex (p, refFace);
-
-				//dgTrace (("%f %f %f\n", p.m_x, p.m_y, p.m_z));
-				faceIndexCount ++;
-				ptr = ptr->m_next;
-				} while (ptr != face);
-				AddPolygon (faceIndexCount, &points[0].m_vertex.m_x, sizeof (points[0]), dgInt32 (points[0].m_material));
-				//dgTrace (("\n"));
 				}
-				}
-				*/
+
+
+hasRightFaces = true;
+dgEdge* right = edge;
+do {
+	right->m_incidentFace |= rightFaceId;
+	right = right->m_next;
+} while (right != edge);
 
 
 
