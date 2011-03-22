@@ -4575,27 +4575,27 @@ do {
 dgTrace (("\n"));
 */
 
-				dgEdge* outerEdgefirst = NULL; 
-				dgEdge* outerEdgeLast = NULL; 
 				dgEdge* edge = face;
 				do {
+					dgEdge* outerEdgefirst = NULL; 
+					dgEdge* outerEdgeLast = NULL; 
+
 					const dgBigVector& p0 = mesh.m_points[edge->m_incidentVertex];
 					const dgBigVector& p1 = mesh.m_points[edge->m_next->m_incidentVertex];
-
 					dgEdge* ptr = outerEdge;
 					do {
 						const dgBigVector& q0 = flatFace.m_points[ptr->m_incidentVertex];
 						dgBigVector diff (q0 - p0);
 						dgFloat64 err = diff % diff;	
 						if (err < dgFloat64 (1.0e-16f)) {
-							outerEdgefirst = ptr;
-							ptr = ptr->m_next;
+							outerEdgeLast = ptr;
+							ptr = ptr->m_prev;
 							do {
 								const dgBigVector& q0 = flatFace.m_points[ptr->m_incidentVertex];
 								dgBigVector diff (q0 - p1);
 								err = diff % diff;	
 								if (err < dgFloat64 (1.0e-16f)) {
-									outerEdgeLast = ptr;
+									outerEdgefirst = ptr;
 									break;
 								}
 								ptr = ptr->m_prev;
@@ -4606,11 +4606,12 @@ dgTrace (("\n"));
 						ptr = ptr->m_next;
 					} while (ptr != outerEdge);
 
-					edge = edge->m_prev;
-				} while (edge != face);
+					_ASSERTE (outerEdgeLast);
+					_ASSERTE (outerEdgefirst);
 
-				_ASSERTE (outerEdgeLast);
-				_ASSERTE (outerEdgefirst);
+
+					edge = edge->m_next;
+				} while (edge != face);
 
 
 //				leftMesh->AddCGSFace (*this, face, backCount, backList, points);
