@@ -4467,6 +4467,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	}
 
 static int xxx;
+static int xxx0;
 
 	bool hasLeftFaces = false;
 	bool hasRightFaces = false;
@@ -4484,7 +4485,7 @@ static int xxx;
 			dgEdge* ptr = face;
 			do {
 				_ASSERTE (ptr->m_incidentFace < (leftFaceId | rightFaceId));
-				dgInt32 index = points.AddPoint (m_points[ptr->m_incidentVertex]);
+				dgInt32 index = points.AddPoint (mesh.m_points[ptr->m_incidentVertex]);
 				meshFace->AddPoint (index);
 
 				ptr->m_mark = mark;
@@ -4496,6 +4497,9 @@ static int xxx;
 			dgMeshTreeCSGFace* faceOnStack[DG_MESH_EFFECT_BOLLEAN_STACK];
 			const dgMeshEffectSolidTree* stackPool[DG_MESH_EFFECT_BOLLEAN_STACK];
 			dgInt32 stack = 1;
+xxx0 ++;
+if (xxx0 == 6)
+xxx0 *=1;
 
 			stackPool[0] = clipper;
 			faceOnStack[0] = meshFace;
@@ -4543,7 +4547,7 @@ static int xxx;
 
 			if (leftCount && rightCount) {
 xxx ++;
-if (xxx == 2)
+if (xxx == 4)
 xxx *=1;
 
 				dgMeshEffect flatFace(GetAllocator(), true);
@@ -4559,8 +4563,8 @@ xxx *=1;
 					}
 				}
 				_ASSERTE (outerEdge);
-/*
-if (xxx == 2){
+
+if (xxx == 4){
 dgEdge* xxx0 = face;
 do {
 	dgInt32 i = xxx0->m_incidentVertex;
@@ -4578,7 +4582,7 @@ do {
 } while (xxx0 != outerEdge);
 dgTrace (("\n"));
 }
-*/
+
 				dgInt32 loops = 0;
 				dgEdge* edge = face;
 				do {
