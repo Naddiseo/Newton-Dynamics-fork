@@ -4498,7 +4498,7 @@ static int xxx0;
 			const dgMeshEffectSolidTree* stackPool[DG_MESH_EFFECT_BOLLEAN_STACK];
 			dgInt32 stack = 1;
 xxx0 ++;
-if (xxx0 == 6)
+if (xxx0 == 84)
 xxx0 *=1;
 
 			stackPool[0] = clipper;
@@ -4547,7 +4547,7 @@ xxx0 *=1;
 
 			if (leftCount && rightCount) {
 xxx ++;
-if (xxx == 4)
+if (xxx == 45)
 xxx *=1;
 
 				dgMeshEffect flatFace(GetAllocator(), true);
@@ -4564,6 +4564,7 @@ xxx *=1;
 				}
 				_ASSERTE (outerEdge);
 
+/*
 if (xxx == 4){
 dgEdge* xxx0 = face;
 do {
@@ -4582,7 +4583,7 @@ do {
 } while (xxx0 != outerEdge);
 dgTrace (("\n"));
 }
-
+*/
 				dgInt32 loops = 0;
 				dgEdge* edge = face;
 				do {
