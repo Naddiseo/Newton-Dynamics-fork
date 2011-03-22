@@ -134,7 +134,7 @@ bool dgMeshTreeCSGFace::CheckConvex(const dgMeshTreeCSGPointsPool& pool) const
 		dgBigVector p2 (pool.m_points[ptr->m_index]);
 		dgBigVector e1 (p2 - p0);
 		dgBigVector normal1 (e1 * e0);
-		if ((normal1 % normal)<= dgFloat64(0.0f)) {
+		if ((normal1 % normal)< dgFloat64(0.0f)) {
 			return false;
 		}
 		e0 = e1;
@@ -411,12 +411,21 @@ void dgMeshEffect::CopyCGSFace (const dgMeshEffect& reference, dgEdge* const fac
 
 void dgMeshEffectSolidTree::MergeVertex(const dgMeshTreeCSGPointsPool& pointsPool,  dgInt32 count, dgMeshTreeCSGFace** const faceList) const
 {
+static int xxx;
 	for (dgInt32 i = 0; i < (count - 1); i ++) {
 		dgMeshTreeCSGFace* const src = faceList[i]; 
 		for (dgInt32 j = i + 1; j < count; j ++) {
 			dgMeshTreeCSGFace* const dst = faceList[j]; 
+
+xxx ++;
+			_ASSERTE (src->CheckConvex(pointsPool));
+			_ASSERTE (dst->CheckConvex(pointsPool));
+
 			src->InsertVertex (dst, pointsPool);
 			dst->InsertVertex (src, pointsPool);
+
+			_ASSERTE (src->CheckConvex(pointsPool));
+			_ASSERTE (dst->CheckConvex(pointsPool));
 		}
 	}
 }

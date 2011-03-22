@@ -3044,9 +3044,6 @@ _ASSERTE (0);
 
 void dgMeshEffect::ClipFace (const dgHugeVector& normal, const dgHugeVector& origin, dgMeshTreeCSGFace* const src, dgMeshTreeCSGFace** left, dgMeshTreeCSGFace** const right, dgMeshTreeCSGPointsPool& pointPool) const
 {
-static int xxx;
-xxx ++;
-
 	dgInt32 count = 0;
 	dgInt32 side[DG_MESH_EFFECT_POINT_SPLITED];
 	dgInt32 faceIndex[DG_MESH_EFFECT_POINT_SPLITED];
