@@ -590,81 +590,6 @@ dgEdge *dgPolyhedra::FindVertexNode (dgInt32 v) const
 
 
 
-dgEdge* dgPolyhedra::SpliteEdge (dgInt32 newIndex,	dgEdge* const edge)
-{
-	dgInt32 i0;
-	dgInt32 i1;
-	dgInt32 f0;
-	dgInt32 f1;
-	dgEdge* edge0;
-	dgEdge* twin0;
-	dgEdge* edge1;
-	dgEdge* twin1;
-
-	dgEdge* edge00;
-	dgEdge* edge01;
-	dgEdge* twin00;
-	dgEdge* twin01;
-
-	edge00 = edge->m_prev;
-	edge01 = edge->m_next;
-	twin00 = edge->m_twin->m_next;
-	twin01 = edge->m_twin->m_prev;
-
-	i0 = edge->m_incidentVertex;
-	i1 = edge->m_twin->m_incidentVertex;
-
-	f0 = edge->m_incidentFace;
-	f1 = edge->m_twin->m_incidentFace;
-
-	DeleteEdge (edge);
-
-	edge0 = AddHalfEdge (i0, newIndex);
-	edge1 = AddHalfEdge (newIndex, i1);
-
-	twin0 = AddHalfEdge (newIndex, i0);
-	twin1 = AddHalfEdge (i1, newIndex);
-	_ASSERTE (edge0);
-	_ASSERTE (edge1);
-	_ASSERTE (twin0);
-	_ASSERTE (twin1);
-
-	edge0->m_twin = twin0;
-	twin0->m_twin = edge0;
-
-	edge1->m_twin = twin1;
-	twin1->m_twin = edge1;
-
-	edge0->m_next = edge1;
-	edge1->m_prev = edge0;
-
-	twin1->m_next = twin0;
-	twin0->m_prev = twin1;
-
-	edge0->m_prev = edge00;
-	edge00 ->m_next = edge0;
-
-	edge1->m_next = edge01;
-	edge01->m_prev = edge1;
-
-	twin0->m_next = twin00;
-	twin00->m_prev = twin0;
-
-	twin1->m_prev = twin01;
-	twin01->m_next = twin1;
-
-	edge0->m_incidentFace = f0;
-	edge1->m_incidentFace = f0;
-
-	twin0->m_incidentFace = f1;
-	twin1->m_incidentFace = f1;
-
-#ifdef __ENABLE_SANITY_CHECK 
-	//	_ASSERTE (SanityCheck ());
-#endif
-
-	return edge0;
-}
 
 
 dgEdge *dgPolyhedra::SpliteEdgeAndTriangulate (dgInt32 newIndex, dgEdge* srcEdge)
@@ -2230,6 +2155,68 @@ void dgPolyhedra::DeleteEdge (dgEdge* const edge)
 	Remove (nodeB);
 }
 
+
+dgEdge* dgPolyhedra::SpliteEdge (dgInt32 newIndex,	dgEdge* const edge)
+{
+	dgEdge* const edge00 = edge->m_prev;
+	dgEdge* const edge01 = edge->m_next;
+	dgEdge* const twin00 = edge->m_twin->m_next;
+	dgEdge* const twin01 = edge->m_twin->m_prev;
+
+	dgInt32 i0 = edge->m_incidentVertex;
+	dgInt32 i1 = edge->m_twin->m_incidentVertex;
+
+	dgInt32 f0 = edge->m_incidentFace;
+	dgInt32 f1 = edge->m_twin->m_incidentFace;
+
+	DeleteEdge (edge);
+
+	dgEdge* const edge0 = AddHalfEdge (i0, newIndex);
+	dgEdge* const edge1 = AddHalfEdge (newIndex, i1);
+
+	dgEdge* const twin0 = AddHalfEdge (newIndex, i0);
+	dgEdge* const twin1 = AddHalfEdge (i1, newIndex);
+	_ASSERTE (edge0);
+	_ASSERTE (edge1);
+	_ASSERTE (twin0);
+	_ASSERTE (twin1);
+
+	edge0->m_twin = twin0;
+	twin0->m_twin = edge0;
+
+	edge1->m_twin = twin1;
+	twin1->m_twin = edge1;
+
+	edge0->m_next = edge1;
+	edge1->m_prev = edge0;
+
+	twin1->m_next = twin0;
+	twin0->m_prev = twin1;
+
+	edge0->m_prev = edge00;
+	edge00 ->m_next = edge0;
+
+	edge1->m_next = edge01;
+	edge01->m_prev = edge1;
+
+	twin0->m_next = twin00;
+	twin00->m_prev = twin0;
+
+	twin1->m_prev = twin01;
+	twin01->m_next = twin1;
+
+	edge0->m_incidentFace = f0;
+	edge1->m_incidentFace = f0;
+
+	twin0->m_incidentFace = f1;
+	twin1->m_incidentFace = f1;
+
+#ifdef __ENABLE_SANITY_CHECK 
+	//	_ASSERTE (SanityCheck ());
+#endif
+
+	return edge0;
+}
 
 
 

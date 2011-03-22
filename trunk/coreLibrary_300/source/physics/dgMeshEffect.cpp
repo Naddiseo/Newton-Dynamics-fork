@@ -2849,16 +2849,13 @@ return false;
 
 dgEdge* dgMeshEffect::InsertEdgeVertex (dgEdge* const edge, dgFloat64 param)
 {
-	_ASSERTE (0);
-	return 0;
-	/*
 
 	dgEdge* const twin = edge->m_twin;
 	dgVertexAtribute attrEdge (InterpolateEdge (edge, param));
 	dgVertexAtribute attrTwin (InterpolateEdge (twin, dgFloat32 (1.0f) - param));
 
 	attrTwin.m_vertex = attrEdge.m_vertex;
-	AddPoint(&attrEdge.m_vertex.m_x, attrEdge.m_material);
+	AddPoint(&attrEdge.m_vertex.m_x, dgFastInt (attrEdge.m_material));
 	AddAtribute (attrTwin);
 
 	dgInt32 edgeAttrV0 = dgInt32 (edge->m_userData);
@@ -2879,7 +2876,6 @@ dgEdge* dgMeshEffect::InsertEdgeVertex (dgEdge* const edge, dgFloat64 param)
 	faceB1->m_next->m_userData = dgUnsigned64 (twinAttrV0);
 
 	return faceA1->m_next;
-*/
 }
 
 
@@ -4460,6 +4456,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 */
 
 	dgMeshEffect mesh = dgMeshEffect (*this);
+	mesh.Triangulate();
+
 	dgTree<dgEdge*,dgEdge*> edgeList(GetAllocator());
 
 	dgPolyhedra::Iterator iter (mesh);
@@ -4542,8 +4540,6 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 			}
 
 			if (leftCount && rightCount) {
-				dgTrace (("missing\n"));
-
 				dgMeshEffect flatFace(GetAllocator(), true);
 				clipper->ReconstructFace (flatFace, points, rightCount, rightList, rightFaceId, leftCount, leftList, leftFaceId);
 
@@ -4557,12 +4553,12 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 					}
 				}
 				_ASSERTE (outerEdge);
-
+/*
 dgEdge* xxx0 = outerEdge;
 do {
 	dgInt32 i = xxx0->m_incidentVertex;
 	dgTrace (("%f %f %f\n", flatFace.m_points[i].m_x, flatFace.m_points[i].m_y, flatFace.m_points[i].m_z ));
-	xxx0 = xxx0->m_next;
+	xxx0 = xxx0->m_prev;
 } while (xxx0 != outerEdge);
 dgTrace (("\n"));
 
@@ -4573,32 +4569,32 @@ do {
 	xxx0 = xxx0->m_next;
 } while (xxx0 != face);
 dgTrace (("\n"));
+*/
 
-
-				dgEdge* outerEdgefirst = NULL; 
-				dgEdge* outerEdgeLast = NULL; 
 				dgEdge* edge = face;
 				do {
+					dgEdge* outerEdgefirst = NULL; 
+					dgEdge* outerEdgeLast = NULL; 
+
 					const dgBigVector& p0 = mesh.m_points[edge->m_incidentVertex];
 					const dgBigVector& p1 = mesh.m_points[edge->m_next->m_incidentVertex];
-
 					dgEdge* ptr = outerEdge;
 					do {
 						const dgBigVector& q0 = flatFace.m_points[ptr->m_incidentVertex];
 						dgBigVector diff (q0 - p0);
 						dgFloat64 err = diff % diff;	
 						if (err < dgFloat64 (1.0e-16f)) {
-							outerEdgefirst = ptr;
-							ptr = ptr->m_next;
+							outerEdgeLast = ptr;
+							ptr = ptr->m_prev;
 							do {
 								const dgBigVector& q0 = flatFace.m_points[ptr->m_incidentVertex];
 								dgBigVector diff (q0 - p1);
 								err = diff % diff;	
 								if (err < dgFloat64 (1.0e-16f)) {
-									outerEdgeLast = ptr;
+									outerEdgefirst = ptr;
 									break;
 								}
-								ptr = ptr->m_next;
+								ptr = ptr->m_prev;
 							} while (ptr != outerEdge);
 
 							break;
@@ -4606,11 +4602,27 @@ dgTrace (("\n"));
 						ptr = ptr->m_next;
 					} while (ptr != outerEdge);
 
+					_ASSERTE (outerEdgeLast);
+					_ASSERTE (outerEdgefirst);
+					_ASSERTE (outerEdgeLast != outerEdgefirst);
+
+					dgBigVector p1p0 (p1 - p0);
+					dgFloat64 den (p1p0 % p1p0);
+					_ASSERTE (den > dgFloat32 (0.0f));
+					for (dgEdge* ptr = outerEdgefirst->m_next; ptr != outerEdgeLast; ptr = ptr->m_next) {
+						dgBigVector p (flatFace.m_points[ptr->m_incidentVertex]);
+						dgBigVector dp (p - p0);
+						dgFloat64 num = dp % p1p0;
+						_ASSERTE (num > dgFloat32 (0.0f));
+						_ASSERTE (num < den);
+						dgFloat64 t = num / den;
+						dgEdge* xxx = mesh.InsertEdgeVertex (edge, t);
+
+					}
+
+
 					edge = edge->m_next;
 				} while (edge != face);
-
-				_ASSERTE (outerEdgeLast);
-				_ASSERTE (outerEdgefirst);
 
 
 //				leftMesh->AddCGSFace (*this, face, backCount, backList, points);

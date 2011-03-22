@@ -2849,16 +2849,13 @@ return false;
 
 dgEdge* dgMeshEffect::InsertEdgeVertex (dgEdge* const edge, dgFloat64 param)
 {
-	_ASSERTE (0);
-	return 0;
-	/*
 
 	dgEdge* const twin = edge->m_twin;
 	dgVertexAtribute attrEdge (InterpolateEdge (edge, param));
 	dgVertexAtribute attrTwin (InterpolateEdge (twin, dgFloat32 (1.0f) - param));
 
 	attrTwin.m_vertex = attrEdge.m_vertex;
-	AddPoint(&attrEdge.m_vertex.m_x, attrEdge.m_material);
+	AddPoint(&attrEdge.m_vertex.m_x, dgFastInt (attrEdge.m_material));
 	AddAtribute (attrTwin);
 
 	dgInt32 edgeAttrV0 = dgInt32 (edge->m_userData);
@@ -2879,7 +2876,6 @@ dgEdge* dgMeshEffect::InsertEdgeVertex (dgEdge* const edge, dgFloat64 param)
 	faceB1->m_next->m_userData = dgUnsigned64 (twinAttrV0);
 
 	return faceA1->m_next;
-*/
 }
 
 
