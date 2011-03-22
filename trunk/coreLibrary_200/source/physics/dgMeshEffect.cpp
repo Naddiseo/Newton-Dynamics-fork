@@ -4460,6 +4460,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 */
 
 	dgMeshEffect mesh = dgMeshEffect (*this);
+	mesh.Triangulate();
+
 	dgTree<dgEdge*,dgEdge*> edgeList(GetAllocator());
 
 	dgPolyhedra::Iterator iter (mesh);
@@ -4542,8 +4544,6 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 			}
 
 			if (leftCount && rightCount) {
-				dgTrace (("missing\n"));
-
 				dgMeshEffect flatFace(GetAllocator(), true);
 				clipper->ReconstructFace (flatFace, points, rightCount, rightList, rightFaceId, leftCount, leftList, leftFaceId);
 
@@ -4557,12 +4557,12 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 					}
 				}
 				_ASSERTE (outerEdge);
-
+/*
 dgEdge* xxx0 = outerEdge;
 do {
 	dgInt32 i = xxx0->m_incidentVertex;
 	dgTrace (("%f %f %f\n", flatFace.m_points[i].m_x, flatFace.m_points[i].m_y, flatFace.m_points[i].m_z ));
-	xxx0 = xxx0->m_next;
+	xxx0 = xxx0->m_prev;
 } while (xxx0 != outerEdge);
 dgTrace (("\n"));
 
@@ -4573,7 +4573,7 @@ do {
 	xxx0 = xxx0->m_next;
 } while (xxx0 != face);
 dgTrace (("\n"));
-
+*/
 
 				dgEdge* outerEdgefirst = NULL; 
 				dgEdge* outerEdgeLast = NULL; 
@@ -4598,7 +4598,7 @@ dgTrace (("\n"));
 									outerEdgeLast = ptr;
 									break;
 								}
-								ptr = ptr->m_next;
+								ptr = ptr->m_prev;
 							} while (ptr != outerEdge);
 
 							break;
@@ -4606,7 +4606,7 @@ dgTrace (("\n"));
 						ptr = ptr->m_next;
 					} while (ptr != outerEdge);
 
-					edge = edge->m_next;
+					edge = edge->m_prev;
 				} while (edge != face);
 
 				_ASSERTE (outerEdgeLast);
