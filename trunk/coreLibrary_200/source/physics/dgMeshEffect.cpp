@@ -4550,8 +4550,22 @@ xxx0 *=1;
 
 			if (leftCount && rightCount) {
 xxx ++;
-if (xxx == 45)
+//if (xxx == 45)
+if (xxx == 7)
 xxx *=1;
+
+if (xxx == 7){
+	dgEdge* xxx0 = face;
+	do {
+		dgInt32 i = xxx0->m_incidentVertex;
+		dgTrace (("%f %f %f\n", mesh.m_points[i].m_x, mesh.m_points[i].m_y, mesh.m_points[i].m_z ));
+		xxx0 = xxx0->m_next;
+	} while (xxx0 != face);
+	dgTrace (("\n"));
+}
+
+
+
 
 				dgMeshEffect flatFace(GetAllocator(), true);
 				clipper->ReconstructFace (flatFace, points, rightCount, rightList, rightFaceId, leftCount, leftList, leftFaceId);

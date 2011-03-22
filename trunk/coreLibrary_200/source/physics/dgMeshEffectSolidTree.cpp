@@ -73,7 +73,7 @@ void dgMeshTreeCSGFace::InsertVertex (const dgMeshTreeCSGFace* const vertices, c
 			dgHugeVector dp  (p1 - p0);
 			dgFloat64 t = (dp0 % dp).GetAproximateValue() / (dp % dp).GetAproximateValue();
 			if ((t > dgFloat64 (0.0)) && (t < dgFloat64 (1.0f))) {
-				dgHugeVector dist (dp0 - dp.Scale(t));
+				dgHugeVector dist (p0 + dp.Scale(t));
 				dgGoogol dist2 = (dist % dist);
 				dgFloat64 val (dist2.GetAproximateValue());
 				if (val < smallDist) {
@@ -418,6 +418,8 @@ static int xxx;
 			dgMeshTreeCSGFace* const dst = faceList[j]; 
 
 xxx ++;
+if (xxx == 2)
+xxx *=1;
 			_ASSERTE (src->CheckConvex(pointsPool));
 			_ASSERTE (dst->CheckConvex(pointsPool));
 
