@@ -63,17 +63,18 @@ void dgMeshTreeCSGFace::InsertVertex (const dgMeshTreeCSGFace* const vertices, c
 	do {
 		CSGLinearEdge* closestEdge = NULL; 
 		dgFloat64 smallDist (dgFloat64 (1.0e10f));
-		const dgHugeVector& p = pool.m_points[points->m_index];
+		dgHugeVector p (pool.m_points[points->m_index]);
 
 		CSGLinearEdge* edge = m_face;
 		do {
-			const dgHugeVector& p0 = pool.m_points[edge->m_index];
-			const dgHugeVector& p1 = pool.m_points[edge->m_next->m_index];
+			dgHugeVector p0 (pool.m_points[edge->m_index]);
+			dgHugeVector p1 (pool.m_points[edge->m_next->m_index]);
 			dgHugeVector dp0 (p - p0);
 			dgHugeVector dp  (p1 - p0);
 			dgFloat64 t = (dp0 % dp).GetAproximateValue() / (dp % dp).GetAproximateValue();
 			if ((t > dgFloat64 (0.0)) && (t < dgFloat64 (1.0f))) {
-				dgHugeVector dist (p0 + dp.Scale(t));
+				dgHugeVector q (p0 + dp.Scale(t));
+				dgHugeVector dist (q - p);
 				dgGoogol dist2 = (dist % dist);
 				dgFloat64 val (dist2.GetAproximateValue());
 				if (val < smallDist) {
@@ -411,15 +412,12 @@ void dgMeshEffect::CopyCGSFace (const dgMeshEffect& reference, dgEdge* const fac
 
 void dgMeshEffectSolidTree::MergeVertex(const dgMeshTreeCSGPointsPool& pointsPool,  dgInt32 count, dgMeshTreeCSGFace** const faceList) const
 {
-static int xxx;
+
 	for (dgInt32 i = 0; i < (count - 1); i ++) {
 		dgMeshTreeCSGFace* const src = faceList[i]; 
 		for (dgInt32 j = i + 1; j < count; j ++) {
 			dgMeshTreeCSGFace* const dst = faceList[j]; 
 
-xxx ++;
-if (xxx == 2)
-xxx *=1;
 			_ASSERTE (src->CheckConvex(pointsPool));
 			_ASSERTE (dst->CheckConvex(pointsPool));
 
@@ -464,8 +462,29 @@ void dgMeshEffectSolidTree::ReconstructFace (dgMeshEffect& polygon, const dgMesh
 					  dgInt32 frontFaceCount, dgMeshTreeCSGFace** const frontFace, dgInt32 frontFaceID,
 					  dgInt32 backFaceCount, dgMeshTreeCSGFace** const backFace, dgInt32 backFaceID) const
 {
+
+static int xxx;
+xxx ++;
+if (xxx == 10)
+xxx *=1;
+
+
 	MergeVertex(pointsPool, backFaceCount, backFace);
 	MergeVertex(pointsPool, frontFaceCount, frontFace);
+
+	for (dgInt32 i = 0; i < backFaceCount; i ++) {
+		dgMeshTreeCSGFace* const src = backFace[i]; 
+		for (dgInt32 j = 0; j < frontFaceCount; j ++) {
+			dgMeshTreeCSGFace* const dst = frontFace[j]; 
+
+			src->InsertVertex (dst, pointsPool);
+			dst->InsertVertex (src, pointsPool);
+
+			_ASSERTE (src->CheckConvex(pointsPool));
+			_ASSERTE (dst->CheckConvex(pointsPool));
+		}
+	}
+
 
 	polygon.BeginPolygon();
 	AddFaces(polygon, backFaceCount, backFace, backFaceID, pointsPool);
