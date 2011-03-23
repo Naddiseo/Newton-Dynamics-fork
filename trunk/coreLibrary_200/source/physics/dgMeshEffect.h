@@ -27,10 +27,10 @@
 class dgWorld;
 class dgCollision;
 class dgMeshEffect;
-class dgMeshTreeCSGFace;
+//class dgMeshTreeCSGFace;
 class dgMeshEffectSolidTree;
 class dgMeshTreeCSGEdgePool;
-class dgMeshTreeCSGPointsPool;
+//class dgMeshTreeCSGPointsPool;
 
 
 #define DG_MESH_EFFECT_INITIAL_VERTEX_SIZE	8
@@ -203,7 +203,8 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void GetFaceAttributeIndex (const void* face, int* indices) const;
 
 	bool Sanity () const;
-	private:
+
+	protected:
 
 	void Init (bool preAllocaBuffers);
 	dgBigVector GetOrigin ()const;
@@ -216,8 +217,6 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void AddPoint(const dgFloat64* vertexList, dgInt32 material);
 	void FixCylindricalMapping (dgVertexAtribute* const attib) const;
 
-	
-
 	void MergeFaces (const dgMeshEffect* const source);
 	void ReverseMergeFaces (dgMeshEffect* const source);
 	dgVertexAtribute InterpolateEdge (dgEdge* const edge, dgFloat64 param) const;
@@ -228,7 +227,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	dgInt32 PlaneApplyCap (const dgMeshEffect* planeMesh, const dgPlane& normal);
 	void PlaneClipMesh (const dgMeshEffect* planeMesh, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
 
-	void ClipFace (const dgHugeVector& normal, const dgHugeVector& origin, dgMeshTreeCSGFace* const src, dgMeshTreeCSGFace** left, dgMeshTreeCSGFace** const right, dgMeshTreeCSGPointsPool& pointPool) const;
+//	void ClipFace (const dgHugeVector& normal, const dgHugeVector& origin, dgMeshTreeCSGFace* const src, dgMeshTreeCSGFace** left, dgMeshTreeCSGFace** const right, dgMeshTreeCSGPointsPool& pointPool) const;
 
 	dgMeshEffect* CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
 

@@ -26,33 +26,20 @@
 
 class dgCollision;
 class dgMeshEffect;
-//class dgMeshTreeCSGFace;
-//class dgMeshEffectSolidTree;
-//class dgMeshTreeCSGEdgePool;
-//class dgMeshTreeCSGPointsPool;
 
 
-class dgMeshTreeCSGPointsPool
+class dgMeshTreeCSGFace: public dgPolyhedra
 {
-public:
-	dgMeshTreeCSGPointsPool ()
-	{
-		m_count = 0;
-	}
-
-	dgInt32 AddPoint (const dgBigVector& point)
-	{
-		m_points[m_count] = point;
-		m_count ++;
-		_ASSERTE (m_count < sizeof (m_points)/sizeof (m_points[0]));
-		return (m_count - 1);
-	}
+	public:
+	dgMeshTreeCSGFace (const dgMeshEffect& mesh, const dgEdge* const face);
+	void ClipFace (dgEdge* const face, const dgHugeVector& normal, const dgHugeVector& origin, dgEdge** const poolReplacement, dgInt32 poolCount, dgEdge** leftOut, dgEdge** rightOut);
+	dgInt32 AddPoint (const dgBigVector& point);
 
 	dgInt32 m_count;
 	dgBigVector m_points[DG_MESH_EFFECT_POINT_SPLITED];
 };
 
-
+/*
 class dgMeshTreeCSGFace: public dgRefCounter
 {
 	public:
@@ -92,7 +79,7 @@ class dgMeshTreeCSGFace: public dgRefCounter
 	CSGLinearEdge* m_last;
 	dgMemoryAllocator* m_allocator;
 };
-
+*/
 
 class dgMeshEffectSolidTree
 {
@@ -114,9 +101,7 @@ class dgMeshEffectSolidTree
 	void BuildPlane (const dgMeshEffect& mesh, dgEdge* const face, dgHugeVector& normal, dgHugeVector& point) const;
 	void AddFace (const dgMeshEffect& mesh, dgEdge* const face);
 
-//	void CopyCGSFace (const dgMeshEffect& reference, dgEdge* const face);
-//	void AddCGSFace (const dgMeshEffect& reference, dgEdge* const refFace, dgInt32 count, dgMeshTreeCSGFace** const faces, const dgMeshTreeCSGPointsPool& points);
-
+/*
 	void ReconstructFace (dgMeshEffect& polygon, const dgMeshTreeCSGPointsPool& pointsPool,
 						  dgInt32 frontFaceCount, dgMeshTreeCSGFace** const frontFace, dgInt32 frontFaceID,
 						  dgInt32 backFaceCount, dgMeshTreeCSGFace** const backFace, dgInt32 backFaceID) const;
@@ -124,11 +109,11 @@ class dgMeshEffectSolidTree
 
 	void AddFaces(dgMeshEffect& polygon, dgInt32 count, dgMeshTreeCSGFace** const faceList, dgInt32 faceID, const dgMeshTreeCSGPointsPool& pointsPool) const;
 	void MergeVertex(const dgMeshTreeCSGPointsPool& pointsPool, dgInt32 count, dgMeshTreeCSGFace** const faceList) const;
-	
+*/	
 		                   
 
 
-	dgHugeVector m_point;
+	dgHugeVector m_origin;
 	dgHugeVector m_normal;
 	dgMeshEffectSolidTree* m_back;
 	dgMeshEffectSolidTree* m_front;

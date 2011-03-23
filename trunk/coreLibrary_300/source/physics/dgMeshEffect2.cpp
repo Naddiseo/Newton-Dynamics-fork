@@ -2054,7 +2054,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 		
 		bool pointSide = true;
 		for (dgMeshEffectSolidTree* ptr = tree; ptr; ) {
-			dgGoogol test (ptr->m_normal % (p1 - ptr->m_point));
+			dgGoogol test (ptr->m_normal % (p1 - ptr->m_origin));
 			if (test.GetAproximateValue() < dgFloat32 (0.01f)) {
 				pointSide = true;
 				ptr = ptr->m_back;
@@ -2227,19 +2227,19 @@ if(xxxx == 5){
 		}
 
 		if (leftConvexMesh) {
-			delete leftConvexMesh;
+			leftConvexMesh->Release();
 		}
 
 		if (rightConvexMesh) {
-			delete rightConvexMesh;
+			rightConvexMesh->Release();
 		}
 
 		if (leftMeshClipper) {
-			delete leftMeshClipper;
+			leftMeshClipper->Release();;
 		}
 
 		if (rightMeshClipper) {
-			delete rightMeshClipper;
+			rightMeshClipper->Release();
 		}
 
 #if 0
