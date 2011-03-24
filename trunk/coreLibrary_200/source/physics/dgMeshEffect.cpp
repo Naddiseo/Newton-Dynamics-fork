@@ -4361,41 +4361,28 @@ xxx *=1;
 				dgEdge* edge = face;
 				bool firstTime = true;
 				do {
-					dgBigVector p0 (mesh.m_points[edge->m_incidentVertex]);
 					dgEdge* outerEdgeFirst = NULL;
 					dgEdge* ptr = outerEdge;
-					dgFloat64 closest = dgFloat64 (1.0e10f);
 					do {
-						dgBigVector q (clipFace.m_points[ptr->m_incidentVertex]);
-						dgBigVector error (q - p0);
-						dgFloat64 val = error % error;
-						if (val < closest) {
+						if (dgInt32 (ptr->m_twin->m_next->m_userData) == edge->m_incidentVertex) {
 							outerEdgeFirst = ptr;
-							closest = val;
+							break;
 						}
 						ptr = ptr->m_next;
 					} while (ptr != outerEdge);
-					_ASSERTE (closest < dgFloat64 (1.0e-12f));
+					_ASSERTE (outerEdgeFirst);
 
-
-					dgBigVector p1 (mesh.m_points[edge->m_next->m_incidentVertex]);
 					dgEdge* outerEdgeLast = NULL;
 					ptr = outerEdge;
-					closest = dgFloat64 (1.0e10f);
 					do {
-						dgBigVector q (clipFace.m_points[ptr->m_incidentVertex]);
-						dgBigVector error (q - p1);
-						dgFloat64 val = error % error;
-						if (val < closest) {
+						if (dgInt32 (ptr->m_twin->m_next->m_userData) == edge->m_next->m_incidentVertex) {
 							outerEdgeLast = ptr;
-							closest = val;
+							break;
 						}
 						ptr = ptr->m_next;
 					} while (ptr != outerEdge);
-					_ASSERTE (closest < dgFloat64 (1.0e-12f));
+					_ASSERTE (outerEdgeLast);
 					_ASSERTE (outerEdgeFirst != outerEdgeLast);
-
-					
 
 					if (outerEdgeFirst->m_prev == outerEdgeLast) {
 						_ASSERTE (0);
@@ -4403,6 +4390,8 @@ xxx *=1;
 //						edge->m_incidentFace |= outerEdgeFirst->m_prev->m_twin->m_incidentFace & (leftFaceId + rightFaceId);
 
 					} else {
+						dgBigVector p0 (mesh.m_points[edge->m_incidentVertex]);
+						dgBigVector p1 (mesh.m_points[edge->m_next->m_incidentVertex]);
 						for (outerEdgeFirst = outerEdgeFirst->m_prev; outerEdgeFirst != outerEdgeLast; outerEdgeFirst = outerEdgeFirst->m_prev) {
 							dgBigVector q (clipFace.m_points[outerEdgeFirst->m_incidentVertex]);
 							dgBigVector dist (p1 - p0);
