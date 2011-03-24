@@ -2036,12 +2036,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 	dgStack<dgBigVector> buffer(pointsCount + m_pointCount);
 	dgBigVector* const pool = &buffer[0];
 
-	for (dgInt32 i = 0; i < m_pointCount; i ++) {
-		pool[i] = m_points[i];
-	}
-
-
-	dgInt32 count = m_pointCount;
+	dgInt32 count = 0;
 	dgFloat64 quantizeFactor = dgFloat64 (16.0f);
 	dgFloat64 invQuantizeFactor = dgFloat64 (1.0f) / quantizeFactor;
 	dgInt32 stride = pointStrideInBytes / sizeof (dgFloat32); 

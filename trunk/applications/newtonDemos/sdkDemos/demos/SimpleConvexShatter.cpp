@@ -44,8 +44,19 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 	NewtonMeshApplyBoxMapping(mesh, tex0, tex0, tex0);
 
 	// pepper the bing box of the mesh with random points
+	dVector points[NUMBER_OF_ITERNAL_PARTS + 100];
 	int count = 0;
-	dVector points[NUMBER_OF_ITERNAL_PARTS + 1];
+	int pointcount = NewtonMeshGetVertexCount(mesh);
+	int pointStride = NewtonMeshGetVertexStrideInByte(mesh) / sizeof (dFloat64);
+	dFloat64* const data = NewtonMeshGetVertexArray(mesh);
+	for (int i = 0; i < pointcount; i ++) {
+		dFloat x = dFloat(data[i * pointStride + 0]);
+		dFloat y = dFloat(data[i * pointStride + 1]);
+		dFloat z = dFloat(data[i * pointStride + 2]);
+		points[count] = dVector (x, y, z);
+		count ++;
+	}
+
 	while (count < NUMBER_OF_ITERNAL_PARTS) {
 		dFloat x = RandomVariable(size.m_x);
 		dFloat y = RandomVariable(size.m_y);
