@@ -4405,14 +4405,23 @@ xxx *=1;
 							dgTree<dgEdge*,dgEdge*>::dgTreeNode* const node = edgeList.Find(edge->m_twin);
 							edge = mesh.InsertEdgeVertex (edge, t);
 							edge->m_incidentFace = outerEdgeFirst->m_twin->m_incidentFace + 1;
-							outerEdgeFirst->m_twin->m_userData = edge->m_incidentVertex;
+							dgEdge* tmp = outerEdgeFirst->m_twin;
+							do {
+								tmp->m_userData = edge->m_incidentVertex;
+								tmp = tmp->m_twin->m_next;
+							} while (tmp != outerEdgeFirst->m_twin);
 							if (firstTime) {
 								face = edge;
 							}
 						
 							edge = edge->m_next;
 							edge->m_incidentFace = outerEdgeFirst->m_prev->m_twin->m_incidentFace + 1;
-							outerEdgeFirst->m_prev->m_twin->m_userData = edge->m_incidentVertex;
+							tmp = outerEdgeFirst->m_prev->m_twin;
+							do {
+								tmp->m_userData = edge->m_incidentVertex;
+								tmp = tmp->m_twin->m_next;
+							} while (tmp != outerEdgeFirst->m_prev->m_twin);
+
 		
 
 							if (node) {
@@ -4426,8 +4435,6 @@ xxx *=1;
 					edge = edge->m_next;
 				} while (edge != face);
 
-				_ASSERTE (0);
-/*
 				dgInt32 internalEdgeStack = 0;
 				dgEdge* internalEdgePool[64];
 				dgInt32 interiorEdgeMark = clipFace.IncLRU();
@@ -4447,6 +4454,22 @@ xxx *=1;
 					
 					dgEdge* ptr = edge;
 					do {
+						if ((ptr->m_userData != -1) && (ptr->m_next->m_userData != -1)) {
+							dgEdge* const missingEdge = mesh.FindEdge(dgInt32 (ptr->m_userData), dgInt32 (ptr->m_next->m_userData));
+							if (!missingEdge) {
+								_ASSERTE (0);
+							}
+						} else {
+							_ASSERTE ((ptr->m_next->m_userData != -1) || (ptr->m_userData != -1));
+							if (ptr->m_userData != -1) {
+								_ASSERTE (ptr->m_next->m_userData == -1);
+								_ASSERTE (0);
+
+							} else {
+								_ASSERTE (0);
+							}
+						}
+/*
 						if ((ptr->m_mark != interiorEdgeMark) && (ptr->m_twin->m_mark != interiorEdgeMark)) {
 							_ASSERTE (ptr->m_incidentFace > 0);
 							_ASSERTE (ptr->m_twin->m_incidentFace > 0);
@@ -4457,10 +4480,8 @@ xxx *=1;
 								_ASSERTE (0);
 
 							}
-							
-
 						}
-
+*/
 						if (ptr->m_mark != interiorEdgeMark) {
 							ptr->m_mark = interiorEdgeMark;
 							_ASSERTE (internalEdgeStack < sizeof (internalEdgePool) / sizeof (internalEdgePool[0]));
@@ -4474,11 +4495,10 @@ xxx *=1;
 							internalEdgePool[internalEdgeStack] = ptr->m_twin;
 							internalEdgeStack ++;
 						}
-
 						ptr = ptr->m_twin->m_next;
 					} while (ptr != edge);
 				}
-*/
+
 /*			
 				bool edgePending = true;
 				dgInt32 interiorEdgeMark = clipFace.IncLRU();
