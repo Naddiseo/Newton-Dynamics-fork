@@ -2036,12 +2036,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 	dgStack<dgBigVector> buffer(pointsCount + m_pointCount);
 	dgBigVector* const pool = &buffer[0];
 
-	for (dgInt32 i = 0; i < m_pointCount; i ++) {
-		pool[i] = m_points[i];
-	}
-
-
-	dgInt32 count = m_pointCount;
+	dgInt32 count = 0;
 	dgFloat64 quantizeFactor = dgFloat64 (16.0f);
 	dgFloat64 invQuantizeFactor = dgFloat64 (1.0f) / quantizeFactor;
 	dgInt32 stride = pointStrideInBytes / sizeof (dgFloat32); 
@@ -2055,7 +2050,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 		bool pointSide = true;
 		for (dgMeshEffectSolidTree* ptr = tree; ptr; ) {
 			dgGoogol test (ptr->m_normal % (p1 - ptr->m_origin));
-			if (test.GetAproximateValue() < dgFloat32 (0.01f)) {
+			if (test.GetAproximateValue() < dgFloat64 (1.0f/32.0f)) {
 				pointSide = true;
 				ptr = ptr->m_back;
 			} else {
@@ -2085,9 +2080,9 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 	dgBigVector maxBox;
 	CalculateAABB (minBox, maxBox);
 	maxBox -= minBox;
-	//dgFloat32 projectSizeFactor = 4.0f;
-	dgFloat32 projectSizeFactor = 1.0f;
-	dgFloat64 perimeterConvexBound = projectSizeFactor * sqrt(maxBox % maxBox);
+	//dgFloat32 bboxDiagnalFactor = 4.0f;
+	dgFloat32 bboxDiagnalFactor = 1.0f;
+	dgFloat64 perimeterConvexBound = bboxDiagnalFactor * sqrt(maxBox % maxBox);
 
 	dgInt32 tetraCount = delaunayTetrahedras.GetCount();
 	dgStack<dgBigVector> voronoiPoints(tetraCount);

@@ -4258,6 +4258,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 
 	dgInt32 leftCount = 0;
 	dgInt32 rightCount = 0;
+
 	
 	dgInt32 rightFaceId = 1 << 24;
 	dgInt32 leftFaceId =  2 << 24;
@@ -4265,12 +4266,13 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	while (edgeList.GetRoot()){
 		dgEdge* const face = edgeList.GetRoot()->GetInfo();
 		edgeList.Remove (edgeList.GetRoot());
-
+		
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
 			dgMeshTreeCSGFace clipFace (mesh, face);
 
 			dgEdge* ptr = face;
 			do {
+				edgeList.Remove(ptr);
 				_ASSERTE (ptr->m_incidentFace < (leftFaceId | rightFaceId));
 				ptr->m_mark = mark;
 				ptr = ptr->m_next;
@@ -4287,6 +4289,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 			_ASSERTE (ptr->m_incidentFace > 0);
 			faceOnStack[0] = ptr;
 			stackPool[0] = clipper;
+
 
 			bool hasLeftFaces = false;
 			bool hasRightFaces = false;
@@ -4337,8 +4340,102 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 			}
 
 			if (hasLeftFaces && hasRightFaces) {
-				_ASSERTE (0);
+				dgEdge* outerEdge = NULL;
+				dgMeshTreeCSGFace::Iterator iter (clipFace);
+				for (iter.Begin(); iter; iter ++) {
+					dgEdge* const edge = &(*iter);
+					if (edge->m_incidentFace < 0) {
+						outerEdge = edge;
+						break;
+					}
+				}
+				_ASSERTE (outerEdge);
+				_ASSERTE (clipFace.CheckConsistency ());
 
+				dgEdge* edge = face;
+				do {
+					dgBigVector p0 (mesh.m_points[edge->m_incidentVertex]);
+					dgEdge* outerEdgeFirst = NULL;
+					dgEdge* ptr = outerEdge;
+					dgFloat64 closest = dgFloat64 (1.0e10f);
+					do {
+						dgBigVector q (clipFace.m_points[ptr->m_incidentVertex]);
+						dgBigVector error (q - p0);
+						dgFloat64 val = error % error;
+						if (val < closest) {
+							outerEdgeFirst = ptr;
+							closest = val;
+						}
+						ptr = ptr->m_next;
+					} while (ptr != outerEdge);
+					_ASSERTE (closest < dgFloat64 (1.0e-12f));
+
+
+					dgBigVector p1 (mesh.m_points[edge->m_next->m_incidentVertex]);
+					dgEdge* outerEdgeLast = NULL;
+					ptr = outerEdge;
+					closest = dgFloat64 (1.0e10f);
+					do {
+						dgBigVector q (clipFace.m_points[ptr->m_incidentVertex]);
+						dgBigVector error (q - p1);
+						dgFloat64 val = error % error;
+						if (val < closest) {
+							outerEdgeLast = ptr;
+							closest = val;
+						}
+						ptr = ptr->m_next;
+					} while (ptr != outerEdge);
+					_ASSERTE (closest < dgFloat64 (1.0e-12f));
+					_ASSERTE (outerEdgeFirst != outerEdgeLast);
+
+					if (outerEdgeFirst->m_prev == outerEdgeLast) {
+						edge->m_incidentFace |= outerEdgeFirst->m_prev->m_twin->m_incidentFace & (leftFaceId + rightFaceId);
+
+					} else {
+						for (outerEdgeFirst = outerEdgeFirst->m_prev; outerEdgeFirst != outerEdgeLast; outerEdgeFirst = outerEdgeFirst->m_prev) {
+							dgBigVector q (clipFace.m_points[outerEdgeFirst->m_incidentVertex]);
+							dgBigVector dist (p1 - p0);
+							dgFloat64 num = (q - p0) % dist;
+							dgFloat64 den = dist % dist;
+							_ASSERTE (num > dgFloat64 (0.0f));
+							_ASSERTE (num < den);
+							dgFloat64 t = num / den;
+
+							
+							dgTree<dgEdge*,dgEdge*>::dgTreeNode* const node = edgeList.Find(edge->m_twin);
+							edge = mesh.InsertEdgeVertex (edge, t);
+							edge->m_incidentFace |= outerEdgeFirst->m_twin->m_incidentFace & (leftFaceId + rightFaceId);
+
+							edge = edge->m_next;
+							edge->m_incidentFace |= outerEdgeFirst->m_prev->m_twin->m_incidentFace & (leftFaceId + rightFaceId);
+
+							if (node) {
+								edgeList.Insert(edge->m_twin, edge->m_twin);
+								edgeList.Insert(edge->m_twin->m_next, edge->m_twin->m_next);
+							}
+
+
+
+
+
+	//						edge = mesh.InsertEdgeVertex (edge, t);
+	//						edge = edge->m_next;
+	//						p0 = mesh.m_points[edge->m_incidentVertex];
+	//						p1p0 = p1 - p0;
+	//						dgFloat64 den (p1p0 % p1p0);
+	//						_ASSERTE (den > dgFloat32 (0.0f));
+
+
+
+
+						}
+					}
+
+
+
+
+					edge = edge->m_next;
+				} while (edge != face);
 
 			} else {
 				_ASSERTE ((hasLeftFaces & !hasRightFaces) | (!hasLeftFaces & hasRightFaces));

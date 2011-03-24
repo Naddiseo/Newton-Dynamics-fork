@@ -46,6 +46,7 @@ dgMeshTreeCSGFace::dgMeshTreeCSGFace (const dgMeshEffect& mesh, const dgEdge* co
 	BeginFace();
 	AddFace(m_count, indexList);
 	EndFace();
+	_ASSERTE (CheckConsistency ());
 }
 
 dgInt32 dgMeshTreeCSGFace::AddPoint (const dgBigVector& point)
@@ -57,6 +58,27 @@ dgInt32 dgMeshTreeCSGFace::AddPoint (const dgBigVector& point)
 }
 
 
+bool dgMeshTreeCSGFace::CheckConsistency ()
+{
+	dgInt32 outFaceCount = 0;
+	dgInt32 mark = IncLRU();
+	dgMeshTreeCSGFace::Iterator iter (*this);
+	for (iter.Begin(); iter; iter ++) {
+		dgEdge* const edge = &(*iter);
+		if ((edge->m_incidentFace < 0) && ((edge->m_mark != mark))){
+			outFaceCount ++;
+			dgEdge* ptr = edge;
+			do {
+				dgInt32 i = ptr->m_incidentVertex;
+				dgTrace (("%f %f %f\n", m_points[i].m_x, m_points[i].m_y, m_points[i].m_z));
+				ptr->m_mark = mark;
+				ptr = ptr->m_next;
+			} while (ptr != edge);
+			dgTrace (("\n"));
+		} 
+	}
+	return (outFaceCount == 1) ? true : false;
+}
 
 /*
 dgMeshTreeCSGFace::dgMeshTreeCSGFace(dgMemoryAllocator* const allocator)
@@ -417,6 +439,9 @@ _ASSERTE (0);
 		}
 	}
 }
+
+
+
 
 /*
 void dgMeshEffectSolidTree::MergeVertex(const dgMeshTreeCSGPointsPool& pointsPool,  dgInt32 count, dgMeshTreeCSGFace** const faceList) const

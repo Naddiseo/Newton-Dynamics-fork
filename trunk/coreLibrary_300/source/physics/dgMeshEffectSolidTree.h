@@ -35,6 +35,7 @@ class dgMeshTreeCSGFace: public dgPolyhedra
 	void ClipFace (dgEdge* const face, const dgHugeVector& normal, const dgHugeVector& origin, dgEdge** const poolReplacement, dgInt32 poolCount, dgEdge** leftOut, dgEdge** rightOut);
 	dgInt32 AddPoint (const dgBigVector& point);
 
+	bool CheckConsistency ();
 	dgInt32 m_count;
 	dgBigVector m_points[DG_MESH_EFFECT_POINT_SPLITED];
 };
