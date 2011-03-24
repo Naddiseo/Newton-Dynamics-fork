@@ -163,7 +163,7 @@ void *dgMemoryAllocator::Malloc (dgInt32 memsize)
 	dgInt32 paddedSize = size + DG_MEMORY_GRANULARITY; 
 	dgInt32 entry = paddedSize >> DG_MEMORY_GRANULARITY_BITS;	
 
-	void *ptr;
+	void* ptr;
 	if (entry >= DG_MEMORY_BIN_ENTRIES) {
 		ptr = MallocLow (size);
 	} else {
@@ -233,6 +233,7 @@ void dgMemoryAllocator::Free (void *retPtr)
 	_ASSERTE (info->m_allocator == this);
 
 	dgInt32 entry = info->m_size;
+
 	if (entry >= DG_MEMORY_BIN_ENTRIES) {
 		FreeLow (retPtr);
 	} else {
@@ -254,6 +255,12 @@ void dgMemoryAllocator::Free (void *retPtr)
 		m_memoryDirectory[entry].m_cache = cashe;
 
 		dgMemoryBin* const bin = (dgMemoryBin *) info->m_ptr;
+
+#ifdef _DEBUG
+		_ASSERTE ((bin->m_info.m_stepInBites - DG_MEMORY_GRANULARITY) > 0);
+		memset (retPtr, 0, bin->m_info.m_stepInBites - DG_MEMORY_GRANULARITY);
+#endif
+
 		bin->m_info.m_count --;
 		if (bin->m_info.m_count == 0) {
 

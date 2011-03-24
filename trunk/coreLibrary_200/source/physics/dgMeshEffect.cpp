@@ -4259,6 +4259,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	dgInt32 leftCount = 0;
 	dgInt32 rightCount = 0;
 
+static int xxx;
 	
 	dgInt32 rightFaceId = 1 << 24;
 	dgInt32 leftFaceId =  2 << 24;
@@ -4298,6 +4299,9 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 				dgEdge* const face = faceOnStack[stack];
 				const dgMeshEffectSolidTree* const root = stackPool[stack];
 
+xxx ++;
+if (xxx == 5)
+xxx *=1;
 				dgEdge* leftFace; 
 				dgEdge* rightFace;
 				clipFace.ClipFace (face, root->m_normal, root->m_origin, faceOnStack, stack, &leftFace, &rightFace);
@@ -4352,8 +4356,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 				_ASSERTE (outerEdge);
 				_ASSERTE (clipFace.CheckConsistency ());
 
-				dgEdge* indexMap[DG_MESH_EFFECT_POINT_SPLITED];
-				memset (indexMap, 0, sizeof (dgEdge*) * clipFace.m_count);
+//				dgEdge* indexMap[DG_MESH_EFFECT_POINT_SPLITED];
+//				memset (indexMap, 0, sizeof (dgEdge*) * clipFace.m_count);
 				dgEdge* edge = face;
 				bool firstTime = true;
 				do {
@@ -4395,8 +4399,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 
 					if (outerEdgeFirst->m_prev == outerEdgeLast) {
 						_ASSERTE (0);
-						indexMap[outerEdgeFirst->m_incidentVertex] = edge;
-						edge->m_incidentFace |= outerEdgeFirst->m_prev->m_twin->m_incidentFace & (leftFaceId + rightFaceId);
+//						indexMap[outerEdgeFirst->m_incidentVertex] = edge;
+//						edge->m_incidentFace |= outerEdgeFirst->m_prev->m_twin->m_incidentFace & (leftFaceId + rightFaceId);
 
 					} else {
 						for (outerEdgeFirst = outerEdgeFirst->m_prev; outerEdgeFirst != outerEdgeLast; outerEdgeFirst = outerEdgeFirst->m_prev) {
@@ -4412,15 +4416,14 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 							dgTree<dgEdge*,dgEdge*>::dgTreeNode* const node = edgeList.Find(edge->m_twin);
 							edge = mesh.InsertEdgeVertex (edge, t);
 							edge->m_incidentFace = outerEdgeFirst->m_twin->m_incidentFace + 1;
-							indexMap[outerEdgeFirst->m_twin->m_incidentVertex] = edge;
+							outerEdgeFirst->m_twin->m_userData = edge->m_incidentVertex;
 							if (firstTime) {
 								face = edge;
 							}
 						
 							edge = edge->m_next;
 							edge->m_incidentFace = outerEdgeFirst->m_prev->m_twin->m_incidentFace + 1;
-							indexMap[outerEdgeFirst->m_prev->m_twin->m_incidentVertex] = edge;
-
+							outerEdgeFirst->m_prev->m_twin->m_userData = edge->m_incidentVertex;
 		
 
 							if (node) {
@@ -4434,6 +4437,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 					edge = edge->m_next;
 				} while (edge != face);
 
+				_ASSERTE (0);
+/*
 				dgInt32 internalEdgeStack = 0;
 				dgEdge* internalEdgePool[64];
 				dgInt32 interiorEdgeMark = clipFace.IncLRU();
@@ -4484,6 +4489,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 						ptr = ptr->m_twin->m_next;
 					} while (ptr != edge);
 				}
+*/
 /*			
 				bool edgePending = true;
 				dgInt32 interiorEdgeMark = clipFace.IncLRU();

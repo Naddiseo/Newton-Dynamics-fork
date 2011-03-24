@@ -585,6 +585,7 @@ void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal
 	*leftOut = NULL; 
 	*rightOut = NULL;	
 
+static int xxx;
 	dgEdge* left = NULL;
 	dgEdge* right = NULL;
 	dgEdge* lastEdge = face;
@@ -592,6 +593,10 @@ void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal
 	dgHugeVector p0 (m_points[ptr->m_incidentVertex]);
 	dgGoogol test0 = normal % (p0 - origin);
 	do {
+xxx ++;
+if (xxx == 32)
+xxx *=1;
+
 		dgHugeVector p1 (m_points[ptr->m_next->m_incidentVertex]);
 		dgGoogol test1 = normal % (p1 - origin);
 		if (test0.GetAproximateValue() < dgFloat64 (0.0f)) {
