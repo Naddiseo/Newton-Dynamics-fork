@@ -4309,7 +4309,7 @@ xxx *=1;
 				if (rightFace) {
 					dgEdge* ptr = rightFace;
 					do {
-						ptr->m_incidentFace = rightFaceId;
+						ptr->m_incidentFace = rightFaceId + 1;
 						ptr = ptr->m_next;
 					} while (ptr != rightFace);
 
@@ -4327,7 +4327,7 @@ xxx *=1;
 				if (leftFace) {
 					dgEdge* ptr = leftFace;
 					do {
-						ptr->m_incidentFace = leftFaceId;
+						ptr->m_incidentFace = leftFaceId + 1;
 						ptr = ptr->m_next;
 					} while (ptr != leftFace);
 

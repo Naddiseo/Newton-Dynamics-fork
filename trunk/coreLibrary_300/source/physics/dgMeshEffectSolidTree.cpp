@@ -585,6 +585,7 @@ void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal
 	*leftOut = NULL; 
 	*rightOut = NULL;	
 
+_ASSERTE (!poolCount);
 static int xxx;
 	dgEdge* left = NULL;
 	dgEdge* right = NULL;
@@ -597,10 +598,13 @@ xxx ++;
 if (xxx == 32)
 xxx *=1;
 
+
 		dgHugeVector p1 (m_points[ptr->m_next->m_incidentVertex]);
 		dgGoogol test1 = normal % (p1 - origin);
-		if (test0.GetAproximateValue() < dgFloat64 (0.0f)) {
-			if (test1.GetAproximateValue() > dgFloat64 (0.0f)) {
+		dgFloat64 val0 = test0.GetAproximateValue();
+		dgFloat64 val1 = test1.GetAproximateValue();
+		if (val0 < dgFloat64 (0.0f)) {
+			if (val1 > dgFloat64 (0.0f)) {
 				bool replaceface = false;
 				if (lastEdge == ptr) {
 					replaceface = true;
@@ -610,15 +614,24 @@ xxx *=1;
 				dgGoogol t (-test0.GetAproximateValue() / den.GetAproximateValue());
 				dgHugeVector q (p0 + (p1 - p0).Scale (t));
 
+				dgUnsigned64 edgeUserData = ptr->m_userData;
+				dgUnsigned64 twinUserData = ptr->m_twin->m_userData;
+
 				ptr = SpliteEdge (m_count, ptr);
 				if (replaceface) {
 					lastEdge = ptr;
 				}
+
+				ptr->m_userData = edgeUserData;
+				ptr->m_twin->m_userData = dgUnsigned64 (-1);
+				ptr->m_next->m_userData = dgUnsigned64 (-1);
+				ptr->m_next->m_twin->m_userData = twinUserData;
+
 				AddPoint (dgBigVector (q.m_x.GetAproximateValue(), q.m_y.GetAproximateValue(), q.m_z.GetAproximateValue(), dgFloat64 (0.0f)));
 				ptr = ptr->m_next;
 				right = ptr;
 
-			} else if (test1.GetAproximateValue() < dgFloat64 (0.0f)) {
+			} else if (val1 < dgFloat64 (0.0f)) {
 				if (!left) {
 					left = ptr;
 				}
@@ -626,12 +639,12 @@ xxx *=1;
 				_ASSERTE (0);
 			}
 
-		} else if (test0.GetAproximateValue() > dgFloat64 (0.0f)) {
-			if (test1.GetAproximateValue() > dgFloat64 (0.0f)) {
+		} else if (val0 > dgFloat64 (0.0f)) {
+			if (val1 > dgFloat64 (0.0f)) {
 				if (!right) {
 					right = ptr;
 				}
-			} else if (test1.GetAproximateValue() < dgFloat64 (0.0f)) {
+			} else if (val1 < dgFloat64 (0.0f)) {
 				bool replaceface = false;
 				if (lastEdge == ptr) {
 					replaceface = true;
@@ -650,9 +663,9 @@ xxx *=1;
 				}
 
 				ptr->m_userData = edgeUserData;
-				ptr->m_twin->m_userData = twinUserData;
+				ptr->m_twin->m_userData = dgUnsigned64 (-1);
 				ptr->m_next->m_userData = dgUnsigned64 (-1);
-				ptr->m_next->m_twin->m_userData = dgUnsigned64 (-1);
+				ptr->m_next->m_twin->m_userData = twinUserData;
 
 				AddPoint (dgBigVector (q.m_x.GetAproximateValue(), q.m_y.GetAproximateValue(), q.m_z.GetAproximateValue(), dgFloat64 (0.0f)));
 				ptr = ptr->m_next;
@@ -663,9 +676,9 @@ xxx *=1;
 				_ASSERTE (0);
 			}
 		} else {
-			if (test1.GetAproximateValue() > dgFloat64 (0.0f)) {
+			if (val1 > dgFloat64 (0.0f)) {
 				_ASSERTE (0);
-			} else if (test1.GetAproximateValue() < dgFloat64 (0.0f)) {
+			} else if (val1 < dgFloat64 (0.0f)) {
 				_ASSERTE (0);
 			} else {
 				_ASSERTE (0);
