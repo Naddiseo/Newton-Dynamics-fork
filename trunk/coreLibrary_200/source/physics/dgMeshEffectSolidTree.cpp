@@ -24,10 +24,9 @@
 #include "dgMeshEffectSolidTree.h"
 
 
-dgMeshTreeCSGFace::dgMeshTreeCSGFace (const dgMeshEffect& mesh, const dgEdge* const face)
-	:dgPolyhedra (mesh.GetAllocator())
+dgMeshTreeCSGFace::dgMeshTreeCSGFace (const dgMeshEffect& mesh, const dgEdge* const face, dgInt32 vertexCount)
+	:dgPolyhedra (mesh.GetAllocator()), m_count (0), m_lastVertexIndex(vertexCount)
 {
-	m_count = 0;
 	const dgEdge* ptr = face;
 
 	const dgFloat64 *const vertex = mesh.GetVertexPool();
@@ -36,7 +35,9 @@ dgMeshTreeCSGFace::dgMeshTreeCSGFace (const dgMeshEffect& mesh, const dgEdge* co
 	dgInt32 indexList[256];
 	do {
 		indexList[m_count] = m_count;	
+		m_intepolatedVertex[m_count] = (ptr->m_incidentVertex >= m_lastVertexIndex) ? true : false;
 		dgInt32 index = ptr->m_incidentVertex * stride;
+
 		dgBigVector p (vertex[index + 0], vertex[index + 1], vertex[index + 2], dgFloat64 (0.0f));
 		AddPoint (p);
 		
@@ -452,133 +453,6 @@ _ASSERTE (0);
 
 
 
-
-/*
-void dgMeshEffectSolidTree::MergeVertex(const dgMeshTreeCSGPointsPool& pointsPool,  dgInt32 count, dgMeshTreeCSGFace** const faceList) const
-{
-
-	for (dgInt32 i = 0; i < (count - 1); i ++) {
-		dgMeshTreeCSGFace* const src = faceList[i]; 
-		for (dgInt32 j = i + 1; j < count; j ++) {
-			dgMeshTreeCSGFace* const dst = faceList[j]; 
-
-			_ASSERTE (src->CheckConvex(pointsPool));
-			_ASSERTE (dst->CheckConvex(pointsPool));
-
-			src->InsertVertex (dst, pointsPool);
-			dst->InsertVertex (src, pointsPool);
-
-			_ASSERTE (src->CheckConvex(pointsPool));
-			_ASSERTE (dst->CheckConvex(pointsPool));
-		}
-	}
-}
-
-void dgMeshEffectSolidTree::AddFaces(dgMeshEffect& polygon, dgInt32 count, dgMeshTreeCSGFace** const faceList, dgInt32 faceID, const dgMeshTreeCSGPointsPool& pointsPool) const
-{
-	dgMeshEffect::dgVertexAtribute points[DG_MESH_EFFECT_POINT_SPLITED];
-	for (dgInt32 i = 0; i < count; i ++) {
-		
-		dgMeshTreeCSGFace* const face = faceList[i]; 
-		dgMeshTreeCSGFace::CSGLinearEdge* const edge = face->m_face;
-		dgMeshTreeCSGFace::CSGLinearEdge* ptr = face->m_face;
-
-		dgInt32 indexCount = 0;
-		do {
-			points[indexCount].m_vertex = pointsPool.m_points[ptr->m_index];
-			points[indexCount].m_normal_x = dgFloat32 (0.0f);
-			points[indexCount].m_normal_y = dgFloat32 (0.0f);
-			points[indexCount].m_normal_z = dgFloat32 (0.0f);
-			points[indexCount].m_u0 = dgFloat32 (0.0f);
-			points[indexCount].m_v0 = dgFloat32 (0.0f);
-			points[indexCount].m_u1 = dgFloat32 (0.0f);
-			points[indexCount].m_v1 = dgFloat32 (0.0f);
-			points[indexCount].m_material = dgFloat32 (0.0f);
-			indexCount ++;
-			ptr = ptr->m_next;
-		} while (ptr != edge);
-		polygon.AddPolygon(indexCount, &points[0].m_vertex.m_x, sizeof (dgMeshEffect::dgVertexAtribute), faceID);
-	}
-}
-
-
-void dgMeshEffectSolidTree::ReconstructFace (dgMeshEffect& polygon, const dgMeshTreeCSGPointsPool& pointsPool,
-					  dgInt32 frontFaceCount, dgMeshTreeCSGFace** const frontFace, dgInt32 frontFaceID,
-					  dgInt32 backFaceCount, dgMeshTreeCSGFace** const backFace, dgInt32 backFaceID) const
-{
-
-static int xxx;
-xxx ++;
-if (xxx == 10)
-xxx *=1;
-
-
-	MergeVertex(pointsPool, backFaceCount, backFace);
-	MergeVertex(pointsPool, frontFaceCount, frontFace);
-
-	for (dgInt32 i = 0; i < backFaceCount; i ++) {
-		dgMeshTreeCSGFace* const src = backFace[i]; 
-		for (dgInt32 j = 0; j < frontFaceCount; j ++) {
-			dgMeshTreeCSGFace* const dst = frontFace[j]; 
-
-			src->InsertVertex (dst, pointsPool);
-			dst->InsertVertex (src, pointsPool);
-
-			_ASSERTE (src->CheckConvex(pointsPool));
-			_ASSERTE (dst->CheckConvex(pointsPool));
-		}
-	}
-
-
-	polygon.BeginPolygon();
-	AddFaces(polygon, backFaceCount, backFace, backFaceID, pointsPool);
-	AddFaces(polygon, frontFaceCount, frontFace, frontFaceID, pointsPool);
-	polygon.EndPolygon();
-
-	_ASSERTE (polygon.GetCount());
-
-	polygon.ConvertToPolygons();
-
-#ifdef _DEBUG
-	dgInt32 mark = polygon.IncLRU();
-	dgInt32 outerEdgeCount = 0;
-	dgMeshEffect::Iterator iter (polygon);
-	for (iter.Begin(); iter; iter ++) {
-		dgEdge* const edge = &(*iter);
-		if ((edge->m_incidentFace < 0) && ((edge->m_mark != mark))){
-			outerEdgeCount ++;
-			dgEdge* ptr = edge;
-			do {
-				ptr->m_mark = mark;
-				ptr = ptr->m_next;
-			} while (ptr != edge);
-			
-		} 
-	}
-	if (outerEdgeCount > 1) {
-		dgInt32 mark = polygon.IncLRU();
-		for (iter.Begin(); iter; iter ++) {
-			dgEdge* const edge = &(*iter);
-			if ((edge->m_incidentFace < 0) && ((edge->m_mark != mark))){
-				outerEdgeCount ++;
-				dgEdge* ptr = edge;
-				do {
-					dgInt32 i = ptr->m_incidentVertex;
-					dgTrace (("%f %f %f\n", polygon.m_points[i].m_x, polygon.m_points[i].m_y, polygon.m_points[i].m_z ));
-					ptr->m_mark = mark;
-					ptr = ptr->m_next;
-				} while (ptr != edge);
-				dgTrace (("\n"));
-			} 
-		}
-	}
-	_ASSERTE (outerEdgeCount == 1);
-#endif
-}
-*/
-
-
-
 //void dgMeshEffect::ClipFace (const dgHugeVector& normal, const dgHugeVector& origin, dgMeshTreeCSGFace* const src, dgMeshTreeCSGFace** left, dgMeshTreeCSGFace** const right, dgMeshTreeCSGPointsPool& pointPool) const
 void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal, const dgHugeVector& origin, dgEdge** const poolReplacement, dgInt32 poolCount, dgEdge** leftOut, dgEdge** rightOut)
 {
@@ -587,20 +461,32 @@ void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal
 
 _ASSERTE (!poolCount);
 static int xxx;
+xxx ++;
+if (xxx == 23)
+xxx *=1;
+
+
 	dgEdge* left = NULL;
 	dgEdge* right = NULL;
 	dgEdge* lastEdge = face;
 	dgEdge* ptr = face;
 	dgHugeVector p0 (m_points[ptr->m_incidentVertex]);
 	dgGoogol test0 = normal % (p0 - origin);
+	if (m_intepolatedVertex[ptr->m_incidentVertex]) {
+		if (fabs (test0.GetAproximateValue()) < dgFloat64 (1.0e-12f)) {
+			test0 = dgGoogol(dgFloat64 (0.0f));
+		}
+	}
+
 	do {
-xxx ++;
-if (xxx == 71)
-xxx *=1;
-
-
 		dgHugeVector p1 (m_points[ptr->m_next->m_incidentVertex]);
 		dgGoogol test1 = normal % (p1 - origin);
+		if (m_intepolatedVertex[ptr->m_next->m_incidentVertex]) {
+			if (fabs (test1.GetAproximateValue()) < dgFloat64 (1.0e-12f)) {
+				test1 = dgGoogol(dgFloat64 (0.0f));
+			}
+		}
+
 		dgFloat64 val0 = test0.GetAproximateValue();
 		dgFloat64 val1 = test1.GetAproximateValue();
 		if (val0 < dgFloat64 (0.0f)) {
@@ -627,16 +513,15 @@ xxx *=1;
 				ptr->m_next->m_userData = dgUnsigned64 (-1);
 				ptr->m_next->m_twin->m_userData = twinUserData;
 
+				m_intepolatedVertex[m_count] = false;
 				AddPoint (dgBigVector (q.m_x.GetAproximateValue(), q.m_y.GetAproximateValue(), q.m_z.GetAproximateValue(), dgFloat64 (0.0f)));
 				ptr = ptr->m_next;
 				right = ptr;
 
-			} else if (val1 < dgFloat64 (0.0f)) {
+			} else if (val1 <= dgFloat64 (0.0f)) {
 				if (!left) {
 					left = ptr;
 				}
-			} else {
-				_ASSERTE (0);
 			}
 
 		} else if (val0 > dgFloat64 (0.0f)) {
@@ -667,6 +552,7 @@ xxx *=1;
 				ptr->m_next->m_userData = dgUnsigned64 (-1);
 				ptr->m_next->m_twin->m_userData = twinUserData;
 
+				m_intepolatedVertex[m_count] = false;
 				AddPoint (dgBigVector (q.m_x.GetAproximateValue(), q.m_y.GetAproximateValue(), q.m_z.GetAproximateValue(), dgFloat64 (0.0f)));
 				ptr = ptr->m_next;
 				left = ptr;
@@ -679,9 +565,7 @@ xxx *=1;
 			if (val1 > dgFloat64 (0.0f)) {
 				_ASSERTE (0);
 			} else if (val1 < dgFloat64 (0.0f)) {
-				_ASSERTE (0);
-			} else {
-				_ASSERTE (0);
+				left = ptr;
 			}
 		}
 

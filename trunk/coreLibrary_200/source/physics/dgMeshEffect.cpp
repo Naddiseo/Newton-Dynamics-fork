@@ -4252,8 +4252,10 @@ return;
 
 void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** left, dgMeshEffect** right) const
 {
-	dgMeshEffect mesh = dgMeshEffect (*this);
+	dgMeshEffect mesh (dgMeshEffect (*this));
 	mesh.Triangulate();
+
+	dgInt32 lastVertexIndex = mesh.m_pointCount;
 
 	dgTree<dgEdge*,dgEdge*> edgeList(GetAllocator());
 
@@ -4276,7 +4278,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 		edgeList.Remove (edgeList.GetRoot());
 		
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
-			dgMeshTreeCSGFace clipFace (mesh, face);
+			dgMeshTreeCSGFace clipFace (mesh, face, lastVertexIndex);
 
 			dgEdge* ptr = face;
 			do {
