@@ -4268,7 +4268,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	dgInt32 leftCount = 0;
 	dgInt32 rightCount = 0;
 
-
+static int xxx;
 	
 	dgInt32 rightFaceId = 1 << 24;
 	dgInt32 leftFaceId =  2 << 24;
@@ -4280,6 +4280,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
 			dgMeshTreeCSGFace clipFace (mesh, face, lastVertexIndex);
 
+xxx ++;
 			dgEdge* ptr = face;
 			do {
 				edgeList.Remove(ptr);

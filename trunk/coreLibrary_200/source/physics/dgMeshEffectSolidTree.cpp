@@ -460,11 +460,6 @@ void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal
 	*rightOut = NULL;	
 
 _ASSERTE (!poolCount);
-static int xxx;
-xxx ++;
-if (xxx == 23)
-xxx *=1;
-
 
 	dgEdge* left = NULL;
 	dgEdge* right = NULL;
@@ -518,10 +513,12 @@ xxx *=1;
 				ptr = ptr->m_next;
 				right = ptr;
 
-			} else if (val1 <= dgFloat64 (0.0f)) {
+			} else if (val1 < dgFloat64 (0.0f)) {
 				if (!left) {
 					left = ptr;
 				}
+//			} else {
+//				_ASSERTE (0);
 			}
 
 		} else if (val0 > dgFloat64 (0.0f)) {
@@ -556,14 +553,13 @@ xxx *=1;
 				AddPoint (dgBigVector (q.m_x.GetAproximateValue(), q.m_y.GetAproximateValue(), q.m_z.GetAproximateValue(), dgFloat64 (0.0f)));
 				ptr = ptr->m_next;
 				left = ptr;
-
-
-			} else {
-				_ASSERTE (0);
+//			} else {
+//				_ASSERTE (0);
 			}
+
 		} else {
 			if (val1 > dgFloat64 (0.0f)) {
-				_ASSERTE (0);
+				right = ptr;
 			} else if (val1 < dgFloat64 (0.0f)) {
 				left = ptr;
 			}
@@ -571,7 +567,6 @@ xxx *=1;
 
 		test0 = test1;
 		p0 = p1;
-	
 
 		ptr = ptr->m_next;
 	} while (ptr != lastEdge);
