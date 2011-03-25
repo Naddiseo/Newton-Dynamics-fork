@@ -122,19 +122,18 @@ void dgMemoryAllocator::SetAllocatorsCallback (dgMemAlloc memAlloc, dgMemFree me
 
 
 
-void *dgMemoryAllocator::MallocLow (dgInt32 size, dgInt32 alignment)
+void *dgMemoryAllocator::MallocLow (dgInt32 workingSize, dgInt32 alignment)
 {
 	_ASSERTE (alignment >= DG_MEMORY_GRANULARITY);
 	_ASSERTE (((-alignment) & (alignment - 1)) == 0);
-	size += alignment * 2;
+	dgInt32 size = workingSize + alignment * 2;
 	void* const ptr = m_malloc(dgUnsigned32 (size));
 	dgUnsigned64 val = dgUnsigned64 (PointerToInt(ptr));
 	val = (val & dgUnsigned64(-alignment)) + alignment * 2;
 	void* const retPtr = IntToPointer (val);
 
 	dgMemoryInfo* const info = ((dgMemoryInfo*) (retPtr)) - 1;
-	info->SaveInfo(this, ptr, size, m_emumerator);
-
+	info->SaveInfo(this, ptr, size, m_emumerator, workingSize);
 
 	dgAtomicAdd (&m_memoryUsed, size);
 	return retPtr;
@@ -148,9 +147,9 @@ void dgMemoryAllocator::FreeLow (void *retPtr)
 
 	dgAtomicAdd (&m_memoryUsed, -info->m_size);
 
-//#ifdef _DEBUG
-//	memset (retPtr, 0, info->m_size - DG_MEMORY_GRANULARITY);
-//#endif
+#ifdef _DEBUG
+	memset (retPtr, 0, info->m_workingSize);
+#endif
 
 	m_free (info->m_ptr, dgUnsigned32 (info->m_size));
 }
@@ -195,7 +194,7 @@ void *dgMemoryAllocator::Malloc (dgInt32 memsize)
 				cashe->m_next = (dgMemoryCacheEntry*) (charPtr + paddedSize);
 				cashe->m_prev = (dgMemoryCacheEntry*) (charPtr - paddedSize);
 				dgMemoryInfo* const info = ((dgMemoryInfo*) (charPtr + DG_MEMORY_GRANULARITY)) - 1;						
-				info->SaveInfo(this, bin, entry, m_emumerator);
+				info->SaveInfo(this, bin, entry, m_emumerator, memsize);
 				charPtr += paddedSize;
 			}
 			dgMemoryCacheEntry* const cashe = (dgMemoryCacheEntry*) (charPtr - paddedSize);
@@ -254,7 +253,6 @@ void dgMemoryAllocator::Free (void *retPtr)
 		}
 		cashe->m_next = tmpCashe;
 		cashe->m_prev = NULL;
-
 
 		m_memoryDirectory[entry].m_cache = cashe;
 

@@ -119,14 +119,20 @@ class dgMemoryAllocator
 		dgMemoryAllocator* m_allocator;
 		dgInt32 m_size;
 		dgInt32 m_enum;
+#ifdef _DEBUG
+		dgInt32 m_workingSize;
+#endif
 
-		void SaveInfo(dgMemoryAllocator* const allocator, void* const ptr, dgInt32 size, dgInt32& enumerator)
+		DG_INLINE void SaveInfo(dgMemoryAllocator* const allocator, void* const ptr, dgInt32 size, dgInt32& enumerator, dgInt32 workingSize = 0)
 		{
 			m_ptr = ptr;
 			m_size = size;
 			m_enum = enumerator;
 			enumerator ++;
 			m_allocator = allocator;
+#ifdef _DEBUG
+			m_workingSize = workingSize;
+#endif
 		}
 	};
 
