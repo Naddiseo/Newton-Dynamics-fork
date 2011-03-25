@@ -27,6 +27,13 @@
 #include "dgMeshEffectSolidTree.h"
 
 
+class dgClipEdgePair
+{
+	public:
+	dgEdge* m_clipEdge;
+	dgEdge* m_edgeOneFace;
+};
+
 /*
 class dgClusterFace
 {
@@ -4242,12 +4249,6 @@ return;
 }
 
 
-class dgClipEdgePair
-{
-	public:
-	dgEdge* m_clipEdge;
-	dgEdge* m_edgeOneFace;
-};
 
 void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** left, dgMeshEffect** right) const
 {
@@ -4469,11 +4470,103 @@ xxx *=1;
 					} else {
 						_ASSERTE ((ptr->m_next->m_userData != -1) || (ptr->m_userData != -1));
 						if (ptr->m_userData != -1) {
+
 							_ASSERTE (ptr->m_next->m_userData == -1);
-							_ASSERTE (0);
+							dgBigVector p (clipFace.m_points[ptr->m_twin->m_incidentVertex]);
+
+							dgVertexAtribute atrib (mesh.InterpolateVertex (p, pair.m_edgeOneFace));
+							dgEdge* const edge = mesh.AddHalfEdge(dgInt32 (ptr->m_userData), mesh.m_pointCount);
+							dgEdge* const twin = mesh.AddHalfEdge(mesh.m_pointCount, dgInt32 (ptr->m_userData));
+							_ASSERTE (edge);
+							_ASSERTE (twin);
+
+							dgEdge* begin = NULL;	
+							dgEdge* tmp = pair.m_edgeOneFace;	
+							do {
+								if (tmp->m_incidentVertex == dgInt32 (ptr->m_userData)) {
+									begin = tmp;
+									break;
+								}
+								tmp = tmp->m_next;
+							} while (tmp != pair.m_edgeOneFace);
+							_ASSERTE (begin);
+							_ASSERTE (begin->m_incidentVertex == dgInt32 (ptr->m_userData));
+
+							edge->m_userData = begin->m_userData;
+							twin->m_userData = mesh.m_atribCount;
+
+							edge->m_incidentFace = begin->m_prev->m_incidentFace;
+							twin->m_incidentFace = begin->m_incidentFace;
+
+							edge->m_twin = twin;
+							twin->m_twin = edge;
+
+							edge->m_next = twin;
+							twin->m_prev = edge;
+
+							edge->m_prev = begin->m_prev;
+							begin->m_prev->m_next = edge;
+
+							twin->m_next = begin;
+							begin->m_prev = twin;
+													
+							mesh.AddPoint(&atrib.m_vertex.m_x, dgFastInt (atrib.m_material));
+							_ASSERTE (edge);
+							_ASSERTE (twin);
+
+							tmp = ptr->m_next;
+							do {
+								tmp->m_userData = twin->m_incidentVertex;
+								tmp = tmp->m_twin->m_next;
+							} while (tmp != ptr->m_next);
 
 						} else {
-							_ASSERTE (0);
+							_ASSERTE (ptr->m_userData == -1);
+							dgBigVector p (clipFace.m_points[ptr->m_incidentVertex]);
+
+							dgVertexAtribute atrib (mesh.InterpolateVertex (p, pair.m_edgeOneFace));
+							dgEdge* const edge = mesh.AddHalfEdge(mesh.m_pointCount, dgInt32 (ptr->m_twin->m_userData));
+							dgEdge* const twin = mesh.AddHalfEdge(dgInt32 (ptr->m_twin->m_userData), mesh.m_pointCount);
+							_ASSERTE (edge);
+							_ASSERTE (twin);
+
+							dgEdge* begin = NULL;	
+							dgEdge* tmp = pair.m_edgeOneFace;	
+							do {
+								if (tmp->m_incidentVertex == dgInt32 (ptr->m_twin->m_userData)) {
+									begin = tmp;
+									break;
+								}
+								tmp = tmp->m_next;
+							} while (tmp != pair.m_edgeOneFace);
+							_ASSERTE (begin);
+							_ASSERTE (begin->m_incidentVertex == dgInt32 (ptr->m_twin->m_userData));
+
+							edge->m_userData = mesh.m_atribCount;
+							twin->m_userData = begin->m_prev->m_userData;
+
+							edge->m_incidentFace = begin->m_incidentFace;
+							twin->m_incidentFace = begin->m_prev->m_incidentFace;
+
+							edge->m_twin = twin;
+							twin->m_twin = edge;
+
+							edge->m_prev = twin;
+							twin->m_next = edge;
+
+							twin->m_prev = begin->m_prev;
+							begin->m_prev->m_next = twin;
+
+							edge->m_next = begin;
+							begin->m_prev = edge;
+
+							mesh.AddPoint(&atrib.m_vertex.m_x, dgFastInt (atrib.m_material));
+
+							tmp = ptr;
+							do {
+								tmp->m_userData = edge->m_incidentVertex;
+								tmp = tmp->m_twin->m_next;
+							} while (tmp != ptr);
 						}
 					}
 					
@@ -4518,35 +4611,6 @@ xxx *=1;
 						ptr = ptr->m_twin->m_next;
 					} while (ptr != pair.m_clipEdge);
 				}
-
-
-/*			
-				bool edgePending = true;
-				dgInt32 interiorEdgeMark = clipFace.IncLRU();
-				while (edgePending) {
-					edgePending = false;
-					for (iter.Begin(); iter; iter ++) {
-						dgEdge* const edge = &(*iter);
-						if ((edge->m_mark != interiorEdgeMark) && (edge->m_incidentFace > 0) && (edge->m_twin->m_incidentFace > 0) &&
-							indexMap[edge->m_incidentVertex] && indexMap[edge->m_twin->m_incidentVertex]) {
-							if ((edge->m_incidentVertex >= 0) && (edge->m_twin->m_incidentVertex >= 0)) {
-								edge->m_mark = interiorEdgeMark;
-								edge->m_twin->m_mark = interiorEdgeMark;
-								edgePending = true;
-
-							}
-						} else {
-							if (!indexMap[edge->m_incidentVertex]) {
-								_ASSERTE (0);
-							} 
-							if (!indexMap[edge->m_twin->m_incidentVertex]) {
-								_ASSERTE (0);
-							}
-						}
-					}
-				}
-*/
-
 
 			} else {
 				_ASSERTE ((hasLeftFaces & !hasRightFaces) | (!hasLeftFaces & hasRightFaces));

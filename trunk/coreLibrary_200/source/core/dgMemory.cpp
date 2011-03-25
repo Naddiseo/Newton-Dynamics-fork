@@ -148,6 +148,10 @@ void dgMemoryAllocator::FreeLow (void *retPtr)
 
 	dgAtomicAdd (&m_memoryUsed, -info->m_size);
 
+//#ifdef _DEBUG
+//	memset (retPtr, 0, info->m_size - DG_MEMORY_GRANULARITY);
+//#endif
+
 	m_free (info->m_ptr, dgUnsigned32 (info->m_size));
 }
 
