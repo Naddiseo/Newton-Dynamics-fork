@@ -4266,7 +4266,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	dgInt32 leftCount = 0;
 	dgInt32 rightCount = 0;
 
-static int xxx;
+
 	
 	dgInt32 rightFaceId = 1 << 24;
 	dgInt32 leftFaceId =  2 << 24;
@@ -4306,9 +4306,6 @@ static int xxx;
 				dgEdge* const face = faceOnStack[stack];
 				const dgMeshEffectSolidTree* const root = stackPool[stack];
 
-xxx ++;
-//if (xxx == 12)
-//xxx *=1;
 				dgEdge* leftFace; 
 				dgEdge* rightFace;
 				clipFace.ClipFace (face, root->m_normal, root->m_origin, faceOnStack, stack, &leftFace, &rightFace);
@@ -4363,9 +4360,6 @@ xxx ++;
 				}
 				_ASSERTE (outerEdge);
 				_ASSERTE (clipFace.CheckConsistency ());
-
-if (xxx == 18)
-xxx *=1;
 
 				dgEdge* edge = face;
 				bool firstTime = true;

@@ -595,7 +595,7 @@ static int xxx;
 	dgGoogol test0 = normal % (p0 - origin);
 	do {
 xxx ++;
-if (xxx == 32)
+if (xxx == 71)
 xxx *=1;
 
 
