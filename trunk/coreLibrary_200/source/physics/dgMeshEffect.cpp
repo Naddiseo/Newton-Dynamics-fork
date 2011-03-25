@@ -4394,9 +4394,7 @@ xxx *=1;
 					_ASSERTE (outerEdgeFirst != outerEdgeLast);
 
 					if (outerEdgeFirst->m_prev == outerEdgeLast) {
-						_ASSERTE (0);
-//						indexMap[outerEdgeFirst->m_incidentVertex] = edge;
-//						edge->m_incidentFace |= outerEdgeFirst->m_prev->m_twin->m_incidentFace & (leftFaceId + rightFaceId);
+						edge->m_incidentFace |= outerEdgeFirst->m_prev->m_twin->m_incidentFace & (leftFaceId + rightFaceId);
 
 					} else {
 						dgBigVector p0 (mesh.m_points[edge->m_incidentVertex]);
