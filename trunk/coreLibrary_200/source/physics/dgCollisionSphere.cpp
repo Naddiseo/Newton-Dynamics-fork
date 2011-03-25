@@ -104,8 +104,12 @@ void dgCollisionSphere::Init (dgFloat32 radius, dgMemoryAllocator* allocator)
 
 		polyhedra.BeginFace();
 		for (dgInt32 i = 0; i < count; i += 3) {
+#ifdef _DEBUG
 			dgEdge* const edge = polyhedra.AddFace (indexList[i],  indexList[i + 1], indexList[i + 2]);
 			_ASSERTE (edge);
+#else 
+			polyhedra.AddFace (indexList[i],  indexList[i + 1], indexList[i + 2]);
+#endif
 		}
 		polyhedra.EndFace();
 

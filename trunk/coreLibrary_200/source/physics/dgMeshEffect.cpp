@@ -4364,6 +4364,9 @@ xxx ++;
 				_ASSERTE (outerEdge);
 				_ASSERTE (clipFace.CheckConsistency ());
 
+if (xxx == 5)
+xxx *=1;
+
 				dgEdge* edge = face;
 				bool firstTime = true;
 				do {

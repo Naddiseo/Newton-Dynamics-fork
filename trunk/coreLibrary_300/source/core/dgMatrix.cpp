@@ -45,15 +45,16 @@ const dgMatrix& dgGetZeroMatrix ()
 }
 
 
-dgMatrix::dgMatrix (
-	const dgQuaternion &rotation, 
-	const dgVector &position)
+dgMatrix::dgMatrix (const dgQuaternion &rotation, const dgVector &position)
 {
 	dgFloat32 x2 = dgFloat32 (2.0f) * rotation.m_q1 * rotation.m_q1;
 	dgFloat32 y2 = dgFloat32 (2.0f) * rotation.m_q2 * rotation.m_q2;
 	dgFloat32 z2 = dgFloat32 (2.0f) * rotation.m_q3 * rotation.m_q3;
+
+#ifdef _DEBUG
 	dgFloat32 w2 = dgFloat32 (2.0f) * rotation.m_q0 * rotation.m_q0;
 	_ASSERTE (dgAbsf (w2 + x2 + y2 + z2 - dgFloat32(2.0f)) <dgFloat32 (1.0e-3f));
+#endif
 
 	dgFloat32 xy = dgFloat32 (2.0f) * rotation.m_q1 * rotation.m_q2;
 	dgFloat32 xz = dgFloat32 (2.0f) * rotation.m_q1 * rotation.m_q3;
