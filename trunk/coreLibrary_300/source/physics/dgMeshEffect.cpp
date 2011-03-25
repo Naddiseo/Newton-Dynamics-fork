@@ -4242,6 +4242,12 @@ return;
 }
 
 
+class dgClipEdgePair
+{
+	public:
+	dgEdge* m_clipEdge;
+	dgEdge* m_edgeOneFace;
+};
 
 void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** left, dgMeshEffect** right) const
 {
@@ -4361,41 +4367,28 @@ xxx *=1;
 				dgEdge* edge = face;
 				bool firstTime = true;
 				do {
-					dgBigVector p0 (mesh.m_points[edge->m_incidentVertex]);
 					dgEdge* outerEdgeFirst = NULL;
 					dgEdge* ptr = outerEdge;
-					dgFloat64 closest = dgFloat64 (1.0e10f);
 					do {
-						dgBigVector q (clipFace.m_points[ptr->m_incidentVertex]);
-						dgBigVector error (q - p0);
-						dgFloat64 val = error % error;
-						if (val < closest) {
+						if (dgInt32 (ptr->m_twin->m_next->m_userData) == edge->m_incidentVertex) {
 							outerEdgeFirst = ptr;
-							closest = val;
+							break;
 						}
 						ptr = ptr->m_next;
 					} while (ptr != outerEdge);
-					_ASSERTE (closest < dgFloat64 (1.0e-12f));
+					_ASSERTE (outerEdgeFirst);
 
-
-					dgBigVector p1 (mesh.m_points[edge->m_next->m_incidentVertex]);
 					dgEdge* outerEdgeLast = NULL;
 					ptr = outerEdge;
-					closest = dgFloat64 (1.0e10f);
 					do {
-						dgBigVector q (clipFace.m_points[ptr->m_incidentVertex]);
-						dgBigVector error (q - p1);
-						dgFloat64 val = error % error;
-						if (val < closest) {
+						if (dgInt32 (ptr->m_twin->m_next->m_userData) == edge->m_next->m_incidentVertex) {
 							outerEdgeLast = ptr;
-							closest = val;
+							break;
 						}
 						ptr = ptr->m_next;
 					} while (ptr != outerEdge);
-					_ASSERTE (closest < dgFloat64 (1.0e-12f));
+					_ASSERTE (outerEdgeLast);
 					_ASSERTE (outerEdgeFirst != outerEdgeLast);
-
-					
 
 					if (outerEdgeFirst->m_prev == outerEdgeLast) {
 						_ASSERTE (0);
@@ -4403,6 +4396,8 @@ xxx *=1;
 //						edge->m_incidentFace |= outerEdgeFirst->m_prev->m_twin->m_incidentFace & (leftFaceId + rightFaceId);
 
 					} else {
+						dgBigVector p0 (mesh.m_points[edge->m_incidentVertex]);
+						dgBigVector p1 (mesh.m_points[edge->m_next->m_incidentVertex]);
 						for (outerEdgeFirst = outerEdgeFirst->m_prev; outerEdgeFirst != outerEdgeLast; outerEdgeFirst = outerEdgeFirst->m_prev) {
 							dgBigVector q (clipFace.m_points[outerEdgeFirst->m_incidentVertex]);
 							dgBigVector dist (p1 - p0);
@@ -4416,14 +4411,23 @@ xxx *=1;
 							dgTree<dgEdge*,dgEdge*>::dgTreeNode* const node = edgeList.Find(edge->m_twin);
 							edge = mesh.InsertEdgeVertex (edge, t);
 							edge->m_incidentFace = outerEdgeFirst->m_twin->m_incidentFace + 1;
-							outerEdgeFirst->m_twin->m_userData = edge->m_incidentVertex;
+							dgEdge* tmp = outerEdgeFirst->m_twin;
+							do {
+								tmp->m_userData = edge->m_incidentVertex;
+								tmp = tmp->m_twin->m_next;
+							} while (tmp != outerEdgeFirst->m_twin);
 							if (firstTime) {
 								face = edge;
 							}
 						
 							edge = edge->m_next;
 							edge->m_incidentFace = outerEdgeFirst->m_prev->m_twin->m_incidentFace + 1;
-							outerEdgeFirst->m_prev->m_twin->m_userData = edge->m_incidentVertex;
+							tmp = outerEdgeFirst->m_prev->m_twin;
+							do {
+								tmp->m_userData = edge->m_incidentVertex;
+								tmp = tmp->m_twin->m_next;
+							} while (tmp != outerEdgeFirst->m_prev->m_twin);
+
 		
 
 							if (node) {
@@ -4437,59 +4441,85 @@ xxx *=1;
 					edge = edge->m_next;
 				} while (edge != face);
 
-				_ASSERTE (0);
-/*
-				dgInt32 internalEdgeStack = 0;
-				dgEdge* internalEdgePool[64];
+				dgList<dgClipEdgePair> queue (GetAllocator());
 				dgInt32 interiorEdgeMark = clipFace.IncLRU();
 				edge = outerEdge;
 				do {
 					edge->m_mark = interiorEdgeMark;
 					edge->m_twin->m_mark = interiorEdgeMark;
-					_ASSERTE (internalEdgeStack < sizeof (internalEdgePool) / sizeof (internalEdgePool[0]));
-					internalEdgePool[internalEdgeStack] = edge->m_twin;
-					internalEdgeStack ++;
+					dgClipEdgePair pair;
+					pair.m_clipEdge = edge->m_twin;
+					pair.m_edgeOneFace = mesh.FindEdge(dgInt32 (edge->m_twin->m_userData), dgInt32 (edge->m_twin->m_next->m_userData));
+					_ASSERTE (pair.m_edgeOneFace);
+					queue.Append (pair);
 					edge = edge->m_next;
 				} while (edge != outerEdge);
 
-				while (internalEdgeStack) {
-					internalEdgeStack --;
-					dgEdge* const edge = internalEdgePool[internalEdgeStack];	
-					
-					dgEdge* ptr = edge;
-					do {
-						if ((ptr->m_mark != interiorEdgeMark) && (ptr->m_twin->m_mark != interiorEdgeMark)) {
-							_ASSERTE (ptr->m_incidentFace > 0);
-							_ASSERTE (ptr->m_twin->m_incidentFace > 0);
-							if (indexMap[ptr->m_incidentVertex] && indexMap[ptr->m_twin->m_incidentVertex]) {
 
-								_ASSERTE (0);
-							} else {
-								_ASSERTE (0);
+				while (queue.GetCount()) {
+					dgClipEdgePair pair (queue.GetFirst()->GetInfo());
+					queue.Remove(queue.GetFirst());
 
-							}
-							
-
+					dgEdge* ptr = pair.m_clipEdge;
+					if ((ptr->m_userData != -1) && (ptr->m_next->m_userData != -1)) {
+						dgEdge* const missingEdge = mesh.FindEdge(dgInt32 (ptr->m_userData), dgInt32 (ptr->m_next->m_userData));
+						if (!missingEdge) {
+							_ASSERTE (0);
 						}
+					} else {
+						_ASSERTE ((ptr->m_next->m_userData != -1) || (ptr->m_userData != -1));
+						if (ptr->m_userData != -1) {
+							_ASSERTE (ptr->m_next->m_userData == -1);
+							_ASSERTE (0);
 
+						} else {
+							_ASSERTE (0);
+						}
+					}
+					
+					do {
 						if (ptr->m_mark != interiorEdgeMark) {
 							ptr->m_mark = interiorEdgeMark;
-							_ASSERTE (internalEdgeStack < sizeof (internalEdgePool) / sizeof (internalEdgePool[0]));
-							internalEdgePool[internalEdgeStack] = ptr;
-							internalEdgeStack ++;
+							dgClipEdgePair pair;
+							pair.m_clipEdge = ptr;
+							pair.m_edgeOneFace = NULL;
+							dgEdge* ptr1 = ptr;
+							do {
+								if ((ptr1->m_userData != -1) && (ptr1->m_next->m_userData != -1)) {
+									pair.m_edgeOneFace = mesh.FindEdge(dgInt32 (ptr1->m_userData), dgInt32 (ptr1->m_next->m_userData));
+									break;
+								}
+
+								ptr1 = ptr1->m_next;
+							} while (ptr1 != ptr);
+							_ASSERTE (pair.m_edgeOneFace);
+							queue.Append (pair);
 						}
 
 						if (ptr->m_twin->m_mark != interiorEdgeMark) {
 							ptr->m_twin->m_mark = interiorEdgeMark;
-							_ASSERTE (internalEdgeStack < sizeof (internalEdgePool) / sizeof (internalEdgePool[0]));
-							internalEdgePool[internalEdgeStack] = ptr->m_twin;
-							internalEdgeStack ++;
-						}
 
+							dgClipEdgePair pair;
+							pair.m_clipEdge = ptr->m_twin;
+							pair.m_edgeOneFace = NULL;
+							dgEdge* ptr1 = ptr->m_twin;
+							do {
+								if ((ptr1->m_userData != -1) && (ptr1->m_next->m_userData != -1)) {
+									pair.m_edgeOneFace = mesh.FindEdge(dgInt32 (ptr1->m_userData), dgInt32 (ptr1->m_next->m_userData));
+									break;
+								}
+
+								ptr1 = ptr1->m_next;
+							} while (ptr1 != ptr->m_twin);
+							_ASSERTE (pair.m_edgeOneFace);
+							queue.Append (pair);
+
+						}
 						ptr = ptr->m_twin->m_next;
-					} while (ptr != edge);
+					} while (ptr != pair.m_clipEdge);
 				}
-*/
+
+
 /*			
 				bool edgePending = true;
 				dgInt32 interiorEdgeMark = clipFace.IncLRU();
