@@ -4363,8 +4363,6 @@ xxx *=1;
 				_ASSERTE (outerEdge);
 				_ASSERTE (clipFace.CheckConsistency ());
 
-//				dgEdge* indexMap[DG_MESH_EFFECT_POINT_SPLITED];
-//				memset (indexMap, 0, sizeof (dgEdge*) * clipFace.m_count);
 				dgEdge* edge = face;
 				bool firstTime = true;
 				do {
@@ -4465,7 +4463,37 @@ xxx *=1;
 					if ((ptr->m_userData != -1) && (ptr->m_next->m_userData != -1)) {
 						dgEdge* const missingEdge = mesh.FindEdge(dgInt32 (ptr->m_userData), dgInt32 (ptr->m_next->m_userData));
 						if (!missingEdge) {
-							_ASSERTE (0);
+							dgEdge* const edge = mesh.AddHalfEdge(dgInt32 (ptr->m_userData), dgInt32 (ptr->m_twin->m_userData));
+							dgEdge* const twin = mesh.AddHalfEdge(dgInt32 (ptr->m_twin->m_userData), dgInt32 (ptr->m_userData));
+							_ASSERTE (edge);
+							_ASSERTE (twin);
+
+							dgEdge* begin = NULL;	
+							dgEdge* tmp = pair.m_edgeOneFace;	
+							do {
+								if (tmp->m_incidentVertex == dgInt32 (ptr->m_userData)) {
+									begin = tmp;
+									break;
+								}
+								tmp = tmp->m_next;
+							} while (tmp != pair.m_edgeOneFace);
+							_ASSERTE (begin);
+							_ASSERTE (begin->m_incidentVertex == dgInt32 (ptr->m_userData));
+
+
+							dgEdge* end = NULL;	
+							tmp = pair.m_edgeOneFace;	
+							do {
+								if (tmp->m_incidentVertex == dgInt32 (ptr->m_twin->m_userData)) {
+									end = tmp;
+									break;
+								}
+								tmp = tmp->m_next;
+							} while (tmp != pair.m_edgeOneFace);
+							_ASSERTE (end);
+							_ASSERTE (end->m_incidentVertex == dgInt32 (ptr->m_twin->m_userData));
+
+							
 						}
 					} else {
 						_ASSERTE ((ptr->m_next->m_userData != -1) || (ptr->m_userData != -1));
