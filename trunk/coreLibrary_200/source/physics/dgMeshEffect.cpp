@@ -4307,8 +4307,8 @@ static int xxx;
 				const dgMeshEffectSolidTree* const root = stackPool[stack];
 
 xxx ++;
-if (xxx == 5)
-xxx *=1;
+//if (xxx == 12)
+//xxx *=1;
 				dgEdge* leftFace; 
 				dgEdge* rightFace;
 				clipFace.ClipFace (face, root->m_normal, root->m_origin, faceOnStack, stack, &leftFace, &rightFace);
@@ -4350,6 +4350,7 @@ xxx *=1;
 				}
 			}
 
+
 			if (hasLeftFaces && hasRightFaces) {
 				dgEdge* outerEdge = NULL;
 				dgMeshTreeCSGFace::Iterator iter (clipFace);
@@ -4362,6 +4363,9 @@ xxx *=1;
 				}
 				_ASSERTE (outerEdge);
 				_ASSERTE (clipFace.CheckConsistency ());
+
+if (xxx == 18)
+xxx *=1;
 
 				dgEdge* edge = face;
 				bool firstTime = true;
@@ -4427,8 +4431,6 @@ xxx *=1;
 								tmp = tmp->m_twin->m_next;
 							} while (tmp != outerEdgeFirst->m_prev->m_twin);
 
-		
-
 							if (node) {
 								edgeList.Insert(edge->m_twin, edge->m_twin);
 								edgeList.Insert(edge->m_twin->m_next, edge->m_twin->m_next);
@@ -4439,6 +4441,9 @@ xxx *=1;
 					firstTime = false;
 					edge = edge->m_next;
 				} while (edge != face);
+
+
+
 
 				dgList<dgClipEdgePair> queue (GetAllocator());
 				dgInt32 interiorEdgeMark = clipFace.IncLRU();
@@ -4493,7 +4498,26 @@ xxx *=1;
 							_ASSERTE (end);
 							_ASSERTE (end->m_incidentVertex == dgInt32 (ptr->m_twin->m_userData));
 
-							
+							edge->m_userData = begin->m_userData;
+							twin->m_userData = end->m_userData;;
+
+							edge->m_incidentFace = begin->m_prev->m_incidentFace;
+							twin->m_incidentFace = end->m_prev->m_incidentFace;
+
+							edge->m_twin = twin;
+							twin->m_twin = edge;
+
+							edge->m_prev = begin->m_prev;
+							begin->m_prev->m_next = edge;
+
+							twin->m_next = begin;
+							begin->m_prev = twin;
+
+							twin->m_prev = end->m_prev;
+							end->m_prev->m_next = twin;
+
+							edge->m_next = end;
+							end->m_prev = edge;
 						}
 					} else {
 						_ASSERTE ((ptr->m_next->m_userData != -1) || (ptr->m_userData != -1));
@@ -4608,7 +4632,9 @@ xxx *=1;
 							do {
 								if ((ptr1->m_userData != -1) && (ptr1->m_next->m_userData != -1)) {
 									pair.m_edgeOneFace = mesh.FindEdge(dgInt32 (ptr1->m_userData), dgInt32 (ptr1->m_next->m_userData));
-									break;
+									if (pair.m_edgeOneFace) {
+										break;
+									}
 								}
 
 								ptr1 = ptr1->m_next;
@@ -4627,9 +4653,10 @@ xxx *=1;
 							do {
 								if ((ptr1->m_userData != -1) && (ptr1->m_next->m_userData != -1)) {
 									pair.m_edgeOneFace = mesh.FindEdge(dgInt32 (ptr1->m_userData), dgInt32 (ptr1->m_next->m_userData));
-									break;
+									if (pair.m_edgeOneFace) {
+										break;
+									}
 								}
-
 								ptr1 = ptr1->m_next;
 							} while (ptr1 != ptr->m_twin);
 							_ASSERTE (pair.m_edgeOneFace);
