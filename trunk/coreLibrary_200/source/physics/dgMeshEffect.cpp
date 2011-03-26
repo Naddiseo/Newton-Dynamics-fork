@@ -1536,8 +1536,7 @@ void dgMeshEffect::AddPolygon (dgInt32 count, const dgFloat64* const vertexList,
 		}
 
 		polygon.BeginFace();
-		dgEdge* xxx =  polygon.AddFace(count, indexList, NULL);
-		_ASSERTE (xxx);
+		polygon.AddFace(count, indexList, NULL);
 		polygon.EndFace();
 		polygon.Triangulate(vertexList, strideIndBytes, NULL);
 
@@ -4226,7 +4225,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	dgInt32 leftCount = 0;
 	dgInt32 rightCount = 0;
 
-static int xxx;
+//static int xxx;
 	
 	dgInt32 rightFaceId = 1 << 24;
 	dgInt32 leftFaceId =  2 << 24;
@@ -4236,9 +4235,9 @@ static int xxx;
 		edgeList.Remove (edgeList.GetRoot());
 		
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
-xxx ++;
-if (xxx == 22)
-xxx *=1;
+//xxx ++;
+//if (xxx == 22)
+//xxx *=1;
 
 			dgMeshTreeCSGFace clipFace (mesh, face, lastVertexIndex);
 
@@ -4430,9 +4429,6 @@ xxx *=1;
 				} while (edge != outerEdge);
 
 
-if (xxx == 22)
-xxx *=1;
-
 				while (queue.GetCount()) {
 					dgClipEdgePair pair (queue.GetFirst()->GetInfo());
 					queue.Remove(queue.GetFirst());
@@ -4612,7 +4608,6 @@ xxx *=1;
 
 								ptr1 = ptr1->m_next;
 							} while (ptr1 != ptr);
-							_ASSERTE (pair.m_edgeOneFace);
 							if (pair.m_edgeOneFace) {
 								ptr->m_mark = interiorEdgeMark;
 								queue.Append (pair);
@@ -4635,7 +4630,6 @@ xxx *=1;
 								}
 								ptr1 = ptr1->m_next;
 							} while (ptr1 != ptr->m_twin);
-							_ASSERTE (pair.m_edgeOneFace);
 							if (pair.m_edgeOneFace) {
 								ptr->m_twin->m_mark = interiorEdgeMark;
 								queue.Append (pair);

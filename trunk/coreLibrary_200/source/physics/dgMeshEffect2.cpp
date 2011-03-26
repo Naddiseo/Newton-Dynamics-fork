@@ -2188,23 +2188,23 @@ xxxx ++;
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
 			if (leftMeshClipper && rightMeshClipper) {
-
+/*
 if (xxxx == 1){
 convexMesh->Release();
 convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 convexMesh->BeginPolygon();
-//convexMesh->MergeFaces(leftMeshClipper);
-convexMesh->MergeFaces(rightMeshClipper);
+convexMesh->MergeFaces(leftMeshClipper);
+//convexMesh->MergeFaces(rightMeshClipper);
 //convexMesh->MergeFaces(leftConvexMesh);
 //convexMesh->MergeFaces(rightConvexMesh);
 convexMesh->EndPolygon();
 //_ASSERTE (!convexMesh->HasOpenEdges());
 }
+*/
 
 
 
 
-/*
 				convexMesh->Release();
 				convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
@@ -2212,11 +2212,12 @@ convexMesh->EndPolygon();
 				convexMesh->MergeFaces(leftConvexMesh);
 				convexMesh->MergeFaces(leftMeshClipper);
 				convexMesh->EndPolygon();
+				convexMesh->ConvertToPolygons();
 
-if(xxxx == 5){
+//if(xxxx == 5){
 				_ASSERTE (!convexMesh->HasOpenEdges());
-}
-*/
+//}
+
 			}
 		}
 
