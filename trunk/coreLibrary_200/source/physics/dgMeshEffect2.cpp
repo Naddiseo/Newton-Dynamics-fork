@@ -2080,8 +2080,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 	dgBigVector maxBox;
 	CalculateAABB (minBox, maxBox);
 	maxBox -= minBox;
-	//dgFloat32 bboxDiagnalFactor = 4.0f;
-	dgFloat32 bboxDiagnalFactor = 1.0f;
+	dgFloat32 bboxDiagnalFactor = 4.0f;
 	dgFloat64 perimeterConvexBound = bboxDiagnalFactor * sqrt(maxBox % maxBox);
 
 	dgInt32 tetraCount = delaunayTetrahedras.GetCount();
@@ -2186,20 +2185,20 @@ xxxx ++;
 		dgMeshEffect* rightMeshClipper = NULL;
 
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
-//		if (leftConvexMesh && rightConvexMesh) {
-//			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
-//			if (leftMeshClipper && rightMeshClipper) {
+		if (leftConvexMesh && rightConvexMesh) {
+			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
+			if (leftMeshClipper && rightMeshClipper) {
 
 if (xxxx == 1){
 convexMesh->Release();
 convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 convexMesh->BeginPolygon();
 //convexMesh->MergeFaces(leftMeshClipper);
-//convexMesh->MergeFaces(rightMeshClipper);
+convexMesh->MergeFaces(rightMeshClipper);
 //convexMesh->MergeFaces(leftConvexMesh);
-convexMesh->MergeFaces(rightConvexMesh);
+//convexMesh->MergeFaces(rightConvexMesh);
 convexMesh->EndPolygon();
-_ASSERTE (!convexMesh->HasOpenEdges());
+//_ASSERTE (!convexMesh->HasOpenEdges());
 }
 
 
@@ -2218,8 +2217,8 @@ if(xxxx == 5){
 				_ASSERTE (!convexMesh->HasOpenEdges());
 }
 */
-//			}
-//		}
+			}
+		}
 
 		if (leftConvexMesh) {
 			leftConvexMesh->Release();
