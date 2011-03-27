@@ -8239,11 +8239,10 @@ void NewtonMeshAddFace(const NewtonMesh* const mesh, int vertexCount, const dFlo
 
 void NewtonMeshEndFace(const NewtonMesh* const mesh)
 {
-	
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 
 	TRACE_FUNTION(__FUNCTION__);
-	meshEffect->EndPolygon();
+	meshEffect->EndPolygon(dgFloat64 (1.0e-8f));
 }
 
 void NewtonMeshBuildFromVertexListIndexList(const NewtonMesh* const mesh,
@@ -8253,7 +8252,6 @@ void NewtonMeshBuildFromVertexListIndexList(const NewtonMesh* const mesh,
 	const dFloat* const uv0, int uv0StrideInBytes, const int* const uv0Index,
 	const dFloat* const uv1, int uv1StrideInBytes, const int* const uv1Index)
 {
-	
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 
 	TRACE_FUNTION(__FUNCTION__);

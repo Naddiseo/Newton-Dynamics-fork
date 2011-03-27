@@ -31,13 +31,17 @@ class dgMeshEffect;
 class dgMeshTreeCSGFace: public dgPolyhedra
 {
 	public:
-	dgMeshTreeCSGFace (const dgMeshEffect& mesh, const dgEdge* const face, dgInt32 vertexCount);
+	dgMeshTreeCSGFace (dgMeshEffect& mesh, dgEdge* const face, dgInt32 vertexCount);
 	void ClipFace (dgEdge* const face, const dgHugeVector& normal, const dgHugeVector& origin, dgEdge** const poolReplacement, dgInt32 poolCount, dgEdge** leftOut, dgEdge** rightOut);
 	dgInt32 AddPoint (const dgBigVector& point);
 
-	bool CheckConsistency ();
+	void MatchFace (dgInt32 leftFaceId, dgInt32 rightFaceId);
+
+	bool CheckConsistency () const;
 	dgInt32 m_count;
 	dgInt32 m_lastVertexIndex;
+	dgEdge* m_face;
+	dgMeshEffect* m_mesh;
 	bool m_intepolatedVertex[DG_MESH_EFFECT_POINT_SPLITED];
 	dgBigVector m_points[DG_MESH_EFFECT_POINT_SPLITED];
 };
