@@ -621,6 +621,13 @@ _ASSERTE (!poolCount);
 
 void dgMeshTreeCSGFace::MatchFace (dgInt32 leftFaceId, dgInt32 rightFaceId, dgTree<dgEdge*,dgEdge*>& edgeList)
 {
+
+static int xxx;
+xxx ++;
+if (xxx == 8)
+xxx *=1;
+
+
 	dgEdge* outerEdge = NULL;
 	dgMeshTreeCSGFace::Iterator iter (*this);
 	for (iter.Begin(); iter; iter ++) {
@@ -634,8 +641,8 @@ void dgMeshTreeCSGFace::MatchFace (dgInt32 leftFaceId, dgInt32 rightFaceId, dgTr
 	_ASSERTE (CheckConsistency ());
 
 	dgEdge* edge = m_face;
-	bool firstTime = true;
 	do {
+		dgEdge* const nextEdge = edge->m_next;
 
 		dgEdge* outerEdgeFirst = NULL;
 		dgEdge* ptr = outerEdge;
@@ -689,16 +696,18 @@ void dgMeshTreeCSGFace::MatchFace (dgInt32 leftFaceId, dgInt32 rightFaceId, dgTr
 
 
 				dgTree<dgEdge*,dgEdge*>::dgTreeNode* const node = edgeList.Find(edge->m_twin);
+				bool fistLoop = (edge == m_face) ;
 				edge = m_mesh->InsertEdgeVertex (edge, t);
+				if (fistLoop) {
+					m_face = edge;
+				}
+
 				edge->m_incidentFace = outerEdgeFirst->m_twin->m_incidentFace + 1;
 				dgEdge* tmp = outerEdgeFirst->m_twin;
 				do {
 					tmp->m_userData = edge->m_incidentVertex;
 					tmp = tmp->m_twin->m_next;
 				} while (tmp != outerEdgeFirst->m_twin);
-				if (firstTime) {
-					m_face = edge;
-				}
 
 				edge = edge->m_next;
 				edge->m_incidentFace = outerEdgeFirst->m_prev->m_twin->m_incidentFace + 1;
@@ -714,10 +723,10 @@ void dgMeshTreeCSGFace::MatchFace (dgInt32 leftFaceId, dgInt32 rightFaceId, dgTr
 				}
 			}
 		}
-
-		firstTime = false;
-		edge = edge->m_next;
+		
+		edge = nextEdge;
 	} while (edge != m_face);
+
 
 
 	dgList<dgClipEdgePair> queue (GetAllocator());
@@ -734,6 +743,8 @@ void dgMeshTreeCSGFace::MatchFace (dgInt32 leftFaceId, dgInt32 rightFaceId, dgTr
 		edge = edge->m_next;
 	} while (edge != outerEdge);
 
+if (xxx == 8)
+xxx *=1;
 
 	while (queue.GetCount()) {
 		dgClipEdgePair pair (queue.GetFirst()->GetInfo());
