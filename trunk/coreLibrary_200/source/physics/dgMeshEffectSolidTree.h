@@ -30,12 +30,20 @@ class dgMeshEffect;
 
 class dgMeshTreeCSGFace: public dgPolyhedra
 {
+
+	class dgClipEdgePair
+	{
+		public:
+		dgEdge* m_clipEdge;
+		dgEdge* m_edgeOneFace;
+	};
+
 	public:
 	dgMeshTreeCSGFace (dgMeshEffect& mesh, dgEdge* const face, dgInt32 vertexCount);
 	void ClipFace (dgEdge* const face, const dgHugeVector& normal, const dgHugeVector& origin, dgEdge** const poolReplacement, dgInt32 poolCount, dgEdge** leftOut, dgEdge** rightOut);
 	dgInt32 AddPoint (const dgBigVector& point);
 
-	void MatchFace (dgInt32 leftFaceId, dgInt32 rightFaceId);
+	void MatchFace (dgInt32 leftFaceId, dgInt32 rightFaceId, dgTree<dgEdge*,dgEdge*>& edgeList);
 
 	bool CheckConsistency () const;
 	dgInt32 m_count;

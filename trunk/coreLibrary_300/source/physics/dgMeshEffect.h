@@ -114,7 +114,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	
 	void BeginPolygon ();
 	void AddPolygon (dgInt32 count, const dgFloat64* const vertexList, dgInt32 stride, dgInt32 material);
-	void EndPolygon ();
+	void EndPolygon (dgFloat64 tol);
 
 	void PackVertexArrays ();
 
@@ -247,6 +247,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	
 	friend class dgConvexHull3d;
 	friend class dgConvexHull4d;
+	friend class dgMeshTreeCSGFace;
 	friend class dgMeshEffectSolidTree;
 };
 

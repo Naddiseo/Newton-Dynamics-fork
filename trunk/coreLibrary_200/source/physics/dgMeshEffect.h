@@ -247,6 +247,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	
 	friend class dgConvexHull3d;
 	friend class dgConvexHull4d;
+	friend class dgMeshTreeCSGFace;
 	friend class dgMeshEffectSolidTree;
 };
 

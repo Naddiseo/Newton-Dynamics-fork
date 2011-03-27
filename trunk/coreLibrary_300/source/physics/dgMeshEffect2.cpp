@@ -2006,7 +2006,7 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 		convexMesh->Release();
 	}
 
-	voronoiPartion->EndPolygon();
+	voronoiPartion->EndPolygon(dgFloat64 (1.0e-5f));
 	
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgControlFP (controlWorld, _MCW_PC);
@@ -2184,42 +2184,29 @@ xxxx ++;
 		dgMeshEffect* leftMeshClipper = NULL;
 		dgMeshEffect* rightMeshClipper = NULL;
 
+if (xxxx == 2){
+
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
 			if (leftMeshClipper && rightMeshClipper) {
-/*
-if (xxxx == 1){
-convexMesh->Release();
-convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
-convexMesh->BeginPolygon();
-convexMesh->MergeFaces(leftMeshClipper);
-//convexMesh->MergeFaces(rightMeshClipper);
-//convexMesh->MergeFaces(leftConvexMesh);
-//convexMesh->MergeFaces(rightConvexMesh);
-convexMesh->EndPolygon();
-//_ASSERTE (!convexMesh->HasOpenEdges());
-}
-*/
-
-
-
 
 				convexMesh->Release();
 				convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
 				convexMesh->BeginPolygon();
-				convexMesh->MergeFaces(leftConvexMesh);
-				convexMesh->MergeFaces(leftMeshClipper);
-				convexMesh->EndPolygon();
-				convexMesh->ConvertToPolygons();
+//convexMesh->MergeFaces(leftConvexMesh);
+//convexMesh->MergeFaces(rightConvexMesh);
+//convexMesh->MergeFaces(rightMeshClipper);
+convexMesh->MergeFaces(leftMeshClipper);
 
-//if(xxxx == 5){
+//				convexMesh->MergeFaces(leftConvexMesh);
+//				convexMesh->MergeFaces(leftMeshClipper);
+				convexMesh->EndPolygon(dgFloat64 (1.0e-5f));
 				_ASSERTE (!convexMesh->HasOpenEdges());
-//}
-
 			}
 		}
+}
 
 		if (leftConvexMesh) {
 			leftConvexMesh->Release();
@@ -2259,18 +2246,18 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 		}
 
 //if(xxxx == 5)
-if(xxxx == 1)
+if(xxxx == 2)
 		voronoiPartion->MergeFaces(convexMesh);
 		layer += dgFloat64 (1.0f);
 
 		convexMesh->Release();
 
 //if(xxxx == 5)
-if(xxxx == 1)
+if(xxxx == 2)
 break;
 	}
 
-	voronoiPartion->EndPolygon();
+	voronoiPartion->EndPolygon(dgFloat64 (1.0e-5f));
 	
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgControlFP (controlWorld, _MCW_PC);

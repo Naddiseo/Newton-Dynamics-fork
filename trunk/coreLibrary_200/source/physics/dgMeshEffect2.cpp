@@ -2185,6 +2185,7 @@ xxxx ++;
 		dgMeshEffect* rightMeshClipper = NULL;
 
 if (xxxx == 2){
+
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
@@ -2196,15 +2197,13 @@ if (xxxx == 2){
 				convexMesh->BeginPolygon();
 //convexMesh->MergeFaces(leftConvexMesh);
 //convexMesh->MergeFaces(rightConvexMesh);
-convexMesh->MergeFaces(leftMeshClipper);
 //convexMesh->MergeFaces(rightMeshClipper);
+convexMesh->MergeFaces(leftMeshClipper);
 
 //				convexMesh->MergeFaces(leftConvexMesh);
 //				convexMesh->MergeFaces(leftMeshClipper);
 				convexMesh->EndPolygon(dgFloat64 (1.0e-5f));
-//				convexMesh->ConvertToPolygons();
 				_ASSERTE (!convexMesh->HasOpenEdges());
-
 			}
 		}
 }
