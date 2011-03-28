@@ -749,7 +749,7 @@ xxx *=1;
 
 	while (queue.GetCount()) {
 xxx1 ++;
-if (xxx1 == 77)
+if (xxx1 == 84)
 xxx1 *= 1;
 
 		dgClipEdgePair pair (queue.GetFirst()->GetInfo());
