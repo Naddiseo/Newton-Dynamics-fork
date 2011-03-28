@@ -623,6 +623,7 @@ void dgMeshTreeCSGFace::MatchFace (dgInt32 leftFaceId, dgInt32 rightFaceId, dgTr
 {
 
 static int xxx;
+static int xxx1;
 xxx ++;
 if (xxx == 8)
 xxx *=1;
@@ -747,6 +748,10 @@ if (xxx == 8)
 xxx *=1;
 
 	while (queue.GetCount()) {
+xxx1 ++;
+if (xxx1 == 75)
+xxx1 *= 1;
+
 		dgClipEdgePair pair (queue.GetFirst()->GetInfo());
 		queue.Remove(queue.GetFirst());
 
