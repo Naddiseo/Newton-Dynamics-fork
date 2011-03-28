@@ -31,15 +31,21 @@ dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMeshEffect& mesh, dgEdge* const face, dg
 	,m_lastVertexIndex(vertexCount)
 	,m_face(face)
 	,m_mesh(&mesh)
+	,m_inteplationFace(mesh.GetAllocator())
 {
 	const dgEdge* ptr = face;
 
 	const dgFloat64 *const vertex = mesh.GetVertexPool();
 	dgInt32 stride = mesh.GetVertexStrideInByte() / sizeof (dgFloat64);
 	
+	
 	dgInt32 indexList[256];
+	dgInt32 interplatedIndexList[256];
+	dgInt64 interplatedAttrbList[256];
 	do {
 		indexList[m_count] = m_count;	
+		interplatedAttrbList [m_count] = ptr->m_userData; 
+		interplatedIndexList[m_count] = ptr->m_incidentVertex;
 		m_intepolatedVertex[m_count] = (ptr->m_incidentVertex >= m_lastVertexIndex) ? true : false;
 		dgInt32 index = ptr->m_incidentVertex * stride;
 
@@ -52,6 +58,10 @@ dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMeshEffect& mesh, dgEdge* const face, dg
 	BeginFace();
 	dgEdge* const edge = AddFace(m_count, indexList);
 	EndFace();
+
+	m_inteplationFace.BeginFace();
+	m_terpolationEdge = m_inteplationFace.AddFace(m_count, interplatedIndexList, interplatedAttrbList);
+	m_inteplationFace.EndFace();
 
 	const dgEdge* src = face;
 	dgEdge* dst = edge;
@@ -743,6 +753,7 @@ xxx *=1;
 		queue.Append (pair);
 		edge = edge->m_next;
 	} while (edge != outerEdge);
+
 
 if (xxx == 8)
 xxx *=1;

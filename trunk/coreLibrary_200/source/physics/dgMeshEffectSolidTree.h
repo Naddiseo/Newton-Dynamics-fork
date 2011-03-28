@@ -37,7 +37,6 @@ class dgMeshTreeCSGFace: public dgPolyhedra
 		dgEdge* m_clipEdge;
 		dgEdge* m_edgeOneFace;
 	};
-
 	public:
 	dgMeshTreeCSGFace (dgMeshEffect& mesh, dgEdge* const face, dgInt32 vertexCount);
 	void ClipFace (dgEdge* const face, const dgHugeVector& normal, const dgHugeVector& origin, dgEdge** const poolReplacement, dgInt32 poolCount, dgEdge** leftOut, dgEdge** rightOut);
@@ -52,6 +51,9 @@ class dgMeshTreeCSGFace: public dgPolyhedra
 	dgMeshEffect* m_mesh;
 	bool m_intepolatedVertex[DG_MESH_EFFECT_POINT_SPLITED];
 	dgBigVector m_points[DG_MESH_EFFECT_POINT_SPLITED];
+	dgPolyhedra m_inteplationFace;
+	dgEdge* m_terpolationEdge;
+
 };
 
 class dgMeshEffectSolidTree
