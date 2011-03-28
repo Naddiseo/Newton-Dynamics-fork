@@ -739,18 +739,13 @@ xxx *=1;
 	} while (edge != m_face);
 
 
-
-	dgList<dgClipEdgePair> queue (GetAllocator());
+	dgList<dgEdge*> queue (GetAllocator());
 	dgInt32 interiorEdgeMark = IncLRU();
 	edge = outerEdge;
 	do {
 		edge->m_mark = interiorEdgeMark;
 		edge->m_twin->m_mark = interiorEdgeMark;
-		dgClipEdgePair pair;
-		pair.m_clipEdge = edge->m_twin;
-		pair.m_edgeOneFace = m_mesh->FindEdge(dgInt32 (edge->m_twin->m_userData), dgInt32 (edge->m_prev->m_twin->m_userData));
-		_ASSERTE (pair.m_edgeOneFace);
-		queue.Append (pair);
+		queue.Append (edge->m_twin);
 		edge = edge->m_next;
 	} while (edge != outerEdge);
 
@@ -763,43 +758,44 @@ xxx1 ++;
 if (xxx1 == 84)
 xxx1 *= 1;
 
-		dgClipEdgePair pair (queue.GetFirst()->GetInfo());
+		dgEdge* const clippedEdge = queue.GetFirst()->GetInfo();
 		queue.Remove(queue.GetFirst());
 
-		dgEdge* ptr = pair.m_clipEdge;
-		if ((ptr->m_userData != -1) && (ptr->m_next->m_userData != -1)) {
-			dgEdge* const missingEdge = m_mesh->FindEdge(dgInt32 (ptr->m_userData), dgInt32 (ptr->m_next->m_userData));
+		if ((clippedEdge->m_userData != -1) && (clippedEdge->m_next->m_userData != -1)) {
+			dgEdge* const missingEdge = m_mesh->FindEdge(dgInt32 (clippedEdge->m_userData), dgInt32 (clippedEdge->m_next->m_userData));
 			if (!missingEdge) {
-				dgEdge* const edge = m_mesh->AddHalfEdge(dgInt32 (ptr->m_userData), dgInt32 (ptr->m_twin->m_userData));
-				dgEdge* const twin = m_mesh->AddHalfEdge(dgInt32 (ptr->m_twin->m_userData), dgInt32 (ptr->m_userData));
+				dgEdge* const edge = m_mesh->AddHalfEdge(dgInt32 (clippedEdge->m_userData), dgInt32 (clippedEdge->m_twin->m_userData));
+				dgEdge* const twin = m_mesh->AddHalfEdge(dgInt32 (clippedEdge->m_twin->m_userData), dgInt32 (clippedEdge->m_userData));
 				_ASSERTE (edge);
 				_ASSERTE (twin);
 
-				dgEdge* begin = NULL;	
-				dgEdge* tmp = pair.m_edgeOneFace;	
-				do {
-					if (tmp->m_incidentVertex == dgInt32 (ptr->m_userData)) {
-						begin = tmp;
-						break;
-					}
-					tmp = tmp->m_next;
-				} while (tmp != pair.m_edgeOneFace);
-				_ASSERTE (begin);
-				_ASSERTE (begin->m_incidentVertex == dgInt32 (ptr->m_userData));
+//				dgEdge* begin = NULL;	
+//				dgEdge* tmp = pair.m_edgeOneFace;	
+//				do {
+//					if (tmp->m_incidentVertex == dgInt32 (ptr->m_userData)) {
+//						begin = tmp;
+//						break;
+//					}
+//					tmp = tmp->m_next;
+//				} while (tmp != pair.m_edgeOneFace);
+//				_ASSERTE (begin);
+//				_ASSERTE (begin->m_incidentVertex == dgInt32 (ptr->m_userData));
 
+//
+//				dgEdge* end = NULL;	
+//				tmp = pair.m_edgeOneFace;	
+//				do {
+//					if (tmp->m_incidentVertex == dgInt32 (ptr->m_twin->m_userData)) {
+//						end = tmp;
+//						break;
+//					}
+//					tmp = tmp->m_next;
+//				} while (tmp != pair.m_edgeOneFace);
+//				_ASSERTE (end);
+//				_ASSERTE (end->m_incidentVertex == dgInt32 (ptr->m_twin->m_userData));
+				_ASSERTE (0);
 
-				dgEdge* end = NULL;	
-				tmp = pair.m_edgeOneFace;	
-				do {
-					if (tmp->m_incidentVertex == dgInt32 (ptr->m_twin->m_userData)) {
-						end = tmp;
-						break;
-					}
-					tmp = tmp->m_next;
-				} while (tmp != pair.m_edgeOneFace);
-				_ASSERTE (end);
-				_ASSERTE (end->m_incidentVertex == dgInt32 (ptr->m_twin->m_userData));
-
+/*
 				edge->m_userData = begin->m_userData;
 				twin->m_userData = end->m_userData;;
 
@@ -820,8 +816,12 @@ xxx1 *= 1;
 
 				edge->m_next = end;
 				end->m_prev = edge;
+*/
 			}
+/*
 		} else {
+			_ASSERTE (0);
+/*
 			_ASSERTE ((ptr->m_next->m_userData != -1) || (ptr->m_userData != -1));
 			if (ptr->m_userData != -1) {
 
@@ -922,11 +922,14 @@ xxx1 *= 1;
 					tmp = tmp->m_twin->m_next;
 				} while (tmp != ptr);
 			}
+*/
 		}
 
+		dgEdge* ptr = clippedEdge;
 		do {
-			if (ptr->m_mark != interiorEdgeMark) {
 
+			if (ptr->m_mark != interiorEdgeMark) {
+/*
 				dgClipEdgePair pair;
 				pair.m_clipEdge = ptr;
 				pair.m_edgeOneFace = NULL;
@@ -945,11 +948,13 @@ xxx1 *= 1;
 					ptr->m_mark = interiorEdgeMark;
 					queue.Append (pair);
 				}
+*/
+				ptr->m_mark = interiorEdgeMark;
+				queue.Append (ptr);
 			}
 
 			if (ptr->m_twin->m_mark != interiorEdgeMark) {
-
-
+/*
 				dgClipEdgePair pair;
 				pair.m_clipEdge = ptr->m_twin;
 				pair.m_edgeOneFace = NULL;
@@ -967,8 +972,12 @@ xxx1 *= 1;
 					ptr->m_twin->m_mark = interiorEdgeMark;
 					queue.Append (pair);
 				}
+*/
+				ptr->m_twin->m_mark = interiorEdgeMark;
+				queue.Append (ptr->m_twin);
 			}
+
 			ptr = ptr->m_twin->m_next;
-		} while (ptr != pair.m_clipEdge);
+		} while (ptr != clippedEdge);
 	}
 }
