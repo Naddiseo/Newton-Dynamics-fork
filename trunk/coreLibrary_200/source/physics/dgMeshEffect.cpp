@@ -4438,6 +4438,9 @@ static int xxx;
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
 
 xxx ++;
+if (xxx == 2)
+xxx *=1;
+
 			dgMeshTreeCSGFace clipFace (mesh, face, lastVertexIndex);
 			dgEdge* ptr = face;
 			do {
