@@ -351,6 +351,8 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 				} 
 			} 
 
+if (fabs (maxDist.GetAproximateValue()) < 1.0e-5f)
+maxDist = dgGoogol(0.0f);
 
 			if ((minDist.GetAproximateValue() < dgFloat64 (0.0f)) && (maxDist.GetAproximateValue() > dgFloat64 (0.0f))) {
 _ASSERTE (0);
