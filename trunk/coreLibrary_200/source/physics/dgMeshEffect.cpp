@@ -4023,11 +4023,7 @@ return;
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
 
-	static int xxx;
-	xxx ++;
-	if (xxx == 2)
-		xxx *=1;
-
+	
 	for (iter.Begin(); iter; ) {
 		dgEdge* const face = &(*iter);
 		iter ++;
@@ -4240,7 +4236,6 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	dgInt32 leftCount = 0;
 	dgInt32 rightCount = 0;
 
-static int xxx;
 	
 	dgInt32 rightFaceId = 1 << 24;
 	dgInt32 leftFaceId =  2 << 24;
@@ -4250,10 +4245,6 @@ static int xxx;
 		edgeList.Remove (edgeList.GetRoot());
 		
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
-//xxx ++;
-//if (xxx == 22)
-//xxx *=1;
-
 			dgMeshTreeCSGFace clipFace (mesh, face, lastVertexIndex);
 
 

@@ -176,18 +176,18 @@ dgInt32 dgCollisionConvexHull::GetFaceIndices (dgInt32 index, dgInt32* indices) 
 	return count;
 }
 
-dgBigVector dgCollisionConvexHull::FaceNormal (const dgEdge *face, const dgVector* const pool) const
+dgBigVector dgCollisionConvexHull::FaceNormal (const dgEdge *face, const dgBigVector* const pool) const
 {
 	const dgEdge *edge = face;
-	dgBigVector p0 (&pool[edge->m_incidentVertex].m_x);
+	dgBigVector p0 (pool[edge->m_incidentVertex]);
 	edge = edge->m_next;
 
-	dgBigVector p1 (&pool[edge->m_incidentVertex].m_x);
+	dgBigVector p1 (pool[edge->m_incidentVertex]);
 	dgBigVector e1 (p1 - p0);
 
 	dgBigVector normal (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 	for (edge = edge->m_next; edge != face; edge = edge->m_next) {
-		dgBigVector p2 (&pool[edge->m_incidentVertex].m_x);
+		dgBigVector p2 (pool[edge->m_incidentVertex]);
 		dgBigVector e2 (p2 - p0);
 		dgBigVector n1 (e1 * e2);
 #ifdef _DEBUG
@@ -217,14 +217,11 @@ dgBigVector dgCollisionConvexHull::FaceNormal (const dgEdge *face, const dgVecto
 }
 
 
-bool dgCollisionConvexHull::RemoveCoplanarEdge (dgPolyhedra& polyhedra, dgVector* const hullVertexArray) const
+bool dgCollisionConvexHull::RemoveCoplanarEdge (dgPolyhedra& polyhedra, const dgBigVector* const hullVertexArray) const
 {
-	bool removeEdge;
-	dgInt32 mark;
-
-	removeEdge = false;
+	bool removeEdge = false;
 	// remove coplanar edges
-	mark = polyhedra.IncLRU();
+	dgInt32 mark = polyhedra.IncLRU();
 	dgPolyhedra::Iterator iter (polyhedra);
 	for (iter.Begin(); iter; ) {
 		dgEdge* edge0 = &(*iter);
@@ -283,11 +280,8 @@ bool dgCollisionConvexHull::RemoveCoplanarEdge (dgPolyhedra& polyhedra, dgVector
 						}
 
 					} else {
-						dgEdge *next; 
-						dgEdge *prev; 
-
-						next = edge0->m_next;
-						prev = edge0->m_prev;
+						dgEdge* next = edge0->m_next;
+						dgEdge* prev = edge0->m_prev;
 						polyhedra.DeleteEdge(edge0);
 						for (edge0 = next; edge0->m_prev->m_twin == edge0; edge0 = next) {
 							next = edge0->m_next;
@@ -310,12 +304,12 @@ bool dgCollisionConvexHull::RemoveCoplanarEdge (dgPolyhedra& polyhedra, dgVector
 }
 
 
-bool dgCollisionConvexHull::CheckConvex (dgPolyhedra& polyhedra1, const dgVector* hullVertexArray) const
+bool dgCollisionConvexHull::CheckConvex (dgPolyhedra& polyhedra1, const dgBigVector* hullVertexArray) const
 {
 	dgPolyhedra polyhedra(polyhedra1);
 
 	dgPolyhedra::Iterator iter (polyhedra);
-	dgVector center (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+	dgBigVector center (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 
 	dgInt32 count = 0;
 	dgInt32 mark = polyhedra.IncLRU();
@@ -331,15 +325,15 @@ bool dgCollisionConvexHull::CheckConvex (dgPolyhedra& polyhedra1, const dgVector
 			} while (ptr != edge);
 		}
 	}
-	center = center.Scale (dgFloat32 (1.0f) / dgFloat32 (count));
+	center = center.Scale (dgFloat64 (1.0f) / dgFloat64 (count));
 
 	for (iter.Begin(); iter; iter ++) {
 		dgEdge* const edge = &(*iter);
-		dgBigVector normal0 (FaceNormal (edge, &hullVertexArray[0]));
-		dgBigVector normal1 (FaceNormal (edge->m_twin, &hullVertexArray[0]));
+		dgBigVector normal0 (FaceNormal (edge, hullVertexArray));
+		dgBigVector normal1 (FaceNormal (edge->m_twin, hullVertexArray));
 
-		dgBigPlane plane0 (normal0, - (normal0 % dgBigVector(hullVertexArray[edge->m_incidentVertex])));
-		dgBigPlane plane1 (normal1, - (normal1 % dgBigVector(hullVertexArray[edge->m_twin->m_incidentVertex])));
+		dgBigPlane plane0 (normal0, - (normal0 % hullVertexArray[edge->m_incidentVertex]));
+		dgBigPlane plane1 (normal1, - (normal1 % hullVertexArray[edge->m_twin->m_incidentVertex]));
 		dgFloat64 test0 = plane0.Evalue(center);
 		if (test0 > dgFloat64 (1.0e-3f)) {
 			return false;
@@ -358,14 +352,21 @@ bool dgCollisionConvexHull::CheckConvex (dgPolyhedra& polyhedra1, const dgVector
 
 bool dgCollisionConvexHull::Create (dgInt32 count, dgInt32 strideInBytes, const dgFloat32* const vertexArray, dgFloat32 tolerance)
 {
-_ASSERTE (0);
-/*
-	dgConvexHull3d convexHull (GetAllocator(), vertexArray, strideInBytes, count, tolerance);
+	dgInt32 stride = strideInBytes / sizeof (dgFloat32);
+	dgStack<dgFloat64> buffer(3 * count);
+	for (dgInt32 i = 0; i < count; i ++) {
+		buffer[i * 3 + 0] = vertexArray[i * stride + 0];
+		buffer[i * 3 + 1] = vertexArray[i * stride + 1];
+		buffer[i * 3 + 2] = vertexArray[i * stride + 2];
+	}
+
+	dgConvexHull3d convexHull (GetAllocator(), &buffer[0], 3 * sizeof (dgFloat64), count, tolerance);
 	if (!convexHull.GetCount()) {
 		return false;
 	}
+
 	dgInt32 vertexCount = convexHull.GetVertexCount();
-	dgVector* const hullVertexArray = (dgVector*) convexHull.GetVertexPool();
+	const dgBigVector* const hullVertexArray = convexHull.GetVertexPool();
 
 	dgPolyhedra polyhedra (GetAllocator());
 	polyhedra.BeginFace();
@@ -486,7 +487,6 @@ _ASSERTE (0);
 	}
 	m_faceArray = (dgConvexSimplexEdge **) m_allocator->Malloc(dgInt32 (m_faceCount * sizeof(dgConvexSimplexEdge *)));
 	memcpy (m_faceArray, &faceArray[0], m_faceCount * sizeof(dgConvexSimplexEdge *));
-*/
 	return true;
 }
 
@@ -645,4 +645,6 @@ bool dgCollisionConvexHull::OOBBTest (const dgMatrix& matrix, const dgCollisionC
 	}
 	return ret;
 }
+
+
 

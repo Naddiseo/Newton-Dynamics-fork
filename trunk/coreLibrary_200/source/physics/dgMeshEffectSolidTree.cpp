@@ -631,14 +631,6 @@ _ASSERTE (!poolCount);
 
 void dgMeshTreeCSGFace::MatchFace (dgInt32 leftFaceId, dgInt32 rightFaceId, dgTree<dgEdge*,dgEdge*>& edgeList)
 {
-
-static int xxx;
-static int xxx1;
-xxx ++;
-if (xxx == 8)
-xxx *=1;
-
-
 	dgEdge* outerEdge = NULL;
 	dgMeshTreeCSGFace::Iterator iter (*this);
 	for (iter.Begin(); iter; iter ++) {
@@ -749,14 +741,7 @@ xxx *=1;
 		edge = edge->m_next;
 	} while (edge != outerEdge);
 
-
-if (xxx == 8)
-xxx *=1;
-
 	while (queue.GetCount()) {
-xxx1 ++;
-if (xxx1 == 84)
-xxx1 *= 1;
 
 		dgEdge* const clippedEdge = queue.GetFirst()->GetInfo();
 		queue.Remove(queue.GetFirst());
