@@ -37,9 +37,9 @@ class dgCollisionConvexHull: public dgCollisionConvex
 	
 	bool Create (dgInt32 count, dgInt32 strideInBytes, const dgFloat32* const vertexArray, dgFloat32 tolerance);
 
-	bool RemoveCoplanarEdge (dgPolyhedra& convex, dgVector* const hullVertexArray) const;	
-	dgBigVector FaceNormal (const dgEdge *face, const dgVector* const pool) const;
-	bool CheckConvex (dgPolyhedra& polyhedra, const dgVector* hullVertexArray) const;
+	bool RemoveCoplanarEdge (dgPolyhedra& convex, const dgBigVector* const hullVertexArray) const;	
+	dgBigVector FaceNormal (const dgEdge *face, const dgBigVector* const pool) const;
+	bool CheckConvex (dgPolyhedra& polyhedra, const dgBigVector* hullVertexArray) const;
 
 	virtual dgInt32 CalculateSignature () const;
 	virtual void SetCollisionBBox (const dgVector& p0, const dgVector& p1);
