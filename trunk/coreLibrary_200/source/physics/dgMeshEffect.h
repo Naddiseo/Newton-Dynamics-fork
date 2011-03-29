@@ -50,8 +50,9 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 {
 	public:
 
-	struct dgVertexAtribute 
+	class dgVertexAtribute 
 	{
+		public:
 		dgBigVector m_vertex;
 		dgFloat64 m_normal_x;
 		dgFloat64 m_normal_y;
@@ -63,8 +64,9 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 		dgFloat64 m_material;
 	};
 
-	struct dgIndexArray 
+	class dgIndexArray 
 	{
+		public:
 		dgInt32 m_materialCount;
 		dgInt32 m_indexCount;
 		dgInt32 m_materials[256];
