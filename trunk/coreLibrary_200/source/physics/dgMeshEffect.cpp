@@ -1615,35 +1615,32 @@ void dgMeshEffect::EndPolygon (dgFloat64 tol)
 		index[1] = indexMap[i * 3 + 1];
 		index[2] = indexMap[i * 3 + 2];
 
-#ifdef _DEBUG
+
 		dgBigVector e1 (m_points[index[1]] - m_points[index[0]]);
 		dgBigVector e2 (m_points[index[2]] - m_points[index[0]]);
 
 		dgBigVector n (e1 * e2);
-//		dgFloat64 mag2 = dgSqrt (n % n);
 		dgFloat64 mag2 = n % n;
-		_ASSERTE (mag2 > dgFloat32 (0.0f));
-#endif
+		if (mag2 > dgFloat64 (1.0e-12f)) {
+			userdata[0] = attrIndexMap[i * 3 + 0];
+			userdata[1] = attrIndexMap[i * 3 + 1];
+			userdata[2] = attrIndexMap[i * 3 + 2];
+			dgEdge* edge = AddFace (3, index, userdata);
+			if (!edge) {
+				_ASSERTE ((m_pointCount + 3) <= m_maxPointCount);
 
-//		if (mag2 > DG_MESH_EFFECT_TRIANGLE_MIN_AREA) {
-		userdata[0] = attrIndexMap[i * 3 + 0];
-		userdata[1] = attrIndexMap[i * 3 + 1];
-		userdata[2] = attrIndexMap[i * 3 + 2];
-		dgEdge* edge = AddFace (3, index, userdata);
-		if (!edge) {
-			_ASSERTE ((m_pointCount + 3) <= m_maxPointCount);
+				m_points[m_pointCount + 0] = m_points[index[0]];
+				m_points[m_pointCount + 1] = m_points[index[1]];
+				m_points[m_pointCount + 2] = m_points[index[2]];
 
-			m_points[m_pointCount + 0] = m_points[index[0]];
-			m_points[m_pointCount + 1] = m_points[index[1]];
-			m_points[m_pointCount + 2] = m_points[index[2]];
+				index[0] = m_pointCount + 0;
+				index[1] = m_pointCount + 1;
+				index[2] = m_pointCount + 2;
 
-			index[0] = m_pointCount + 0;
-			index[1] = m_pointCount + 1;
-			index[2] = m_pointCount + 2;
-
-			m_pointCount += 3;
-			edge = AddFace (3, index, userdata);
-			_ASSERTE (edge);
+				m_pointCount += 3;
+				edge = AddFace (3, index, userdata);
+				_ASSERTE (edge);
+			}
 		}
 	}
 	EndFace();
@@ -2905,66 +2902,73 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgBigVecto
 
 			dgBigVector p10 (q1 - q0);
 			dgBigVector p20 (q2 - q0);
-			dgBigVector p_p0 (point - q0);
-			dgBigVector p_p1 (point - q1);
-			dgBigVector p_p2 (point - q2);
+			
+			dgFloat64 dot = p20 % p10;
+			dgFloat64 mag1 = p10 % p10;
+			dgFloat64 mag2 = p20 % p20;
+			dgFloat64 collinear = dot * dot - mag2 * mag1;
+			if (fabs (collinear) > dgFloat64 (1.0e-8f)) {
+				dgBigVector p_p0 (point - q0);
+				dgBigVector p_p1 (point - q1);
+				dgBigVector p_p2 (point - q2);
 
-			dgFloat64 alpha1 = p10 % p_p0;
-			dgFloat64 alpha2 = p20 % p_p0;
-			dgFloat64 alpha3 = p10 % p_p1;
-			dgFloat64 alpha4 = p20 % p_p1;
-			dgFloat64 alpha5 = p10 % p_p2;
-			dgFloat64 alpha6 = p20 % p_p2;
+				dgFloat64 alpha1 = p10 % p_p0;
+				dgFloat64 alpha2 = p20 % p_p0;
+				dgFloat64 alpha3 = p10 % p_p1;
+				dgFloat64 alpha4 = p20 % p_p1;
+				dgFloat64 alpha5 = p10 % p_p2;
+				dgFloat64 alpha6 = p20 % p_p2;
 
-			dgFloat64 vc = alpha1 * alpha4 - alpha3 * alpha2;
-			dgFloat64 vb = alpha5 * alpha2 - alpha1 * alpha6;
-			dgFloat64 va = alpha3 * alpha6 - alpha5 * alpha4;
-			dgFloat64 den = va + vb + vc;
-			dgFloat64 minError = den * (-tol);
-			dgFloat64 maxError = den * (dgFloat32 (1.0f) + tol);
-			if ((va > minError) && (vb > minError) && (vc > minError) && (va < maxError) && (vb < maxError) && (vc < maxError)) {
-				edge2 = ptr;
+				dgFloat64 vc = alpha1 * alpha4 - alpha3 * alpha2;
+				dgFloat64 vb = alpha5 * alpha2 - alpha1 * alpha6;
+				dgFloat64 va = alpha3 * alpha6 - alpha5 * alpha4;
+				dgFloat64 den = va + vb + vc;
+				dgFloat64 minError = den * (-tol);
+				dgFloat64 maxError = den * (dgFloat32 (1.0f) + tol);
+				if ((va > minError) && (vb > minError) && (vc > minError) && (va < maxError) && (vb < maxError) && (vc < maxError)) {
+					edge2 = ptr;
 
-				den = dgFloat64 (1.0f) / (va + vb + vc);
+					den = dgFloat64 (1.0f) / (va + vb + vc);
 
-				dgFloat64 alpha0 = dgFloat32 (va * den);
-				dgFloat64 alpha1 = dgFloat32 (vb * den);
-				dgFloat64 alpha2 = dgFloat32 (vc * den);
+					dgFloat64 alpha0 = dgFloat32 (va * den);
+					dgFloat64 alpha1 = dgFloat32 (vb * den);
+					dgFloat64 alpha2 = dgFloat32 (vc * den);
 
-				const dgVertexAtribute& attr0 = m_attib[edge0->m_userData];
-				const dgVertexAtribute& attr1 = m_attib[edge1->m_userData];
-				const dgVertexAtribute& attr2 = m_attib[edge2->m_userData];
-				dgBigVector normal (attr0.m_normal_x * alpha0 + attr1.m_normal_x * alpha1 + attr2.m_normal_x * alpha2,
-									attr0.m_normal_y * alpha0 + attr1.m_normal_y * alpha1 + attr2.m_normal_y * alpha2,
-									attr0.m_normal_z * alpha0 + attr1.m_normal_z * alpha1 + attr2.m_normal_z * alpha2, dgFloat32 (0.0f));
-				normal = normal.Scale (dgFloat64 (1.0f) / sqrt (normal % normal));
+					const dgVertexAtribute& attr0 = m_attib[edge0->m_userData];
+					const dgVertexAtribute& attr1 = m_attib[edge1->m_userData];
+					const dgVertexAtribute& attr2 = m_attib[edge2->m_userData];
+					dgBigVector normal (attr0.m_normal_x * alpha0 + attr1.m_normal_x * alpha1 + attr2.m_normal_x * alpha2,
+										attr0.m_normal_y * alpha0 + attr1.m_normal_y * alpha1 + attr2.m_normal_y * alpha2,
+										attr0.m_normal_z * alpha0 + attr1.m_normal_z * alpha1 + attr2.m_normal_z * alpha2, dgFloat32 (0.0f));
+					normal = normal.Scale (dgFloat64 (1.0f) / sqrt (normal % normal));
 
-	#ifdef _DEBUG
-				dgBigVector testPoint (attr0.m_vertex.m_x * alpha0 + attr1.m_vertex.m_x * alpha1 + attr2.m_vertex.m_x * alpha2,
-									   attr0.m_vertex.m_y * alpha0 + attr1.m_vertex.m_y * alpha1 + attr2.m_vertex.m_y * alpha2,
-									   attr0.m_vertex.m_z * alpha0 + attr1.m_vertex.m_z * alpha1 + attr2.m_vertex.m_z * alpha2, dgFloat32 (0.0f));
-				_ASSERTE (fabs (testPoint.m_x - point.m_x) < dgFloat32 (1.0e-2f));
-				_ASSERTE (fabs (testPoint.m_y - point.m_y) < dgFloat32 (1.0e-2f));
-				_ASSERTE (fabs (testPoint.m_z - point.m_z) < dgFloat32 (1.0e-2f));
-	#endif
+		#ifdef _DEBUG
+					dgBigVector testPoint (attr0.m_vertex.m_x * alpha0 + attr1.m_vertex.m_x * alpha1 + attr2.m_vertex.m_x * alpha2,
+										   attr0.m_vertex.m_y * alpha0 + attr1.m_vertex.m_y * alpha1 + attr2.m_vertex.m_y * alpha2,
+										   attr0.m_vertex.m_z * alpha0 + attr1.m_vertex.m_z * alpha1 + attr2.m_vertex.m_z * alpha2, dgFloat32 (0.0f));
+					_ASSERTE (fabs (testPoint.m_x - point.m_x) < dgFloat32 (1.0e-2f));
+					_ASSERTE (fabs (testPoint.m_y - point.m_y) < dgFloat32 (1.0e-2f));
+					_ASSERTE (fabs (testPoint.m_z - point.m_z) < dgFloat32 (1.0e-2f));
+		#endif
 
 
-				attribute.m_vertex.m_x = point.m_x;
-				attribute.m_vertex.m_y = point.m_y;
-				attribute.m_vertex.m_z = point.m_z;
-				attribute.m_vertex.m_w = point.m_w;
-				attribute.m_normal_x = normal.m_x;
-				attribute.m_normal_y = normal.m_y;
-				attribute.m_normal_z = normal.m_z;
-				attribute.m_u0 = attr0.m_u0 * alpha0 +  attr1.m_u0 * alpha1 + attr2.m_u0 * alpha2;
-				attribute.m_v0 = attr0.m_v0 * alpha0 +  attr1.m_v0 * alpha1 + attr2.m_v0 * alpha2;
-				attribute.m_u1 = attr0.m_u1 * alpha0 +  attr1.m_u1 * alpha1 + attr2.m_u1 * alpha2;
-				attribute.m_v1 = attr0.m_v1 * alpha0 +  attr1.m_v1 * alpha1 + attr2.m_v1 * alpha2;
+					attribute.m_vertex.m_x = point.m_x;
+					attribute.m_vertex.m_y = point.m_y;
+					attribute.m_vertex.m_z = point.m_z;
+					attribute.m_vertex.m_w = point.m_w;
+					attribute.m_normal_x = normal.m_x;
+					attribute.m_normal_y = normal.m_y;
+					attribute.m_normal_z = normal.m_z;
+					attribute.m_u0 = attr0.m_u0 * alpha0 +  attr1.m_u0 * alpha1 + attr2.m_u0 * alpha2;
+					attribute.m_v0 = attr0.m_v0 * alpha0 +  attr1.m_v0 * alpha1 + attr2.m_v0 * alpha2;
+					attribute.m_u1 = attr0.m_u1 * alpha0 +  attr1.m_u1 * alpha1 + attr2.m_u1 * alpha2;
+					attribute.m_v1 = attr0.m_v1 * alpha0 +  attr1.m_v1 * alpha1 + attr2.m_v1 * alpha2;
 
-				attribute.m_material = attr0.m_material;
-				_ASSERTE (attr0.m_material == attr1.m_material);
-				_ASSERTE (attr0.m_material == attr2.m_material);
-				return attribute; 
+					attribute.m_material = attr0.m_material;
+					_ASSERTE (attr0.m_material == attr1.m_material);
+					_ASSERTE (attr0.m_material == attr2.m_material);
+					return attribute; 
+				}
 			}
 
 			q1 = q2;
@@ -4015,6 +4019,7 @@ bool dgMeshEffect::SeparateDuplicateLoops (dgEdge* const face)
 
 void dgMeshEffect::RepairTJoints ()
 {
+return;
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
 
@@ -4425,8 +4430,6 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	leftMesh->BeginPolygon();
 	rightMesh->BeginPolygon();
 
-static int xxx;
-
 
 	dgInt32 rightFaceId = 1 << 24;
 	dgInt32 leftFaceId =  2 << 24;
@@ -4436,11 +4439,6 @@ static int xxx;
 		edgeList.Remove (edgeList.GetRoot());
 		
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
-
-xxx ++;
-if (xxx == 2)
-xxx *=1;
-
 			dgMeshTreeCSGFace clipFace (mesh, face, lastVertexIndex);
 			dgEdge* ptr = face;
 			do {
@@ -4512,8 +4510,6 @@ xxx *=1;
 			_ASSERTE (clipFace.CheckConsistency ());
 			if (hasLeftFaces && hasRightFaces) {
 
-if (xxx == 2)
-xxx *=1;
 				dgEdge* outerEdge = NULL;
 				dgMeshTreeCSGFace::Iterator iter (clipFace);
 				for (iter.Begin(); iter; iter ++) {
@@ -4652,8 +4648,8 @@ xxx *=1;
 			}
 		}
 	}
-	leftMesh->EndPolygon(dgFloat64 (0.0f));
-	rightMesh->EndPolygon(dgFloat64 (0.0f));
+	leftMesh->EndPolygon(dgFloat64 (dgFloat64 (1.0e-5f)));
+	rightMesh->EndPolygon(dgFloat64 (dgFloat64 (1.0e-5f)));
 
 	if (leftMesh->GetCount() && rightMesh->GetCount()) {
 		*left = leftMesh;

@@ -3558,8 +3558,9 @@ void dgPolyhedra::Triangulate (const dgFloat64* const vertex, dgInt32 strideInBy
 
 	dgInt32 mark = IncLRU();
 	Iterator iter (*this);
-	for (iter.Begin(); iter; iter ++) {
+	for (iter.Begin(); iter; ) {
 		dgEdge* const thisEdge = &(*iter);
+		iter ++;
 
 		if (thisEdge->m_mark == mark) {
 			continue;
