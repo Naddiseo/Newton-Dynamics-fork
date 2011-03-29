@@ -2952,6 +2952,7 @@ dgMeshEffect::dgVertexAtribute dgMeshEffect::InterpolateVertex (const dgBigVecto
 				attribute.m_vertex.m_x = point.m_x;
 				attribute.m_vertex.m_y = point.m_y;
 				attribute.m_vertex.m_z = point.m_z;
+				attribute.m_vertex.m_w = point.m_w;
 				attribute.m_normal_x = normal.m_x;
 				attribute.m_normal_y = normal.m_y;
 				attribute.m_normal_z = normal.m_z;
@@ -4424,8 +4425,9 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	leftMesh->BeginPolygon();
 	rightMesh->BeginPolygon();
 
-//	dgInt32 leftCount = 0;
-//	dgInt32 rightCount = 0;
+static int xxx;
+
+
 	dgInt32 rightFaceId = 1 << 24;
 	dgInt32 leftFaceId =  2 << 24;
 	dgInt32 mark = mesh.IncLRU();
@@ -4435,6 +4437,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 		
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
 
+xxx ++;
 			dgMeshTreeCSGFace clipFace (mesh, face, lastVertexIndex);
 			dgEdge* ptr = face;
 			do {
@@ -4505,6 +4508,9 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 
 			_ASSERTE (clipFace.CheckConsistency ());
 			if (hasLeftFaces && hasRightFaces) {
+
+if (xxx == 2)
+xxx *=1;
 				dgEdge* outerEdge = NULL;
 				dgMeshTreeCSGFace::Iterator iter (clipFace);
 				for (iter.Begin(); iter; iter ++) {
@@ -4590,7 +4596,41 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 				} while (edge != face);
 
 
+				dgInt32 clipMark = clipFace.IncLRU();
+				dgMeshTreeCSGFace::Iterator clipFaceIter (clipFace);
+				for (clipFaceIter.Begin(); clipFaceIter; clipFaceIter ++) {
+					dgEdge* const edge = &(*clipFaceIter);
+					if ((edge->m_incidentFace > 0) && (edge->m_mark != clipMark)) {
+						dgInt32 faceId = edge->m_incidentFace;
+						#ifdef _DEBUG
+						_ASSERTE ((faceId & leftFaceId) | (faceId & rightFaceId));
+						dgEdge* ptr1 = edge;
+						do {
+							_ASSERTE (ptr1->m_incidentFace & faceId);
+							_ASSERTE ((ptr1->m_incidentFace & leftFaceId) | (ptr1->m_incidentFace & rightFaceId));
+							ptr1 = ptr1->m_next;
+						} while (ptr1 != edge);
+						#endif
 
+						dgInt32 count = 0;
+						dgVertexAtribute facePoints[256];
+
+						dgEdge* ptr = edge;
+						do {
+							facePoints[count] = mesh.InterpolateVertex(clipFace.m_points[ptr->m_incidentVertex], face);
+							count ++;
+							ptr->m_mark = clipMark;
+							ptr = ptr->m_next;
+						} while (ptr != edge);
+
+
+						if (ptr->m_incidentFace & leftFaceId) {
+							leftMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+						} else {
+							rightMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+						}
+					}
+				}
 
 			} else {
 				_ASSERTE ((hasLeftFaces & !hasRightFaces) | (!hasLeftFaces & hasRightFaces));
