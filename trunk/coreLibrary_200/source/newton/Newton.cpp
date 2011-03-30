@@ -2717,8 +2717,6 @@ NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const newtonWorld, in
 // See also: NewtonCreateConvexHull, NewtonMeshCreate
 NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, dFloat tolerance, int shapeID)
 {
-	
-
 	TRACE_FUNTION(__FUNCTION__);
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 	return (NewtonCollision*) meshEffect->CreateConvexCollision(tolerance, shapeID);
