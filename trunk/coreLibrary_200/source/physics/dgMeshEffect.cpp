@@ -587,19 +587,16 @@ dgMeshEffect::dgMeshEffect (dgMemoryAllocator* const allocator, const dgMatrix& 
 dgMeshEffect::dgMeshEffect(dgPolyhedra& mesh, const dgMeshEffect& source)
 	:dgPolyhedra (mesh) 
 {
-	_ASSERTE (0);
-/*
 	m_isFlagFace = source.m_isFlagFace;
 	m_pointCount = source.m_pointCount;
 	m_maxPointCount = source.m_maxPointCount;
-	m_points = (dgVector*) GetAllocator()->MallocLow(dgInt32 (m_maxPointCount * sizeof(dgVector)));
-	memcpy (m_points, source.m_points, m_pointCount * sizeof(dgVector));
+	m_points = (dgBigVector*) GetAllocator()->MallocLow(dgInt32 (m_maxPointCount * sizeof(dgBigVector)));
+	memcpy (m_points, source.m_points, m_pointCount * sizeof(dgBigVector));
 
 	m_atribCount = source.m_atribCount;
 	m_maxAtribCount = source.m_maxAtribCount;
 	m_attib = (dgVertexAtribute*) GetAllocator()->MallocLow(dgInt32 (m_maxAtribCount * sizeof(dgVertexAtribute)));
 	memcpy (m_attib, source.m_attib, m_atribCount * sizeof(dgVertexAtribute));
-*/
 }
 
 
@@ -1059,15 +1056,13 @@ dgBigVector dgMeshEffect::GetOrigin ()const
 
 void dgMeshEffect::FixCylindricalMapping (dgVertexAtribute* attribArray) const
 {
-	_ASSERTE (0);
-/*
 	dgPolyhedra::Iterator iter (*this);	
 	for(iter.Begin(); iter; iter ++){
 		dgEdge* const edge = &(*iter);
 		dgVertexAtribute& attrib0 = attribArray[dgInt32 (edge->m_userData)];
 		dgVertexAtribute& attrib1 = attribArray[dgInt32 (edge->m_next->m_userData)];
 
-		dgFloat32 error = dgAbsf (attrib0.m_u0 - attrib1.m_u0);
+		dgFloat64 error = fabs (attrib0.m_u0 - attrib1.m_u0);
 		if (error > dgFloat32 (0.6f)) {
 			if (attrib0.m_u0 < attrib1.m_u0) {
 				attrib0.m_u0 += dgFloat32 (1.0f);
@@ -1085,8 +1080,7 @@ void dgMeshEffect::FixCylindricalMapping (dgVertexAtribute* attribArray) const
 		dgVertexAtribute& attrib0 = attribArray[dgInt32 (edge->m_userData)];
 		dgVertexAtribute& attrib1 = attribArray[dgInt32 (edge->m_next->m_userData)];
 
-		dgFloat32 error;
-		error = dgAbsf (attrib0.m_u0 - attrib1.m_u0);
+		dgFloat64 error = fabs (attrib0.m_u0 - attrib1.m_u0);
 		if (error > dgFloat32 (0.6f)) {
 			if (attrib0.m_u0 < attrib1.m_u0) {
 				attrib0.m_u0 += dgFloat32 (1.0f);
@@ -1097,33 +1091,26 @@ void dgMeshEffect::FixCylindricalMapping (dgVertexAtribute* attribArray) const
 			}
 		}
 	}
-*/
 }
 
 
 void dgMeshEffect::SphericalMapping (dgInt32 material)
 {
-	_ASSERTE (0);
-	/*
+	dgBigVector origin (GetOrigin());
 
-	dgVector origin (GetOrigin());
-
-	dgStack<dgVector>sphere (m_pointCount);
+	dgStack<dgBigVector>sphere (m_pointCount);
 	for (dgInt32 i = 0; i < m_pointCount; i ++) {
-		dgFloat32 u;
-		dgFloat32 v;
-		dgVector point (m_points[i] - origin);
+		dgBigVector point (m_points[i] - origin);
 		point = point.Scale (1.0f / dgSqrt (point % point));
 
-		u = dgAtan2 (point.m_z, point.m_y);
+		dgFloat64 u = dgAtan2 (point.m_z, point.m_y);
 		if (u < dgFloat32 (0.0f)) {
 			u += dgFloat32 (3.141592f * 2.0f);
 		}
-		v  = ClampValue(point.m_x, dgFloat32(-0.9999f), dgFloat32(0.9999f)) * dgFloat32 (0.5f * 3.141592f);
-//		v  = dgSin (ClampValue(point.m_x, dgFloat32(-0.9999f), dgFloat32(0.9999f)));
+		dgFloat64 v = ClampValue(point.m_x, dgFloat64(-0.9999f), dgFloat64(0.9999f)) * dgFloat64 (0.5f * 3.141592f);
 
-		sphere[i].m_x = dgFloat32 (1.0f) - u * dgFloat32 (1.0f / (2.0f * 3.141592f));
-		sphere[i].m_y = dgFloat32 (0.5f) * (dgFloat32 (1.0f) + v / dgFloat32 (0.5f * 3.141592f));
+		sphere[i].m_x = dgFloat64 (1.0f) - u * dgFloat64 (1.0f / (2.0f * 3.141592f));
+		sphere[i].m_y = dgFloat64 (0.5f) * (dgFloat64 (1.0f) + v / dgFloat64 (0.5f * 3.141592f));
 	}
 
 
@@ -1144,7 +1131,6 @@ void dgMeshEffect::SphericalMapping (dgInt32 material)
 
 	FixCylindricalMapping (&attribArray[0]);
 	ApplyAttributeArray (&attribArray[0]);
-*/
 }
 
 void dgMeshEffect::CylindricalMapping (dgInt32 cylinderMaterial, dgInt32 capMaterial)

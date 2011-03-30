@@ -208,7 +208,7 @@ class SimpleShatterEffectEntity: public DemoEntity
 {
 	public:
 	SimpleShatterEffectEntity (DemoMesh* const mesh, const ShatterEffect& columnDebris)
-		:DemoEntity (NULL), m_effect(columnDebris), m_myBody(NULL)
+		:DemoEntity (NULL), m_delay (500), m_effect(columnDebris), m_myBody(NULL)
 	{
 		SetMesh(mesh);
 	}
@@ -220,9 +220,13 @@ class SimpleShatterEffectEntity: public DemoEntity
 
 	void SimulationLister(DemoEntityManager* const scene, DemoEntityManager::dListNode* const mynode, dFloat timeStep)
 	{
+		m_delay --;
+		if (m_delay > 0) {
+			return;
+		}
 
 		// see if the net force on the body comes fr a high impact collision
-		dVector netForce (0.0f, -m_myweight, 0.0f) ;
+		dFloat maxInternalForce = 0.0f;
 		for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(m_myBody); joint; joint = NewtonBodyGetNextContactJoint(m_myBody, joint)) {
 			for (void* contact = NewtonContactJointGetFirstContact (joint); contact; contact = NewtonContactJointGetNextContact (joint, contact)) {
 				//dVector point;
@@ -231,17 +235,19 @@ class SimpleShatterEffectEntity: public DemoEntity
 				NewtonMaterial* const material = NewtonContactGetMaterial (contact);
 				//NewtonMaterialGetContactPositionAndNormal (material, &point.m_x, &normal.m_x);
 				NewtonMaterialGetContactForce(material, m_myBody, &contactForce[0]);
-				netForce += contactForce;
+				dFloat forceMag = contactForce % contactForce;
+				if (forceMag > maxInternalForce) {
+					maxInternalForce = forceMag;
+				}
 			}
 		}
 
-		dFloat mag2 = netForce % netForce ;
+		
 
 		// if the force is bigger than 4 Gravities, It is considered a collision force
-		float maxForce = 20.0f * m_myweight;
+		dFloat maxForce = 10.0f * m_myweight;
 
-
-		if (mag2 > (maxForce * maxForce)) {
+		if (maxInternalForce > (maxForce * maxForce)) {
 			NewtonWorld* const world = NewtonBodyGetWorld(m_myBody);
 
 			dFloat Ixx; 
@@ -329,18 +335,14 @@ class SimpleShatterEffectEntity: public DemoEntity
 		}
 	};
 
+	int m_delay;
 	ShatterEffect m_effect;
 	NewtonBody* m_myBody;
 	dFloat m_myweight; 
 };
 
-/*
-static void AddTopLayer (
-	DemoEntityManager* const scene, 
-	DemoMesh* const visualMesh, 
-	NewtonCollision* const collision,
-	const ShatterEffect& shatterEffect, 
-	dVector location)
+
+static void AddShatterEntity (DemoEntityManager* const scene, DemoMesh* const visualMesh, NewtonCollision* const collision, const ShatterEffect& shatterEffect, dVector location)
 {
 	dQuaternion rotation;
 	SimpleShatterEffectEntity* const entity = new SimpleShatterEffectEntity (visualMesh, shatterEffect);
@@ -396,107 +398,9 @@ int materialId = 0;
 
 	// set the force and torque call back function
 	NewtonBodySetForceAndTorqueCallback (rigidBody, PhysicsApplyGravityForce);
-
-//	return rigidBody;
 }
 
 
-static void AddColumnsLayer (DemoEntityManager* const scene, DemoMesh* const visualMesh, NewtonCollision* const collision, const ShatterEffect& shatterEffect, dVector location, float separation)
-{
-	//create and array of entities all reusing the same effect
-	for (int i = 0; i < 2; i ++) {
-		for (int j = 0; j < 2; j ++) {
-			float x = (float (i) - 0.5f) * separation + location.m_x;
-			float z = (float (j) - 0.5f) * separation + location.m_z;
-			dQuaternion rotation;
-			dVector position (x, location.m_y, z, 1.0f);
-			AddTopLayer (scene, visualMesh, collision, shatterEffect, position);
-		}
-	}
-}
-
-
-static void Stonehenge (DemoEntityManager* const scene, dVector location, int levels, int xCount, int zCount, float separation)
-{
-	NewtonWorld* const world = scene->GetNewton();
-
-	// Create the vertical column effect
-	dVector size (1.0f, 4.0f, 1.0f);
-//	NewtonCollision* const verticalColumnCollision = CreateConvexCollision (world, GetIdentityMatrix(), size, _RANDOM_CONVEX_HULL_PRIMITIVE, 0);
-	NewtonCollision* const verticalColumnCollision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
-
-	// create a newton mesh from the collision primitive
-	NewtonMesh* const verticalColumnNewtonMesh = NewtonMeshCreateFromCollision(verticalColumnCollision);
-
-	// apply a material map
-	int columnMaterial = LoadTexture("KAMEN-stup.tga");
-	NewtonMeshApplyBoxMapping(verticalColumnNewtonMesh, columnMaterial, columnMaterial, columnMaterial);
-
-	// shatter this mesh into pieces
-	ShatterEffect columnDebris (world, verticalColumnNewtonMesh, columnMaterial);
-
-	// create the visual Mesh
-	DemoMesh* const visualColumnMesh = new DemoMesh(verticalColumnNewtonMesh);
-
-	// calculate the floor position for this objects
-	dVector meshBounds;
-	dMatrix matrix (GetIdentityMatrix());
-	NewtonMeshCalculateOOBB(verticalColumnNewtonMesh, &matrix[0][0], &meshBounds.m_x, &meshBounds.m_y, &meshBounds.m_z);
-
-
-	// now calculate the top mesh
-	float topSize = 10.0f;
-//	size = dVector (topSize, 0.2f, topSize, 0.0f);
-	size = dVector (topSize, 0.5f, topSize, 0.0f);
-	NewtonCollision* const topSlabCollision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
-//	NewtonCollision* const topSlabCollision = CreateConvexCollision (world, GetIdentityMatrix(), size, _RANDOM_CONVEX_HULL_PRIMITIVE, 0);
-	
-	NewtonMesh* const topNewtonMesh = NewtonMeshCreateFromCollision(topSlabCollision);
-	int topMaterial = LoadTexture("reljef.tga");
-	NewtonMeshApplyBoxMapping(topNewtonMesh, columnMaterial, topMaterial, columnMaterial);
-
-	// create a newton mesh from the collision primitive
-	ShatterEffect topDebris (world, topNewtonMesh, columnMaterial);
-
-	// create the visual top mesh
-	DemoMesh* const visualTopMesh = new DemoMesh(topNewtonMesh);
-
-
-	//create and array of entities all reusing the same effect
-	for (int i = 0; i < zCount; i ++) {
-		for (int j = 0; j < xCount; j ++) {
-			float x = (float (i) - 0.5f) * separation + location.m_x;
-			float z = (float (j) - 0.5f) * separation + location.m_z;
-
-			for (int i = 0; i < levels; i ++) {
-				// add a column layer
-//				dVector posit (location.m_x, FindFloor (world, location.m_x, location.m_z) + meshBounds.m_x, location.m_z);
-				dVector posit (x, FindFloor (world, x, z) + meshBounds.m_x, z);
-				AddColumnsLayer (scene, visualColumnMesh, verticalColumnCollision, columnDebris, posit, topSize - 1.0f);
-
-				// add the top
-				float xColum = (-0.5f) * (topSize - 1.0f) + x;
-				float zColum = (-0.5f) * (topSize - 1.0f) + z;
-
-//				posit = dVector (location.m_x, FindFloor (world, x, z) + size.m_y * 0.5f, location.m_z);
-				posit = dVector (x, FindFloor (world, xColum, zColum) + size.m_y * 0.5f, z);
-				AddTopLayer (scene, visualTopMesh, topSlabCollision, topDebris, posit);
-			}
-		}
-	}
-
-	// make sure we release reference to all assets
-
-	visualTopMesh->Release();
-	NewtonMeshDestroy (topNewtonMesh);
-	NewtonReleaseCollision(world, topSlabCollision);
-
-
-	visualColumnMesh->Release();
-	NewtonMeshDestroy (verticalColumnNewtonMesh);
-	NewtonReleaseCollision(world, verticalColumnCollision);
-}
-*/
 
 void AddShatterPrimitive (DemoEntityManager* const scene, dFloat mass, const dVector& origin, const dVector& size, int xCount, int zCount, dFloat spacing, PrimitiveType type, int materialID)
 {
@@ -511,17 +415,14 @@ void AddShatterPrimitive (DemoEntityManager* const scene, dFloat mass, const dVe
 	NewtonMesh* const mesh = NewtonMeshCreateFromCollision(collision);
 
 	// apply a material map
-	int externalMaterial = LoadTexture("KAMEN-stup.tga");
-	int internalMaterial = LoadTexture("reljef.tga");
+	int externalMaterial = LoadTexture("reljef.tga");
+	int internalMaterial = LoadTexture("KAMEN-stup.tga");
 	NewtonMeshApplyBoxMapping(mesh, externalMaterial, externalMaterial, externalMaterial);
 
 	// create a newton mesh from the collision primitive
 	ShatterEffect shatter (world, mesh, internalMaterial);
 
-
-
-/*
-	DemoMesh* const geometry = new DemoMesh("shatter", collision, "wood_0.tga", "wood_0.tga", "wood_1.tga");
+	DemoMesh* const visualMesh = new DemoMesh(mesh);
 
 	for (int i = 0; i < xCount; i ++) {
 		dFloat x = origin.m_x + (i - xCount / 2) * spacing;
@@ -531,14 +432,14 @@ void AddShatterPrimitive (DemoEntityManager* const scene, dFloat mass, const dVe
 			matrix.m_posit.m_x = x;
 			matrix.m_posit.m_z = z;
 			matrix.m_posit.m_y = FindFloor (world, x, z) + 4.0f;
-			CreateSimpleSolid (scene, geometry, mass, matrix, collision, materialID);
+			AddShatterEntity (scene, visualMesh, collision, shatter, matrix.m_posit);
 		}
 	}
-*/
+
 
 	// do not forget to release the assets	
 	NewtonMeshDestroy (mesh);
-//	geometry->Release(); 
+	visualMesh->Release(); 
 	NewtonReleaseCollision(world, collision);
 
 }
@@ -558,14 +459,14 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	//CreateLevelMesh (scene, "sponza.xml", false);
 
 	// create a shattered mesh array
-//	Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 3, 2, 2, 30.0f);
 //  CreateSimpleVoronoiShatter (scene);
 
 	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (scene->GetNewton());
 	dVector location (0.0f, 0.0f, 0.0f, 0.0f);
 	dVector size (0.5f, 0.5f, 0.5f, 0.0f);
 	int count = 3;
-	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
+	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _BOX_PRIMITIVE, defaultMaterialID);
+//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
 
 	// place camera into position
 	dQuaternion rot;

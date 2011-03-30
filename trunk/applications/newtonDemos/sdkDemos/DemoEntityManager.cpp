@@ -422,7 +422,7 @@ void DemoEntityManager::UpdateCamera (float timestep)
 
 						dVector veloc (targetMatrix.m_front.Scale (40.0f));
 						NewtonCollision* const ballCollision = NewtonCreateSphere (m_world, 0.25f, 0.25f, 0.25f, 0, NULL);
-						NewtonBody* const body = CreateSimpleSolid (this, m_meshBallMesh, 10.0f, matrix, ballCollision, 0);
+						NewtonBody* const body = CreateSimpleSolid (this, m_meshBallMesh, 100.0f, matrix, ballCollision, 0);
 						NewtonReleaseCollision(m_world, ballCollision);
 
 						NewtonBodySetVelocity(body, &veloc[0]);

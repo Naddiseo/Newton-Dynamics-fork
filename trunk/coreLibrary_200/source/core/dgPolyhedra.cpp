@@ -2193,9 +2193,6 @@ bool dgPolyhedra::FlipEdge (dgEdge* const edge)
 
 bool dgPolyhedra::GetConectedSurface (dgPolyhedra &polyhedra) const
 {
-_ASSERTE (0);
-return false;
-/*
 	if (!GetCount()) {
 		return false;
 	}
@@ -2255,7 +2252,6 @@ return false;
 	polyhedra.EndFace ();
 
 	return true;
-*/
 }
 
 

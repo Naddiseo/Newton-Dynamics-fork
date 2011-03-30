@@ -49,7 +49,15 @@ dgCollisionConvexHull::dgCollisionConvexHull(dgMemoryAllocator* const allocator,
 	m_boundPlanesCount = 0;
 
 	m_rtti |= dgCollisionConvexHull_RTTI;
+
+static int xxx;
+xxx ++;
+if (xxx == 5)
+xxx *=1;
+
+
 	Create (count, strideInBytes, vertexArray, tolerance);
+
 
 	dgInt32 planeCount = 0;
 	dgPlaneLocation planesArray[1024];
@@ -60,9 +68,13 @@ dgCollisionConvexHull::dgCollisionConvexHull(dgMemoryAllocator* const allocator,
 		dgInt32 i0 = face->m_prev->m_vertex;
 		dgInt32 i1 = face->m_vertex;
 		dgInt32 i2 = face->m_next->m_vertex;
-		const dgVector& p0 = m_vertex[i0];
+		const dgBigVector p0 (m_vertex[i0]);
+		const dgBigVector p1 (m_vertex[i1]);
+		const dgBigVector p2 (m_vertex[i2]);
 
-		dgVector normal ((m_vertex[i1] - p0) * (m_vertex[i2] - p0));
+		dgBigVector normal1 ((p1 - p0) * (p2 - p0));
+
+		dgVector normal ((m_vertex[i1] - m_vertex[i0]) * (m_vertex[i2] - m_vertex[i0]));
 		normal = normal.Scale (dgFloat32 (1.0f) / dgSqrt (normal % normal));
 		dgInt32 add = 1;
 		for (dgInt32 j = 0; j < 3; j ++) {
