@@ -19,7 +19,11 @@
 #include "../DemoCamera.h"
 #include "../PhysicsUtils.h"
 
-#define NUMBER_OF_ITERNAL_PARTS 10
+#define INITIAL_DELAY				500
+//#define INITIAL_DELAY				0
+#define NUMBER_OF_ITERNAL_PARTS		10
+#define BREAK_FORCE_IN_GRAVITIES	10
+//#define BREAK_FORCE_IN_GRAVITIES	1
 
 #if 1
 static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
@@ -208,7 +212,7 @@ class SimpleShatterEffectEntity: public DemoEntity
 {
 	public:
 	SimpleShatterEffectEntity (DemoMesh* const mesh, const ShatterEffect& columnDebris)
-		:DemoEntity (NULL), m_delay (500), m_effect(columnDebris), m_myBody(NULL)
+		:DemoEntity (NULL), m_delay (INITIAL_DELAY), m_effect(columnDebris), m_myBody(NULL)
 	{
 		SetMesh(mesh);
 	}
@@ -245,7 +249,7 @@ class SimpleShatterEffectEntity: public DemoEntity
 		
 
 		// if the force is bigger than 4 Gravities, It is considered a collision force
-		dFloat maxForce = 10.0f * m_myweight;
+		dFloat maxForce = BREAK_FORCE_IN_GRAVITIES * m_myweight;
 
 		if (maxInternalForce > (maxForce * maxForce)) {
 			NewtonWorld* const world = NewtonBodyGetWorld(m_myBody);
@@ -464,11 +468,11 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (scene->GetNewton());
 	dVector location (0.0f, 0.0f, 0.0f, 0.0f);
 	dVector size (0.5f, 0.5f, 0.5f, 0.0f);
-	int count = 3;
+	int count = 4;
 	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _BOX_PRIMITIVE, defaultMaterialID);
 	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
 	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
-	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
+//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
 
 	// place camera into position
 	dQuaternion rot;

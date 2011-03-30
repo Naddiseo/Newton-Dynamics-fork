@@ -2182,26 +2182,22 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 			if (leftConvexMesh && rightConvexMesh) {
 				ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
 				if (leftMeshClipper && rightMeshClipper) {
-
 					convexMesh->Release();
 					convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
 					convexMesh->BeginPolygon();
-	//convexMesh->MergeFaces(leftConvexMesh);
-	//convexMesh->MergeFaces(rightConvexMesh);
-	//convexMesh->MergeFaces(rightMeshClipper);
-	//convexMesh->MergeFaces(leftMeshClipper);
-
 					convexMesh->MergeFaces(leftConvexMesh);
 					convexMesh->MergeFaces(leftMeshClipper);
 					convexMesh->EndPolygon(dgFloat64 (1.0e-5f));
-	//				_ASSERTE (!convexMesh->HasOpenEdges());
 				}
 			} else if (leftConvexMesh) {
 				_ASSERTE (!rightConvexMesh);
 				convexMesh->Release();
 				convexMesh = leftConvexMesh;
 				convexMesh->AddRef();
+			} else {
+				convexMesh->Release();
+				convexMesh = NULL;
 			}
 
 
@@ -2221,6 +2217,8 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 				rightMeshClipper->Release();
 			}
 
+			if (convexMesh) {
+
 #if 0
 dgBigVector xxx (0, 0, 0, 0);
 for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
@@ -2235,17 +2233,18 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 }
 #endif
 
-			for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
-				convexMesh->m_points[i].m_w = layer;
-			}
-			for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
-				convexMesh->m_attib[i].m_vertex.m_w = layer;
-			}
+				for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
+					convexMesh->m_points[i].m_w = layer;
+				}
+				for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
+					convexMesh->m_attib[i].m_vertex.m_w = layer;
+				}
 
-			voronoiPartion->MergeFaces(convexMesh);
-			layer += dgFloat64 (1.0f);
+				voronoiPartion->MergeFaces(convexMesh);
+				layer += dgFloat64 (1.0f);
 
-			convexMesh->Release();
+				convexMesh->Release();
+			}
 		}
 	}
 
