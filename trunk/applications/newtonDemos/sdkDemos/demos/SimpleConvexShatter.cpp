@@ -162,8 +162,8 @@ class ShatterEffect: public dList<ShatterAtom>
 
 		// now we iterate over each pieces and for each one we create a visual entity and a rigid body
 		NewtonMesh* nextDebri;
-		for (NewtonMesh* debri = NewtonMeshCreateFirstSingleSegment (debriMeshPieces); debri; debri = nextDebri) {
-			nextDebri = NewtonMeshCreateNextSingleSegment (debriMeshPieces, debri); 
+		for (NewtonMesh* debri = NewtonMeshCreateFirstLayer (debriMeshPieces); debri; debri = nextDebri) {
+			nextDebri = NewtonMeshCreateNextLayer (debriMeshPieces, debri); 
 
 			NewtonCollision* const collision = NewtonCreateConvexHullFromMesh (m_world, debri, 0.0f, 0);
 			if (collision) {
@@ -262,8 +262,8 @@ class SimpleShatterEffectEntity: public DemoEntity
 			dMatrix bodyMatrix;
 
 			NewtonBodyGetVelocity(m_myBody, &veloc[0]);
-			NewtonBodyGetVelocity(m_myBody, &omega[0]);
-			NewtonBodyGetCentreOfMass(m_myBody, &omega[0]);
+			NewtonBodyGetOmega(m_myBody, &omega[0]);
+			NewtonBodyGetCentreOfMass(m_myBody, &com[0]);
 			NewtonBodyGetMatrix(m_myBody, &bodyMatrix[0][0]);
 			com = bodyMatrix.TransformVector (com);
 
@@ -466,7 +466,7 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	dVector size (0.5f, 0.5f, 0.5f, 0.0f);
 	int count = 3;
 	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _BOX_PRIMITIVE, defaultMaterialID);
-//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
+	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
 //	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
 //	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
 
