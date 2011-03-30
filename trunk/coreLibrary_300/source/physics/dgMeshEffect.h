@@ -27,10 +27,8 @@
 class dgWorld;
 class dgCollision;
 class dgMeshEffect;
-//class dgMeshTreeCSGFace;
 class dgMeshEffectSolidTree;
 class dgMeshTreeCSGEdgePool;
-//class dgMeshTreeCSGPointsPool;
 
 
 #define DG_MESH_EFFECT_INITIAL_VERTEX_SIZE	8
@@ -38,9 +36,7 @@ class dgMeshTreeCSGEdgePool;
 #define DG_MESH_EFFECT_POINT_SPLITED		512
 #define DG_MESH_EFFECT_POLYGON_SPLITED		256
 #define DG_MESH_EFFECT_FLAT_CUT_BORDER_EDGE	0x01
-
 #define DG_VERTEXLIST_INDEXLIST_TOL			(dgFloat64 (0.0f))
-
 
 
 

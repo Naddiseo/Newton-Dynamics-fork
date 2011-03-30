@@ -84,7 +84,7 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 	NewtonMesh* const convexParts = NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interior, &textureMatrix[0][0]);
 //	NewtonMesh* const convexParts = NewtonMeshConvexDecomposition (mesh, 1000000);
 
-#if 0
+#if 1
 dScene xxxx(world);
 dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
 dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
