@@ -640,102 +640,6 @@ dgEdge *dgPolyhedra::SpliteEdgeAndTriangulate (dgInt32 newIndex, dgEdge* srcEdge
 	return ankle;
 }
 
-dgSphere dgPolyhedra::CalculateSphere (const dgFloat32* const vertex, dgInt32 strideInBytes, const dgMatrix* const basis) const
-{
-	dgStack<dgInt32> pool (GetCount() * 3 + 6); 
-	dgInt32* const indexList = &pool[0]; 
-
-	dgMatrix axis (dgGetIdentityMatrix());
-	dgVector p0 (dgFloat32 ( 1.0e10f), dgFloat32 ( 1.0e10f), dgFloat32 ( 1.0e10f), dgFloat32 (0.0f));
-	dgVector p1 (dgFloat32 (-1.0e10f), dgFloat32 (-1.0e10f), dgFloat32 (-1.0e10f), dgFloat32 (0.0f));
-
-	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat32));
-	dgInt32 indexCount = 0;
-	dgInt32 mark = IncLRU();
-	dgPolyhedra::Iterator iter(*this);
-	for (iter.Begin(); iter; iter ++) {
-		dgEdge* const edge = &(*iter);
-		if (edge->m_mark != mark) {
-			dgEdge *ptr = edge;
-			do {
-				ptr->m_mark = mark;
-				ptr = ptr->m_twin->m_next;
-			} while (ptr != edge);
-			dgInt32 index = edge->m_incidentVertex;
-			indexList[indexCount + 6] = edge->m_incidentVertex;
-			dgVector point (vertex[index * stride + 0], vertex[index * stride + 1], vertex[index * stride + 2], dgFloat32 (0.0f));
-			for (dgInt32 i = 0; i < 3; i ++) {
-				if (point[i] < p0[i]) {
-					p0[i] = point[i];
-					indexList[i * 2 + 0] = index;
-				}
-				if (point[i] > p1[i]) {
-					p1[i] = point[i];
-					indexList[i * 2 + 1] = index;
-				}
-			}
-			indexCount ++;
-		}
-	}
-	indexCount += 6;
-
-
-	dgVector size (p1 - p0);
-	dgFloat32 volume = size.m_x * size.m_y * size.m_z;
-
-
-	for (dgFloat32 pitch = dgFloat32 (0.0f); pitch < dgFloat32 (90.0f); pitch += dgFloat32 (10.0f)) {
-		dgMatrix pitchMatrix (dgPitchMatrix(pitch * dgFloat32 (3.1416f) / dgFloat32 (180.0f)));
-		for (dgFloat32 yaw = dgFloat32 (0.0f); yaw  < dgFloat32 (90.0f); yaw  += dgFloat32 (10.0f)) {
-			dgMatrix yawMatrix (dgYawMatrix(yaw * dgFloat32 (3.1416f) / dgFloat32 (180.0f)));
-			for (dgFloat32 roll = dgFloat32 (0.0f); roll < dgFloat32 (90.0f); roll += dgFloat32 (10.0f)) {
-				dgInt32 tmpIndex[6];
-				dgMatrix rollMatrix (dgRollMatrix(roll * dgFloat32 (3.1416f) / dgFloat32 (180.0f)));
-				dgMatrix tmp (pitchMatrix * yawMatrix * rollMatrix);
-				dgVector q0 (dgFloat32 ( 1.0e10f), dgFloat32 ( 1.0e10f), dgFloat32 ( 1.0e10f), dgFloat32 (0.0f));
-				dgVector q1 (dgFloat32 (-1.0e10f), dgFloat32 (-1.0e10f), dgFloat32 (-1.0e10f), dgFloat32 (0.0f));
-
-				dgFloat32 volume1 = dgFloat32 (1.0e10f);
-				for (dgInt32 i = 0; i < indexCount; i ++) {
-					dgInt32 index = indexList[i];
-					dgVector point (vertex[index * stride + 0], vertex[index * stride + 1], vertex[index * stride + 2], dgFloat32 (0.0f));
-					point = tmp.UnrotateVector(point);
-
-					for (dgInt32 j = 0; j < 3; j ++) {
-						if (point[j] < q0[j]) {
-							q0[j] = point[j];
-							tmpIndex[j * 2 + 0] = index;
-						}
-						if (point[j] > q1[j]) {
-							q1[j] = point[j];
-							tmpIndex[j * 2 + 1] = index;
-						}
-					}
-
-
-					dgVector size1 (q1 - q0);
-					volume1 = size1.m_x * size1.m_y * size1.m_z;
-					if (volume1 >= volume) {
-						break;
-					}
-				}
-
-				if (volume1 < volume) {
-					p0 = q0;
-					p1 = q1;
-					axis = tmp;
-					volume = volume1;
-					memcpy (indexList, tmpIndex, sizeof (tmpIndex));
-				}
-			}
-		}
-	}
-
-	dgSphere sphere (axis);
-	sphere.m_posit = axis.RotateVector((p1 + p0).Scale (dgFloat32 (0.5f)));
-	sphere.m_size = (p1 - p0).Scale (dgFloat32 (0.5f));
-	return sphere;
-}
 
 
 
@@ -3944,4 +3848,104 @@ void dgPolyhedra::ConvexPartition (const dgFloat64* const vertex, dgInt32 stride
 			//return removeCount ? true : false;
 		}
 	}
+}
+
+
+dgSphere dgPolyhedra::CalculateSphere (const dgFloat64* const vertex, dgInt32 strideInBytes, const dgMatrix* const basis) const
+{
+	dgStack<dgInt32> pool (GetCount() * 3 + 6); 
+	dgInt32* const indexList = &pool[0]; 
+
+	dgMatrix axis (dgGetIdentityMatrix());
+	dgBigVector p0 (dgFloat32 ( 1.0e10f), dgFloat32 ( 1.0e10f), dgFloat32 ( 1.0e10f), dgFloat32 (0.0f));
+	dgBigVector p1 (dgFloat32 (-1.0e10f), dgFloat32 (-1.0e10f), dgFloat32 (-1.0e10f), dgFloat32 (0.0f));
+
+	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat64));
+	dgInt32 indexCount = 0;
+	dgInt32 mark = IncLRU();
+	dgPolyhedra::Iterator iter(*this);
+	for (iter.Begin(); iter; iter ++) {
+		dgEdge* const edge = &(*iter);
+		if (edge->m_mark != mark) {
+			dgEdge *ptr = edge;
+			do {
+				ptr->m_mark = mark;
+				ptr = ptr->m_twin->m_next;
+			} while (ptr != edge);
+			dgInt32 index = edge->m_incidentVertex;
+			indexList[indexCount + 6] = edge->m_incidentVertex;
+			dgBigVector point (vertex[index * stride + 0], vertex[index * stride + 1], vertex[index * stride + 2], dgFloat32 (0.0f));
+			for (dgInt32 i = 0; i < 3; i ++) {
+				if (point[i] < p0[i]) {
+					p0[i] = point[i];
+					indexList[i * 2 + 0] = index;
+				}
+				if (point[i] > p1[i]) {
+					p1[i] = point[i];
+					indexList[i * 2 + 1] = index;
+				}
+			}
+			indexCount ++;
+		}
+	}
+	indexCount += 6;
+
+
+	dgBigVector size (p1 - p0);
+	dgFloat64 volume = size.m_x * size.m_y * size.m_z;
+
+
+	for (dgFloat32 pitch = dgFloat32 (0.0f); pitch < dgFloat32 (90.0f); pitch += dgFloat32 (10.0f)) {
+		dgMatrix pitchMatrix (dgPitchMatrix(pitch * dgFloat32 (3.1416f) / dgFloat32 (180.0f)));
+		for (dgFloat32 yaw = dgFloat32 (0.0f); yaw  < dgFloat32 (90.0f); yaw  += dgFloat32 (10.0f)) {
+			dgMatrix yawMatrix (dgYawMatrix(yaw * dgFloat32 (3.1416f) / dgFloat32 (180.0f)));
+			for (dgFloat32 roll = dgFloat32 (0.0f); roll < dgFloat32 (90.0f); roll += dgFloat32 (10.0f)) {
+				dgInt32 tmpIndex[6];
+				dgMatrix rollMatrix (dgRollMatrix(roll * dgFloat32 (3.1416f) / dgFloat32 (180.0f)));
+				dgMatrix tmp (pitchMatrix * yawMatrix * rollMatrix);
+				dgBigVector q0 (dgFloat32 ( 1.0e10f), dgFloat32 ( 1.0e10f), dgFloat32 ( 1.0e10f), dgFloat32 (0.0f));
+				dgBigVector q1 (dgFloat32 (-1.0e10f), dgFloat32 (-1.0e10f), dgFloat32 (-1.0e10f), dgFloat32 (0.0f));
+
+				dgFloat32 volume1 = dgFloat32 (1.0e10f);
+				for (dgInt32 i = 0; i < indexCount; i ++) {
+					dgInt32 index = indexList[i];
+					dgBigVector point (vertex[index * stride + 0], vertex[index * stride + 1], vertex[index * stride + 2], dgFloat32 (0.0f));
+					point = tmp.UnrotateVector(point);
+
+					for (dgInt32 j = 0; j < 3; j ++) {
+						if (point[j] < q0[j]) {
+							q0[j] = point[j];
+							tmpIndex[j * 2 + 0] = index;
+						}
+						if (point[j] > q1[j]) {
+							q1[j] = point[j];
+							tmpIndex[j * 2 + 1] = index;
+						}
+					}
+
+
+					dgVector size1 (q1 - q0);
+					volume1 = size1.m_x * size1.m_y * size1.m_z;
+					if (volume1 >= volume) {
+						break;
+					}
+				}
+
+				if (volume1 < volume) {
+					p0 = q0;
+					p1 = q1;
+					axis = tmp;
+					volume = volume1;
+					memcpy (indexList, tmpIndex, sizeof (tmpIndex));
+				}
+			}
+		}
+	}
+
+	dgSphere sphere (axis);
+	dgVector q0 (p0);
+	dgVector q1 (p1);
+	sphere.m_posit = axis.RotateVector((q1 + q0).Scale (dgFloat32 (0.5f)));
+	sphere.m_size = (q1 - q0).Scale (dgFloat32 (0.5f));
+	return sphere;
 }

@@ -31,7 +31,8 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 	NewtonWorld* const world = scene->GetNewton();
 
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
-	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _REGULAR_CONVEX_HULL_PRIMITIVE, 0);
+	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _SPHERE_PRIMITIVE, 0);
+//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _REGULAR_CONVEX_HULL_PRIMITIVE, 0);
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _RANDOM_CONVEX_HULL_PRIMITIVE, 0);
 	
 	
@@ -46,6 +47,7 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 	// pepper the bing box of the mesh with random points
 	dVector points[NUMBER_OF_ITERNAL_PARTS + 100];
 	int count = 0;
+/*
 	int pointcount = NewtonMeshGetVertexCount(mesh);
 	int pointStride = NewtonMeshGetVertexStrideInByte(mesh) / sizeof (dFloat64);
 	dFloat64* const data = NewtonMeshGetVertexArray(mesh);
@@ -56,7 +58,7 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 		points[count] = dVector (x, y, z);
 		count ++;
 	}
-
+*/
 	while (count < NUMBER_OF_ITERNAL_PARTS) {
 		dFloat x = RandomVariable(size.m_x);
 		dFloat y = RandomVariable(size.m_y);
@@ -67,14 +69,6 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 		}
 	} 
 
-//points[0] =	dVector (-0.95387375f, 0.051684085f, -1.3675097f);
-//points[1] = dVector (0.027149497f, -0.038374674f, 0.47796631f);
-//points[2] = dVector (0.24927004f, -0.015358878f, -0.45922884f);
-//count = 3;
-
-
-//count = 0;
-
 	// Create the array of convex pieces from the mesh
 	int interior = LoadTexture("KAMEN-stup.tga");
 //	int interior = LoadTexture("camo.tga");
@@ -84,7 +78,7 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 	NewtonMesh* const convexParts = NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interior, &textureMatrix[0][0]);
 //	NewtonMesh* const convexParts = NewtonMeshConvexDecomposition (mesh, 1000000);
 
-#if 1
+#if 0
 dScene xxxx(world);
 dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
 dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
@@ -114,7 +108,7 @@ xxxx.Serialize("xxx.xml");
 #endif
 
 
-class DebriAtom
+class ShatterAtom
 {
 	public:
 	DemoMesh* m_mesh;
@@ -124,11 +118,11 @@ class DebriAtom
 	dFloat m_massFraction;
 };
 
-class DebriEffect: public dList<DebriAtom> 
+class ShatterEffect: public dList<ShatterAtom> 
 {
 	public:
 
-	DebriEffect(NewtonWorld* const world, NewtonMesh* const mesh, int interiorMaterial)
+	ShatterEffect(NewtonWorld* const world, NewtonMesh* const mesh, int interiorMaterial)
 		:dList(), m_world (world)
 	{
 		// first we populate the bounding Box area with few random point to get some interior subdivisions.
@@ -142,7 +136,8 @@ class DebriEffect: public dList<DebriAtom>
 		// pepper the inside of the BBox box of the mesh with random points
 		int count = 0;
 		dVector points[NUMBER_OF_ITERNAL_PARTS + 1];
-		while (count < NUMBER_OF_ITERNAL_PARTS) {			dFloat x = RandomVariable(size.m_x);
+		while (count < NUMBER_OF_ITERNAL_PARTS) {			
+			dFloat x = RandomVariable(size.m_x);
 			dFloat y = RandomVariable(size.m_y);
 			dFloat z = RandomVariable(size.m_z);
 			if ((x <= size.m_x) && (x >= -size.m_x) && (y <= size.m_y) && (y >= -size.m_y) && (z <= size.m_z) && (z >= -size.m_z)){
@@ -172,7 +167,7 @@ class DebriEffect: public dList<DebriAtom>
 
 			NewtonCollision* const collision = NewtonCreateConvexHullFromMesh (m_world, debri, 0.0f, 0);
 			if (collision) {
-				DebriAtom& atom = Append()->GetInfo();
+				ShatterAtom& atom = Append()->GetInfo();
 				atom.m_mesh = new DemoMesh(debri);
 				atom.m_collision = collision;
 				NewtonConvexCollisionCalculateInertialMatrix (atom.m_collision, &atom.m_momentOfInirtia[0], &atom.m_centerOfMass[0]);	
@@ -185,20 +180,20 @@ class DebriEffect: public dList<DebriAtom>
 		NewtonMeshDestroy(debriMeshPieces);
 	}
 
-	DebriEffect (const DebriEffect& list)
+	ShatterEffect (const ShatterEffect& list)
 		:dList(), m_world(list.m_world)
 	{
 		for (dListNode* node = list.GetFirst(); node; node = node->GetNext()) {
-			DebriAtom& atom = Append(node->GetInfo())->GetInfo();
+			ShatterAtom& atom = Append(node->GetInfo())->GetInfo();
 			atom.m_mesh->AddRef();
 			NewtonAddCollisionReference (atom.m_collision); 
 		}
 	}
 
-	~DebriEffect()
+	~ShatterEffect()
 	{
 		for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
-			DebriAtom& atom = node->GetInfo();
+			ShatterAtom& atom = node->GetInfo();
 			NewtonReleaseCollision (m_world, atom.m_collision);
 			atom.m_mesh->Release();
 		}
@@ -212,7 +207,7 @@ class DebriEffect: public dList<DebriAtom>
 class SimpleShatterEffectEntity: public DemoEntity
 {
 	public:
-	SimpleShatterEffectEntity (DemoMesh* const mesh, const DebriEffect& columnDebris)
+	SimpleShatterEffectEntity (DemoMesh* const mesh, const ShatterEffect& columnDebris)
 		:DemoEntity (NULL), m_effect(columnDebris), m_myBody(NULL)
 	{
 		SetMesh(mesh);
@@ -220,7 +215,6 @@ class SimpleShatterEffectEntity: public DemoEntity
 
 	~SimpleShatterEffectEntity ()
 	{
-
 	}
 
 
@@ -269,8 +263,8 @@ class SimpleShatterEffectEntity: public DemoEntity
 
 			dMatrix matrix (GetCurrentMatrix());
 			dQuaternion rotation (matrix);
-			for (DebriEffect::dListNode* node = m_effect.GetFirst(); node; node = node->GetNext()) {
-				DebriAtom& atom = node->GetInfo();
+			for (ShatterEffect::dListNode* node = m_effect.GetFirst(); node; node = node->GetNext()) {
+				ShatterAtom& atom = node->GetInfo();
 
 				DemoEntity* const entity = new DemoEntity (NULL);
 				entity->SetMesh (atom.m_mesh);
@@ -333,21 +327,19 @@ class SimpleShatterEffectEntity: public DemoEntity
 			NewtonDestroyBody(world, m_myBody);
 			scene->RemoveEntity	(mynode);
 		}
-
-
 	};
 
-	DebriEffect m_effect;
+	ShatterEffect m_effect;
 	NewtonBody* m_myBody;
 	dFloat m_myweight; 
 };
 
-
+/*
 static void AddTopLayer (
 	DemoEntityManager* const scene, 
 	DemoMesh* const visualMesh, 
 	NewtonCollision* const collision,
-	const DebriEffect& shatterEffect, 
+	const ShatterEffect& shatterEffect, 
 	dVector location)
 {
 	dQuaternion rotation;
@@ -409,7 +401,7 @@ int materialId = 0;
 }
 
 
-static void AddColumnsLayer (DemoEntityManager* const scene, DemoMesh* const visualMesh, NewtonCollision* const collision, const DebriEffect& shatterEffect, dVector location, float separation)
+static void AddColumnsLayer (DemoEntityManager* const scene, DemoMesh* const visualMesh, NewtonCollision* const collision, const ShatterEffect& shatterEffect, dVector location, float separation)
 {
 	//create and array of entities all reusing the same effect
 	for (int i = 0; i < 2; i ++) {
@@ -424,11 +416,9 @@ static void AddColumnsLayer (DemoEntityManager* const scene, DemoMesh* const vis
 }
 
 
-
 static void Stonehenge (DemoEntityManager* const scene, dVector location, int levels, int xCount, int zCount, float separation)
 {
 	NewtonWorld* const world = scene->GetNewton();
-
 
 	// Create the vertical column effect
 	dVector size (1.0f, 4.0f, 1.0f);
@@ -443,7 +433,7 @@ static void Stonehenge (DemoEntityManager* const scene, dVector location, int le
 	NewtonMeshApplyBoxMapping(verticalColumnNewtonMesh, columnMaterial, columnMaterial, columnMaterial);
 
 	// shatter this mesh into pieces
-	DebriEffect columnDebris (world, verticalColumnNewtonMesh, columnMaterial);
+	ShatterEffect columnDebris (world, verticalColumnNewtonMesh, columnMaterial);
 
 	// create the visual Mesh
 	DemoMesh* const visualColumnMesh = new DemoMesh(verticalColumnNewtonMesh);
@@ -466,7 +456,7 @@ static void Stonehenge (DemoEntityManager* const scene, dVector location, int le
 	NewtonMeshApplyBoxMapping(topNewtonMesh, columnMaterial, topMaterial, columnMaterial);
 
 	// create a newton mesh from the collision primitive
-	DebriEffect topDebris (world, topNewtonMesh, columnMaterial);
+	ShatterEffect topDebris (world, topNewtonMesh, columnMaterial);
 
 	// create the visual top mesh
 	DemoMesh* const visualTopMesh = new DemoMesh(topNewtonMesh);
@@ -506,6 +496,52 @@ static void Stonehenge (DemoEntityManager* const scene, dVector location, int le
 	NewtonMeshDestroy (verticalColumnNewtonMesh);
 	NewtonReleaseCollision(world, verticalColumnCollision);
 }
+*/
+
+void AddShatterPrimitive (DemoEntityManager* const scene, dFloat mass, const dVector& origin, const dVector& size, int xCount, int zCount, dFloat spacing, PrimitiveType type, int materialID)
+{
+	dMatrix matrix (GetIdentityMatrix());
+
+	// create the shape and visual mesh as a common data to be re used
+	NewtonWorld* const world = scene->GetNewton();
+	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, type, materialID);
+
+
+	// create a newton mesh from the collision primitive
+	NewtonMesh* const mesh = NewtonMeshCreateFromCollision(collision);
+
+	// apply a material map
+	int externalMaterial = LoadTexture("KAMEN-stup.tga");
+	int internalMaterial = LoadTexture("reljef.tga");
+	NewtonMeshApplyBoxMapping(mesh, externalMaterial, externalMaterial, externalMaterial);
+
+	// create a newton mesh from the collision primitive
+	ShatterEffect shatter (world, mesh, internalMaterial);
+
+
+
+/*
+	DemoMesh* const geometry = new DemoMesh("shatter", collision, "wood_0.tga", "wood_0.tga", "wood_1.tga");
+
+	for (int i = 0; i < xCount; i ++) {
+		dFloat x = origin.m_x + (i - xCount / 2) * spacing;
+		for (int j = 0; j < zCount; j ++) {
+			dFloat z = origin.m_z + (j - zCount / 2) * spacing;
+
+			matrix.m_posit.m_x = x;
+			matrix.m_posit.m_z = z;
+			matrix.m_posit.m_y = FindFloor (world, x, z) + 4.0f;
+			CreateSimpleSolid (scene, geometry, mass, matrix, collision, materialID);
+		}
+	}
+*/
+
+	// do not forget to release the assets	
+	NewtonMeshDestroy (mesh);
+//	geometry->Release(); 
+	NewtonReleaseCollision(world, collision);
+
+}
 
 
 
@@ -523,8 +559,13 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 
 	// create a shattered mesh array
 //	Stonehenge (scene, dVector (0.0f, 0.0f, 0.0f, 0.0f), 3, 2, 2, 30.0f);
- CreateSimpleVoronoiShatter (scene);
+//  CreateSimpleVoronoiShatter (scene);
 
+	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (scene->GetNewton());
+	dVector location (0.0f, 0.0f, 0.0f, 0.0f);
+	dVector size (0.5f, 0.5f, 0.5f, 0.0f);
+	int count = 3;
+	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
 
 	// place camera into position
 	dQuaternion rot;

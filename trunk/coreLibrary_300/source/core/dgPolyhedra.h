@@ -124,6 +124,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	bool GetConectedSurface (dgPolyhedra &polyhedra) const;
 	void EndConectedSurface() const;
 
+	dgSphere CalculateSphere (const dgFloat64* const vertex, dgInt32 strideInBytes, const dgMatrix* const basis = NULL) const;
 	void ChangeEdgeIncidentVertex (dgEdge* const edge, dgInt32 newIndex);	
 	void DeleteDegenerateFaces (const dgFloat64* const pool, dgInt32 dstStrideInBytes, dgFloat64 minArea);
 
@@ -162,7 +163,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	dgEdge* SpliteEdgeAndTriangulate (dgInt32 newIndex, dgEdge* const edge);
 
 	dgEdge* FindVertexNode (dgInt32 v0) const;
-	dgSphere CalculateSphere (const dgFloat64* const vertex, dgInt32 strideInBytes, const dgMatrix* const basis = NULL) const;
+	
 	dgInt32 PackVertex (dgFloat64* const destArray, const dgFloat64* const unpackArray, dgInt32 strideInBytes);
 	void DeleteOverlapingFaces (const dgFloat64* const pool, dgInt32 strideInBytes, dgFloat64 distTol);
 	void InvertWinding ();

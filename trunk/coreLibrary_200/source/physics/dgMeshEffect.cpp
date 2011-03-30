@@ -970,10 +970,7 @@ void dgMeshEffect::RemoveUnusedVertices(dgInt32* const vertexMap)
 
 dgMatrix dgMeshEffect::CalculateOOBB (dgBigVector& size) const
 {
-_ASSERTE (0);
-return dgGetIdentityMatrix();
-/*
-	dgSphere sphere (CalculateSphere (&m_points[0].m_x, sizeof (dgVector), NULL));
+	dgSphere sphere (CalculateSphere (&m_points[0].m_x, sizeof (dgBigVector), NULL));
 	size = sphere.m_size;
 
 	dgMatrix permuation (dgGetIdentityMatrix());
@@ -990,7 +987,6 @@ return dgGetIdentityMatrix();
 	}
 
 	return sphere;
-*/
 }
 
 void dgMeshEffect::CalculateAABB (dgBigVector& minBox, dgBigVector& maxBox) const
@@ -2462,15 +2458,11 @@ dgInt32 dgMeshEffect::GetEffectiveVertexCount() const
 
 dgCollision* dgMeshEffect::CreateConvexCollision(dgFloat64 tolerance, dgInt32 shapeID, const dgMatrix& srcMatrix) const
 {
-	_ASSERTE (0);
-	return 0;
-	/*
-
 	dgStack<dgVector> poolPtr (m_pointCount * 2); 
 	dgVector* const pool = &poolPtr[0];
 
-	dgVector minBox;
-	dgVector maxBox;
+	dgBigVector minBox;
+	dgBigVector maxBox;
 	CalculateAABB (minBox, maxBox);
 	dgVector com ((minBox + maxBox).Scale (dgFloat32 (0.5f)));
 
@@ -2480,15 +2472,15 @@ dgCollision* dgMeshEffect::CreateConvexCollision(dgFloat64 tolerance, dgInt32 sh
 	for (iter.Begin(); iter; iter ++){
 		dgEdge* const vertex = &(*iter);
 		if (vertex->m_mark != mark) {
-			dgEdge* ptr;
-			ptr = vertex;
+			dgEdge* ptr = vertex;
 			do {
 				ptr->m_mark = mark;
 				ptr = ptr->m_twin->m_next;
 			} while (ptr != vertex);
 
 			if (count < dgInt32 (poolPtr.GetElementsCount())) {
-				pool[count] = m_points[vertex->m_incidentVertex] - com;
+				const dgBigVector p = m_points[vertex->m_incidentVertex];
+				pool[count] = dgVector (p) - com;
 				count ++;
 			}
 		}
@@ -2511,15 +2503,15 @@ dgCollision* dgMeshEffect::CreateConvexCollision(dgFloat64 tolerance, dgInt32 sh
 	memcpy (&buffer[2 + count * 3], &matrix, sizeof (dgMatrix));
 	dgUnsigned32 crc = dgCollision::MakeCRC(&buffer[0], buffer.GetSizeInBytes());
 
-	dgCollisionConvexHull* collision = new (GetAllocator()) dgCollisionConvexHull (GetAllocator(), crc, count, sizeof (dgVector), tolerance, &pool[0].m_x, matrix);
+	dgCollisionConvexHull* collision = new (GetAllocator()) dgCollisionConvexHull (GetAllocator(), crc, count, sizeof (dgVector), dgFloat32 (tolerance), &pool[0].m_x, matrix);
 	if (!collision->GetVertexCount()) {
 		collision->Release();
 		collision = NULL;
 	} else {
 		collision->SetUserDataID (dgUnsigned32 (shapeID));
 	}
+
 	return collision;
-*/
 }
 
 
