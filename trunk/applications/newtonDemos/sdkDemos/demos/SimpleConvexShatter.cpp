@@ -460,7 +460,7 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 
 	// load the scene from and alchemedia file format
 	//CreateLevelMesh (scene, "flatPlane.xml", false);
-	CreateLevelMesh (scene, "sponza.xml", true);
+	CreateLevelMesh (scene, "sponza.xml", false);
 
 	// create a shattered mesh array
 //  CreateSimpleVoronoiShatter (scene);
