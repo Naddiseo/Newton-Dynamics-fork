@@ -459,8 +459,8 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	scene->Append(new SkyBox());
 
 	// load the scene from and alchemedia file format
-	CreateLevelMesh (scene, "flatPlane.xml", false);
-	//CreateLevelMesh (scene, "sponza.xml", false);
+	//CreateLevelMesh (scene, "flatPlane.xml", false);
+	CreateLevelMesh (scene, "sponza.xml", true);
 
 	// create a shattered mesh array
 //  CreateSimpleVoronoiShatter (scene);
@@ -473,10 +473,14 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
 	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
 //	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
+	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CYLINDER_PRIMITIVE, defaultMaterialID);
+	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CONE_PRIMITIVE, defaultMaterialID);
+//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CAPSULE_PRIMITIVE, defaultMaterialID);
 
 	// place camera into position
 	dQuaternion rot;
-	dVector origin (-40.0f, 10.0f, 0.0f, 0.0f);
+//	dVector origin (-40.0f, 10.0f, 0.0f, 0.0f);
+	dVector origin (-15.0f, 10.0f, 0.0f, 0.0f);
 	scene->SetCameraMatrix(rot, origin);
 
 	// resume the simulation

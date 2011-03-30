@@ -13,6 +13,8 @@
 #define MAX_PHYSICS_LOOPS 1
 #define MAX_PHYSICS_FPS	  120.0f
 
+#define PROJECTILE_INITIAL_SPEED 20.0f
+
 
 DemoEntityManager::DemoEntityManager(QWidget* const parent, QGLFormat& format)
 	:QGLWidget (format, parent)
@@ -420,7 +422,7 @@ void DemoEntityManager::UpdateCamera (float timestep)
 						dMatrix matrix (GetIdentityMatrix());
 						matrix.m_posit = targetMatrix.m_posit;
 
-						dVector veloc (targetMatrix.m_front.Scale (40.0f));
+						dVector veloc (targetMatrix.m_front.Scale (PROJECTILE_INITIAL_SPEED));
 						NewtonCollision* const ballCollision = NewtonCreateSphere (m_world, 0.25f, 0.25f, 0.25f, 0, NULL);
 						NewtonBody* const body = CreateSimpleSolid (this, m_meshBallMesh, 100.0f, matrix, ballCollision, 0);
 						NewtonReleaseCollision(m_world, ballCollision);
