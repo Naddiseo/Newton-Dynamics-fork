@@ -16,6 +16,7 @@
 #include <math.h>
 #include <float.h>
 
+
 #ifndef dFloat
 	#ifdef __USE_DOUBLE_PRECISION__
 		typedef double dFloat;
@@ -41,14 +42,14 @@
 #define dAcos(x)	dFloat (acos (dFloat(x)))
 #define	dAtan2(x,y) dFloat (atan2 (dFloat(x), dFloat(y)))
 
-#ifndef _MSC_VER
+#if ( !defined (_MSC_VER) && !defined (_MINGW_32_VER) && !defined (_MINGW_64_VER) )
 	#define _ASSERTE(x)
-	#ifndef min
-		#define min(a,b) ((a < b) ? (a) : (b))
-		#define max(a,b) ((a > b) ? (a) : (b))
-	#endif 
 #endif
 
+#ifndef min
+    #define min(a,b) ((a < b) ? (a) : (b))
+    #define max(a,b) ((a > b) ? (a) : (b))
+#endif
 
 #ifdef _MSC_VER
 	#ifdef _DEBUG

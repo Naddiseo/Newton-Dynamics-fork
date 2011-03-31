@@ -190,10 +190,20 @@ void GetMinMax (dgBigVector &minOut, dgBigVector &maxOut, const dgFloat64* const
 	void cpuid(dgUnsigned32 op, dgUnsigned32 reg[4])
 	{
 		asm volatile(
+			#ifdef _MINGW_64_VER
+				"pushq %%rbx      \n\t" /* save %rbx */
+			#else
 			"pushl %%ebx      \n\t" /* save %ebx */
+			#endif
+
 			"cpuid            \n\t"
 			"movl %%ebx, %1   \n\t" /* save what cpuid just put in %ebx */
+
+			#ifdef _MINGW_64_VER
+				"popq %%rbx       \n\t" /* restore the old %rbx */
+			#else		
 			"popl %%ebx       \n\t" /* restore the old %ebx */
+			#endif
 			: "=a"(reg[0]), "=r"(reg[1]), "=c"(reg[2]), "=d"(reg[3])
 			: "a"(op)
 			: "cc");

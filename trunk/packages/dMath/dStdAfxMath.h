@@ -26,6 +26,9 @@
 	#include <crtdbg.h>
 #endif
 
+#if ( defined (_MINGW_32_VER) || defined (_MINGW_64_VER) )
+	#include <crtdbg.h>
+#endif
 
 
 #endif

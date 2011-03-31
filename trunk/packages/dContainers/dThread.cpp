@@ -18,7 +18,7 @@
 	#include <crtdbg.h>
 #endif
 
-#ifdef _LINUX_VER
+#ifdef _POSIX_VER
 	#include <pthread.h>
 	#include <semaphore.h>
 	#include <unistd.h>
@@ -28,7 +28,7 @@
 
 static inline void dInterlockedIncrement (int* const Addend )
 {
-	#if (defined (_LINUX_VER))
+	#if (defined (_POSIX_VER))
 		__sync_fetch_and_add ((int32_t*)Addend, 1 );
 	#endif
 
@@ -44,7 +44,7 @@ static inline void dInterlockedIncrement (int* const Addend )
 
 static inline void dInterlockedDecrement(int* const Addend)
 {
-	#if (defined (_LINUX_VER))
+	#if (defined (_POSIX_VER))
 		__sync_fetch_and_sub ((int32_t*)Addend, 1 );
 	#endif
 
@@ -60,7 +60,7 @@ static inline void dInterlockedDecrement(int* const Addend)
 
 static inline int dInterlockedExchange (int* spin, int testValue)
 {
-	#if (defined (_LINUX_VER))
+	#if (defined (_POSIX_VER))
 		return __sync_val_compare_and_swap((int32_t*)spin, !testValue, testValue);
 	#endif
 
@@ -89,7 +89,7 @@ dThread::dThread(void)
 	m_threadhandle = _beginthreadex( NULL, 0, TaskCallback, this, 0, NULL);
 #endif
 
-#if (defined (_LINUX_VER) || defined (_MAC_VER))
+#if (defined (_POSIX_VER) || defined (_MAC_VER))
 	pthread_create( &m_threadhandle, NULL, TaskCallback, this);
 #endif
 }
@@ -105,7 +105,7 @@ dThread::~dThread(void)
 #if defined (_MSC_VER)
 unsigned _stdcall dThread::TaskCallback(void *param)
 #endif
-#if (defined (_LINUX_VER) || defined (_MAC_VER))
+#if (defined (_POSIX_VER) || defined (_MAC_VER))
 void* dThread::TaskCallback(void *param)
 #endif
 {
@@ -169,7 +169,7 @@ void dThread::YieldTime()
 		Sleep(0);
 	#endif
 
-	#if (defined (_LINUX_VER) || defined (_MAC_VER))
+	#if (defined (_POSIX_VER) || defined (_MAC_VER))
 		sched_yield();
 	#endif
 }

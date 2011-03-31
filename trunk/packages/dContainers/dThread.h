@@ -13,6 +13,15 @@
 #ifndef __DTHREAD_H__
 #define __DTHREAD_H__
 
+#if ( defined (_LINUX_VER) || defined (_MINGW_32_VER) || defined (_MINGW_64_VER) )
+    #define _POSIX_VER
+    #include <pthread.h>
+#endif
+
+#if ( defined (_MINGW_32_VER) || defined (_MINGW_64_VER) )
+    #include <stdint.h>
+    #include <crtdbg.h>
+#endif
 
 class dThread
 {
@@ -37,7 +46,7 @@ class dThread
 	static unsigned _stdcall TaskCallback(void *param);
 #endif
 
-#if (defined (_LINUX_VER) || defined (_MAC_VER))
+#if (defined (_POSIX_VER) || defined (_MAC_VER))
 	static void* TaskCallback(void *Param);
 #endif
 
@@ -50,7 +59,7 @@ class dThread
 	uintptr_t m_threadhandle;
 #endif
 
-#if (defined (_LINUX_VER) || defined (_MAC_VER))
+#if (defined (_POSIX_VER) || defined (_MAC_VER))
 	pthread_t m_threadhandle;
 #endif
 };
