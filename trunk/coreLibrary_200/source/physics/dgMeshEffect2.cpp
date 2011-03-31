@@ -2190,12 +2190,12 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 					convexMesh->MergeFaces(leftMeshClipper);
 					convexMesh->EndPolygon(dgFloat64 (1.0e-5f));
 				}
-			} else if (leftConvexMesh) {
-				_ASSERTE (!rightConvexMesh);
-				convexMesh->Release();
-				convexMesh = leftConvexMesh;
-				convexMesh->AddRef();
-			} else {
+//			} else if (leftConvexMesh) {
+//				_ASSERTE (!rightConvexMesh);
+//				convexMesh->Release();
+//				convexMesh = leftConvexMesh;
+//				convexMesh->AddRef();
+			} else if (rightConvexMesh) {
 				convexMesh->Release();
 				convexMesh = NULL;
 			}
@@ -2219,7 +2219,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 
 			if (convexMesh) {
 
-#if 0
+#if 1
 dgBigVector xxx (0, 0, 0, 0);
 for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 	xxx += convexMesh->m_points[i];

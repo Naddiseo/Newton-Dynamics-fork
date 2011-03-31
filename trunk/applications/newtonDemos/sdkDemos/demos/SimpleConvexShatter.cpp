@@ -35,8 +35,8 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 	NewtonWorld* const world = scene->GetNewton();
 
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
-	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _SPHERE_PRIMITIVE, 0);
-//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _REGULAR_CONVEX_HULL_PRIMITIVE, 0);
+//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _SPHERE_PRIMITIVE, 0);
+	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _REGULAR_CONVEX_HULL_PRIMITIVE, 0);
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _RANDOM_CONVEX_HULL_PRIMITIVE, 0);
 	
 	
@@ -51,18 +51,7 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 	// pepper the bing box of the mesh with random points
 	dVector points[NUMBER_OF_ITERNAL_PARTS + 100];
 	int count = 0;
-/*
-	int pointcount = NewtonMeshGetVertexCount(mesh);
-	int pointStride = NewtonMeshGetVertexStrideInByte(mesh) / sizeof (dFloat64);
-	dFloat64* const data = NewtonMeshGetVertexArray(mesh);
-	for (int i = 0; i < pointcount; i ++) {
-		dFloat x = dFloat(data[i * pointStride + 0]);
-		dFloat y = dFloat(data[i * pointStride + 1]);
-		dFloat z = dFloat(data[i * pointStride + 2]);
-		points[count] = dVector (x, y, z);
-		count ++;
-	}
-*/
+
 	while (count < NUMBER_OF_ITERNAL_PARTS) {
 		dFloat x = RandomVariable(size.m_x);
 		dFloat y = RandomVariable(size.m_y);
@@ -72,6 +61,8 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 			count ++;
 		}
 	} 
+
+count = 4;
 
 	// Create the array of convex pieces from the mesh
 	int interior = LoadTexture("KAMEN-stup.tga");
@@ -461,24 +452,24 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 
 
 	// load the scene from and alchemedia file format
-	//CreateLevelMesh (scene, "flatPlane.xml", false);
-	CreateLevelMesh (scene, "sponza.xml", true);
+	CreateLevelMesh (scene, "flatPlane.xml", false);
+//	CreateLevelMesh (scene, "sponza.xml", true);
 
 	// create a shattered mesh array
-//  CreateSimpleVoronoiShatter (scene);
-
+    CreateSimpleVoronoiShatter (scene);
+/*
 	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (scene->GetNewton());
 	dVector location (0.0f, 0.0f, 0.0f, 0.0f);
 	dVector size (0.5f, 0.5f, 0.5f, 0.0f);
 	int count = 4;
-	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _BOX_PRIMITIVE, defaultMaterialID);
+//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _BOX_PRIMITIVE, defaultMaterialID);
 	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
-	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
+//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
 //	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
-	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CYLINDER_PRIMITIVE, defaultMaterialID);
-	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CONE_PRIMITIVE, defaultMaterialID);
+//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CYLINDER_PRIMITIVE, defaultMaterialID);
+//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CONE_PRIMITIVE, defaultMaterialID);
 //	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CAPSULE_PRIMITIVE, defaultMaterialID);
-
+*/
 	// place camera into position
 	dQuaternion rot;
 //	dVector origin (-40.0f, 10.0f, 0.0f, 0.0f);
