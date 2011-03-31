@@ -3261,25 +3261,21 @@ dgMeshEffectSolidTree* dgMeshEffect::CreateSolidTree() const
 	dgPolyhedra::Iterator srcIter (*this);
 	for (srcIter.Begin(); srcIter; srcIter ++){
 		dgEdge* const face = &(*srcIter);
-		if (face->m_incidentFace > 0) {
-			if (face->m_mark != mark) {
-				if (face->m_incidentFace) {
-					dgEdge* ptr = face;
-					do {
-						ptr->m_mark = mark;
-						ptr = ptr->m_next;
-					} while (ptr != face);
+		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
+			dgEdge* ptr = face;
+			do {
+				ptr->m_mark = mark;
+				ptr = ptr->m_next;
+			} while (ptr != face);
 
-					if (!tree) {
-						dgBigVector normal (FaceNormal (face, &m_points[0][0], sizeof (dgVector)));
-						dgFloat64 mag2 = normal % normal;
-						if (mag2 > dgFloat32 (1.0e-10f)) {
-							tree = new (GetAllocator()) dgMeshEffectSolidTree (*this, face);
-						}
-					} else {
-						tree->AddFace (*this, face);
-					}
+			if (!tree) {
+				dgBigVector normal (FaceNormal (face, &m_points[0][0], sizeof (dgBigVector)));
+				dgFloat64 mag2 = normal % normal;
+				if (mag2 > dgFloat32 (1.0e-10f)) {
+					tree = new (GetAllocator()) dgMeshEffectSolidTree (*this, face);
 				}
+			} else {
+				tree->AddFace (*this, face);
 			}
 		}
 	}

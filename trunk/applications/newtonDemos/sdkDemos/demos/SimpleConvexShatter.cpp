@@ -91,7 +91,17 @@ xxxx.Serialize("xxx.xml");
 	DemoMesh* const mesh1 = new DemoMesh(convexParts);
 	entity->SetMesh(mesh1);
 	mesh1->Release();
-	
+
+
+DemoEntity* const entity2 = new DemoEntity(NULL);
+entity2->SetMatrix(*scene, dQuaternion(), dVector (0, 10, 0, 0));
+entity2->InterpolateMatrix (*scene, 1.0f);
+
+scene->Append (entity2);
+DemoMesh* const mesh2 = new DemoMesh(mesh);
+entity2->SetMesh(mesh2);
+mesh2->Release();
+
 
 	// make sure the assets are released before leaving the function
 	if (convexParts) {
