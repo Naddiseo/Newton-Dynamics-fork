@@ -205,16 +205,28 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 			} 
 
 			dgFloat64 minVal = minDist.GetAproximateValue();
-			if (fabs (minVal) < dgFloat64 (1.0e-3f)) {
-				if (fabs (minVal) > dgFloat64 (0.0f)) {
-					_ASSERTE (0);
+			if (minVal > dgFloat64 (-1.0e-3f)) {
+				if (minVal != dgFloat64 (0.0f)) {
+					dgFloat64 t = minVal / (root->m_normal % root->m_normal).GetAproximateValue();
+					dgHugeVector dist(root->m_normal.Scale (dgGoogol(t)));
+					dgFloat64 dist2 = (dist % dist).GetAproximateValue();
+					if (dist2 < dgFloat64 (1.0e-10f)) {
+						minDist = dgGoogol (dgFloat64 (0.0f));
+						minVal = dgFloat64 (0.0f);
+					}
 				}
 			}
 
 			dgFloat64 maxVal = maxDist.GetAproximateValue();
-			if (fabs (maxVal) < dgFloat64 (1.0e-3f)) {
-				if (fabs (maxVal) > dgFloat64 (0.0f)) {
-					_ASSERTE (0);
+			if (maxVal < dgFloat64 (1.0e-3f)) {
+				if (maxVal != dgFloat64 (0.0f)) {
+					dgFloat64 t = maxVal / (root->m_normal % root->m_normal).GetAproximateValue();
+					dgHugeVector dist(root->m_normal.Scale (dgGoogol(t)));
+					dgFloat64 dist2 = (dist % dist).GetAproximateValue();
+					if (dist2 < dgFloat64 (1.0e-10f)) {
+						maxDist = dgGoogol (dgFloat64 (0.0f));
+						maxVal = dgFloat64 (0.0f);
+					}
 				}
 			}
 
