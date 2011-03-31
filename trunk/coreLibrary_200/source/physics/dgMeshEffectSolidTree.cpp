@@ -207,7 +207,7 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 			} 
 
 			dgFloat64 minVal = minDist.GetAproximateValue();
-			if (minVal > dgFloat64 (-1.0e-3f)) {
+			if (minVal > dgFloat64 (-1.0e-2f)) {
 				if (minVal != dgFloat64 (0.0f)) {
 					dgFloat64 t = minVal / (root->m_normal % root->m_normal).GetAproximateValue();
 					dgHugeVector dist(root->m_normal.Scale (dgGoogol(t)));
@@ -220,7 +220,7 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 			}
 
 			dgFloat64 maxVal = maxDist.GetAproximateValue();
-			if (maxVal < dgFloat64 (1.0e-3f)) {
+			if (maxVal < dgFloat64 (1.0e-2f)) {
 				if (maxVal != dgFloat64 (0.0f)) {
 					dgFloat64 t = maxVal / (root->m_normal % root->m_normal).GetAproximateValue();
 					dgHugeVector dist(root->m_normal.Scale (dgGoogol(t)));

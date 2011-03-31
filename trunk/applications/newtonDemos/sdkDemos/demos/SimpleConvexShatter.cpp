@@ -62,7 +62,7 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 		}
 	} 
 
-count = 4;
+//count = 4;
 
 	// Create the array of convex pieces from the mesh
 	int interior = LoadTexture("KAMEN-stup.tga");
