@@ -450,6 +450,7 @@ void AddShatterPrimitive (DemoEntityManager* const scene, dFloat mass, const dVe
 
 
 
+
 void SimpleConvexShatter (DemoEntityManager* const scene)
 {
 	// suspend simulation before making changes to the physics world
@@ -458,9 +459,10 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	// load the skybox
 	scene->Append(new SkyBox());
 
+
 	// load the scene from and alchemedia file format
 	//CreateLevelMesh (scene, "flatPlane.xml", false);
-	CreateLevelMesh (scene, "sponza.xml", false);
+	CreateLevelMesh (scene, "sponza.xml", true);
 
 	// create a shattered mesh array
 //  CreateSimpleVoronoiShatter (scene);

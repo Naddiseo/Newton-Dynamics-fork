@@ -45,8 +45,6 @@ class AdjacentdFaces
 class dgPolygonSoupDatabaseBuilder 
 {
 	public:
-
-
 	dgPolygonSoupDatabaseBuilder (dgMemoryAllocator* const allocator);
 	~dgPolygonSoupDatabaseBuilder ();
 

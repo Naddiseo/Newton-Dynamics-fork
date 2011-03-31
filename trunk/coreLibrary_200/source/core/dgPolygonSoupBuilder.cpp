@@ -111,6 +111,9 @@ void dgPolygonSoupDatabaseBuilder::AddMesh (const dgFloat32* const vertex, dgInt
 	dgBigVector* const vertexPool = &m_vertexPoints[m_vertexCount];
 
 	worldMatrix.TransformTriplex (&vertexPool[0].m_x, sizeof (dgBigVector), vertex, strideInBytes, vertexCount);
+	for (dgInt32 i = 0; i < vertexCount; i ++) {
+		vertexPool[i].m_w = dgFloat64 (0.0f);
+	}
 
 	dgInt32 totalIndexCount = faceCount;
 	for (dgInt32 i = 0; i < faceCount; i ++) {
@@ -214,7 +217,7 @@ void dgPolygonSoupDatabaseBuilder::OptimizeByGroupID()
 
 				memcpy (&builderAux.m_faceVertexCount[0], &builderLeftOver.m_faceVertexCount[0], sizeof (dgInt32) * builderLeftOver.m_faceCount);
 				memcpy (&builderAux.m_vertexIndex[0], &builderLeftOver.m_vertexIndex[0], sizeof (dgInt32) * builderLeftOver.m_indexCount);
-				memcpy (&builderAux.m_vertexPoints[0], &builderLeftOver.m_vertexPoints[0], sizeof (dgTriplex) * builderLeftOver.m_vertexCount);
+				memcpy (&builderAux.m_vertexPoints[0], &builderLeftOver.m_vertexPoints[0], sizeof (dgBigVector) * builderLeftOver.m_vertexCount);
 
 				builderAux.m_faceCount = builderLeftOver.m_faceCount;
 				builderAux.m_indexCount = builderLeftOver.m_indexCount;
@@ -243,7 +246,7 @@ void dgPolygonSoupDatabaseBuilder::OptimizeByGroupID()
 
 	memcpy (&m_faceVertexCount[0], &builder.m_faceVertexCount[0], sizeof (dgInt32) * builder.m_faceCount);
 	memcpy (&m_vertexIndex[0], &builder.m_vertexIndex[0], sizeof (dgInt32) * builder.m_indexCount);
-	memcpy (&m_vertexPoints[0], &builder.m_vertexPoints[0], sizeof (dgTriplex) * builder.m_vertexCount);
+	memcpy (&m_vertexPoints[0], &builder.m_vertexPoints[0], sizeof (dgBigVector) * builder.m_vertexCount);
 	
 	m_faceCount = builder.m_faceCount;
 	m_indexCount = builder.m_indexCount;
@@ -254,11 +257,9 @@ void dgPolygonSoupDatabaseBuilder::OptimizeByGroupID()
 
 void dgPolygonSoupDatabaseBuilder::OptimizeByGroupID (dgPolygonSoupDatabaseBuilder& source, dgInt32 faceNumber, dgInt32 faceIndexNumber, dgPolygonSoupDatabaseBuilder& leftOver) 
 {
-	_ASSERTE (0);
-/*
 	dgInt32 indexPool[1024 * 1];
 	dgInt32 atributeData[1024 * 1];
-	dgTriplex vertexPool[1024 * 1];
+	dgVector vertexPool[1024 * 1];
 	dgPolyhedra polyhedra(m_allocator);
 
 	dgInt32 attribute = source.m_vertexIndex[faceIndexNumber];
@@ -275,8 +276,7 @@ void dgPolygonSoupDatabaseBuilder::OptimizeByGroupID (dgPolygonSoupDatabaseBuild
 		_ASSERTE (indexCount < 1024);
 
 		if (source.m_vertexIndex[faceIndexNumber] == attribute) {
-			dgEdge *face;
-			face = polyhedra.AddFace(indexCount - 1, &source.m_vertexIndex[faceIndexNumber + 1]);
+			dgEdge* const face = polyhedra.AddFace(indexCount - 1, &source.m_vertexIndex[faceIndexNumber + 1]);
 			if (!face) {
 				dgInt32 faceArray;
 				for (dgInt32 j = 0; j < indexCount - 1; j ++) {
@@ -285,11 +285,10 @@ void dgPolygonSoupDatabaseBuilder::OptimizeByGroupID (dgPolygonSoupDatabaseBuild
 					vertexPool[j] = source.m_vertexPoints[index];
 				}
 				faceArray = indexCount - 1;
-				leftOver.AddMesh (&vertexPool[0].m_x, indexCount - 1, sizeof (dgTriplex), 1, &faceArray, indexPool, atributeData, dgGetIdentityMatrix());
+				leftOver.AddMesh (&vertexPool[0].m_x, indexCount - 1, sizeof (dgVector), 1, &faceArray, indexPool, atributeData, dgGetIdentityMatrix());
 			} else {
-				dgEdge *ptr;
 				// set the attribute
-				ptr = face;
+				dgEdge* ptr = face;
 				do {
 					ptr->m_userData = dgUnsigned64 (attribute);
 					ptr = ptr->m_next;
@@ -305,8 +304,9 @@ void dgPolygonSoupDatabaseBuilder::OptimizeByGroupID (dgPolygonSoupDatabaseBuild
 
 	dgPolyhedra facesLeft(m_allocator);
 	facesLeft.BeginFace();
-	polyhedra.ConvexPartition (&source.m_vertexPoints[0].m_x, sizeof (dgTriplex), &facesLeft);
+	polyhedra.ConvexPartition (&source.m_vertexPoints[0].m_x, sizeof (dgBigVector), &facesLeft);
 	facesLeft.EndFace();
+
 
 	dgInt32 mark = polyhedra.IncLRU();
 	dgPolyhedra::Iterator iter (polyhedra);
@@ -329,18 +329,15 @@ void dgPolygonSoupDatabaseBuilder::OptimizeByGroupID (dgPolygonSoupDatabaseBuild
  		} while (ptr != edge);
 
 		if (indexCount >= 3) {
-			AddMesh (&vertexPool[0].m_x, indexCount, sizeof (dgTriplex), 1, &indexCount, indexPool, atributeData, dgGetIdentityMatrix());
+			AddMesh (&vertexPool[0].m_x, indexCount, sizeof (dgVector), 1, &indexCount, indexPool, atributeData, dgGetIdentityMatrix());
 		}
 	}
+
 
 	mark = facesLeft.IncLRU();
 	dgPolyhedra::Iterator iter1 (facesLeft);
 	for (iter1.Begin(); iter1; iter1 ++) {
-		dgEdge *ptr;
-		dgEdge *edge;
-		dgInt32 indexCount;
-
-		edge = &(*iter1);
+		dgEdge* const edge = &(*iter1);
 		if (edge->m_incidentFace < 0) {
 			continue;
 		}
@@ -348,8 +345,8 @@ void dgPolygonSoupDatabaseBuilder::OptimizeByGroupID (dgPolygonSoupDatabaseBuild
 			continue;
 		}
 
-		ptr = edge;
-		indexCount = 0;
+		dgEdge* ptr = edge;
+		dgInt32 indexCount = 0;
 		do {
 			ptr->m_mark = mark;
 			vertexPool[indexCount] = source.m_vertexPoints[ptr->m_incidentVertex];
@@ -357,10 +354,9 @@ void dgPolygonSoupDatabaseBuilder::OptimizeByGroupID (dgPolygonSoupDatabaseBuild
 			ptr = ptr->m_next;
  		} while (ptr != edge);
 		if (indexCount >= 3) {
-			AddMesh (&vertexPool[0].m_x, indexCount, sizeof (dgTriplex), 1, &indexCount, indexPool, atributeData, dgGetIdentityMatrix());
+			AddMesh (&vertexPool[0].m_x, indexCount, sizeof (dgVector), 1, &indexCount, indexPool, atributeData, dgGetIdentityMatrix());
 		}
 	}
-*/
 }
 
 
@@ -436,12 +432,11 @@ void dgPolygonSoupDatabaseBuilder::Optimize(bool optimize)
 {
 	#define DG_PATITION_SIZE (1024 * 4)
 	if (optimize && (m_faceCount > DG_PATITION_SIZE)) {
-_ASSERTE (0);
-/*
+
 		dgBigVector median (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 		dgBigVector varian (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 
-		dgStack<dgTriplex> pool (1024 * 2);
+		dgStack<dgVector> pool (1024 * 2);
 		dgStack<dgInt32> indexArray (1024 * 2);
 		dgInt32 polygonIndex = 0;
 		for (dgInt32 i = 0; i < m_faceCount; i ++) {
@@ -479,19 +474,6 @@ _ASSERTE (0);
 		dgBigVector center = median.Scale (dgFloat32 (1.0f) / dgFloat32 (m_faceCount));
 		dgFloat64 axisVal = center[axis];
 
-#if 0
-		dgInt32 axis = 0;
-		dgFloat64 axisVal = x / m_faceCount;
-		if ((yd > xd) && (yd > zd)) {
-			axis = 1;
-			axisVal = y / m_faceCount;
-		}
-		if ((zd > xd) && (zd > yd)) {
-			axis = 2;
-			axisVal = z / m_faceCount;
-		}
-#endif
-
 		dgPolygonSoupDatabaseBuilder left(m_allocator);
 		dgPolygonSoupDatabaseBuilder right(m_allocator);
 
@@ -520,9 +502,9 @@ _ASSERTE (0);
 			}
 
 			if (!side) {
-				left.AddMesh (&pool[0].m_x, count - 1, sizeof (dgTriplex), 1, &faceArray, &indexArray[0], &faceTagsData, dgGetIdentityMatrix()); 
+				left.AddMesh (&pool[0].m_x, count - 1, sizeof (dgVector), 1, &faceArray, &indexArray[0], &faceTagsData, dgGetIdentityMatrix()); 
 			} else {
-				right.AddMesh (&pool[0].m_x, count - 1, sizeof (dgTriplex), 1, &faceArray, &indexArray[0], &faceTagsData, dgGetIdentityMatrix()); 
+				right.AddMesh (&pool[0].m_x, count - 1, sizeof (dgVector), 1, &faceArray, &indexArray[0], &faceTagsData, dgGetIdentityMatrix()); 
 			}
 			polygonIndex += count;
 		}
@@ -544,7 +526,7 @@ _ASSERTE (0);
 				pool[j - 1] = left.m_vertexPoints[k];
 				indexArray[j - 1] = j - 1;
 			}
-			AddMesh (&pool[0].m_x, count - 1, sizeof (dgTriplex), 1, &faceArray, &indexArray[0], &faceTagsData, dgGetIdentityMatrix()); 
+			AddMesh (&pool[0].m_x, count - 1, sizeof (dgVector), 1, &faceArray, &indexArray[0], &faceTagsData, dgGetIdentityMatrix()); 
 			polygonIndex += count;
 		}
 
@@ -558,7 +540,7 @@ _ASSERTE (0);
 				pool[j - 1] = right.m_vertexPoints[k];
 				indexArray[j - 1] = j - 1;
 			}
-			AddMesh (&pool[0].m_x, count - 1, sizeof (dgTriplex), 1, &faceArray, &indexArray[0], &faceTagsData, dgGetIdentityMatrix()); 
+			AddMesh (&pool[0].m_x, count - 1, sizeof (dgVector), 1, &faceArray, &indexArray[0], &faceTagsData, dgGetIdentityMatrix()); 
 			polygonIndex += count;
 		}
 
@@ -567,7 +549,7 @@ _ASSERTE (0);
 		} else {
 			EndAndOptimize(false);
 		}
-*/
+
 	} else {
 		EndAndOptimize(optimize);
 	}
