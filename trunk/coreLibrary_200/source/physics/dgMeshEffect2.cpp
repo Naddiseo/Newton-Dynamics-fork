@@ -2190,7 +2190,7 @@ xxxx ++;
 
 					convexMesh->BeginPolygon();
 					convexMesh->MergeFaces(leftConvexMesh);
-					convexMesh->MergeFaces(leftMeshClipper);
+					//convexMesh->MergeFaces(leftMeshClipper);
 					convexMesh->EndPolygon(dgFloat64 (1.0e-5f));
 				}
 			} else if (rightConvexMesh) {

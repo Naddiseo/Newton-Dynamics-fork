@@ -148,14 +148,13 @@ void dgMeshEffectSolidTree::BuildPlane (const dgMeshEffect& mesh, dgEdge* const 
 	dgEdge* edge = face;
 	normal = dgHugeVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 
-	dgHugeVector p0 (dgBigVector (mesh.m_points[edge->m_incidentVertex]));
+	dgHugeVector p0 (mesh.m_points[edge->m_incidentVertex]);
 	edge = edge->m_next;
 
-	dgHugeVector p1 (dgBigVector (mesh.m_points[edge->m_incidentVertex]));
+	dgHugeVector p1 (mesh.m_points[edge->m_incidentVertex]);
 	dgHugeVector e1 (p1 - p0);
-	//		_ASSERTE (edge->m_next->m_next->m_next == edge);
 	for (edge = edge->m_next; edge != face; edge = edge->m_next) {
-		dgHugeVector p2 (dgBigVector (mesh.m_points[edge->m_incidentVertex]));
+		dgHugeVector p2 (mesh.m_points[edge->m_incidentVertex]);
 		dgHugeVector e2 (p2 - p0);
 		normal += e1 * e2;
 		e1 = e2;
@@ -180,7 +179,7 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 		dgEdge* ptr = face;
 		faces[0].SetAllocator(mesh.GetAllocator());
 		do {
-			faces[0].Append(dgBigVector (mesh.m_points[ptr->m_incidentVertex]));
+			faces[0].Append(mesh.m_points[ptr->m_incidentVertex]);
 			ptr = ptr->m_next;
 		} while (ptr != face);
 
