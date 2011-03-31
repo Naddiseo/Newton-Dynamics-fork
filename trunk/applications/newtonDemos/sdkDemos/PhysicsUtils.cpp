@@ -1110,7 +1110,7 @@ static void CreateLevelMeshBody (NewtonWorld* const world, DemoEntity* const ent
 				index = segment.m_indexes[i + 2] * 3;
 				face[2] = dVector (vertex[index + 0], vertex[index + 1], vertex[index + 2]);
 
-				matrix.TransformTriplex (face, sizeof (dVector), face, sizeof (dVector), 3);
+				matrix.TransformTriplex (&face[0].m_x, sizeof (dVector), &face[0].m_x, sizeof (dVector), 3);
 
 				// stress test the collision builder
 				// matID = matID == 2 ? 1 : 2 ;

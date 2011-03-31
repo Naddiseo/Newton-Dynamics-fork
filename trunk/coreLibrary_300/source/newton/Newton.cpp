@@ -8309,15 +8309,10 @@ int NewtonMeshGetPointStrideInByte (const NewtonMesh* const mesh)
 
 dFloat64* NewtonMeshGetPointArray (const NewtonMesh* const mesh) 
 {
-	_ASSERTE (0);
-	return NULL;
-/*
-	
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 
 	TRACE_FUNTION(__FUNCTION__);
 	return meshEffect->GetAttributePool();
-*/
 }
 
 

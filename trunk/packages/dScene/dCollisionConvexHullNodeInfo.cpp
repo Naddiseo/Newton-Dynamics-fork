@@ -108,7 +108,7 @@ void dCollisionConvexHullNodeInfo::SetFaceSelection (int count, const dFloat* po
 void dCollisionConvexHullNodeInfo::BakeTransform (const dMatrix& transform)
 {
 	dCollisionNodeInfo::BakeTransform (transform);
-	transform.TransformTriplex(m_vertexCloud, sizeof (dVector), m_vertexCloud, sizeof (dVector), m_count);;
+	transform.TransformTriplex(&m_vertexCloud[0].m_x, sizeof (dVector), &m_vertexCloud[0].m_x, sizeof (dVector), m_count);;
 }
 
 

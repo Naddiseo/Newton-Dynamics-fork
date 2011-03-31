@@ -122,20 +122,20 @@ void dMeshNodeInfo::BakeTransform (const dMatrix& transform)
 	matrix = transform * dMatrix (GetIdentityMatrix(), scale, stretchMatrix);
 
 	int pointCount = NewtonMeshGetPointCount (m_mesh); 
-	int pointStride = NewtonMeshGetPointStrideInByte (m_mesh) / sizeof (dFloat);
+	int pointStride = NewtonMeshGetPointStrideInByte (m_mesh) / sizeof (dFloat64);
 	dFloat64* const points = NewtonMeshGetPointArray (m_mesh); 
-	matrix.TransformTriplex(points, pointStride * sizeof (dFloat), points, pointStride * sizeof (dFloat), pointCount);
+	matrix.TransformTriplex(points, pointStride * sizeof (dFloat64), points, pointStride * sizeof (dFloat64), pointCount);
 
 
 	dFloat64* const normals = NewtonMeshGetNormalArray(m_mesh); 
 	dMatrix rotation (matrix.Inverse4x4().Transpose() * matrix);
 	rotation.m_posit = dVector (0.0f, 0.0f, 0.0f, 1.0f);
-	rotation.TransformTriplex(normals, pointStride * sizeof (dFloat), normals, pointStride * sizeof (dFloat), pointCount);
+	rotation.TransformTriplex(normals, pointStride * sizeof (dFloat64), normals, pointStride * sizeof (dFloat64), pointCount);
 
 	int vertexCount = NewtonMeshGetVertexCount (m_mesh); 
-	int vertexStride = NewtonMeshGetVertexStrideInByte (m_mesh) / sizeof (dFloat);
+	int vertexStride = NewtonMeshGetVertexStrideInByte (m_mesh) / sizeof (dFloat64);
 	dFloat64* const vertex = NewtonMeshGetVertexArray (m_mesh); 
-	matrix.TransformTriplex(vertex, vertexStride * sizeof (dFloat), vertex, vertexStride * sizeof (dFloat), vertexCount);
+	matrix.TransformTriplex(vertex, vertexStride * sizeof (dFloat64), vertex, vertexStride * sizeof (dFloat64), vertexCount);
 }
 
 void dMeshNodeInfo::BuildFromVertexListIndexList(int faceCount, const int* const faceIndexCount, const int* faceMaterialIndex, 

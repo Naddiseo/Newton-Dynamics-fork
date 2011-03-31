@@ -238,35 +238,31 @@ dVector dMatrix::UntransformVector (const dVector &v) const
 }
 
 
-void dMatrix::TransformTriplex (
-	void* const dstPtr, 
-	int dstStrideInBytes,
-	void* const srcPtr, 
-	int srcStrideInBytes, 
-	int count) const
+void dMatrix::TransformTriplex (dFloat* const dst, int dstStrideInBytes, dFloat* const src, int srcStrideInBytes, int count) const
 {
-	int i;
-	dFloat x;
-	dFloat y;
-	dFloat z;
-	dFloat* dst;
-	dFloat* src;
-
-	dst = (dFloat*) dstPtr;
-	src = (dFloat*) srcPtr;
-
 	dstStrideInBytes /= sizeof (dFloat);
 	srcStrideInBytes /= sizeof (dFloat);
+	for (int i = 0 ; i < count; i ++ ) {
+		dFloat x = src[srcStrideInBytes * i + 0];
+		dFloat y = src[srcStrideInBytes * i + 1];
+		dFloat z = src[srcStrideInBytes * i + 2];
+		dst[dstStrideInBytes * i + 0] = x * m_front.m_x + y * m_up.m_x + z * m_right.m_x + m_posit.m_x;
+		dst[dstStrideInBytes * i + 1] = x * m_front.m_y + y * m_up.m_y + z * m_right.m_y + m_posit.m_y;
+		dst[dstStrideInBytes * i + 2] = x * m_front.m_z + y * m_up.m_z + z * m_right.m_z + m_posit.m_z;
+	}
+}
 
-	for (i = 0 ; i < count; i ++ ) {
-		x = src[0];
-		y = src[1];
-		z = src[2];
-		dst[0] = x * m_front.m_x + y * m_up.m_x + z * m_right.m_x + m_posit.m_x;
-		dst[1] = x * m_front.m_y + y * m_up.m_y + z * m_right.m_y + m_posit.m_y;
-		dst[2] = x * m_front.m_z + y * m_up.m_z + z * m_right.m_z + m_posit.m_z;
-		dst += dstStrideInBytes;
-		src += srcStrideInBytes;
+void dMatrix::TransformTriplex (dFloat64* const dst, int dstStrideInBytes, dFloat64* const src, int srcStrideInBytes, int count) const
+{
+	dstStrideInBytes /= sizeof (dFloat64);
+	srcStrideInBytes /= sizeof (dFloat64);
+	for (int i = 0 ; i < count; i ++ ) {
+		dFloat64 x = src[srcStrideInBytes * i + 0];
+		dFloat64 y = src[srcStrideInBytes * i + 1];
+		dFloat64 z = src[srcStrideInBytes * i + 2];
+		dst[dstStrideInBytes * i + 0] = x * m_front.m_x + y * m_up.m_x + z * m_right.m_x + m_posit.m_x;
+		dst[dstStrideInBytes * i + 1] = x * m_front.m_y + y * m_up.m_y + z * m_right.m_y + m_posit.m_y;
+		dst[dstStrideInBytes * i + 2] = x * m_front.m_z + y * m_up.m_z + z * m_right.m_z + m_posit.m_z;
 	}
 }
 

@@ -277,27 +277,33 @@ dgFloat32 dgCollisionConvex::GetDiscretedAngleStep (dgFloat32 radius) const
 
 bool dgCollisionConvex::SanityCheck (dgPolyhedra& hull) const
 {
-	_ASSERTE (0);
-/*
-	dgEdge * edge;
-	dgEdge * ptr;
-	dgEdge * neiborg;
-	dgFloat32 project;
 	dgPolyhedra::Iterator iter (hull);
-
 	for (iter.Begin(); iter; iter ++) { 
-		edge = &(*iter);
+		dgEdge* const edge = &(*iter);
 		if (edge->m_incidentFace < 0) {
 			return false;
 		}
-		dgVector n0 (hull.FaceNormal (edge, &m_vertex[0].m_x, sizeof (dgVector)));
+//		dgBigVector n0 (hull.FaceNormal (edge, &m_vertex[0].m_x, sizeof (dgBigVector)));
+		dgEdge* ptr = edge;
+		dgVector p0 (m_vertex[edge->m_incidentVertex]);
+		ptr = ptr->m_next;
+		dgVector p1 (m_vertex[ptr->m_incidentVertex]);
+		dgVector e1 (p1 - p0);
+		dgVector n0 (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+		for (ptr = ptr->m_next; ptr != edge; ptr = ptr->m_next) {
+			dgVector p2 (m_vertex[ptr->m_incidentVertex]);
+			dgVector e2 (p2 - p0);
+			n0 += e1 * e2;
+			e1 = e2;
+		} 
+
 		ptr = edge;
 		do {
 			dgVector p0 (m_vertex[ptr->m_twin->m_incidentVertex]);
-			for (neiborg = ptr->m_twin->m_next->m_next; neiborg != ptr->m_twin; neiborg = neiborg->m_next) { 
+			for (dgEdge* neiborg = ptr->m_twin->m_next->m_next; neiborg != ptr->m_twin; neiborg = neiborg->m_next) { 
 				dgVector p1 (m_vertex[neiborg->m_incidentVertex]);
 				dgVector dp (p1 - p0);
-				project = dp % n0;
+				dgFloat32 project = dp % n0;
 				if (project > dgFloat32 (0.0f)) {
 					return false;
 				}
@@ -306,7 +312,7 @@ bool dgCollisionConvex::SanityCheck (dgPolyhedra& hull) const
 			ptr = ptr->m_next;
 		} while (ptr != edge);
 	}
-*/
+
 	return true;
 }
 

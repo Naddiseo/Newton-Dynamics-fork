@@ -143,9 +143,6 @@ void dRigidbodyNodeInfo::Serialize (TiXmlElement* const rootNode) const
 
 bool dRigidbodyNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
-	_ASSERTE (0);
-	return false;
-/*
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 
 	TiXmlElement* dataNode = (TiXmlElement*) rootNode->FirstChild ("centerOfMass");
@@ -164,7 +161,6 @@ bool dRigidbodyNodeInfo::Deserialize (TiXmlElement* const rootNode, int revision
 	dStringToFloatArray (dataNode->Attribute("float4"), &m_internalDamp[0], 4);
 
 	return true;
-*/
 }
 
 

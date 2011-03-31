@@ -24,6 +24,11 @@
 	#endif
 #endif 
 
+#ifndef dFloat64
+	typedef double dFloat64;
+#endif 
+
+
 // transcendental functions
 #define	dAbs(x)		dFloat (fabs (dFloat(x))) 
 #define	dSqrt(x)	dFloat (sqrt (dFloat(x))) 

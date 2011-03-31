@@ -55,9 +55,8 @@ class dMatrix
 	// constructor for polar composition
 	dMatrix (const dMatrix& transformMatrix, const dVector& scale, const dMatrix& stretchAxis);
 
-	
-	void TransformTriplex (void* const dst, int dstStrideInBytes,
-						   void* const src, int srcStrideInBytes, int count) const;
+	void TransformTriplex (dFloat* const dst, int dstStrideInBytes, dFloat* const src, int srcStrideInBytes, int count) const;
+	void TransformTriplex (dFloat64* const dst, int dstStrideInBytes, dFloat64* const src, int srcStrideInBytes, int count) const;
 
 	dMatrix operator* (const dMatrix & B) const;
 
