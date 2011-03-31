@@ -49,6 +49,8 @@ dgCollisionConvexHull::dgCollisionConvexHull(dgMemoryAllocator* const allocator,
 	m_boundPlanesCount = 0;
 
 	m_rtti |= dgCollisionConvexHull_RTTI;
+
+
 	Create (count, strideInBytes, vertexArray, tolerance);
 
 	dgInt32 planeCount = 0;
@@ -60,9 +62,13 @@ dgCollisionConvexHull::dgCollisionConvexHull(dgMemoryAllocator* const allocator,
 		dgInt32 i0 = face->m_prev->m_vertex;
 		dgInt32 i1 = face->m_vertex;
 		dgInt32 i2 = face->m_next->m_vertex;
-		const dgVector& p0 = m_vertex[i0];
+		const dgBigVector p0 (m_vertex[i0]);
+		const dgBigVector p1 (m_vertex[i1]);
+		const dgBigVector p2 (m_vertex[i2]);
 
-		dgVector normal ((m_vertex[i1] - p0) * (m_vertex[i2] - p0));
+		dgBigVector normal1 ((p1 - p0) * (p2 - p0));
+
+		dgVector normal ((m_vertex[i1] - m_vertex[i0]) * (m_vertex[i2] - m_vertex[i0]));
 		normal = normal.Scale (dgFloat32 (1.0f) / dgSqrt (normal % normal));
 		dgInt32 add = 1;
 		for (dgInt32 j = 0; j < 3; j ++) {
@@ -360,17 +366,69 @@ bool dgCollisionConvexHull::Create (dgInt32 count, dgInt32 strideInBytes, const 
 		buffer[i * 3 + 2] = vertexArray[i * stride + 2];
 	}
 
-	dgConvexHull3d convexHull (GetAllocator(), &buffer[0], 3 * sizeof (dgFloat64), count, tolerance);
-	if (!convexHull.GetCount()) {
+	dgConvexHull3d* convexHull =  new (GetAllocator()) dgConvexHull3d (GetAllocator(), &buffer[0], 3 * sizeof (dgFloat64), count, tolerance);
+	if (!convexHull->GetCount()) {
+		delete convexHull;
 		return false;
 	}
 
-	dgInt32 vertexCount = convexHull.GetVertexCount();
-	const dgBigVector* const hullVertexArray = convexHull.GetVertexPool();
+	// check for degenerated faces
+	for (bool success = false; !success;  ) {
+		success = true;
+		const dgBigVector* const hullVertexArray = convexHull->GetVertexPool();
+
+		dgStack<dgInt8> mask(convexHull->GetVertexCount());
+		memset (&mask[0], 1, mask.GetSizeInBytes());
+		for (dgConvexHull3d::dgListNode* node = convexHull->GetFirst(); node; node = node->GetNext()) {
+			dgConvexHull3DFace& face = node->GetInfo();
+			const dgBigVector& p0 = hullVertexArray[face.m_index[0]];
+			const dgBigVector& p1 = hullVertexArray[face.m_index[1]];
+			const dgBigVector& p2 = hullVertexArray[face.m_index[2]];
+			dgBigVector p1p0 (p1 - p0);
+			dgBigVector p2p0 (p2 - p0);
+			dgBigVector normal (p2p0 * p1p0);
+			dgFloat64 mag2 = normal % normal;
+			if (mag2 < dgFloat64 (1.0e-6f * 1.0e-6f)) {
+				success = false;
+				dgInt32 index = -1;
+				dgBigVector p2p1 (p2 - p1);
+				dgFloat64 dist10 = p1p0 % p1p0;
+				dgFloat64 dist20 = p2p0 % p2p0;
+				dgFloat64 dist21 = p2p1 % p2p1;
+				if ((dist10 >= dist20) && (dist10 >= dist21)) {
+					index = 2;
+				} else if ((dist20 >= dist10) && (dist20 >= dist21)) {
+					index = 1;
+				} else if ((dist21 >= dist10) && (dist21 >= dist20)) {
+					index = 0;
+				}
+				_ASSERTE (index != -1);
+				mask[face.m_index[index]] = 0;
+			}
+		}
+		if (!success) {
+			dgInt32 count = 0;
+			dgInt32 vertexCount = convexHull->GetVertexCount();
+			for (dgInt32 i = 0; i < vertexCount; i ++) {
+				if (mask[i]) {
+					buffer[count * 3 + 0] = hullVertexArray[i].m_x;
+					buffer[count * 3 + 1] = hullVertexArray[i].m_y;
+					buffer[count * 3 + 2] = hullVertexArray[i].m_z;
+					count ++;
+				}
+			}
+			delete convexHull;
+			convexHull =  new (GetAllocator()) dgConvexHull3d (GetAllocator(), &buffer[0], 3 * sizeof (dgFloat64), count, tolerance);
+		}
+	}
+
+
+	dgInt32 vertexCount = convexHull->GetVertexCount();
+	const dgBigVector* const hullVertexArray = convexHull->GetVertexPool();
 
 	dgPolyhedra polyhedra (GetAllocator());
 	polyhedra.BeginFace();
-	for (dgConvexHull3d::dgListNode* node = convexHull.GetFirst(); node; node = node->GetNext()) {
+	for (dgConvexHull3d::dgListNode* node = convexHull->GetFirst(); node; node = node->GetNext()) {
 		dgConvexHull3DFace& face = node->GetInfo();
 		polyhedra.AddFace (face.m_index[0], face.m_index[1], face.m_index[2]);
 	}
@@ -487,6 +545,8 @@ bool dgCollisionConvexHull::Create (dgInt32 count, dgInt32 strideInBytes, const 
 	}
 	m_faceArray = (dgConvexSimplexEdge **) m_allocator->Malloc(dgInt32 (m_faceCount * sizeof(dgConvexSimplexEdge *)));
 	memcpy (m_faceArray, &faceArray[0], m_faceCount * sizeof(dgConvexSimplexEdge *));
+
+	delete convexHull;
 	return true;
 }
 

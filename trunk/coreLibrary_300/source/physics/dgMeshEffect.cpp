@@ -4195,6 +4195,57 @@ void dgMeshEffect::RepairTJoints ()
 }
 
 
+dgMeshEffect* dgMeshEffect::GetNextLayer (dgInt32 mark)
+{
+	Iterator iter(*this);
+	dgEdge* edge = NULL;
+	for (iter.Begin (); iter; iter ++) {
+		edge = &(*iter);
+		if ((edge->m_mark < mark) && (edge->m_incidentFace > 0)) {
+			break;
+		}
+	}
+
+	if (!edge) {
+		return NULL;
+	}
+
+	dgInt32 layer = dgInt32 (m_points[edge->m_incidentVertex].m_w);
+	dgPolyhedra polyhedra(GetAllocator());
+
+	polyhedra.BeginFace ();
+	for (iter.Begin (); iter; iter ++) {
+		dgEdge* const edge = &(*iter);
+		if ((edge->m_mark < mark) && (edge->m_incidentFace > 0)) {
+			dgInt32 thislayer = dgInt32 (m_points[edge->m_incidentVertex].m_w);
+			if (thislayer == layer) {
+				dgEdge* ptr = edge;
+				dgInt32 count = 0;
+				dgInt32 faceIndex[256];
+				dgInt64 faceDataIndex[256];
+				do {
+					ptr->m_mark = mark;
+					faceIndex[count] = ptr->m_incidentVertex;
+					faceDataIndex[count] = ptr->m_userData;
+					count ++;
+					_ASSERTE (count < sizeof (faceIndex)/ sizeof(faceIndex[0]));
+					ptr = ptr->m_next;
+				} while (ptr != edge);
+				polyhedra.AddFace (count, &faceIndex[0], &faceDataIndex[0]);
+			}
+		}
+	}
+	polyhedra.EndFace ();
+
+	dgMeshEffect* solid = NULL;
+	if (polyhedra.GetCount()) {
+		solid = new (GetAllocator()) dgMeshEffect(polyhedra, *this);
+		solid->SetLRU(mark);
+	}
+	return solid;
+}
+
+
 void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** left, dgMeshEffect** right) const
 {
 	dgMeshEffect mesh (dgMeshEffect (*this));

@@ -2717,8 +2717,6 @@ NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const newtonWorld, in
 // See also: NewtonCreateConvexHull, NewtonMeshCreate
 NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, dFloat tolerance, int shapeID)
 {
-	
-
 	TRACE_FUNTION(__FUNCTION__);
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 	return (NewtonCollision*) meshEffect->CreateConvexCollision(tolerance, shapeID);
@@ -8239,11 +8237,10 @@ void NewtonMeshAddFace(const NewtonMesh* const mesh, int vertexCount, const dFlo
 
 void NewtonMeshEndFace(const NewtonMesh* const mesh)
 {
-	
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 
 	TRACE_FUNTION(__FUNCTION__);
-	meshEffect->EndPolygon();
+	meshEffect->EndPolygon(dgFloat64 (1.0e-8f));
 }
 
 void NewtonMeshBuildFromVertexListIndexList(const NewtonMesh* const mesh,
@@ -8253,7 +8250,6 @@ void NewtonMeshBuildFromVertexListIndexList(const NewtonMesh* const mesh,
 	const dFloat* const uv0, int uv0StrideInBytes, const int* const uv0Index,
 	const dFloat* const uv1, int uv1StrideInBytes, const int* const uv1Index)
 {
-	
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 
 	TRACE_FUNTION(__FUNCTION__);
@@ -8454,7 +8450,6 @@ void NewtonMeshMaterialGetIndexStream (const NewtonMesh* const mesh, void* const
 
 void NewtonMeshMaterialGetIndexStreamShort (const NewtonMesh* const mesh, void* const handle, int materialId, short int* const index)
 {
-	
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 	TRACE_FUNTION(__FUNCTION__);
 	meshEffect->GetMaterialGetIndexStreamShort ((dgMeshEffect::dgIndexArray*) handle, materialId, index);		
@@ -8464,17 +8459,15 @@ void NewtonMeshMaterialGetIndexStreamShort (const NewtonMesh* const mesh, void* 
 
 NewtonMesh* NewtonMeshCreateFirstSingleSegment (const NewtonMesh* const mesh)
 {
-	dgMeshEffect* solid;
-	dgMeshEffect* effectMesh;
 	TRACE_FUNTION(__FUNCTION__);
 
-	effectMesh = (dgMeshEffect*)mesh;
+	dgMeshEffect* const effectMesh = (dgMeshEffect*)mesh;
 
 	dgPolyhedra segment(effectMesh->GetAllocator());
 
 	effectMesh->BeginConectedSurface();
 	if (effectMesh->GetConectedSurface (segment)) {
-	solid = new (effectMesh->GetAllocator()) dgMeshEffect(segment, *((dgMeshEffect*)mesh));
+		dgMeshEffect* const solid = new (effectMesh->GetAllocator()) dgMeshEffect(segment, *((dgMeshEffect*)mesh));
 	return (NewtonMesh*)solid;
 	} else {
 		return NULL;
@@ -8483,21 +8476,17 @@ NewtonMesh* NewtonMeshCreateFirstSingleSegment (const NewtonMesh* const mesh)
 
 NewtonMesh* NewtonMeshCreateNextSingleSegment (const NewtonMesh* const mesh, const NewtonMesh* const segment)
 {
-	dgMeshEffect* solid;
-	dgMeshEffect* effectMesh;
-	dgInt32 moreSegments;
-
-	effectMesh = (dgMeshEffect*)mesh;
-
-	dgPolyhedra nextSegment(effectMesh->GetAllocator());
-
 	TRACE_FUNTION(__FUNCTION__);
 
+	dgMeshEffect* const effectMesh = (dgMeshEffect*)mesh;
+	dgPolyhedra nextSegment(effectMesh->GetAllocator());
+
 	_ASSERTE (segment);
-	moreSegments = effectMesh->GetConectedSurface (nextSegment);
+	dgInt32 moreSegments = effectMesh->GetConectedSurface (nextSegment);
+
+	dgMeshEffect* solid;
 	if (moreSegments) {
 		solid = new (effectMesh->GetAllocator()) dgMeshEffect(nextSegment, *effectMesh);
-
 	} else {
 		solid = NULL;
 		effectMesh->EndConectedSurface();
@@ -8505,6 +8494,23 @@ NewtonMesh* NewtonMeshCreateNextSingleSegment (const NewtonMesh* const mesh, con
 
 	return (NewtonMesh*)solid;
 }
+
+NewtonMesh* NewtonMeshCreateFirstLayer (const NewtonMesh* const mesh)
+{
+	TRACE_FUNTION(__FUNCTION__);
+
+	dgMeshEffect* const effectMesh = (dgMeshEffect*)mesh;
+	return (NewtonMesh*) effectMesh->GetFirstLayer ();
+}
+
+NewtonMesh* NewtonMeshCreateNextLayer (const NewtonMesh* const mesh, const NewtonMesh* const segment)
+{
+	TRACE_FUNTION(__FUNCTION__);
+
+	dgMeshEffect* const effectMesh = (dgMeshEffect*)mesh;
+	return (NewtonMesh*) effectMesh->GetNextLayer ((dgMeshEffect*)segment);
+}
+
 
 
 int NewtonMeshGetTotalFaceCount (const NewtonMesh* const mesh)

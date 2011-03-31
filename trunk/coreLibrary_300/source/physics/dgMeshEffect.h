@@ -105,6 +105,9 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	static bool CheckIntersection (const dgMeshEffect* const meshA, const dgMeshEffectSolidTree* const solidTreeA,
 								   const dgMeshEffect* const meshB, const dgMeshEffectSolidTree* const solidTreeB, dgFloat64 scale);
 
+	dgMeshEffect* GetFirstLayer ();
+	dgMeshEffect* GetNextLayer (dgMeshEffect* const layer);
+
 	void Triangulate ();
 	void ConvertToPolygons ();
 
@@ -220,14 +223,15 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	dgVertexAtribute InterpolateEdge (dgEdge* const edge, dgFloat64 param) const;
 	dgVertexAtribute InterpolateVertex (const dgBigVector& point, dgEdge* const face) const;
 
+	dgMeshEffect* GetNextLayer (dgInt32 mark);
+
 	void ClipMesh (const dgMeshEffect* clipMesh, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
 	void ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
 	dgInt32 PlaneApplyCap (const dgMeshEffect* planeMesh, const dgPlane& normal);
 	void PlaneClipMesh (const dgMeshEffect* planeMesh, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
-
-//	void ClipFace (const dgHugeVector& normal, const dgHugeVector& origin, dgMeshTreeCSGFace* const src, dgMeshTreeCSGFace** left, dgMeshTreeCSGFace** const right, dgMeshTreeCSGPointsPool& pointPool) const;
-
 	dgMeshEffect* CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
+
+
 
 	bool CheckSingleMesh() const;
 
@@ -314,6 +318,20 @@ inline dgInt32 dgMeshEffect::GetVertexStrideInByte() const
 inline dgFloat64* dgMeshEffect::GetVertexPool () const 
 {
 	return &m_points[0].m_x;
+}
+
+
+inline dgMeshEffect* dgMeshEffect::GetFirstLayer ()
+{
+	return GetNextLayer (IncLRU());
+}
+
+inline dgMeshEffect* dgMeshEffect::GetNextLayer (dgMeshEffect* const layerSegment)
+{
+	if (!layerSegment) {
+		return NULL;
+	}
+	return GetNextLayer (layerSegment->IncLRU() - 1);
 }
 
 
