@@ -149,6 +149,7 @@ static void GenericContactProcess (const NewtonJoint* contactJoint, dFloat times
 
 	bestSound = NULL;
 	contactBestSpeed = 0.5f;
+	NewtonBody* const body0 = NewtonJointGetBody0(contactJoint);
 	for (void* contact = NewtonContactJointGetFirstContact (contactJoint); contact; contact = NewtonContactJointGetNextContact (contactJoint, contact)) {
 		dFloat contactNormalSpeed;
 		NewtonMaterial* material;
@@ -160,7 +161,7 @@ static void GenericContactProcess (const NewtonJoint* contactJoint, dFloat times
 		if (contactNormalSpeed > contactBestSpeed){
 			dVector normal;
 			contactBestSpeed = contactNormalSpeed;
-			NewtonMaterialGetContactPositionAndNormal (material, &contactPosit[0], &normal[0]);
+			NewtonMaterialGetContactPositionAndNormal (material, body0, &contactPosit[0], &normal[0]);
 			bestSound = (SoundEffect *)NewtonMaterialGetMaterialPairUserData (material);
 		}
 	}

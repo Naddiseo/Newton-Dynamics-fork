@@ -65,7 +65,7 @@ class alchemediaCamera: public dCameraNodeInfo
 	void DrawSolidWireFrame(dScene* const world, dScene::dTreeNode* const myNode, const dVector& color) const;
 	void DrawGouraudShaded(dScene* const world, dScene::dTreeNode* const myNode, const dVector& color) const;
 
-	bool Deserialize (TiXmlElement* rootNode, int revisionNumber); 
+	bool Deserialize (TiXmlElement* const rootNode, int revisionNumber); 
 
 	// save the projection mode
 	ProjectionModes m_projectionMode;

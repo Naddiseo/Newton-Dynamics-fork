@@ -563,6 +563,8 @@ void ValveMapImport::LoadWorld (FILE* file, dScene* world, void* userData)
 	// link the mesh to the scene node
 	world->AddReference(worldSceneNode, worldMeshNode);
 
+	_ASSERTE (0);
+/*
 	worldMeshNodeInfo->BeginBuild();
 	// append all brushes top the world mesh info	
 	for (BrushList::dListNode* node = brushList.GetFirst(); node; node = node->GetNext()) {
@@ -610,4 +612,5 @@ void ValveMapImport::LoadWorld (FILE* file, dScene* world, void* userData)
 		NewtonMeshDestroy (node->GetInfo());
 	}
 	SkipChar (file, '}');
+*/
 }

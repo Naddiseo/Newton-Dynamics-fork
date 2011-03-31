@@ -62,13 +62,13 @@ void pyRigidBody::SetShape (int type)
 	NewtonMesh* newtonMesh = meshInfo->GetMesh();
 
 	int vertexCount = NewtonMeshGetVertexCount(newtonMesh);
-	int vertexStride = NewtonMeshGetVertexStrideInByte(newtonMesh) / sizeof (dFloat);
-	dFloat* vertex = NewtonMeshGetVertexArray(newtonMesh);
+	int vertexStride = NewtonMeshGetVertexStrideInByte(newtonMesh) / sizeof (dFloat64);
+	dFloat64* vertex = NewtonMeshGetVertexArray(newtonMesh);
 	dVector* savedVertex = new dVector[vertexCount];
 
 	for (int i = 0; i < vertexCount; i ++) {
 		int index = i * vertexStride;
-		savedVertex[i] = dVector(vertex[index + 0], vertex[index + 1], vertex[index + 2], vertex[index + 3]); 
+		savedVertex[i] = dVector(dFloat (vertex[index + 0]), dFloat(vertex[index + 1]), dFloat(vertex[index + 2]), dFloat(vertex[index + 3])); 
 	}
 	matrix.TransformTriplex(vertex, vertexStride * sizeof (dFloat), vertex, vertexStride * sizeof (dFloat), vertexCount);
 
@@ -116,6 +116,8 @@ void pyRigidBody::SetShape (int type)
 
 		case m_convexHull: 
 		{
+			_ASSERTE (0);
+/*
 			dVector size;
 			dMatrix offset;
 			NewtonMeshCalculateOOBB(newtonMesh, &matrix[0][0], &size[0], &size[1], &size[2]);
@@ -128,6 +130,7 @@ void pyRigidBody::SetShape (int type)
 
 			maintInv.TransformTriplex(vertex, vertexStride * sizeof (dFloat), vertex, vertexStride * sizeof (dFloat), vertexCount);
 			info->SetFaceSelection (vertexCount, vertex, vertexStride * sizeof (dFloat));
+*/
 			break;
 		}
 

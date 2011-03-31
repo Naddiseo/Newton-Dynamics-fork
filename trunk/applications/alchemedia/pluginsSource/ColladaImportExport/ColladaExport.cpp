@@ -425,6 +425,8 @@ void ColladaExport::AddGeometryLibrary (daeDocument *document, const dScene* sce
 
 void ColladaExport::AddMesh (daeDocument *document, const dScene* scene, dScene::dTreeNode* meshNode, UniqueNameFilter& uniqueNames)
 {
+_ASSERTE (0);
+/*
 	domCOLLADA *domRoot = daeSafeCast<domCOLLADA>(document->getDomRoot());
 	domLibrary_geometries* library = domRoot->getLibrary_geometries_array()[0];
 	_ASSERTE (library);
@@ -708,6 +710,7 @@ void ColladaExport::AddMesh (daeDocument *document, const dScene* scene, dScene:
 	delete[] faceIndexCount;
 	delete[] uv0ArrayIndexList;
 	delete[] normalArrayIndexList;
+*/
 }
 
 

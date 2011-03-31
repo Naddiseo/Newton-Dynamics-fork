@@ -577,7 +577,8 @@ dScene::dTreeNode* ColladaImport::LoadMesh (DAE* collada, domMesh* colladaMesh, 
 	SourceBuffer normalSource (normalSrc);
 	SourceBuffer uv0Source (uv0Src);
 	SourceBuffer uv1Source (uv1Src);
-
+_ASSERTE (0);
+/*
 	dMatrix matrix (GetIdentityMatrix());
 	matrix[0][0] = m_scale;
 	matrix[1][1] = m_scale;
@@ -600,6 +601,7 @@ dScene::dTreeNode* ColladaImport::LoadMesh (DAE* collada, domMesh* colladaMesh, 
 	delete[] normal;
 	delete[] uv0;
 	delete[] uv1;
+*/
 	return node;
 }
 
@@ -702,7 +704,8 @@ dScene::dTreeNode* ColladaImport::LoadConvexMesh (DAE* collada, domConvex_mesh* 
 	SourceBuffer normalSource (normalSrc);
 	SourceBuffer uv0Source (uv0Src);
 	SourceBuffer uv1Source (uv1Src);
-
+_ASSERTE (0);
+/*
 	dMatrix matrix (GetIdentityMatrix());
 	matrix[0][0] = m_scale;
 	matrix[1][1] = m_scale;
@@ -725,7 +728,7 @@ dScene::dTreeNode* ColladaImport::LoadConvexMesh (DAE* collada, domConvex_mesh* 
 	delete[] normal;
 	delete[] uv0;
 	delete[] uv1;
-
+*/
 	return node;
 }
 
@@ -793,6 +796,9 @@ void ColladaImport::LoadSkinController (DAE* collada, dScene* world, domInstance
 	NewtonMesh* mesh = info->GetMesh();
 	int stride = NewtonMeshGetVertexStrideInByte(mesh) / sizeof (dFloat);
 	int vertexCount = NewtonMeshGetVertexCount(mesh);
+
+_ASSERTE (0);
+/*
 	const dFloat* const vertex = NewtonMeshGetVertexArray(mesh);
 
 	domSkin::domVertex_weights::domV *v = vertexWeights->getV();
@@ -835,6 +841,7 @@ void ColladaImport::LoadSkinController (DAE* collada, dScene* world, domInstance
 	dGeometryNodeSkinModifierInfo* skinInfo = (dGeometryNodeSkinModifierInfo*) world->GetInfoFromNode(skinNode);
 	skinInfo->SkinMesh(skinNode, world, skindata, skinCount);
 	delete[] skindata;
+*/
 }
 
 
@@ -1264,7 +1271,8 @@ dScene::dTreeNode* ColladaImport::LoadCollision (
 			_ASSERTE (source);
 
 			SourceBuffer vertexSource (source);
-
+_ASSERTE (0);
+/*
 			dMatrix matrix (GetIdentityMatrix());
 			matrix[0][0] = m_scale;
 			matrix[1][1] = m_scale;
@@ -1281,7 +1289,7 @@ dScene::dTreeNode* ColladaImport::LoadCollision (
 			dCollisionConvexHullNodeInfo* const collInfo = (dCollisionConvexHullNodeInfo*) world->GetInfoFromNode(node);
 			collInfo->SetFaceSelection (vCount, points, stride);
 			NewtonMeshDestroy(mesh);
-
+*/
 		} else {
 			_ASSERTE (0);
 /*

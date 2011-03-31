@@ -57,6 +57,7 @@ DG_PHYSICS_SRCS = \
 	$(DG_PHYSICS_PATH)dgBody.cpp \
 	$(DG_PHYSICS_PATH)dgMeshEffect.cpp \
 	$(DG_PHYSICS_PATH)dgMeshEffect2.cpp \
+	$(DG_PHYSICS_PATH)dgMeshEffectSolidTree.cpp \
 	$(DG_PHYSICS_PATH)dgCollisionConvex.cpp \
 	$(DG_PHYSICS_PATH)dgBallConstraint.cpp \
 	$(DG_PHYSICS_PATH)dgBilateralConstraint.cpp \

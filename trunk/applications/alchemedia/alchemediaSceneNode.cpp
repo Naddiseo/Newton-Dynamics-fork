@@ -402,6 +402,8 @@ dSceneNodeInfo::dGizmoHandle alchemediaSceneNode::GetHighlightedGizmoHandle(dSce
 
 void alchemediaSceneNode::DrawGizmoHandle(dScene* world, const dMatrix& coordinaSystem, dGizmoMode mode, dGizmoHandle handle, const dVector& color, dFloat size) const
 {
+	_ASSERTE (0);
+/*
 	glEnable (GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glDisable(GL_CULL_FACE);
@@ -428,7 +430,7 @@ void alchemediaSceneNode::DrawGizmoHandle(dScene* world, const dMatrix& coordina
 
 			switch (handle) 
 			{
-			case m_xHandle:
+				case m_xHandle:
 				{
 					dFloat radius = D_TRANSLATE_ARROW_RADIUS_FACTOR * size;
 					dFloat height = D_TRANSLATE_ARROW_HEIGHT_FACTOR * size;
@@ -441,7 +443,7 @@ void alchemediaSceneNode::DrawGizmoHandle(dScene* world, const dMatrix& coordina
 					break;
 				}
 
-			case m_yHandle:
+				case m_yHandle:
 				{
 					dFloat radius = D_TRANSLATE_ARROW_RADIUS_FACTOR * size;
 					dFloat height = D_TRANSLATE_ARROW_HEIGHT_FACTOR * size;
@@ -453,7 +455,7 @@ void alchemediaSceneNode::DrawGizmoHandle(dScene* world, const dMatrix& coordina
 					break;
 				}
 
-			case m_zHandle:
+				case m_zHandle:
 				{
 					dFloat radius = D_TRANSLATE_ARROW_RADIUS_FACTOR * size;
 					dFloat height = D_TRANSLATE_ARROW_HEIGHT_FACTOR * size;
@@ -466,7 +468,7 @@ void alchemediaSceneNode::DrawGizmoHandle(dScene* world, const dMatrix& coordina
 				}
 
 
-			case m_xyHandle:
+				case m_xyHandle:
 				{
 					matrix.TransformTriplex(q, sizeof (dVector), p, sizeof (dVector), 4);
 
@@ -481,7 +483,7 @@ void alchemediaSceneNode::DrawGizmoHandle(dScene* world, const dMatrix& coordina
 					break;
 				}
 
-			case m_zxHandle:
+				case m_zxHandle:
 				{
 					dMatrix matrix1 (dPitchMatrix(90.0f * 3.1416f/180.0f) * matrix);
 					matrix1.TransformTriplex(q, sizeof (dVector), p, sizeof (dVector), 4);
@@ -497,7 +499,7 @@ void alchemediaSceneNode::DrawGizmoHandle(dScene* world, const dMatrix& coordina
 					break;
 				}
 
-			case m_yzHandle:
+				case m_yzHandle:
 				{
 					dMatrix matrix1 (dYawMatrix(-90.0f * 3.1416f/180.0f) * matrix);
 					matrix1.TransformTriplex(q, sizeof (dVector), p, sizeof (dVector), 4);
@@ -517,7 +519,7 @@ void alchemediaSceneNode::DrawGizmoHandle(dScene* world, const dMatrix& coordina
 		}
 
 
-	case dNodeInfo::m_rotation:
+		case dNodeInfo::m_rotation:
 		{
 			switch (handle) 
 			{
@@ -688,7 +690,7 @@ void alchemediaSceneNode::DrawGizmoHandle(dScene* world, const dMatrix& coordina
 			break;
 		}
 	}
-
+*/
 }
 
 

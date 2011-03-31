@@ -345,7 +345,7 @@ class MaterialManager
 				contactBestSpeed = contactNormalSpeed;
 				dVector normal;
 				contactBestSpeed = contactNormalSpeed;
-				NewtonMaterialGetContactPositionAndNormal (material, &contactPosit[0], &normal[0]);
+				NewtonMaterialGetContactPositionAndNormal (material, body0, &contactPosit[0], &normal[0]);
 				bestSound = appMaterial->m_impactSound;
 			}
 		}

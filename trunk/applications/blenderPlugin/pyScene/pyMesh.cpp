@@ -80,6 +80,9 @@ void* pyMesh::GetNextTriangle(void* face)
 
 pyVertex pyMesh::GetVertex(int i)
 {
+_ASSERTE (0);
+return pyVertex();
+/*
 	dMeshNodeInfo* meshInfo = GetInfo();
 	NewtonMesh* mesh = meshInfo->GetMesh();
 
@@ -94,10 +97,14 @@ pyVertex pyMesh::GetVertex(int i)
 	vertex.y = p.m_y;
 	vertex.z = p.m_z;
 	return vertex;
+*/
 }
 
 pyVertex pyMesh::GetNormal(int i)
 {
+_ASSERTE (0);
+return pyVertex();
+	/*
 	dMeshNodeInfo* meshInfo = GetInfo();
 	NewtonMesh* mesh = meshInfo->GetMesh();
 
@@ -112,11 +119,16 @@ pyVertex pyMesh::GetNormal(int i)
 	vertex.y = p.m_y;
 	vertex.z = p.m_z;
 	return vertex;
+*/
 }
 
 
 pyVertex pyMesh::GetUV0(int i)
 {
+	_ASSERTE (0);
+	return pyVertex();
+	/*
+
 	dMeshNodeInfo* meshInfo = GetInfo();
 	NewtonMesh* mesh = meshInfo->GetMesh();
 
@@ -128,10 +140,15 @@ pyVertex pyMesh::GetUV0(int i)
 	point.y = uv[i * stride + 1];
 	point.z = 0.0;
 	return point;
+*/
 }
 
 pyVertex pyMesh::GetUV1(int i)
 {
+	_ASSERTE (0);
+	return pyVertex();
+	/*
+
 	dMeshNodeInfo* meshInfo = GetInfo();
 	NewtonMesh* mesh = meshInfo->GetMesh();
 
@@ -143,6 +160,7 @@ pyVertex pyMesh::GetUV1(int i)
 	point.y = uv[i * stride + 1];
 	point.z = 0.0;
 	return point;
+*/
 }
 
 

@@ -89,7 +89,7 @@ void alchemediaStaticMesh::ConvertToTriangles()
 
 void alchemediaStaticMesh::WeldTJoints ()
 {
-	dMeshNodeInfo::WeldTJoints ();
+	dMeshNodeInfo::RepairTJoints ();
 	InvalidateCache();
 }
 
@@ -108,6 +108,8 @@ void alchemediaStaticMesh::SmoothNormals (dFloat angleInRadiants)
 
 void alchemediaStaticMesh::DrawWireFrame(dScene* const world, dScene::dTreeNode* const myNode, const dVector& color) const
 {
+	_ASSERTE (0);
+/*
 	_ASSERTE (world->GetInfoFromNode(myNode) == this);
 
 
@@ -150,11 +152,14 @@ void alchemediaStaticMesh::DrawWireFrame(dScene* const world, dScene::dTreeNode*
 	glCallList(m_wireFrameDipalyList);
 
 	glPopMatrix();
+*/
 }
 
 
 void alchemediaStaticMesh::DrawSolidWireFrame(dScene* const world, dScene::dTreeNode* const myNode, const dVector& color) const
 {
+_ASSERTE (0);
+/*
 	if (!m_solidDipalyList) {
 
 		m_solidDipalyList = glGenLists(1);
@@ -204,13 +209,15 @@ void alchemediaStaticMesh::DrawSolidWireFrame(dScene* const world, dScene::dTree
 	glCallList(m_solidDipalyList);
 
 	glPopMatrix();
-
+*/
 }
 
 
 // draw scene in Gouraud shaded normal textured mode 
 void alchemediaStaticMesh::DrawGouraudShaded(dScene* const world, dScene::dTreeNode* const myNode, const dVector& color) const
 {
+	_ASSERTE (0);
+	/*
 	_ASSERTE (world->GetInfoFromNode(myNode) == this);
 	if (!m_gouraudDipalyList) {
 
@@ -319,6 +326,7 @@ void alchemediaStaticMesh::DrawGouraudShaded(dScene* const world, dScene::dTreeN
 	glPopMatrix();
 
 //glDisable(GL_POLYGON_OFFSET_FILL);
+*/
 }
 
 
