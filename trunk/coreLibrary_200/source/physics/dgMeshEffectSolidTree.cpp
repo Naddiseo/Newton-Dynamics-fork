@@ -204,7 +204,21 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 				} 
 			} 
 
-			if ((minDist.GetAproximateValue() < dgFloat64 (0.0f)) && (maxDist.GetAproximateValue() > dgFloat64 (0.0f))) {
+			dgFloat64 minVal = minDist.GetAproximateValue();
+			if (fabs (minVal) < dgFloat64 (1.0e-3f)) {
+				if (fabs (minVal) > dgFloat64 (0.0f)) {
+					_ASSERTE (0);
+				}
+			}
+
+			dgFloat64 maxVal = maxDist.GetAproximateValue();
+			if (fabs (maxVal) < dgFloat64 (1.0e-3f)) {
+				if (fabs (maxVal) > dgFloat64 (0.0f)) {
+					_ASSERTE (0);
+				}
+			}
+
+			if ((minVal < dgFloat64 (0.0f)) && (maxVal > dgFloat64 (0.0f))) {
 
 				CSGConvexCurve tmp(mesh.GetAllocator());
 				for (CSGConvexCurve::dgListNode* node = curve.GetFirst(); node; node = node->GetNext()) {
