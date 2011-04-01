@@ -1839,9 +1839,9 @@ void dgWorld::CalculateContacts (dgCollidingPairCollector::dgPair* const pair, d
 // ***************************************************************************
 //
 // ***************************************************************************
-dgInt32 dgWorld::CollideContinueSimd  (dgCollision* dgInt32 collisionA, const dgMatrix& matrixA, const dgVector& velocA, const dgVector& omegaA, 
-	dgCollision* dgInt32 collisionB, const dgMatrix& matrixB, const dgVector& velocB, const dgVector& omegaB, 
-	dgFloat32& retTimeStep, dgTriplex* const points, dgTriplex* const normals, dgFloat32* const penetration, dgInt32 maxSize, dgInt32 threadIndex)
+dgInt32 dgWorld::CollideContinueSimd  (dgCollision* const collisionA, const dgMatrix& matrixA, const dgVector& velocA, const dgVector& omegaA, 
+									   dgCollision* const collisionB, const dgMatrix& matrixB, const dgVector& velocB, const dgVector& omegaB, 
+									   dgFloat32& retTimeStep, dgTriplex* const points, dgTriplex* const normals, dgFloat32* const penetration, dgInt32 maxSize, dgInt32 threadIndex)
 {
 	dgBody collideBodyA;
 	dgBody collideBodyB;
@@ -1946,8 +1946,8 @@ dgInt32 dgWorld::CollideContinueSimd  (dgCollision* dgInt32 collisionA, const dg
 }
 
 
-dgInt32 dgWorld::CollideContinue (dgCollision* dgInt32 collisionA, const dgMatrix& matrixA, const dgVector& velocA, const dgVector& omegaA, 
-								  dgCollision* dgInt32 collisionB, const dgMatrix& matrixB, const dgVector& velocB, const dgVector& omegaB, 
+dgInt32 dgWorld::CollideContinue (dgCollision* const collisionA, const dgMatrix& matrixA, const dgVector& velocA, const dgVector& omegaA, 
+								  dgCollision* const collisionB, const dgMatrix& matrixB, const dgVector& velocB, const dgVector& omegaB, 
 								  dgFloat32& retTimeStep, dgTriplex* const points, dgTriplex* const normals, dgFloat32* const penetration, dgInt32 maxSize, dgInt32 threadIndex)
 {
 	dgBody collideBodyA;
@@ -2080,8 +2080,8 @@ dgInt32 dgWorld::Collide (dgCollision* const collisionA, const dgMatrix& matrixA
 //	collideBodyB.m_collisionWorldMatrix = collisionB->m_offset * matrixB;
 	collideBodyB.UpdateCollisionMatrix(dgFloat32 (0.0f), 0);
 
-	bool isTriggerA = collisionA->IsTriggerVolume();
-	bool isTriggerB = collisionB->IsTriggerVolume();
+//	bool isTriggerA = collisionA->IsTriggerVolume();
+//	bool isTriggerB = collisionB->IsTriggerVolume();
 
 	dgCollisionParamProxy proxy(threadIndex);
 	proxy.m_timestep = dgFloat32 (0.0f);
