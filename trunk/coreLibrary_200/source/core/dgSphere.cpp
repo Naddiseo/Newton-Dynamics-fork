@@ -113,16 +113,6 @@ namespace InternalSphere
 
 	static void Statistics (dgSphere &sphere, dgVector &eigenValues, dgVector &scaleVector, const dgFloat32 vertex[], const dgInt32 faceIndex[], dgInt32 indexCount, dgInt32 stride)
 	{
-//		dgFloat64 K;
-//		dgFloat64 Ixx;
-//		dgFloat64 Iyy;
-//		dgFloat64 Izz;
-//		dgFloat64 Ixy;
-//		dgFloat64 Ixz;
-//		dgFloat64 Iyz;
-//		dgFloat64 area;
-//		dgFloat64 totalArea;
-
 		dgVector var (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 		dgVector cov (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 		dgVector centre (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
@@ -202,9 +192,9 @@ namespace InternalSphere
 	
 	static void Statistics (dgSphere &sphere, dgVector &eigenValues, dgVector &scaleVector, const dgFloat32 vertex[], dgInt32 vertexCount, dgInt32 stride)
 	{
-		dgBigVector var (0.0f, 0.0f, 0.0f, 0.0f);
-		dgBigVector cov (0.0f, 0.0f, 0.0f, 0.0f);
-		dgBigVector massCenter (0.0f, 0.0f, 0.0f, 0.0f);
+		dgBigVector var (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+		dgBigVector cov (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+		dgBigVector massCenter (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 	
 		const dgFloat32* ptr = vertex;
 		for (dgInt32 i = 0; i < vertexCount; i ++) {
@@ -212,9 +202,9 @@ namespace InternalSphere
 			dgFloat32 y = ptr[1] * scaleVector.m_y;
 			dgFloat32 z = ptr[2] * scaleVector.m_z;
 			ptr += stride;
-			massCenter += dgBigVector (x, y, z, 0.0f);
-			var += dgBigVector (x * x, y * y, z * z, 0.0f);
-			cov += dgBigVector (x * y, x * z, y * z, 0.0f);
+			massCenter += dgBigVector (x, y, z, dgFloat32 (0.0f));
+			var += dgBigVector (x * x, y * y, z * z, dgFloat32 (0.0f));
+			cov += dgBigVector (x * y, x * z, y * z, dgFloat32 (0.0f));
 		}
 	
 		dgFloat64 k = dgFloat64 (1.0) / vertexCount;
@@ -262,10 +252,10 @@ namespace InternalSphere
 		dgFloat64 totalArea;
 		const dgFace *Face;
 	
-		dgVector var (0.0f, 0.0f, 0.0f);
-		dgVector cov (0.0f, 0.0f, 0.0f);
-		dgVector centre (0.0f, 0.0f, 0.0f);
-		dgVector massCenter (0.0f, 0.0f, 0.0f);
+		dgVector var (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+		dgVector cov (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+		dgVector centre (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+		dgVector massCenter (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 		
 		totalArea = 0.0;
 		ptr = vertex;
@@ -419,7 +409,7 @@ void dgSphere::SetDimensions (const dgFloat32 vertex[], dgInt32 strideInBytes, c
 void dgSphere::SetDimensions (const dgFloat32 vertex[], dgInt32 strideInBytes, dgInt32 count, const dgMatrix *basis) 
 {
 	dgVector eigen;
-	dgVector scaleVector (dgFloat32(1.0f), dgFloat32(1.0f), dgFloat32(1.0f), 0.0f);
+	dgVector scaleVector (dgFloat32(1.0f), dgFloat32(1.0f), dgFloat32(1.0f), dgFloat32 (0.0f));
 
 	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat32));
 	if (!basis)	{
@@ -475,7 +465,7 @@ void dgSphere::SetDimensions (
 	dgInt32 stride;
 	dgFloat32 aspect;
 	dgVector eigen;
-	dgVector scaleVector (dgFloat32(1.0f), dgFloat32(1.0f), dgFloat32(1.0f), 0.0f);
+	dgVector scaleVector (dgFloat32(1.0f), dgFloat32(1.0f), dgFloat32(1.0f), dgFloat32 (0.0f));
 
 	stride = strideInBytes / sizeof (dgFloat32);
 	if (!basis)	{
