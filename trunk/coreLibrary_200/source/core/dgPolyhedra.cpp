@@ -1993,8 +1993,16 @@ void dgPolyhedra::DeleteFace(dgEdge* const face)
 		dgEdge* ptr = face;
 		do {
 			ptr->m_incidentFace = -1;
-			edgeList[count] = ptr;
-			count ++;
+			dgInt32 i = 0;
+			for (; i < count; i ++) {
+				if ((edgeList[i] == ptr) || (edgeList[i]->m_twin == ptr)) {
+					break;
+				}
+			}
+			if (i == count) {
+				edgeList[count] = ptr;
+				count ++;
+			}
 			ptr = ptr->m_next;
 		} while (ptr != face);
 
@@ -2308,9 +2316,8 @@ void dgPolyhedra::DeleteDegenerateFaces (const dgFloat64* const pool, dgInt32 st
 	}
 
 	dgFloat64 area2 = area * area;
-	area2 *= 4.0f;
+	area2 *= dgFloat64 (4.0f);
 
-//	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat32));
 	for (dgInt32 i = 0; i < count; i ++) {
 		dgPolyhedra::dgTreeNode* const faceNode = faceArray[i];
 		dgEdge* const edge = &faceNode->GetInfo();

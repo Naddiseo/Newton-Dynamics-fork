@@ -4255,16 +4255,10 @@ void dgMeshEffect::RepairTJoints ()
 	mark = IncLRU();
 #endif
 
-static int xxx;
-
-
-
 	for (iter.Begin(); iter; ) {
 		dgEdge* const face = &(*iter);
 		iter ++;
 		if ((face->m_incidentFace < 0) && (face->m_mark != mark)) {
-xxx ++;
-
 			// vertices project 
 			while (SeparateDuplicateLoops (face));
 
@@ -4272,9 +4266,6 @@ xxx ++;
 			dgFloat64 lengh2 = dgFloat64 (0.0f);
 			dgEdge* ptr = face;
 			do {
-if (xxx == 803)
-dgTrace (("%d %f %f %f\n", ptr->m_incidentVertex, m_points[ptr->m_incidentVertex].m_x, m_points[ptr->m_incidentVertex].m_y, m_points[ptr->m_incidentVertex].m_z));
-
 				dgBigVector dir1 (m_points[ptr->m_next->m_incidentVertex] - m_points[ptr->m_incidentVertex]);
 				dgFloat64 val = dir1 % dir1;
 				if (val > lengh2) {
@@ -4286,10 +4277,8 @@ dgTrace (("%d %f %f %f\n", ptr->m_incidentVertex, m_points[ptr->m_incidentVertex
 
 			_ASSERTE (lengh2 > dgFloat32 (0.0f));
 
-if (xxx == 803)
-xxx *=1;
-			dgEdge* firstEdge = NULL;
 			dgEdge* lastEdge = NULL;
+			dgEdge* firstEdge = NULL;
 			dgFloat64 minVal = dgFloat64 (-1.0e10f);
 			dgFloat64 maxVal = dgFloat64 (-1.0e10f);
 			ptr = face;
@@ -4455,4 +4444,6 @@ xxx *=1;
 			}
 		}
 	}
+
+	DeleteDegenerateFaces(&m_points[0].m_x, sizeof (m_points[0]), dgFloat64 (1.0e-7f));
 }
