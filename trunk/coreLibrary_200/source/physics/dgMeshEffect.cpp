@@ -818,6 +818,15 @@ void dgMeshEffect::Triangulate  ()
 		}
 	}
 	EndFace();
+
+	for (iter.Begin(); iter; iter ++){
+		dgEdge* const face = &(*iter);
+		if (face->m_incidentFace > 0) {
+			dgInt32 attribIndex = dgInt32 (face->m_userData);
+			m_attib[attribIndex].m_vertex.m_w = m_points[face->m_incidentVertex].m_w;
+		}
+	}
+
 }
 
 void dgMeshEffect::ConvertToPolygons ()
@@ -878,6 +887,14 @@ void dgMeshEffect::ConvertToPolygons ()
 		}
 	}
 	EndFace();
+
+	for (iter.Begin(); iter; iter ++){
+		dgEdge* const face = &(*iter);
+		if (face->m_incidentFace > 0) {
+			dgInt32 attribIndex = dgInt32 (face->m_userData);
+			m_attib[attribIndex].m_vertex.m_w = m_points[face->m_incidentVertex].m_w;
+		}
+	}
 }
 
 void dgMeshEffect::RemoveUnusedVertices(dgInt32* const vertexMap)
@@ -1584,6 +1601,10 @@ void dgMeshEffect::EndPolygon (dgFloat64 tol)
 	}
 #endif
 
+static int xxx;
+xxx ++;
+if (xxx == 35)
+xxx *=1;
 
 	dgInt32 triangCount = m_pointCount / 3;
 	m_pointCount = dgVertexListToIndexList (&m_points[0].m_x, sizeof (dgBigVector), sizeof (dgBigVector)/sizeof (dgFloat64), m_pointCount, &indexMap[0], tol);
@@ -4161,6 +4182,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 							_ASSERTE ((ptr->m_incidentFace & leftFaceId) | (ptr->m_incidentFace & rightFaceId));
 
 							facePoints[count] = clipFace.m_points[ptr->m_incidentVertex];
+							_ASSERTE (facePoints[count].m_vertex.m_w == dgFloat64 (0.0f));
 							count ++;
 							ptr->m_mark = clipMark;
 							ptr = ptr->m_next;
@@ -4185,6 +4207,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 				do {
 					//ptr->m_incidentFace |= faceId;
 					facePoints[count] = mesh.m_attib[ptr->m_userData];
+					_ASSERTE (facePoints[count].m_vertex.m_w == dgFloat64 (0.0f));
 					count ++;
 					ptr = ptr->m_next;
 				} while (ptr != face);
@@ -4212,16 +4235,13 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 
 void dgMeshEffect::RepairTJoints ()
 {
-return;
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
-	
+#ifdef _DEBUG
 	for (iter.Begin(); iter; ) {
 		dgEdge* const face = &(*iter);
 		iter ++;
 		if ((face->m_incidentFace < 0) && (face->m_mark != mark)) {
-
-#ifdef _DEBUG			
 			for (dgEdge* ptr = face; ptr != face->m_prev; ptr = ptr->m_next) {
 				dgBigVector p0 (m_points[ptr->m_incidentVertex]);
 				for (dgEdge* ptr1 = ptr->m_next; ptr1 != face; ptr1 = ptr1->m_next) {
@@ -4230,15 +4250,26 @@ return;
 						dgBigVector dp (p1 - p0);
 						dgFloat64 err2 (dp % dp);
 						if (err2 < dgFloat64 (1.0e-16f)) {
-							return;
-//							_ASSERTE (0);
-
+							_ASSERTE (0);
 						}
 					}
 				} 
 			}
+		}
+	}
+	mark = IncLRU();
 #endif
 
+static int xxx;
+xxx ++;
+if (xxx == 35)
+xxx *=1;
+
+
+	for (iter.Begin(); iter; ) {
+		dgEdge* const face = &(*iter);
+		iter ++;
+		if ((face->m_incidentFace < 0) && (face->m_mark != mark)) {
 			// vertices project 
 			while (SeparateDuplicateLoops (face));
 
@@ -4291,8 +4322,8 @@ return;
 			do {
 				dgBigVector p2 (m_points[ptr->m_incidentVertex]);
 				dgFloat64 num = (p2 - p0) % p1p0;
-//				_ASSERTE (num >= dgFloat64 (0.0f));
-//				_ASSERTE (num <= den);
+				_ASSERTE (num >= dgFloat64 (0.0f));
+				_ASSERTE (num <= den);
 				dgBigVector q (p0 + p1p0.Scale (num / den));
 				dgBigVector dist (p2 - q);
 				dgFloat64 err2 = dist % dist;

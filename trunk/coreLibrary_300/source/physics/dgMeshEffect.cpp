@@ -818,6 +818,15 @@ void dgMeshEffect::Triangulate  ()
 		}
 	}
 	EndFace();
+
+	for (iter.Begin(); iter; iter ++){
+		dgEdge* const face = &(*iter);
+		if (face->m_incidentFace > 0) {
+			dgInt32 attribIndex = dgInt32 (face->m_userData);
+			m_attib[attribIndex].m_vertex.m_w = m_points[face->m_incidentVertex].m_w;
+		}
+	}
+
 }
 
 void dgMeshEffect::ConvertToPolygons ()
@@ -878,6 +887,14 @@ void dgMeshEffect::ConvertToPolygons ()
 		}
 	}
 	EndFace();
+
+	for (iter.Begin(); iter; iter ++){
+		dgEdge* const face = &(*iter);
+		if (face->m_incidentFace > 0) {
+			dgInt32 attribIndex = dgInt32 (face->m_userData);
+			m_attib[attribIndex].m_vertex.m_w = m_points[face->m_incidentVertex].m_w;
+		}
+	}
 }
 
 void dgMeshEffect::RemoveUnusedVertices(dgInt32* const vertexMap)
@@ -1584,6 +1601,10 @@ void dgMeshEffect::EndPolygon (dgFloat64 tol)
 	}
 #endif
 
+static int xxx;
+xxx ++;
+if (xxx == 35)
+xxx *=1;
 
 	dgInt32 triangCount = m_pointCount / 3;
 	m_pointCount = dgVertexListToIndexList (&m_points[0].m_x, sizeof (dgBigVector), sizeof (dgBigVector)/sizeof (dgFloat64), m_pointCount, &indexMap[0], tol);
@@ -3261,25 +3282,21 @@ dgMeshEffectSolidTree* dgMeshEffect::CreateSolidTree() const
 	dgPolyhedra::Iterator srcIter (*this);
 	for (srcIter.Begin(); srcIter; srcIter ++){
 		dgEdge* const face = &(*srcIter);
-		if (face->m_incidentFace > 0) {
-			if (face->m_mark != mark) {
-				if (face->m_incidentFace) {
-					dgEdge* ptr = face;
-					do {
-						ptr->m_mark = mark;
-						ptr = ptr->m_next;
-					} while (ptr != face);
+		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
+			dgEdge* ptr = face;
+			do {
+				ptr->m_mark = mark;
+				ptr = ptr->m_next;
+			} while (ptr != face);
 
-					if (!tree) {
-						dgBigVector normal (FaceNormal (face, &m_points[0][0], sizeof (dgVector)));
-						dgFloat64 mag2 = normal % normal;
-						if (mag2 > dgFloat32 (1.0e-10f)) {
-							tree = new (GetAllocator()) dgMeshEffectSolidTree (*this, face);
-						}
-					} else {
-						tree->AddFace (*this, face);
-					}
+			if (!tree) {
+				dgBigVector normal (FaceNormal (face, &m_points[0][0], sizeof (dgBigVector)));
+				dgFloat64 mag2 = normal % normal;
+				if (mag2 > dgFloat32 (1.0e-10f)) {
+					tree = new (GetAllocator()) dgMeshEffectSolidTree (*this, face);
 				}
+			} else {
+				tree->AddFace (*this, face);
 			}
 		}
 	}
@@ -3995,206 +4012,6 @@ bool dgMeshEffect::SeparateDuplicateLoops (dgEdge* const face)
 }
 
 
-
-void dgMeshEffect::RepairTJoints ()
-{
-#if 0
-	dgInt32 mark = IncLRU();
-	dgPolyhedra::Iterator iter (*this);
-
-	
-	for (iter.Begin(); iter; ) {
-		dgEdge* const face = &(*iter);
-		iter ++;
-		if ((face->m_incidentFace < 0) && (face->m_mark != mark)) {
-
-#ifdef _DEBUG			
-			for (dgEdge* ptr = face; ptr != face->m_prev; ptr = ptr->m_next) {
-				dgBigVector p0 (m_points[ptr->m_incidentVertex]);
-				for (dgEdge* ptr1 = ptr->m_next; ptr1 != face; ptr1 = ptr1->m_next) {
-					if (ptr->m_incidentVertex != ptr1->m_incidentVertex) {
-						dgBigVector p1 (m_points[ptr1->m_incidentVertex]);
-						dgBigVector dp (p1 - p0);
-						dgFloat64 err2 (dp % dp);
-						if (err2 < dgFloat64 (1.0e-16f)) {
-							_ASSERTE (0);
-
-						}
-					}
-				} 
-			}
-#endif
-
-			// vertices project 
-			while (SeparateDuplicateLoops (face));
-
-			dgBigVector dir (dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f));
-			dgFloat64 lengh2 = dgFloat64 (0.0f);
-			dgEdge* ptr = face;
-			do {
-				dgBigVector dir1 (m_points[ptr->m_next->m_incidentVertex] - m_points[ptr->m_incidentVertex]);
-				dgFloat64 val = dir1 % dir1;
-				if (val > lengh2) {
-					lengh2 = val;
-					dir = dir1;
-				}
-				ptr = ptr->m_next;
-			} while (ptr != face);
-
-			_ASSERTE (lengh2 > dgFloat32 (0.0f));
-
-			dgEdge* firstEdge = NULL;
-			dgEdge* lastEdge = NULL;
-			dgFloat64 minVal = dgFloat64 (-1.0e10f);
-			dgFloat64 maxVal = dgFloat64 (-1.0e10f);
-			ptr = face;
-			do {
-				const dgBigVector& p = m_points[ptr->m_incidentVertex];
-				dgFloat64 val = p % dir;
-				if (val > maxVal) {
-					maxVal = val;
-					lastEdge = ptr;
-				}
-				val *= dgFloat64 (-1.0f);
-				if (val > minVal) {
-					minVal = val;
-					firstEdge = ptr;
-				}
-
-				ptr->m_mark = mark;
-				ptr = ptr->m_next;
-			} while (ptr != face);
-
-			_ASSERTE (firstEdge);
-			_ASSERTE (lastEdge);
-
-			bool isTJoint = true;
-			dgBigVector p0 (m_points[firstEdge->m_incidentVertex]);
-			dgBigVector p1 (m_points[lastEdge->m_incidentVertex]);
-			dgBigVector p1p0 (p1 - p0);
-			dgFloat64 den = p1p0 % p1p0;
-			ptr = firstEdge->m_next;
-			do {
-				dgBigVector p2 (m_points[ptr->m_incidentVertex]);
-				dgFloat64 num = (p2 - p0) % p1p0;
-				_ASSERTE (num >= dgFloat64 (0.0f));
-				_ASSERTE (num <= den);
-				dgBigVector q (p0 + p1p0.Scale (num / den));
-				dgBigVector dist (p2 - q);
-				dgFloat64 err2 = dist % dist;
-				isTJoint &= (err2 < (dgFloat64 (1.0e-4f) * dgFloat64 (1.0e-4f)));
-				ptr = ptr->m_next;
-			} while (isTJoint && (ptr != firstEdge));
-
-			if (isTJoint) {
-				do {
-					dgEdge* next = NULL;
-
-					const dgBigVector p0 = m_points[firstEdge->m_incidentVertex];
-					const dgBigVector p1 = m_points[firstEdge->m_next->m_incidentVertex];
-					const dgBigVector p2 = m_points[firstEdge->m_prev->m_incidentVertex];
-
-					dgBigVector p1p0 (p1 - p0);
-					dgBigVector p2p0 (p2 - p0);
-					dgFloat64 dist10 = p1p0 % p1p0;
-					dgFloat64 dist20 = p2p0 % p2p0;
-
-					if (dist20 > dist10) {
-						_ASSERTE (0);
-						/*
-						dgFloat64 t = (p1p0 % p2p0) / dist20;
-						_ASSERTE (t > dgFloat32 (0.0f));
-						_ASSERTE (t < dgFloat32 (1.0f));
-
-						if (corner->m_next->m_next->m_next != corner) {
-						next = corner->m_next;
-						ConectVertex (corner->m_next, corner->m_prev);
-						}
-						_ASSERTE (corner->m_next->m_next->m_next  == corner);
-
-						corner->m_userData = corner->m_prev->m_twin->m_userData;
-						corner->m_incidentFace = corner->m_prev->m_twin->m_incidentFace;
-
-						dgVertexAtribute attrib (InterpolateEdge (corner->m_prev->m_twin, t));
-						attrib.m_vertex = m_points[corner->m_next->m_incidentVertex];
-						AddAtribute(attrib);
-						corner->m_next->m_incidentFace = corner->m_prev->m_twin->m_incidentFace;
-						corner->m_next->m_userData = dgUnsigned64 (m_atribCount - 1);
-						DeleteEdge(corner->m_prev);
-						*/
-					} else {
-
-						_ASSERTE (dist20 < dist10);
-
-						dgFloat64 t = (p1p0 % p2p0) / dist10;
-						_ASSERTE (t > dgFloat32 (0.0f));
-						_ASSERTE (t < dgFloat32 (1.0f));
-
-						if (firstEdge->m_next->m_next->m_next != firstEdge) {
-							ConectVertex (firstEdge->m_next, firstEdge->m_prev);
-							next = firstEdge->m_next->m_twin;
-						}
-						_ASSERTE (firstEdge->m_next->m_next->m_next == firstEdge);
-
-#ifdef _DEBUG
-						dgEdge* tmp = firstEdge->m_twin;
-						do {
-							_ASSERTE (tmp->m_incidentFace > 0);
-						} while (tmp != firstEdge->m_twin); 
-#endif
-
-						dgEdge* const begin = firstEdge->m_prev;
-						dgEdge* const last = firstEdge->m_next;
-						firstEdge->m_next->m_userData = firstEdge->m_twin->m_userData;
-						firstEdge->m_next->m_incidentFace = firstEdge->m_twin->m_incidentFace;
-						dgVertexAtribute attrib (InterpolateEdge (firstEdge->m_twin, dgFloat64 (1.0f) - t));
-						attrib.m_vertex = m_points[firstEdge->m_prev->m_incidentVertex];
-						AddAtribute(attrib);
-						firstEdge->m_prev->m_incidentFace = firstEdge->m_twin->m_incidentFace;
-						firstEdge->m_prev->m_userData = dgUnsigned64 (m_atribCount - 1);
-
-						bool restart = false;
-						if ((firstEdge == &(*iter)) || (firstEdge->m_twin == &(*iter))) {
-							restart = true;
-						}
-						DeleteEdge(firstEdge);
-						if (restart) {
-							iter.Begin();
-						}
-
-						for (dgEdge* ptr = begin->m_next->m_next; ptr != last; ptr = ptr->m_next) {
-							dgEdge* const e = AddHalfEdge (begin->m_incidentVertex, ptr->m_incidentVertex);
-							dgEdge* const t = AddHalfEdge (ptr->m_incidentVertex, begin->m_incidentVertex);
-							_ASSERTE (e);
-							_ASSERTE (t);
-							e->m_twin = t;
-							t->m_twin = e;
-
-							e->m_incidentFace = ptr->m_incidentFace;
-							t->m_incidentFace = ptr->m_incidentFace;
-
-							e->m_userData = last->m_next->m_userData;
-							t->m_userData = ptr->m_userData;
-
-							t->m_prev = ptr->m_prev;
-							ptr->m_prev->m_next = t;
-							e->m_next = ptr;
-							ptr->m_prev = e;
-							t->m_next = last->m_next;
-							e->m_prev = last;
-							last->m_next->m_prev = t;
-							last->m_next = e;
-						}
-					}
-					firstEdge = next;
-				} while (firstEdge);
-			}
-		}
-	}
-#endif
-}
-
-
 dgMeshEffect* dgMeshEffect::GetNextLayer (dgInt32 mark)
 {
 	Iterator iter(*this);
@@ -4365,6 +4182,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 							_ASSERTE ((ptr->m_incidentFace & leftFaceId) | (ptr->m_incidentFace & rightFaceId));
 
 							facePoints[count] = clipFace.m_points[ptr->m_incidentVertex];
+							_ASSERTE (facePoints[count].m_vertex.m_w == dgFloat64 (0.0f));
 							count ++;
 							ptr->m_mark = clipMark;
 							ptr = ptr->m_next;
@@ -4389,6 +4207,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 				do {
 					//ptr->m_incidentFace |= faceId;
 					facePoints[count] = mesh.m_attib[ptr->m_userData];
+					_ASSERTE (facePoints[count].m_vertex.m_w == dgFloat64 (0.0f));
 					count ++;
 					ptr = ptr->m_next;
 				} while (ptr != face);
@@ -4410,5 +4229,230 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 		*right = NULL;
 		*left = leftMesh;
 		rightMesh->Release();
+	}
+}
+
+
+void dgMeshEffect::RepairTJoints ()
+{
+	dgInt32 mark = IncLRU();
+	dgPolyhedra::Iterator iter (*this);
+#ifdef _DEBUG
+	for (iter.Begin(); iter; ) {
+		dgEdge* const face = &(*iter);
+		iter ++;
+		if ((face->m_incidentFace < 0) && (face->m_mark != mark)) {
+			for (dgEdge* ptr = face; ptr != face->m_prev; ptr = ptr->m_next) {
+				dgBigVector p0 (m_points[ptr->m_incidentVertex]);
+				for (dgEdge* ptr1 = ptr->m_next; ptr1 != face; ptr1 = ptr1->m_next) {
+					if (ptr->m_incidentVertex != ptr1->m_incidentVertex) {
+						dgBigVector p1 (m_points[ptr1->m_incidentVertex]);
+						dgBigVector dp (p1 - p0);
+						dgFloat64 err2 (dp % dp);
+						if (err2 < dgFloat64 (1.0e-16f)) {
+							_ASSERTE (0);
+						}
+					}
+				} 
+			}
+		}
+	}
+	mark = IncLRU();
+#endif
+
+static int xxx;
+xxx ++;
+if (xxx == 35)
+xxx *=1;
+
+
+	for (iter.Begin(); iter; ) {
+		dgEdge* const face = &(*iter);
+		iter ++;
+		if ((face->m_incidentFace < 0) && (face->m_mark != mark)) {
+			// vertices project 
+			while (SeparateDuplicateLoops (face));
+
+			dgBigVector dir (dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f));
+			dgFloat64 lengh2 = dgFloat64 (0.0f);
+			dgEdge* ptr = face;
+			do {
+				dgBigVector dir1 (m_points[ptr->m_next->m_incidentVertex] - m_points[ptr->m_incidentVertex]);
+				dgFloat64 val = dir1 % dir1;
+				if (val > lengh2) {
+					lengh2 = val;
+					dir = dir1;
+				}
+				ptr = ptr->m_next;
+			} while (ptr != face);
+
+			_ASSERTE (lengh2 > dgFloat32 (0.0f));
+
+			dgEdge* firstEdge = NULL;
+			dgEdge* lastEdge = NULL;
+			dgFloat64 minVal = dgFloat64 (-1.0e10f);
+			dgFloat64 maxVal = dgFloat64 (-1.0e10f);
+			ptr = face;
+			do {
+				const dgBigVector& p = m_points[ptr->m_incidentVertex];
+				dgFloat64 val = p % dir;
+				if (val > maxVal) {
+					maxVal = val;
+					lastEdge = ptr;
+				}
+				val *= dgFloat64 (-1.0f);
+				if (val > minVal) {
+					minVal = val;
+					firstEdge = ptr;
+				}
+
+				ptr->m_mark = mark;
+				ptr = ptr->m_next;
+			} while (ptr != face);
+
+			_ASSERTE (firstEdge);
+			_ASSERTE (lastEdge);
+
+			bool isTJoint = true;
+			dgBigVector p0 (m_points[firstEdge->m_incidentVertex]);
+			dgBigVector p1 (m_points[lastEdge->m_incidentVertex]);
+			dgBigVector p1p0 (p1 - p0);
+			dgFloat64 den = p1p0 % p1p0;
+			ptr = firstEdge->m_next;
+			do {
+				dgBigVector p2 (m_points[ptr->m_incidentVertex]);
+				dgFloat64 num = (p2 - p0) % p1p0;
+				_ASSERTE (num >= dgFloat64 (0.0f));
+				_ASSERTE (num <= den);
+				dgBigVector q (p0 + p1p0.Scale (num / den));
+				dgBigVector dist (p2 - q);
+				dgFloat64 err2 = dist % dist;
+				isTJoint &= (err2 < (dgFloat64 (1.0e-4f) * dgFloat64 (1.0e-4f)));
+				ptr = ptr->m_next;
+			} while (isTJoint && (ptr != firstEdge));
+
+			if (isTJoint) {
+				do {
+					dgEdge* next = NULL;
+
+					const dgBigVector p0 = m_points[firstEdge->m_incidentVertex];
+					const dgBigVector p1 = m_points[firstEdge->m_next->m_incidentVertex];
+					const dgBigVector p2 = m_points[firstEdge->m_prev->m_incidentVertex];
+
+					dgBigVector p1p0 (p1 - p0);
+					dgBigVector p2p0 (p2 - p0);
+					dgFloat64 dist10 = p1p0 % p1p0;
+					dgFloat64 dist20 = p2p0 % p2p0;
+
+					dgEdge* begin = NULL;
+					dgEdge* last = NULL;
+					if (dist20 > dist10) {
+						dgFloat64 t = (p1p0 % p2p0) / dist20;
+						_ASSERTE (t > dgFloat32 (0.0f));
+						_ASSERTE (t < dgFloat32 (1.0f));
+
+						if (firstEdge->m_next->m_next->m_next != firstEdge) {
+							ConectVertex (firstEdge->m_prev, firstEdge->m_next);
+							next = firstEdge->m_next->m_twin->m_next;
+						}
+						_ASSERTE (firstEdge->m_next->m_next->m_next == firstEdge);
+
+#ifdef _DEBUG
+						dgEdge* tmp = firstEdge->m_twin;
+						do {
+							_ASSERTE (tmp->m_incidentFace > 0);
+						} while (tmp != firstEdge->m_twin); 
+#endif
+
+						begin = firstEdge->m_next;
+						last = firstEdge;
+						firstEdge->m_userData = firstEdge->m_prev->m_twin->m_userData;
+						firstEdge->m_incidentFace = firstEdge->m_prev->m_twin->m_incidentFace;
+						dgVertexAtribute attrib (InterpolateEdge (firstEdge->m_prev->m_twin, t));
+						attrib.m_vertex = m_points[firstEdge->m_next->m_incidentVertex];
+						AddAtribute(attrib);
+
+						firstEdge->m_next->m_userData = dgUnsigned64 (m_atribCount - 1);
+
+						bool restart = false;
+						if ((firstEdge->m_prev == &(*iter)) || (firstEdge->m_prev->m_twin == &(*iter))) {
+							restart = true;
+						}
+						DeleteEdge(firstEdge->m_prev);
+						if (restart) {
+							iter.Begin();
+						}
+
+					} else {
+
+						_ASSERTE (dist20 < dist10);
+
+						dgFloat64 t = (p1p0 % p2p0) / dist10;
+						_ASSERTE (t > dgFloat32 (0.0f));
+						_ASSERTE (t < dgFloat32 (1.0f));
+
+						if (firstEdge->m_next->m_next->m_next != firstEdge) {
+							ConectVertex (firstEdge->m_next, firstEdge->m_prev);
+							next = firstEdge->m_next->m_twin;
+						}
+						_ASSERTE (firstEdge->m_next->m_next->m_next == firstEdge);
+
+#ifdef _DEBUG
+						dgEdge* tmp = firstEdge->m_twin;
+						do {
+							_ASSERTE (tmp->m_incidentFace > 0);
+						} while (tmp != firstEdge->m_twin); 
+#endif
+
+						begin = firstEdge->m_prev;
+						last = firstEdge->m_next;
+						firstEdge->m_next->m_userData = firstEdge->m_twin->m_userData;
+						firstEdge->m_next->m_incidentFace = firstEdge->m_twin->m_incidentFace;
+						dgVertexAtribute attrib (InterpolateEdge (firstEdge->m_twin, dgFloat64 (1.0f) - t));
+						attrib.m_vertex = m_points[firstEdge->m_prev->m_incidentVertex];
+						AddAtribute(attrib);
+						//firstEdge->m_prev->m_incidentFace = firstEdge->m_twin->m_incidentFace;
+						firstEdge->m_prev->m_userData = dgUnsigned64 (m_atribCount - 1);
+
+						bool restart = false;
+						if ((firstEdge == &(*iter)) || (firstEdge->m_twin == &(*iter))) {
+							restart = true;
+						}
+						DeleteEdge(firstEdge);
+						if (restart) {
+							iter.Begin();
+						}
+					}
+
+					_ASSERTE (begin);
+					_ASSERTE (last);
+					for (dgEdge* ptr = begin->m_next->m_next; ptr != last; ptr = ptr->m_next) {
+						dgEdge* const e = AddHalfEdge (begin->m_incidentVertex, ptr->m_incidentVertex);
+						dgEdge* const t = AddHalfEdge (ptr->m_incidentVertex, begin->m_incidentVertex);
+						_ASSERTE (e);
+						_ASSERTE (t);
+						e->m_twin = t;
+						t->m_twin = e;
+
+						e->m_incidentFace = ptr->m_incidentFace;
+						t->m_incidentFace = ptr->m_incidentFace;
+
+						e->m_userData = last->m_next->m_userData;
+						t->m_userData = ptr->m_userData;
+
+						t->m_prev = ptr->m_prev;
+						ptr->m_prev->m_next = t;
+						e->m_next = ptr;
+						ptr->m_prev = e;
+						t->m_next = last->m_next;
+						e->m_prev = last;
+						last->m_next->m_prev = t;
+						last->m_next = e;
+					}
+
+					firstEdge = next;
+				} while (firstEdge);
+			}
+		}
 	}
 }

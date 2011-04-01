@@ -2122,6 +2122,8 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 
 	dgTree<dgList<dgInt32>, dgInt32>::Iterator iter (delanayNodes);
 	for (iter.Begin(); iter; iter ++) {
+
+
 		int count = 0;
 		dgBigVector pointArray[256];
 		dgTree<dgList<dgInt32>, dgInt32>::dgTreeNode* const nodeNode = iter.GetNode();
@@ -2190,12 +2192,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 					convexMesh->MergeFaces(leftMeshClipper);
 					convexMesh->EndPolygon(dgFloat64 (1.0e-5f));
 				}
-			} else if (leftConvexMesh) {
-				_ASSERTE (!rightConvexMesh);
-				convexMesh->Release();
-				convexMesh = leftConvexMesh;
-				convexMesh->AddRef();
-			} else {
+			} else if (rightConvexMesh) {
 				convexMesh->Release();
 				convexMesh = NULL;
 			}
@@ -2219,12 +2216,12 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgIn
 
 			if (convexMesh) {
 
-#if 0
+#if 1
 dgBigVector xxx (0, 0, 0, 0);
 for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 	xxx += convexMesh->m_points[i];
 }
-xxx = xxx.Scale (0.2f / convexMesh->m_pointCount);
+xxx = xxx.Scale (0.5f / convexMesh->m_pointCount);
 for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 	convexMesh->m_points[i] += xxx;
 }
