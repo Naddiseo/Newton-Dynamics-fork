@@ -1601,11 +1601,6 @@ void dgMeshEffect::EndPolygon (dgFloat64 tol)
 	}
 #endif
 
-static int xxx;
-xxx ++;
-if (xxx == 35)
-xxx *=1;
-
 	dgInt32 triangCount = m_pointCount / 3;
 	m_pointCount = dgVertexListToIndexList (&m_points[0].m_x, sizeof (dgBigVector), sizeof (dgBigVector)/sizeof (dgFloat64), m_pointCount, &indexMap[0], tol);
 	m_atribCount = dgVertexListToIndexList (&m_attib[0].m_vertex.m_x, sizeof (dgVertexAtribute), sizeof (dgVertexAtribute)/sizeof (dgFloat64), m_atribCount, &attrIndexMap[0], tol);
@@ -4261,15 +4256,15 @@ void dgMeshEffect::RepairTJoints ()
 #endif
 
 static int xxx;
-xxx ++;
-if (xxx == 35)
-xxx *=1;
+
 
 
 	for (iter.Begin(); iter; ) {
 		dgEdge* const face = &(*iter);
 		iter ++;
 		if ((face->m_incidentFace < 0) && (face->m_mark != mark)) {
+xxx ++;
+
 			// vertices project 
 			while (SeparateDuplicateLoops (face));
 
@@ -4277,6 +4272,9 @@ xxx *=1;
 			dgFloat64 lengh2 = dgFloat64 (0.0f);
 			dgEdge* ptr = face;
 			do {
+if (xxx == 803)
+dgTrace (("%d %f %f %f\n", ptr->m_incidentVertex, m_points[ptr->m_incidentVertex].m_x, m_points[ptr->m_incidentVertex].m_y, m_points[ptr->m_incidentVertex].m_z));
+
 				dgBigVector dir1 (m_points[ptr->m_next->m_incidentVertex] - m_points[ptr->m_incidentVertex]);
 				dgFloat64 val = dir1 % dir1;
 				if (val > lengh2) {
@@ -4288,6 +4286,8 @@ xxx *=1;
 
 			_ASSERTE (lengh2 > dgFloat32 (0.0f));
 
+if (xxx == 803)
+xxx *=1;
 			dgEdge* firstEdge = NULL;
 			dgEdge* lastEdge = NULL;
 			dgFloat64 minVal = dgFloat64 (-1.0e10f);
@@ -4322,8 +4322,6 @@ xxx *=1;
 			do {
 				dgBigVector p2 (m_points[ptr->m_incidentVertex]);
 				dgFloat64 num = (p2 - p0) % p1p0;
-				_ASSERTE (num >= dgFloat64 (0.0f));
-				_ASSERTE (num <= den);
 				dgBigVector q (p0 + p1p0.Scale (num / den));
 				dgBigVector dist (p2 - q);
 				dgFloat64 err2 = dist % dist;
@@ -4371,7 +4369,7 @@ xxx *=1;
 						dgVertexAtribute attrib (InterpolateEdge (firstEdge->m_prev->m_twin, t));
 						attrib.m_vertex = m_points[firstEdge->m_next->m_incidentVertex];
 						AddAtribute(attrib);
-
+						firstEdge->m_next->m_incidentFace = firstEdge->m_prev->m_twin->m_incidentFace;
 						firstEdge->m_next->m_userData = dgUnsigned64 (m_atribCount - 1);
 
 						bool restart = false;
@@ -4411,7 +4409,7 @@ xxx *=1;
 						dgVertexAtribute attrib (InterpolateEdge (firstEdge->m_twin, dgFloat64 (1.0f) - t));
 						attrib.m_vertex = m_points[firstEdge->m_prev->m_incidentVertex];
 						AddAtribute(attrib);
-						//firstEdge->m_prev->m_incidentFace = firstEdge->m_twin->m_incidentFace;
+						firstEdge->m_prev->m_incidentFace = firstEdge->m_twin->m_incidentFace;
 						firstEdge->m_prev->m_userData = dgUnsigned64 (m_atribCount - 1);
 
 						bool restart = false;
@@ -4429,25 +4427,27 @@ xxx *=1;
 					for (dgEdge* ptr = begin->m_next->m_next; ptr != last; ptr = ptr->m_next) {
 						dgEdge* const e = AddHalfEdge (begin->m_incidentVertex, ptr->m_incidentVertex);
 						dgEdge* const t = AddHalfEdge (ptr->m_incidentVertex, begin->m_incidentVertex);
-						_ASSERTE (e);
-						_ASSERTE (t);
-						e->m_twin = t;
-						t->m_twin = e;
+						if (e && t) {
+							_ASSERTE (e);
+							_ASSERTE (t);
+							e->m_twin = t;
+							t->m_twin = e;
 
-						e->m_incidentFace = ptr->m_incidentFace;
-						t->m_incidentFace = ptr->m_incidentFace;
+							e->m_incidentFace = ptr->m_incidentFace;
+							t->m_incidentFace = ptr->m_incidentFace;
 
-						e->m_userData = last->m_next->m_userData;
-						t->m_userData = ptr->m_userData;
+							e->m_userData = last->m_next->m_userData;
+							t->m_userData = ptr->m_userData;
 
-						t->m_prev = ptr->m_prev;
-						ptr->m_prev->m_next = t;
-						e->m_next = ptr;
-						ptr->m_prev = e;
-						t->m_next = last->m_next;
-						e->m_prev = last;
-						last->m_next->m_prev = t;
-						last->m_next = e;
+							t->m_prev = ptr->m_prev;
+							ptr->m_prev->m_next = t;
+							e->m_next = ptr;
+							ptr->m_prev = e;
+							t->m_next = last->m_next;
+							e->m_prev = last;
+							last->m_next->m_prev = t;
+							last->m_next = e;
+						}
 					}
 
 					firstEdge = next;

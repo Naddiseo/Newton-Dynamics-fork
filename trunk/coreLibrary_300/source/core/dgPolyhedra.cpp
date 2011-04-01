@@ -2032,11 +2032,15 @@ dgBigVector dgPolyhedra::FaceNormal (dgEdge* const face, const dgFloat64* const 
 
 dgEdge* dgPolyhedra::AddHalfEdge (dgInt32 v0, dgInt32 v1)
 {
-	dgPairKey pairKey (v0, v1);
-	dgEdge tmpEdge (v0, -1);
+	if (v0 != v1) {
+		dgPairKey pairKey (v0, v1);
+		dgEdge tmpEdge (v0, -1);
 
-	dgTreeNode* node = Insert (tmpEdge, pairKey.GetVal()); 
-	return node ? &node->GetInfo() : NULL;
+		dgTreeNode* node = Insert (tmpEdge, pairKey.GetVal()); 
+		return node ? &node->GetInfo() : NULL;
+	} else {
+		return NULL;
+	}
 }
 
 
