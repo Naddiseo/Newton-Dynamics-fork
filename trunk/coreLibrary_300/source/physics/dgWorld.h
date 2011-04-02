@@ -88,7 +88,6 @@ class dgCollisionParamProxy;
 enum dgPerformanceCounters
 {
 	m_worldTicks = 0,
-
 	m_collisionTicks,
 	m_forceCallback,
 	m_broadPhaceTicks,
@@ -167,15 +166,15 @@ class dgWorld:
 
 	void Update (dgFloat32 timestep);
 	void UpdateCollision ();
-	dgInt32 Collide (dgCollision* collisionA, const dgMatrix& matrixA, dgCollision* collisionB, const dgMatrix& matrixB, 
-					 dgTriplex* points, dgTriplex* normals, dgFloat32* penetration, dgInt32 maxSize, dgInt32 threadIndex);
+	dgInt32 Collide (dgCollision* const collisionA, const dgMatrix& matrixA, dgCollision* const collisionB, const dgMatrix& matrixB, 
+					 dgTriplex* const points, dgTriplex* const normals, dgFloat32* const penetration, dgInt32 maxSize, dgInt32 threadIndex);
 
-	dgInt32 CollideContinue (dgCollision* collisionA, const dgMatrix& matrixA, const dgVector& velocA, const dgVector& omegaA, 
-							 dgCollision* collisionB, const dgMatrix& matrixB, const dgVector& velocB, const dgVector& omegaB, 
-							 dgFloat32& timeStep, dgTriplex* points, dgTriplex* normals, dgFloat32* penetration, dgInt32 maxSize, dgInt32 threadIndex);
-	dgInt32 CollideContinueSimd (dgCollision* collisionA, const dgMatrix& matrixA, const dgVector& velocA, const dgVector& omegaA, 
-								 dgCollision* collisionB, const dgMatrix& matrixB, const dgVector& velocB, const dgVector& omegaB, 
-								 dgFloat32& timeStep, dgTriplex* points, dgTriplex* normals, dgFloat32* penetration, dgInt32 maxSize, dgInt32 threadIndex);
+	dgInt32 CollideContinue (dgCollision* const collisionA, const dgMatrix& matrixA, const dgVector& velocA, const dgVector& omegaA, 
+		dgCollision* const collisionB, const dgMatrix& matrixB, const dgVector& velocB, const dgVector& omegaB, 
+		dgFloat32& timeStep, dgTriplex* const points, dgTriplex* const normals, dgFloat32* const penetration, dgInt32 maxSize, dgInt32 threadIndex);
+	dgInt32 CollideContinueSimd (dgCollision* const collisionA, const dgMatrix& matrixA, const dgVector& velocA, const dgVector& omegaA, 
+		dgCollision* const collisionB, const dgMatrix& matrixB, const dgVector& velocB, const dgVector& omegaB, 
+		dgFloat32& timeStep, dgTriplex* const points, dgTriplex* const normals, dgFloat32* const penetration, dgInt32 maxSize, dgInt32 threadIndex);
 
 
 	dgInt32 ClosestPoint (dgTriplex& point, dgCollision* const collision, const dgMatrix& matrix, dgTriplex& contact, dgTriplex& normal, dgInt32 threadIndex) const;

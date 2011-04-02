@@ -1854,10 +1854,9 @@ void dgWorld::CalculateContacts (dgCollidingPairCollector::dgPair* const pair, d
 // ***************************************************************************
 //
 // ***************************************************************************
-
-dgInt32 dgWorld::CollideContinueSimd (dgCollision* collisionA, const dgMatrix& matrixA, const dgVector& velocA, 
-	const dgVector& omegaA, dgCollision* collisionB, const dgMatrix& matrixB, const dgVector& velocB, const dgVector& omegaB, 
-	dgFloat32& retTimeStep, dgTriplex* points, dgTriplex* normals, dgFloat32* penetration, dgInt32 maxSize, dgInt32 threadIndex)
+dgInt32 dgWorld::CollideContinueSimd  (dgCollision* const collisionA, const dgMatrix& matrixA, const dgVector& velocA, const dgVector& omegaA, 
+									   dgCollision* const collisionB, const dgMatrix& matrixB, const dgVector& velocB, const dgVector& omegaB, 
+									   dgFloat32& retTimeStep, dgTriplex* const points, dgTriplex* const normals, dgFloat32* const penetration, dgInt32 maxSize, dgInt32 threadIndex)
 {
 _ASSERTE (0);
 return 0;
@@ -1870,7 +1869,6 @@ return 0;
 	count = 0;
 	retTimeStep = dgFloat32 (1.0e10f);
 	maxSize = GetMin (DG_MAX_CONTATCS, maxSize);
-
 
 	collideBodyA.m_world = this;
 	collideBodyA.SetContinuesCollisionMode(true); 
@@ -1968,9 +1966,9 @@ return 0;
 }
 
 
-dgInt32 dgWorld::CollideContinue (dgCollision* collisionA, const dgMatrix& matrixA, const dgVector& velocA, const dgVector& omegaA, dgCollision* collisionB, 
-	const dgMatrix& matrixB, const dgVector& velocB, const dgVector& omegaB, dgFloat32& retTimeStep, dgTriplex* points, dgTriplex* normals, 
-	dgFloat32* penetration, dgInt32 maxSize, dgInt32 threadIndex)
+dgInt32 dgWorld::CollideContinue (dgCollision* const collisionA, const dgMatrix& matrixA, const dgVector& velocA, const dgVector& omegaA, 
+								  dgCollision* const collisionB, const dgMatrix& matrixB, const dgVector& velocB, const dgVector& omegaB, 
+								  dgFloat32& retTimeStep, dgTriplex* const points, dgTriplex* const normals, dgFloat32* const penetration, dgInt32 maxSize, dgInt32 threadIndex)
 {
 _ASSERTE (0);
 return 0;
@@ -2080,8 +2078,7 @@ return 0;
 }
 
 
-dgInt32 dgWorld::Collide (dgCollision* collisionA, const dgMatrix& matrixA, dgCollision* collisionB, const dgMatrix& matrixB, dgTriplex* points, 
-	dgTriplex* normals, dgFloat32* penetration, dgInt32 maxSize, dgInt32 threadIndex)
+dgInt32 dgWorld::Collide (dgCollision* const collisionA, const dgMatrix& matrixA, dgCollision* const collisionB, const dgMatrix& matrixB, dgTriplex* const points, dgTriplex* const normals, dgFloat32* const penetration, dgInt32 maxSize, dgInt32 threadIndex)
 {
 _ASSERTE (0);
 return 0;
