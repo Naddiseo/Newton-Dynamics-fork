@@ -195,6 +195,8 @@ void dgBody::SetMatrixIgnoreSleep(const dgMatrix& matrix)
 //	}
 		
 	m_sleeping = false;
+	m_prevExternalForce = dgVector (0.0f, 0.0f, 0.0f, 0.0f);
+	m_prevExternalTorque = dgVector (0.0f, 0.0f, 0.0f, 0.0f);
 	SetMatrix(matrix);
 }
 

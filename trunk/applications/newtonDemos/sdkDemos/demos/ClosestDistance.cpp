@@ -110,7 +110,7 @@ void ClosestDistance (DemoEntityManager* const scene)
 
 	// load the scene from and alchemedia file format
 	char fileName[2048];
-	GetWorkingFileName ("closestDistance.xml", fileName);
+	GetWorkingFileName ("closestDistance.ngd", fileName);
 	scene->LoadScene (fileName);
 
 	// customize the scene after loading
@@ -136,7 +136,7 @@ void ClosestDistance (DemoEntityManager* const scene)
 	#else
 
 		dScene compoundTestMesh (world);
-		GetWorkingFileName ("bessel.xml", fileName);
+		GetWorkingFileName ("bessel.ngd", fileName);
 
 		compoundTestMesh.Deserialize(fileName);
 

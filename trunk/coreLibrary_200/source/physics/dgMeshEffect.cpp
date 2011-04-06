@@ -2072,10 +2072,6 @@ void dgMeshEffect::GetEdgeIndex (const void* edge, dgInt32& v0, dgInt32& v1) con
 
 void* dgMeshEffect::GetFirstFace ()
 {
-	_ASSERTE (0);
-	return 0;
-	/*
-
 	Iterator iter (*this);
 	iter.Begin();
 
@@ -2084,7 +2080,7 @@ void* dgMeshEffect::GetFirstFace ()
 		int mark = IncLRU();
 		node = iter.GetNode();
 
-		dgEdge* edge = &node->GetInfo();
+		dgEdge* const edge = &node->GetInfo();
 		dgEdge* ptr = edge;
 		do {
 			ptr->m_mark = mark;
@@ -2093,7 +2089,6 @@ void* dgMeshEffect::GetFirstFace ()
 	}
 
 	return node;
-*/
 }
 
 void* dgMeshEffect::GetNextFace (const void* face)

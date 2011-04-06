@@ -1,0 +1,138 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_EXPORT_DIALOG DIALOGEX 0, 0, 99, 120
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Netwon Export Options"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,7,95,36,14
+    PUSHBUTTON      "Cancel",IDCANCEL,56,95,36,14
+    CONTROL         "  Export Mesh",IDC_EXPORT_MESH,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,51,61,10
+    CONTROL         " Export Animation",IDC_EXPORT_ANIMATION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,71,74,12
+    CONTROL         " Export Skeleton",IDC_EXPORT_SKELETON,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,29,69,10
+    CONTROL         " Export model",IDC_EXPORT_MODEL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,68,10
+END
+
+IDD_NEWTON_WORLD_PANE DIALOGEX 0, 0, 107, 79
+STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE
+FONT 8, "Microsoft Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "Preview",IDC_PREVIEW_WORLD,"Button",BS_AUTOCHECKBOX | BS_PUSHLIKE | WS_TABSTOP,6,3,45,14
+    PUSHBUTTON      "Single Step",IDC_STEP_WORLD,55,3,45,14
+    LTEXT           "gravity",IDC_STATIC,6,26,23,11
+    CONTROL         "Custom1",IDC_GRAVITY_X,"CustEdit",WS_TABSTOP,28,25,24,11
+    CONTROL         "Custom1",IDC_GRAVITY_Y,"CustEdit",WS_TABSTOP,52,25,24,11
+    CONTROL         "Custom1",IDC_GRAVITY_Z,"CustEdit",WS_TABSTOP,76,25,24,11
+END
+
+IDD_NEWTON_BODY_PANE DIALOGEX 0, 0, 120, 183
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "mass",IDC_STATIC,14,55,18,8
+    CONTROL         "Custom1",IDC_RIGID_BODY_MASS,"CustEdit",WS_TABSTOP,37,54,43,9
+    CONTROL         "Custom1",IDC_RIGID_BODY_MASS_PINNER,"SpinnerControl",WS_TABSTOP,78,54,12,11
+    PUSHBUTTON      "Attach RigidBody",IDC_ATTACH_RIGIDBODY,12,5,93,13
+    PUSHBUTTON      "Detach RigidBody",IDC_DETACH_RIGIDBODY,13,20,91,12
+    PUSHBUTTON      "Select RigidBodies",IDC_SELECT_RIGIDBODIES,13,34,91,14
+    COMBOBOX        IDC_RIGID_BODY_COLLISION,14,77,71,30,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Collision Shape",IDC_STATIC,15,67,51,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_EXPORT_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 92
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 113
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_CLASS_NAME          "Newton Plugin "
+    IDS_PARAMS              "Parameters"
+    IDS_SPIN                "Spin"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

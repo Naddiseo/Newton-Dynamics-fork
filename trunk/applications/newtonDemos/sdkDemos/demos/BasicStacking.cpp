@@ -274,10 +274,10 @@ void BasicBoxStacks (DemoEntityManager* const scene)
 
 	// load the scene from and alchemedia file format
 	char fileName[2048];
-	//GetWorkingFileName ("boxStacks_1.xml", fileName);
-	//GetWorkingFileName ("boxStacks_3.xml", fileName);
-	GetWorkingFileName ("boxStacks.xml", fileName);
-	//GetWorkingFileName ("pyramid40x40.xml", fileName);
+	//GetWorkingFileName ("boxStacks_1.ngd", fileName);
+	//GetWorkingFileName ("boxStacks_3.ngd", fileName);
+	GetWorkingFileName ("boxStacks.ngd", fileName);
+	//GetWorkingFileName ("pyramid40x40.ngd", fileName);
 	scene->LoadScene (fileName);
 
 	// place camera into position

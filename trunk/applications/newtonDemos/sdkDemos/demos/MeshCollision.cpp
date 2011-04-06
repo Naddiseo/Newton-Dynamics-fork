@@ -362,10 +362,10 @@ static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 
 
 	// load the scene from and alchemedia file format
-//	CreateLevelMesh (scene, "flatPlane.xml", optimization);
-	CreateLevelMesh (scene, "sponza.xml", optimization);
-//	CreateLevelMesh (scene, "cattle.xml", fileName);
-//	CreateLevelMesh (scene, "playground.xml", fileName);
+//	CreateLevelMesh (scene, "flatPlane.ngd", optimization);
+	CreateLevelMesh (scene, "sponza.ngd", optimization);
+//	CreateLevelMesh (scene, "cattle.ngd", fileName);
+//	CreateLevelMesh (scene, "playground.ngd", fileName);
 	
 	// place camera into position
 //	dQuaternion rot;

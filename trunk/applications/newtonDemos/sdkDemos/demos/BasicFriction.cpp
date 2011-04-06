@@ -144,7 +144,7 @@ void Friction (DemoEntityManager* const scene)
 
 	// load the scene from and alchemedia file format
 	char fileName[2048];
-	GetWorkingFileName ("frictionDemo.xml", fileName);
+	GetWorkingFileName ("frictionDemo.ngd", fileName);
 	scene->LoadScene (fileName);
 
 

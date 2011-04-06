@@ -119,7 +119,7 @@ class ComplexScene: public DemoEntity
 	{
 		// open the level data
 		char fullPathName[2048];
-		GetWorkingFileName ("playground.xml", fullPathName);
+		GetWorkingFileName ("playground.ngd", fullPathName);
 
 		scene->LoadScene (fullPathName);
 
