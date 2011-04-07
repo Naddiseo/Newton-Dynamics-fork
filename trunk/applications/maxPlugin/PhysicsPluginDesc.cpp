@@ -27,12 +27,11 @@
 
 PhysicsPluginClassDesc::PhysicsPluginClassDesc ()
 	:ClassDesc2()
+	,m_minFps (120.0f)
 	,m_gravity(0.0f, -9.8f, 0.0f, 0.0f)
 	,m_systemMatrix (dVector (0.0f, 0.0f, 1.0f, 0.0f), dVector (1.0f, 0.0f, 0.0f, 0.0f), dVector (0.0f, 1.0f, 0.0f, 0.0f), dVector (0.0f, 0.0f, 0.0f, 1.0f))
 	,m_systemMatrixInv (m_systemMatrix.Inverse())
 {
-//	float scale = float (GetMasterScale(UNITS_METERS));	
-//	m_gravity.z = -9.8f / scale;
 }
 
 
@@ -98,10 +97,11 @@ IOResult PhysicsPluginClassDesc::Load(ILoad* iload)
 {
 	IOResult ret = ClassDesc2::Load(iload);
 
-	ULONG nread;
+	ULONG retVal;
 
 	iload->OpenChunk();
-	iload->Read(&m_gravity, sizeof (m_gravity), &nread);
+	iload->Read(&m_gravity, sizeof (m_gravity), &retVal);
+	iload->Read(&m_minFps, sizeof (m_minFps), &retVal);
 	iload->CloseChunk();
 
 	return ret;
@@ -112,10 +112,11 @@ IOResult PhysicsPluginClassDesc::Save(ISave* isave)
 {
 	IOResult ret = ClassDesc2::Save(isave);
 
-	ULONG nwrit;
+	ULONG retVal;
 
 	isave->BeginChunk(USHORT (ClassID().PartB()));
-	isave->Write(&m_gravity, sizeof (m_gravity), &nwrit);
+	isave->Write(&m_gravity, sizeof (m_gravity), &retVal);
+	isave->Write(&m_minFps, sizeof (m_minFps), &retVal);
 	isave->EndChunk();
 
 	return ret;

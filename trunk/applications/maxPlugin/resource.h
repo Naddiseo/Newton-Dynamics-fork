@@ -25,8 +25,9 @@
 #define IDC_IDC_STEP_WORLD              1027
 #define IDC_STEP_WORLD                  1027
 #define IDC_GRAVITY_X                   1030
+#define IDC_GRAVITY_X2                  1031
+#define IDC_MINUMIN_SIMULATION_RATE     1031
 #define IDC_GRAVITY_Y                   1033
-#define GRAVITY_YIDC_GRAVITY_Y          1034
 #define IDC_GRAVITY_Z                   1034
 
 // Next default values for new objects

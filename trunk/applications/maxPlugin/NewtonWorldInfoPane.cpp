@@ -43,14 +43,18 @@ void NewtonWorldInfoPane::Init(HWND hWnd)
 	HWND gravity_x = GetDlgItem(hWnd, IDC_GRAVITY_X);
 	HWND gravity_y = GetDlgItem(hWnd, IDC_GRAVITY_Y);
 	HWND gravity_z = GetDlgItem(hWnd, IDC_GRAVITY_Z);
+	HWND minFps = GetDlgItem(hWnd, IDC_MINUMIN_SIMULATION_RATE);
 
 	m_gravity[0] = GetICustEdit(gravity_x);
 	m_gravity[1] = GetICustEdit(gravity_y);
 	m_gravity[2] = GetICustEdit(gravity_z);
 
+	m_minFps = GetICustEdit(minFps);
+
 	PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetControlDesc();
 	dVector gravity = plugin->m_systemMatrixInv.RotateVector(plugin->m_gravity.Scale (1.0f / float (GetMasterScale(UNITS_METERS))));
 
+	m_minFps->SetText(plugin->m_minFps);
 	m_gravity[0]->SetText(gravity.m_x);
 	m_gravity[1]->SetText(gravity.m_y);
 	m_gravity[2]->SetText(gravity.m_z);
@@ -58,6 +62,7 @@ void NewtonWorldInfoPane::Init(HWND hWnd)
 
 void NewtonWorldInfoPane::Destroy(HWND hWnd)
 {
+	ReleaseICustEdit (m_minFps);
 	ReleaseICustEdit (m_gravity[0]);
 	ReleaseICustEdit (m_gravity[1]);
 	ReleaseICustEdit (m_gravity[2]);
@@ -169,6 +174,8 @@ void NewtonWorldInfoPane::Update()
 {
 	PhysicsPluginObject& me = *(PhysicsPluginObject *)this;
 
+	float fps = ((PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetControlDesc())->m_minFps;
+
 	int ticks = GetTicksPerFrame();
 	Interval range (me.m_ip->GetAnimRange());
 	TimeValue time (me.m_ip->GetTime());
@@ -179,8 +186,11 @@ void NewtonWorldInfoPane::Update()
 	int ticksPerFrame = GetTicksPerFrame();
 	float timestep = float (ticksPerFrame) / float (4800.0f);
 
-	int count = int (dFloor (timestep / (1.0f / 120.0f))) + 1;
+	int count = int (dCiel (timestep * fps));
 	timestep = timestep / float (count);
+
+//count = 1;
+//timestep = 1.0f/1000.0f;
 	for (int i = 0; i < count; i ++) {
 		NewtonUpdate(me.m_newton, timestep);
 	}

@@ -164,17 +164,19 @@ void NewtonRigidBodyInfoPane::AddNodeToWorld (INode* const node)
 		os.obj->GetLocalBoundBox(0, node, NULL, box); 
 
 		Point3 center (box.Center());
-		Point3 boxSize (box.Width() * 0.5f);
+		Point3 boxSize (box.Width());
 
 		dMatrix GeoMatrix (GetMatrixFromMaxMatrix (node->GetObjectTM(0)));
 		dMatrix nodeMatrix (GetMatrixFromMaxMatrix (node->GetNodeTM(0)));
 
 		dMatrix offset (GeoMatrix * nodeMatrix.Inverse4x4());
 
-		offset.m_posit.m_x = center.x * scale;
-		offset.m_posit.m_y = center.y * scale;
-		offset.m_posit.m_z = center.z * scale;
+		offset.m_posit.m_x += center.x;
+		offset.m_posit.m_y += center.y;
+		offset.m_posit.m_z += center.z;
 		offset = plugin->m_systemMatrixInv * offset * plugin->m_systemMatrix;
+
+		offset.m_posit = offset.m_posit.Scale (scale);
 
 		dVector size (plugin->m_systemMatrix.RotateVector(dVector(boxSize.x, boxSize.y, boxSize.z, 0.0f)));
 		size = size.Scale (scale);
@@ -241,9 +243,6 @@ void NewtonRigidBodyInfoPane::RemoveNodeFromWorld (INode* const node)
 
 
 
-
-
-
 void NewtonRigidBodyInfoPane::SaveState ()
 {
 	PhysicsPluginObject& me = *(PhysicsPluginObject*)this;
@@ -260,7 +259,7 @@ void NewtonRigidBodyInfoPane::SaveState ()
 			theHold.Put(new UpdateUndoRedo (node, time));
 		}
 
-		dMatrix matrix (GetMatrixFromMaxMatrix (node->GetObjectTM(time)));
+		dMatrix matrix (GetMatrixFromMaxMatrix (node->GetNodeTM(time)));
 		matrix = plugin->m_systemMatrixInv * matrix * plugin->m_systemMatrix;
 		matrix.m_posit = matrix.m_posit.Scale (scale);
 
@@ -362,6 +361,7 @@ void NewtonRigidBodyInfoPane::SetTransforms (TimeValue tick) const
 		maxMatrix.SetRow (1, *((Point3*) &matrix[1]));
 		maxMatrix.SetRow (2, *((Point3*) &matrix[2]));
 		maxMatrix.SetRow (3, *((Point3*) &matrix[3]));
+
 		node->SetNodeTM(tick, maxMatrix);
 	}
 }

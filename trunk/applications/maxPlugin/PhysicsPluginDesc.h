@@ -50,6 +50,7 @@ class PhysicsPluginClassDesc: public ClassDesc2
 	static ClassDesc* GetControlDesc();
 
 	PhysicsPluginObject* m_object;
+	float m_minFps;
 	dVector m_gravity;
 	dMatrix m_systemMatrix;
 	dMatrix m_systemMatrixInv;
