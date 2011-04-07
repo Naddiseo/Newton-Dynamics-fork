@@ -29,7 +29,7 @@
 NewtonWorldInfoPane::NewtonWorldInfoPane(void)
 	:m_hWnd (0)
 	,m_updateState(false)
-	,m_animationFPS (60.0f)
+//	,m_animationFPS (60.0f)
 {
 }
 
@@ -151,10 +151,10 @@ void NewtonWorldInfoPane::StartUpdates ()
 	m_updateState = true;
 
 	int ticksPerFrame = GetTicksPerFrame();
-	m_animationFPS = float (ticksPerFrame) / float (4800.0f);
+	float timestep = float (ticksPerFrame) / float (4800.0f);
 
 	me.SaveState ();
-	SetTimer(me.m_hWnd, IDC_UPDATE_WORLD, int (m_animationFPS * 1000.f), NULL);
+	SetTimer(me.m_hWnd, IDC_UPDATE_WORLD, int (timestep * 1000.f), NULL);
 }
 
 void NewtonWorldInfoPane::StopUpdates ()
@@ -177,8 +177,14 @@ void NewtonWorldInfoPane::Update()
 	if (time > range.End()) {
 		time = range.Start() + time % (range.End() - range.Start());
 	}
+	int ticksPerFrame = GetTicksPerFrame();
+	float timestep = float (ticksPerFrame) / float (4800.0f);
 
-	NewtonUpdate(me.m_newton, 1.0f/100.0f);
+	int count = int (dFloor (timestep / (1.0f / 120.0f))) + 1;
+	timestep = timestep / float (count);
+	for (int i = 0; i < count; i ++) {
+		NewtonUpdate(me.m_newton, timestep);
+	}
 	
 
 	me.SetTransforms (time);

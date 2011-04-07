@@ -44,7 +44,7 @@ class NewtonWorldInfoPane
 
 	HWND m_hWnd;
 	bool m_updateState;
-	float m_animationFPS;
+//	float m_animationFPS;
 	ICustEdit* m_gravity[3];
 };
 
