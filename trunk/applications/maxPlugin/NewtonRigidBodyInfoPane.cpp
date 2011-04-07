@@ -22,7 +22,7 @@
 #include "Common.h"
 #include "PhysicsPluginDesc.h"
 #include "NewtonRigidBodyInfoPane.h"
-#include "NewtonRigidBodyControllers.h"
+
 
 #define RIGID_BODY_INFO_ID Class_ID(0x2dd440ce, 0x3a326f7c)
 

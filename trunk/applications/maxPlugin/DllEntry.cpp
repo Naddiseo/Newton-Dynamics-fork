@@ -24,7 +24,7 @@
 #include "ImportDesc.h"
 #include "ExportDesc.h"
 #include "PhysicsPluginDesc.h"
-#include "NewtonRigidBodyControllers.h"
+
 
 HINSTANCE hInstance;
 int controlsInit = FALSE;

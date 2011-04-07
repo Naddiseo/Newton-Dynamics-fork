@@ -288,14 +288,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\NewtonRigidBodyControllers.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\NewtonRigidBodyControllers.h"
-			>
-		</File>
-		<File
 			RelativePath=".\NewtonRigidBodyInfoPane.cpp"
 			>
 		</File>
