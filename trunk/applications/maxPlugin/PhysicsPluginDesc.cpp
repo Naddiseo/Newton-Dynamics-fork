@@ -140,8 +140,9 @@ PhysicsPluginObject::PhysicsPluginObject()
 	m_newton = NewtonCreate();
 
 	// Register the callback
-	RegisterNotification(RemoveAllRigidBodies, this, NOTIFY_FILE_PRE_OPEN);
-	RegisterNotification(AddAllRidigBodies, this, NOTIFY_FILE_POST_OPEN);
+	RegisterNotification(OnCloneNode, this, NOTIFY_POST_NODES_CLONED);
+	RegisterNotification(OnPreLoadScene, this, NOTIFY_FILE_PRE_OPEN);
+	RegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
 }
 
 PhysicsPluginObject::~PhysicsPluginObject()
@@ -155,8 +156,9 @@ void PhysicsPluginObject::DeleteThis ()
 	NewtonDestroy (m_newton);
 
 	// When done, unregister the callback
-	UnRegisterNotification(RemoveAllRigidBodies, this, NOTIFY_FILE_PRE_OPEN);
-	UnRegisterNotification(AddAllRidigBodies, this, NOTIFY_FILE_POST_OPEN);
+	UnRegisterNotification(OnCloneNode, this, NOTIFY_POST_NODES_CLONED);
+	UnRegisterNotification(OnPreLoadScene, this, NOTIFY_FILE_PRE_OPEN);
+	UnRegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
 }
 
 
@@ -238,12 +240,13 @@ void PhysicsPluginObject::SetStartupParam (MSTR param)
 
 
 //Declare the callback function  
-void PhysicsPluginObject::RemoveAllRigidBodies(void* param, NotifyInfo* info)
+void PhysicsPluginObject::OnPreLoadScene(void* param, NotifyInfo* info)
 {
-	// Get the nodes being deleted
 	PhysicsPluginObject* const me = (PhysicsPluginObject*)param;
 
 	dList<INode*> list;
+	me->StopUpdates();
+
 	me->GetNodeList (list);
 	for (dList<INode*>::dListNode* ptr = list.GetFirst(); ptr; ptr = ptr->GetNext()) {
 		INode* node = ptr->GetInfo();
@@ -251,11 +254,11 @@ void PhysicsPluginObject::RemoveAllRigidBodies(void* param, NotifyInfo* info)
 	}
 }
 
-void PhysicsPluginObject::AddAllRidigBodies(void* param, NotifyInfo* info)
+void PhysicsPluginObject::OnPostLoadScene(void* param, NotifyInfo* info)
 {
-	// Get the nodes being deleted
 	PhysicsPluginObject* const me = (PhysicsPluginObject*)param;
 
+	me->StopUpdates();
 	dList<INode*> list;
 	me->GetNodeList (list);
 	for (dList<INode*>::dListNode* ptr = list.GetFirst(); ptr; ptr = ptr->GetNext()) {
@@ -264,7 +267,34 @@ void PhysicsPluginObject::AddAllRidigBodies(void* param, NotifyInfo* info)
 	}
 }
 
+void PhysicsPluginObject::OnCloneNode(void *param, NotifyInfo *info)
+{
+	PhysicsPluginObject* const me = (PhysicsPluginObject*)param;
 
+	/** For example, if there are N nodes cloned C times, the 
+	notification is sent C times. The CallParam for NOTIFY_POST_NODES_CLONED is a pointer to this struct: struct{ 
+	INodeTab* origNodes; INodeTab* clonedNodes; CloneType cloneType;} */
+
+	struct CloneData
+	{ 
+		INodeTab* origNodes; 
+		INodeTab* clonedNodes; 
+		CloneType cloneType;
+	} ;
+
+	me->StopUpdates();
+	CloneData* const data = (CloneData*)info->callParam;
+	const INodeTab& origNodes = *data->origNodes; 
+	const INodeTab& clonedNodes = *data->clonedNodes; 
+
+	_ASSERTE (origNodes.Count() == clonedNodes.Count());
+
+	for (int i = 0; i < origNodes.Count(); i ++) {
+		INode* const origNode = origNodes[i];
+		INode* const cloneNode = clonedNodes[i];
+		me->CloneRigidBody(origNode, cloneNode);
+	}
+}
 
 
 

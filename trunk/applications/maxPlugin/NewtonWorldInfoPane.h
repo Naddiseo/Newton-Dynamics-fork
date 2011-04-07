@@ -36,9 +36,6 @@ class NewtonWorldInfoPane
 	void StartUpdates ();
 	void StopUpdates ();
 	void Update ();
-
-	
-
 	
 	static INT_PTR CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 

@@ -78,8 +78,9 @@ class PhysicsPluginObject
 
 	void GetNodeList (dList<INode*>& list);
 
-	static void AddAllRidigBodies(void *param, NotifyInfo *info);
-	static void RemoveAllRigidBodies(void *param, NotifyInfo *info);
+	static void OnCloneNode(void *param, NotifyInfo *info);
+	static void OnPostLoadScene(void *param, NotifyInfo *info);
+	static void OnPreLoadScene(void *param, NotifyInfo *info);
 
 	SClass_ID SuperClassID();
 	Class_ID ClassID();

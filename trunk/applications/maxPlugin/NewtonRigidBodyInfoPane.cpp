@@ -143,6 +143,7 @@ void NewtonRigidBodyInfoPane::Destroy(HWND hWnd)
 }
 
 
+
 void NewtonRigidBodyInfoPane::AddNodeToWorld (INode* const node)
 {
 	AppDataChunk* const rigidBodyChunk = node->GetAppDataChunk(GetRigidBodyID(), node->SuperClassID(), 0); 
@@ -224,6 +225,7 @@ void NewtonRigidBodyInfoPane::AddNodeToWorld (INode* const node)
 		NewtonReleaseCollision(me.m_newton, collision);
 	}
 }
+
 
 
 void NewtonRigidBodyInfoPane::RemoveNodeFromWorld (INode* const node)
@@ -444,33 +446,51 @@ void NewtonRigidBodyInfoPane::SelectRigiBodies()
 	me.SelectionSetChanged (me.m_ip, me.m_iu);
 }
 
-void NewtonRigidBodyInfoPane::AttachRigidBodyToNode(INode* const node)
+bool NewtonRigidBodyInfoPane::AttachRigidBodyToNode(INode* const node)
 {
 	Object* const obj = node->GetObjOrWSMRef();
-	_ASSERTE (obj);
-
-	switch(obj->SuperClassID()) 
-	{
-		case GEOMOBJECT_CLASS_ID: 
+	if (obj) {
+		switch(obj->SuperClassID()) 
 		{
-			AppDataChunk* const rigidBodyChunk = node->GetAppDataChunk(GetRigidBodyID(), node->SuperClassID(), 0); 
-			if (!rigidBodyChunk) {
-				RidBodyData* const rigidBody = (RidBodyData*) MAX_malloc (sizeof (RidBodyData));
-				memset (rigidBody, 0, sizeof (RidBodyData));
+			case GEOMOBJECT_CLASS_ID: 
+			{
+				AppDataChunk* const rigidBodyChunk = node->GetAppDataChunk(GetRigidBodyID(), node->SuperClassID(), 0); 
+				if (!rigidBodyChunk) {
+					RidBodyData* const rigidBody = (RidBodyData*) MAX_malloc (sizeof (RidBodyData));
+					memset (rigidBody, 0, sizeof (RidBodyData));
 
-				rigidBody->m_mass = m_massEdit->GetFloat();
-				rigidBody->m_collisionShape = m_curCollsionShape;
+					rigidBody->m_mass = m_massEdit->GetFloat();
+					rigidBody->m_collisionShape = m_curCollsionShape;
 
-				node->AddAppDataChunk(GetRigidBodyID(), node->SuperClassID(), 0, sizeof (RidBodyData), rigidBody);
-				AddNodeToWorld (node);
+					node->AddAppDataChunk(GetRigidBodyID(), node->SuperClassID(), 0, sizeof (RidBodyData), rigidBody);
+					AddNodeToWorld (node);
+				}
+				return true;
+				break;
 			}
-			break;
-		}
 
-		default:;
-		{
-			_ASSERTE (0);
+			default:;
+			{
+				_ASSERTE (0);
+			}
 		}
+	}
+
+	return false;
+}
+
+void NewtonRigidBodyInfoPane::CloneRigidBody(INode* const orignal, INode* const clone)
+{
+	AppDataChunk* const sourceBody = orignal->GetAppDataChunk(GetRigidBodyID(), orignal->SuperClassID(), 0); 
+	if (sourceBody) {
+		_ASSERTE (!clone->GetAppDataChunk(GetRigidBodyID(), clone->SuperClassID(), 0));
+		
+		RidBodyData* const rigidBody = (RidBodyData*) MAX_malloc (sizeof (RidBodyData));
+		memcpy (rigidBody, (RidBodyData*) sourceBody->data, sizeof (RidBodyData));
+		rigidBody->m_body = NULL;
+		clone->AddAppDataChunk(GetRigidBodyID(), clone->SuperClassID(), 0, sizeof (RidBodyData), rigidBody);
+
+		AddNodeToWorld (clone);
 	}
 }
 
@@ -593,8 +613,6 @@ INT_PTR CALLBACK NewtonRigidBodyInfoPane::DialogProc(HWND hWnd, UINT msg, WPARAM
 
 						int index = CollisionShape(SendMessage(collisionShapeHandle, CB_GETCURSEL, 0, 0));  
 						me.m_curCollsionShape = CollisionShape(SendMessage(collisionShapeHandle, CB_GETITEMDATA, index, 0));  
-
-
 							for (dList<INode*>::dListNode* ptr = obj->m_currentSelection.GetFirst(); ptr; ptr = ptr->GetNext()) {
 								INode* const node = ptr->GetInfo();
 								AppDataChunk* const rigidBodyChunk = node->GetAppDataChunk(GetRigidBodyID(), node->SuperClassID(), 0); 

@@ -24,7 +24,7 @@
 #define __NEWTON_RIGIDBODY_INFO_PANE_H__
 
 
-
+class RidBodyData;
 
 class NewtonRigidBodyInfoPane
 {
@@ -51,8 +51,9 @@ class NewtonRigidBodyInfoPane
 	void AttachSelectedRigiBodies();
 	void DetachSelectedRigiBodies();
 
-	void AttachRigidBodyToNode(INode* const node);
+	bool AttachRigidBodyToNode(INode* const node);
 	void RemoveRigidBodyFromNode(INode* const node);
+	void CloneRigidBody(INode* const orignal, INode* const clone);
 	
 	void SetCollisionData (HWND listControl, int shapeId, char* const label) const;
 
