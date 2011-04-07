@@ -137,10 +137,25 @@ PhysicsPluginObject::PhysicsPluginObject()
 {
 	_ASSERTE (!m_newton);
 	m_newton = NewtonCreate();
+
+	// Register the callback
+	RegisterNotification(RemoveAllRigidBodies, this, NOTIFY_FILE_PRE_OPEN);
+	RegisterNotification(AddAllRidigBodies, this, NOTIFY_FILE_POST_OPEN);
 }
 
 PhysicsPluginObject::~PhysicsPluginObject()
 {
+}
+
+
+void PhysicsPluginObject::DeleteThis ()
+{
+	_ASSERTE (m_newton);
+	NewtonDestroy (m_newton);
+
+	// When done, unregister the callback
+	UnRegisterNotification(RemoveAllRigidBodies, this, NOTIFY_FILE_PRE_OPEN);
+	UnRegisterNotification(AddAllRidigBodies, this, NOTIFY_FILE_POST_OPEN);
 }
 
 
@@ -163,9 +178,6 @@ void  PhysicsPluginObject::BeginEditParams (Interface *ip, IUtil *iu)
 	m_rigidBodyPaneHandle = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_NEWTON_BODY_PANE), NewtonRigidBodyInfoPane::DialogProc, _T("RigidBodies properties"), LPARAM (this));
 
 	SelectionSetChanged (ip, iu);
-
-
-
 }
 
 void  PhysicsPluginObject::EndEditParams (Interface *ip, IUtil *iu)
@@ -215,17 +227,43 @@ void PhysicsPluginObject::GetNodeList(dList<INode*>& list)
 	}
 }
 
-/*
-void  PhysicsPluginObject::SetStartupParam (MSTR param)
+
+void PhysicsPluginObject::SetStartupParam (MSTR param)
 {
 	_ASSERTE (0);
 }
 
-*/
-void PhysicsPluginObject::DeleteThis ()
+
+
+
+//Declare the callback function  
+void PhysicsPluginObject::RemoveAllRigidBodies(void* param, NotifyInfo* info)
 {
-	_ASSERTE (m_newton);
-	NewtonDestroy (m_newton);
+	// Get the nodes being deleted
+	PhysicsPluginObject* const me = (PhysicsPluginObject*)param;
+
+	dList<INode*> list;
+	me->GetNodeList (list);
+	for (dList<INode*>::dListNode* ptr = list.GetFirst(); ptr; ptr = ptr->GetNext()) {
+		INode* node = ptr->GetInfo();
+		me->RemoveRigidBodyFromNode(node);
+	}
 }
+
+void PhysicsPluginObject::AddAllRidigBodies(void* param, NotifyInfo* info)
+{
+	// Get the nodes being deleted
+	PhysicsPluginObject* const me = (PhysicsPluginObject*)param;
+
+	dList<INode*> list;
+	me->GetNodeList (list);
+	for (dList<INode*>::dListNode* ptr = list.GetFirst(); ptr; ptr = ptr->GetNext()) {
+		INode* node = ptr->GetInfo();
+		me->AddNodeToWorld(node);
+	}
+}
+
+
+
 
 

@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "NewtonRigidBodyControllers.h"
 
+/*
 #define NEWTON_POSITION_CONTROL_ID Class_ID(0x6e6c6a1b, 0x6c7d3fb9)
 #define NEWTON_ROTATION_CONTROL_ID Class_ID(0x30a55fdc, 0x422f5500)
 
@@ -308,5 +309,5 @@ void RigidBodyRotationControl::SetValue(TimeValue t, void *val, int commit, GetS
 		m_rotation = rotation;
 	}
 }
-
+*/
 

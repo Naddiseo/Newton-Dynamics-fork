@@ -67,8 +67,6 @@ class UpdateUndoRedo: public RestoreObj
 		return sizeof (*this);
 	}
 
-
-
 	TimeValue m_time;
 	INode* m_node;
 	Matrix3 m_matrix;
@@ -148,77 +146,81 @@ void NewtonRigidBodyInfoPane::Destroy(HWND hWnd)
 void NewtonRigidBodyInfoPane::AddNodeToWorld (INode* const node)
 {
 	AppDataChunk* const rigidBodyChunk = node->GetAppDataChunk(GetRigidBodyID(), node->SuperClassID(), 0); 
-	_ASSERTE (rigidBodyChunk);
+	if (rigidBodyChunk) {
+		RidBodyData* const bodyData = (RidBodyData*) rigidBodyChunk->data;
+		_ASSERTE (bodyData);
+		//_ASSERTE (!bodyData->m_body);
 
-	RidBodyData* const bodyData = (RidBodyData*) rigidBodyChunk->data;
-	_ASSERTE (bodyData);
-	_ASSERTE (!bodyData->m_body);
+		PhysicsPluginObject& me = *(PhysicsPluginObject*)this;
+		PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetControlDesc();
 
-	PhysicsPluginObject& me = *(PhysicsPluginObject*)this;
-	PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetControlDesc();
+		float scale = float (GetMasterScale(UNITS_METERS));
+		
+		ObjectState os (node->EvalWorldState(0)); 
 
-	float scale = float (GetMasterScale(UNITS_METERS));
-	
-	ObjectState os (node->EvalWorldState(0)); 
+		_ASSERTE (os.obj);
 
-	_ASSERTE (os.obj);
+		Box3 box;
+		os.obj->GetLocalBoundBox(0, node, NULL, box); 
 
-	Box3 box;
-	os.obj->GetLocalBoundBox(0, node, NULL, box); 
+		Point3 center (box.Center());
+		Point3 boxSize (box.Width() * 0.5f);
 
-	Point3 center (box.Center());
-	Point3 boxSize (box.Width() * 0.5f);
+		dMatrix GeoMatrix (GetMatrixFromMaxMatrix (node->GetObjectTM(0)));
+		dMatrix nodeMatrix (GetMatrixFromMaxMatrix (node->GetNodeTM(0)));
 
-	dMatrix offset (GetIdentityMatrix());
-	offset.m_posit.m_x = center.x * scale;
-	offset.m_posit.m_y = center.y * scale;
-	offset.m_posit.m_z = center.z * scale;
-	offset = plugin->m_systemMatrixInv * offset * plugin->m_systemMatrix;
+		dMatrix offset (GeoMatrix * nodeMatrix.Inverse4x4());
 
-	dVector size (plugin->m_systemMatrix.RotateVector(dVector(boxSize.x, boxSize.y, boxSize.z, 0.0f)));
-	size = size.Scale (scale);
+		offset.m_posit.m_x = center.x * scale;
+		offset.m_posit.m_y = center.y * scale;
+		offset.m_posit.m_z = center.z * scale;
+		offset = plugin->m_systemMatrixInv * offset * plugin->m_systemMatrix;
 
-	NewtonCollision* collision = NULL;
-	switch (bodyData->m_collisionShape) 
-	{
-		case m_box:
+		dVector size (plugin->m_systemMatrix.RotateVector(dVector(boxSize.x, boxSize.y, boxSize.z, 0.0f)));
+		size = size.Scale (scale);
+
+		NewtonCollision* collision = NULL;
+		switch (bodyData->m_collisionShape) 
 		{
-			collision = NewtonCreateBox(me.m_newton, size.m_x, size.m_y, size.m_z, 0, &offset[0][0]);
-			break;
+			case m_box:
+			{
+				collision = NewtonCreateBox(me.m_newton, size.m_x, size.m_y, size.m_z, 0, &offset[0][0]);
+				break;
+			}
+			case m_convexHull:
+			{
+				_ASSERTE (0);
+				break;
+			}
+				
+			default:;
+			{
+				_ASSERTE (0);
+			}
 		}
-		case m_convexHull:
-		{
-			_ASSERTE (0);
-			break;
-		}
-			
-		default:;
-		{
-			_ASSERTE (0);
-		}
+
+		
+		nodeMatrix = plugin->m_systemMatrixInv * nodeMatrix * plugin->m_systemMatrix;
+		nodeMatrix.m_posit = nodeMatrix.m_posit.Scale (scale);
+
+		NewtonBody* const rigidBody = NewtonCreateBody(me.m_newton, collision, &nodeMatrix[0][0]);
+		NewtonBodySetUserData(rigidBody, node);
+
+		dVector origin;
+		dVector inertia;
+		NewtonConvexCollisionCalculateInertialMatrix (collision, &inertia[0], &origin[0]);	
+
+		bodyData->m_Ixx = inertia.m_x;
+		bodyData->m_Iyy = inertia.m_y;
+		bodyData->m_Izz = inertia.m_z;
+		NewtonBodySetCentreOfMass(rigidBody, &origin[0]);
+		NewtonBodySetMassMatrix(rigidBody, bodyData->m_mass, bodyData->m_mass * inertia.m_x, bodyData->m_mass * inertia.m_y, bodyData->m_mass * inertia.m_z);
+
+		NewtonBodySetForceAndTorqueCallback(rigidBody, ApplyGravityForce);
+
+		bodyData->m_body = rigidBody;
+		NewtonReleaseCollision(me.m_newton, collision);
 	}
-
-	dMatrix matrix (GetMatrixFromMaxMatrix (node->GetObjectTM(0)));
-	matrix = plugin->m_systemMatrixInv * matrix * plugin->m_systemMatrix;
-	matrix.m_posit = matrix.m_posit.Scale (scale);
-
-	NewtonBody* const rigidBody = NewtonCreateBody(me.m_newton, collision, &matrix[0][0]);
-	NewtonBodySetUserData(rigidBody, node);
-
-	dVector origin;
-	dVector inertia;
-	NewtonConvexCollisionCalculateInertialMatrix (collision, &inertia[0], &origin[0]);	
-
-	bodyData->m_Ixx = inertia.m_x;
-	bodyData->m_Iyy = inertia.m_y;
-	bodyData->m_Izz = inertia.m_z;
-	NewtonBodySetCentreOfMass(rigidBody, &origin[0]);
-	NewtonBodySetMassMatrix(rigidBody, bodyData->m_mass, bodyData->m_mass * inertia.m_x, bodyData->m_mass * inertia.m_y, bodyData->m_mass * inertia.m_z);
-
-	NewtonBodySetForceAndTorqueCallback(rigidBody, ApplyGravityForce);
-
-	bodyData->m_body = rigidBody;
-	NewtonReleaseCollision(me.m_newton, collision);
 }
 
 
@@ -442,52 +444,59 @@ void NewtonRigidBodyInfoPane::SelectRigiBodies()
 	me.SelectionSetChanged (me.m_ip, me.m_iu);
 }
 
-
-void NewtonRigidBodyInfoPane::AttachRigiBody()
+void NewtonRigidBodyInfoPane::AttachRigidBodyToNode(INode* const node)
 {
-	RigidBodyPositionControlDesc& positionDesc = *(RigidBodyPositionControlDesc*)RigidBodyPositionControlDesc::GetControlDesc();
-	RigidBodyRotationControlDesc& rotationDesc = *(RigidBodyRotationControlDesc*)RigidBodyRotationControlDesc::GetControlDesc();
+	Object* const obj = node->GetObjOrWSMRef();
+	_ASSERTE (obj);
 
+	switch(obj->SuperClassID()) 
+	{
+		case GEOMOBJECT_CLASS_ID: 
+		{
+			AppDataChunk* const rigidBodyChunk = node->GetAppDataChunk(GetRigidBodyID(), node->SuperClassID(), 0); 
+			if (!rigidBodyChunk) {
+				RidBodyData* const rigidBody = (RidBodyData*) MAX_malloc (sizeof (RidBodyData));
+				memset (rigidBody, 0, sizeof (RidBodyData));
+
+				rigidBody->m_mass = m_massEdit->GetFloat();
+				rigidBody->m_collisionShape = m_curCollsionShape;
+
+				node->AddAppDataChunk(GetRigidBodyID(), node->SuperClassID(), 0, sizeof (RidBodyData), rigidBody);
+				AddNodeToWorld (node);
+			}
+			break;
+		}
+
+		default:;
+		{
+			_ASSERTE (0);
+		}
+	}
+}
+
+void NewtonRigidBodyInfoPane::AttachSelectedRigiBodies()
+{
 	PhysicsPluginObject& me = *(PhysicsPluginObject*)this;
 	for (dList<INode*>::dListNode* nodeSel = me.m_currentSelection.GetFirst(); nodeSel; nodeSel = nodeSel->GetNext()) {
 		INode* const node = nodeSel->GetInfo();
+		AttachRigidBodyToNode(node);
+	}
+	SelectionHasChanged();
+}
 
-		Object* const obj = node->GetObjOrWSMRef();
-		_ASSERTE (obj);
-
+void NewtonRigidBodyInfoPane::RemoveRigidBodyFromNode(INode* const node)
+{
+	Object* const obj = node->GetObjOrWSMRef();
+	if (obj) {
 		switch(obj->SuperClassID()) 
 		{
 			case GEOMOBJECT_CLASS_ID: 
 			{
 				AppDataChunk* const rigidBodyChunk = node->GetAppDataChunk(GetRigidBodyID(), node->SuperClassID(), 0); 
-				if (!rigidBodyChunk) {
-					RidBodyData* const rigidBody = (RidBodyData*) MAX_malloc (sizeof (RidBodyData));
-					memset (rigidBody, 0, sizeof (RidBodyData));
-
-					Matrix3 matrix (node->GetNodeTM (0));
-					Control* const control = node->GetTMController();
-					
-					Control* const posit = control->GetPositionController();
-					Control* const rotation = control->GetRotationController();
-
-					_ASSERTE (posit->ClassID() != positionDesc.ClassID());
-					_ASSERTE (rotation->ClassID() != rotationDesc.ClassID());
-
-					RigidBodyPositionControl* const newtonPosition = (RigidBodyPositionControl*)positionDesc.Create(posit->ClassID());
-					RigidBodyRotationControl* const newtonRotation = (RigidBodyRotationControl*)rotationDesc.Create(rotation->ClassID());
-
-					control->SetPositionController(newtonPosition);
-					control->SetRotationController(newtonRotation);
-					node->SetNodeTM(TimeValue(0.0f), matrix);
-
-					rigidBody->m_mass = m_massEdit->GetFloat();
-					rigidBody->m_collisionShape = m_curCollsionShape;
-					
-					node->AddAppDataChunk(GetRigidBodyID(), node->SuperClassID(), 0, sizeof (RidBodyData), rigidBody);
-					AddNodeToWorld (node);
+				if (rigidBodyChunk) {
+					RemoveNodeFromWorld(node);
+					node->RemoveAppDataChunk(GetRigidBodyID(), node->SuperClassID(), 0);
 				}
-
-				
 				break;
 			}
 
@@ -497,59 +506,14 @@ void NewtonRigidBodyInfoPane::AttachRigiBody()
 			}
 		}
 	}
-	SelectionHasChanged();
 }
 
-
-void NewtonRigidBodyInfoPane::DetachRigiBody()
+void NewtonRigidBodyInfoPane::DetachSelectedRigiBodies()
 {
-	RigidBodyPositionControlDesc& positionDesc = *(RigidBodyPositionControlDesc*)RigidBodyPositionControlDesc::GetControlDesc();
-	RigidBodyRotationControlDesc& rotationDesc = *(RigidBodyRotationControlDesc*)RigidBodyRotationControlDesc::GetControlDesc();
-
 	PhysicsPluginObject& me = *(PhysicsPluginObject*)this;
 	for (dList<INode*>::dListNode* nodeSel = me.m_currentSelection.GetFirst(); nodeSel; nodeSel = nodeSel->GetNext()) {
 		INode* const node = nodeSel->GetInfo();
-
-		Object* const obj = node->GetObjOrWSMRef();
-		_ASSERTE (obj);
-
-		switch(obj->SuperClassID()) 
-		{
-			case GEOMOBJECT_CLASS_ID: 
-			{
-				AppDataChunk* const rigidBodyChunk = node->GetAppDataChunk(GetRigidBodyID(), node->SuperClassID(), 0); 
-				if (rigidBodyChunk) {
-
-					RemoveNodeFromWorld(node);
-
-					node->RemoveAppDataChunk(GetRigidBodyID(), node->SuperClassID(), 0);
-			
-					Matrix3 matrix (node->GetNodeTM (0));
-					Control* const control = node->GetTMController();
-
-					RigidBodyPositionControl* const newtonPosition = (RigidBodyPositionControl*) control->GetPositionController();;
-					RigidBodyRotationControl* const newtonRotation = (RigidBodyRotationControl*) control->GetRotationController();
-
-					_ASSERTE (newtonPosition->ClassID() == positionDesc.ClassID());
-					_ASSERTE (newtonRotation->ClassID() == rotationDesc.ClassID());
-						
-					Control* const regularPositionController = (Control*) CreateInstance (CTRL_POSITION_CLASS_ID, newtonPosition->m_oldControlerID);
-					Control* const regularRotationController = (Control*) CreateInstance (CTRL_ROTATION_CLASS_ID, newtonRotation->m_oldControlerID);
-
-					control->SetPositionController(regularPositionController);
-					control->SetRotationController(regularRotationController);
-
-					node->SetNodeTM(TimeValue(0.0f), matrix);
-				}
-
-				break;
-			}
-
-			default:;
-			{
-				_ASSERTE (0);
-			}
-		}
+		RemoveRigidBodyFromNode(node);
 	}
 	SelectionHasChanged();
 }
@@ -606,13 +570,13 @@ INT_PTR CALLBACK NewtonRigidBodyInfoPane::DialogProc(HWND hWnd, UINT msg, WPARAM
 			{
 				case IDC_ATTACH_RIGIDBODY:
 				{
-					me.AttachRigiBody();										
+					me.AttachSelectedRigiBodies();										
 					break;
 				}
 
 				case IDC_DETACH_RIGIDBODY:
 				{
-					me.DetachRigiBody();										
+					me.DetachSelectedRigiBodies();										
 					break;
 				}
 

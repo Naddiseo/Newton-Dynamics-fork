@@ -59,7 +59,7 @@ __declspec( dllexport ) const TCHAR* LibDescription()
 //TODO: Must change this number when adding a new class
 __declspec( dllexport ) int LibNumberClasses()
 {
-	return 5;
+	return 3;
 }
 
 // This function returns the number of plug-in classes this DLL
@@ -70,8 +70,8 @@ __declspec( dllexport ) ClassDesc* LibClassDesc(int i)
 		case 0: return ImportAlchemediaDesc::GetControlDesc();
 		case 1: return ExportAlchemediaDesc::GetControlDesc();
 		case 2: return PhysicsPluginClassDesc::GetControlDesc();
-		case 3: return RigidBodyPositionControlDesc::GetControlDesc();
-		case 4: return RigidBodyRotationControlDesc::GetControlDesc();
+//		case 3: return RigidBodyPositionControlDesc::GetControlDesc();
+//		case 4: return RigidBodyRotationControlDesc::GetControlDesc();
 		default: return 0;
 	}
 }

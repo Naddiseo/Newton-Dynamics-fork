@@ -47,9 +47,13 @@ class NewtonRigidBodyInfoPane
 
 	void SelectionHasChanged();
 
-	void AttachRigiBody();
-	void DetachRigiBody();
 	void SelectRigiBodies();
+	void AttachSelectedRigiBodies();
+	void DetachSelectedRigiBodies();
+
+	void AttachRigidBodyToNode(INode* const node);
+	void RemoveRigidBodyFromNode(INode* const node);
+	
 	void SetCollisionData (HWND listControl, int shapeId, char* const label) const;
 
 	void SetSelectionMass (dFloat mass);

@@ -29,7 +29,6 @@
 NewtonWorldInfoPane::NewtonWorldInfoPane(void)
 	:m_hWnd (0)
 	,m_updateState(false)
-//	,m_animationFPS (60.0f)
 {
 }
 
@@ -186,13 +185,8 @@ void NewtonWorldInfoPane::Update()
 		NewtonUpdate(me.m_newton, timestep);
 	}
 	
-
 	me.SetTransforms (time);
 
-
 	me.m_ip->SetTime (time);  
-
-
-
 }
 

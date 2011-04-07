@@ -73,10 +73,12 @@ class PhysicsPluginObject
 
 	virtual void  DeleteThis (); 
 	virtual void  SelectionSetChanged (Interface *ip, IUtil *iu); 
-	//	virtual void  SetStartupParam (MSTR param); 
+	virtual void  SetStartupParam (MSTR param); 
 
 	void GetNodeList (dList<INode*>& list);
 
+	static void AddAllRidigBodies(void *param, NotifyInfo *info);
+	static void RemoveAllRigidBodies(void *param, NotifyInfo *info);
 
 	SClass_ID SuperClassID();
 	Class_ID ClassID();

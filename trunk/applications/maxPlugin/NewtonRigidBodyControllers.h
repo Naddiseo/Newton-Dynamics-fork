@@ -23,7 +23,7 @@
 #ifndef __NEWTON_RIGIDBODY_CONTROLLERS_H__
 #define __NEWTON_RIGIDBODY_CONTROLLERS_H__
 
-
+/*
 
 class RigidBodyPositionControlDesc: public ClassDesc2 
 {
@@ -101,7 +101,7 @@ protected:
 
 	friend class NewtonRigidBodyInfoPane;
 };
-
+*/
 
 
 #endif
