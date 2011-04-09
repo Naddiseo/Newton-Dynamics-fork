@@ -19,7 +19,10 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
+
 #include "Common.h"
+
+#if 0
 #include "PhysicsPluginDesc.h"
 
 #define PHYSICS_PLUGIN_CLASS_ID	Class_ID(0x6185a57, 0x3a1f2f69)
@@ -82,7 +85,7 @@ void PhysicsPluginClassDesc::ResetClassParams (BOOL fileReset)
 	ClassDesc2::ResetClassParams (fileReset);
 }
 
-ClassDesc* PhysicsPluginClassDesc::GetControlDesc()
+ClassDesc* PhysicsPluginClassDesc::GetDescriptor()
 { 
 	static PhysicsPluginClassDesc desc;
 	return &desc; 
@@ -164,12 +167,12 @@ void PhysicsPluginObject::DeleteThis ()
 
 SClass_ID PhysicsPluginObject::SuperClassID()
 {
-	return PhysicsPluginClassDesc::GetControlDesc()->SuperClassID();
+	return PhysicsPluginClassDesc::GetDescriptor()->SuperClassID();
 }
 
 Class_ID PhysicsPluginObject::ClassID()
 {
-	return PhysicsPluginClassDesc::GetControlDesc()->ClassID();
+	return PhysicsPluginClassDesc::GetDescriptor()->ClassID();
 }
 
 
@@ -295,6 +298,6 @@ void PhysicsPluginObject::OnCloneNode(void *param, NotifyInfo *info)
 		me->CloneRigidBody(origNode, cloneNode);
 	}
 }
-
+#endif
 
 

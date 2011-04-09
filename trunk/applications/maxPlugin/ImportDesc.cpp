@@ -67,7 +67,7 @@ HINSTANCE ImportAlchemediaDesc::HInstance()
 }
 
 
-ClassDesc* ImportAlchemediaDesc::GetControlDesc() 
+ClassDesc* ImportAlchemediaDesc::GetDescriptor() 
 {
 	static ImportAlchemediaDesc desc;
 	return &desc; 
@@ -83,8 +83,19 @@ AlchemediaMaxImport::AlchemediaMaxImport()
 
 AlchemediaMaxImport::~AlchemediaMaxImport() 
 {
-
 }
+
+
+SClass_ID AlchemediaMaxImport::SuperClassID()
+{
+	return ImportAlchemediaDesc::GetDescriptor()->SuperClassID(); 
+}
+
+Class_ID AlchemediaMaxImport::ClassID()
+{
+	return ImportAlchemediaDesc::GetDescriptor()->ClassID(); 
+}
+
 
 int AlchemediaMaxImport::ExtCount()
 {

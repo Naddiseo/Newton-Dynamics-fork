@@ -23,6 +23,7 @@
 #ifndef __NEWTON_RIGIDBODY_INFO_PANE_H__
 #define __NEWTON_RIGIDBODY_INFO_PANE_H__
 
+#if 0
 
 class RidBodyData;
 
@@ -74,10 +75,9 @@ class NewtonRigidBodyInfoPane
 	ICustEdit* m_massEdit;
 	ISpinnerControl* m_massSpinner;
 	CollisionShape m_curCollsionShape;
-
-	
-	
 };
+
+#endif
 
 
 #endif

@@ -20,14 +20,12 @@
 */
 
 #include "Common.h"
+#if 0
+
 #include "PhysicsPluginDesc.h"
 #include "NewtonRigidBodyInfoPane.h"
 
-
 #define RIGID_BODY_INFO_ID Class_ID(0x2dd440ce, 0x3a326f7c)
-
-
-
 
 
 class RidBodyData
@@ -153,7 +151,7 @@ void NewtonRigidBodyInfoPane::AddNodeToWorld (INode* const node)
 		//_ASSERTE (!bodyData->m_body);
 
 		PhysicsPluginObject& me = *(PhysicsPluginObject*)this;
-		PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetControlDesc();
+		PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetDescriptor();
 
 		float scale = float (GetMasterScale(UNITS_METERS));
 		
@@ -250,7 +248,7 @@ void NewtonRigidBodyInfoPane::SaveState ()
 	PhysicsPluginObject& me = *(PhysicsPluginObject*)this;
 
 	TimeValue time = me.m_ip->GetTime();
-	PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetControlDesc();
+	PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetDescriptor();
 	float scale = float (GetMasterScale(UNITS_METERS));
 
 	theHold.Begin();
@@ -331,7 +329,7 @@ void NewtonRigidBodyInfoPane::ApplyGravityForce (const NewtonBody* const body, d
 
 	NewtonBodyGetMassMatrix (body, &mass, &Ixx, &Iyy, &Izz);
 
-	PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetControlDesc();
+	PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetDescriptor();
 	dVector gravity (plugin->m_gravity.Scale (mass));
 	NewtonBodySetForce (body, &gravity.m_x);
 }
@@ -340,7 +338,7 @@ void NewtonRigidBodyInfoPane::ApplyGravityForce (const NewtonBody* const body, d
 void NewtonRigidBodyInfoPane::SetTransforms (TimeValue tick) const
 {
 	PhysicsPluginObject& me = *(PhysicsPluginObject*)this;
-	PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetControlDesc();
+	PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetDescriptor();
 
 	float scale = 1.0f / float (GetMasterScale(UNITS_METERS));	
 	for (NewtonBody* body = NewtonWorldGetFirstBody (me.m_newton); body; body = NewtonWorldGetNextBody(me.m_newton, body)) {
@@ -641,4 +639,4 @@ INT_PTR CALLBACK NewtonRigidBodyInfoPane::DialogProc(HWND hWnd, UINT msg, WPARAM
 	return TRUE;
 }
 
-
+#endif

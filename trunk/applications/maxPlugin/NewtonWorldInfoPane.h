@@ -23,7 +23,7 @@
 #ifndef __NEWTON_WORLD_INFO_PANE_H__
 #define __NEWTON_WORLD_INFO_PANE_H__
 
-
+#if 0
 class NewtonWorldInfoPane
 {
 	public:
@@ -44,6 +44,6 @@ class NewtonWorldInfoPane
 	ICustEdit* m_minFps;
 	ICustEdit* m_gravity[3];
 };
-
+#endif
 
 #endif

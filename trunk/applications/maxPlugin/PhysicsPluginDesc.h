@@ -23,6 +23,7 @@
 #ifndef __NEWTONWORLD_DESC_H__
 #define __NEWTONWORLD_DESC_H__
 
+#if 0
 #include "NewtonWorldInfoPane.h"
 #include "NewtonRigidBodyInfoPane.h"
 
@@ -47,7 +48,7 @@ class PhysicsPluginClassDesc: public ClassDesc2
 	virtual IOResult Save(ISave *isave);
 
 
-	static ClassDesc* GetControlDesc();
+	static ClassDesc* GetDescriptor();
 
 	PhysicsPluginObject* m_object;
 	float m_minFps;
@@ -93,12 +94,8 @@ class PhysicsPluginObject
 	HWND m_rigidBodyPaneHandle;
 	bool m_selectionActive;
 	dList<INode*> m_currentSelection;
-	
 };
-
-
-
-
+#endif
 
 #endif
 

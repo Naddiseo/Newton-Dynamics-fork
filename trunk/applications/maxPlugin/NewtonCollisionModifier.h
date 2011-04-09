@@ -20,14 +20,15 @@
 */
 
 
-#ifndef __EXPORT_DESC_H__
-#define __EXPORT_DESC_H__
+#ifndef __NEWTON_COLLISION_MODIFIER_H__
+#define __NEWTON_COLLISION_MODIFIER_H__
 
-#include "options.h"
+#if 0
 
-class ExportAlchemediaDesc : public ClassDesc2 
+class NewtonCollisionModifierDesc: public ClassDesc2 
 {
-public:
+	public:
+	NewtonCollisionModifierDesc ();
 	int IsPublic();
 	void* Create(BOOL loading = FALSE);
 	const TCHAR* ClassName();
@@ -36,38 +37,43 @@ public:
 	const TCHAR* Category();
 	const TCHAR* InternalName();
 	HINSTANCE HInstance();
+	void ResetClassParams (BOOL fileReset); 
+
 	static ClassDesc* GetDescriptor();
+
 };
 
 
-class AlchemediaMaxExport: public SceneExport 
+
+class NewtonCollisionModifier: public Modifier 
 {
 	public:
-	AlchemediaMaxExport();
-	~AlchemediaMaxExport();		
 
-	Class_ID ClassID();
+	//Constructor/Destructor
+	NewtonCollisionModifier();
+	~NewtonCollisionModifier();		
+
 	SClass_ID SuperClassID();
+	Class_ID ClassID();
 
-	int ExtCount();					
-	const TCHAR* Ext(int n);					
-	const TCHAR* LongDesc();					
-	const TCHAR* ShortDesc();				
-	const TCHAR* AuthorName();				
-	const TCHAR* CopyrightMessage();		
-	const TCHAR* OtherMessage1();			
-	const TCHAR* OtherMessage2();			
-	unsigned int Version();					
-	void ShowAbout(HWND hWnd);		
-	int DoExport(const TCHAR *name,ExpInterface *ei,Interface *i, BOOL suppressPrompts=FALSE, DWORD options=0);
 
-	static BOOL CALLBACK ExportDescOptionsDlgProc(HWND hWnd,UINT message,WPARAM wParam,LPARAM lParam);
+//	virtual Deformer& GetDeformer(TimeValue t,ModContext &mc,Matrix3& mat,Matrix3& invmat); 
 
-	static HWND hParams;
-	Options m_options;
+
+
+	virtual void BeginEditParams (IObjParam *ip, ULONG flags, Animatable *prev);
+	virtual void EndEditParams(IObjParam *ip, ULONG flags,Animatable *next);
+	virtual RefResult NotifyRefChanged(Interval changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message);
+	virtual CreateMouseCallBack* GetCreateMouseCallBack();
+	virtual ChannelMask ChannelsUsed();
+	virtual ChannelMask ChannelsChanged();
+	virtual void ModifyObject(TimeValue t, ModContext &mc, ObjectState* os, INode *node);
+	virtual Class_ID InputType();
+
+
+	static INT_PTR CALLBACK DialogProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 };
-
-
+#endif
 
 #endif
 

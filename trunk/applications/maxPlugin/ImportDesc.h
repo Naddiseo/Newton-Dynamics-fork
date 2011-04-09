@@ -35,7 +35,7 @@ class ImportAlchemediaDesc: public ClassDesc2
 	const TCHAR* Category();
 	const TCHAR* InternalName();
 	HINSTANCE HInstance();
-	static ClassDesc* GetControlDesc();
+	static ClassDesc* GetDescriptor();
 };
 
 
@@ -44,7 +44,12 @@ class AlchemediaMaxImport : public SceneImport
 {
 	public:
 
-	static HWND hParams;
+	//Constructor/Destructor
+	AlchemediaMaxImport();
+	~AlchemediaMaxImport();		
+
+	Class_ID ClassID();
+	SClass_ID SuperClassID();
 
 	int ExtCount();					// Number of extensions supported
 	const TCHAR* Ext(int n);					// Extension #n (i.e. "3DS")
@@ -58,9 +63,8 @@ class AlchemediaMaxImport : public SceneImport
 	void ShowAbout(HWND hWnd);		// Show DLL's "About..." box
 	int DoImport(const TCHAR *name,ImpInterface *i,Interface *gi, BOOL suppressPrompts=FALSE);	// Import file
 
-	//Constructor/Destructor
-	AlchemediaMaxImport();
-	~AlchemediaMaxImport();		
+
+	static HWND hParams;
 };
 
 

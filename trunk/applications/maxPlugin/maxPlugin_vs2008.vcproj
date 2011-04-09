@@ -288,6 +288,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\NewtonCollisionModifier.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\NewtonCollisionModifier.h"
+			>
+		</File>
+		<File
 			RelativePath=".\NewtonRigidBodyInfoPane.cpp"
 			>
 		</File>

@@ -20,6 +20,9 @@
 */
 
 #include "Common.h"
+#if 0
+
+
 #include "PhysicsPluginDesc.h"
 #include "NewtonWorldInfoPane.h"
 
@@ -51,7 +54,7 @@ void NewtonWorldInfoPane::Init(HWND hWnd)
 
 	m_minFps = GetICustEdit(minFps);
 
-	PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetControlDesc();
+	PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetDescriptor();
 	dVector gravity = plugin->m_systemMatrixInv.RotateVector(plugin->m_gravity.Scale (1.0f / float (GetMasterScale(UNITS_METERS))));
 
 	m_minFps->SetText(plugin->m_minFps);
@@ -131,7 +134,7 @@ INT_PTR CALLBACK NewtonWorldInfoPane::DialogProc(HWND hWnd, UINT msg, WPARAM wPa
 				case IDC_GRAVITY_Y:
 				case IDC_GRAVITY_Z:
 				{
-					PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetControlDesc();
+					PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetDescriptor();
 					dVector gravity (obj->m_gravity[0]->GetFloat(), obj->m_gravity[1]->GetFloat(), obj->m_gravity[2]->GetFloat(), 0.0f);
 					plugin->m_gravity = plugin->m_systemMatrix.RotateVector(gravity.Scale(float (GetMasterScale(UNITS_METERS))));
 					break;
@@ -174,7 +177,7 @@ void NewtonWorldInfoPane::Update()
 {
 	PhysicsPluginObject& me = *(PhysicsPluginObject *)this;
 
-	float fps = ((PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetControlDesc())->m_minFps;
+	float fps = ((PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetDescriptor())->m_minFps;
 
 	int ticks = GetTicksPerFrame();
 	Interval range (me.m_ip->GetAnimRange());
@@ -200,3 +203,4 @@ void NewtonWorldInfoPane::Update()
 	me.m_ip->SetTime (time);  
 }
 
+#endif

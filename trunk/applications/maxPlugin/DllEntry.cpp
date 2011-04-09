@@ -24,7 +24,7 @@
 #include "ImportDesc.h"
 #include "ExportDesc.h"
 #include "PhysicsPluginDesc.h"
-
+#include "NewtonCollisionModifier.h"
 
 HINSTANCE hInstance;
 int controlsInit = FALSE;
@@ -59,7 +59,7 @@ __declspec( dllexport ) const TCHAR* LibDescription()
 //TODO: Must change this number when adding a new class
 __declspec( dllexport ) int LibNumberClasses()
 {
-	return 3;
+	return 2;
 }
 
 // This function returns the number of plug-in classes this DLL
@@ -67,11 +67,10 @@ __declspec( dllexport ) ClassDesc* LibClassDesc(int i)
 {
 	switch(i) 
 	{
-		case 0: return ImportAlchemediaDesc::GetControlDesc();
-		case 1: return ExportAlchemediaDesc::GetControlDesc();
-		case 2: return PhysicsPluginClassDesc::GetControlDesc();
-//		case 3: return RigidBodyPositionControlDesc::GetControlDesc();
-//		case 4: return RigidBodyRotationControlDesc::GetControlDesc();
+		case 0: return ImportAlchemediaDesc::GetDescriptor();
+		case 1: return ExportAlchemediaDesc::GetDescriptor();
+//		case 2: return PhysicsPluginClassDesc::GetDescriptor();
+//		case 3: return NewtonCollisionModifierDesc::GetDescriptor();
 		default: return 0;
 	}
 }

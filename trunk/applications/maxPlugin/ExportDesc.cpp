@@ -69,7 +69,7 @@ HINSTANCE ExportAlchemediaDesc::HInstance()
 	return hInstance; 
 }			
 
-ClassDesc* ExportAlchemediaDesc::GetControlDesc() 
+ClassDesc* ExportAlchemediaDesc::GetDescriptor() 
 {
 	static ExportAlchemediaDesc desc;
 	return &desc;
@@ -182,6 +182,16 @@ int AlchemediaMaxExport::DoExport(const TCHAR *name,ExpInterface *ei,Interface *
 	m_options.Save();
 	return TRUE;
 
+}
+
+SClass_ID AlchemediaMaxExport::SuperClassID()
+{
+	return ExportAlchemediaDesc::GetDescriptor()->SuperClassID(); 
+}
+
+Class_ID AlchemediaMaxExport::ClassID()
+{
+	return ExportAlchemediaDesc::GetDescriptor()->ClassID(); 
 }
 
 
