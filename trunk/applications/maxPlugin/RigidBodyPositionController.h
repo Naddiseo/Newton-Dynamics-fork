@@ -37,8 +37,6 @@ class RigidBodyPositionControllerDesc: public ClassDesc2
 	static ClassDesc* GetDescriptor();
 };
 
-
-
 class RigidBodyPositionController: public Control, public RigidBodyData
 {
 	public:
@@ -64,8 +62,6 @@ class RigidBodyPositionController: public Control, public RigidBodyData
 
 	void AddRigidBody(INode* const myNode);
 	void RemoveRigidBody(INode* const myNode);
-
-//	friend class NewtonRigidBodyInfoPane;
 };
 
 

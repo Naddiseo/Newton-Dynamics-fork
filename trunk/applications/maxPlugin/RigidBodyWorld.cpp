@@ -163,6 +163,7 @@ RigidBodyPositionController* RigidBodyWorldDesc::GetRigidBodyControl(INode* cons
 
 void RigidBodyWorldDesc::OnPreCloneNode(void* param, NotifyInfo* info)
 {
+return;
 	RigidBodyWorldDesc* const me = (RigidBodyWorldDesc*) param;
 	const INodeTab& origNodes = *(INodeTab*) info->callParam;
 
@@ -201,7 +202,7 @@ void RigidBodyWorldDesc::OnPreCloneNode(void* param, NotifyInfo* info)
 
 void RigidBodyWorldDesc::OnPostCloneNode(void* param, NotifyInfo* info)
 {
-	RigidBodyWorldDesc* const me = (RigidBodyWorldDesc*) param;
+return;
 
 	struct CloneData
 	{ 
@@ -210,6 +211,7 @@ void RigidBodyWorldDesc::OnPostCloneNode(void* param, NotifyInfo* info)
 		CloneType cloneType;
 	} ;
 
+	RigidBodyWorldDesc* const me = (RigidBodyWorldDesc*) param;
 	CloneData* const data = (CloneData*)info->callParam;
 //	me->StopUpdates();
 	
@@ -357,7 +359,8 @@ void RigidBodyWorld::InitUI(HWND hWnd)
 	m_gravity[2] = GetICustEdit(gravity_z);
 
 
-	dVector gravity = desc->m_systemMatrixInv.RotateVector(desc->m_gravity.Scale (1.0f / float (GetMasterScale(UNITS_METERS))));
+	float scale = 1.0f / float (GetMasterScale(UNITS_METERS));
+	dVector gravity = desc->m_systemMatrixInv.RotateVector(desc->m_gravity.Scale (scale));
 
 	m_minFps->SetText(desc->m_minFps);
 	m_gravity[0]->SetText(gravity.m_x, 1);
