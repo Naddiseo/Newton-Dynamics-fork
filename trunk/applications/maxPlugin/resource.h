@@ -10,25 +10,26 @@
 #define IDD_EXPORT_DIALOG               102
 #define IDD_NEWTON_WORLD_PANE           103
 #define IDD_NEWTON_BODY_PANE            105
-#define IDC_UPDATE_WORLD                106
 #define IDC_EXPORT_MESH                 1001
 #define IDC_EXPORT_ANIMATION            1002
 #define IDC_EXPORT_SKELETON             1003
 #define IDC_EXPORT_MODEL                1004
 #define IDC_RIGID_BODY_MASS             1011
 #define IDC_RIGID_BODY_MASS_PINNER      1014
-#define IDC_ATTACH_RIGIDBODY            1015
-#define IDC_DETACH_RIGIDBODY            1016
-#define IDC_SELECT_RIGIDBODIES          1017
 #define IDC_RIGID_BODY_COLLISION        1021
 #define IDC_PREVIEW_WORLD               1026
-#define IDC_IDC_STEP_WORLD              1027
 #define IDC_STEP_WORLD                  1027
 #define IDC_GRAVITY_X                   1030
-#define IDC_GRAVITY_X2                  1031
 #define IDC_MINUMIN_SIMULATION_RATE     1031
 #define IDC_GRAVITY_Y                   1033
+#define IDC_HIDE_GIZMO                  1033
 #define IDC_GRAVITY_Z                   1034
+#define IDC_DELETE_RIGIDBODY            1035
+#define IDC_MAKE_RIGIDBODY              1036
+#define IDC_HIDE_GIZMOS                 1037
+#define IDC_SHOW_GIZMOS                 1038
+#define IDC_REMOVE_ALL                  1039
+#define IDC_SELECT_ALL                  1040
 
 // Next default values for new objects
 // 
@@ -36,7 +37,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        107
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1031
+#define _APS_NEXT_CONTROL_VALUE         1034
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

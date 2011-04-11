@@ -23,8 +23,10 @@
 
 #include "ImportDesc.h"
 #include "ExportDesc.h"
-#include "PhysicsPluginDesc.h"
-#include "NewtonCollisionModifier.h"
+#include "RigidBodyWorld.h"
+#include "RigidBodyPositionController.h"
+#include "RigidBodyRotationController.h"
+
 
 HINSTANCE hInstance;
 int controlsInit = FALSE;
@@ -41,7 +43,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID lpvReserved)
 
 	if (!controlsInit) {
 		controlsInit = TRUE;
-//		InitCustomControls(hInstance);	// Initialize MAX's custom controls
 		InitCommonControls();			// Initialize Win95 controls
 	}
 			
@@ -59,7 +60,7 @@ __declspec( dllexport ) const TCHAR* LibDescription()
 //TODO: Must change this number when adding a new class
 __declspec( dllexport ) int LibNumberClasses()
 {
-	return 2;
+	return 5;
 }
 
 // This function returns the number of plug-in classes this DLL
@@ -67,10 +68,11 @@ __declspec( dllexport ) ClassDesc* LibClassDesc(int i)
 {
 	switch(i) 
 	{
-		case 0: return ImportAlchemediaDesc::GetDescriptor();
-		case 1: return ExportAlchemediaDesc::GetDescriptor();
-//		case 2: return PhysicsPluginClassDesc::GetDescriptor();
-//		case 3: return NewtonCollisionModifierDesc::GetDescriptor();
+		case 0: return RigidBodyWorldDesc::GetDescriptor();
+		case 1: return ImportAlchemediaDesc::GetDescriptor();
+		case 2: return ExportAlchemediaDesc::GetDescriptor();
+		case 3: return RigidBodyPositionControllerDesc::GetDescriptor();
+		case 4: return RigidBodyRotationControllerDesc::GetDescriptor();
 		default: return 0;
 	}
 }

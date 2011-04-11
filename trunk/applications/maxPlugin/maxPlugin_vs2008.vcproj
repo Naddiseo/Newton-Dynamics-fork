@@ -288,30 +288,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\NewtonCollisionModifier.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\NewtonCollisionModifier.h"
-			>
-		</File>
-		<File
-			RelativePath=".\NewtonRigidBodyInfoPane.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\NewtonRigidBodyInfoPane.h"
-			>
-		</File>
-		<File
-			RelativePath=".\NewtonWorldInfoPane.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\NewtonWorldInfoPane.h"
-			>
-		</File>
-		<File
 			RelativePath=".\options.cpp"
 			>
 		</File>
@@ -320,15 +296,31 @@
 			>
 		</File>
 		<File
-			RelativePath=".\PhysicsPluginDesc.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\PhysicsPluginDesc.h"
-			>
-		</File>
-		<File
 			RelativePath=".\resource.h"
+			>
+		</File>
+		<File
+			RelativePath=".\RigidBodyPositionController.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\RigidBodyPositionController.h"
+			>
+		</File>
+		<File
+			RelativePath=".\RigidBodyRotationController.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\RigidBodyRotationController.h"
+			>
+		</File>
+		<File
+			RelativePath=".\RigidBodyWorld.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\RigidBodyWorld.h"
 			>
 		</File>
 	</Files>

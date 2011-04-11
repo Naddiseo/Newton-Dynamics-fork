@@ -238,7 +238,7 @@ dVector dMatrix::UntransformVector (const dVector &v) const
 }
 
 
-void dMatrix::TransformTriplex (dFloat* const dst, int dstStrideInBytes, dFloat* const src, int srcStrideInBytes, int count) const
+void dMatrix::TransformTriplex (dFloat* const dst, int dstStrideInBytes, const dFloat* const src, int srcStrideInBytes, int count) const
 {
 	dstStrideInBytes /= sizeof (dFloat);
 	srcStrideInBytes /= sizeof (dFloat);
@@ -252,7 +252,7 @@ void dMatrix::TransformTriplex (dFloat* const dst, int dstStrideInBytes, dFloat*
 	}
 }
 
-void dMatrix::TransformTriplex (dFloat64* const dst, int dstStrideInBytes, dFloat64* const src, int srcStrideInBytes, int count) const
+void dMatrix::TransformTriplex (dFloat64* const dst, int dstStrideInBytes, const dFloat64* const src, int srcStrideInBytes, int count) const
 {
 	dstStrideInBytes /= sizeof (dFloat64);
 	srcStrideInBytes /= sizeof (dFloat64);
