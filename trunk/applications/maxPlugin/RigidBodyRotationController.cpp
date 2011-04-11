@@ -70,9 +70,6 @@ ClassDesc* RigidBodyRotationControllerDesc::GetDescriptor()
 }
 
 
-
-
-
 RigidBodyRotationController::RigidBodyRotationController(Class_ID oldID)
 	:Control()
 	,m_rotation ()

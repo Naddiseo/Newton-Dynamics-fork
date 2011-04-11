@@ -39,9 +39,6 @@ class RigidBodyRotationControllerDesc: public ClassDesc2
 	static ClassDesc* GetDescriptor();
 };
 
-
-
-
 class RigidBodyRotationController: public Control
 {
 	public:
@@ -61,8 +58,6 @@ class RigidBodyRotationController: public Control
 	Quat m_rotation;
 	Quat m_baseRotation;
 	Class_ID m_oldControlerID;
-
-//	friend class NewtonRigidBodyInfoPane;
 };
 
 
