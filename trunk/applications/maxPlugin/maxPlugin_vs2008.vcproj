@@ -316,6 +316,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\RigidBodyUIPane.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\RigidBodyUIPane.h"
+			>
+		</File>
+		<File
 			RelativePath=".\RigidBodyWorld.cpp"
 			>
 		</File>

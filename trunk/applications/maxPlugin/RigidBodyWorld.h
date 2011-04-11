@@ -23,6 +23,7 @@
 #ifndef __RIGIDBODID_WORLD_DESC_H__
 #define __RIGIDBODID_WORLD_DESC_H__
 
+#include "RigidBodyUIPane.h"
 
 class RigidBodyPositionController;
 
@@ -82,9 +83,10 @@ class RigidBodyWorldDesc: public ClassDesc2
 	virtual BOOL NeedsToSave();
 	virtual IOResult Load(ILoad *iload);
 	virtual IOResult Save(ISave *isave);
+	
 
-	void AttachRigiBodyController (INode* const node, bool createBody);
-	void DetachRigiBodyController (INode* const node, bool deleteBody);
+//	void AttachRigiBodyController (INode* const node, bool createBody);
+//	void DetachRigiBodyController (INode* const node, bool deleteBody);
 
 	
 	RigidBodyPositionController* GetRigidBodyControl(INode* const node) const;
@@ -93,8 +95,7 @@ class RigidBodyWorldDesc: public ClassDesc2
 	static void OnPreCloneNode(void* param, NotifyInfo* info);
 	static void OnPostCloneNode(void* param, NotifyInfo* info);
 
-//	RigidBodyWorld* m_object;
-//	float m_minFps;
+	float m_minFps;
 	dVector m_gravity;
 	dMatrix m_systemMatrix;
 	dMatrix m_systemMatrixInv;
@@ -103,47 +104,41 @@ class RigidBodyWorldDesc: public ClassDesc2
 };
 
 
-
-class RigidBodyWorld: public UtilityObj
-//	,public NewtonWorldInfoPane
-//	,public NewtonRigidBodyInfoPane
+class RigidBodyWorld: public UtilityObj, public RigidBodyUIPane
 {
 	public:
 	RigidBodyWorld();
 	~RigidBodyWorld();		
 
+	SClass_ID SuperClassID();
+	Class_ID ClassID();
+
+	void InitUI(HWND hWnd);
+	void DestroyUI(HWND hWnd);
+
+
 	virtual void DeleteThis (); 
 
-	virtual void  BeginEditParams (Interface* ip, IUtil* iu); 
-	virtual void  EndEditParams (Interface* ip, IUtil* iu); 
+	virtual void BeginEditParams (Interface* ip, IUtil* iu); 
+	virtual void EndEditParams (Interface* ip, IUtil* iu); 
+	virtual void SelectionSetChanged (Interface *ip, IUtil *iu); 
 
-	static INT_PTR CALLBACK NetwonBodyUIProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-	static INT_PTR CALLBACK NetwonWorldUIProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	static INT_PTR CALLBACK Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	
 
 	void UpdateViewPorts ();
-	void MakeRigidBodies ();
-	void RemoveRigidBodies ();
+
+
 
 
 
 
 /*
-
-	
-	virtual void  SelectionSetChanged (Interface *ip, IUtil *iu); 
-	virtual void  SetStartupParam (MSTR param); 
-
+	virtual void SelectionSetChanged (Interface *ip, IUtil *iu); 
+	virtual void SetStartupParam (MSTR param); 
 	void GetNodeList (dList<INode*>& list);
-
-	
 	static void OnPostLoadScene(void *param, NotifyInfo *info);
 	static void OnPreLoadScene(void *param, NotifyInfo *info);
-
-	SClass_ID SuperClassID();
-	Class_ID ClassID();
-
-
 	IUtil* m_iu;
 	Interface *m_ip;
 	NewtonWorld* m_newton;
@@ -152,8 +147,17 @@ class RigidBodyWorld: public UtilityObj
 	bool m_selectionActive;
 	dList<INode*> m_currentSelection;
 */
+
+	void AttachRigiBodyController (INode* const node);
+	void DetachRigiBodyController (INode* const node);
+
+	
+	bool m_selectionChange;
 	HWND m_newtonBodyUI;
 	HWND m_newtonWorldUI;
+
+	ICustEdit* m_minFps;
+	ICustEdit* m_gravity[3];
 	
 };
 

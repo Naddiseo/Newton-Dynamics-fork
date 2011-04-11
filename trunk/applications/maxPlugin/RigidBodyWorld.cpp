@@ -32,22 +32,30 @@
 
 RigidBodyWorldDesc::RigidBodyWorldDesc ()
 	:ClassDesc2()
-//	,m_minFps (120.0f)
+	,m_minFps (120.0f)
 	,m_gravity(0.0f, -9.8f, 0.0f, 0.0f)
 	,m_systemMatrix (dVector (0.0f, 0.0f, 1.0f, 0.0f), dVector (1.0f, 0.0f, 0.0f, 0.0f), dVector (0.0f, 1.0f, 0.0f, 0.0f), dVector (0.0f, 0.0f, 0.0f, 1.0f))
 	,m_systemMatrixInv (m_systemMatrix.Inverse())
 {
-	m_newton = NewtonCreate();
-
-
 	RegisterNotification(OnPreCloneNode, this, NOTIFY_PRE_NODES_CLONED);
 	RegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
+
+//	RegisterNotification(OnPreLoadScene, this, NOTIFY_FILE_PRE_OPEN);
+//	RegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
+
+	m_newton = NewtonCreate();
 }
 
 RigidBodyWorldDesc::~RigidBodyWorldDesc ()
 {
 	_ASSERTE (m_newton);
 	NewtonDestroy (m_newton);
+
+	UnRegisterNotification(OnPreCloneNode, this, NOTIFY_PRE_NODES_CLONED);
+	UnRegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
+
+//	UnRegisterNotification(OnPreLoadScene, this, NOTIFY_FILE_PRE_OPEN);
+//	UnRegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
 }
 
 int RigidBodyWorldDesc::IsPublic() 
@@ -115,14 +123,12 @@ IOResult RigidBodyWorldDesc::Load(ILoad* iload)
 {
 	IOResult ret = ClassDesc2::Load(iload);
 
-	_ASSERTE (0);
-/*
 	ULONG retVal;
 	iload->OpenChunk();
 	iload->Read(&m_gravity, sizeof (m_gravity), &retVal);
 	iload->Read(&m_minFps, sizeof (m_minFps), &retVal);
 	iload->CloseChunk();
-*/
+
 	return ret;
 }
 
@@ -130,14 +136,12 @@ IOResult RigidBodyWorldDesc::Save(ISave* isave)
 {
 	IOResult ret = ClassDesc2::Save(isave);
 
-	_ASSERTE (0);
-/*
 	ULONG retVal;
 	isave->BeginChunk(USHORT (ClassID().PartB()));
 	isave->Write(&m_gravity, sizeof (m_gravity), &retVal);
 	isave->Write(&m_minFps, sizeof (m_minFps), &retVal);
 	isave->EndChunk();
-*/
+
 	return ret;
 }
 
@@ -157,66 +161,10 @@ RigidBodyPositionController* RigidBodyWorldDesc::GetRigidBodyControl(INode* cons
 
 
 
-void RigidBodyWorldDesc::AttachRigiBodyController (INode* const node, bool createBody)
-{
-	Control* const control = node->GetTMController();
-
-	RigidBodyPositionControllerDesc& rigidBodyPositionControllerDesc = *(RigidBodyPositionControllerDesc*)RigidBodyPositionControllerDesc::GetDescriptor();
-	RigidBodyRotationControllerDesc& rigidBodyRotationControllerDesc = *(RigidBodyRotationControllerDesc*)RigidBodyRotationControllerDesc::GetDescriptor();
-
-	Control* const positController = control->GetPositionController();
-	Control* const rotationController = control->GetRotationController();
-	_ASSERTE (positController);
-	_ASSERTE (rotationController);
-
-	if (positController->ClassID() != rigidBodyPositionControllerDesc.ClassID()) {
-		Matrix3 matrix (node->GetNodeTM (GetCOREInterface()->GetTime()));		
-
-		RigidBodyPositionController* const rigidBodyPositionController = (RigidBodyPositionController*) rigidBodyPositionControllerDesc.Create(positController->ClassID());
-		RigidBodyRotationController* const rigidBodyRotationController = (RigidBodyRotationController*) rigidBodyRotationControllerDesc.Create(rotationController->ClassID());
-
-		control->SetPositionController(rigidBodyPositionController);
-		control->SetRotationController(rigidBodyRotationController);
-
-		node->SetNodeTM(GetCOREInterface()->GetTime(), matrix);
-
-		if (createBody) {
-			rigidBodyPositionController->AddRigidBody(node);
-		}
-	}
-}
-
-
-void RigidBodyWorldDesc::DetachRigiBodyController (INode* const node, bool deleteBody)
-{
-	Control* const control = node->GetTMController();
-
-	RigidBodyPositionControllerDesc& rigidBodyPositionControllerDesc = *(RigidBodyPositionControllerDesc*)RigidBodyPositionControllerDesc::GetDescriptor();
-	RigidBodyRotationControllerDesc& rigidBodyRotationControllerDesc = *(RigidBodyRotationControllerDesc*)RigidBodyRotationControllerDesc::GetDescriptor();
-
-	RigidBodyPositionController* const positController = (RigidBodyPositionController*) control->GetPositionController();
-	RigidBodyRotationController* const rotationController = (RigidBodyRotationController*) control->GetRotationController();
-	_ASSERTE (positController);
-	_ASSERTE (rotationController);
-	if (positController->ClassID() == rigidBodyPositionControllerDesc.ClassID()) {
-		if (deleteBody) {
-			positController->RemoveRigidBody(node);
-		}
-
-		Matrix3 matrix (node->GetNodeTM (GetCOREInterface()->GetTime()));		
-
-		Control* const regularPositionController = (Control*) CreateInstance (CTRL_POSITION_CLASS_ID, positController->m_oldControlerID);
-		Control* const regularRotationController = (Control*) CreateInstance (CTRL_ROTATION_CLASS_ID, rotationController->m_oldControlerID);
-
-		control->SetPositionController(regularPositionController);
-		control->SetRotationController(regularRotationController);
-
-		node->SetNodeTM(GetCOREInterface()->GetTime(), matrix);
-	}
-}
 
 void RigidBodyWorldDesc::OnPreCloneNode(void* param, NotifyInfo* info)
 {
+/*
 	RigidBodyWorldDesc* const me = (RigidBodyWorldDesc*) param;
 	const INodeTab& origNodes = *(INodeTab*) info->callParam;
 
@@ -243,10 +191,12 @@ void RigidBodyWorldDesc::OnPreCloneNode(void* param, NotifyInfo* info)
 			}
 		}
 	}
+*/
 }
 
 void RigidBodyWorldDesc::OnPostCloneNode(void* param, NotifyInfo* info)
 {
+/*
 	RigidBodyWorldDesc* const me = (RigidBodyWorldDesc*) param;
 
 	struct CloneData
@@ -339,6 +289,7 @@ void RigidBodyWorldDesc::OnPostCloneNode(void* param, NotifyInfo* info)
 	}
 
 	me->m_savedCloneList.RemoveAll();
+*/
 }
 
 
@@ -348,49 +299,70 @@ void RigidBodyWorldDesc::OnPostCloneNode(void* param, NotifyInfo* info)
 
 RigidBodyWorld::RigidBodyWorld()
 	:UtilityObj()
-//	,NewtonWorldInfoPane()
-//	,NewtonRigidBodyInfoPane()
-//	,m_iu (NULL)
-//	,m_ip (NULL)
-//	,m_newton(NULL)
-//	,m_worldPaneHandle(0)
-//	,m_rigidBodyPaneHandle(0)
-//	,m_selectionActive(true)
-//	,m_currentSelection()
+	,m_selectionChange(true)
+	,m_newtonBodyUI(NULL)
+	,m_newtonWorldUI(NULL)
 {
-//	_ASSERTE (!m_newton);
-//	m_newton = NewtonCreate();
-
-	// Register the callback
-//	RegisterNotification(OnCloneNode, this, NOTIFY_POST_NODES_CLONED);
-//	RegisterNotification(OnPreLoadScene, this, NOTIFY_FILE_PRE_OPEN);
-//	RegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
 }
 
 RigidBodyWorld::~RigidBodyWorld()
 {
 }
 
+SClass_ID RigidBodyWorld::SuperClassID()
+{
+	return RigidBodyWorldDesc::GetDescriptor()->SuperClassID();
+}
+
+Class_ID RigidBodyWorld::ClassID()
+{
+	return RigidBodyWorldDesc::GetDescriptor()->ClassID();
+}
+
 
 void RigidBodyWorld::DeleteThis ()
 {
-//	_ASSERTE (m_newton);
-//	NewtonDestroy (m_newton);
-
-	// When done, unregister the callback
-//	UnRegisterNotification(OnCloneNode, this, NOTIFY_POST_NODES_CLONED);
-//	UnRegisterNotification(OnPreLoadScene, this, NOTIFY_FILE_PRE_OPEN);
-//	UnRegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
 }
 
+
+void RigidBodyWorld::InitUI(HWND hWnd)
+{
+	RigidBodyWorldDesc* const desc = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+
+	HWND minFps = GetDlgItem(hWnd, IDC_MINUMIN_SIMULATION_RATE);
+	HWND gravity_x = GetDlgItem(hWnd, IDC_GRAVITY_X);
+	HWND gravity_y = GetDlgItem(hWnd, IDC_GRAVITY_Y);
+	HWND gravity_z = GetDlgItem(hWnd, IDC_GRAVITY_Z);
+
+	m_minFps = GetICustEdit(minFps);
+	m_gravity[0] = GetICustEdit(gravity_x);
+	m_gravity[1] = GetICustEdit(gravity_y);
+	m_gravity[2] = GetICustEdit(gravity_z);
+
+
+	dVector gravity = desc->m_systemMatrixInv.RotateVector(desc->m_gravity.Scale (1.0f / float (GetMasterScale(UNITS_METERS))));
+
+	m_minFps->SetText(desc->m_minFps);
+	m_gravity[0]->SetText(gravity.m_x, 1);
+	m_gravity[1]->SetText(gravity.m_y, 1);
+	m_gravity[2]->SetText(gravity.m_z, 1);
+}
+
+void RigidBodyWorld::DestroyUI(HWND hWnd)
+{
+	ReleaseICustEdit (m_minFps);
+	ReleaseICustEdit (m_gravity[0]);
+	ReleaseICustEdit (m_gravity[1]);
+	ReleaseICustEdit (m_gravity[2]);
+}
 
 
 void RigidBodyWorld::BeginEditParams (Interface *ip, IUtil *iu)
 {
 	_ASSERTE (ip == GetCOREInterface());
-	m_newtonWorldUI = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_NEWTON_WORLD_PANE), NetwonWorldUIProc, _T("Newton World"), LPARAM (this));
-	m_newtonBodyUI = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_NEWTON_BODY_PANE), NetwonBodyUIProc, _T("RigidBodies properties"), LPARAM (this));
-//	SelectionSetChanged (ip, iu);
+	m_newtonWorldUI = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_NEWTON_WORLD_PANE), RigidBodyWorld::Proc, _T("Newton World"), LPARAM (this));
+	m_newtonBodyUI = ip->AddRollupPage(hInstance, MAKEINTRESOURCE(IDD_NEWTON_BODY_PANE), RigidBodyUIPane::Proc, _T("RigidBodies properties"), LPARAM (this));
+	SelectionSetChanged (ip, iu);
 }
 
 void RigidBodyWorld::EndEditParams (Interface *ip, IUtil *iu)
@@ -403,7 +375,7 @@ void RigidBodyWorld::EndEditParams (Interface *ip, IUtil *iu)
 
 
 
-INT_PTR CALLBACK RigidBodyWorld::NetwonBodyUIProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	RigidBodyWorld* const world = (RigidBodyWorld *)GetWindowLong (hWnd, GWL_USERDATA);
 	RigidBodyWorldDesc* const desc = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
@@ -414,129 +386,29 @@ INT_PTR CALLBACK RigidBodyWorld::NetwonBodyUIProc(HWND hWnd, UINT msg, WPARAM wP
 		{
 			RigidBodyWorld* const world = (RigidBodyWorld *)lParam;
 			SetWindowLong(hWnd, GWL_USERDATA, (LONG)world);
-			//			obj->NewtonWorldInfoPane::Init(hWnd);
+			world->RigidBodyWorld::InitUI(hWnd);
 			break;
 		}
-		/*
+
 		case WM_DESTROY:
 		{
-		//			obj->NewtonWorldInfoPane::Destroy(hWnd);
-		break;
-		}
-
-		case WM_ENABLE:
-		{
-		EnableWindow(obj->m_worldPaneHandle, (BOOL) wParam);
-		break;
-		}
-
-		case WM_TIMER:
-		{
-		obj->Update();
-		break;
-		}
-		*/
-
-		case WM_COMMAND:
-		{
-			switch (LOWORD(wParam)) 
-			{
-				case IDC_HIDE_GIZMO:
-				{
-					Interface* const ip = GetCOREInterface();
-					int selectionCount = ip->GetSelNodeCount();
-					for (int i = 0; i < selectionCount; i ++) {
-						INode* const node = ip->GetSelNode(i);
-						RigidBodyPositionController* const bodyInfo = desc->GetRigidBodyControl(node);
-						if (bodyInfo) {
-							bodyInfo->m_hideGizmos = (IsDlgButtonChecked(hWnd, IDC_HIDE_GIZMO) == BST_CHECKED) ? TRUE : FALSE;
-						}
-					}
-
-					world->UpdateViewPorts();
-					break;
-				}
-/*
-				case IDC_DELETE_RIGIDBODY:
-				{
-					world->RemoveRigidBodies ();
-					break;
-				}
-
-				
-				case IDC_PREVIEW_WORLD:
-				{
-				if (IsDlgButtonChecked(hWnd, IDC_PREVIEW_WORLD) == BST_CHECKED) {
-				obj->StartUpdates();
-				} else {
-				obj->StopUpdates();
-				}
-				break;
-				}
-
-				case IDC_STEP_WORLD:
-				{
-				if (!obj->m_updateState) {
-				obj->SaveState ();
-				obj->Update();
-				}
-				break;
-				}
-
-				case IDC_GRAVITY_X:
-				case IDC_GRAVITY_Y:
-				case IDC_GRAVITY_Z:
-				{
-				PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetDescriptor();
-				dVector gravity (obj->m_gravity[0]->GetFloat(), obj->m_gravity[1]->GetFloat(), obj->m_gravity[2]->GetFloat(), 0.0f);
-				plugin->m_gravity = plugin->m_systemMatrix.RotateVector(gravity.Scale(float (GetMasterScale(UNITS_METERS))));
-				break;
-				}
-				*/
-			}
-
-			break;
-		}
-
-		default:
-		return FALSE;
-	}
-	return TRUE;
-}
-
-
-INT_PTR CALLBACK RigidBodyWorld::NetwonWorldUIProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-	RigidBodyWorld* const world = (RigidBodyWorld *)GetWindowLong (hWnd, GWL_USERDATA);
-	RigidBodyWorldDesc* const desc = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
-
-	switch (msg) 
-	{
-		case WM_INITDIALOG:
-		{
-			RigidBodyWorld* const world = (RigidBodyWorld *)lParam;
-			SetWindowLong(hWnd, GWL_USERDATA, (LONG)world);
-			break;
-		}
-/*
-		case WM_DESTROY:
-		{
-//			obj->NewtonWorldInfoPane::Destroy(hWnd);
+			world->RigidBodyWorld::DestroyUI(hWnd);
 			break;
 		}
 
 		case WM_ENABLE:
 		{
-			EnableWindow(obj->m_worldPaneHandle, (BOOL) wParam);
+			//EnableWindow(obj->m_worldPaneHandle, (BOOL) wParam);
 			break;
 		}
 
 		case WM_TIMER:
 		{
-			obj->Update();
+			_ASSERTE (0);
+			//obj->Update();
 			break;
 		}
-*/
+
 
 		case WM_COMMAND:
 		{
@@ -544,13 +416,32 @@ INT_PTR CALLBACK RigidBodyWorld::NetwonWorldUIProc(HWND hWnd, UINT msg, WPARAM w
 			{
 				case IDC_MAKE_RIGIDBODY:
 				{
-					world->MakeRigidBodies ();
+					Interface* const ip = GetCOREInterface();
+					int selectionCount = ip->GetSelNodeCount();
+					for (int i = 0; i < selectionCount; i ++) {
+						INode* const node = ip->GetSelNode(i);
+						Object* const obj = node->GetObjOrWSMRef();
+						if (obj) {
+							world->AttachRigiBodyController (node);
+						}
+					}
+					world->UpdateViewPorts();
 					break;
 				}
 
 				case IDC_DELETE_RIGIDBODY:
 				{
-					world->RemoveRigidBodies ();
+					Interface* const ip = GetCOREInterface();
+					int selectionCount = ip->GetSelNodeCount();
+					for (int i = 0; i < selectionCount; i ++) {
+						INode* const node = ip->GetSelNode(i);
+						RigidBodyPositionController* const bodyInfo = (RigidBodyPositionController*)desc->GetRigidBodyControl(node);
+						if (bodyInfo) {
+							world->DetachRigiBodyController (node);
+						}
+					}
+					world->UpdateViewPorts ();
+
 					break;
 				}
 
@@ -580,12 +471,14 @@ INT_PTR CALLBACK RigidBodyWorld::NetwonWorldUIProc(HWND hWnd, UINT msg, WPARAM w
 
 				case IDC_SELECT_ALL:
 				{
+					world->m_selectionChange = false;
 					Interface* const ip = GetCOREInterface();
 					ip->ClearNodeSelection(FALSE);
 					for (NewtonBody* body = NewtonWorldGetFirstBody(desc->m_newton); body; body = NewtonWorldGetNextBody(desc->m_newton, body)) {
 						INode* const node = (INode*)NewtonBodyGetUserData(body);
 						ip->SelectNode(node, 0); 
 					}
+					world->m_selectionChange = true;
 					world->UpdateViewPorts();
 					break;
 				}
@@ -598,12 +491,29 @@ INT_PTR CALLBACK RigidBodyWorld::NetwonWorldUIProc(HWND hWnd, UINT msg, WPARAM w
 					for (NewtonBody* body = NewtonWorldGetFirstBody(desc->m_newton); body; ) {
 						INode* const node = (INode*)NewtonBodyGetUserData(body);
 						body = NewtonWorldGetNextBody(desc->m_newton, body);
-						desc->DetachRigiBodyController (node, true);
+						world->DetachRigiBodyController (node);
 					}
 					world->UpdateViewPorts();
 					break;
 				}
 
+				case IDC_MINUMIN_SIMULATION_RATE:
+				{
+					desc->m_minFps = world->m_minFps->GetFloat();
+					break;
+				}
+
+				case IDC_GRAVITY_X:
+				case IDC_GRAVITY_Y:
+				case IDC_GRAVITY_Z:
+				{
+					dVector gravity (world->m_gravity[0]->GetFloat(), world->m_gravity[1]->GetFloat(), world->m_gravity[2]->GetFloat(), 0.0f);
+					//world->m_gravity[0]->SetText(gravity.m_x, 1);
+					//world->m_gravity[1]->SetText(gravity.m_y, 1);
+					//world->m_gravity[2]->SetText(gravity.m_z, 1);
+					desc->m_gravity = desc->m_systemMatrix.RotateVector(gravity.Scale(float (GetMasterScale(UNITS_METERS))));
+					break;
+				}
 
 /*
 				case IDC_PREVIEW_WORLD:
@@ -625,15 +535,6 @@ INT_PTR CALLBACK RigidBodyWorld::NetwonWorldUIProc(HWND hWnd, UINT msg, WPARAM w
 					break;
 				}
 
-				case IDC_GRAVITY_X:
-				case IDC_GRAVITY_Y:
-				case IDC_GRAVITY_Z:
-				{
-					PhysicsPluginClassDesc* const plugin = (PhysicsPluginClassDesc*) PhysicsPluginClassDesc::GetDescriptor();
-					dVector gravity (obj->m_gravity[0]->GetFloat(), obj->m_gravity[1]->GetFloat(), obj->m_gravity[2]->GetFloat(), 0.0f);
-					plugin->m_gravity = plugin->m_systemMatrix.RotateVector(gravity.Scale(float (GetMasterScale(UNITS_METERS))));
-					break;
-				}
 */
 			}
 
@@ -647,60 +548,80 @@ INT_PTR CALLBACK RigidBodyWorld::NetwonWorldUIProc(HWND hWnd, UINT msg, WPARAM w
 }
 
 
-void RigidBodyWorld::MakeRigidBodies ()
+void RigidBodyWorld::SelectionSetChanged (Interface *ip, IUtil *iu)
 {
-	RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
-	Interface* const ip = GetCOREInterface();
-	int selectionCount = ip->GetSelNodeCount();
-	for (int i = 0; i < selectionCount; i ++) {
-		INode* const node = ip->GetSelNode(i);
-		Object* const obj = node->GetObjOrWSMRef();
-		if (obj) {
-			switch(obj->SuperClassID()) 
-			{
-				case GEOMOBJECT_CLASS_ID: 
-				{
-					plugin->AttachRigiBodyController (node, true);
-					break;
-				}
-
-				default:;
-				{
-					_ASSERTE (0);
-				}
-			}
+	if (m_selectionChange) {
+		RigidBodyUIPane::SelectionSetChanged();
+/*
+		m_currentSelection.RemoveAll();
+		int selectionCount = m_ip->GetSelNodeCount();
+		for (int i = 0; i < selectionCount; i ++) {
+			INode* const node = m_ip->GetSelNode(i);
+			m_currentSelection.Append(node);
 		}
-	}
 
-	UpdateViewPorts();
+		NewtonRigidBodyInfoPane::SelectionHasChanged();
+*/
+	}
 }
 
 
-void RigidBodyWorld::RemoveRigidBodies ()
-{
-	RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
-	Interface* const ip = GetCOREInterface();
-	int selectionCount = ip->GetSelNodeCount();
-	for (int i = 0; i < selectionCount; i ++) {
-		INode* const node = ip->GetSelNode(i);
-		Object* const obj = node->GetObjOrWSMRef();
-		if (obj) {
-			switch(obj->SuperClassID()) 
-			{
-				case GEOMOBJECT_CLASS_ID: 
-				{
-					plugin->DetachRigiBodyController (node, true);
-					break;
-				}
 
-				default:;
-				{
-					_ASSERTE (0);
-				}
-			}
-		}
+
+void RigidBodyWorld::AttachRigiBodyController (INode* const node)
+{
+	Control* const control = node->GetTMController();
+
+	RigidBodyPositionControllerDesc& rigidBodyPositionControllerDesc = *(RigidBodyPositionControllerDesc*)RigidBodyPositionControllerDesc::GetDescriptor();
+	RigidBodyRotationControllerDesc& rigidBodyRotationControllerDesc = *(RigidBodyRotationControllerDesc*)RigidBodyRotationControllerDesc::GetDescriptor();
+
+	Control* const positController = control->GetPositionController();
+	Control* const rotationController = control->GetRotationController();
+	_ASSERTE (positController);
+	_ASSERTE (rotationController);
+
+	if (positController->ClassID() != rigidBodyPositionControllerDesc.ClassID()) {
+		Matrix3 matrix (node->GetNodeTM (GetCOREInterface()->GetTime()));		
+
+		RigidBodyPositionController* const rigidBodyPositionController = (RigidBodyPositionController*) rigidBodyPositionControllerDesc.Create(positController->ClassID());
+		RigidBodyRotationController* const rigidBodyRotationController = (RigidBodyRotationController*) rigidBodyRotationControllerDesc.Create(rotationController->ClassID());
+
+		control->SetPositionController(rigidBodyPositionController);
+		control->SetRotationController(rigidBodyRotationController);
+
+		node->SetNodeTM(GetCOREInterface()->GetTime(), matrix);
+
+		rigidBodyPositionController->m_mass = m_massEdit->GetFloat();
+
+		rigidBodyPositionController->AddRigidBody(node);
 	}
-	UpdateViewPorts ();
+}
+
+
+void RigidBodyWorld::DetachRigiBodyController (INode* const node)
+{
+	Control* const control = node->GetTMController();
+
+	RigidBodyPositionControllerDesc& rigidBodyPositionControllerDesc = *(RigidBodyPositionControllerDesc*)RigidBodyPositionControllerDesc::GetDescriptor();
+	RigidBodyRotationControllerDesc& rigidBodyRotationControllerDesc = *(RigidBodyRotationControllerDesc*)RigidBodyRotationControllerDesc::GetDescriptor();
+
+	RigidBodyPositionController* const positController = (RigidBodyPositionController*) control->GetPositionController();
+	RigidBodyRotationController* const rotationController = (RigidBodyRotationController*) control->GetRotationController();
+	_ASSERTE (positController);
+	_ASSERTE (rotationController);
+	if (positController->ClassID() == rigidBodyPositionControllerDesc.ClassID()) {
+		positController->RemoveRigidBody(node);
+
+		Matrix3 matrix (node->GetNodeTM (GetCOREInterface()->GetTime()));		
+
+		Control* const regularPositionController = (Control*) CreateInstance (CTRL_POSITION_CLASS_ID, positController->m_oldControlerID);
+		Control* const regularRotationController = (Control*) CreateInstance (CTRL_ROTATION_CLASS_ID, rotationController->m_oldControlerID);
+
+		control->SetPositionController(regularPositionController);
+		control->SetRotationController(regularRotationController);
+
+		node->SetNodeTM(GetCOREInterface()->GetTime(), matrix);
+	}
 }
 
 
