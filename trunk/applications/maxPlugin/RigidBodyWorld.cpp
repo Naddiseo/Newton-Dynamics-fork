@@ -151,7 +151,9 @@ RigidBodyPositionController* RigidBodyWorldDesc::GetRigidBodyControl(INode* cons
 	if (control) {
 		RigidBodyPositionControllerDesc& rigidBodyPositionControllerDesc = *(RigidBodyPositionControllerDesc*)RigidBodyPositionControllerDesc::GetDescriptor();
 		RigidBodyPositionController* const positController = (RigidBodyPositionController*) control->GetPositionController();
-		return (positController->ClassID() == rigidBodyPositionControllerDesc.ClassID()) ? positController : NULL;
+		if (positController && (positController->ClassID() == rigidBodyPositionControllerDesc.ClassID())) {
+			return positController;
+		}
 	}
 
 	return NULL;
@@ -163,7 +165,6 @@ RigidBodyPositionController* RigidBodyWorldDesc::GetRigidBodyControl(INode* cons
 
 void RigidBodyWorldDesc::OnPreCloneNode(void* param, NotifyInfo* info)
 {
-return;
 	RigidBodyWorldDesc* const me = (RigidBodyWorldDesc*) param;
 	const INodeTab& origNodes = *(INodeTab*) info->callParam;
 
@@ -202,7 +203,6 @@ return;
 
 void RigidBodyWorldDesc::OnPostCloneNode(void* param, NotifyInfo* info)
 {
-return;
 
 	struct CloneData
 	{ 
@@ -221,7 +221,6 @@ return;
 
 	RigidBodyPositionControllerDesc& rigidBodyPositionControllerDesc = *(RigidBodyPositionControllerDesc*)RigidBodyPositionControllerDesc::GetDescriptor();
 	RigidBodyRotationControllerDesc& rigidBodyRotationControllerDesc = *(RigidBodyRotationControllerDesc*)RigidBodyRotationControllerDesc::GetDescriptor();
-
 
 	TimeValue t (GetCOREInterface()->GetTime());
 	for (int i = 0; i < origNodes.Count(); i ++) {
@@ -247,68 +246,72 @@ return;
 			control->SetRotationController(rigidBodyRotationController);
 
 			RigidBodyData* const nodeData = rigidBodyPositionController;
-			node->SetNodeTM(t, data.m_matrix);
 			memcpy (nodeData, &data.m_bodyData, sizeof (RigidBodyData));
+
+			node->SetNodeTM(t, data.m_matrix);
 		}
 	}
 
-/*
-	RigidBodyPositionControllerDesc& rigidBodyPositionControllerDesc = *(RigidBodyPositionControllerDesc*)RigidBodyPositionControllerDesc::GetDescriptor();
-	RigidBodyRotationControllerDesc& rigidBodyRotationControllerDesc = *(RigidBodyRotationControllerDesc*)RigidBodyRotationControllerDesc::GetDescriptor();
+
 	for (int i = 0; i < origNodes.Count(); i ++) {
 		INode* const origNode = origNodes[i];
-		Control* const origControl = origNode->GetTMController();
-		if (origControl) {
 
-			RigidBodyPositionController* const origPositController = (RigidBodyPositionController*) origControl->GetPositionController();
-			if (origPositController) {
-				if (origPositController->ClassID() == rigidBodyPositionControllerDesc.ClassID()) {
-					INode* const cloneNode = clonedNodes[i];
+		RigidBodyData* const origData = me->GetRigidBodyControl(origNode);
+		if (origData) {
+			INode* const cloneNode = clonedNodes[i];
+			Control* const cloneControl = cloneNode->GetTMController();
+			Control* const oldPositControl = cloneControl->GetPositionController();
+			Control* const oldRotationControl = cloneControl->GetRotationController();
 
-					me->AttachRigiBodyController (cloneNode, false);
-
-					Control* const cloneControl = cloneNode->GetTMController();
-					RigidBodyPositionController* const clonePositController = (RigidBodyPositionController*) cloneControl->GetPositionController();
-
-					RigidBodyData* const orgData = origPositController;
-					RigidBodyData* const cloneData = clonePositController;
-					memcpy (cloneData, orgData, sizeof (RigidBodyData));
-
-					NewtonCollision* collision = NewtonBodyGetCollision(orgData->m_body);
-					dMatrix matrix;
-					NewtonBodyGetMatrix(orgData->m_body, &matrix[0][0]);
-					cloneData->m_body = NewtonCreateBody (me->m_newton, collision, &matrix[0][0]);
-
-					NewtonBodySetUserData(cloneData->m_body, cloneNode);
-
-					float mass;
-					float Ixx;
-					float Iyy;
-					float Izz;
-					NewtonBodyGetMassMatrix(orgData->m_body, &mass, &Ixx, &Iyy, &Izz);
-					NewtonBodySetMassMatrix(cloneData->m_body, mass, Ixx, Iyy, Izz);
-
-					NewtonBodySetMaterialGroupID(cloneData->m_body, NewtonBodyGetMaterialGroupID(orgData->m_body));
-					NewtonBodySetForceAndTorqueCallback(cloneData->m_body, NewtonBodyGetForceAndTorqueCallback(orgData->m_body));
-
-					dVector com;
-					NewtonBodyGetCentreOfMass(orgData->m_body, &com[0]);
-					NewtonBodySetCentreOfMass(cloneData->m_body, &com[0]);
+			Matrix3 cloneMatrix (cloneNode->GetNodeTM(t));
 			
-					dVector veloc;
-					NewtonBodyGetVelocity(orgData->m_body, &veloc[0]);
-					NewtonBodySetVelocity(cloneData->m_body, &veloc[0]);
+			RigidBodyPositionController* const clonePositionController = (RigidBodyPositionController*) rigidBodyPositionControllerDesc.Create(oldPositControl->ClassID());
+			RigidBodyRotationController* const cloneRotationController = (RigidBodyRotationController*) rigidBodyRotationControllerDesc.Create(oldRotationControl->ClassID());
 
-					dVector omega;
-					NewtonBodyGetOmega(orgData->m_body, &omega[0]);
-					NewtonBodySetOmega(cloneData->m_body, &omega[0]);
-				}
-			}
+			cloneControl->SetPositionController(clonePositionController);
+			cloneControl->SetRotationController(cloneRotationController);
+
+			RigidBodyData* const cloneData = clonePositionController;
+			memcpy (cloneData, origData, sizeof (RigidBodyData));
+
+			NewtonCollision* const collision = NewtonBodyGetCollision(origData->m_body);
+
+			dMatrix matrix;
+			NewtonBodyGetMatrix(origData->m_body, &matrix[0][0]);
+			cloneData->m_body = NewtonCreateBody (me->m_newton, collision, &matrix[0][0]);
+
+			NewtonBodySetUserData(cloneData->m_body, cloneNode);
+
+			float mass;
+			float Ixx;
+			float Iyy;
+			float Izz;
+			NewtonBodyGetMassMatrix(origData->m_body, &mass, &Ixx, &Iyy, &Izz);
+			NewtonBodySetMassMatrix(cloneData->m_body, mass, Ixx, Iyy, Izz);
+
+			NewtonBodySetMaterialGroupID(cloneData->m_body, NewtonBodyGetMaterialGroupID(origData->m_body));
+			NewtonBodySetForceAndTorqueCallback(cloneData->m_body, NewtonBodyGetForceAndTorqueCallback(origData->m_body));
+
+			dVector com;
+			NewtonBodyGetCentreOfMass(origData->m_body, &com[0]);
+			NewtonBodySetCentreOfMass(cloneData->m_body, &com[0]);
+			
+			dVector veloc;
+			NewtonBodyGetVelocity(origData->m_body, &veloc[0]);
+			NewtonBodySetVelocity(cloneData->m_body, &veloc[0]);
+
+			dVector omega;
+			NewtonBodyGetOmega(origData->m_body, &omega[0]);
+			NewtonBodySetOmega(cloneData->m_body, &omega[0]);
+
+			cloneNode->SetNodeTM(t, cloneMatrix);
+
+			_ASSERTE (me->GetRigidBodyControl (cloneNode));
+
 		}
 	}
 
 	me->m_savedCloneList.RemoveAll();
-*/
 }
 
 
@@ -620,16 +623,18 @@ void RigidBodyWorld::AttachRigiBodyController (INode* const node)
 
 void RigidBodyWorld::DetachRigiBodyController (INode* const node)
 {
-	Control* const control = node->GetTMController();
+	RigidBodyWorldDesc* const desc = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+	if (desc->GetRigidBodyControl(node)) {
+		Control* const control = node->GetTMController();
+		RigidBodyPositionControllerDesc& rigidBodyPositionControllerDesc = *(RigidBodyPositionControllerDesc*)RigidBodyPositionControllerDesc::GetDescriptor();
+		RigidBodyRotationControllerDesc& rigidBodyRotationControllerDesc = *(RigidBodyRotationControllerDesc*)RigidBodyRotationControllerDesc::GetDescriptor();
 
-	RigidBodyPositionControllerDesc& rigidBodyPositionControllerDesc = *(RigidBodyPositionControllerDesc*)RigidBodyPositionControllerDesc::GetDescriptor();
-	RigidBodyRotationControllerDesc& rigidBodyRotationControllerDesc = *(RigidBodyRotationControllerDesc*)RigidBodyRotationControllerDesc::GetDescriptor();
+		RigidBodyPositionController* const positController = (RigidBodyPositionController*) control->GetPositionController();
+		RigidBodyRotationController* const rotationController = (RigidBodyRotationController*) control->GetRotationController();
+		_ASSERTE (positController);
+		_ASSERTE (rotationController);
+		_ASSERTE (positController->ClassID() == rigidBodyPositionControllerDesc.ClassID()); 
 
-	RigidBodyPositionController* const positController = (RigidBodyPositionController*) control->GetPositionController();
-	RigidBodyRotationController* const rotationController = (RigidBodyRotationController*) control->GetRotationController();
-	_ASSERTE (positController);
-	_ASSERTE (rotationController);
-	if (positController->ClassID() == rigidBodyPositionControllerDesc.ClassID()) {
 		positController->RemoveRigidBody(node);
 
 		Matrix3 matrix (node->GetNodeTM (GetCOREInterface()->GetTime()));		

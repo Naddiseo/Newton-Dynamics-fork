@@ -56,6 +56,7 @@ class RigidBodyPositionController: public Control, public RigidBodyData
 	virtual IOResult Load(ILoad *iload);
 	virtual IOResult Save(ISave *isave);
 
+	virtual void PostCloneNode();
 
 	static void ApplyGravityForce (const NewtonBody* const body, dFloat timestep, int threadIndex);
 	static void RenderGizmo (void* const userData, int vertexCount, const dFloat* const faceArray, int faceId);

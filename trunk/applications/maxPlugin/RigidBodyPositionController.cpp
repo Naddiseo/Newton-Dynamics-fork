@@ -319,3 +319,7 @@ int RigidBodyPositionController::Display(TimeValue t, INode* inode, ViewExp *vpt
 }
 
 
+void RigidBodyPositionController::PostCloneNode()
+{
+	_ASSERTE (0);
+}
