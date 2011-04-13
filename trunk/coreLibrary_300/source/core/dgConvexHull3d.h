@@ -48,6 +48,7 @@ class dgConvexHull3DFace
 	friend class dgConvexHull3d;
 };
 
+class dgHullVertex;
 
 class dgConvexHull3d: public dgList<dgConvexHull3DFace>
 {
@@ -61,20 +62,23 @@ class dgConvexHull3d: public dgList<dgConvexHull3DFace>
 	
 
 	protected:
+	
 	dgConvexHull3d(dgMemoryAllocator* const allocator);
+	void BuildHUll (const dgFloat64* const vertexCloud, dgInt32 strideInBytes, dgInt32 count, dgFloat64 distTol, dgInt32 maxVertexCount);
 
 	virtual dgListNode* AddFace (dgInt32 i0, dgInt32 i1, dgInt32 i2);
 	virtual void DeleteFace (dgListNode* const node) ;
-	virtual dgInt32 InitVertexArray(dgBigVector* const convexPoints, dgBigVector* const points, const dgFloat64* const vertexCloud, dgInt32 strideInBytes, dgInt32 count, void* const memoryPool, dgInt32 maxMemSize);
+//	virtual dgInt32 InitVertexArray(dgBigVector* const convexPoints, dgBigVector* const points, const dgFloat64* const vertexCloud, dgInt32 strideInBytes, dgInt32 count, void* const memoryPool, dgInt32 maxMemSize);
+	virtual dgInt32 InitVertexArray(dgHullVertex* const points, const dgFloat64* const vertexCloud, dgInt32 strideInBytes, dgInt32 count, void* const memoryPool, dgInt32 maxMemSize);
 
-	void CalculateConvexHull (dgAABBPointTree3d* vertexTree, dgBigVector* const convexPoints, dgBigVector* const points, dgInt32 count, dgFloat64 distTol, dgInt32 maxVertexCount);
+	void CalculateConvexHull (dgAABBPointTree3d* vertexTree, dgHullVertex* const points, dgInt32 count, dgFloat64 distTol, dgInt32 maxVertexCount);
 	dgInt32 BuildNormalList (dgBigVector* const normalArray) const;
-	dgInt32 SupportVertex (dgAABBPointTree3d** const tree, const dgBigVector* const points, const dgBigVector& dir) const;
+	dgInt32 SupportVertex (dgAABBPointTree3d** const tree, const dgHullVertex* const points, const dgBigVector& dir) const;
 	dgFloat64 TetrahedrumVolume (const dgBigVector& p0, const dgBigVector& p1, const dgBigVector& p2, const dgBigVector& p3) const;
 	void TessellateTriangle (dgInt32 level, const dgVector& p0, const dgVector& p1, const dgVector& p2, dgInt32& count, dgBigVector* const ouput, dgInt32& start) const;
 
-	dgAABBPointTree3d* BuildTree (dgAABBPointTree3d* const parent, dgBigVector* const points, dgInt32 count, dgInt32 baseIndex, dgInt8** const memoryPool, dgInt32& maxMemSize) const;
-	static dgInt32 ConvexCompareVertex(const dgBigVector* const  A, const dgBigVector* const B, void* const context);
+	dgAABBPointTree3d* BuildTree (dgAABBPointTree3d* const parent, dgHullVertex* const points, dgInt32 count, dgInt32 baseIndex, dgInt8** const memoryPool, dgInt32& maxMemSize) const;
+	static dgInt32 ConvexCompareVertex(const dgHullVertex* const  A, const dgHullVertex* const B, void* const context);
 	bool Sanity() const;
 
 	dgInt32 m_count;
