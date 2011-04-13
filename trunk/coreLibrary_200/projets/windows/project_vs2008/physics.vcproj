@@ -72,7 +72,7 @@
 				WarnAsError="false"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="1"
+				DebugInformationFormat="3"
 				CompileAs="0"
 			/>
 			<Tool
@@ -163,7 +163,7 @@
 				WarnAsError="false"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="1"
+				DebugInformationFormat="3"
 				CompileAs="2"
 			/>
 			<Tool
@@ -253,7 +253,7 @@
 				WarnAsError="false"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="1"
+				DebugInformationFormat="3"
 				CompileAs="0"
 			/>
 			<Tool
@@ -346,7 +346,7 @@
 				WarnAsError="false"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="1"
+				DebugInformationFormat="3"
 				CompileAs="2"
 			/>
 			<Tool
