@@ -78,6 +78,19 @@ RigidBodyRotationController::RigidBodyRotationController(Class_ID oldID)
 {
 }
 
+RigidBodyRotationController::RigidBodyRotationController(const RigidBodyRotationController& me)
+	:Control()
+	,m_rotation (me.m_rotation)
+	,m_baseRotation(me.m_baseRotation)
+	,m_oldControlerID(me.m_oldControlerID)
+{
+
+}
+
+RigidBodyRotationController::~RigidBodyRotationController()
+{
+}
+
 Class_ID RigidBodyRotationController::ClassID()
 {
 	return RigidBodyRotationControllerDesc::GetDescriptor()->ClassID();
@@ -130,7 +143,7 @@ IOResult RigidBodyRotationController::Save(ISave *isave)
 RefResult RigidBodyRotationController::NotifyRefChanged(Interval,RefTargetHandle,PartID &,RefMessage)
 {
 	_ASSERTE (0);
-	return REF_FAIL;
+	return REF_SUCCEED;
 }
 
 void RigidBodyRotationController::MouseCycleStarted(TimeValue t)
@@ -167,3 +180,9 @@ void RigidBodyRotationController::SetValue(TimeValue t, void *val, int commit, G
 }
 
 
+RefTargetHandle RigidBodyRotationController::Clone(RemapDir& remap)
+{
+	RigidBodyRotationController* ctrl = new RigidBodyRotationController(*this);
+	CloneControl(ctrl, remap);
+	return ctrl;
+}

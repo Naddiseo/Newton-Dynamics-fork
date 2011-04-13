@@ -74,6 +74,7 @@ ClassDesc* RigidBodyPositionControllerDesc::GetDescriptor()
 RigidBodyPositionController::RigidBodyPositionController(Class_ID oldClassId)
 	:Control(), RigidBodyData()
 {
+	m_body = NULL;
 	m_oldControlerID = oldClassId;
 }
 
@@ -83,6 +84,10 @@ RigidBodyPositionController::RigidBodyPositionController(const RigidBodyPosition
 	m_body = NULL;
 }
 
+RigidBodyPositionController::~RigidBodyPositionController()
+{
+	_ASSERTE (m_body == NULL);
+}
 
 Class_ID RigidBodyPositionController::ClassID()
 {
@@ -137,7 +142,7 @@ IOResult RigidBodyPositionController::Save(ISave *isave)
 RefResult RigidBodyPositionController::NotifyRefChanged(Interval,RefTargetHandle,PartID &,RefMessage)
 {
 	_ASSERTE (0);
-	return REF_FAIL;
+	return REF_SUCCEED;
 }
 
 void RigidBodyPositionController::MouseCycleStarted(TimeValue t)
@@ -190,6 +195,7 @@ void RigidBodyPositionController::RemoveRigidBody(INode* const myNode)
 	RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
 	_ASSERTE (m_body);
 	NewtonDestroyBody(plugin->m_newton, m_body);
+	plugin->m_newton = NULL;
 }
 
 void RigidBodyPositionController::AddRigidBody(INode* const myNode)
@@ -322,4 +328,11 @@ int RigidBodyPositionController::Display(TimeValue t, INode* inode, ViewExp *vpt
 void RigidBodyPositionController::PostCloneNode()
 {
 	_ASSERTE (0);
+}
+
+RefTargetHandle RigidBodyPositionController::Clone(RemapDir& remap)
+{
+	RigidBodyPositionController* ctrl = new RigidBodyPositionController(*this);
+	CloneControl(ctrl, remap);
+	return ctrl;
 }

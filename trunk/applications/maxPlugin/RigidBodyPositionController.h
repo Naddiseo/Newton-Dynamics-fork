@@ -43,6 +43,8 @@ class RigidBodyPositionController: public Control, public RigidBodyData
 	RigidBodyPositionController(Class_ID oldClassId);
 	RigidBodyPositionController(const RigidBodyPositionController& clone);
 
+	~RigidBodyPositionController();
+
 	virtual Class_ID ClassID();
 	virtual SClass_ID SuperClassID();
 	virtual void Copy(Control *from);
@@ -57,6 +59,8 @@ class RigidBodyPositionController: public Control, public RigidBodyData
 	virtual IOResult Save(ISave *isave);
 
 	virtual void PostCloneNode();
+	RefTargetHandle Clone(RemapDir& remap=DefaultRemapDir());
+	
 
 	static void ApplyGravityForce (const NewtonBody* const body, dFloat timestep, int threadIndex);
 	static void RenderGizmo (void* const userData, int vertexCount, const dFloat* const faceArray, int faceId);

@@ -43,6 +43,9 @@ class RigidBodyRotationController: public Control
 {
 	public:
 	RigidBodyRotationController(Class_ID oldID);
+	RigidBodyRotationController(const RigidBodyRotationController& me);
+	~RigidBodyRotationController();
+
 
 	virtual Class_ID ClassID();
 	virtual SClass_ID SuperClassID();
@@ -54,6 +57,8 @@ class RigidBodyRotationController: public Control
 
 	virtual IOResult Load(ILoad *iload);
 	virtual IOResult Save(ISave *isave);
+
+	RefTargetHandle Clone(RemapDir& remap);
 
 	Quat m_rotation;
 	Quat m_baseRotation;
