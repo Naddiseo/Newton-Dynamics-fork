@@ -37,8 +37,8 @@ RigidBodyWorldDesc::RigidBodyWorldDesc ()
 	,m_systemMatrix (dVector (0.0f, 0.0f, 1.0f, 0.0f), dVector (1.0f, 0.0f, 0.0f, 0.0f), dVector (0.0f, 1.0f, 0.0f, 0.0f), dVector (0.0f, 0.0f, 0.0f, 1.0f))
 	,m_systemMatrixInv (m_systemMatrix.Inverse())
 {
-	RegisterNotification(OnPreCloneNode, this, NOTIFY_PRE_NODES_CLONED);
-	RegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
+//	RegisterNotification(OnPreCloneNode, this, NOTIFY_PRE_NODES_CLONED);
+//	RegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
 
 //	RegisterNotification(OnPreLoadScene, this, NOTIFY_FILE_PRE_OPEN);
 //	RegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
@@ -51,8 +51,8 @@ RigidBodyWorldDesc::~RigidBodyWorldDesc ()
 	_ASSERTE (m_newton);
 	NewtonDestroy (m_newton);
 
-	UnRegisterNotification(OnPreCloneNode, this, NOTIFY_PRE_NODES_CLONED);
-	UnRegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
+//	UnRegisterNotification(OnPreCloneNode, this, NOTIFY_PRE_NODES_CLONED);
+//	UnRegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
 
 //	UnRegisterNotification(OnPreLoadScene, this, NOTIFY_FILE_PRE_OPEN);
 //	UnRegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);

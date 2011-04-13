@@ -183,6 +183,7 @@
 				ModuleDefinitionFile=".\maxPlugin.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug\maxPlugin.pdb"
+				GenerateMapFile="true"
 				SubSystem="2"
 				BaseAddress="0x16860000"
 				RandomizedBaseAddress="1"
