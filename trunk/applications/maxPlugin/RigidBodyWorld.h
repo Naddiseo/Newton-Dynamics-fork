@@ -25,7 +25,7 @@
 
 #include "RigidBodyUIPane.h"
 
-class RigidBodyPositionController;
+class RigidBodyController;
 
 class RigidBodyData
 {
@@ -42,6 +42,7 @@ class RigidBodyData
 	RigidBodyData()
 	{
 		memset (this, 0, sizeof (RigidBodyData));
+		m_oldControlerID = Class_ID (PRS_CONTROL_CLASS_ID, 0);
 	}	
 
 	Point3 m_position;
@@ -89,11 +90,11 @@ class RigidBodyWorldDesc: public ClassDesc2
 //	void DetachRigiBodyController (INode* const node, bool deleteBody);
 
 	
-	RigidBodyPositionController* GetRigidBodyControl(INode* const node) const;
+	RigidBodyController* GetRigidBodyControl(INode* const node) const;
 	
 	static ClassDesc* GetDescriptor();
-	static void OnPreCloneNode(void* param, NotifyInfo* info);
-	static void OnPostCloneNode(void* param, NotifyInfo* info);
+//	static void OnPreCloneNode(void* param, NotifyInfo* info);
+//	static void OnPostCloneNode(void* param, NotifyInfo* info);
 
 	float m_minFps;
 	dVector m_gravity;

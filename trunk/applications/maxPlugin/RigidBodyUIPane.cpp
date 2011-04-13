@@ -23,8 +23,7 @@
 #include "Common.h"
 #include "RigidBodyWorld.h"
 #include "RigidBodyUIPane.h"
-#include "RigidBodyPositionController.h"
-#include "RigidBodyRotationController.h"
+#include "RigidBodyController.h"
 
 
 
@@ -147,7 +146,7 @@ INT_PTR CALLBACK RigidBodyUIPane::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 					int selectionCount = ip->GetSelNodeCount();
 					for (int i = 0; i < selectionCount; i ++) {
 						INode* const node = ip->GetSelNode(i);
-						RigidBodyPositionController* const bodyInfo = desc->GetRigidBodyControl(node);
+						RigidBodyController* const bodyInfo = desc->GetRigidBodyControl(node);
 						if (bodyInfo) {
 							bodyInfo->m_hideGizmos = (IsDlgButtonChecked(hWnd, IDC_HIDE_GIZMO) == BST_CHECKED) ? TRUE : FALSE;
 						}
@@ -170,7 +169,7 @@ INT_PTR CALLBACK RigidBodyUIPane::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 
 void RigidBodyUIPane::SetSelectionMass (dFloat mass)
 {
-
+return;
 //	RigidBodyWorld& world = *(RigidBodyWorld*)this;
 
 	RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
@@ -178,7 +177,7 @@ void RigidBodyUIPane::SetSelectionMass (dFloat mass)
 	int selectionCount = ip->GetSelNodeCount();
 	for (int i = 0; i < selectionCount; i ++) {
 		INode* const node = ip->GetSelNode(i);
-		RigidBodyPositionController* const bodyInfo = (RigidBodyPositionController*)plugin->GetRigidBodyControl(node);
+		RigidBodyController* const bodyInfo = (RigidBodyController*)plugin->GetRigidBodyControl(node);
 		if (bodyInfo) {
 			bodyInfo->m_mass = mass;
 			_ASSERTE (bodyInfo->m_body);
@@ -227,10 +226,10 @@ void RigidBodyUIPane::SelectionSetChanged ()
 	RigidBodyWorld& me = *(RigidBodyWorld*)this;
 
 	int count = 0;
-	RigidBodyPositionController* bodyInfo = NULL; 
+	RigidBodyController* bodyInfo = NULL; 
 	for (int i = 0; i < selectionCount; i ++) {
 		INode* const node = ip->GetSelNode(i);
-		RigidBodyPositionController* const info = (RigidBodyPositionController*)plugin->GetRigidBodyControl(node);
+		RigidBodyController* const info = (RigidBodyController*)plugin->GetRigidBodyControl(node);
 		if (info) {
 			count ++;
 			bodyInfo = info;

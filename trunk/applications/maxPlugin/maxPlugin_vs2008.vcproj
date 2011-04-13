@@ -301,19 +301,11 @@
 			>
 		</File>
 		<File
-			RelativePath=".\RigidBodyPositionController.cpp"
+			RelativePath=".\RigidBodyController.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\RigidBodyPositionController.h"
-			>
-		</File>
-		<File
-			RelativePath=".\RigidBodyRotationController.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\RigidBodyRotationController.h"
+			RelativePath=".\RigidBodyController.h"
 			>
 		</File>
 		<File

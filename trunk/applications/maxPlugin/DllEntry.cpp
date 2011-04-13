@@ -24,9 +24,7 @@
 #include "ImportDesc.h"
 #include "ExportDesc.h"
 #include "RigidBodyWorld.h"
-#include "RigidBodyPositionController.h"
-#include "RigidBodyRotationController.h"
-
+#include "RigidBodyController.h"
 
 HINSTANCE hInstance;
 int controlsInit = FALSE;
@@ -60,7 +58,7 @@ __declspec( dllexport ) const TCHAR* LibDescription()
 //TODO: Must change this number when adding a new class
 __declspec( dllexport ) int LibNumberClasses()
 {
-	return 5;
+	return 4;
 }
 
 // This function returns the number of plug-in classes this DLL
@@ -71,8 +69,7 @@ __declspec( dllexport ) ClassDesc* LibClassDesc(int i)
 		case 0: return RigidBodyWorldDesc::GetDescriptor();
 		case 1: return ImportAlchemediaDesc::GetDescriptor();
 		case 2: return ExportAlchemediaDesc::GetDescriptor();
-		case 3: return RigidBodyPositionControllerDesc::GetDescriptor();
-		case 4: return RigidBodyRotationControllerDesc::GetDescriptor();
+		case 3: return RigidBodyControllerDesc::GetDescriptor();
 		default: return 0;
 	}
 }
