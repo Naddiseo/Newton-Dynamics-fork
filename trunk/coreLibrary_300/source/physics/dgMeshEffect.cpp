@@ -1572,7 +1572,7 @@ void dgMeshEffect::AddPolygon (dgInt32 count, const dgFloat64* const vertexList,
 //		dgFloat32 mag2 = dgSqrt (n % n);
 //		if (mag2 > DG_MESH_EFFECT_TRIANGLE_MIN_AREA) {
 		dgFloat64 mag2 = n % n;
-		_ASSERTE (mag2 > dgFloat32 (0.0f));
+//		_ASSERTE (mag2 > dgFloat32 (0.0f));
 		if (mag2 > dgFloat32 (0.0f)) {
 			AddPoint(vertexList, material);
 			AddPoint(vertexList + stride, material);

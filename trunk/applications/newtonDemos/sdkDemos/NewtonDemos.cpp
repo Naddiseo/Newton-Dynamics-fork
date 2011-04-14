@@ -26,8 +26,8 @@
 //#define DEFAULT_SCENE	3						// simple level mesh collision
 //#define DEFAULT_SCENE	4						// optimized level mesh collision
 //#define DEFAULT_SCENE	5						// Scene Collision
-#define DEFAULT_SCENE	6						// Simple convex decomposition
-//#define DEFAULT_SCENE	7						// Simple convex Shatter
+//#define DEFAULT_SCENE	6						// Simple convex decomposition
+#define DEFAULT_SCENE	7						// Simple convex Shatter
 
 
 

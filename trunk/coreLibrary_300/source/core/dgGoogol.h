@@ -25,8 +25,10 @@
 
 #include "dgStdafx.h"
 #include "dgVector.h"
-#define DG_GOOGOL_SIZE		32
-//#define DG_GOOGOL_SIZE	16
+//#define DG_GOOGOL_SIZE		32
+#define DG_GOOGOL_SIZE	16
+
+
 
 
 class dgGoogol

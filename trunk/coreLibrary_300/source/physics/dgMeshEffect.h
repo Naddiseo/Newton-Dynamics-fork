@@ -171,7 +171,8 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	
 	dgCollision* CreateConvexCollision(dgFloat64 tolerance, dgInt32 shapeID, const dgMatrix& matrix = dgGetIdentityMatrix()) const;
 
-	dgMeshEffect* CreateConvexApproximation (dgInt32 maxCount) const;
+	//dgMeshEffect* CreateConvexApproximation (dgInt32 maxCount) const;
+	dgMeshEffect* CreateDelanayTretrahedralization (dgInt32 interionMaterial, dgMatrix& matrix) const;
 	dgMeshEffect* CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
 
 	void PlaneClipMesh (const dgPlane& plane, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource);
@@ -229,8 +230,6 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
 	dgInt32 PlaneApplyCap (const dgMeshEffect* planeMesh, const dgPlane& normal);
 	void PlaneClipMesh (const dgMeshEffect* planeMesh, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
-	dgMeshEffect* CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
-
 
 
 	bool CheckSingleMesh() const;

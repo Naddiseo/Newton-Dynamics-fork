@@ -147,7 +147,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/LD "
 				Optimization="0"
-				AdditionalIncludeDirectories="f:/maxsdk\include;../../packages;../../packages/dMath;../../packages/dScene;../../packages/dContainers;../../packages/thirdParty/tinyxml"
+				AdditionalIncludeDirectories="&quot;D:\Program Files (x86)\Autodesk\3ds Max 2009 SDK\maxsdk\include&quot;;../../packages;../../packages/dMath;../../packages/dScene;../../packages/dContainers;../../packages/thirdParty/tinyxml"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_NEWTON_USE_LIB"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
@@ -176,10 +176,10 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="odbc32.lib odbccp32.lib comctl32.lib core.lib geom.lib gfx.lib mesh.lib maxutil.lib biped.lib maxscrpt.lib paramblk2.lib"
-				OutputFile="F:\3dsMax\plugins\Newton.dli"
+				OutputFile="D:\Program Files (x86)\Autodesk\3ds Max 2009\plugins\Newton.dli"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="F:\maxsdk\lib"
+				AdditionalLibraryDirectories="D:\Program Files (x86)\Autodesk\3ds Max 2009 SDK\maxsdk\lib"
 				ModuleDefinitionFile=".\maxPlugin.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug\maxPlugin.pdb"
@@ -298,14 +298,6 @@
 		</File>
 		<File
 			RelativePath=".\resource.h"
-			>
-		</File>
-		<File
-			RelativePath=".\RigidBodyController.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\RigidBodyController.h"
 			>
 		</File>
 		<File
