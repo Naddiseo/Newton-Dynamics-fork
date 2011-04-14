@@ -26,7 +26,8 @@
 //#define DEFAULT_SCENE	3						// simple level mesh collision
 //#define DEFAULT_SCENE	4						// optimized level mesh collision
 //#define DEFAULT_SCENE	5						// Scene Collision
-#define DEFAULT_SCENE	6						// Simple convex Shatter
+#define DEFAULT_SCENE	6						// Simple convex decomposition
+//#define DEFAULT_SCENE	7						// Simple convex Shatter
 
 
 
@@ -81,6 +82,7 @@ void BasicBoxStacks (DemoEntityManager* const scene);
 void SimpleMeshLevelCollision (DemoEntityManager* const scene);
 void OptimizedMeshLevelCollision (DemoEntityManager* const scene);
 void SceneCollision (DemoEntityManager* const scene);
+void SimpleConvexAproximation(DemoEntityManager* const scene);
 void SimpleConvexShatter (DemoEntityManager* const scene);
 
 
@@ -92,6 +94,7 @@ static SDKDemos demosSelection[] =
 	{"Unoptimized Mesh collision", "show simple level mesh", SimpleMeshLevelCollision},
 	{"Optimized Mesh collision", "show optimized level mesh", OptimizedMeshLevelCollision},
 	{"multi geometry collision", "show static mesh with the ability of moving internal parts", SceneCollision},
+	{"Simple convex decomposition", "demonstrate convex decomposition and compound collision", SimpleConvexAproximation},
 	{"Simple convex Shatter", "demonstrate fracture destruction using Voronoi partition", SimpleConvexShatter},
 
 /*

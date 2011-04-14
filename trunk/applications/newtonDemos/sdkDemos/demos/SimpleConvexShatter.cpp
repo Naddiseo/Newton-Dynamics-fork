@@ -406,8 +406,7 @@ int materialId = 0;
 }
 
 
-
-void AddShatterPrimitive (DemoEntityManager* const scene, dFloat mass, const dVector& origin, const dVector& size, int xCount, int zCount, dFloat spacing, PrimitiveType type, int materialID)
+static void AddShatterPrimitive (DemoEntityManager* const scene, dFloat mass, const dVector& origin, const dVector& size, int xCount, int zCount, dFloat spacing, PrimitiveType type, int materialID)
 {
 	dMatrix matrix (GetIdentityMatrix());
 
@@ -460,10 +459,9 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	// load the skybox
 	scene->Append(new SkyBox());
 
-
 	// load the scene from and alchemedia file format
 //	CreateLevelMesh (scene, "flatPlane.ngd", false);
-	CreateLevelMesh (scene, "sponza.ngd", true);
+	CreateLevelMesh (scene, "sponza.ngd", false);
 
 	// create a shattered mesh array
 //    CreateSimpleVoronoiShatter (scene);

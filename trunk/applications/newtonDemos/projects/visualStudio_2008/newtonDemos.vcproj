@@ -292,6 +292,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\sdkDemos\demos\ConvexApproximation.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\sdkDemos\demos\MeshCollision.cpp"
 				>
 			</File>

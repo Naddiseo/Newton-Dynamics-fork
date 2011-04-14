@@ -94,10 +94,10 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 
 	dgEdge* InsertEdgeVertex (dgEdge* const edge, dgFloat64 param);
 
-	dgMeshEffect* Union (const dgMatrix& matrix, const dgMeshEffect* clip) const;
-	dgMeshEffect* Difference (const dgMatrix& matrix, const dgMeshEffect* clip) const;
-	dgMeshEffect* Intersection (const dgMatrix& matrix, const dgMeshEffect* clip) const;
-	void ClipMesh (const dgMatrix& matrix, const dgMeshEffect* clip, dgMeshEffect** top, dgMeshEffect** bottom) const;
+	dgMeshEffect* Union (const dgMatrix& matrix, const dgMeshEffect* const clip) const;
+	dgMeshEffect* Difference (const dgMatrix& matrix, const dgMeshEffect* const clip) const;
+	dgMeshEffect* Intersection (const dgMatrix& matrix, const dgMeshEffect* const clip) const;
+	void ClipMesh (const dgMatrix& matrix, const dgMeshEffect* const clip, dgMeshEffect** const top, dgMeshEffect** const bottom) const;
 
 	bool CheckIntersection (const dgMeshEffectSolidTree* const solidTree, dgFloat64 scale) const;
 	dgMeshEffectSolidTree* CreateSolidTree() const;

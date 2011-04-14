@@ -3041,22 +3041,17 @@ _ASSERTE (0);
 
 
 
-dgMeshEffect* dgMeshEffect::Union (const dgMatrix& matrix, const dgMeshEffect* clipMesh) const
+dgMeshEffect* dgMeshEffect::Union (const dgMatrix& matrix, const dgMeshEffect* const clipMesh) const
 {
 	dgMeshEffect clipper (*clipMesh);
-	dgMeshEffect* leftMeshSource;
-	dgMeshEffect* rightMeshSource;
-	dgMeshEffect* leftMeshClipper;
-	dgMeshEffect* rightMeshClipper;
-	dgMeshEffect* result;
 
 	clipper.TransformMesh (matrix);
 
-	result = NULL;
-	leftMeshSource = NULL;
-	rightMeshSource = NULL;
-	leftMeshClipper = NULL;
-	rightMeshClipper = NULL;
+	dgMeshEffect* result = NULL;
+	dgMeshEffect* leftMeshSource = NULL;
+	dgMeshEffect* rightMeshSource = NULL;
+	dgMeshEffect* leftMeshClipper = NULL;
+	dgMeshEffect* rightMeshClipper = NULL;
 
 	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource);
 	if (leftMeshSource && rightMeshSource) {
@@ -3091,23 +3086,17 @@ dgMeshEffect* dgMeshEffect::Union (const dgMatrix& matrix, const dgMeshEffect* c
 }
 
 
-dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffect* clipMesh) const
+dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffect* const clipMesh) const
 {
-//	dgMeshEffect source (*this);
 	dgMeshEffect clipper (*clipMesh);
-	dgMeshEffect* leftMeshSource;
-	dgMeshEffect* rightMeshSource;
-	dgMeshEffect* leftMeshClipper;
-	dgMeshEffect* rightMeshClipper;
-	dgMeshEffect* result;
 
 	clipper.TransformMesh (matrix);
 
-	result = NULL;
-	leftMeshSource = NULL;
-	rightMeshSource = NULL;
-	leftMeshClipper = NULL;
-	rightMeshClipper = NULL;
+	dgMeshEffect* result = NULL;
+	dgMeshEffect* leftMeshSource = NULL;
+	dgMeshEffect* rightMeshSource = NULL;
+	dgMeshEffect* leftMeshClipper = NULL;
+	dgMeshEffect* rightMeshClipper = NULL;
 
 	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource);
 	if (leftMeshSource && rightMeshSource) {
@@ -3142,23 +3131,17 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 }
 
 
-dgMeshEffect* dgMeshEffect::Intersection (const dgMatrix& matrix, const dgMeshEffect* clipMesh) const
+dgMeshEffect* dgMeshEffect::Intersection (const dgMatrix& matrix, const dgMeshEffect* const clipMesh) const
 {
-//	dgMeshEffect source (*this);
 	dgMeshEffect clipper (*clipMesh);
-	dgMeshEffect* leftMeshSource;
-	dgMeshEffect* rightMeshSource;
-	dgMeshEffect* leftMeshClipper;
-	dgMeshEffect* rightMeshClipper;
-	dgMeshEffect* result;
 
 	clipper.TransformMesh (matrix);
 
-	result = NULL;
-	leftMeshSource = NULL;
-	rightMeshSource = NULL;
-	leftMeshClipper = NULL;
-	rightMeshClipper = NULL;
+	dgMeshEffect* result = NULL;
+	dgMeshEffect* leftMeshSource = NULL;
+	dgMeshEffect* rightMeshSource = NULL;
+	dgMeshEffect* leftMeshClipper = NULL;
+	dgMeshEffect* rightMeshClipper = NULL;
 
 	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource);
 	if (leftMeshSource && rightMeshSource) {
@@ -3192,7 +3175,7 @@ dgMeshEffect* dgMeshEffect::Intersection (const dgMatrix& matrix, const dgMeshEf
 }
 
 
-void dgMeshEffect::ClipMesh (const dgMatrix& matrix, const dgMeshEffect* clipMesh, dgMeshEffect** left, dgMeshEffect** right) const
+void dgMeshEffect::ClipMesh (const dgMatrix& matrix, const dgMeshEffect* const clipMesh, dgMeshEffect** const left, dgMeshEffect** const right) const
 {
 	dgMeshEffect clipper (*clipMesh);
 	clipper.TransformMesh (matrix);
@@ -3203,15 +3186,10 @@ void dgMeshEffect::ClipMesh (const dgMatrix& matrix, const dgMeshEffect* clipMes
 		PlaneClipMesh (&clipper, left, right);
 	
 	} else {
-		dgMeshEffect* leftMeshSource;
-		dgMeshEffect* rightMeshSource;
-		dgMeshEffect* leftMeshClipper;
-		dgMeshEffect* rightMeshClipper;
-
-		leftMeshSource = NULL;
-		rightMeshSource = NULL;
-		leftMeshClipper = NULL;
-		rightMeshClipper = NULL;
+		dgMeshEffect* leftMeshSource = NULL;
+		dgMeshEffect* rightMeshSource = NULL;
+		dgMeshEffect* leftMeshClipper = NULL;
+		dgMeshEffect* rightMeshClipper = NULL;
 
 		ClipMesh (&clipper, &leftMeshSource, &rightMeshSource);
 		if (leftMeshSource && rightMeshSource) {
