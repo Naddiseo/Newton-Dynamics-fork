@@ -3077,11 +3077,6 @@ dgMeshEffect* dgMeshEffect::Union (const dgMatrix& matrix, const dgMeshEffect* c
 
 dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffect* const clipMesh) const
 {
-#if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
-	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);
-	dgControlFP (_PC_53, _MCW_PC);
-#endif
-
 
 	dgMeshEffect clipper (*clipMesh);
 
@@ -3092,18 +3087,7 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 	dgMeshEffect* rightMeshSource = NULL;
 	dgMeshEffect* leftMeshClipper = NULL;
 	dgMeshEffect* rightMeshClipper = NULL;
-
 	
-/*
-if (xxx == 2){
-ClipMesh (&clipper, &leftMeshSource, &rightMeshSource);
-result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
-result->BeginPolygon();
-//result->MergeFaces(leftMeshSource);
-result->MergeFaces(rightMeshSource);
-result->EndPolygon(dgFloat64 (1.0e-5f));
-} else 
-*/
 	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource);
 	if (leftMeshSource && rightMeshSource) {
 		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper);
@@ -3136,10 +3120,6 @@ result->EndPolygon(dgFloat64 (1.0e-5f));
 	if (result) {
 		result->ConvertToPolygons();
 	}
-
-#if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
-	dgControlFP (controlWorld, _MCW_PC);
-#endif
 
 	return result;
 }
