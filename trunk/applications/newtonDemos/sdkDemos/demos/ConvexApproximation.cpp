@@ -76,6 +76,7 @@ dScene xxxx(world);
 dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
 dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
 dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(meshNode);
+//modelMesh->ReplaceMesh (mesh);
 //modelMesh->ReplaceMesh (brush);
 //modelMesh->ReplaceMesh (mesh1);
 //modelMesh->ReplaceMesh (mesh3);

@@ -413,9 +413,9 @@ dgInt32 dgConvexHull3d::InitVertexArray(dgHullVertex* const points, const dgFloa
 		}
 	}
 	if (!validTetrahedrum) {
-		// the point do no form a convex hull
+		// the points do not form a convex hull
 		m_count = 0;
-		_ASSERTE (0);
+		//_ASSERTE (0);
 		return count;
 	}
 
