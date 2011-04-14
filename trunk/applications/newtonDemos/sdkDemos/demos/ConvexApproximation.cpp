@@ -34,8 +34,8 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 	dVector size = dVector (5.0f, 5.0f, 5.0f, 0.0f);
 	NewtonWorld* const world = scene->GetNewton();
 
-//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
-	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _SPHERE_PRIMITIVE, 0);
+	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
+//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _SPHERE_PRIMITIVE, 0);
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _REGULAR_CONVEX_HULL_PRIMITIVE, 0);
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _RANDOM_CONVEX_HULL_PRIMITIVE, 0);
 	
@@ -48,7 +48,7 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 
 
 	// create a thing box;
-	dVector size1 = dVector (size.m_x * 4.0f, size.m_y * 0.4f, size.m_z * 0.4f, 0.0f);
+	dVector size1 = dVector (size.m_x * 4.0f, size.m_y * 0.5f, size.m_z * 0.5f, 0.0f);
 	NewtonCollision* const collision1 = CreateConvexCollision (world, GetIdentityMatrix(), size1, _BOX_PRIMITIVE, 0);
 	NewtonMesh* const brush = NewtonMeshCreateFromCollision(collision1);
 
