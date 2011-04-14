@@ -1456,7 +1456,7 @@ dgInt32 dgCollisionCompound::CalculateContacts (dgCollidingPairCollector::dgPair
 		} else if (pair->m_body1->m_collision->IsType (dgCollision::dgCollisionBVH_RTTI)) {
 			contactCount = CalculateContactsToCollisionTree (pair, proxy, useSimd);
 		} else if (pair->m_body1->m_collision->IsType (dgCollision::dgCollisionHeightField_RTTI)) {
-			contactCount = CalculateContactsToHightField (pair, proxy, useSimd);
+			contactCount = CalculateContactsToHeightField (pair, proxy, useSimd);
 		} else {
 			_ASSERTE (pair->m_body1->m_collision->IsType (dgCollision::dgCollisionUserMesh_RTTI));
 			contactCount = CalculateContactsBruteForce (pair, proxy, useSimd);
@@ -1938,7 +1938,7 @@ dgInt32 dgCollisionCompound::CalculateContactsToCollisionTree (dgCollidingPairCo
 }
 
 
-dgInt32 dgCollisionCompound::CalculateContactsToHightField (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxy, dgInt32 useSimd) const
+dgInt32 dgCollisionCompound::CalculateContactsToHeightField (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxy, dgInt32 useSimd) const
 {
 	dgNodeBase nodeProxi;
 	dgContactPoint* const contacts = pair->m_contactBuffer;

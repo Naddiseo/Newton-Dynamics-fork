@@ -2762,15 +2762,12 @@ dgInt32 dgMeshEffect::RayIntersection (dgFloat32& p0p1, const dgVector& p0, cons
 
 void dgMeshEffect::TransformMesh (const dgMatrix& matrix)
 {
-_ASSERTE (0);
- /*
 	dgMatrix normalMatrix (matrix);
 	normalMatrix.m_posit = dgVector (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (1.0f));
 
-	matrix.TransformTriplex (&m_points->m_x, sizeof (dgVector), &m_points->m_x, sizeof (dgVector), m_pointCount);
+	matrix.TransformTriplex (&m_points->m_x, sizeof (dgBigVector), &m_points->m_x, sizeof (dgBigVector), m_pointCount);
 	matrix.TransformTriplex (&m_attib[0].m_vertex.m_x, sizeof (dgVertexAtribute), &m_attib[0].m_vertex.m_x, sizeof (dgVertexAtribute), m_atribCount);
-	normalMatrix.TransformTriplex (&m_attib[0].m_normal.m_x, sizeof (dgVertexAtribute), &m_attib[0].m_normal.m_x, sizeof (dgVertexAtribute), m_atribCount);
-*/
+	normalMatrix.TransformTriplex (&m_attib[0].m_normal_x, sizeof (dgVertexAtribute), &m_attib[0].m_normal_x, sizeof (dgVertexAtribute), m_atribCount);
 }
 
 
@@ -3002,41 +2999,29 @@ void dgMeshEffect::MergeFaces (const dgMeshEffect* const source)
 
 void dgMeshEffect::ReverseMergeFaces (dgMeshEffect* const source)
 {
-_ASSERTE (0);
- /*
-
-	dgInt32 mark;
-
-	mark = source->IncLRU();
+	dgInt32 mark = source->IncLRU();
 	dgPolyhedra::Iterator iter (*source);
 	for(iter.Begin(); iter; iter ++){
-		dgEdge* edge;
-		edge = &(*iter);
+		dgEdge* const edge = &(*iter);
 		if ((edge->m_incidentFace > 0) && (edge->m_mark < mark)) {
-			dgInt32 count;
-			dgEdge * ptr;
-			dgVertexAtribute face[8];
+			dgVertexAtribute face[DG_MESH_EFFECT_POINT_SPLITED];
 
-			count = 0;
-			ptr = edge;
+			dgInt32 count = 0;
+			dgEdge* ptr = edge;
 			do {
 				ptr->m_mark = mark;
 				face[count] = source->m_attib[ptr->m_userData];
-				face[count].m_normal.m_x *= dgFloat32 (-1.0f);
-				face[count].m_normal.m_y *= dgFloat32 (-1.0f);
-				face[count].m_normal.m_z *= dgFloat32 (-1.0f);
+				face[count].m_normal_x *= dgFloat32 (-1.0f);
+				face[count].m_normal_y *= dgFloat32 (-1.0f);
+				face[count].m_normal_z *= dgFloat32 (-1.0f);
 				count ++;
+				_ASSERTE (count < (sizeof (face) / sizeof (face[0])));
 				ptr = ptr->m_prev;
 			} while (ptr != edge);
-
-			_ASSERTE (count == 3);
-			AddPolygon(count, &face[0].m_vertex.m_x, sizeof (dgVertexAtribute), face[0].m_material);
+			AddPolygon(count, &face[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (face[0].m_material));
 		}
 	}
-*/
 }
-
-
 
 
 
@@ -3079,6 +3064,10 @@ dgMeshEffect* dgMeshEffect::Union (const dgMatrix& matrix, const dgMeshEffect* c
 
 	if (rightMeshSource) {
 		delete rightMeshSource;
+	}
+
+	if (result) {
+		result->ConvertToPolygons();
 	}
 
 	return result;
@@ -3127,6 +3116,10 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 		delete rightMeshSource;
 	}
 
+	if (result) {
+		result->ConvertToPolygons();
+	}
+
 	return result;
 }
 
@@ -3169,6 +3162,10 @@ dgMeshEffect* dgMeshEffect::Intersection (const dgMatrix& matrix, const dgMeshEf
 
 	if (rightMeshSource) {
 		delete rightMeshSource;
+	}
+
+	if (result) {
+		result->ConvertToPolygons();
 	}
 
 	return result;
@@ -3219,7 +3216,6 @@ void dgMeshEffect::ClipMesh (const dgMatrix& matrix, const dgMeshEffect* const c
 			}
 		}
 
-
 		if (leftMeshClipper) {
 			delete leftMeshClipper;
 		}
@@ -3227,7 +3223,6 @@ void dgMeshEffect::ClipMesh (const dgMatrix& matrix, const dgMeshEffect* const c
 		if (rightMeshClipper) {
 			delete rightMeshClipper;
 		}
-
 
 		if (leftMeshSource) {
 			delete leftMeshSource;
@@ -4165,7 +4160,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 					}
 				}
 
-			} else {
+//			} else {
+			} else if ((hasLeftFaces & !hasRightFaces) | (!hasLeftFaces & hasRightFaces)){
 				_ASSERTE ((hasLeftFaces & !hasRightFaces) | (!hasLeftFaces & hasRightFaces));
 				//dgInt32 faceId = hasLeftFaces ? leftFaceId : rightFaceId;
 				dgMeshEffect* const dst = hasLeftFaces ? leftMesh : rightMesh;
@@ -4193,9 +4189,14 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 		*left = NULL;
 		*right = rightMesh;
 		leftMesh->Release();
-	} else {
+	} else if (leftMesh->GetCount()){
 		*right = NULL;
 		*left = leftMesh;
+		rightMesh->Release();
+	} else {
+		*right = NULL;
+		*left =  NULL;
+		leftMesh->Release();
 		rightMesh->Release();
 	}
 }

@@ -38,12 +38,12 @@ class dMeshNodeInfo: public dGeometryNodeInfo
 
 	dMeshNodeInfo();
 	dMeshNodeInfo(dScene* const world);
-	dMeshNodeInfo(NewtonMesh* mesh);
+	dMeshNodeInfo(NewtonMesh* const mesh);
 	dMeshNodeInfo(const dMeshNodeInfo& me);
 	virtual ~dMeshNodeInfo(void);
 
 	virtual NewtonMesh* GetMesh () const;
-	virtual void ReplaceMesh (NewtonMesh* mesh);
+	virtual void ReplaceMesh (NewtonMesh* const mesh);
 
 	virtual void BakeTransform (const dMatrix& matrix);
 

@@ -39,7 +39,7 @@ dMeshNodeInfo::dMeshNodeInfo(dScene* const world)
 {
 }
 
-dMeshNodeInfo::dMeshNodeInfo(NewtonMesh* mesh)
+dMeshNodeInfo::dMeshNodeInfo(NewtonMesh* const mesh)
 	:dGeometryNodeInfo (), m_mesh (mesh)
 {
 	SetName ("mesh");
@@ -60,7 +60,7 @@ NewtonMesh* dMeshNodeInfo::GetMesh () const
 	return m_mesh;
 }
 
-void dMeshNodeInfo::ReplaceMesh (NewtonMesh* mesh)
+void dMeshNodeInfo::ReplaceMesh (NewtonMesh* const mesh)
 {
 	if (m_mesh) {
 		NewtonMeshDestroy(m_mesh);

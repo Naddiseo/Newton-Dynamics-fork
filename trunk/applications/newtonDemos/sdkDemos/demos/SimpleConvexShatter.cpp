@@ -79,7 +79,7 @@ dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
 dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
 dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(meshNode);
 modelMesh->ReplaceMesh (convexParts);
-xxxx.Serialize("xxx.xml");
+xxxx.Serialize("xxx.ngd");
 #endif
 
 	DemoEntity* const entity = new DemoEntity(NULL);

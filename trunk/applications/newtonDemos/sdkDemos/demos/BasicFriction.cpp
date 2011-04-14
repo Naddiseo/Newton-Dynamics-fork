@@ -178,7 +178,7 @@ void Friction (DemoEntityManager* const scene)
 	dVector origin (-70.0f, 10.0f, 0.0f, 0.0f);
 	scene->SetCameraMatrix(rot, origin);
 
-//	scene->SaveScene ("test1.xml");
+//	scene->SaveScene ("test1.ngd");
 //	dScene CreateAlchemediaFromPhysic(); 
 
 	// resume the simulation

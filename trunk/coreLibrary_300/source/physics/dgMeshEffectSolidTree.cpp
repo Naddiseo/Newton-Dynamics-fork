@@ -489,9 +489,6 @@ void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal
 		ptr = ptr->m_next;
 	} while (ptr != lastEdge);
 
-
-
-	_ASSERTE (left || right);
 	if (left && right) {
 		*leftOut = left; 
 		*rightOut = right;
@@ -522,8 +519,7 @@ void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal
 	} else if (left) {
 		_ASSERTE (!right);
 		*leftOut = left;
-	} else {
-		_ASSERTE (right);
+	} else if (right) {
 		*rightOut = right;
 	}
 }

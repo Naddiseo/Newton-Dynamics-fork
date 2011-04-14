@@ -48,8 +48,8 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 
 
 	// create a thing box;
-	dVector size1 = dVector (1.0f, 0.1f, 0.1f, 0.0f);
-	NewtonCollision* const collision1 = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
+	dVector size1 = dVector (size.m_x * 4.0f, size.m_y * 0.4f, size.m_z * 0.4f, 0.0f);
+	NewtonCollision* const collision1 = CreateConvexCollision (world, GetIdentityMatrix(), size1, _BOX_PRIMITIVE, 0);
 	NewtonMesh* const brush = NewtonMeshCreateFromCollision(collision1);
 
 	int interior = LoadTexture("KAMEN-stup.tga");
@@ -59,11 +59,11 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 	// now use th brush to carve the big box
 	dMatrix matrix (GetIdentityMatrix());
 	NewtonMesh* const mesh1 = NewtonMeshDifference (mesh, brush, &matrix[0][0]);
-
-	matrix = dYawMatrix(3.1416f * 0.5f);
+	
+	matrix = dRollMatrix(3.1416f * 0.5f);
 	NewtonMesh* const mesh2 = NewtonMeshDifference (mesh1, brush, &matrix[0][0]);
 
-	matrix = dPitchMatrix(3.1416f * 0.5f);
+	matrix = dYawMatrix(3.1416f * 0.5f);
 	NewtonMesh* const mesh3 = NewtonMeshDifference (mesh2, brush, &matrix[0][0]);
 
 
@@ -73,9 +73,9 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 dScene xxxx(world);
 dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
 dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
-dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(modelNode);
+dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(meshNode);
 modelMesh->ReplaceMesh (mesh3);
-xxxx.Serialize("xxx.xml");
+xxxx.Serialize("xxx.ngd");
 #endif
 
 /*
