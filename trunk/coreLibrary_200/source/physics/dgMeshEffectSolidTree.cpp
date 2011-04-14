@@ -348,17 +348,11 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 
 
 
-
-//void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal, const dgHugeVector& origin, dgEdge** const poolReplacement, dgInt32 poolCount, dgEdge** leftOut, dgEdge** rightOut)
 void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal, const dgHugeVector& origin, dgEdge** leftOut, dgEdge** rightOut)
 {
-	dgEdge* left = NULL;
-	dgEdge* right = NULL;
-	dgEdge* ptr = face;
-	dgEdge* lastEdge = face;
-	dgMeshEffect::dgVertexAtribute p0 (m_points[ptr->m_incidentVertex]);
+	dgMeshEffect::dgVertexAtribute p0 (m_points[face->m_incidentVertex]);
 	dgGoogol test0 = normal % (dgHugeVector(p0.m_vertex) - origin);
-	if (ptr->m_incidentVertex > m_baseCount) {
+	if (face->m_incidentVertex > m_baseCount) {
 		if (fabs (test0.GetAproximateValue()) < dgFloat64 (1.0e-12f)) {
 			test0 = dgGoogol(dgFloat64 (0.0f));
 		}
@@ -366,6 +360,10 @@ void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal
 
  	*leftOut = NULL; 
 	*rightOut = NULL;	
+	dgEdge* ptr = face;
+	dgEdge* left = NULL;
+	dgEdge* right = NULL;
+	dgEdge* lastEdge = face;
 	do {
 		dgMeshEffect::dgVertexAtribute p1 (m_points[ptr->m_next->m_incidentVertex]);
 		dgGoogol test1 = normal % (dgHugeVector (p1.m_vertex) - origin);
@@ -422,8 +420,6 @@ void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal
 				if (!left) {
 					left = ptr;
 				}
-//			} else {
-//				_ASSERTE (0);
 			}
 
 		} else if (val0 > dgFloat64 (0.0f)) {
@@ -470,9 +466,6 @@ void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal
 				AddPoint (attr);
 				ptr = ptr->m_next;
 				left = ptr;
-
-//			} else {
-//				_ASSERTE (0);
 			}
 
 		} else {
@@ -521,6 +514,15 @@ void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal
 		*leftOut = left;
 	} else if (right) {
 		*rightOut = right;
+	} else {
+		dgBigVector clipNormal (normal.m_x.GetAproximateValue(), normal.m_y.GetAproximateValue(), normal.m_z.GetAproximateValue(), dgFloat64 (0.0f));
+		dgBigVector facenormal (FaceNormal(face, &m_points[0].m_vertex.m_x, sizeof (dgMeshEffect::dgVertexAtribute)));
+		dgFloat64 dir (facenormal % clipNormal);
+		if (dir > 0.0f) {
+			*rightOut = face;
+		} else if (dir < 0.0f) {
+			*leftOut = face;
+		}
 	}
 }
 

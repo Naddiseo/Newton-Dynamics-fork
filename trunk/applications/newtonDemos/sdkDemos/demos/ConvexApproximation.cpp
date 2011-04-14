@@ -34,8 +34,8 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 	dVector size = dVector (5.0f, 5.0f, 5.0f, 0.0f);
 	NewtonWorld* const world = scene->GetNewton();
 
-	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
-//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _SPHERE_PRIMITIVE, 0);
+//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
+	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _SPHERE_PRIMITIVE, 0);
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _REGULAR_CONVEX_HULL_PRIMITIVE, 0);
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _RANDOM_CONVEX_HULL_PRIMITIVE, 0);
 	
@@ -67,13 +67,13 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 	NewtonMesh* const mesh3 = NewtonMeshDifference (mesh2, brush, &matrix[0][0]);
 
 
-//count = 4;
-
 #if 1
 dScene xxxx(world);
 dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
 dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
 dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(meshNode);
+//modelMesh->ReplaceMesh (brush);
+//modelMesh->ReplaceMesh (mesh1);
 modelMesh->ReplaceMesh (mesh3);
 xxxx.Serialize("xxx.ngd");
 #endif
