@@ -69,7 +69,8 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 	dMatrix textureMatrix (GetIdentityMatrix());
 	textureMatrix[0][0] = 1.0f / size.m_x;
 	textureMatrix[1][1] = 1.0f / size.m_y;
-	NewtonMesh* const tetrahedras = NewtonMeshTetrahedralization (mesh3, interior, &textureMatrix[0][0]);
+//	NewtonMesh* const tetrahedras = NewtonMeshTetrahedralization (mesh3, interior, &textureMatrix[0][0]);
+	NewtonMesh* const tetrahedras = NewtonMeshTetrahedralization (mesh1, interior, &textureMatrix[0][0]);
 
 #if 1
 dScene xxxx(world);

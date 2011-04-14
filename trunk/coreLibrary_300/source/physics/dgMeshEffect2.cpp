@@ -2106,9 +2106,7 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 }
 
 
-//dgCollision* dgMeshEffect::CreateConvexApproximationCollision(dgWorld* const world, dgInt32 maxCount, dgInt32 shapeId, dgInt32 childrenID) const
-//dgMeshEffect* dgMeshEffect::CreateConvexApproximation(dgInt32 maxCount) const
-dgMeshEffect* dgMeshEffect::CreateDelanayTretrahedralization (dgInt32 interionMaterial, dgMatrix& matrix) const
+dgMeshEffect* dgMeshEffect::CreateDelanayTretrahedralization (dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
 {
 /*
 	dgMeshEffect tmpMesh (*this);
@@ -2212,37 +2210,84 @@ for (iter.Begin(); iter; iter ++)
 		pointArray[2] = delaunayTetrahedras.GetVertex(face.m_index[2]);
 		pointArray[3] = delaunayTetrahedras.GetVertex(face.m_otherVertex);
 
-		dgMeshEffect* const convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, 4, sizeof (dgBigVector), dgFloat64 (1.0e-3f));
+		pointArray[0].m_w = dgFloat64 (0.0f);
+		pointArray[1].m_w = dgFloat64 (0.0f);
+		pointArray[2].m_w = dgFloat64 (0.0f);
+		pointArray[3].m_w = dgFloat64 (0.0f);
+
+		dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, 4, sizeof (dgBigVector), dgFloat64 (1.0e-3f));
 		if (convexMesh->GetCount()) {
 
+			convexMesh->CalculateNormals(dgFloat64 (45.0f * 3.1416f / 180.0f));
+			convexMesh->UniformBoxMapping (interiorMaterial, textureProjectionMatrix);
+
+			dgMeshEffect* leftConvexMesh = NULL;
+			dgMeshEffect* rightConvexMesh = NULL;
+			dgMeshEffect* leftMeshClipper = NULL;
+			dgMeshEffect* rightMeshClipper = NULL;
+
+			convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
+			if (leftConvexMesh && rightConvexMesh) {
+				ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
+				if (leftMeshClipper && rightMeshClipper) {
+					convexMesh->Release();
+					convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+
+					convexMesh->BeginPolygon();
+					convexMesh->MergeFaces(leftConvexMesh);
+					convexMesh->MergeFaces(leftMeshClipper);
+					convexMesh->EndPolygon(dgFloat64 (1.0e-5f));
+				}
+			} else if (rightConvexMesh) {
+				convexMesh->Release();
+				convexMesh = NULL;
+			}
 
 
-#if 1
-			dgBigVector xxx (0, 0, 0, 0);
-			for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
-				xxx += convexMesh->m_points[i];
-			}
-			xxx = xxx.Scale (0.5f / convexMesh->m_pointCount);
-			for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
-				convexMesh->m_points[i] += xxx;
-			}
-			for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
-				convexMesh->m_attib[i].m_vertex += xxx;
-			}
-#endif
-
-			for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
-				convexMesh->m_points[i].m_w = layer;
-			}
-			for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
-				convexMesh->m_attib[i].m_vertex.m_w = layer;
+			if (leftConvexMesh) {
+				leftConvexMesh->Release();
 			}
 
-			tetrahedralization->MergeFaces(convexMesh);
-			layer += dgFloat64 (1.0f);
+			if (rightConvexMesh) {
+				rightConvexMesh->Release();
+			}
+
+			if (leftMeshClipper) {
+				leftMeshClipper->Release();;
+			}
+
+			if (rightMeshClipper) {
+				rightMeshClipper->Release();
+			}
+
+			if (convexMesh) {
+	#if 0
+				dgBigVector xxx (0, 0, 0, 0);
+				for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
+					xxx += convexMesh->m_points[i];
+				}
+				xxx = xxx.Scale (0.5f / convexMesh->m_pointCount);
+				for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
+					convexMesh->m_points[i] += xxx;
+				}
+				for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
+					convexMesh->m_attib[i].m_vertex += xxx;
+				}
+	#endif
+
+				for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
+					convexMesh->m_points[i].m_w = layer;
+				}
+				for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
+					convexMesh->m_attib[i].m_vertex.m_w = layer;
+				}
+
+				tetrahedralization->MergeFaces(convexMesh);
+				layer += dgFloat64 (1.0f);
+
+				convexMesh->Release();
+			}
 		}
-
-		convexMesh->Release();
 	}
 
 	 tetrahedralization->EndPolygon(dgFloat64 (1.0e-5f));
