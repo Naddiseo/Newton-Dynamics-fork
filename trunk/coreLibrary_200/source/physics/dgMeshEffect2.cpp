@@ -2236,7 +2236,7 @@ for (iter.Begin(); iter; iter ++)
 //		pointArray[3].m_w = dgFloat64 (0.0f);
 
 
-		dgMeshEffect* const convexMesh = MakeDelanayIntersection (tree, &pointArray[0], count, interiorMaterial, textureProjectionMatrix, dgFloat64 (45.0f * 3.1416f / 180.0f));
+		dgMeshEffect* const convexMesh = MakeDelanayIntersection (tree, &pointArray[0], 4, interiorMaterial, textureProjectionMatrix, dgFloat64 (45.0f * 3.1416f / 180.0f));
 		if (convexMesh) {
 			if (convexMesh) {
 				for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
@@ -2268,20 +2268,6 @@ for (iter.Begin(); iter; iter ++)
 
 dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* const tree, dgBigVector* const points, dgInt32 count, dgInt32 materialId, const dgMatrix& textureProjectionMatrix, dgFloat32 normalAngleInRadians) const
 {
-
-static int xxx1;
-xxx1 ++;
-
-//	dgBigVector xxx (0, 0, 0, 0);
-//	for(int i = 0; i < 4; i ++)
-//	{
-//		xxx += pointArray[i];
-//	}
-//	xxx = xxx.Scale (0.25);
-//	if (((xxx.m_y > -1.25) && (xxx.m_y < 1.25) && (xxx.m_z > -1.25) && (xxx.m_z < 1.25))) {
-
-
-
 	for (dgInt32 i = 0; i < count; i ++) {
 		volatile float x = dgFloat32 (points[i].m_x);
 		volatile float y = dgFloat32 (points[i].m_y);
@@ -2291,6 +2277,19 @@ xxx1 ++;
 		points[i].m_z = z;
 		points[i].m_w = dgFloat64 (0.0f);
 	}
+
+
+static int xxx1;
+
+
+dgBigVector xxx (0, 0, 0, 0);
+for(int i = 0; i < 4; i ++)
+{
+	xxx += points[i];
+}
+xxx = xxx.Scale (0.25);
+//if (((xxx.m_y > -1.25) && (xxx.m_y < 1.25) && (xxx.m_z > -1.25) && (xxx.m_z < 1.25))) {
+if (1) {
 
 	dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &points[0].m_x, count, sizeof (dgBigVector), dgFloat64 (0.0f));
 	_ASSERTE (convexMesh);
@@ -2304,17 +2303,78 @@ xxx1 ++;
 		dgMeshEffect* leftMeshClipper = NULL;
 		dgMeshEffect* rightMeshClipper = NULL;
 
+if (xxx1 == 2)
+xxx1 *=1;
+
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
 			if (leftMeshClipper && rightMeshClipper) {
 				convexMesh->Release();
-				convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+				convexMesh = NULL;
 
-				convexMesh->BeginPolygon();
-				convexMesh->MergeFaces(leftConvexMesh);
-				convexMesh->MergeFaces(leftMeshClipper);
-				convexMesh->EndPolygon(dgFloat64 (1.0e-5f));
+				dgInt32 leftConvexMark = leftConvexMesh->IncLRU();
+				Iterator leftConvexIter (*leftConvexMesh);
+				for (leftConvexIter.Begin(); leftConvexIter; ) {
+					dgEdge* const leftConvexFace = &(*leftConvexIter);
+					leftConvexIter ++;
+					if ((leftConvexFace->m_mark != leftConvexMark) && (leftConvexFace->m_incidentFace > 0)) {
+						dgEdge* ptr = leftConvexFace;
+						do {
+							ptr->m_mark = leftConvexMark;
+							ptr = ptr->m_next;
+						} while (ptr != leftConvexFace);
+
+
+						dgBigVector convexNormal (leftConvexMesh->FaceNormal(leftConvexFace, &leftConvexMesh->m_points[0].m_x, sizeof (dgBigVector)));
+						dgBigVector convexPoint (leftConvexMesh->m_points[leftConvexFace->m_incidentVertex]);
+
+						dgFloat64 error2 = (convexNormal % convexNormal) * dgFloat64 (1.0e-5f * 1.0e-5f);
+						dgInt32 deleteFaceCount = 0;
+						dgEdge* faceArray[32];
+						dgInt32 leftClipperMark = leftMeshClipper->IncLRU();
+						Iterator leftClipperIter (*leftMeshClipper);
+						for (leftClipperIter.Begin (); leftClipperIter; ) {
+							dgEdge* const leftClipperFace = &(*leftClipperIter);
+							leftClipperIter ++;
+							if ((leftClipperFace->m_mark != leftClipperMark) && (leftClipperFace->m_incidentFace > 0)) {
+								dgEdge* ptr = leftClipperFace;
+								do {
+									ptr->m_mark = leftClipperMark;
+									ptr = ptr->m_next;
+								} while (ptr != leftClipperFace);
+
+								dgBigVector clipNormal (leftMeshClipper->FaceNormal(leftClipperFace, &leftMeshClipper->m_points[0].m_x, sizeof (dgBigVector)));
+								dgBigVector clipPoint (leftMeshClipper->m_points[leftClipperFace->m_incidentVertex]);
+
+								if ((clipNormal % convexNormal) < dgFloat64 (0.0f)) {
+									dgFloat64 dist = convexNormal % (clipPoint - convexPoint);
+									if ((dist * dist) < error2) {
+										faceArray[deleteFaceCount] = leftClipperFace;
+										deleteFaceCount ++;
+									}
+								}
+							}
+						}
+
+						if (deleteFaceCount) {
+							for (dgInt32 i = 0; i < deleteFaceCount; i ++) {
+								leftMeshClipper->DeleteFace(faceArray[i]);
+							}
+							leftConvexMesh->DeleteFace(leftConvexFace);
+							leftConvexIter.Begin ();
+						}
+					}
+				}
+				
+				if (leftConvexMesh->GetCount() && leftMeshClipper->GetCount()) {
+					convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+					convexMesh->BeginPolygon();
+					convexMesh->MergeFaces(leftConvexMesh);
+					convexMesh->MergeFaces(leftMeshClipper);
+					convexMesh->EndPolygon(dgFloat64 (1.0e-5f));
+				}
+xxx1 ++;
 			}
 		} else if (rightConvexMesh) {
 			convexMesh->Release();
@@ -2338,25 +2398,31 @@ xxx1 ++;
 			rightMeshClipper->Release();
 		}
 
-		#if 0
-		if (convexMesh) {
-			dgBigVector xxx (0, 0, 0, 0);
-			for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
-				xxx += convexMesh->m_points[i];
-			}
-			xxx = xxx.Scale (0.5f / convexMesh->m_pointCount);
-			for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
-				convexMesh->m_points[i] += xxx;
-			}
-			for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
-				convexMesh->m_attib[i].m_vertex += xxx;
-			}
-		}
-		#endif
+#if 1
+if (convexMesh) {
+	dgBigVector xxx (0, 0, 0, 0);
+	for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
+		xxx += convexMesh->m_points[i];
+	}
+	xxx = xxx.Scale (0.5f / convexMesh->m_pointCount);
+	for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
+		convexMesh->m_points[i] += xxx;
+	}
+	for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
+		convexMesh->m_attib[i].m_vertex += xxx;
+	}
+}
+#endif
+
+
 	} else {
 		convexMesh->Release();
 		convexMesh = NULL;
 	}
 
+//if (xxx1 == 3)
 	return convexMesh;
+
+}
+return NULL;
 }

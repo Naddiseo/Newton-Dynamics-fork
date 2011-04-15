@@ -132,6 +132,9 @@
     <ClCompile Include="..\..\..\source\physics\dgWorldDynamicUpdate.cpp">
       <Filter>Systems</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\source\physics\dgMeshEffectSolidTree.cpp">
+      <Filter>Systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\source\physics\dgBallConstraint.h">
@@ -252,6 +255,9 @@
       <Filter>Systems</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\source\physics\dgWorldDynamicUpdate.h">
+      <Filter>Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\physics\dgMeshEffectSolidTree.h">
       <Filter>Systems</Filter>
     </ClInclude>
   </ItemGroup>

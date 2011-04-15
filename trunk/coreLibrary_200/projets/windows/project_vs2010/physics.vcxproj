@@ -1006,6 +1006,7 @@
     <ClCompile Include="..\..\..\source\physics\dgContact.cpp" />
     <ClCompile Include="..\..\..\source\physics\dgCorkscrewConstraint.cpp" />
     <ClCompile Include="..\..\..\source\physics\dgHingeConstraint.cpp" />
+    <ClCompile Include="..\..\..\source\physics\dgMeshEffectSolidTree.cpp" />
     <ClCompile Include="..\..\..\source\physics\dgPointToCurveConstraint.cpp" />
     <ClCompile Include="..\..\..\source\physics\dgSlidingConstraint.cpp" />
     <ClCompile Include="..\..\..\source\physics\dgUniversalConstraint.cpp" />
@@ -1065,6 +1066,7 @@
     <ClInclude Include="..\..\..\source\physics\dgContact.h" />
     <ClInclude Include="..\..\..\source\physics\dgCorkscrewConstraint.h" />
     <ClInclude Include="..\..\..\source\physics\dgHingeConstraint.h" />
+    <ClInclude Include="..\..\..\source\physics\dgMeshEffectSolidTree.h" />
     <ClInclude Include="..\..\..\source\physics\dgPointToCurveConstraint.h" />
     <ClInclude Include="..\..\..\source\physics\dgSlidingConstraint.h" />
     <ClInclude Include="..\..\..\source\physics\dgUniversalConstraint.h" />
