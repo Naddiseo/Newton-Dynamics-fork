@@ -338,11 +338,15 @@ inline dgMeshEffect* dgMeshEffect::GetNextLayer (dgMeshEffect* const layerSegmen
 
 inline dgFloat64 dgMeshEffect::QuantizeCordinade(dgFloat64 x) const
 {
-//	dgFloat64 scale = dgFloat64(1<<23);
-//	dgFloat64 den = (dgFloat64 (1.0f) / dgFloat64(1<<23));
-//	dgFloat64 y = floor (x * scale) * den; 
-//	return y; 
-	return x;
+	dgInt32 exp;
+	dgFloat64 mantissa = frexp(x, &exp);
+
+	const dgFloat64 scale = dgFloat64 (1 << 30);
+	const dgFloat64 invScale = dgFloat64 (1.0f) / dgFloat64 (1 << 30);
+	mantissa = invScale * floor (mantissa * scale);
+
+	dgFloat64 x1 = ldexp(mantissa, exp);
+	return x1;
 }
 
 #endif

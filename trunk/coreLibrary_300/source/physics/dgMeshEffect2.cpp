@@ -2012,13 +2012,10 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 		}
 
 #if 1
-		for (int i = 0; i < count; i ++) {
-			volatile float x = dgFloat32 (pointArray[i].m_x);
-			volatile float y = dgFloat32 (pointArray[i].m_y);
-			volatile float z = dgFloat32 (pointArray[i].m_z);
-			pointArray[i].m_x = x;
-			pointArray[i].m_y = y;
-			pointArray[i].m_z = z;
+		for (dgInt32 i = 0; i < count; i ++) {
+			pointArray[i].m_x = QuantizeCordinade(pointArray[i].m_x);
+			pointArray[i].m_y = QuantizeCordinade(pointArray[i].m_y);
+			pointArray[i].m_z = QuantizeCordinade(pointArray[i].m_z);
 		}
 
 		dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgBigVector), dgFloat64 (0.0f));
@@ -2230,11 +2227,6 @@ for (iter.Begin(); iter; iter ++)
 		pointArray[1] = delaunayTetrahedras.GetVertex(face.m_index[1]);
 		pointArray[2] = delaunayTetrahedras.GetVertex(face.m_index[2]);
 		pointArray[3] = delaunayTetrahedras.GetVertex(face.m_otherVertex);
-//		pointArray[0].m_w = dgFloat64 (0.0f);
-//		pointArray[1].m_w = dgFloat64 (0.0f);
-//		pointArray[2].m_w = dgFloat64 (0.0f);
-//		pointArray[3].m_w = dgFloat64 (0.0f);
-
 
 		dgMeshEffect* const convexMesh = MakeDelanayIntersection (tree, &pointArray[0], 4, interiorMaterial, textureProjectionMatrix, dgFloat64 (45.0f * 3.1416f / 180.0f));
 		if (convexMesh) {
@@ -2322,6 +2314,9 @@ dgInt32 dgMeshEffect::GetDelanayIntersectionCoplanalFaces (dgEdge** const edgeAr
 dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* const tree, dgBigVector* const points, dgInt32 count, dgInt32 materialId, const dgMatrix& textureProjectionMatrix, dgFloat32 normalAngleInRadians) const
 {
 	for (dgInt32 i = 0; i < count; i ++) {
+		points[i].m_x = QuantizeCordinade(points[i].m_x);
+		points[i].m_y = QuantizeCordinade(points[i].m_y);
+		points[i].m_z = QuantizeCordinade(points[i].m_z);
 		points[i].m_w = dgFloat64 (0.0f);
 	}
 
@@ -2364,8 +2359,6 @@ xxx1 *=1;
 			if (leftMeshClipper && rightMeshClipper) {
 				convexMesh->Release();
 				convexMesh = NULL;
-
-
 
 				dgEdge* convexFaceDelete[256];
 				dgEdge* clipFaceDelete[256];
