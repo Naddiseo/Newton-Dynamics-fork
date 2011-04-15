@@ -4054,6 +4054,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	leftMesh->BeginPolygon();
 	rightMesh->BeginPolygon();
 
+//static int xxxx;
+//xxxx ++;
 
 	dgInt32 rightFaceId = 1 << 24;
 	dgInt32 leftFaceId =  2 << 24;
@@ -4063,7 +4065,9 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 		edgeList.Remove (edgeList.GetRoot());
 		
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
-			dgMeshTreeCSGFace clipFace (mesh, face);
+
+
+ 			dgMeshTreeCSGFace clipFace (mesh, face);
 			dgEdge* ptr = face;
 			do {
 				edgeList.Remove(ptr);
@@ -4084,6 +4088,10 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 			faceOnStack[0] = ptr;
 			stackPool[0] = clipper;
 
+//dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVector)));
+//if (xxxx == 7)
+//xxxx *=1;
+
 
 			bool hasLeftFaces = false;
 			bool hasRightFaces = false;
@@ -4095,7 +4103,6 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 				dgEdge* leftFace; 
 				dgEdge* rightFace;
 				clipFace.ClipFace (face, root->m_normal, root->m_origin, &leftFace, &rightFace);
-				//_ASSERTE (leftFace || rightFace);
 
 				if (rightFace) {
 					dgEdge* ptr = rightFace;

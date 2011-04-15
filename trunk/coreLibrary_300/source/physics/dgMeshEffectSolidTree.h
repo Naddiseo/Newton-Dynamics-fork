@@ -40,7 +40,7 @@ class dgMeshTreeCSGFace: public dgPolyhedra
 	bool CheckConsistency () const;
 
 	dgInt32 m_count;
-	dgInt32 m_baseCount;
+//	dgInt32 m_baseCount;
 	dgMeshEffect::dgVertexAtribute m_points[DG_MESH_EFFECT_POINT_SPLITED];
 };
 

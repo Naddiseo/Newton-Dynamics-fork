@@ -2265,6 +2265,59 @@ for (iter.Begin(); iter; iter ++)
 }
 
 
+dgInt32 dgMeshEffect::GetDelanayIntersectionCoplanalFaces (dgEdge** const edgeArray, dgMeshEffect* const otherCap) const
+{
+	const dgFloat64 tol = dgFloat64 (1.0e-5f);
+	const dgFloat64 tol2 = tol * tol;
+
+	dgInt32 count = 0;
+	dgInt32 mark = IncLRU();
+	Iterator iter (*this);
+	for (iter.Begin(); iter; iter ++) {
+		dgEdge* const face = &(*iter);
+		if ((face->m_mark != mark) && (face->m_incidentFace > 0)) {
+			dgEdge* ptr = face;
+			do {
+				ptr->m_mark = mark;
+				ptr = ptr->m_next;
+			} while (ptr != face);
+
+			dgBigVector normal (FaceNormal(face, &m_points[0].m_x, sizeof (dgBigVector)));
+			dgBigVector origin (m_points[face->m_incidentVertex]);
+			
+			dgFloat64 error2 = (normal % normal) * tol2;
+			dgInt32 capMark = otherCap->IncLRU();
+			
+			Iterator capIter (*otherCap);
+			for (capIter.Begin (); capIter; capIter ++) {
+				dgEdge* const capFace = &(*capIter);
+				if ((capFace->m_mark != capMark) && (capFace->m_incidentFace > 0)) {
+					dgEdge* ptr = capFace;
+					do {
+						ptr->m_mark = capMark;
+						ptr = ptr->m_next;
+					} while (ptr != capFace);
+
+					dgBigVector capNormal (otherCap->FaceNormal(capFace, &otherCap->m_points[0].m_x, sizeof (dgBigVector)));
+
+					if ((capNormal % normal) < dgFloat64 (0.0f)) {
+						dgBigVector capOrigin (otherCap->m_points[capFace->m_incidentVertex]);
+						dgFloat64 dist = normal % (capOrigin - origin);
+						if ((dist * dist) < error2) {
+							edgeArray[count] = face; 
+							count ++;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	
+	return count;
+}
+
 
 dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* const tree, dgBigVector* const points, dgInt32 count, dgInt32 materialId, const dgMatrix& textureProjectionMatrix, dgFloat32 normalAngleInRadians) const
 {
@@ -2280,7 +2333,9 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 
 
 static int xxx1;
+dgTrace (("%d\n", xxx1))
 xxx1 ++;
+
 
 dgBigVector xxx (0, 0, 0, 0);
 for(int i = 0; i < 4; i ++)
@@ -2306,69 +2361,30 @@ if (1) {
 if (xxx1 == 149)
 xxx1 *=1;
 
+//if (xxx1==26)
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
 
 //if (xxx1 != 149)
-if (0)
+//if (xxx1==26)
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
 			if (leftMeshClipper && rightMeshClipper) {
 				convexMesh->Release();
 				convexMesh = NULL;
 
-				dgInt32 leftConvexMark = leftConvexMesh->IncLRU();
-				Iterator leftConvexIter (*leftConvexMesh);
-				for (leftConvexIter.Begin(); leftConvexIter; ) {
-					dgEdge* const leftConvexFace = &(*leftConvexIter);
-					leftConvexIter ++;
-					if ((leftConvexFace->m_mark != leftConvexMark) && (leftConvexFace->m_incidentFace > 0)) {
-						dgEdge* ptr = leftConvexFace;
-						do {
-							ptr->m_mark = leftConvexMark;
-							ptr = ptr->m_next;
-						} while (ptr != leftConvexFace);
 
 
-						dgBigVector convexNormal (leftConvexMesh->FaceNormal(leftConvexFace, &leftConvexMesh->m_points[0].m_x, sizeof (dgBigVector)));
-						dgBigVector convexPoint (leftConvexMesh->m_points[leftConvexFace->m_incidentVertex]);
+				dgEdge* convexFaceDelete[256];
+				dgEdge* clipFaceDelete[256];
+				dgInt32 convexFaceDeleteCount = leftConvexMesh->GetDelanayIntersectionCoplanalFaces (convexFaceDelete, leftMeshClipper);
+				dgInt32 clipFaceDeleteCount = leftMeshClipper->GetDelanayIntersectionCoplanalFaces (clipFaceDelete, leftConvexMesh);
 
-						dgFloat64 tol = dgFloat64 (1.0e-4f);
-						dgFloat64 error2 = (convexNormal % convexNormal) * tol * tol;
-						dgInt32 deleteFaceCount = 0;
-						dgEdge* faceArray[32];
-						dgInt32 leftClipperMark = leftMeshClipper->IncLRU();
-						Iterator leftClipperIter (*leftMeshClipper);
-						for (leftClipperIter.Begin (); leftClipperIter; ) {
-							dgEdge* const leftClipperFace = &(*leftClipperIter);
-							leftClipperIter ++;
-							if ((leftClipperFace->m_mark != leftClipperMark) && (leftClipperFace->m_incidentFace > 0)) {
-								dgEdge* ptr = leftClipperFace;
-								do {
-									ptr->m_mark = leftClipperMark;
-									ptr = ptr->m_next;
-								} while (ptr != leftClipperFace);
+				for (dgInt32 i = 0; i < convexFaceDeleteCount; i ++) {
+					leftConvexMesh->DeleteFace(convexFaceDelete[i]);
+				}
 
-								dgBigVector clipNormal (leftMeshClipper->FaceNormal(leftClipperFace, &leftMeshClipper->m_points[0].m_x, sizeof (dgBigVector)));
-								dgBigVector clipPoint (leftMeshClipper->m_points[leftClipperFace->m_incidentVertex]);
-
-								if ((clipNormal % convexNormal) < dgFloat64 (0.0f)) {
-									dgFloat64 dist = convexNormal % (clipPoint - convexPoint);
-									if ((dist * dist) < error2) {
-										faceArray[deleteFaceCount] = leftClipperFace;
-										deleteFaceCount ++;
-									}
-								}
-							}
-						}
-
-						if (deleteFaceCount) {
-							for (dgInt32 i = 0; i < deleteFaceCount; i ++) {
-								leftMeshClipper->DeleteFace(faceArray[i]);
-							}
-							leftConvexMesh->DeleteFace(leftConvexFace);
-							leftConvexIter.Begin ();
-						}
-					}
+				for (dgInt32 i = 0; i < clipFaceDeleteCount; i ++) {
+					leftMeshClipper->DeleteFace(clipFaceDelete[i]);
 				}
 				
 				if (leftConvexMesh->GetCount() && leftMeshClipper->GetCount()) {
@@ -2425,6 +2441,8 @@ if (convexMesh) {
 	}
 
 //if (xxx1 == 149)
+//if ((xxx1 >= 26) && (xxx1 < 28))
+//if ((xxx1 == 26))
 	return convexMesh;
 
 }

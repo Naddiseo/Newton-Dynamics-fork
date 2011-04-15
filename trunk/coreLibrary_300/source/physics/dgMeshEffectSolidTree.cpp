@@ -37,7 +37,7 @@ dgMeshTreeCSGFace::dgMeshTreeCSGFace (const dgMeshEffect& mesh, dgEdge* const fa
 		ptr = ptr->m_next;
 	} while (ptr != face);
 
-	m_baseCount = m_count;
+	//m_baseCount = m_count;
 
 	BeginFace();
 	AddFace(m_count, indexList);
@@ -352,11 +352,11 @@ void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal
 {
 	dgMeshEffect::dgVertexAtribute p0 (m_points[face->m_incidentVertex]);
 	dgGoogol test0 = normal % (dgHugeVector(p0.m_vertex) - origin);
-	if (face->m_incidentVertex > m_baseCount) {
+//	if (face->m_incidentVertex > m_baseCount) {
 		if (fabs (test0.GetAproximateValue()) < dgFloat64 (1.0e-12f)) {
 			test0 = dgGoogol(dgFloat64 (0.0f));
 		}
-	}
+//	}
 
  	*leftOut = NULL; 
 	*rightOut = NULL;	
@@ -367,11 +367,11 @@ void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal
 	do {
 		dgMeshEffect::dgVertexAtribute p1 (m_points[ptr->m_next->m_incidentVertex]);
 		dgGoogol test1 = normal % (dgHugeVector (p1.m_vertex) - origin);
-		if (ptr->m_next->m_incidentVertex > m_baseCount) {
+//		if (ptr->m_next->m_incidentVertex > m_baseCount) {
 			if (fabs (test1.GetAproximateValue()) < dgFloat64 (1.0e-12f)) {
 				test1 = dgGoogol(dgFloat64 (0.0f));
 			}
-		}
+//		}
 
 		dgFloat64 val0 = test0.GetAproximateValue();
 		dgFloat64 val1 = test1.GetAproximateValue();
