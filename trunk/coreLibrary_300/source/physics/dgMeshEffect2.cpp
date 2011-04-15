@@ -2215,6 +2215,15 @@ for (iter.Begin(); iter; iter ++)
 		pointArray[2].m_w = dgFloat64 (0.0f);
 		pointArray[3].m_w = dgFloat64 (0.0f);
 
+dgBigVector xxx (0, 0, 0, 0);
+for(int i = 0; i < 4; i ++)
+{
+xxx += pointArray[i];
+}
+xxx = xxx.Scale (0.25);
+//if (((xxx.m_y > -1.25) && (xxx.m_y < 1.25) && (xxx.m_z > -1.25) && (xxx.m_z < 1.25))) {
+if (1) {
+
 		dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, 4, sizeof (dgBigVector), dgFloat64 (1.0e-3f));
 		if (convexMesh->GetCount()) {
 
@@ -2261,7 +2270,7 @@ for (iter.Begin(); iter; iter ++)
 			}
 
 			if (convexMesh) {
-	#if 0
+	#if 1
 				dgBigVector xxx (0, 0, 0, 0);
 				for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 					xxx += convexMesh->m_points[i];
@@ -2288,6 +2297,7 @@ for (iter.Begin(); iter; iter ++)
 				convexMesh->Release();
 			}
 		}
+}
 	}
 
 	 tetrahedralization->EndPolygon(dgFloat64 (1.0e-5f));
