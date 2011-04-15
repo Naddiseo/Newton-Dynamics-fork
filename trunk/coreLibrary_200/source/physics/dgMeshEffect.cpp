@@ -3068,6 +3068,8 @@ dgMeshEffect* dgMeshEffect::Union (const dgMatrix& matrix, const dgMeshEffect* c
 
 	if (result) {
 		result->ConvertToPolygons();
+		dgStack<dgInt32> map(result->m_pointCount + 1);
+		result->RemoveUnusedVertices(&map[0]);
 	}
 
 	return result;
@@ -3119,6 +3121,8 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 
 	if (result) {
 		result->ConvertToPolygons();
+		dgStack<dgInt32> map(result->m_pointCount + 1);
+		result->RemoveUnusedVertices(&map[0]);
 	}
 
 	return result;
@@ -3167,6 +3171,8 @@ dgMeshEffect* dgMeshEffect::Intersection (const dgMatrix& matrix, const dgMeshEf
 
 	if (result) {
 		result->ConvertToPolygons();
+		dgStack<dgInt32> map(result->m_pointCount + 1);
+		result->RemoveUnusedVertices(&map[0]);
 	}
 
 	return result;

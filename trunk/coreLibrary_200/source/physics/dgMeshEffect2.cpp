@@ -2280,7 +2280,7 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 
 
 static int xxx1;
-
+xxx1 ++;
 
 dgBigVector xxx (0, 0, 0, 0);
 for(int i = 0; i < 4; i ++)
@@ -2303,10 +2303,13 @@ if (1) {
 		dgMeshEffect* leftMeshClipper = NULL;
 		dgMeshEffect* rightMeshClipper = NULL;
 
-if (xxx1 == 2)
+if (xxx1 == 149)
 xxx1 *=1;
 
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
+
+//if (xxx1 != 149)
+if (0)
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
 			if (leftMeshClipper && rightMeshClipper) {
@@ -2329,7 +2332,8 @@ xxx1 *=1;
 						dgBigVector convexNormal (leftConvexMesh->FaceNormal(leftConvexFace, &leftConvexMesh->m_points[0].m_x, sizeof (dgBigVector)));
 						dgBigVector convexPoint (leftConvexMesh->m_points[leftConvexFace->m_incidentVertex]);
 
-						dgFloat64 error2 = (convexNormal % convexNormal) * dgFloat64 (1.0e-5f * 1.0e-5f);
+						dgFloat64 tol = dgFloat64 (1.0e-4f);
+						dgFloat64 error2 = (convexNormal % convexNormal) * tol * tol;
 						dgInt32 deleteFaceCount = 0;
 						dgEdge* faceArray[32];
 						dgInt32 leftClipperMark = leftMeshClipper->IncLRU();
@@ -2374,7 +2378,7 @@ xxx1 *=1;
 					convexMesh->MergeFaces(leftMeshClipper);
 					convexMesh->EndPolygon(dgFloat64 (1.0e-5f));
 				}
-xxx1 ++;
+
 			}
 		} else if (rightConvexMesh) {
 			convexMesh->Release();
@@ -2420,7 +2424,7 @@ if (convexMesh) {
 		convexMesh = NULL;
 	}
 
-//if (xxx1 == 3)
+//if (xxx1 == 149)
 	return convexMesh;
 
 }

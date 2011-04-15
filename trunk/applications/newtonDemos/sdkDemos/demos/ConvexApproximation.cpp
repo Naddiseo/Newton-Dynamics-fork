@@ -70,7 +70,7 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 	textureMatrix[0][0] = 1.0f / size.m_x;
 	textureMatrix[1][1] = 1.0f / size.m_y;
 //	NewtonMesh* const tetrahedras = NewtonMeshTetrahedralization (mesh3, interior, &textureMatrix[0][0]);
-	NewtonMesh* const tetrahedras = NewtonMeshTetrahedralization (mesh1, interior, &textureMatrix[0][0]);
+	NewtonMesh* const tetrahedras = NewtonMeshTetrahedralization (mesh2, interior, &textureMatrix[0][0]);
 
 #if 1
 dScene xxxx(world);
@@ -80,6 +80,7 @@ dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(meshNode);
 //modelMesh->ReplaceMesh (mesh);
 //modelMesh->ReplaceMesh (brush);
 //modelMesh->ReplaceMesh (mesh1);
+//modelMesh->ReplaceMesh (mesh2);
 //modelMesh->ReplaceMesh (mesh3);
 modelMesh->ReplaceMesh (tetrahedras);
 
