@@ -2322,18 +2322,17 @@ dgInt32 dgMeshEffect::GetDelanayIntersectionCoplanalFaces (dgEdge** const edgeAr
 dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* const tree, dgBigVector* const points, dgInt32 count, dgInt32 materialId, const dgMatrix& textureProjectionMatrix, dgFloat32 normalAngleInRadians) const
 {
 	for (dgInt32 i = 0; i < count; i ++) {
-		volatile float x = dgFloat32 (points[i].m_x);
-		volatile float y = dgFloat32 (points[i].m_y);
-		volatile float z = dgFloat32 (points[i].m_z);
-		points[i].m_x = x;
-		points[i].m_y = y;
-		points[i].m_z = z;
+//		volatile float x = dgFloat32 (points[i].m_x);
+//		volatile float y = dgFloat32 (points[i].m_y);
+//		volatile float z = dgFloat32 (points[i].m_z);
+//		points[i].m_x = x;
+//		points[i].m_y = y;
+//		points[i].m_z = z;
 		points[i].m_w = dgFloat64 (0.0f);
 	}
 
 
 static int xxx1;
-dgTrace (("%d\n", xxx1))
 xxx1 ++;
 
 
@@ -2361,11 +2360,12 @@ if (1) {
 if (xxx1 == 149)
 xxx1 *=1;
 
-//if (xxx1==26)
+if (xxx1==17)
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
 
 //if (xxx1 != 149)
-//if (xxx1==26)
+if (xxx1==17)
+//if (0)
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
 			if (leftMeshClipper && rightMeshClipper) {
@@ -2424,7 +2424,7 @@ if (convexMesh) {
 	for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 		xxx += convexMesh->m_points[i];
 	}
-	xxx = xxx.Scale (0.5f / convexMesh->m_pointCount);
+	xxx = xxx.Scale (0.2f / convexMesh->m_pointCount);
 	for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 		convexMesh->m_points[i] += xxx;
 	}
@@ -2441,8 +2441,8 @@ if (convexMesh) {
 	}
 
 //if (xxx1 == 149)
-//if ((xxx1 >= 26) && (xxx1 < 28))
-//if ((xxx1 == 26))
+//if ((xxx1 >= 16) && (xxx1 < 18))
+if ((xxx1 == 17))
 	return convexMesh;
 
 }

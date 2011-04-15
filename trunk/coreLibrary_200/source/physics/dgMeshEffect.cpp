@@ -3248,8 +3248,12 @@ void dgMeshEffect::ClipMesh (const dgMatrix& matrix, const dgMeshEffect* const c
 dgMeshEffectSolidTree* dgMeshEffect::CreateSolidTree() const
 {
 	dgMeshEffectSolidTree* tree = NULL;
-	dgInt32 mark = IncLRU();
-	dgPolyhedra::Iterator srcIter (*this);
+
+	dgMeshEffect tmp (*this);
+	tmp.Triangulate();
+
+	dgInt32 mark = tmp.IncLRU();
+	dgPolyhedra::Iterator srcIter (tmp);
 	for (srcIter.Begin(); srcIter; srcIter ++){
 		dgEdge* const face = &(*srcIter);
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
@@ -3260,13 +3264,13 @@ dgMeshEffectSolidTree* dgMeshEffect::CreateSolidTree() const
 			} while (ptr != face);
 
 			if (!tree) {
-				dgBigVector normal (FaceNormal (face, &m_points[0][0], sizeof (dgBigVector)));
+				dgBigVector normal (tmp.FaceNormal (face, &tmp.m_points[0][0], sizeof (dgBigVector)));
 				dgFloat64 mag2 = normal % normal;
 				if (mag2 > dgFloat32 (1.0e-10f)) {
 					tree = new (GetAllocator()) dgMeshEffectSolidTree (*this, face);
 				}
 			} else {
-				tree->AddFace (*this, face);
+				tree->AddFace (tmp, face);
 			}
 		}
 	}
@@ -4054,8 +4058,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	leftMesh->BeginPolygon();
 	rightMesh->BeginPolygon();
 
-//static int xxxx;
-//xxxx ++;
+static int xxxx;
+xxxx ++;
 
 	dgInt32 rightFaceId = 1 << 24;
 	dgInt32 leftFaceId =  2 << 24;
@@ -4088,9 +4092,9 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 			faceOnStack[0] = ptr;
 			stackPool[0] = clipper;
 
-//dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVector)));
-//if (xxxx == 7)
-//xxxx *=1;
+dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVector)));
+if (xxxx == 7)
+xxxx *=1;
 
 
 			bool hasLeftFaces = false;
