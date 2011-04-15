@@ -2011,7 +2011,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 			_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
 		}
 
-/*
+#if 1
 		for (int i = 0; i < count; i ++) {
 			volatile float x = dgFloat32 (pointArray[i].m_x);
 			volatile float y = dgFloat32 (pointArray[i].m_y);
@@ -2094,8 +2094,8 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 				convexMesh->Release();
 			}
 		}
-*/
-		
+
+#else		
 		dgMeshEffect* const convexMesh = MakeDelanayIntersection (tree, &pointArray[0], count, interiorMaterial, textureProjectionMatrix, dgFloat64 (45.0f * 3.1416f / 180.0f));
 		if (convexMesh) {
 			for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
@@ -2110,7 +2110,7 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 
 			convexMesh->Release();
 		}
-
+#endif
 
 	}
 
@@ -2322,15 +2322,8 @@ dgInt32 dgMeshEffect::GetDelanayIntersectionCoplanalFaces (dgEdge** const edgeAr
 dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* const tree, dgBigVector* const points, dgInt32 count, dgInt32 materialId, const dgMatrix& textureProjectionMatrix, dgFloat32 normalAngleInRadians) const
 {
 	for (dgInt32 i = 0; i < count; i ++) {
-//		volatile float x = dgFloat32 (points[i].m_x);
-//		volatile float y = dgFloat32 (points[i].m_y);
-//		volatile float z = dgFloat32 (points[i].m_z);
-//		points[i].m_x = x;
-//		points[i].m_y = y;
-//		points[i].m_z = z;
 		points[i].m_w = dgFloat64 (0.0f);
 	}
-
 
 static int xxx1;
 xxx1 ++;
@@ -2360,11 +2353,11 @@ if (1) {
 if (xxx1 == 149)
 xxx1 *=1;
 
-if (xxx1==17)
+//if (xxx1==17)
 		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
 
 //if (xxx1 != 149)
-if (xxx1==17)
+//if (xxx1==17)
 //if (0)
 		if (leftConvexMesh && rightConvexMesh) {
 			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
@@ -2442,7 +2435,7 @@ if (convexMesh) {
 
 //if (xxx1 == 149)
 //if ((xxx1 >= 16) && (xxx1 < 18))
-if ((xxx1 == 17))
+//if ((xxx1 == 17))
 	return convexMesh;
 
 }

@@ -4042,7 +4042,6 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	dgMeshEffect mesh (dgMeshEffect (*this));
 	mesh.Triangulate();
 
-
 	dgTree<dgEdge*,dgEdge*> edgeList(GetAllocator());
 
 	dgPolyhedra::Iterator iter (mesh);
@@ -4179,7 +4178,6 @@ xxxx *=1;
 					}
 				}
 
-//			} else {
 			} else if ((hasLeftFaces & !hasRightFaces) | (!hasLeftFaces & hasRightFaces)){
 				_ASSERTE ((hasLeftFaces & !hasRightFaces) | (!hasLeftFaces & hasRightFaces));
 				//dgInt32 faceId = hasLeftFaces ? leftFaceId : rightFaceId;
