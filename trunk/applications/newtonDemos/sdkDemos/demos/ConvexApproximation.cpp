@@ -34,9 +34,9 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 	dVector size = dVector (5.0f, 5.0f, 5.0f, 0.0f);
 	NewtonWorld* const world = scene->GetNewton();
 
-	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
+//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _SPHERE_PRIMITIVE, 0);
-//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _REGULAR_CONVEX_HULL_PRIMITIVE, 0);
+	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _REGULAR_CONVEX_HULL_PRIMITIVE, 0);
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _RANDOM_CONVEX_HULL_PRIMITIVE, 0);
 	
 	// create a newton mesh from the collision primitive
@@ -81,8 +81,8 @@ dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(meshNode);
 //modelMesh->ReplaceMesh (brush);
 //modelMesh->ReplaceMesh (mesh1);
 //modelMesh->ReplaceMesh (mesh2);
-//modelMesh->ReplaceMesh (mesh3);
-modelMesh->ReplaceMesh (tetrahedras);
+modelMesh->ReplaceMesh (mesh3);
+//modelMesh->ReplaceMesh (tetrahedras);
 
 xxxx.Serialize("xxx.ngd");
 #endif

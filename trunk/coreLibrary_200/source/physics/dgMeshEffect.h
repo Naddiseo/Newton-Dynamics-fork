@@ -39,7 +39,9 @@ class dgMeshTreeCSGEdgePool;
 #define DG_VERTEXLIST_INDEXLIST_TOL			(dgFloat64 (0.0f))
 
 
-
+#define DG_MESH_EFFECT_PRECISION_BITS		30
+#define DG_MESH_EFFECT_PRECISION_SCALE		dgFloat64(1<<DG_MESH_EFFECT_PRECISION_BITS)
+#define DG_MESH_EFFECT_PRECISION_SCALE_INV	(dgFloat64 (1.0f) / DG_MESH_EFFECT_PRECISION_SCALE)
 
 
 class dgMeshEffect: public dgPolyhedra, public dgRefCounter
@@ -340,10 +342,7 @@ inline dgFloat64 dgMeshEffect::QuantizeCordinade(dgFloat64 x) const
 {
 	dgInt32 exp;
 	dgFloat64 mantissa = frexp(x, &exp);
-
-	const dgFloat64 scale = dgFloat64 (1 << 30);
-	const dgFloat64 invScale = dgFloat64 (1.0f) / dgFloat64 (1 << 30);
-	mantissa = invScale * floor (mantissa * scale);
+	mantissa = DG_MESH_EFFECT_PRECISION_SCALE_INV * floor (mantissa * DG_MESH_EFFECT_PRECISION_SCALE);
 
 	dgFloat64 x1 = ldexp(mantissa, exp);
 	return x1;

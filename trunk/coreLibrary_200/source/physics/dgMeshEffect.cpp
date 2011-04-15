@@ -1546,37 +1546,48 @@ void dgMeshEffect::AddPolygon (dgInt32 count, const dgFloat64* const vertexList,
 				edge->m_next->m_next->m_mark = mark;
 
 				#ifdef _DEBUG
-					dgBigVector p0 (&vertexList[i0 * stride]);
-					dgBigVector p1 (&vertexList[i1 * stride]);
-					dgBigVector p2 (&vertexList[i2 * stride]);
-					dgBigVector e1 (p1 - p0);
-					dgBigVector e2 (p2 - p0);
-					dgBigVector n (e1 * e2);
-					dgFloat64 mag2 = n % n;
-					_ASSERTE (mag2 > dgFloat32 (0.0f));
+					dgBigVector p0_ (&vertexList[i0 * stride]);
+					dgBigVector p1_ (&vertexList[i1 * stride]);
+					dgBigVector p2_ (&vertexList[i2 * stride]);
+					dgBigVector e1_ (p1_ - p0_);
+					dgBigVector e2_ (p2_ - p0_);
+					dgBigVector n_ (e1_ * e2_);
+					dgFloat64 mag2_ = n_ % n_;
+					_ASSERTE (mag2_ > dgFloat32 (DG_MESH_EFFECT_PRECISION_SCALE_INV * DG_MESH_EFFECT_PRECISION_SCALE_INV)); 
 				#endif
 				AddPoint(vertexList + i0 * stride, material);
 				AddPoint(vertexList + i1 * stride, material);
 				AddPoint(vertexList + i2 * stride, material);
+
+				#ifdef _DEBUG
+					const dgBigVector& p0 = m_points[m_pointCount - 3];
+					const dgBigVector& p1 = m_points[m_pointCount - 2];
+					const dgBigVector& p2 = m_points[m_pointCount - 1];
+					dgBigVector e1 (p1 - p0);
+					dgBigVector e2 (p2 - p0);
+					dgBigVector n (e1 * e2);
+					dgFloat64 mag3 = n % n;
+					_ASSERTE (mag3 > dgFloat64 (DG_MESH_EFFECT_PRECISION_SCALE_INV * DG_MESH_EFFECT_PRECISION_SCALE_INV));
+				#endif
 			}
 		}
 
 	} else {
 
-		dgBigVector p0 (&vertexList[0 * stride]);
-		dgBigVector p1 (&vertexList[1 * stride]);
-		dgBigVector p2 (&vertexList[2 * stride]);
+		AddPoint(vertexList, material);
+		AddPoint(vertexList + stride, material);
+		AddPoint(vertexList + stride + stride, material);
+
+		const dgBigVector& p0 = m_points[m_pointCount - 3];
+		const dgBigVector& p1 = m_points[m_pointCount - 2];
+		const dgBigVector& p2 = m_points[m_pointCount - 1];
 		dgBigVector e1 (p1 - p0);
 		dgBigVector e2 (p2 - p0);
 		dgBigVector n (e1 * e2);
-//		dgFloat32 mag2 = dgSqrt (n % n);
-//		if (mag2 > DG_MESH_EFFECT_TRIANGLE_MIN_AREA) {
-		dgFloat64 mag2 = n % n;
-//		_ASSERTE (mag2 > dgFloat32 (0.0f));
-		if (mag2 > dgFloat32 (0.0f)) {
-			AddPoint(vertexList, material);
-			AddPoint(vertexList + stride, material);
-			AddPoint(vertexList + stride + stride, material);
+		dgFloat64 mag3 = n % n;
+		if (mag3 < dgFloat64 (DG_MESH_EFFECT_PRECISION_SCALE_INV * DG_MESH_EFFECT_PRECISION_SCALE_INV)) {
+			m_pointCount -= 3;
+			m_atribCount -= 3;
 		}
 	}
 }
@@ -4060,6 +4071,10 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 static int xxxx;
 xxxx ++;
 
+if (xxxx == 26)
+xxxx *=1;
+
+
 	dgInt32 rightFaceId = 1 << 24;
 	dgInt32 leftFaceId =  2 << 24;
 	dgInt32 mark = mesh.IncLRU();
@@ -4094,6 +4109,7 @@ xxxx ++;
 dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVector)));
 if (xxxx == 7)
 xxxx *=1;
+
 
 
 			bool hasLeftFaces = false;
