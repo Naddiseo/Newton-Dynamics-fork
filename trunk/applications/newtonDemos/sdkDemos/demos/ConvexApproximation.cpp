@@ -31,7 +31,7 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 	// create a collision primitive
 //	dVector size (2.0f, 2.0f, 2.0f);
 //	dVector size = dVector (10.0f, 0.5f, 10.0f, 0.0f);
-	dVector size = dVector (5.0f, 5.0f, 5.0f, 0.0f);
+	dVector size = dVector (4.0f, 4.0f, 4.0f, 0.0f);
 	NewtonWorld* const world = scene->GetNewton();
 
 	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
@@ -49,7 +49,7 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 
 	// create a thing box;
 //	dVector size1 = dVector (size.m_x * 4.0f, size.m_y * 0.5f, size.m_z * 0.5f, 0.0f);
-	dVector size1 = dVector (size.m_x, size.m_y * 0.5f, size.m_z * 0.5f, 0.0f);
+	dVector size1 = dVector (size.m_x * 0.5f, size.m_y * 0.5f, size.m_z * 0.5f, 0.0f);
 	NewtonCollision* const collision1 = CreateConvexCollision (world, GetIdentityMatrix(), size1, _BOX_PRIMITIVE, 0);
 	NewtonMesh* const brush = NewtonMeshCreateFromCollision(collision1);
 
@@ -59,9 +59,9 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 
 	// now use th brush to carve the big box
 	dMatrix matrix (GetIdentityMatrix());
-	matrix.m_posit.m_x = size.m_x;
-	//NewtonMesh* const mesh1 = NewtonMeshDifference (mesh, brush, &matrix[0][0]);
-	NewtonMesh* const mesh1 = NewtonMeshDifference (brush, mesh, &matrix[0][0]);
+	matrix.m_posit.m_x = -(size.m_x - size1.m_x) * 0.5f;
+	NewtonMesh* const mesh1 = NewtonMeshDifference (mesh, brush, &matrix[0][0]);
+//	NewtonMesh* const mesh1 = NewtonMeshDifference (brush, mesh, &matrix[0][0]);
 /*	
 	matrix = dRollMatrix(3.1416f * 0.5f);
 	NewtonMesh* const mesh2 = NewtonMeshDifference (mesh1, brush, &matrix[0][0]);
