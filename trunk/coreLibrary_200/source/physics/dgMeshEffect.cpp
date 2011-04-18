@@ -4123,14 +4123,16 @@ if (fabs(xxx.m_x) > 0.9)
 
 				dgMeshTreeCSGFace* leftFace; 
 				dgMeshTreeCSGFace* rightFace;
+
+dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
 				face->Clip(root->m_normal, root->m_origin, &leftFace, &rightFace);
 				face->Release();
 
 				if (!(rightFace || leftFace)) {
 					hasCoplanar = true;
 					if (!(root->m_front || root->m_back)) {
-						_ASSERTE (0);
-
+						faceList[faceCount] = face;
+						faceCount ++;
 					} else {
 						if (root->m_front) {
 							stackPool[stack] = root->m_front;
