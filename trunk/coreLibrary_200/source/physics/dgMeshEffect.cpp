@@ -3106,11 +3106,9 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 	dgMeshEffect* leftMeshClipper = NULL;
 	dgMeshEffect* rightMeshClipper = NULL;
 	
-	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource, &sourceCoplanar);
-//	if (leftMeshSource && rightMeshSource) {
-	if (rightMeshSource) {
+//	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource, &sourceCoplanar);
+//	if (rightMeshSource) {
 		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
-//		if (leftMeshSource && rightMeshSource) {
 		if (leftMeshClipper || clipperCoplanar) {
 			result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
@@ -3126,7 +3124,7 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 
 			result->EndPolygon(dgFloat64 (1.0e-5f));
 		}
-	}
+//	}
 
 	if (sourceCoplanar) {
 		sourceCoplanar->Release();
@@ -4095,7 +4093,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 		dgEdge* const face = &(*iter);
 
 dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVector)));
-//if (fabs(xxx.m_x) > 0.9)
+if (fabs(xxx.m_x) > 0.9)
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
 			dgEdge* ptr = face;
 			do {
