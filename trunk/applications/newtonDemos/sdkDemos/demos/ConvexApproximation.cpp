@@ -48,7 +48,8 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 
 
 	// create a thing box;
-	dVector size1 = dVector (size.m_x * 4.0f, size.m_y * 0.5f, size.m_z * 0.5f, 0.0f);
+//	dVector size1 = dVector (size.m_x * 4.0f, size.m_y * 0.5f, size.m_z * 0.5f, 0.0f);
+	dVector size1 = dVector (size.m_x, size.m_y * 0.5f, size.m_z * 0.5f, 0.0f);
 	NewtonCollision* const collision1 = CreateConvexCollision (world, GetIdentityMatrix(), size1, _BOX_PRIMITIVE, 0);
 	NewtonMesh* const brush = NewtonMeshCreateFromCollision(collision1);
 
@@ -58,8 +59,9 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 
 	// now use th brush to carve the big box
 	dMatrix matrix (GetIdentityMatrix());
+	matrix.m_posit.m_x = size.m_x;
 	NewtonMesh* const mesh1 = NewtonMeshDifference (mesh, brush, &matrix[0][0]);
-	
+/*	
 	matrix = dRollMatrix(3.1416f * 0.5f);
 	NewtonMesh* const mesh2 = NewtonMeshDifference (mesh1, brush, &matrix[0][0]);
 
@@ -71,7 +73,7 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 	textureMatrix[1][1] = 1.0f / size.m_y;
 //	NewtonMesh* const tetrahedras = NewtonMeshTetrahedralization (mesh3, interior, &textureMatrix[0][0]);
 	NewtonMesh* const tetrahedras = NewtonMeshTetrahedralization (mesh2, interior, &textureMatrix[0][0]);
-
+*/
 #if 1
 dScene xxxx(world);
 dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
@@ -79,9 +81,9 @@ dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
 dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(meshNode);
 //modelMesh->ReplaceMesh (mesh);
 //modelMesh->ReplaceMesh (brush);
-//modelMesh->ReplaceMesh (mesh1);
+modelMesh->ReplaceMesh (mesh1);
 //modelMesh->ReplaceMesh (mesh2);
-modelMesh->ReplaceMesh (mesh3);
+//modelMesh->ReplaceMesh (mesh3);
 //modelMesh->ReplaceMesh (tetrahedras);
 
 xxxx.Serialize("xxx.ngd");
