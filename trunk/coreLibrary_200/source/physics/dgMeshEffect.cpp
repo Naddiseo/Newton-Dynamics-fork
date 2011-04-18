@@ -3039,6 +3039,9 @@ void dgMeshEffect::ReverseMergeFaces (dgMeshEffect* const source)
 
 dgMeshEffect* dgMeshEffect::Union (const dgMatrix& matrix, const dgMeshEffect* const clipMesh) const
 {
+	_ASSERTE (0);
+	return NULL;
+/*
 	dgMeshEffect clipper (*clipMesh);
 
 	clipper.TransformMesh (matrix);
@@ -3084,50 +3087,62 @@ dgMeshEffect* dgMeshEffect::Union (const dgMatrix& matrix, const dgMeshEffect* c
 	}
 
 	return result;
-
+*/
 }
 
 
 dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffect* const clipMesh) const
 {
-
 	dgMeshEffect clipper (*clipMesh);
 
 	clipper.TransformMesh (matrix);
 
 	dgMeshEffect* result = NULL;
+	dgMeshEffect* sourceCoplanar = NULL;
 	dgMeshEffect* leftMeshSource = NULL;
 	dgMeshEffect* rightMeshSource = NULL;
+
+	dgMeshEffect* clipperCoplanar = NULL;
 	dgMeshEffect* leftMeshClipper = NULL;
 	dgMeshEffect* rightMeshClipper = NULL;
 	
-//	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource);
-//	if (leftMeshSource && rightMeshSource) {
-		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper);
-//		if (leftMeshSource && rightMeshSource) {
+	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource, &sourceCoplanar);
+	_ASSERTE (0);
+/*
+	if (leftMeshSource && rightMeshSource) {
+		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
+		if (leftMeshSource && rightMeshSource) {
 			result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
 			result->BeginPolygon();
 			result->MergeFaces(rightMeshSource);
-//			result->ReverseMergeFaces(leftMeshClipper);
+			result->ReverseMergeFaces(leftMeshClipper);
 			result->EndPolygon(dgFloat64 (1.0e-5f));
-//		}
-//	}
+		}
+	}
+*/
+	if (sourceCoplanar) {
+		sourceCoplanar->Release();
+	}
+
+	if (clipperCoplanar) {
+		sourceCoplanar->Release();
+	}
 
 	if (leftMeshClipper) {
-		delete leftMeshClipper;
+		leftMeshClipper->Release();
 	}
 
 	if (rightMeshClipper) {
-		delete rightMeshClipper;
+		rightMeshClipper->Release();
 	}
 
 	if (leftMeshSource) {
-		delete leftMeshSource;
+		leftMeshSource->Release();;
 	}
 
 	if (rightMeshSource) {
-		delete rightMeshSource;
+		rightMeshSource->Release();
 	}
 
 	if (result) {
@@ -3142,6 +3157,9 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 
 dgMeshEffect* dgMeshEffect::Intersection (const dgMatrix& matrix, const dgMeshEffect* const clipMesh) const
 {
+	_ASSERTE (0);
+	return NULL;
+/*
 	dgMeshEffect clipper (*clipMesh);
 
 	clipper.TransformMesh (matrix);
@@ -3187,11 +3205,15 @@ dgMeshEffect* dgMeshEffect::Intersection (const dgMatrix& matrix, const dgMeshEf
 	}
 
 	return result;
+*/
 }
 
 
 void dgMeshEffect::ClipMesh (const dgMatrix& matrix, const dgMeshEffect* const clipMesh, dgMeshEffect** const left, dgMeshEffect** const right) const
 {
+	_ASSERTE (0);
+/*
+
 	dgMeshEffect clipper (*clipMesh);
 	clipper.TransformMesh (matrix);
 
@@ -3250,10 +3272,8 @@ void dgMeshEffect::ClipMesh (const dgMatrix& matrix, const dgMeshEffect* const c
 			delete rightMeshSource;
 		}
 	}
+*/
 }
-
-
-
 
 
 dgMeshEffectSolidTree* dgMeshEffect::CreateSolidTree() const
@@ -3296,11 +3316,11 @@ void dgMeshEffect::DestroySolidTree (dgMeshEffectSolidTree* const tree)
 
 
 
-void dgMeshEffect::ClipMesh (const dgMeshEffect* const clipMesh, dgMeshEffect** left, dgMeshEffect** right) const
+void dgMeshEffect::ClipMesh (const dgMeshEffect* const clipMesh, dgMeshEffect** const left, dgMeshEffect** const right, dgMeshEffect** const coplanar) const
 {
 	const dgMeshEffectSolidTree* const clipper = clipMesh->CreateSolidTree();
 	_ASSERTE (clipper);
-	ClipMesh (clipper, left, right);
+	ClipMesh (clipper, left, right, coplanar);
 	delete clipper;
 }
 
@@ -3432,7 +3452,7 @@ return false;
 
 
 
-void dgMeshEffect::PlaneClipMesh (const dgMeshEffect* planeMesh, dgMeshEffect** left, dgMeshEffect** right) const
+void dgMeshEffect::PlaneClipMesh (const dgMeshEffect* const planeMesh, dgMeshEffect** left, dgMeshEffect** right) const
 {
 _ASSERTE (0);
 /*
@@ -4048,17 +4068,19 @@ dgMeshEffect* dgMeshEffect::GetNextLayer (dgInt32 mark)
 }
 
 
-void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** left, dgMeshEffect** right) const
+void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** const left, dgMeshEffect** const right, dgMeshEffect** const coplanar) const
 {
 	dgMeshEffect mesh (dgMeshEffect (*this));
 	mesh.Triangulate();
 
 	dgMeshEffect* const leftMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 	dgMeshEffect* const rightMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+	dgMeshEffect* const meshCoplanar = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+
 
 	leftMesh->BeginPolygon();
 	rightMesh->BeginPolygon();
-	
+	meshCoplanar->BeginPolygon();
 
 	dgInt32 mark = mesh.IncLRU();
 	dgPolyhedra::Iterator iter (mesh);
@@ -4078,7 +4100,6 @@ dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVecto
 			dgMeshTreeCSGFace* faceList[DG_MESH_EFFECT_BOLLEAN_STACK];
 			dgMeshTreeCSGFace* faceOnStack[DG_MESH_EFFECT_BOLLEAN_STACK];
 			const dgMeshEffectSolidTree* stackPool[DG_MESH_EFFECT_BOLLEAN_STACK];
-
 			dgInt32 stack = 1;
 			dgMeshTreeCSGFace* const orginalFace = new (GetAllocator()) dgMeshTreeCSGFace (GetAllocator(), mesh, face);
 			faceOnStack[0] = orginalFace;
@@ -4167,12 +4188,16 @@ dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVecto
 					count ++;
 				}
 
-				dgInt32 materialID = dgFastInt (facePoints[0].m_material) + (orginalFace->m_iscoplanar << 16);
-				if (rightCount) {
-					rightMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), materialID);
+				if (orginalFace->m_iscoplanar) {
+					meshCoplanar->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
 				} else {
-					leftMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), materialID);
+					if (rightCount) {
+						rightMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+					} else {
+						leftMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+					}
 				}
+
 
 			} else {
 				if (hasCoplanar) {
@@ -4201,11 +4226,14 @@ dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVecto
 						count ++;
 					}
 
-					dgInt32 materialID = dgFastInt (facePoints[0].m_material) + (face->m_iscoplanar << 16);
-					if (face->m_frontSize) {
-						rightMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), materialID);
+					if (face->m_iscoplanar) {
+						meshCoplanar->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
 					} else {
-						leftMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), materialID);
+						if (face->m_frontSize) {
+							rightMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+						} else {
+							leftMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+						}
 					}
 				}
 			}
@@ -4220,6 +4248,7 @@ dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVecto
 
 	leftMesh->EndPolygon(dgFloat64 (dgFloat64 (1.0e-5f)));
 	rightMesh->EndPolygon(dgFloat64 (dgFloat64 (1.0e-5f)));
+	meshCoplanar->EndPolygon(dgFloat64 (dgFloat64 (1.0e-5f)));
 
 	if (leftMesh->GetCount() && rightMesh->GetCount()) {
 		*left = leftMesh;
@@ -4233,10 +4262,16 @@ dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVecto
 		*left = leftMesh;
 		rightMesh->Release();
 	} else {
+		_ASSERTE (0);
 		*right = NULL;
 		*left =  NULL;
 		leftMesh->Release();
 		rightMesh->Release();
+	}
+
+	*coplanar = NULL;
+	if (meshCoplanar->GetCount()) {
+		*coplanar = meshCoplanar;
 	}
 }
 

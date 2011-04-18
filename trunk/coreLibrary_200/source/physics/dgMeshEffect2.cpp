@@ -1886,6 +1886,9 @@ class Tetrahedralization: public dgDelaunayTetrahedralization
 
 dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
 {
+	_ASSERTE (0);
+	return NULL;
+/*
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);
 	dgControlFP (_PC_53, _MCW_PC);
@@ -2119,6 +2122,7 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 
 	delete tree;
 	return voronoiPartion;
+*/
 }
 
 
@@ -2313,6 +2317,9 @@ dgInt32 dgMeshEffect::GetDelanayIntersectionCoplanalFaces (dgEdge** const edgeAr
 
 dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* const tree, dgBigVector* const points, dgInt32 count, dgInt32 materialId, const dgMatrix& textureProjectionMatrix, dgFloat32 normalAngleInRadians) const
 {
+	_ASSERTE (0);
+	return NULL;
+/*
 	for (dgInt32 i = 0; i < count; i ++) {
 		points[i].m_x = QuantizeCordinade(points[i].m_x);
 		points[i].m_y = QuantizeCordinade(points[i].m_y);
@@ -2433,4 +2440,5 @@ if (convexMesh) {
 
 }
 return NULL;
+*/
 }
