@@ -131,8 +131,6 @@ class dgList
 
 	class Iterator
 	{
-		
-
 		public:
 		Iterator (const dgList<T> &me)
 		{
