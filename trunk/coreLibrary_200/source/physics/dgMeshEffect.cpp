@@ -3107,20 +3107,27 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 	dgMeshEffect* rightMeshClipper = NULL;
 	
 	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource, &sourceCoplanar);
-	_ASSERTE (0);
-/*
-	if (leftMeshSource && rightMeshSource) {
+//	if (leftMeshSource && rightMeshSource) {
+	if (rightMeshSource) {
 		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
-		if (leftMeshSource && rightMeshSource) {
+//		if (leftMeshSource && rightMeshSource) {
+		if (leftMeshClipper || clipperCoplanar) {
 			result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
 			result->BeginPolygon();
 			result->MergeFaces(rightMeshSource);
-			result->ReverseMergeFaces(leftMeshClipper);
+			if (leftMeshClipper) {
+				result->ReverseMergeFaces(leftMeshClipper);
+			}
+			if (clipperCoplanar) {
+				_ASSERTE (sourceCoplanar);
+				result->ReverseMergeFaces(clipperCoplanar);
+			}
+
 			result->EndPolygon(dgFloat64 (1.0e-5f));
 		}
 	}
-*/
+
 	if (sourceCoplanar) {
 		sourceCoplanar->Release();
 	}

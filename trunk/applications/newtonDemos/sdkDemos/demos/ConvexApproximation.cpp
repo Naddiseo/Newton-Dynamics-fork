@@ -60,7 +60,8 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 	// now use th brush to carve the big box
 	dMatrix matrix (GetIdentityMatrix());
 	matrix.m_posit.m_x = size.m_x;
-	NewtonMesh* const mesh1 = NewtonMeshDifference (mesh, brush, &matrix[0][0]);
+	//NewtonMesh* const mesh1 = NewtonMeshDifference (mesh, brush, &matrix[0][0]);
+	NewtonMesh* const mesh1 = NewtonMeshDifference (brush, mesh, &matrix[0][0]);
 /*	
 	matrix = dRollMatrix(3.1416f * 0.5f);
 	NewtonMesh* const mesh2 = NewtonMeshDifference (mesh1, brush, &matrix[0][0]);
