@@ -295,9 +295,8 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 
 
 dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, const dgMeshEffect& mesh, dgEdge* const face)
-	:dgList<dgMeshEffect::dgVertexAtribute>(allocator)
+	:dgList<dgMeshEffect::dgVertexAtribute>(allocator), m_iscoplanar(false), m_frontSize(false)
 {
-
 	const dgEdge* ptr = face;
 	const dgMeshEffect::dgVertexAtribute* const attib = mesh.m_attib;
 	do {
@@ -332,7 +331,7 @@ dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, const 
 }
 
 dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, dgInt32 count, const dgMeshEffect::dgVertexAtribute* const points)
-	:dgList<dgMeshEffect::dgVertexAtribute>(allocator)
+	:dgList<dgMeshEffect::dgVertexAtribute>(allocator), m_iscoplanar(false), m_frontSize(false)
 {
 	for (dgInt32 i = 0; i < count; i ++) {
 //		dgTrace (("%f %f %f\n", points[i].m_vertex.m_x, points[i].m_vertex.m_y, points[i].m_vertex.m_z));
@@ -487,7 +486,7 @@ bool dgMeshTreeCSGFace::IsPointOnEdge (const dgBigVector& p0, const dgBigVector&
 	dgFloat64 num = q0p0 % p1p0;
 
 	if (num > dgFloat32 (1.0e-12f)) {
-		if (num < den * dgFloat64 (0.999999999)) {
+		if (num < den * dgFloat64 (1.0 - 1.0e-12f)) {
 			dgFloat64 t = num / den;
 			_ASSERTE (t > dgFloat64 (0.0f));
 			_ASSERTE (t < dgFloat64 (1.0f));
@@ -529,3 +528,63 @@ void dgMeshTreeCSGFace::MergeMissingVertex (const dgMeshTreeCSGFace* const face)
 	}
 }
 
+
+void dgMeshTreeCSGFace::DetermineSide (const dgMeshEffectSolidTree* const bsp)
+{
+	for (const dgMeshEffectSolidTree* root = bsp; root;) { 
+		#ifdef _DEBUG
+		{
+			dgFloat64 maxVal = dgFloat64 (-1.0e-20f);
+			dgFloat64 minVal = dgFloat64 ( 1.0e-20f);
+			for (dgMeshTreeCSGFace::dgListNode* node = GetFirst(); node; node = node->GetNext()) {
+				dgHugeVector p (node->GetInfo().m_vertex);
+				dgGoogol test = root->m_normal % (p - root->m_origin);
+
+				dgFloat64 dist = test.GetAproximateValue();
+				if (dist > maxVal) {
+					maxVal = dist;
+				}
+				if (dist < minVal) {
+					minVal = dist;
+				}
+			}
+			if (fabs (minVal) < dgFloat64 (1.0e-7f)) {
+				minVal = dgFloat64 (0.0f);
+			}
+			if (fabs (maxVal) < dgFloat64 (1.0e-7f)) {
+				maxVal = dgFloat64 (0.0f);
+			}
+			_ASSERTE ((minVal * maxVal) >= dgFloat64 (0.0f));
+		}
+		#endif
+
+		dgFloat64 maxDist = dgFloat64 (0.0f);
+		for (dgMeshTreeCSGFace::dgListNode* node = GetFirst(); node; node = node->GetNext()) {
+			dgHugeVector p (node->GetInfo().m_vertex);
+			dgGoogol test = root->m_normal % (p - root->m_origin);
+			dgFloat64 dist = test.GetAproximateValue();
+			if (fabs (dist) > fabs (maxDist)) {
+				maxDist = dist;
+			}
+		}
+		if (fabs (maxDist) < dgFloat64 (1.0e-7f)) {
+			maxDist = dgFloat64 (0.0f);
+		}
+
+		if (maxDist > dgFloat64 (0.0f)) {
+			root = root->m_front;
+			m_frontSize = true;
+			m_iscoplanar = false;
+		} else if (maxDist < dgFloat64 (0.0f)) {
+			m_frontSize = false;
+			root = root->m_back;
+		} else {
+			m_iscoplanar = true;
+			if (root->m_front) {
+				root = root->m_front;
+			} else {
+				root = root->m_back;
+			}
+		}
+	}
+}

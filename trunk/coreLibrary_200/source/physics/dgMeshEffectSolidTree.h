@@ -26,7 +26,7 @@
 
 class dgCollision;
 class dgMeshEffect;
-
+class dgMeshEffectSolidTree;
 
 
 class dgMeshTreeCSGFace: public dgList<dgMeshEffect::dgVertexAtribute>, public dgRefCounter
@@ -41,6 +41,11 @@ class dgMeshTreeCSGFace: public dgList<dgMeshEffect::dgVertexAtribute>, public d
 
 	void MergeMissingVertex (const dgMeshTreeCSGFace* const face);
 	bool IsPointOnEdge (const dgBigVector& p0, const dgBigVector& p1, const dgBigVector& q) const;
+
+	void DetermineSide (const dgMeshEffectSolidTree* const bsp) ;
+
+	bool m_iscoplanar;
+	bool m_frontSize;
 
 };
 

@@ -26,22 +26,27 @@
 
 class dgCollision;
 class dgMeshEffect;
+class dgMeshEffectSolidTree;
 
 
-class dgMeshTreeCSGFace: public dgPolyhedra
+class dgMeshTreeCSGFace: public dgList<dgMeshEffect::dgVertexAtribute>, public dgRefCounter
 {
 	public:
-	dgMeshTreeCSGFace (const dgMeshEffect& mesh, dgEdge* const face);
-	void ClipFace (dgEdge* const face, const dgHugeVector& normal, const dgHugeVector& origin, dgEdge** leftOut, dgEdge** rightOut);
+	dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, const dgMeshEffect& mesh, dgEdge* const face);
+	dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, dgInt32 count, const dgMeshEffect::dgVertexAtribute* const points);
 
+	void Clip (const dgHugeVector& normal, const dgHugeVector& origin, dgMeshTreeCSGFace** leftOut, dgMeshTreeCSGFace** rightOut);
 
+	dgMeshEffect::dgVertexAtribute InterPolalate (const dgHugeVector& normal, const dgHugeVector& origin, const dgMeshEffect::dgVertexAtribute& p0, const dgMeshEffect::dgVertexAtribute& p1) const;
 
-	dgInt32 AddPoint (const dgMeshEffect::dgVertexAtribute& point);
-	bool CheckConsistency () const;
+	void MergeMissingVertex (const dgMeshTreeCSGFace* const face);
+	bool IsPointOnEdge (const dgBigVector& p0, const dgBigVector& p1, const dgBigVector& q) const;
 
-	dgInt32 m_count;
-//	dgInt32 m_baseCount;
-	dgMeshEffect::dgVertexAtribute m_points[DG_MESH_EFFECT_POINT_SPLITED];
+	void DetermineSide (const dgMeshEffectSolidTree* const bsp) ;
+
+	bool m_iscoplanar;
+	bool m_frontSize;
+
 };
 
 class dgMeshEffectSolidTree

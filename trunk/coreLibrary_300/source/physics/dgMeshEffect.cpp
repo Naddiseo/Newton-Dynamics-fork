@@ -3101,18 +3101,18 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 	dgMeshEffect* leftMeshClipper = NULL;
 	dgMeshEffect* rightMeshClipper = NULL;
 	
-	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource);
-	if (leftMeshSource && rightMeshSource) {
+//	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource);
+//	if (leftMeshSource && rightMeshSource) {
 		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper);
-		if (leftMeshSource && rightMeshSource) {
+//		if (leftMeshSource && rightMeshSource) {
 			result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
 			result->BeginPolygon();
 			result->MergeFaces(rightMeshSource);
-			result->ReverseMergeFaces(leftMeshClipper);
+//			result->ReverseMergeFaces(leftMeshClipper);
 			result->EndPolygon(dgFloat64 (1.0e-5f));
-		}
-	}
+//		}
+//	}
 
 	if (leftMeshClipper) {
 		delete leftMeshClipper;
@@ -4053,165 +4053,171 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	dgMeshEffect mesh (dgMeshEffect (*this));
 	mesh.Triangulate();
 
-	dgTree<dgEdge*,dgEdge*> edgeList(GetAllocator());
-
-	dgPolyhedra::Iterator iter (mesh);
-	for (iter.Begin(); iter; iter ++){
-		dgEdge* const edge = &(*iter);
-		edgeList.Insert(edge, edge);
-	}
-
-
 	dgMeshEffect* const leftMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 	dgMeshEffect* const rightMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
 	leftMesh->BeginPolygon();
 	rightMesh->BeginPolygon();
+	
 
-static int xxxx;
-xxxx ++;
-
-if (xxxx == 26)
-xxxx *=1;
-
-
-	dgInt32 rightFaceId = 1 << 24;
-	dgInt32 leftFaceId =  2 << 24;
 	dgInt32 mark = mesh.IncLRU();
-	while (edgeList.GetRoot()){
-		dgEdge* face = edgeList.GetRoot()->GetInfo();
-		edgeList.Remove (edgeList.GetRoot());
-		
+	dgPolyhedra::Iterator iter (mesh);
+	for (iter.Begin(); iter; iter ++){
+		dgEdge* const face = &(*iter);
+
+dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVector)));
+//if (fabs(xxx.m_x) > 0.9)
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
-
-
- 			dgMeshTreeCSGFace clipFace (mesh, face);
 			dgEdge* ptr = face;
 			do {
-				edgeList.Remove(ptr);
-				_ASSERTE (ptr->m_incidentFace < (leftFaceId | rightFaceId));
 				ptr->m_mark = mark;
 				ptr = ptr->m_next;
 			} while (ptr != face);
 
-			dgEdge* faceOnStack[DG_MESH_EFFECT_BOLLEAN_STACK];
+			dgInt32 faceCount = 0;
+			dgMeshTreeCSGFace* faceList[DG_MESH_EFFECT_BOLLEAN_STACK];
+			dgMeshTreeCSGFace* faceOnStack[DG_MESH_EFFECT_BOLLEAN_STACK];
 			const dgMeshEffectSolidTree* stackPool[DG_MESH_EFFECT_BOLLEAN_STACK];
 
 			dgInt32 stack = 1;
-			ptr = &clipFace.GetRoot()->GetInfo();
-			if (ptr->m_incidentFace < 0) {
-				ptr = ptr->m_twin;
-			}
-			_ASSERTE (ptr->m_incidentFace > 0);
-			faceOnStack[0] = ptr;
+			dgMeshTreeCSGFace* const orginalFace = new (GetAllocator()) dgMeshTreeCSGFace (GetAllocator(), mesh, face);
+			faceOnStack[0] = orginalFace;
 			stackPool[0] = clipper;
 
-dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVector)));
-if (xxxx == 7)
-xxxx *=1;
+			dgInt32 leftCount = 0;
+			dgInt32 rightCount = 0;
+			bool hasCoplanar = false;
 
-
-
-			bool hasLeftFaces = false;
-			bool hasRightFaces = false;
+			orginalFace->AddRef();
+	
 			while (stack) {
 				stack --;
-				dgEdge* const face = faceOnStack[stack];
+				dgMeshTreeCSGFace* const face = faceOnStack[stack];
 				const dgMeshEffectSolidTree* const root = stackPool[stack];
 
-				dgEdge* leftFace; 
-				dgEdge* rightFace;
-				clipFace.ClipFace (face, root->m_normal, root->m_origin, &leftFace, &rightFace);
+				dgMeshTreeCSGFace* leftFace; 
+				dgMeshTreeCSGFace* rightFace;
+				face->Clip(root->m_normal, root->m_origin, &leftFace, &rightFace);
+				face->Release();
 
-				if (rightFace) {
-					dgEdge* ptr = rightFace;
-					do {
-						ptr->m_incidentFace = rightFaceId + 1;
-						ptr = ptr->m_next;
-					} while (ptr != rightFace);
+				if (!(rightFace || leftFace)) {
+					hasCoplanar = true;
+					if (!(root->m_front || root->m_back)) {
+						_ASSERTE (0);
 
-					if (root->m_front) {
-						stackPool[stack] = root->m_front;
-						faceOnStack[stack] = rightFace;
-						stack ++;
-						_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
 					} else {
-						hasRightFaces = true;
+						if (root->m_front) {
+							stackPool[stack] = root->m_front;
+							faceOnStack[stack] = face;
+							stack ++;
+							_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
+						}
+						if (root->m_back) {
+							stackPool[stack] = root->m_back;
+							faceOnStack[stack] = face;
+							stack ++;
+							_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
+						}
 					}
-				}
+				} else {
 
-				if (leftFace) {
-					dgEdge* ptr = leftFace;
-					do {
-						ptr->m_incidentFace = leftFaceId + 1;
-						ptr = ptr->m_next;
-					} while (ptr != leftFace);
-
-					if (root->m_back) {
-						stackPool[stack] = root->m_back;
-						faceOnStack[stack] = leftFace;
-						stack ++;
-						_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
-					} else {
-						hasLeftFaces = true;
-					}
-				}
-			}
-
-			_ASSERTE (clipFace.CheckConsistency ());
-			if (hasLeftFaces && hasRightFaces) {
-
-				dgInt32 clipMark = clipFace.IncLRU();
-				dgMeshTreeCSGFace::Iterator clipFaceIter (clipFace);
-				for (clipFaceIter.Begin(); clipFaceIter; clipFaceIter ++) {
-					dgEdge* const edge = &(*clipFaceIter);
-					if ((edge->m_incidentFace > 0) && (edge->m_mark != clipMark)) {
-						dgInt32 faceId = edge->m_incidentFace;
-
-						_ASSERTE ((faceId & leftFaceId) | (faceId & rightFaceId));
-
-						dgInt32 count = 0;
-						dgVertexAtribute facePoints[256];
-
-						dgEdge* ptr = edge;
-						do {
-							_ASSERTE (ptr->m_incidentFace & faceId);
-							_ASSERTE ((ptr->m_incidentFace & leftFaceId) | (ptr->m_incidentFace & rightFaceId));
-
-							facePoints[count] = clipFace.m_points[ptr->m_incidentVertex];
-							_ASSERTE (facePoints[count].m_vertex.m_w == dgFloat64 (0.0f));
-							count ++;
-							ptr->m_mark = clipMark;
-							ptr = ptr->m_next;
-						} while (ptr != edge);
-
-
-						if (faceId & leftFaceId) {
-							leftMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+					if (rightFace) {
+						if (root->m_front) {
+							stackPool[stack] = root->m_front;
+							faceOnStack[stack] = rightFace;
+							stack ++;
+							_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
 						} else {
-							rightMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+							rightCount ++;
+							faceList[faceCount] = rightFace;
+							faceCount ++;
+							_ASSERTE (faceCount < sizeof (faceList) / sizeof (faceList[0]));
+						}
+					}
+
+					if (leftFace) {
+						if (root->m_back) {
+							stackPool[stack] = root->m_back;
+							faceOnStack[stack] = leftFace;
+							stack ++;
+							_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
+						} else {
+							leftCount ++;
+							faceList[faceCount] = leftFace;
+							faceCount ++;
+							_ASSERTE (faceCount < sizeof (faceList) / sizeof (faceList[0]));
 						}
 					}
 				}
+			}
 
-			} else if ((hasLeftFaces & !hasRightFaces) | (!hasLeftFaces & hasRightFaces)){
-				_ASSERTE ((hasLeftFaces & !hasRightFaces) | (!hasLeftFaces & hasRightFaces));
-				//dgInt32 faceId = hasLeftFaces ? leftFaceId : rightFaceId;
-				dgMeshEffect* const dst = hasLeftFaces ? leftMesh : rightMesh;
-				dgEdge* ptr = face;
+
+			_ASSERTE (faceCount);
+			
+			if ((leftCount == 0) || (rightCount == 0)) {
+
+				if (hasCoplanar) {
+					orginalFace->DetermineSide (clipper);
+				}
+
 				dgInt32 count = 0;
-				dgVertexAtribute facePoints[256];
-				do {
-					//ptr->m_incidentFace |= faceId;
-					facePoints[count] = mesh.m_attib[ptr->m_userData];
-					_ASSERTE (facePoints[count].m_vertex.m_w == dgFloat64 (0.0f));
+				dgMeshEffect::dgVertexAtribute facePoints[256];
+				for (dgMeshTreeCSGFace::dgListNode* node = orginalFace->GetFirst(); node; node = node->GetNext()) {
+					facePoints[count] = node->GetInfo();
 					count ++;
-					ptr = ptr->m_next;
-				} while (ptr != face);
-				dst->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+				}
+
+				dgInt32 materialID = dgFastInt (facePoints[0].m_material) + (orginalFace->m_iscoplanar << 16);
+				if (rightCount) {
+					rightMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), materialID);
+				} else {
+					leftMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), materialID);
+				}
+
+			} else {
+				if (hasCoplanar) {
+					for (dgInt32 i = 0; i < faceCount; i ++) {
+						dgMeshTreeCSGFace* const face = faceList[i];
+						face->DetermineSide (clipper);
+					}
+				}
+
+				for (dgInt32 i = 0; i < faceCount - 1; i ++) {
+					dgMeshTreeCSGFace* const face0 = faceList[i];
+					for (dgInt32 j = i + 1; j < faceCount; j ++) {
+						dgMeshTreeCSGFace* const face1 = faceList[j];
+						face0->MergeMissingVertex (face1);
+						face1->MergeMissingVertex (face0);
+					}
+				}
+
+				for (dgInt32 i = 0; i < faceCount; i ++) {
+					dgMeshTreeCSGFace* const face = faceList[i];
+
+					dgInt32 count = 0;
+					dgVertexAtribute facePoints[256];
+					for (dgMeshTreeCSGFace::dgListNode* node = face->GetFirst(); node; node = node->GetNext()) {
+						facePoints[count] = node->GetInfo();
+						count ++;
+					}
+
+					dgInt32 materialID = dgFastInt (facePoints[0].m_material) + (face->m_iscoplanar << 16);
+					if (face->m_frontSize) {
+						rightMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), materialID);
+					} else {
+						leftMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), materialID);
+					}
+				}
+			}
+
+			orginalFace->Release();
+			for (dgInt32 i = 0; i < faceCount; i ++) {
+				dgMeshTreeCSGFace* const face = faceList[i];
+				face->Release();
 			}
 		}
 	}
+
 	leftMesh->EndPolygon(dgFloat64 (dgFloat64 (1.0e-5f)));
 	rightMesh->EndPolygon(dgFloat64 (dgFloat64 (1.0e-5f)));
 
@@ -4237,12 +4243,16 @@ xxxx *=1;
 
 void dgMeshEffect::RepairTJoints ()
 {
+static int xxx;
+xxx ++;
+if (xxx == 29)
+xxx *=1;
+
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
 #ifdef _DEBUG
-	for (iter.Begin(); iter; ) {
+	for (iter.Begin(); iter; iter ++) {
 		dgEdge* const face = &(*iter);
-		iter ++;
 		if ((face->m_incidentFace < 0) && (face->m_mark != mark)) {
 			for (dgEdge* ptr = face; ptr != face->m_prev; ptr = ptr->m_next) {
 				dgBigVector p0 (m_points[ptr->m_incidentVertex]);
@@ -4262,11 +4272,16 @@ void dgMeshEffect::RepairTJoints ()
 	mark = IncLRU();
 #endif
 
+
+
 	for (iter.Begin(); iter; ) {
 		dgEdge* const face = &(*iter);
 		iter ++;
+
+
 		if ((face->m_incidentFace < 0) && (face->m_mark != mark)) {
 			// vertices project 
+
 			while (SeparateDuplicateLoops (face));
 
 			dgBigVector dir (dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f));
@@ -4453,4 +4468,5 @@ void dgMeshEffect::RepairTJoints ()
 	}
 
 	DeleteDegenerateFaces(&m_points[0].m_x, sizeof (m_points[0]), dgFloat64 (1.0e-7f));
+
 }
