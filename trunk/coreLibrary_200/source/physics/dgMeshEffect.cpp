@@ -895,6 +895,8 @@ void dgMeshEffect::ConvertToPolygons ()
 			m_attib[attribIndex].m_vertex.m_w = m_points[face->m_incidentVertex].m_w;
 		}
 	}
+
+	RepairTJoints (false);
 }
 
 void dgMeshEffect::RemoveUnusedVertices(dgInt32* const vertexMap)
@@ -1654,7 +1656,7 @@ void dgMeshEffect::EndPolygon (dgFloat64 tol)
 	}
 	EndFace();
 
-	RepairTJoints ();
+	RepairTJoints (true);
 
 
 #ifdef _DEBUG
@@ -3084,9 +3086,7 @@ void dgMeshEffect::FilterCoplanarFaces (const dgMeshEffect* const coplanarFaces)
 			}
 		}
 	}
-
 }
-
 
 
 dgMeshEffect* dgMeshEffect::Union (const dgMatrix& matrix, const dgMeshEffect* const clipMesh) const
@@ -3167,12 +3167,11 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
 		if (leftMeshClipper || clipperCoplanar) {
 			if (leftMeshClipper) {
-				result->ReverseMergeFaces(leftMeshClipper);
+				//result->ReverseMergeFaces(leftMeshClipper);
 			}
 			if (clipperCoplanar) {
 				_ASSERTE (sourceCoplanar);
 				clipperCoplanar->FilterCoplanarFaces (sourceCoplanar);
-
 				result->ReverseMergeFaces(clipperCoplanar);
 			}
 		}
@@ -4333,8 +4332,13 @@ dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVecto
 }
 
 
-void dgMeshEffect::RepairTJoints ()
+void dgMeshEffect::RepairTJoints (bool triangulate)
 {
+//static int xxx;
+//xxx ++;
+//if (xxx == 7)
+//xxx *=1;
+	
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
 #ifdef _DEBUG
@@ -4368,8 +4372,31 @@ void dgMeshEffect::RepairTJoints ()
 
 		if ((face->m_incidentFace < 0) && (face->m_mark != mark)) {
 			// vertices project 
+/*
+if (xxx >= 7){
+dgEdge* ptr = face;
+do {
+	dgInt32 i = ptr->m_incidentVertex;
+	dgTrace(("%d: %f %f %f\n", i, m_points[i].m_x, m_points[i].m_y, m_points[i].m_z));
+	ptr = ptr->m_next;
+} while (ptr != face);
+dgTrace(("\n"));
+}
+*/
 
 			while (SeparateDuplicateLoops (face));
+
+/*
+if (xxx >= 7){
+	dgEdge* ptr = face;
+	do {
+		dgInt32 i = ptr->m_incidentVertex;
+		dgTrace(("%d: %f %f %f\n", i, m_points[i].m_x, m_points[i].m_y, m_points[i].m_z));
+		ptr = ptr->m_next;
+	} while (ptr != face);
+	dgTrace(("\n"));
+}
+*/
 
 			dgBigVector dir (dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f));
 			dgFloat64 lengh2 = dgFloat64 (0.0f);
@@ -4457,6 +4484,7 @@ void dgMeshEffect::RepairTJoints ()
 						dgEdge* tmp = firstEdge->m_twin;
 						do {
 							_ASSERTE (tmp->m_incidentFace > 0);
+							tmp = tmp->m_next;
 						} while (tmp != firstEdge->m_twin); 
 #endif
 
@@ -4497,6 +4525,7 @@ void dgMeshEffect::RepairTJoints ()
 						dgEdge* tmp = firstEdge->m_twin;
 						do {
 							_ASSERTE (tmp->m_incidentFace > 0);
+							tmp = tmp->m_next;
 						} while (tmp != firstEdge->m_twin); 
 #endif
 
@@ -4520,31 +4549,33 @@ void dgMeshEffect::RepairTJoints ()
 						}
 					}
 
-					_ASSERTE (begin);
-					_ASSERTE (last);
-					for (dgEdge* ptr = begin->m_next->m_next; ptr != last; ptr = ptr->m_next) {
-						dgEdge* const e = AddHalfEdge (begin->m_incidentVertex, ptr->m_incidentVertex);
-						dgEdge* const t = AddHalfEdge (ptr->m_incidentVertex, begin->m_incidentVertex);
-						if (e && t) {
-							_ASSERTE (e);
-							_ASSERTE (t);
-							e->m_twin = t;
-							t->m_twin = e;
+					if (triangulate) {
+						_ASSERTE (begin);
+						_ASSERTE (last);
+						for (dgEdge* ptr = begin->m_next->m_next; ptr != last; ptr = ptr->m_next) {
+							dgEdge* const e = AddHalfEdge (begin->m_incidentVertex, ptr->m_incidentVertex);
+							dgEdge* const t = AddHalfEdge (ptr->m_incidentVertex, begin->m_incidentVertex);
+							if (e && t) {
+								_ASSERTE (e);
+								_ASSERTE (t);
+								e->m_twin = t;
+								t->m_twin = e;
 
-							e->m_incidentFace = ptr->m_incidentFace;
-							t->m_incidentFace = ptr->m_incidentFace;
+								e->m_incidentFace = ptr->m_incidentFace;
+								t->m_incidentFace = ptr->m_incidentFace;
 
-							e->m_userData = last->m_next->m_userData;
-							t->m_userData = ptr->m_userData;
+								e->m_userData = last->m_next->m_userData;
+								t->m_userData = ptr->m_userData;
 
-							t->m_prev = ptr->m_prev;
-							ptr->m_prev->m_next = t;
-							e->m_next = ptr;
-							ptr->m_prev = e;
-							t->m_next = last->m_next;
-							e->m_prev = last;
-							last->m_next->m_prev = t;
-							last->m_next = e;
+								t->m_prev = ptr->m_prev;
+								ptr->m_prev->m_next = t;
+								e->m_next = ptr;
+								ptr->m_prev = e;
+								t->m_next = last->m_next;
+								e->m_prev = last;
+								last->m_next->m_prev = t;
+								last->m_next = e;
+							}
 						}
 					}
 
@@ -4555,5 +4586,4 @@ void dgMeshEffect::RepairTJoints ()
 	}
 
 	DeleteDegenerateFaces(&m_points[0].m_x, sizeof (m_points[0]), dgFloat64 (1.0e-7f));
-
 }
