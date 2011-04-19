@@ -4241,15 +4241,17 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 			_ASSERTE (faceCount);
 
 			//if (hasCoplanar) {
-			if (leftCount && rightCount) {
-				for (dgInt32 i = 0; i < faceCount; i ++) {
-					dgMeshTreeCSGFace* const face = faceList[i];
-					face->DetermineSide (clipper);
-				}
-			}
+//			if (leftCount && rightCount) {
+//				for (dgInt32 i = 0; i < faceCount; i ++) {
+//					dgMeshTreeCSGFace* const face = faceList[i];
+//					face->DetermineSide (clipper);
+//				}
+//			}
 
 			if (!hasCoplanar && ((leftCount == 0) || (rightCount == 0))) {
 			
+				//orginalFace->DetermineSide (clipper);
+
 				dgInt32 count = 0;
 				dgMeshEffect::dgVertexAtribute facePoints[256];
 				for (dgMeshTreeCSGFace::dgListNode* node = orginalFace->GetFirst(); node; node = node->GetNext()) {
@@ -4257,17 +4259,22 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 					count ++;
 				}
 
-				if (orginalFace->m_iscoplanar) {
-					meshCoplanar->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
-				} else {
+//				if (orginalFace->m_iscoplanar) {
+//					meshCoplanar->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+//				} else {
 					if (rightCount) {
 						rightMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
 					} else {
 						leftMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
 					}
-				}
+//				}
 
 			} else {
+				for (dgInt32 i = 0; i < faceCount; i ++) {
+					dgMeshTreeCSGFace* const face = faceList[i];
+					face->DetermineSide (clipper);
+				}
+
 				for (dgInt32 i = 0; i < faceCount - 1; i ++) {
 					dgMeshTreeCSGFace* const face0 = faceList[i];
 					for (dgInt32 j = i + 1; j < faceCount; j ++) {
