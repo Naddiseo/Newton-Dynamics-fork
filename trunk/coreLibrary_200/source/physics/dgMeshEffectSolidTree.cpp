@@ -311,10 +311,10 @@ dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, dgInt3
 	:dgList<dgMeshEffect::dgVertexAtribute>(allocator), m_iscoplanar(false), m_frontSize(false)
 {
 	for (dgInt32 i = 0; i < count; i ++) {
-//		dgTrace (("%f %f %f\n", points[i].m_vertex.m_x, points[i].m_vertex.m_y, points[i].m_vertex.m_z));
+dgTrace (("%f %f %f\n", points[i].m_vertex.m_x, points[i].m_vertex.m_y, points[i].m_vertex.m_z));
 		Append (points[i]);
 	}
-//	dgTrace (("\n"));
+dgTrace (("\n"));
 }
 
 dgMeshEffect::dgVertexAtribute dgMeshTreeCSGFace::InterPolalate (const dgHugeVector& normal, const dgHugeVector& origin, const dgMeshEffect::dgVertexAtribute& p0, const dgMeshEffect::dgVertexAtribute& p1) const
