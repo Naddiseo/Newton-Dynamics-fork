@@ -3164,17 +3164,17 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 		result->BeginPolygon();
 		result->MergeFaces(rightMeshSource);
 
-		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
-		if (leftMeshClipper || clipperCoplanar) {
+//		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
+//		if (leftMeshClipper || clipperCoplanar) {
 			if (leftMeshClipper) {
-				//result->ReverseMergeFaces(leftMeshClipper);
+//				result->ReverseMergeFaces(leftMeshClipper);
 			}
 			if (clipperCoplanar) {
 				_ASSERTE (sourceCoplanar);
 				clipperCoplanar->FilterCoplanarFaces (sourceCoplanar);
-				result->ReverseMergeFaces(clipperCoplanar);
+//				result->ReverseMergeFaces(clipperCoplanar);
 			}
-		}
+//		}
 
 		result->EndPolygon(dgFloat64 (1.0e-5f));
 	}
@@ -4146,7 +4146,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 		dgEdge* const face = &(*iter);
 
 dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVector)));
-//if (fabs(xxx.m_x) > 0.9)
+if (xxx.m_x < -0.9)
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
 			dgEdge* ptr = face;
 			do {
