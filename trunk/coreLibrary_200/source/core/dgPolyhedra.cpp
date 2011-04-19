@@ -3289,7 +3289,7 @@ void dgPolyhedra::RefineTriangulation (const dgFloat64* const vertex, dgInt32 st
 	while (dignonals.GetCount() && maxCount) {
 		maxCount --;
 		dgList<dgDiagonalEdge>::dgListNode* const node = dignonals.GetFirst();
-		const dgDiagonalEdge& key = node->GetInfo();
+		dgDiagonalEdge key (node->GetInfo());
 		dignonals.Remove(node);
 		dgEdge* const edge = FindEdge(key.m_i0, key.m_i1);
 		if (edge) {
