@@ -3164,17 +3164,17 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 		result->BeginPolygon();
 		result->MergeFaces(rightMeshSource);
 
-//		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
-//		if (leftMeshClipper || clipperCoplanar) {
+		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
+		if (leftMeshClipper || clipperCoplanar) {
 			if (leftMeshClipper) {
-//				result->ReverseMergeFaces(leftMeshClipper);
+				result->ReverseMergeFaces(leftMeshClipper);
 			}
 			if (clipperCoplanar) {
 				_ASSERTE (sourceCoplanar);
 				clipperCoplanar->FilterCoplanarFaces (sourceCoplanar);
-//				result->ReverseMergeFaces(clipperCoplanar);
+				result->ReverseMergeFaces(clipperCoplanar);
 			}
-//		}
+		}
 
 		result->EndPolygon(dgFloat64 (1.0e-5f));
 	}
@@ -4145,8 +4145,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	for (iter.Begin(); iter; iter ++){
 		dgEdge* const face = &(*iter);
 
-dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVector)));
-if (xxx.m_x < -0.9)
+//dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVector)));
+//if (xxx.m_x < -0.9)
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
 			dgEdge* ptr = face;
 			do {
@@ -4177,11 +4177,11 @@ if (xxx.m_x < -0.9)
 				dgMeshTreeCSGFace* leftFace; 
 				dgMeshTreeCSGFace* rightFace;
 
-dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
-dgBigVector xxx2 (root->m_origin.m_x.GetAproximateValue(), root->m_origin.m_y.GetAproximateValue(), root->m_origin.m_z.GetAproximateValue(), 0.0);
-xxx1 = xxx1.Scale (1.0 / sqrt ((xxx1 % xxx1)));
-xxx1.m_w = - (xxx1 % xxx2);
-dgTrace (("%f %f %f %f\n\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
+//dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
+//dgBigVector xxx2 (root->m_origin.m_x.GetAproximateValue(), root->m_origin.m_y.GetAproximateValue(), root->m_origin.m_z.GetAproximateValue(), 0.0);
+//xxx1 = xxx1.Scale (1.0 / sqrt ((xxx1 % xxx1)));
+//xxx1.m_w = - (xxx1 % xxx2);
+//dgTrace (("%f %f %f %f\n\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
 
 				face->Clip(root->m_normal, root->m_origin, &leftFace, &rightFace);
 				face->Release();
@@ -4240,7 +4240,8 @@ dgTrace (("%f %f %f %f\n\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
 
 			_ASSERTE (faceCount);
 
-			if (hasCoplanar) {
+			//if (hasCoplanar) {
+			if (leftCount && rightCount) {
 				for (dgInt32 i = 0; i < faceCount; i ++) {
 					dgMeshTreeCSGFace* const face = faceList[i];
 					face->DetermineSide (clipper);
@@ -4338,10 +4339,6 @@ dgTrace (("%f %f %f %f\n\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
 
 void dgMeshEffect::RepairTJoints (bool triangulate)
 {
-//static int xxx;
-//xxx ++;
-//if (xxx == 7)
-//xxx *=1;
 	
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);

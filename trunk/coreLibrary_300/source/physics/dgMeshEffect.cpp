@@ -3167,7 +3167,7 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
 		if (leftMeshClipper || clipperCoplanar) {
 			if (leftMeshClipper) {
-				//result->ReverseMergeFaces(leftMeshClipper);
+				result->ReverseMergeFaces(leftMeshClipper);
 			}
 			if (clipperCoplanar) {
 				_ASSERTE (sourceCoplanar);
@@ -4145,8 +4145,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	for (iter.Begin(); iter; iter ++){
 		dgEdge* const face = &(*iter);
 
-dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVector)));
-//if (fabs(xxx.m_x) > 0.9)
+//dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVector)));
+//if (xxx.m_x < -0.9)
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
 			dgEdge* ptr = face;
 			do {
@@ -4178,6 +4178,10 @@ dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVecto
 				dgMeshTreeCSGFace* rightFace;
 
 //dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
+//dgBigVector xxx2 (root->m_origin.m_x.GetAproximateValue(), root->m_origin.m_y.GetAproximateValue(), root->m_origin.m_z.GetAproximateValue(), 0.0);
+//xxx1 = xxx1.Scale (1.0 / sqrt ((xxx1 % xxx1)));
+//xxx1.m_w = - (xxx1 % xxx2);
+//dgTrace (("%f %f %f %f\n\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
 
 				face->Clip(root->m_normal, root->m_origin, &leftFace, &rightFace);
 				face->Release();
@@ -4236,7 +4240,8 @@ dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVecto
 
 			_ASSERTE (faceCount);
 
-			if (hasCoplanar) {
+			//if (hasCoplanar) {
+			if (leftCount && rightCount) {
 				for (dgInt32 i = 0; i < faceCount; i ++) {
 					dgMeshTreeCSGFace* const face = faceList[i];
 					face->DetermineSide (clipper);
@@ -4334,10 +4339,6 @@ dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVecto
 
 void dgMeshEffect::RepairTJoints (bool triangulate)
 {
-//static int xxx;
-//xxx ++;
-//if (xxx == 7)
-//xxx *=1;
 	
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);

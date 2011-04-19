@@ -300,44 +300,21 @@ dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, const 
 	const dgEdge* ptr = face;
 	const dgMeshEffect::dgVertexAtribute* const attib = mesh.m_attib;
 	do {
-		Append (attib[dgInt32 (ptr->m_userData)]);
+		Append (attib[ptr->m_userData]);
+//dgTrace (("%f %f %f\n", attib[ptr->m_userData].m_vertex.m_x, attib[ptr->m_userData].m_vertex.m_y, attib[ptr->m_userData].m_vertex.m_z));
 		ptr = ptr->m_next;
 	} while (ptr != face);
-
-/*
-	dgHugeVector normal (0.0, -2.0, 0.0, 0.0);
-	dgHugeVector origin (0.0, 0.0, 0.0, 0.0);
-
-	dgMeshEffect::dgVertexAtribute xxx[4];
-
-	memset (xxx, 0, sizeof (xxx));
-	xxx[0].m_vertex = dgBigVector(0, 0, 0, 0);
-	xxx[0].m_normal_x = 1;
-	xxx[1].m_vertex = dgBigVector(1, 1, 0, 0);
-	xxx[1].m_normal_x = 1;
-	xxx[2].m_vertex = dgBigVector(1, 0.5, 0, 0);
-	xxx[2].m_normal_x = 1;
-	xxx[3].m_vertex = dgBigVector(1, -1, 0, 0);
-	xxx[3].m_normal_x = 1;
-
-	Append (xxx[0]);
-	Append (xxx[1]);
-	Append (xxx[2]);
-//	Append (xxx[3]);
-	dgMeshTreeCSGFace* leftOut;
-	dgMeshTreeCSGFace* rightOut;
-	Clip (normal, origin, &leftOut, &rightOut);
-*/
+//dgTrace (("\n"));
 }
 
 dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, dgInt32 count, const dgMeshEffect::dgVertexAtribute* const points)
 	:dgList<dgMeshEffect::dgVertexAtribute>(allocator), m_iscoplanar(false), m_frontSize(false)
 {
 	for (dgInt32 i = 0; i < count; i ++) {
-//		dgTrace (("%f %f %f\n", points[i].m_vertex.m_x, points[i].m_vertex.m_y, points[i].m_vertex.m_z));
+//dgTrace (("%f %f %f\n", points[i].m_vertex.m_x, points[i].m_vertex.m_y, points[i].m_vertex.m_z));
 		Append (points[i]);
 	}
-//	dgTrace (("\n"));
+//dgTrace (("\n"));
 }
 
 dgMeshEffect::dgVertexAtribute dgMeshTreeCSGFace::InterPolalate (const dgHugeVector& normal, const dgHugeVector& origin, const dgMeshEffect::dgVertexAtribute& p0, const dgMeshEffect::dgVertexAtribute& p1) const
