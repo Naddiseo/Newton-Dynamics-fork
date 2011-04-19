@@ -4177,7 +4177,11 @@ if (xxx.m_x < -0.9)
 				dgMeshTreeCSGFace* leftFace; 
 				dgMeshTreeCSGFace* rightFace;
 
-//dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
+dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
+dgBigVector xxx2 (root->m_origin.m_x.GetAproximateValue(), root->m_origin.m_y.GetAproximateValue(), root->m_origin.m_z.GetAproximateValue(), 0.0);
+xxx1 = xxx1.Scale (1.0f / sqrtf ((xxx1 % xxx1)));
+xxx1.m_w = - (xxx1 % xxx2);
+dgTrace (("%f %f %f %f\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
 
 				face->Clip(root->m_normal, root->m_origin, &leftFace, &rightFace);
 				face->Release();
