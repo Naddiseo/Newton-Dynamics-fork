@@ -2260,7 +2260,7 @@ for (iter.Begin(); iter; iter ++)
 	return tetrahedralization;
 }
 
-
+/*
 dgInt32 dgMeshEffect::GetDelanayIntersectionCoplanalFaces (dgEdge** const edgeArray, dgMeshEffect* const otherCap) const
 {
 	const dgFloat64 tol = dgFloat64 (1.0e-5f);
@@ -2309,11 +2309,10 @@ dgInt32 dgMeshEffect::GetDelanayIntersectionCoplanalFaces (dgEdge** const edgeAr
 			}
 		}
 	}
-
 	
 	return count;
 }
-
+*/
 
 dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* const tree, dgBigVector* const points, dgInt32 count, dgInt32 materialId, const dgMatrix& textureProjectionMatrix, dgFloat32 normalAngleInRadians) const
 {

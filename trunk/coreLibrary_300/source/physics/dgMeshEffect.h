@@ -228,13 +228,18 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 
 	dgMeshEffect* GetNextLayer (dgInt32 mark);
 
-	void ClipMesh (const dgMeshEffect* clipMesh, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
-	void ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
+	void FilterCoplanarFaces (const dgMeshEffect* const otherCap);
+	void ClipMesh (const dgMeshEffect* const clipMesh, dgMeshEffect** const left, dgMeshEffect** const right, dgMeshEffect** const coplanar) const;
+	void ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** const left, dgMeshEffect** const right, dgMeshEffect** const coplanar) const;
+
 	dgInt32 PlaneApplyCap (const dgMeshEffect* planeMesh, const dgPlane& normal);
 	void PlaneClipMesh (const dgMeshEffect* planeMesh, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
 
-	dgInt32 GetDelanayIntersectionCoplanalFaces (dgEdge** const edgeArray, dgMeshEffect* const otherCap) const;
+//	dgInt32 GetDelanayIntersectionCoplanalFaces (dgEdge** const edgeArray, dgMeshEffect* const otherCap) const;
+	
 	dgMeshEffect* MakeDelanayIntersection (dgMeshEffectSolidTree* const tree, dgBigVector* const points, dgInt32 count, dgInt32 materialId, const dgMatrix& textureProjectionMatrix, dgFloat32 normalAngleInRadians) const;
+
+	
 
 	bool CheckSingleMesh() const;
 

@@ -3036,6 +3036,58 @@ void dgMeshEffect::ReverseMergeFaces (dgMeshEffect* const source)
 
 
 
+void dgMeshEffect::FilterCoplanarFaces (const dgMeshEffect* const coplanarFaces)
+{
+	const dgFloat64 tol = dgFloat64 (1.0e-5f);
+	const dgFloat64 tol2 = tol * tol;
+
+	dgInt32 mark = IncLRU();
+	Iterator iter (*this);
+	for (iter.Begin(); iter; ) {
+		dgEdge* const face = &(*iter);
+		iter ++;
+		if ((face->m_mark != mark) && (face->m_incidentFace > 0)) {
+			dgEdge* ptr = face;
+			do {
+				ptr->m_mark = mark;
+				ptr = ptr->m_next;
+			} while (ptr != face);
+
+			dgBigVector normal (FaceNormal(face, &m_points[0].m_x, sizeof (dgBigVector)));
+			dgBigVector origin (m_points[face->m_incidentVertex]);
+
+			dgFloat64 error2 = (normal % normal) * tol2;
+			dgInt32 capMark = coplanarFaces->IncLRU();
+
+			Iterator capIter (*coplanarFaces);
+			for (capIter.Begin (); capIter; capIter ++) {
+				dgEdge* const capFace = &(*capIter);
+				if ((capFace->m_mark != capMark) && (capFace->m_incidentFace > 0)) {
+					dgEdge* ptr = capFace;
+					do {
+						ptr->m_mark = capMark;
+						ptr = ptr->m_next;
+					} while (ptr != capFace);
+
+					dgBigVector capNormal (coplanarFaces->FaceNormal(capFace, &coplanarFaces->m_points[0].m_x, sizeof (dgBigVector)));
+
+					if ((capNormal % normal) > dgFloat64 (0.0f)) {
+						dgBigVector capOrigin (coplanarFaces->m_points[capFace->m_incidentVertex]);
+						dgFloat64 dist = normal % (capOrigin - origin);
+						if ((dist * dist) < error2) {
+							DeleteFace(face);
+							iter.Begin();
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+}
+
+
 
 dgMeshEffect* dgMeshEffect::Union (const dgMatrix& matrix, const dgMeshEffect* const clipMesh) const
 {
@@ -3119,6 +3171,8 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 			}
 			if (clipperCoplanar) {
 				_ASSERTE (sourceCoplanar);
+				clipperCoplanar->FilterCoplanarFaces (sourceCoplanar);
+
 				result->ReverseMergeFaces(clipperCoplanar);
 			}
 		}
@@ -4281,11 +4335,6 @@ dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVecto
 
 void dgMeshEffect::RepairTJoints ()
 {
-static int xxx;
-xxx ++;
-if (xxx == 29)
-xxx *=1;
-
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
 #ifdef _DEBUG

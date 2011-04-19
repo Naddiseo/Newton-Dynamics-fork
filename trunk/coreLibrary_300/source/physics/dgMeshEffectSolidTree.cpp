@@ -534,8 +534,8 @@ void dgMeshTreeCSGFace::DetermineSide (const dgMeshEffectSolidTree* const bsp)
 	for (const dgMeshEffectSolidTree* root = bsp; root;) { 
 		#ifdef _DEBUG
 		{
-			dgFloat64 maxVal = dgFloat64 (-1.0e-20f);
-			dgFloat64 minVal = dgFloat64 ( 1.0e-20f);
+			dgFloat64 maxVal = dgFloat64 (-1.0e20f);
+			dgFloat64 minVal = dgFloat64 ( 1.0e20f);
 			for (dgMeshTreeCSGFace::dgListNode* node = GetFirst(); node; node = node->GetNext()) {
 				dgHugeVector p (node->GetInfo().m_vertex);
 				dgGoogol test = root->m_normal % (p - root->m_origin);
