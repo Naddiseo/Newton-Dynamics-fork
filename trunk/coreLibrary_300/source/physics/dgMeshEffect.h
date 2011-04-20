@@ -32,7 +32,7 @@ class dgMeshTreeCSGEdgePool;
 
 
 #define DG_MESH_EFFECT_INITIAL_VERTEX_SIZE	8
-#define DG_MESH_EFFECT_BOLLEAN_STACK		128
+#define DG_MESH_EFFECT_BOLLEAN_STACK		512
 #define DG_MESH_EFFECT_POINT_SPLITED		512
 #define DG_MESH_EFFECT_POLYGON_SPLITED		256
 #define DG_MESH_EFFECT_FLAT_CUT_BORDER_EDGE	0x01
@@ -228,7 +228,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 
 	dgMeshEffect* GetNextLayer (dgInt32 mark);
 
-	void FilterCoplanarFaces (const dgMeshEffect* const otherCap);
+	void FilterCoplanarFaces (const dgMeshEffect* const otherCap, dgFloat32 sign);
 	void ClipMesh (const dgMeshEffect* const clipMesh, dgMeshEffect** const left, dgMeshEffect** const right, dgMeshEffect** const coplanar) const;
 	void ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** const left, dgMeshEffect** const right, dgMeshEffect** const coplanar) const;
 

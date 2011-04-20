@@ -3224,24 +3224,22 @@ dgMeshEffect* dgMeshEffect::Intersection (const dgMatrix& matrix, const dgMeshEf
 	DG_BOLLEAN_INIT();
 
 	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource, &sourceCoplanar);
-	if (rightMeshSource) {
+	clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
+	if (leftMeshSource || leftMeshClipper) {
 		result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
-
 		result->BeginPolygon();
+
 		if (leftMeshSource) {
 			result->MergeFaces(leftMeshSource);
 		}
 
-		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
-		if (leftMeshClipper || clipperCoplanar) {
-			if (leftMeshClipper) {
-				result->MergeFaces(leftMeshClipper);
-			}
-			if (clipperCoplanar) {
-				_ASSERTE (sourceCoplanar);
-				clipperCoplanar->FilterCoplanarFaces (sourceCoplanar, dgFloat32 (-1.0f));
-				result->MergeFaces(clipperCoplanar);
-			}
+		if (leftMeshClipper) {
+			result->MergeFaces(leftMeshClipper);
+		}
+
+		if (clipperCoplanar && sourceCoplanar) {
+			sourceCoplanar->FilterCoplanarFaces (clipperCoplanar, dgFloat32 (-1.0f));
+			result->MergeFaces(sourceCoplanar);
 		}
 
 		result->EndPolygon(dgFloat64 (1.0e-5f));
@@ -4143,8 +4141,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 				ptr = ptr->m_next;
 			} while (ptr != face);
 
-			dgInt32 faceCount = 0;
-			dgMeshTreeCSGFace* faceList[DG_MESH_EFFECT_BOLLEAN_STACK];
+			dgList<dgMeshTreeCSGFace*> faceList(GetAllocator());
 			dgMeshTreeCSGFace* faceOnStack[DG_MESH_EFFECT_BOLLEAN_STACK];
 			const dgMeshEffectSolidTree* stackPool[DG_MESH_EFFECT_BOLLEAN_STACK];
 			dgInt32 stack = 1;
@@ -4178,8 +4175,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 				if (!(rightFace || leftFace)) {
 					hasCoplanar = true;
 					if (!(root->m_front || root->m_back)) {
-						faceList[faceCount] = face;
-						faceCount ++;
+						faceList.Append(face);
 					} else {
 						if (root->m_front) {
 							stackPool[stack] = root->m_front;
@@ -4204,9 +4200,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 							_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
 						} else {
 							rightCount ++;
-							faceList[faceCount] = rightFace;
-							faceCount ++;
-							_ASSERTE (faceCount < sizeof (faceList) / sizeof (faceList[0]));
+							faceList.Append (rightFace);
 						}
 					}
 
@@ -4218,16 +4212,14 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 							_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
 						} else {
 							leftCount ++;
-							faceList[faceCount] = leftFace;
-							faceCount ++;
-							_ASSERTE (faceCount < sizeof (faceList) / sizeof (faceList[0]));
+							faceList.Append (leftFace);
 						}
 					}
 				}
 			}
 
 
-			_ASSERTE (faceCount);
+			_ASSERTE (faceList.GetCount());
 			if (!hasCoplanar && ((leftCount == 0) || (rightCount == 0))) {
 				dgInt32 count = 0;
 				dgMeshEffect::dgVertexAtribute facePoints[256];
@@ -4242,22 +4234,22 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 					leftMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
 				}
 			} else {
-				for (dgInt32 i = 0; i < faceCount; i ++) {
-					dgMeshTreeCSGFace* const face = faceList[i];
+				for (dgList<dgMeshTreeCSGFace*>::dgListNode* node = faceList.GetFirst(); node; node = node->GetNext()) {
+					dgMeshTreeCSGFace* const face = node->GetInfo();
 					face->DetermineSide (clipper);
 				}
 
-				for (dgInt32 i = 0; i < faceCount - 1; i ++) {
-					dgMeshTreeCSGFace* const face0 = faceList[i];
-					for (dgInt32 j = i + 1; j < faceCount; j ++) {
-						dgMeshTreeCSGFace* const face1 = faceList[j];
+				for (dgList<dgMeshTreeCSGFace*>::dgListNode* node = faceList.GetFirst(); node->GetNext(); node = node->GetNext()) {
+					dgMeshTreeCSGFace* const face0 = node->GetInfo();
+					for (dgList<dgMeshTreeCSGFace*>::dgListNode* node1 = node->GetNext(); node1; node1 = node1->GetNext()) {
+						dgMeshTreeCSGFace* const face1 = node1->GetInfo();
 						face0->MergeMissingVertex (face1);
 						face1->MergeMissingVertex (face0);
 					}
 				}
 
-				for (dgInt32 i = 0; i < faceCount; i ++) {
-					dgMeshTreeCSGFace* const face = faceList[i];
+				for (dgList<dgMeshTreeCSGFace*>::dgListNode* node1 = faceList.GetFirst(); node1; node1 = node1->GetNext()) {
+					dgMeshTreeCSGFace* const face = node1->GetInfo();
 
 					dgInt32 count = 0;
 					dgVertexAtribute facePoints[256];
@@ -4279,8 +4271,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 			}
 
 			orginalFace->Release();
-			for (dgInt32 i = 0; i < faceCount; i ++) {
-				dgMeshTreeCSGFace* const face = faceList[i];
+			for (dgList<dgMeshTreeCSGFace*>::dgListNode* node = faceList.GetFirst(); node; node = node->GetNext()) {
+				dgMeshTreeCSGFace* const face = node->GetInfo();
 				face->Release();
 			}
 		}
