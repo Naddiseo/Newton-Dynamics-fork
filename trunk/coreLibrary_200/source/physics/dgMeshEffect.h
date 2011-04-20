@@ -44,6 +44,42 @@ class dgMeshTreeCSGEdgePool;
 #define DG_MESH_EFFECT_PRECISION_SCALE_INV	(dgFloat64 (1.0f) / DG_MESH_EFFECT_PRECISION_SCALE)
 
 
+#define DG_MESG_EFFECT_BOOLEAN_INIT()					\
+	dgMeshEffect* result = NULL;						\
+	dgMeshEffect* sourceCoplanar = NULL;				\
+	dgMeshEffect* leftMeshSource = NULL;				\
+	dgMeshEffect* rightMeshSource = NULL;				\
+	dgMeshEffect* clipperCoplanar = NULL;				\
+	dgMeshEffect* leftMeshClipper = NULL;				\
+	dgMeshEffect* rightMeshClipper = NULL;
+
+#define DG_MESG_EFFECT_BOOLEAN_FINISH()					\
+	if (sourceCoplanar) {								\
+		sourceCoplanar->Release();						\
+	}													\
+	if (clipperCoplanar) {								\
+		sourceCoplanar->Release();						\
+	}													\
+	if (leftMeshClipper) {								\
+		leftMeshClipper->Release();						\
+	}													\
+	if (rightMeshClipper) {								\
+		rightMeshClipper->Release();					\
+	}													\
+	if (leftMeshSource) {								\
+		leftMeshSource->Release();						\
+	}													\
+	if (rightMeshSource) {								\
+		rightMeshSource->Release();						\
+	}													\
+	if (result) {										\
+		result->ConvertToPolygons();					\
+		dgStack<dgInt32> map(result->m_pointCount + 1);	\
+		result->RemoveUnusedVertices(&map[0]);			\
+	}													
+
+
+
 class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 {
 	public:

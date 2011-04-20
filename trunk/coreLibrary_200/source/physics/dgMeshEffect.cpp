@@ -28,41 +28,6 @@
 
 
 
-#define DG_BOLLEAN_INIT()								\
-	dgMeshEffect clipper (*clipMesh);					\
-	clipper.TransformMesh (matrix);						\
-	dgMeshEffect* result = NULL;						\
-	dgMeshEffect* sourceCoplanar = NULL;				\
-	dgMeshEffect* leftMeshSource = NULL;				\
-	dgMeshEffect* rightMeshSource = NULL;				\
-	dgMeshEffect* clipperCoplanar = NULL;				\
-	dgMeshEffect* leftMeshClipper = NULL;				\
-	dgMeshEffect* rightMeshClipper = NULL;
-
-#define DG_BOLLEAN_FINISH()								\
-	if (sourceCoplanar) {								\
-		sourceCoplanar->Release();						\
-	}													\
-	if (clipperCoplanar) {								\
-		sourceCoplanar->Release();						\
-	}													\
-	if (leftMeshClipper) {								\
-		leftMeshClipper->Release();						\
-	}													\
-	if (rightMeshClipper) {								\
-		rightMeshClipper->Release();					\
-	}													\
-	if (leftMeshSource) {								\
-		leftMeshSource->Release();						\
-	}													\
-	if (rightMeshSource) {								\
-		rightMeshSource->Release();						\
-	}													\
-	if (result) {										\
-		result->ConvertToPolygons();					\
-		dgStack<dgInt32> map(result->m_pointCount + 1);	\
-		result->RemoveUnusedVertices(&map[0]);			\
-	}													
 
 
 /*
@@ -3129,7 +3094,10 @@ void dgMeshEffect::FilterCoplanarFaces (const dgMeshEffect* const coplanarFaces,
 
 dgMeshEffect* dgMeshEffect::Union (const dgMatrix& matrix, const dgMeshEffect* const clipMesh) const
 {
-	DG_BOLLEAN_INIT();
+	dgMeshEffect clipper (*clipMesh);
+	clipper.TransformMesh (matrix);
+
+	DG_MESG_EFFECT_BOOLEAN_INIT();
 
 	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource, &sourceCoplanar);
 	clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
@@ -3159,13 +3127,16 @@ dgMeshEffect* dgMeshEffect::Union (const dgMatrix& matrix, const dgMeshEffect* c
 		}
 	}
 
-	DG_BOLLEAN_FINISH();
+	DG_MESG_EFFECT_BOOLEAN_FINISH();
 	return result;
 }
 
 dgMeshEffect* dgMeshEffect::Intersection (const dgMatrix& matrix, const dgMeshEffect* const clipMesh) const
 {
-	DG_BOLLEAN_INIT();
+	dgMeshEffect clipper (*clipMesh);
+	clipper.TransformMesh (matrix);
+
+	DG_MESG_EFFECT_BOOLEAN_INIT();
 
 	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource, &sourceCoplanar);
 	clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
@@ -3193,7 +3164,7 @@ dgMeshEffect* dgMeshEffect::Intersection (const dgMatrix& matrix, const dgMeshEf
 		}
 	}
 
-	DG_BOLLEAN_FINISH();
+	DG_MESG_EFFECT_BOOLEAN_FINISH();
 	return result;
 }
 
@@ -3201,7 +3172,10 @@ dgMeshEffect* dgMeshEffect::Intersection (const dgMatrix& matrix, const dgMeshEf
 														
 dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffect* const clipMesh) const
 {
-	DG_BOLLEAN_INIT();
+	dgMeshEffect clipper (*clipMesh);
+	clipper.TransformMesh (matrix);
+
+	DG_MESG_EFFECT_BOOLEAN_INIT();
 	
 	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource, &sourceCoplanar);
 	if (rightMeshSource) {
@@ -3229,7 +3203,7 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 		}
 	}
 
-	DG_BOLLEAN_FINISH();
+	DG_MESG_EFFECT_BOOLEAN_FINISH();
 	return result;
 }
 
