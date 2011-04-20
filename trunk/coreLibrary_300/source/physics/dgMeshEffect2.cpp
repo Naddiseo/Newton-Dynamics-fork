@@ -1886,9 +1886,6 @@ class Tetrahedralization: public dgDelaunayTetrahedralization
 
 dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
 {
-	_ASSERTE (0);
-	return NULL;
-/*
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);
 	dgControlFP (_PC_53, _MCW_PC);
@@ -2014,7 +2011,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 			_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
 		}
 
-#if 1
+#if 0
 		for (dgInt32 i = 0; i < count; i ++) {
 			pointArray[i].m_x = QuantizeCordinade(pointArray[i].m_x);
 			pointArray[i].m_y = QuantizeCordinade(pointArray[i].m_y);
@@ -2122,7 +2119,6 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 
 	delete tree;
 	return voronoiPartion;
-*/
 }
 
 
@@ -2316,9 +2312,6 @@ dgInt32 dgMeshEffect::GetDelanayIntersectionCoplanalFaces (dgEdge** const edgeAr
 
 dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* const tree, dgBigVector* const points, dgInt32 count, dgInt32 materialId, const dgMatrix& textureProjectionMatrix, dgFloat32 normalAngleInRadians) const
 {
-	_ASSERTE (0);
-	return NULL;
-/*
 	for (dgInt32 i = 0; i < count; i ++) {
 		points[i].m_x = QuantizeCordinade(points[i].m_x);
 		points[i].m_y = QuantizeCordinade(points[i].m_y);
@@ -2326,118 +2319,62 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 		points[i].m_w = dgFloat64 (0.0f);
 	}
 
-static int xxx1;
-xxx1 ++;
+	dgMeshEffect* intersection = NULL;
+	dgMeshEffect convexMesh (GetAllocator(), &points[0].m_x, count, sizeof (dgBigVector), dgFloat64 (0.0f));
 
+	if (convexMesh.GetCount()) {
+		convexMesh.CalculateNormals(normalAngleInRadians);
+		convexMesh.UniformBoxMapping (materialId, textureProjectionMatrix);
 
-dgBigVector xxx (0, 0, 0, 0);
-for(int i = 0; i < 4; i ++)
-{
-	xxx += points[i];
-}
-xxx = xxx.Scale (0.25);
-//if (((xxx.m_y > -1.25) && (xxx.m_y < 1.25) && (xxx.m_z > -1.25) && (xxx.m_z < 1.25))) {
-if (1) {
+		DG_MESG_EFFECT_BOOLEAN_INIT();
 
-	dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &points[0].m_x, count, sizeof (dgBigVector), dgFloat64 (0.0f));
-	_ASSERTE (convexMesh);
+		ClipMesh (&convexMesh, &leftMeshSource, &rightMeshSource, &sourceCoplanar);
+		convexMesh.ClipMesh (tree, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
+		if (leftMeshSource || leftMeshClipper) {
+			result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+			result->BeginPolygon();
 
-	if (convexMesh->GetCount()) {
-		convexMesh->CalculateNormals(normalAngleInRadians);
-		convexMesh->UniformBoxMapping (materialId, textureProjectionMatrix);
-
-		dgMeshEffect* leftConvexMesh = NULL;
-		dgMeshEffect* rightConvexMesh = NULL;
-		dgMeshEffect* leftMeshClipper = NULL;
-		dgMeshEffect* rightMeshClipper = NULL;
-
-if (xxx1 == 149)
-xxx1 *=1;
-
-//if (xxx1==17)
-		convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
-
-//if (xxx1 != 149)
-//if (xxx1==17)
-//if (0)
-		if (leftConvexMesh && rightConvexMesh) {
-			ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
-			if (leftMeshClipper && rightMeshClipper) {
-				convexMesh->Release();
-				convexMesh = NULL;
-
-				dgEdge* convexFaceDelete[256];
-				dgEdge* clipFaceDelete[256];
-				dgInt32 convexFaceDeleteCount = leftConvexMesh->GetDelanayIntersectionCoplanalFaces (convexFaceDelete, leftMeshClipper);
-				dgInt32 clipFaceDeleteCount = leftMeshClipper->GetDelanayIntersectionCoplanalFaces (clipFaceDelete, leftConvexMesh);
-
-				for (dgInt32 i = 0; i < convexFaceDeleteCount; i ++) {
-					leftConvexMesh->DeleteFace(convexFaceDelete[i]);
-				}
-
-				for (dgInt32 i = 0; i < clipFaceDeleteCount; i ++) {
-					leftMeshClipper->DeleteFace(clipFaceDelete[i]);
-				}
-				
-				if (leftConvexMesh->GetCount() && leftMeshClipper->GetCount()) {
-					convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
-					convexMesh->BeginPolygon();
-					convexMesh->MergeFaces(leftConvexMesh);
-					convexMesh->MergeFaces(leftMeshClipper);
-					convexMesh->EndPolygon(dgFloat64 (1.0e-5f));
-				}
-
+			if (leftMeshSource) {
+				result->MergeFaces(leftMeshSource);
 			}
-		} else if (rightConvexMesh) {
-			convexMesh->Release();
-			convexMesh = NULL;
-		}
 
+			if (leftMeshClipper) {
+				result->MergeFaces(leftMeshClipper);
+			}
 
-		if (leftConvexMesh) {
-			leftConvexMesh->Release();
-		}
+			if (clipperCoplanar && sourceCoplanar) {
+				sourceCoplanar->FilterCoplanarFaces (clipperCoplanar, dgFloat32 (-1.0f));
+				result->MergeFaces(sourceCoplanar);
+			}
 
-		if (rightConvexMesh) {
-			rightConvexMesh->Release();
+			result->EndPolygon(dgFloat64 (1.0e-5f));
+			if (!result->GetCount()) {
+				result->Release();
+				result = NULL;
+			}
 		}
+		intersection = result;
 
-		if (leftMeshClipper) {
-			leftMeshClipper->Release();;
-		}
+		DG_MESG_EFFECT_BOOLEAN_FINISH()
+	}
 
-		if (rightMeshClipper) {
-			rightMeshClipper->Release();
-		}
 
 #if 1
-if (convexMesh) {
+if (intersection) {
 	dgBigVector xxx (0, 0, 0, 0);
-	for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
-		xxx += convexMesh->m_points[i];
+	for (dgInt32 i = 0; i < intersection->m_pointCount; i ++) {
+		xxx += intersection->m_points[i];
 	}
-	xxx = xxx.Scale (0.2f / convexMesh->m_pointCount);
-	for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
-		convexMesh->m_points[i] += xxx;
+	xxx = xxx.Scale (0.5f / intersection->m_pointCount);
+	for (dgInt32 i = 0; i < intersection->m_pointCount; i ++) {
+		intersection->m_points[i] += xxx;
 	}
-	for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
-		convexMesh->m_attib[i].m_vertex += xxx;
+	for (dgInt32 i = 0; i < intersection->m_atribCount; i ++) {
+		intersection->m_attib[i].m_vertex += xxx;
 	}
 }
 #endif
 
+	return intersection;
 
-	} else {
-		convexMesh->Release();
-		convexMesh = NULL;
-	}
-
-//if (xxx1 == 149)
-//if ((xxx1 >= 16) && (xxx1 < 18))
-//if ((xxx1 == 17))
-	return convexMesh;
-
-}
-return NULL;
-*/
 }

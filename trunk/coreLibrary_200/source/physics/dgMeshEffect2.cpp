@@ -2328,8 +2328,8 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 
 		DG_MESG_EFFECT_BOOLEAN_INIT();
 
-		ClipMesh (tree, &leftMeshSource, &rightMeshSource, &sourceCoplanar);
-		convexMesh.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
+		ClipMesh (&convexMesh, &leftMeshSource, &rightMeshSource, &sourceCoplanar);
+		convexMesh.ClipMesh (tree, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
 		if (leftMeshSource || leftMeshClipper) {
 			result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 			result->BeginPolygon();
