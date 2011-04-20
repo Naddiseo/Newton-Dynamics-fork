@@ -2215,10 +2215,7 @@ for (iter.Begin(); iter; iter ++)
 	tetrahedralization->BeginPolygon();
 	dgFloat64 layer = dgFloat64 (0.0f);
 
-
-
 	for (dgConvexHull4d::dgListNode* node = delaunayTetrahedras.GetFirst(); node; node = node->GetNext()) {
-
 		dgConvexHull4dTetraherum* const tetra = &node->GetInfo();
 		const dgConvexHull4dTetraherum::dgTetrahedrumFace& face = tetra->m_faces[0];
 
@@ -2256,62 +2253,10 @@ for (iter.Begin(); iter; iter ++)
 	return tetrahedralization;
 }
 
-/*
-dgInt32 dgMeshEffect::GetDelanayIntersectionCoplanalFaces (dgEdge** const edgeArray, dgMeshEffect* const otherCap) const
-{
-	const dgFloat64 tol = dgFloat64 (1.0e-5f);
-	const dgFloat64 tol2 = tol * tol;
-
-	dgInt32 count = 0;
-	dgInt32 mark = IncLRU();
-	Iterator iter (*this);
-	for (iter.Begin(); iter; iter ++) {
-		dgEdge* const face = &(*iter);
-		if ((face->m_mark != mark) && (face->m_incidentFace > 0)) {
-			dgEdge* ptr = face;
-			do {
-				ptr->m_mark = mark;
-				ptr = ptr->m_next;
-			} while (ptr != face);
-
-			dgBigVector normal (FaceNormal(face, &m_points[0].m_x, sizeof (dgBigVector)));
-			dgBigVector origin (m_points[face->m_incidentVertex]);
-			
-			dgFloat64 error2 = (normal % normal) * tol2;
-			dgInt32 capMark = otherCap->IncLRU();
-			
-			Iterator capIter (*otherCap);
-			for (capIter.Begin (); capIter; capIter ++) {
-				dgEdge* const capFace = &(*capIter);
-				if ((capFace->m_mark != capMark) && (capFace->m_incidentFace > 0)) {
-					dgEdge* ptr = capFace;
-					do {
-						ptr->m_mark = capMark;
-						ptr = ptr->m_next;
-					} while (ptr != capFace);
-
-					dgBigVector capNormal (otherCap->FaceNormal(capFace, &otherCap->m_points[0].m_x, sizeof (dgBigVector)));
-
-					if ((capNormal % normal) < dgFloat64 (0.0f)) {
-						dgBigVector capOrigin (otherCap->m_points[capFace->m_incidentVertex]);
-						dgFloat64 dist = normal % (capOrigin - origin);
-						if ((dist * dist) < error2) {
-							edgeArray[count] = face; 
-							count ++;
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	return count;
-}
-*/
 
 dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* const tree, dgBigVector* const points, dgInt32 count, dgInt32 materialId, const dgMatrix& textureProjectionMatrix, dgFloat32 normalAngleInRadians) const
 {
+
 	for (dgInt32 i = 0; i < count; i ++) {
 		points[i].m_x = QuantizeCordinade(points[i].m_x);
 		points[i].m_y = QuantizeCordinade(points[i].m_y);
@@ -2321,6 +2266,7 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 
 	dgMeshEffect* intersection = NULL;
 	dgMeshEffect convexMesh (GetAllocator(), &points[0].m_x, count, sizeof (dgBigVector), dgFloat64 (0.0f));
+
 
 	if (convexMesh.GetCount()) {
 		convexMesh.CalculateNormals(normalAngleInRadians);
@@ -2354,12 +2300,11 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 			}
 		}
 		intersection = result;
-
 		DG_MESG_EFFECT_BOOLEAN_FINISH()
 	}
 
 
-#if 1
+#if 0
 if (intersection) {
 	dgBigVector xxx (0, 0, 0, 0);
 	for (dgInt32 i = 0; i < intersection->m_pointCount; i ++) {
@@ -2376,5 +2321,4 @@ if (intersection) {
 #endif
 
 	return intersection;
-
 }

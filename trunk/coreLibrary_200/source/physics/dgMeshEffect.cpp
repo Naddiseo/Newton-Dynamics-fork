@@ -4078,7 +4078,6 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	dgMeshEffect* const rightMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 	dgMeshEffect* const meshCoplanar = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
-
 	leftMesh->BeginPolygon();
 	rightMesh->BeginPolygon();
 	meshCoplanar->BeginPolygon();
@@ -4088,8 +4087,6 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	for (iter.Begin(); iter; iter ++){
 		dgEdge* const face = &(*iter);
 
-//dgBigVector xxx (mesh.FaceNormal(face, &mesh.m_points[0].m_x, sizeof (dgBigVector)));
-//if (xxx.m_x < -0.9)
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
 			dgEdge* ptr = face;
 			do {
@@ -4260,6 +4257,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	*coplanar = NULL;
 	if (meshCoplanar->GetCount()) {
 		*coplanar = meshCoplanar;
+	} else {
+		meshCoplanar->Release();
 	}
 }
 
