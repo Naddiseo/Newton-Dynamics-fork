@@ -3075,7 +3075,7 @@ void dgMeshEffect::ReverseMergeFaces (dgMeshEffect* const source)
 
 
 
-void dgMeshEffect::FilterCoplanarFaces (const dgMeshEffect* const coplanarFaces)
+void dgMeshEffect::FilterCoplanarFaces (const dgMeshEffect* const coplanarFaces, dgFloat32 sign)
 {
 	const dgFloat64 tol = dgFloat64 (1.0e-5f);
 	const dgFloat64 tol2 = tol * tol;
@@ -3093,6 +3093,7 @@ void dgMeshEffect::FilterCoplanarFaces (const dgMeshEffect* const coplanarFaces)
 			} while (ptr != face);
 
 			dgBigVector normal (FaceNormal(face, &m_points[0].m_x, sizeof (dgBigVector)));
+			normal = normal.Scale (sign);
 			dgBigVector origin (m_points[face->m_incidentVertex]);
 
 			dgFloat64 error2 = (normal % normal) * tol2;
@@ -3191,7 +3192,9 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 	if (rightMeshSource) {
 		result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 		result->BeginPolygon();
-		result->MergeFaces(rightMeshSource);
+		if (rightMeshSource) {
+			result->MergeFaces(rightMeshSource);
+		}
 
 		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
 		if (leftMeshClipper || clipperCoplanar) {
@@ -3200,12 +3203,15 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 			}
 			if (clipperCoplanar) {
 				_ASSERTE (sourceCoplanar);
-				clipperCoplanar->FilterCoplanarFaces (sourceCoplanar);
+				clipperCoplanar->FilterCoplanarFaces (sourceCoplanar, dgFloat32 (1.0f));
 				result->ReverseMergeFaces(clipperCoplanar);
 			}
 		}
-
 		result->EndPolygon(dgFloat64 (1.0e-5f));
+		if (!result->GetCount()) {
+			result->Release();
+			result = NULL;
+		}
 	}
 
 	DG_BOLLEAN_FINISH();
@@ -3216,39 +3222,33 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 dgMeshEffect* dgMeshEffect::Intersection (const dgMatrix& matrix, const dgMeshEffect* const clipMesh) const
 {
 	DG_BOLLEAN_INIT();
-/*
-	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource);
-	if (leftMeshSource && rightMeshSource) {
-		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper);
-		if (leftMeshSource && rightMeshSource) {
-			result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
-			result->BeginPolygon();
-			result->MergeFaces(leftMeshSource);
-			result->MergeFaces(leftMeshClipper);
-			result->EndPolygon(dgFloat64 (1.0e-5f));
-		}
-	}
-*/
 
 	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource, &sourceCoplanar);
 	if (rightMeshSource) {
 		result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+
 		result->BeginPolygon();
-		result->MergeFaces(rightMeshSource);
+		if (leftMeshSource) {
+			result->MergeFaces(leftMeshSource);
+		}
 
 		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
 		if (leftMeshClipper || clipperCoplanar) {
 			if (leftMeshClipper) {
-				result->ReverseMergeFaces(leftMeshClipper);
+				result->MergeFaces(leftMeshClipper);
 			}
 			if (clipperCoplanar) {
 				_ASSERTE (sourceCoplanar);
-				clipperCoplanar->FilterCoplanarFaces (sourceCoplanar);
-				result->ReverseMergeFaces(clipperCoplanar);
+				clipperCoplanar->FilterCoplanarFaces (sourceCoplanar, dgFloat32 (-1.0f));
+				result->MergeFaces(clipperCoplanar);
 			}
 		}
 
 		result->EndPolygon(dgFloat64 (1.0e-5f));
+		if (!result->GetCount()) {
+			result->Release();
+			result = NULL;
+		}
 	}
 
 	DG_BOLLEAN_FINISH();

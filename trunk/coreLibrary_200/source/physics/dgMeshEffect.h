@@ -228,7 +228,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 
 	dgMeshEffect* GetNextLayer (dgInt32 mark);
 
-	void FilterCoplanarFaces (const dgMeshEffect* const otherCap);
+	void FilterCoplanarFaces (const dgMeshEffect* const otherCap, dgFloat32 sign);
 	void ClipMesh (const dgMeshEffect* const clipMesh, dgMeshEffect** const left, dgMeshEffect** const right, dgMeshEffect** const coplanar) const;
 	void ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** const left, dgMeshEffect** const right, dgMeshEffect** const coplanar) const;
 
