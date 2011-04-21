@@ -4170,13 +4170,15 @@ dgVertexAtribute p (node->GetInfo());
 					if (!(root->m_front || root->m_back)) {
 						faceList.Append(face);
 					} else {
+						//_ASSERTE (!(root->m_front && root->m_back));
 						if (root->m_front) {
 							stackPool[stack] = root->m_front;
 							faceOnStack[stack] = face;
 							stack ++;
 							_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
-						}
-						if (root->m_back) {
+						} else {
+							//if (root->m_back) {
+							_ASSERTE (root->m_back);
 							stackPool[stack] = root->m_back;
 							faceOnStack[stack] = face;
 							stack ++;

@@ -295,6 +295,39 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 						stack ++;
 						_ASSERTE (stack < (sizeof (pool)/sizeof (pool[0])));
 					}
+				} else {
+					_ASSERTE (minVal == dgFloat64 (0.0f));
+					_ASSERTE (maxVal == dgFloat64 (0.0f));
+
+					CSGConvexCurve tmp(mesh.GetAllocator());
+					for (CSGConvexCurve::dgListNode* node = curve.GetFirst(); node; node = node->GetNext()) {
+						tmp.Append(node->GetInfo());
+					}
+					curve.RemoveAll();
+ 
+					if (root->m_front) {
+						CSGConvexCurve& frontFace = faces[stack];
+						frontFace.SetAllocator(mesh.GetAllocator());
+						for (CSGConvexCurve::dgListNode* node = tmp.GetFirst(); node; node = node->GetNext()) {
+							frontFace.Append(node->GetInfo());
+						}
+						
+						pool[stack] = root->m_front;
+						stack ++;
+						_ASSERTE (stack < (sizeof (pool)/sizeof (pool[0])));
+					}
+
+					if (root->m_back) {
+						CSGConvexCurve& backFace = faces[stack];
+						backFace.SetAllocator(mesh.GetAllocator());
+						for (CSGConvexCurve::dgListNode* node = tmp.GetFirst(); node; node = node->GetNext()) {
+							backFace.Append(node->GetInfo());
+						}
+
+						pool[stack] = root->m_back;
+						stack ++;
+						_ASSERTE (stack < (sizeof (pool)/sizeof (pool[0])));
+					}
 				}
 			}
 		}
