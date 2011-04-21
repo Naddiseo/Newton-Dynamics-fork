@@ -2222,7 +2222,6 @@ static int xxx;
 
 xxx ++;
 
-
 		dgBigVector pointArray[4];
 		pointArray[0] = delaunayTetrahedras.GetVertex(face.m_index[0]);
 		pointArray[1] = delaunayTetrahedras.GetVertex(face.m_index[1]);
