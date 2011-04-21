@@ -2231,7 +2231,7 @@ xxx ++;
 
 		dgMeshEffect* const convexMesh = MakeDelanayIntersection (tree, &pointArray[0], 4, interiorMaterial, textureProjectionMatrix, dgFloat64 (45.0f * 3.1416f / 180.0f));
 
-//if (xxx == 17)
+if (xxx == 17)
 		if (convexMesh) {
 			if (convexMesh) {
 				for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
@@ -2277,7 +2277,7 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 		convexMesh.CalculateNormals(normalAngleInRadians);
 		convexMesh.UniformBoxMapping (materialId, textureProjectionMatrix);
 
-return new (GetAllocator()) dgMeshEffect (convexMesh);
+//intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
 
 		DG_MESG_EFFECT_BOOLEAN_INIT();
 
@@ -2308,6 +2308,7 @@ return new (GetAllocator()) dgMeshEffect (convexMesh);
 		}
 		intersection = result;
 		DG_MESG_EFFECT_BOOLEAN_FINISH()
+
 	}
 
 
