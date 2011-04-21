@@ -338,7 +338,7 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 
 
 dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, const dgMeshEffect& mesh, dgEdge* const face)
-	:dgList<dgMeshEffect::dgVertexAtribute>(allocator), m_iscoplanar(false), m_frontSize(false)
+	:dgList<dgMeshEffect::dgVertexAtribute>(allocator), m_side(m_back)
 {
 	const dgEdge* ptr = face;
 	const dgMeshEffect::dgVertexAtribute* const attib = mesh.m_attib;
@@ -351,7 +351,7 @@ dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, const 
 }
 
 dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, dgInt32 count, const dgMeshEffect::dgVertexAtribute* const points)
-	:dgList<dgMeshEffect::dgVertexAtribute>(allocator), m_iscoplanar(false), m_frontSize(false)
+	:dgList<dgMeshEffect::dgVertexAtribute>(allocator), m_side(m_back)
 {
 	for (dgInt32 i = 0; i < count; i ++) {
 //dgTrace (("%f %f %f\n", points[i].m_vertex.m_x, points[i].m_vertex.m_y, points[i].m_vertex.m_z));
@@ -549,9 +549,15 @@ void dgMeshTreeCSGFace::MergeMissingVertex (const dgMeshTreeCSGFace* const face)
 }
 
 
-void dgMeshTreeCSGFace::DetermineSide (const dgMeshEffectSolidTree* const bsp)
+dgMeshTreeCSGFace::dgFaceCode dgMeshTreeCSGFace::DetermineSide (const dgMeshEffectSolidTree* const bsp)
 {
-	for (const dgMeshEffectSolidTree* root = bsp; root;) { 
+_ASSERTE (0);
+	dgFaceCode side = m_coplanar;
+	const dgMeshEffectSolidTree* root = bsp;
+
+	_ASSERTE (root);
+
+	while (root) { 
 		#ifdef _DEBUG
 
 dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
@@ -597,20 +603,44 @@ dgTrace (("%f %f %f %f\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
 			maxDist = dgFloat64 (0.0f);
 		}
 
+
 		if (maxDist > dgFloat64 (0.0f)) {
+			side = m_front;
 			root = root->m_front;
-			m_frontSize = true;
-			m_iscoplanar = false;
 		} else if (maxDist < dgFloat64 (0.0f)) {
-			m_frontSize = false;
+			side = m_back;
 			root = root->m_back;
 		} else {
+	
+			if (!(root->m_front || root->m_back)) {
+				side = m_coplanar;
+				root = NULL;
+			} else {
+				_ASSERTE (0);
+/*
+				bool isFront = false;
+				if (root->m_front) {
+					isFront = DetermineSide (root->m_front);
+				} 
+
+				if (root->m_back) {
+					isFront = DetermineSide (root->m_front);
+				} 
+*/
+			}
+
+
+/*
 			m_iscoplanar = true;
 			if (root->m_front) {
 				root = root->m_front;
 			} else {
 				root = root->m_back;
 			}
+*/
 		}
 	}
+
+
+	return side;
 }

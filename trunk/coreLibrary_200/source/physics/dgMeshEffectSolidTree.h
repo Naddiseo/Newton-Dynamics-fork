@@ -31,7 +31,16 @@ class dgMeshEffectSolidTree;
 
 class dgMeshTreeCSGFace: public dgList<dgMeshEffect::dgVertexAtribute>, public dgRefCounter
 {
+
 	public:
+
+	enum dgFaceCode
+	{
+		m_back,
+		m_front,
+		m_coplanar,
+	};
+
 	dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, const dgMeshEffect& mesh, dgEdge* const face);
 	dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, dgInt32 count, const dgMeshEffect::dgVertexAtribute* const points);
 
@@ -42,11 +51,9 @@ class dgMeshTreeCSGFace: public dgList<dgMeshEffect::dgVertexAtribute>, public d
 	void MergeMissingVertex (const dgMeshTreeCSGFace* const face);
 	bool IsPointOnEdge (const dgBigVector& p0, const dgBigVector& p1, const dgBigVector& q) const;
 
-	void DetermineSide (const dgMeshEffectSolidTree* const bsp) ;
+	dgFaceCode DetermineSide (const dgMeshEffectSolidTree* const bsp);
 
-	bool m_iscoplanar;
-	bool m_frontSize;
-
+	dgFaceCode m_side;
 };
 
 class dgMeshEffectSolidTree

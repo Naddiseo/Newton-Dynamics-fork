@@ -4238,10 +4238,9 @@ dgVertexAtribute p (node->GetInfo());
 dgTrace (("%f %f %f\n", p.m_vertex.m_x, p.m_vertex.m_y, p.m_vertex.m_z));	
 }
 dgTrace (("\n"));	
-
 					}
 
-					face->DetermineSide (clipper);
+					face->m_side = face->DetermineSide (clipper);
 				}
 
 				for (dgList<dgMeshTreeCSGFace*>::dgListNode* node = faceList.GetFirst(); node->GetNext(); node = node->GetNext()) {
@@ -4263,14 +4262,33 @@ dgTrace (("\n"));
 						count ++;
 					}
 
-					if (face->m_iscoplanar) {
-						meshCoplanar->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
-					} else {
-						if (face->m_frontSize) {
-							rightMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
-						} else {
-							leftMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+					switch (face->m_side) 
+					{
+						case dgMeshTreeCSGFace::m_coplanar:
+						{
+							meshCoplanar->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+							break;
 						}
+						case dgMeshTreeCSGFace::m_back:
+						{
+							leftMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));							
+							break;
+						}
+
+						case dgMeshTreeCSGFace::m_front:
+						{
+							rightMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+							break;
+						}
+
+//					if (face->m_iscoplanar) {
+//						meshCoplanar->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+//					} else {
+//						if (face->m_isFrontSize) {
+//							rightMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+//						} else {
+//							leftMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
+//						}
 					}
 				}
 			}
