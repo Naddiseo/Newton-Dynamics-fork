@@ -2215,9 +2215,12 @@ for (iter.Begin(); iter; iter ++)
 	tetrahedralization->BeginPolygon();
 	dgFloat64 layer = dgFloat64 (0.0f);
 
+static int xxx;
 	for (dgConvexHull4d::dgListNode* node = delaunayTetrahedras.GetFirst(); node; node = node->GetNext()) {
 		dgConvexHull4dTetraherum* const tetra = &node->GetInfo();
 		const dgConvexHull4dTetraherum::dgTetrahedrumFace& face = tetra->m_faces[0];
+
+xxx ++;
 
 		dgBigVector pointArray[4];
 		pointArray[0] = delaunayTetrahedras.GetVertex(face.m_index[0]);
@@ -2226,6 +2229,8 @@ for (iter.Begin(); iter; iter ++)
 		pointArray[3] = delaunayTetrahedras.GetVertex(face.m_otherVertex);
 
 		dgMeshEffect* const convexMesh = MakeDelanayIntersection (tree, &pointArray[0], 4, interiorMaterial, textureProjectionMatrix, dgFloat64 (45.0f * 3.1416f / 180.0f));
+
+if (xxx == 17)
 		if (convexMesh) {
 			if (convexMesh) {
 				for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
@@ -2267,10 +2272,11 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 	dgMeshEffect* intersection = NULL;
 	dgMeshEffect convexMesh (GetAllocator(), &points[0].m_x, count, sizeof (dgBigVector), dgFloat64 (0.0f));
 
-
 	if (convexMesh.GetCount()) {
 		convexMesh.CalculateNormals(normalAngleInRadians);
 		convexMesh.UniformBoxMapping (materialId, textureProjectionMatrix);
+
+//intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
 
 		DG_MESG_EFFECT_BOOLEAN_INIT();
 
@@ -2301,10 +2307,11 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 		}
 		intersection = result;
 		DG_MESG_EFFECT_BOOLEAN_FINISH()
+
 	}
 
 
-#if 0
+#if 1
 if (intersection) {
 	dgBigVector xxx (0, 0, 0, 0);
 	for (dgInt32 i = 0; i < intersection->m_pointCount; i ++) {
