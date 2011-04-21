@@ -56,10 +56,16 @@ bool dgMeshEffectSolidTree::CSGConvexCurve::CheckConvex(const dgHugeVector& norm
 };
 
 
-
+#ifdef _DEBUG
+dgInt32 dgMeshEffectSolidTree::m_enumerator;
+#endif
 
 dgMeshEffectSolidTree::dgMeshEffectSolidTree (const dgMeshEffect& mesh, dgEdge* const face)
 {
+#ifdef _DEBUG
+	m_id = m_enumerator;
+#endif
+
 	BuildPlane (mesh, face, m_normal, m_origin);
 	m_front = NULL;
 	m_back = NULL;
@@ -68,6 +74,10 @@ dgMeshEffectSolidTree::dgMeshEffectSolidTree (const dgMeshEffect& mesh, dgEdge* 
 dgMeshEffectSolidTree::dgMeshEffectSolidTree (const dgHugeVector& normal, const dgHugeVector& origin)
 	:m_origin (origin), m_normal (normal)
 {
+#ifdef _DEBUG
+	m_id = m_enumerator;
+#endif
+
 	m_front = NULL;
 	m_back = NULL;
 }
@@ -510,7 +520,14 @@ void dgMeshTreeCSGFace::DetermineSide (const dgMeshEffectSolidTree* const bsp)
 {
 	for (const dgMeshEffectSolidTree* root = bsp; root;) { 
 		#ifdef _DEBUG
-		{
+
+dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
+dgBigVector xxx2 (root->m_origin.m_x.GetAproximateValue(), root->m_origin.m_y.GetAproximateValue(), root->m_origin.m_z.GetAproximateValue(), 0.0);
+xxx1 = xxx1.Scale (1.0 / sqrt ((xxx1 % xxx1)));
+xxx1.m_w = - (xxx1 % xxx2);
+dgTrace (("%f %f %f %f\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
+
+
 			dgFloat64 maxVal = dgFloat64 (-1.0e20f);
 			dgFloat64 minVal = dgFloat64 ( 1.0e20f);
 			for (dgMeshTreeCSGFace::dgListNode* node = GetFirst(); node; node = node->GetNext()) {
@@ -532,7 +549,6 @@ void dgMeshTreeCSGFace::DetermineSide (const dgMeshEffectSolidTree* const bsp)
 				maxVal = dgFloat64 (0.0f);
 			}
 			_ASSERTE ((minVal * maxVal) >= dgFloat64 (0.0f));
-		}
 		#endif
 
 		dgFloat64 maxDist = dgFloat64 (0.0f);

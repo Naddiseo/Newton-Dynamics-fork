@@ -3284,6 +3284,11 @@ dgMeshEffectSolidTree* dgMeshEffect::CreateSolidTree() const
 	dgMeshEffect tmp (*this);
 	tmp.Triangulate();
 
+#ifdef _DEBUG
+	dgMeshEffectSolidTree::m_enumerator = 0;
+#endif
+
+
 	dgInt32 mark = tmp.IncLRU();
 	dgPolyhedra::Iterator srcIter (tmp);
 	for (srcIter.Begin(); srcIter; srcIter ++){
@@ -3304,6 +3309,11 @@ dgMeshEffectSolidTree* dgMeshEffect::CreateSolidTree() const
 			} else {
 				tree->AddFace (tmp, face);
 			}
+
+#ifdef _DEBUG
+			dgMeshEffectSolidTree::m_enumerator++;
+#endif
+
 		}
 	}
 	_ASSERTE (tree);
@@ -4082,6 +4092,11 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	rightMesh->BeginPolygon();
 	meshCoplanar->BeginPolygon();
 
+
+static int xxx;
+static int xxx1;
+xxx ++;
+
 	dgInt32 mark = mesh.IncLRU();
 	dgPolyhedra::Iterator iter (mesh);
 	for (iter.Begin(); iter; iter ++){
@@ -4098,15 +4113,26 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 			dgMeshTreeCSGFace* faceOnStack[DG_MESH_EFFECT_BOLLEAN_STACK];
 			const dgMeshEffectSolidTree* stackPool[DG_MESH_EFFECT_BOLLEAN_STACK];
 			dgInt32 stack = 1;
-			dgMeshTreeCSGFace* const orginalFace = new (GetAllocator()) dgMeshTreeCSGFace (GetAllocator(), mesh, face);
-			faceOnStack[0] = orginalFace;
+			dgMeshTreeCSGFace* const originalFace = new (GetAllocator()) dgMeshTreeCSGFace (GetAllocator(), mesh, face);
+			faceOnStack[0] = originalFace;
 			stackPool[0] = clipper;
 
 			dgInt32 leftCount = 0;
 			dgInt32 rightCount = 0;
 			bool hasCoplanar = false;
 
-			orginalFace->AddRef();
+			originalFace->AddRef();
+
+
+if (xxx == 4){
+dgTrace (("\n"));	
+for (dgMeshTreeCSGFace::dgListNode* node = originalFace->GetFirst(); node; node = node->GetNext()){
+dgVertexAtribute p (node->GetInfo());
+dgTrace (("%f %f %f\n", p.m_vertex.m_x, p.m_vertex.m_y, p.m_vertex.m_z));	
+}
+dgTrace (("\n"));	
+}
+
 	
 			while (stack) {
 				stack --;
@@ -4116,11 +4142,25 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 				dgMeshTreeCSGFace* leftFace; 
 				dgMeshTreeCSGFace* rightFace;
 
-//dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
-//dgBigVector xxx2 (root->m_origin.m_x.GetAproximateValue(), root->m_origin.m_y.GetAproximateValue(), root->m_origin.m_z.GetAproximateValue(), 0.0);
-//xxx1 = xxx1.Scale (1.0 / sqrt ((xxx1 % xxx1)));
-//xxx1.m_w = - (xxx1 % xxx2);
-//dgTrace (("%f %f %f %f\n\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
+if (xxx == 4){
+dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
+dgBigVector xxx2 (root->m_origin.m_x.GetAproximateValue(), root->m_origin.m_y.GetAproximateValue(), root->m_origin.m_z.GetAproximateValue(), 0.0);
+xxx1 = xxx1.Scale (1.0 / sqrt ((xxx1 % xxx1)));
+xxx1.m_w = - (xxx1 % xxx2);
+dgTrace (("%f %f %f %f\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
+}
+
+/*
+if (xxx1 == 59)
+{
+for (dgMeshTreeCSGFace::dgListNode* node = face->GetFirst(); node; node = node->GetNext()){
+dgVertexAtribute p (node->GetInfo());
+//dgTrace (("%f %f %f\n", p.m_vertex.m_x, p.m_vertex.m_y, p.m_vertex.m_z));	
+}
+//dgTrace (("\n"));	
+}
+*/
+
 
 				face->Clip(root->m_normal, root->m_origin, &leftFace, &rightFace);
 				face->Release();
@@ -4176,7 +4216,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 			if (!hasCoplanar && ((leftCount == 0) || (rightCount == 0))) {
 				dgInt32 count = 0;
 				dgMeshEffect::dgVertexAtribute facePoints[256];
-				for (dgMeshTreeCSGFace::dgListNode* node = orginalFace->GetFirst(); node; node = node->GetNext()) {
+				for (dgMeshTreeCSGFace::dgListNode* node = originalFace->GetFirst(); node; node = node->GetNext()) {
 					facePoints[count] = node->GetInfo();
 					count ++;
 				}
@@ -4189,6 +4229,16 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 			} else {
 				for (dgList<dgMeshTreeCSGFace*>::dgListNode* node = faceList.GetFirst(); node; node = node->GetNext()) {
 					dgMeshTreeCSGFace* const face = node->GetInfo();
+
+if (xxx == 4){
+for (dgMeshTreeCSGFace::dgListNode* node = face->GetFirst(); node; node = node->GetNext()){
+dgVertexAtribute p (node->GetInfo());
+dgTrace (("%f %f %f\n", p.m_vertex.m_x, p.m_vertex.m_y, p.m_vertex.m_z));	
+}
+dgTrace (("\n"));	
+
+					}
+
 					face->DetermineSide (clipper);
 				}
 
@@ -4223,7 +4273,7 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 				}
 			}
 
-			orginalFace->Release();
+			originalFace->Release();
 			for (dgList<dgMeshTreeCSGFace*>::dgListNode* node = faceList.GetFirst(); node; node = node->GetNext()) {
 				dgMeshTreeCSGFace* const face = node->GetInfo();
 				face->Release();

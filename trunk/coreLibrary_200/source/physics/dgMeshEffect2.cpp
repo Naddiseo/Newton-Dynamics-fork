@@ -2228,7 +2228,11 @@ xxx ++;
 		pointArray[2] = delaunayTetrahedras.GetVertex(face.m_index[2]);
 		pointArray[3] = delaunayTetrahedras.GetVertex(face.m_otherVertex);
 
-		dgMeshEffect* const convexMesh = MakeDelanayIntersection (tree, &pointArray[0], 4, interiorMaterial, textureProjectionMatrix, dgFloat64 (45.0f * 3.1416f / 180.0f));
+dgMeshEffect* convexMesh = NULL;
+if (xxx == 17)
+convexMesh = MakeDelanayIntersection (tree, &pointArray[0], 4, interiorMaterial, textureProjectionMatrix, dgFloat64 (45.0f * 3.1416f / 180.0f));
+
+		//dgMeshEffect* const convexMesh = MakeDelanayIntersection (tree, &pointArray[0], 4, interiorMaterial, textureProjectionMatrix, dgFloat64 (45.0f * 3.1416f / 180.0f));
 
 if (xxx == 17)
 		if (convexMesh) {
@@ -2276,7 +2280,9 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 		convexMesh.CalculateNormals(normalAngleInRadians);
 		convexMesh.UniformBoxMapping (materialId, textureProjectionMatrix);
 
-//intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
+#if 0
+intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
+#else
 
 		DG_MESG_EFFECT_BOOLEAN_INIT();
 
@@ -2307,7 +2313,7 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 		}
 		intersection = result;
 		DG_MESG_EFFECT_BOOLEAN_FINISH()
-
+#endif
 	}
 
 
