@@ -60,26 +60,37 @@ bool dgMeshEffectSolidTree::CSGConvexCurve::CheckConvex(const dgHugeVector& norm
 dgInt32 dgMeshEffectSolidTree::m_enumerator;
 #endif
 
+
+dgMeshEffectSolidTree::dgMeshEffectSolidTree (dgPlaneType type)
+	:m_planeType(type), m_front(NULL), m_back(NULL)
+{
+	#ifdef _DEBUG
+		m_id = m_enumerator;
+	#endif
+}
+
 dgMeshEffectSolidTree::dgMeshEffectSolidTree (const dgMeshEffect& mesh, dgEdge* const face)
+	:m_planeType(m_divider)
+	,m_front (new (mesh.GetAllocator()) dgMeshEffectSolidTree (m_empty))
+	,m_back (new (mesh.GetAllocator()) dgMeshEffectSolidTree (m_solid))
 {
 #ifdef _DEBUG
 	m_id = m_enumerator;
 #endif
 
 	BuildPlane (mesh, face, m_normal, m_origin);
-	m_front = NULL;
-	m_back = NULL;
 }
 
-dgMeshEffectSolidTree::dgMeshEffectSolidTree (const dgHugeVector& normal, const dgHugeVector& origin)
-	:m_origin (origin), m_normal (normal)
+dgMeshEffectSolidTree::dgMeshEffectSolidTree (const dgHugeVector& normal, const dgHugeVector& origin, dgMemoryAllocator* const allocator)
+	:m_planeType(m_divider)
+	,m_front (new (allocator) dgMeshEffectSolidTree (m_empty))
+	,m_back (new (allocator) dgMeshEffectSolidTree (m_solid))
+	,m_origin (origin) 
+	,m_normal (normal)
 {
 #ifdef _DEBUG
 	m_id = m_enumerator;
 #endif
-
-	m_front = NULL;
-	m_back = NULL;
 }
 
 
@@ -140,10 +151,12 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 
 		dgInt32 stack = 1;
 		pool[0] = this;
-		while (stack) {
 
+		while (stack) {
 			stack --;
 			dgMeshEffectSolidTree* const root = pool[stack];
+			_ASSERTE (root->m_planeType == m_divider);
+
 			CSGConvexCurve& curve = faces[stack];
 			_ASSERTE (curve.CheckConvex(normal, point));
 
@@ -188,15 +201,15 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 			}
 
 			if ((minVal < dgFloat64 (0.0f)) && (maxVal > dgFloat64 (0.0f))) {
-
 				CSGConvexCurve tmp(mesh.GetAllocator());
 				for (CSGConvexCurve::dgListNode* node = curve.GetFirst(); node; node = node->GetNext()) {
 					tmp.Append(node->GetInfo());
 				}
 				curve.RemoveAll();
 
-				if (!root->m_back) {
-					root->m_back = new (mesh.GetAllocator()) dgMeshEffectSolidTree (normal, point);
+				if (root->m_back->m_planeType != m_divider) {
+					delete root->m_back;
+					root->m_back = new (mesh.GetAllocator()) dgMeshEffectSolidTree (normal, point, mesh.GetAllocator());
 				} else {
 					dgHugeVector p0 (tmp.GetLast()->GetInfo());
 					CSGConvexCurve& backFace = faces[stack];
@@ -236,8 +249,8 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 					_ASSERTE (stack < (sizeof (pool)/sizeof (pool[0])));
 				}
 
-				if (!root->m_front) {
-					root->m_front = new (mesh.GetAllocator())dgMeshEffectSolidTree (normal, point);
+				if (root->m_front->m_planeType != m_divider) {
+					root->m_front = new (mesh.GetAllocator())dgMeshEffectSolidTree (normal, point, mesh.GetAllocator());
 				} else {
 					dgHugeVector p0 (tmp.GetLast()->GetInfo());
 					CSGConvexCurve& frontFace = faces[stack];
@@ -279,8 +292,9 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 			} else {
 
 				if (minVal < dgFloat64 (0.0f)) {
-					if (!root->m_back) {
-						root->m_back = new (mesh.GetAllocator())dgMeshEffectSolidTree (normal, point);
+					if (root->m_back->m_planeType != m_divider) {
+						delete root->m_back;
+						root->m_back = new (mesh.GetAllocator()) dgMeshEffectSolidTree (normal, point, mesh.GetAllocator());
 					} else {
 						pool[stack] = root->m_back;
 						stack ++;
@@ -288,14 +302,17 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 					}
 
 				} else if (maxVal > dgFloat64 (0.0f)) {
-					if (!root->m_front) {
-						root->m_front = new (mesh.GetAllocator())dgMeshEffectSolidTree (normal, point);
+					if (root->m_front->m_planeType != m_divider) {
+						delete root->m_front;
+						root->m_front = new (mesh.GetAllocator())dgMeshEffectSolidTree (normal, point, mesh.GetAllocator());
 					} else {
 						pool[stack] = root->m_front;
 						stack ++;
 						_ASSERTE (stack < (sizeof (pool)/sizeof (pool[0])));
 					}
+
 				} else {
+
 					_ASSERTE (minVal == dgFloat64 (0.0f));
 					_ASSERTE (maxVal == dgFloat64 (0.0f));
 
@@ -305,7 +322,7 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 					}
 					curve.RemoveAll();
  
-					if (root->m_front) {
+					if (root->m_front->m_planeType == m_divider) {
 						CSGConvexCurve& frontFace = faces[stack];
 						frontFace.SetAllocator(mesh.GetAllocator());
 						for (CSGConvexCurve::dgListNode* node = tmp.GetFirst(); node; node = node->GetNext()) {
@@ -317,7 +334,7 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 						_ASSERTE (stack < (sizeof (pool)/sizeof (pool[0])));
 					}
 
-					if (root->m_back) {
+					if (root->m_back->m_planeType == m_divider) {
 						CSGConvexCurve& backFace = faces[stack];
 						backFace.SetAllocator(mesh.GetAllocator());
 						for (CSGConvexCurve::dgListNode* node = tmp.GetFirst(); node; node = node->GetNext()) {
@@ -551,13 +568,11 @@ void dgMeshTreeCSGFace::MergeMissingVertex (const dgMeshTreeCSGFace* const face)
 
 dgMeshTreeCSGFace::dgFaceCode dgMeshTreeCSGFace::DetermineSide (const dgMeshEffectSolidTree* const bsp)
 {
-_ASSERTE (0);
 	dgFaceCode side = m_coplanar;
 	const dgMeshEffectSolidTree* root = bsp;
 
 	_ASSERTE (root);
-
-	while (root) { 
+	while (root->m_planeType == dgMeshEffectSolidTree::m_divider) { 
 		#ifdef _DEBUG
 
 dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
@@ -611,36 +626,13 @@ dgTrace (("%f %f %f %f\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
 			side = m_back;
 			root = root->m_back;
 		} else {
-	
-			if (!(root->m_front || root->m_back)) {
-				side = m_coplanar;
-				root = NULL;
-			} else {
-				_ASSERTE (0);
-/*
-				bool isFront = false;
-				if (root->m_front) {
-					isFront = DetermineSide (root->m_front);
-				} 
 
-				if (root->m_back) {
-					isFront = DetermineSide (root->m_front);
-				} 
-*/
-			}
-
-
-/*
-			m_iscoplanar = true;
-			if (root->m_front) {
-				root = root->m_front;
-			} else {
-				root = root->m_back;
-			}
-*/
+			dgFaceCode isBack = DetermineSide (root->m_back);
+			dgFaceCode isFront = DetermineSide (root->m_front);
+			return (isBack == isFront) ? isFront : m_coplanar;
 		}
 	}
 
-
-	return side;
+	_ASSERTE (root->m_planeType != dgMeshEffectSolidTree::m_divider);
+	return (root->m_planeType == dgMeshEffectSolidTree::m_empty) ? m_front : m_back;
 }

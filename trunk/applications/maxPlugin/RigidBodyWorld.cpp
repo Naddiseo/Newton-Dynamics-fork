@@ -596,11 +596,15 @@ void RigidBodyWorld::AttachRigiBodyController (INode* const node)
 	if (control->ClassID() != desc.ClassID()) {
 		Matrix3 matrix (node->GetNodeTM (GetCOREInterface()->GetTime()));		
 
+		Interval thisValidity (FOREVER);
+		//desc.GetValidity (node, GetCOREInterface()->GetTime(), thisValidity);
+
+
 		RigidBodyData data;
 		data.m_oldControlerID = control->ClassID();
 
 #if 1
-		// this create the matrix controller but for some reason that I can no explain I can no move the body with the navigation 
+		// this create the matrix controller but for some reason that I cannot explain I can no move the body with the navigation 
 		RigidBodyController* const rigidBodyController = (RigidBodyController*)CreateInstance(desc.SuperClassID(), desc.ClassID());
 //		RigidBodyController* const rigidBodyController = (RigidBodyController*)CreateInstance(CTRL_MATRIX3_CLASS_ID, RIGIDBODY_CONTROLLER_ID);
 		_ASSERTE (rigidBodyController);
@@ -615,7 +619,22 @@ void RigidBodyWorld::AttachRigiBodyController (INode* const node)
 		node->SetTMController (rigidBodyController);
 		_ASSERTE (node->GetTMController());
 		_ASSERTE (node->GetTMController() == rigidBodyController);
+
+
+        BOOL updateObjTM = FALSE;
+        node->SetAFlag(A_INODE_IN_UPDATE_TM); //flag to fix #592326. exposeTM's check this for loops.
+
+//		Interval tmValid() const { return tmvi; }
+//        if (!node->tmValid().InInterval(GetCOREInterface()->GetTime()))  {
+	          // This is the case before initial pose is introduced.
+              // Add in TM controller's relative TM
+              rigidBodyController->GetValue(GetCOREInterface()->GetTime(), &matrix, thisValidity, CTRL_RELATIVE);
+              //tmValid = thisValidity
+
+Matrix3 matrix1 (node->GetNodeTM (GetCOREInterface()->GetTime(), &FOREVER));		
+
 		node->SetNodeTM(GetCOREInterface()->GetTime(), matrix);
+		
 	}
 }
 

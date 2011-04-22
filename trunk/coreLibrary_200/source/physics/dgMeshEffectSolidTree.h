@@ -61,6 +61,13 @@ class dgMeshEffectSolidTree
 	public:
 	DG_CLASS_ALLOCATOR(allocator)
 
+	enum dgPlaneType
+	{
+		m_divider = 1,
+		m_empty,
+		m_solid,
+	};
+
 	class CSGConvexCurve: public dgList<dgHugeVector>
 	{
 		public:
@@ -69,8 +76,9 @@ class dgMeshEffectSolidTree
 		bool CheckConvex(const dgHugeVector& normal, const dgHugeVector& point) const;
 	};
 
+	dgMeshEffectSolidTree (dgPlaneType type);
 	dgMeshEffectSolidTree (const dgMeshEffect& mesh, dgEdge* const face);
-	dgMeshEffectSolidTree (const dgHugeVector& normal, const dgHugeVector& point);
+	dgMeshEffectSolidTree (const dgHugeVector& normal, const dgHugeVector& point, dgMemoryAllocator* const allocator);
 	~dgMeshEffectSolidTree();
 
 	void BuildPlane (const dgMeshEffect& mesh, dgEdge* const face, dgHugeVector& normal, dgHugeVector& point) const;
@@ -80,9 +88,12 @@ class dgMeshEffectSolidTree
 	dgInt32 m_id;
 	static dgInt32 m_enumerator;
 #endif
-	dgHugeVector m_origin;
-	dgHugeVector m_normal;
+
+	dgPlaneType m_planeType;
 	dgMeshEffectSolidTree* m_back;
 	dgMeshEffectSolidTree* m_front;
+
+	dgHugeVector m_origin;
+	dgHugeVector m_normal;
 };
 #endif

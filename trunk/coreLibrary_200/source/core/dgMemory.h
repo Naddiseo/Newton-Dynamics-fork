@@ -81,7 +81,7 @@ class dgMemoryAllocator
 		#define DG_MEMORY_GRANULARITY_BITS		5	
 	#endif
 	#define DG_MEMORY_GRANULARITY				(1 << DG_MEMORY_GRANULARITY_BITS)	
-	#define DG_MEMORY_SIZE						(1024 - 64)
+	#define DG_MEMORY_SIZE						(2048 - 64)
 	#define DG_MEMORY_BIN_SIZE					(1024 * 16)
 	#define DG_MEMORY_BIN_ENTRIES				(DG_MEMORY_SIZE / DG_MEMORY_GRANULARITY)
 

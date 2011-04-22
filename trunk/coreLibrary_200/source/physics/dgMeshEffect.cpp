@@ -4132,12 +4132,13 @@ dgTrace (("%f %f %f\n", p.m_vertex.m_x, p.m_vertex.m_y, p.m_vertex.m_z));
 }
 dgTrace (("\n"));	
 }
-
 	
 			while (stack) {
 				stack --;
 				dgMeshTreeCSGFace* const face = faceOnStack[stack];
 				const dgMeshEffectSolidTree* const root = stackPool[stack];
+
+				_ASSERTE (root->m_planeType == dgMeshEffectSolidTree::m_divider);
 
 				dgMeshTreeCSGFace* leftFace; 
 				dgMeshTreeCSGFace* rightFace;
@@ -4161,34 +4162,35 @@ dgVertexAtribute p (node->GetInfo());
 }
 */
 
-
 				face->Clip(root->m_normal, root->m_origin, &leftFace, &rightFace);
 				face->Release();
 
 				if (!(rightFace || leftFace)) {
+
 					hasCoplanar = true;
-					if (!(root->m_front || root->m_back)) {
+					if (!((root->m_front->m_planeType == dgMeshEffectSolidTree::m_divider) || (root->m_back->m_planeType == dgMeshEffectSolidTree::m_divider))) {
 						faceList.Append(face);
 					} else {
 						//_ASSERTE (!(root->m_front && root->m_back));
-						if (root->m_front) {
+						if (root->m_front->m_planeType == dgMeshEffectSolidTree::m_divider) {
 							stackPool[stack] = root->m_front;
 							faceOnStack[stack] = face;
 							stack ++;
 							_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
 						} else {
 							//if (root->m_back) {
-							_ASSERTE (root->m_back);
+							_ASSERTE (root->m_back->m_planeType == dgMeshEffectSolidTree::m_divider);
 							stackPool[stack] = root->m_back;
 							faceOnStack[stack] = face;
 							stack ++;
 							_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
 						}
 					}
+
 				} else {
 
 					if (rightFace) {
-						if (root->m_front) {
+						if (root->m_front->m_planeType == dgMeshEffectSolidTree::m_divider) {
 							stackPool[stack] = root->m_front;
 							faceOnStack[stack] = rightFace;
 							stack ++;
@@ -4200,7 +4202,7 @@ dgVertexAtribute p (node->GetInfo());
 					}
 
 					if (leftFace) {
-						if (root->m_back) {
+						if (root->m_back->m_planeType == dgMeshEffectSolidTree::m_divider) {
 							stackPool[stack] = root->m_back;
 							faceOnStack[stack] = leftFace;
 							stack ++;
