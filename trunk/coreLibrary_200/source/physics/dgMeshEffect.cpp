@@ -3190,7 +3190,7 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 			if (leftMeshClipper) {
 				result->ReverseMergeFaces(leftMeshClipper);
 			}
-			if (clipperCoplanar) {
+			if (clipperCoplanar && sourceCoplanar) {
 				_ASSERTE (sourceCoplanar);
 				clipperCoplanar->FilterCoplanarFaces (sourceCoplanar, dgFloat32 (1.0f));
 				result->ReverseMergeFaces(clipperCoplanar);
@@ -3203,7 +3203,32 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 		}
 	}
 
-	DG_MESG_EFFECT_BOOLEAN_FINISH();
+//	DG_MESG_EFFECT_BOOLEAN_FINISH();
+
+	if (sourceCoplanar) {								
+		sourceCoplanar->Release();						
+	}													
+	if (clipperCoplanar) {								
+		clipperCoplanar->Release();						
+	}													
+	if (leftMeshClipper) {								
+		leftMeshClipper->Release();						
+	}													
+	if (rightMeshClipper) {								
+		rightMeshClipper->Release();					
+	}													
+	if (leftMeshSource) {								
+		leftMeshSource->Release();						
+	}													
+	if (rightMeshSource) {								
+		rightMeshSource->Release();						
+	}													
+	if (result) {										
+		result->ConvertToPolygons();					
+		dgStack<dgInt32> map(result->m_pointCount + 1);	
+		result->RemoveUnusedVertices(&map[0]);			
+	}													
+
 	return result;
 }
 
@@ -3279,21 +3304,16 @@ void dgMeshEffect::ClipMesh (const dgMatrix& matrix, const dgMeshEffect* const c
 
 dgMeshEffectSolidTree* dgMeshEffect::CreateSolidTree() const
 {
-_ASSERTE (0);
-	dgMeshEffectSolidTree* tree = NULL;
-
-	dgMeshEffect tmp (*this);
-	tmp.Triangulate();
 
 #ifdef _DEBUG
 	dgMeshEffectSolidTree::m_enumerator = 0;
 #endif
 
-
-	dgInt32 mark = tmp.IncLRU();
-	dgPolyhedra::Iterator srcIter (tmp);
-	for (srcIter.Begin(); srcIter; srcIter ++){
-		dgEdge* const face = &(*srcIter);
+	dgMeshEffectSolidTree* tree = NULL;
+	dgInt32 mark = IncLRU();
+	dgPolyhedra::Iterator iter (*this);
+	for (iter.Begin(); iter; iter ++){
+		dgEdge* const face = &(*iter);
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
 			dgEdge* ptr = face;
 			do {
@@ -3301,15 +3321,55 @@ _ASSERTE (0);
 				ptr = ptr->m_next;
 			} while (ptr != face);
 
-			if (!tree) {
-				dgBigVector normal (tmp.FaceNormal (face, &tmp.m_points[0][0], sizeof (dgBigVector)));
-				dgFloat64 mag2 = normal % normal;
-				if (mag2 > dgFloat32 (1.0e-10f)) {
-					tree = new (GetAllocator()) dgMeshEffectSolidTree (*this, face);
+			if (ptr->m_next->m_next->m_next == ptr) {
+				if (!tree) {
+					dgBigVector normal (FaceNormal (face, &m_points[0][0], sizeof (dgBigVector)));
+					dgFloat64 mag2 = normal % normal;
+					if (mag2 > dgFloat32 (1.0e-10f)) {
+						tree = new (GetAllocator()) dgMeshEffectSolidTree (*this, face);
+					}
+				} else {
+					tree->AddFace (*this, face);
 				}
 			} else {
-				tree->AddFace (tmp, face);
+				dgMeshEffect flatFace (GetAllocator(), true);
+				dgInt32 count = 0;
+				dgVertexAtribute points[256];
+
+				flatFace.BeginPolygon();
+				dgEdge* ptr = face;
+				do {
+					points[count] = m_attib[ptr->m_userData];
+					count ++;
+					ptr = ptr->m_next;
+				} while (ptr != face);
+				flatFace.AddPolygon(count, &points[0].m_vertex.m_x, sizeof (dgVertexAtribute), 0);
+				flatFace.EndPolygon(dgFloat64 (1.0e-5f));
+
+				dgInt32 flatMark = flatFace.IncLRU();
+				dgPolyhedra::Iterator flatIter (flatFace);
+				for (flatIter.Begin(); flatIter; flatIter ++){
+					dgEdge* const face = &(*flatIter);
+					if ((face->m_incidentFace > 0) && (face->m_mark != mark)) {
+						dgEdge* ptr = face;
+						do {
+							ptr->m_mark = flatMark;
+							ptr = ptr->m_next;
+						} while (ptr != face);
+
+						if (!tree) {
+							dgBigVector normal (flatFace.FaceNormal (face, &flatFace.m_points[0][0], sizeof (dgBigVector)));
+							dgFloat64 mag2 = normal % normal;
+							if (mag2 > dgFloat32 (1.0e-10f)) {
+								tree = new (GetAllocator()) dgMeshEffectSolidTree (flatFace, face);
+							}
+						} else {
+							tree->AddFace (flatFace, face);
+						}
+					}
+				}
 			}
+
 
 #ifdef _DEBUG
 			dgMeshEffectSolidTree::m_enumerator++;

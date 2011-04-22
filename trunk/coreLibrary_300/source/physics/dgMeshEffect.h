@@ -58,7 +58,7 @@ class dgMeshTreeCSGEdgePool;
 		sourceCoplanar->Release();						\
 	}													\
 	if (clipperCoplanar) {								\
-		sourceCoplanar->Release();						\
+		clipperCoplanar->Release();						\
 	}													\
 	if (leftMeshClipper) {								\
 		leftMeshClipper->Release();						\
