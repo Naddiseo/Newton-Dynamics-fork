@@ -568,7 +568,6 @@ void dgMeshTreeCSGFace::MergeMissingVertex (const dgMeshTreeCSGFace* const face)
 
 dgMeshTreeCSGFace::dgFaceCode dgMeshTreeCSGFace::DetermineSide (const dgMeshEffectSolidTree* const bsp)
 {
-	dgFaceCode side = m_coplanar;
 	const dgMeshEffectSolidTree* root = bsp;
 
 	_ASSERTE (root);
@@ -618,12 +617,9 @@ dgMeshTreeCSGFace::dgFaceCode dgMeshTreeCSGFace::DetermineSide (const dgMeshEffe
 			maxDist = dgFloat64 (0.0f);
 		}
 
-
 		if (maxDist > dgFloat64 (0.0f)) {
-			side = m_front;
 			root = root->m_front;
 		} else if (maxDist < dgFloat64 (0.0f)) {
-			side = m_back;
 			root = root->m_back;
 		} else {
 

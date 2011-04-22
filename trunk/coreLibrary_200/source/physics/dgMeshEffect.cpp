@@ -4156,7 +4156,6 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 
 static int xxx;
 static int xxx2;
-static int xxx3;
 xxx ++;
 
 	dgInt32 mark = mesh.IncLRU();
@@ -4172,7 +4171,7 @@ xxx ++;
 			} while (ptr != face);
 
 xxx2 ++;
-if (xxx2 == 92)
+if (xxx2 == 40)
 xxx2 *=1;
 
 			dgList<dgMeshTreeCSGFace*> faceList(GetAllocator());
@@ -4191,8 +4190,8 @@ xxx2 *=1;
 
 			
 
-/*
-if (xxx == 4){
+
+if (xxx2 == 40){
 dgTrace (("\n"));	
 for (dgMeshTreeCSGFace::dgListNode* node = originalFace->GetFirst(); node; node = node->GetNext()){
 dgVertexAtribute p (node->GetInfo());
@@ -4200,10 +4199,8 @@ dgTrace (("%f %f %f\n", p.m_vertex.m_x, p.m_vertex.m_y, p.m_vertex.m_z));
 }
 dgTrace (("\n"));	
 }
-*/	
+	
 			while (stack) {
-
-xxx3 ++;
 
 				stack --;
 				dgMeshTreeCSGFace* const face = faceOnStack[stack];
@@ -4214,15 +4211,15 @@ xxx3 ++;
 				dgMeshTreeCSGFace* leftFace; 
 				dgMeshTreeCSGFace* rightFace;
 
-/*
-if (xxx == 4){
+
+if (xxx2 == 40){
 dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
 dgBigVector xxx2 (root->m_origin.m_x.GetAproximateValue(), root->m_origin.m_y.GetAproximateValue(), root->m_origin.m_z.GetAproximateValue(), 0.0);
 xxx1 = xxx1.Scale (1.0 / sqrt ((xxx1 % xxx1)));
 xxx1.m_w = - (xxx1 % xxx2);
 dgTrace (("%f %f %f %f\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
 }
-*/
+
 
 				face->Clip(root->m_normal, root->m_origin, &leftFace, &rightFace);
 				face->Release();
@@ -4252,7 +4249,18 @@ dgTrace (("%f %f %f %f\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
 
 				} else {
 
+
+
 					if (rightFace) {
+if (xxx2 == 40){
+dgTrace (("\n"));	
+for (dgMeshTreeCSGFace::dgListNode* node = rightFace->GetFirst(); node; node = node->GetNext()){
+	dgVertexAtribute p (node->GetInfo());
+	dgTrace (("%f %f %f\n", p.m_vertex.m_x, p.m_vertex.m_y, p.m_vertex.m_z));	
+}
+dgTrace (("\n"));	
+}
+
 						if (root->m_front->m_planeType == dgMeshEffectSolidTree::m_divider) {
 							stackPool[stack] = root->m_front;
 							faceOnStack[stack] = rightFace;
@@ -4266,6 +4274,16 @@ dgTrace (("%f %f %f %f\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
 					}
 
 					if (leftFace) {
+
+if (xxx2 == 40){
+dgTrace (("\n"));	
+for (dgMeshTreeCSGFace::dgListNode* node = leftFace->GetFirst(); node; node = node->GetNext()){
+	dgVertexAtribute p (node->GetInfo());
+	dgTrace (("%f %f %f\n", p.m_vertex.m_x, p.m_vertex.m_y, p.m_vertex.m_z));	
+}
+dgTrace (("\n"));	
+}
+
 						if (root->m_back->m_planeType == dgMeshEffectSolidTree::m_divider) {
 							stackPool[stack] = root->m_back;
 							faceOnStack[stack] = leftFace;
@@ -4430,18 +4448,6 @@ void dgMeshEffect::RepairTJoints (bool triangulate)
 			// vertices project 
 
 			while (SeparateDuplicateLoops (face));
-
-/*
-if (xxx >= 7){
-	dgEdge* ptr = face;
-	do {
-		dgInt32 i = ptr->m_incidentVertex;
-		dgTrace(("%d: %f %f %f\n", i, m_points[i].m_x, m_points[i].m_y, m_points[i].m_z));
-		ptr = ptr->m_next;
-	} while (ptr != face);
-	dgTrace(("\n"));
-}
-*/
 
 			dgBigVector dir (dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f));
 			dgFloat64 lengh2 = dgFloat64 (0.0f);
