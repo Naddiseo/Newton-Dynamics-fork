@@ -355,7 +355,8 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 
 
 dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, const dgMeshEffect& mesh, dgEdge* const face)
-	:dgList<dgMeshEffect::dgVertexAtribute>(allocator), m_side(m_back)
+//	:dgList<dgMeshEffect::dgVertexAtribute>(allocator), m_side(m_back)
+	:dgList<dgCSGFacePoint>(allocator), m_side(m_back)
 {
 	const dgEdge* ptr = face;
 	const dgMeshEffect::dgVertexAtribute* const attib = mesh.m_attib;
@@ -365,20 +366,29 @@ dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, const 
 		ptr = ptr->m_next;
 	} while (ptr != face);
 //dgTrace (("\n"));
+
 }
 
-dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, dgInt32 count, const dgMeshEffect::dgVertexAtribute* const points)
-	:dgList<dgMeshEffect::dgVertexAtribute>(allocator), m_side(m_back)
+dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, dgInt32 count, const dgCSGFacePoint* const points)
+//	:dgList<dgMeshEffect::dgVertexAtribute>(allocator), m_side(m_back)
+	:dgList<dgCSGFacePoint>(allocator), m_side(m_back)
+
 {
+	_ASSERTE (0);
+/*
 	for (dgInt32 i = 0; i < count; i ++) {
 //dgTrace (("%f %f %f\n", points[i].m_vertex.m_x, points[i].m_vertex.m_y, points[i].m_vertex.m_z));
 		Append (points[i]);
 	}
 //dgTrace (("\n"));
+*/
 }
 
-dgMeshEffect::dgVertexAtribute dgMeshTreeCSGFace::InterPolalate (const dgHugeVector& normal, const dgHugeVector& origin, const dgMeshEffect::dgVertexAtribute& p0, const dgMeshEffect::dgVertexAtribute& p1) const
+dgCSGFacePoint dgMeshTreeCSGFace::Interpolate (const dgHugeVector& normal, const dgHugeVector& origin, const dgCSGFacePoint& p0, const dgCSGFacePoint& p1) const
 {
+_ASSERTE (0);
+return dgCSGFacePoint();
+/*
 	dgHugeVector dp (p1.m_vertex - p0.m_vertex);
 	dgGoogol den (normal % dp);
 	dgGoogol num = normal % (dgHugeVector(p0.m_vertex) - origin);
@@ -407,6 +417,7 @@ dgMeshEffect::dgVertexAtribute dgMeshTreeCSGFace::InterPolalate (const dgHugeVec
 
 	attr.m_material = p0.m_material;
 	return attr;
+*/
 }
 
 void dgMeshTreeCSGFace::Clip (const dgHugeVector& normal, const dgHugeVector& origin, dgMeshTreeCSGFace** leftOut, dgMeshTreeCSGFace** rightOut)
@@ -417,14 +428,15 @@ void dgMeshTreeCSGFace::Clip (const dgHugeVector& normal, const dgHugeVector& or
 	dgInt32 rightCount = 0;
 	dgInt32 leftCount = 0;
 	for (dgMeshTreeCSGFace::dgListNode* ptr = GetFirst(); ptr; ptr = ptr->GetNext()) {
-		const dgMeshEffect::dgVertexAtribute& p = ptr->GetInfo();
+		const dgCSGFacePoint& p = ptr->GetInfo();
 
-		dgGoogol test = normal % (dgHugeVector (p.m_vertex) - origin);
-		if (fabs (test.GetAproximateValue()) < dgFloat64 (1.0e-12f)) {
-			test = dgGoogol(dgFloat64 (0.0f));
+		dgGoogol test = normal % (p.m_vertex - origin);
+		dgFloat64 val = test.GetAproximateValue();
+		if (fabs (val) < dgFloat64 (1.0e-16f)) {
+			val = dgFloat64 (0.0f);
 		}
 
-		dgFloat64 val = test.GetAproximateValue();
+//		dgFloat64 val = test.GetAproximateValue();
 		if (val > dgFloat64 (0.0f)) {
 			pointSide[count] = 1;
 			rightCount ++;
@@ -436,6 +448,7 @@ void dgMeshTreeCSGFace::Clip (const dgHugeVector& normal, const dgHugeVector& or
 		}
 		count ++;
 	}
+
 
 	*leftOut = NULL;
 	*rightOut = NULL;
@@ -457,18 +470,18 @@ void dgMeshTreeCSGFace::Clip (const dgHugeVector& normal, const dgHugeVector& or
 	} else {
 		dgInt32 leftCount = 0;
 		dgInt32 rightCount = 0;
-		dgMeshEffect::dgVertexAtribute leftFace[256];
-		dgMeshEffect::dgVertexAtribute rightFace[256];
+		dgCSGFacePoint leftFace[256];
+		dgCSGFacePoint rightFace[256];
 
 		dgInt32 i1 = 0;
 		dgInt32 i0 = count - 1;
-		dgMeshEffect::dgVertexAtribute p0 (GetLast()->GetInfo());
+		dgCSGFacePoint p0 (GetLast()->GetInfo());
 		for (dgMeshTreeCSGFace::dgListNode* ptr = GetFirst(); ptr; ptr = ptr->GetNext()) {
-			dgMeshEffect::dgVertexAtribute p1 (ptr->GetInfo());
+			dgCSGFacePoint p1 (ptr->GetInfo());
 
-			dgMeshEffect::dgVertexAtribute inter; 
+			dgCSGFacePoint inter; 
 			if (((pointSide[i0] == -1) && (pointSide[i1] == 1)) || ((pointSide[i0] == 1) && (pointSide[i1] == -1))) {
-				inter = InterPolalate (normal, origin, p0, p1);
+				inter = Interpolate (normal, origin, p0, p1);
 			}
 
 			if (pointSide[i1] == -1)	{
@@ -540,6 +553,8 @@ bool dgMeshTreeCSGFace::IsPointOnEdge (const dgBigVector& p0, const dgBigVector&
 
 void dgMeshTreeCSGFace::MergeMissingVertex (const dgMeshTreeCSGFace* const face)
 {
+	_ASSERTE (0);
+/*
 	for (dgMeshTreeCSGFace::dgListNode* outNode = GetFirst(); outNode != GetLast(); outNode = outNode->GetNext()) {
 		dgBigVector p0 (outNode->GetInfo().m_vertex);
 		for (dgMeshTreeCSGFace::dgListNode* node = face->GetFirst(); node; node = node->GetNext()) {
@@ -563,6 +578,7 @@ void dgMeshTreeCSGFace::MergeMissingVertex (const dgMeshTreeCSGFace* const face)
 			}
 		}
 	}
+*/
 }
 
 

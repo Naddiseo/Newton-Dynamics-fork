@@ -4194,7 +4194,7 @@ xxx2 *=1;
 if (xxx2 == 40){
 dgTrace (("\n"));	
 for (dgMeshTreeCSGFace::dgListNode* node = originalFace->GetFirst(); node; node = node->GetNext()){
-dgVertexAtribute p (node->GetInfo());
+dgCSGFacePoint p (node->GetInfo());
 dgTrace (("%f %f %f\n", p.m_vertex.m_x, p.m_vertex.m_y, p.m_vertex.m_z));	
 }
 dgTrace (("\n"));	
@@ -4255,7 +4255,7 @@ dgTrace (("%f %f %f %f\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
 if (xxx2 == 40){
 dgTrace (("\n"));	
 for (dgMeshTreeCSGFace::dgListNode* node = rightFace->GetFirst(); node; node = node->GetNext()){
-	dgVertexAtribute p (node->GetInfo());
+	dgCSGFacePoint p (node->GetInfo());
 	dgTrace (("%f %f %f\n", p.m_vertex.m_x, p.m_vertex.m_y, p.m_vertex.m_z));	
 }
 dgTrace (("\n"));	
@@ -4278,7 +4278,7 @@ dgTrace (("\n"));
 if (xxx2 == 40){
 dgTrace (("\n"));	
 for (dgMeshTreeCSGFace::dgListNode* node = leftFace->GetFirst(); node; node = node->GetNext()){
-	dgVertexAtribute p (node->GetInfo());
+	dgCSGFacePoint p (node->GetInfo());
 	dgTrace (("%f %f %f\n", p.m_vertex.m_x, p.m_vertex.m_y, p.m_vertex.m_z));	
 }
 dgTrace (("\n"));	
@@ -4304,7 +4304,7 @@ dgTrace (("\n"));
 				dgInt32 count = 0;
 				dgMeshEffect::dgVertexAtribute facePoints[256];
 				for (dgMeshTreeCSGFace::dgListNode* node = originalFace->GetFirst(); node; node = node->GetNext()) {
-					facePoints[count] = node->GetInfo();
+					facePoints[count] = node->GetInfo().GetPoint();
 					count ++;
 				}
 
@@ -4344,7 +4344,7 @@ dgTrace (("\n"));
 					dgInt32 count = 0;
 					dgVertexAtribute facePoints[256];
 					for (dgMeshTreeCSGFace::dgListNode* node = face->GetFirst(); node; node = node->GetNext()) {
-						facePoints[count] = node->GetInfo();
+						facePoints[count] = node->GetInfo().GetPoint();
 						count ++;
 					}
 

@@ -58,7 +58,8 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 
 
 	// now use th brush to carve the big box
-	dMatrix matrix (GetIdentityMatrix());
+//	dMatrix matrix (GetIdentityMatrix());
+	dMatrix matrix (dPitchMatrix(3.14159265f * 0.5f / 180.0f));
 //	matrix.m_posit.m_x = -(size.m_x - size1.m_x) * 0.5f;
 //	matrix.m_posit.m_y = -(size.m_y) * 0.5f;
 //	NewtonMesh* const mesh1 = NewtonMeshUnion(mesh, brush, &matrix[0][0]);
@@ -66,17 +67,17 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 
 	NewtonMesh* const mesh1 = NewtonMeshDifference (mesh, brush, &matrix[0][0]);
 
-	matrix = dRollMatrix( 3.14159265f * 0.5f);
-	NewtonMesh* const mesh2 = NewtonMeshDifference (mesh1, brush, &matrix[0][0]);
+	matrix = dRollMatrix (3.14159265f * 0.5f);
+//	NewtonMesh* const mesh2 = NewtonMeshDifference (mesh1, brush, &matrix[0][0]);
 
 	matrix = dYawMatrix( 3.14159265f * 0.5f);
-	NewtonMesh* const mesh3 = NewtonMeshDifference (mesh2, brush, &matrix[0][0]);
+//	NewtonMesh* const mesh3 = NewtonMeshDifference (mesh2, brush, &matrix[0][0]);
 
 	dMatrix textureMatrix (GetIdentityMatrix());
 	textureMatrix[0][0] = 1.0f / size.m_x;
 	textureMatrix[1][1] = 1.0f / size.m_y;
 
-//	NewtonMesh* const tetrahedras = NewtonMeshTetrahedralization (mesh1, interior, &textureMatrix[0][0]);
+	NewtonMesh* const tetrahedras = NewtonMeshTetrahedralization (mesh1, interior, &textureMatrix[0][0]);
 //	NewtonMesh* const tetrahedras = NewtonMeshTetrahedralization (mesh2, interior, &textureMatrix[0][0]);
 //	NewtonMesh* const tetrahedras = NewtonMeshTetrahedralization (mesh3, interior, &textureMatrix[0][0]);
 	
@@ -91,8 +92,8 @@ dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(meshNode);
 //modelMesh->ReplaceMesh (brush);
 //modelMesh->ReplaceMesh (mesh1);
 //modelMesh->ReplaceMesh (mesh2);
-modelMesh->ReplaceMesh (mesh3);
-//modelMesh->ReplaceMesh (tetrahedras);
+//modelMesh->ReplaceMesh (mesh3);
+modelMesh->ReplaceMesh (tetrahedras);
 
 xxxx.Serialize("../../../media/xxx.ngd");
 #endif
