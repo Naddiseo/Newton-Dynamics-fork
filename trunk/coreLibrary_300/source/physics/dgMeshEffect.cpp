@@ -3279,6 +3279,7 @@ void dgMeshEffect::ClipMesh (const dgMatrix& matrix, const dgMeshEffect* const c
 
 dgMeshEffectSolidTree* dgMeshEffect::CreateSolidTree() const
 {
+_ASSERTE (0);
 	dgMeshEffectSolidTree* tree = NULL;
 
 	dgMeshEffect tmp (*this);
@@ -4094,7 +4095,8 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 
 
 static int xxx;
-static int xxx1;
+static int xxx2;
+static int xxx3;
 xxx ++;
 
 	dgInt32 mark = mesh.IncLRU();
@@ -4108,6 +4110,10 @@ xxx ++;
 				ptr->m_mark = mark;
 				ptr = ptr->m_next;
 			} while (ptr != face);
+
+xxx2 ++;
+if (xxx2 == 92)
+xxx2 *=1;
 
 			dgList<dgMeshTreeCSGFace*> faceList(GetAllocator());
 			dgMeshTreeCSGFace* faceOnStack[DG_MESH_EFFECT_BOLLEAN_STACK];
@@ -4123,7 +4129,9 @@ xxx ++;
 
 			originalFace->AddRef();
 
+			
 
+/*
 if (xxx == 4){
 dgTrace (("\n"));	
 for (dgMeshTreeCSGFace::dgListNode* node = originalFace->GetFirst(); node; node = node->GetNext()){
@@ -4132,8 +4140,11 @@ dgTrace (("%f %f %f\n", p.m_vertex.m_x, p.m_vertex.m_y, p.m_vertex.m_z));
 }
 dgTrace (("\n"));	
 }
-	
+*/	
 			while (stack) {
+
+xxx3 ++;
+
 				stack --;
 				dgMeshTreeCSGFace* const face = faceOnStack[stack];
 				const dgMeshEffectSolidTree* const root = stackPool[stack];
@@ -4143,22 +4154,13 @@ dgTrace (("\n"));
 				dgMeshTreeCSGFace* leftFace; 
 				dgMeshTreeCSGFace* rightFace;
 
+/*
 if (xxx == 4){
 dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
 dgBigVector xxx2 (root->m_origin.m_x.GetAproximateValue(), root->m_origin.m_y.GetAproximateValue(), root->m_origin.m_z.GetAproximateValue(), 0.0);
 xxx1 = xxx1.Scale (1.0 / sqrt ((xxx1 % xxx1)));
 xxx1.m_w = - (xxx1 % xxx2);
 dgTrace (("%f %f %f %f\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
-}
-
-/*
-if (xxx1 == 59)
-{
-for (dgMeshTreeCSGFace::dgListNode* node = face->GetFirst(); node; node = node->GetNext()){
-dgVertexAtribute p (node->GetInfo());
-//dgTrace (("%f %f %f\n", p.m_vertex.m_x, p.m_vertex.m_y, p.m_vertex.m_z));	
-}
-//dgTrace (("\n"));	
 }
 */
 
@@ -4169,6 +4171,7 @@ dgVertexAtribute p (node->GetInfo());
 
 					hasCoplanar = true;
 					if (!((root->m_front->m_planeType == dgMeshEffectSolidTree::m_divider) || (root->m_back->m_planeType == dgMeshEffectSolidTree::m_divider))) {
+						_ASSERTE (face->DetermineSide(clipper) != 0);
 						faceList.Append(face);
 					} else {
 						//_ASSERTE (!(root->m_front && root->m_back));
@@ -4197,6 +4200,7 @@ dgVertexAtribute p (node->GetInfo());
 							_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
 						} else {
 							rightCount ++;
+							_ASSERTE (rightFace->DetermineSide(clipper) != 0);
 							faceList.Append (rightFace);
 						}
 					}
@@ -4209,6 +4213,7 @@ dgVertexAtribute p (node->GetInfo());
 							_ASSERTE (stack < sizeof (stackPool) / sizeof (stackPool[0]));
 						} else {
 							leftCount ++;
+							_ASSERTE (leftFace->DetermineSide(clipper) != 0);
 							faceList.Append (leftFace);
 						}
 					}
@@ -4233,14 +4238,15 @@ dgVertexAtribute p (node->GetInfo());
 			} else {
 				for (dgList<dgMeshTreeCSGFace*>::dgListNode* node = faceList.GetFirst(); node; node = node->GetNext()) {
 					dgMeshTreeCSGFace* const face = node->GetInfo();
-
+/*
 if (xxx == 4){
 for (dgMeshTreeCSGFace::dgListNode* node = face->GetFirst(); node; node = node->GetNext()){
 dgVertexAtribute p (node->GetInfo());
 dgTrace (("%f %f %f\n", p.m_vertex.m_x, p.m_vertex.m_y, p.m_vertex.m_z));	
 }
 dgTrace (("\n"));	
-					}
+}
+*/
 
 					face->m_side = face->DetermineSide (clipper);
 				}
@@ -4282,15 +4288,6 @@ dgTrace (("\n"));
 							rightMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
 							break;
 						}
-
-//					if (face->m_iscoplanar) {
-//						meshCoplanar->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
-//					} else {
-//						if (face->m_isFrontSize) {
-//							rightMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
-//						} else {
-//							leftMesh->AddPolygon(count, &facePoints[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (facePoints[0].m_material));
-//						}
 					}
 				}
 			}
@@ -4371,17 +4368,6 @@ void dgMeshEffect::RepairTJoints (bool triangulate)
 
 		if ((face->m_incidentFace < 0) && (face->m_mark != mark)) {
 			// vertices project 
-/*
-if (xxx >= 7){
-dgEdge* ptr = face;
-do {
-	dgInt32 i = ptr->m_incidentVertex;
-	dgTrace(("%d: %f %f %f\n", i, m_points[i].m_x, m_points[i].m_y, m_points[i].m_z));
-	ptr = ptr->m_next;
-} while (ptr != face);
-dgTrace(("\n"));
-}
-*/
 
 			while (SeparateDuplicateLoops (face));
 

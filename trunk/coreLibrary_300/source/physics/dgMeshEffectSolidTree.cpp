@@ -575,11 +575,11 @@ dgMeshTreeCSGFace::dgFaceCode dgMeshTreeCSGFace::DetermineSide (const dgMeshEffe
 	while (root->m_planeType == dgMeshEffectSolidTree::m_divider) { 
 		#ifdef _DEBUG
 
-dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
-dgBigVector xxx2 (root->m_origin.m_x.GetAproximateValue(), root->m_origin.m_y.GetAproximateValue(), root->m_origin.m_z.GetAproximateValue(), 0.0);
-xxx1 = xxx1.Scale (1.0 / sqrt ((xxx1 % xxx1)));
-xxx1.m_w = - (xxx1 % xxx2);
-dgTrace (("%f %f %f %f\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
+//dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
+//dgBigVector xxx2 (root->m_origin.m_x.GetAproximateValue(), root->m_origin.m_y.GetAproximateValue(), root->m_origin.m_z.GetAproximateValue(), 0.0);
+//xxx1 = xxx1.Scale (1.0 / sqrt ((xxx1 % xxx1)));
+//xxx1.m_w = - (xxx1 % xxx2);
+//dgTrace (("%f %f %f %f\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
 
 
 			dgFloat64 maxVal = dgFloat64 (-1.0e20f);

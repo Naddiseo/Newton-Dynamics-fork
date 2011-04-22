@@ -36,7 +36,7 @@ class dgMeshTreeCSGFace: public dgList<dgMeshEffect::dgVertexAtribute>, public d
 
 	enum dgFaceCode
 	{
-		m_back,
+		m_back = 1,
 		m_front,
 		m_coplanar,
 	};
