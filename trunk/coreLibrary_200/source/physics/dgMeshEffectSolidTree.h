@@ -80,9 +80,8 @@ class dgCSGFacePoint
 
 };
 
-//class dgMeshTreeCSGFace: public dgList<dgMeshEffect::dgVertexAtribute>, public dgRefCounter
-class dgMeshTreeCSGFace: public dgList<dgCSGFacePoint>, public dgRefCounter
 
+class dgMeshTreeCSGFace: public dgList<dgCSGFacePoint>, public dgRefCounter
 {
 
 	public:
@@ -107,6 +106,8 @@ class dgMeshTreeCSGFace: public dgList<dgCSGFacePoint>, public dgRefCounter
 
 	dgFaceCode DetermineSide (const dgMeshEffectSolidTree* const bsp);
 
+	bool CheckFaceArea (dgInt32 count, const dgCSGFacePoint* const points) const;
+
 	dgFaceCode m_side;
 };
 
@@ -122,11 +123,11 @@ class dgMeshEffectSolidTree
 		m_solid,
 	};
 
-	class CSGConvexCurve: public dgList<dgHugeVector>
+	class CSGConvexCurve: public dgList<dgHugeVector>, public dgRefCounter
 	{
 		public:
-		CSGConvexCurve ();
 		CSGConvexCurve (dgMemoryAllocator* const allocator);
+		CSGConvexCurve (const dgMeshEffect& mesh, dgEdge* const face);
 		bool CheckConvex(const dgHugeVector& normal, const dgHugeVector& point) const;
 	};
 
