@@ -124,21 +124,15 @@ dgTemplateVector<T>::dgTemplateVector () {}
 
 template<class T>
 dgTemplateVector<T>::dgTemplateVector (const T *ptr)
+	:m_x(ptr[0]), m_y(ptr[1]), m_z(ptr[2]), m_w (0.0f)
 {
-	m_x = ptr[0];
-	m_y = ptr[1];
-	m_z = ptr[2];
-	m_w = T (0.0f);
 //	_ASSERTE (dgCheckVector ((*this)));
 }
 
 template<class T>
 dgTemplateVector<T>::dgTemplateVector (T x, T y, T z, T w) 
+	:m_x(x), m_y(y), m_z(z), m_w (w)
 {
-	m_x = x;
-	m_y = y;
-	m_z = z;
-	m_w = w;
 }
 
 
