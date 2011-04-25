@@ -3185,7 +3185,7 @@ xxx ++;
 		result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 		result->BeginPolygon();
 		if (rightMeshSource) {
-//if (xxx != 2)
+if (xxx != 2)
 			result->MergeFaces(rightMeshSource);
 		}
 
@@ -3198,7 +3198,6 @@ xxx ++;
 			if (clipperCoplanar && sourceCoplanar) {
 				_ASSERTE (sourceCoplanar);
 				clipperCoplanar->FilterCoplanarFaces (sourceCoplanar, dgFloat32 (1.0f));
-if (xxx != 2)
 				result->ReverseMergeFaces(clipperCoplanar);
 			}
 		}

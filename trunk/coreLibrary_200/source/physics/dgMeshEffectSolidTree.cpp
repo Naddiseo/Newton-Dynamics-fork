@@ -23,7 +23,7 @@
 #include "dgMeshEffect.h"
 #include "dgMeshEffectSolidTree.h"
 
-#define DG_CLIPPER_TOL	dgFloat64 (1.0e-16)
+#define DG_CLIPPER_TOL	dgFloat64 (1.0e-12)
 
 dgMeshEffectSolidTree::CSGConvexCurve::CSGConvexCurve (dgMemoryAllocator* const allocator)
 	:dgList<dgHugeVector>(allocator)
