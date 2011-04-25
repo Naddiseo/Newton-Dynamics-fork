@@ -2229,12 +2229,12 @@ xxx ++;
 		pointArray[3] = delaunayTetrahedras.GetVertex(face.m_otherVertex);
 
 dgMeshEffect* convexMesh = NULL;
-if (xxx == 11)
+//if (xxx == 14)
 convexMesh = MakeDelanayIntersection (tree, &pointArray[0], 4, interiorMaterial, textureProjectionMatrix, dgFloat64 (45.0f * 3.1416f / 180.0f));
 
 //		dgMeshEffect* const convexMesh = MakeDelanayIntersection (tree, &pointArray[0], 4, interiorMaterial, textureProjectionMatrix, dgFloat64 (45.0f * 3.1416f / 180.0f));
 
-if (xxx == 11)
+//if (xxx == 14)
 		if (convexMesh) {
 			if (convexMesh) {
 				for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
@@ -2280,7 +2280,7 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 		convexMesh.CalculateNormals(normalAngleInRadians);
 		convexMesh.UniformBoxMapping (materialId, textureProjectionMatrix);
 
-#if 0
+#if 1
 intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
 #else
 
