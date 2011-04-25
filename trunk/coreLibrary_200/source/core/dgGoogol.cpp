@@ -35,20 +35,33 @@
 
 
 static dgFloat64 m_splitter = dgFloat64 (0.0f);
-static dgFloat64 m_precision = dgFloat64 (0.0f);
+//static dgFloat64 m_precision = dgFloat64 (0.0f);
 
 dgGoogol::dgGoogol(void)
-	:m_significantCount (0)
+	:dgArray (2, GetAllocator())
+	,m_significantCount (0)
 {
+/*
 #ifdef _DEBUG
 	memset (m_elements, 0, sizeof (m_elements));
 #endif
+*/
 }
 
-
 dgGoogol::dgGoogol(dgFloat64 value)
+	:dgArray (2, GetAllocator())
 {
 	InitFloatFloat (value);
+}
+
+dgGoogol::dgGoogol(const dgGoogol& copy)
+	:dgArray (2, GetAllocator())
+	,m_significantCount (copy.m_significantCount)
+{
+	if (m_significantCount) {
+		(*this)[m_significantCount - 1] = 0.0;
+		memcpy (&(*this)[0], &copy[0], m_significantCount * sizeof (dgFloat64));
+	}
 }
 
 dgGoogol::~dgGoogol(void)
@@ -56,11 +69,22 @@ dgGoogol::~dgGoogol(void)
 }
 
 
+dgMemoryAllocator* dgGoogol::GetAllocator ()
+{
+	static dgMemoryAllocator allocator;
+	return &allocator;
+}
+
+
 dgFloat64 dgGoogol::GetAproximateValue() const
 {
 	dgFloat64 val = 0.0f;
+
+	const dgFloat64* const src = &(*this)[0];
+	_ASSERTE (src);
+
 	for (dgInt32 i = m_significantCount - 1; i >= 0; i --) {
-		val += m_elements[i];
+		val += src[i];
 	}
 	return val;
 }
@@ -68,6 +92,7 @@ dgFloat64 dgGoogol::GetAproximateValue() const
 void dgGoogol::InitFloatFloat (dgFloat64 value)
 {
 	if (m_splitter == 0.0) {
+
 		dgInt32 every_other = 1;
 		dgFloat64 check = dgFloat64 (1.0);
 		dgFloat64 epsilon = dgFloat64 (1.0);
@@ -83,23 +108,19 @@ void dgGoogol::InitFloatFloat (dgFloat64 value)
 			every_other = !every_other;
 			check = dgFloat64 (1.0) + epsilon;
 		} while ((check != dgFloat64 (1.0)) && (check != lastcheck));
+//		m_splitter *= 2.0;
+
 		m_splitter += dgFloat64 (1.0);
 
-		m_precision = epsilon;
-		for (dgInt32 i = 1; i < DG_GOOGOL_SIZE; i ++) {
-			m_precision *= epsilon;
-		}
-	
+//		m_precision = epsilon;
+//		for (dgInt32 i = 1; i < DG_GOOGOL_SIZE; i ++) {
+//			m_precision *= epsilon;
+//		}
 	}
 
-
+	(*this)[0] = value;
 	m_significantCount = 1;
-#ifdef _DEBUG
-	memset (m_elements, 0, sizeof (m_elements));
-#endif
-	m_elements[0] = value;
-
-
+	
 }
 
 
@@ -114,16 +135,23 @@ inline void dgGoogol::AddFloat (dgFloat64 a, dgFloat64 b, dgFloat64& x, dgFloat6
 	y = around + bround;
 }
 
-inline void dgGoogol::PackFloat ()
+void dgGoogol::PackFloat ()
 {
 	if (m_significantCount > 1) {
-		dgFloat64 elements[DG_GOOGOL_SIZE];
+//		dgFloat64 elements[DG_GOOGOL_SIZE];
+		
+		dgFloat64 elements[1024];
+		_ASSERTE (m_significantCount < sizeof (elements) / sizeof (elements[0]));
 		dgInt32 bottom = m_significantCount - 1;
-		dgFloat64 Q = m_elements[bottom];
+
+		dgFloat64* const dst = &(*this)[0];
+		_ASSERTE (dst);
+
+		dgFloat64 Q = dst[bottom];
 		for (dgInt32 i = m_significantCount - 2; i >= 0; i--) {
 			dgFloat64 q;
 			dgFloat64 Qnew;
-			dgFloat64 enow = m_elements[i];
+			dgFloat64 enow = dst[i];
 
 			AddFloat (Q, enow, Qnew, q);
 			if (q != 0) {
@@ -144,18 +172,16 @@ inline void dgGoogol::PackFloat ()
 			if (q != 0) {
 				elements[top] = q;
 				top ++;
-				_ASSERTE (top < DG_GOOGOL_SIZE);
+				_ASSERTE (top < sizeof (elements) / sizeof (elements[0]));
 			}
 			Q = Qnew;
 		}
 		elements[top] = Q;
 		m_significantCount = top + 1;
-		_ASSERTE (m_significantCount <= DG_GOOGOL_SIZE);
-		#ifdef _DEBUG
-			memset (m_elements, 0, DG_GOOGOL_SIZE * sizeof (dgFloat64));
-		#endif
-		memcpy (m_elements, elements, m_significantCount * sizeof (dgFloat64));
+		_ASSERTE (m_significantCount < sizeof (elements) / sizeof (elements[0]));
+		memcpy (dst, elements, m_significantCount * sizeof (dgFloat64));
 	}
+
 }
 
 
@@ -186,11 +212,19 @@ inline void dgGoogol::MulFloat (dgFloat64 a, dgFloat64 b, dgFloat64& x, dgFloat6
 }
 
 
-inline dgGoogol dgGoogol::ScaleFloat(dgFloat64 scale) const
+dgGoogol dgGoogol::ScaleFloat(dgFloat64 scale) const
 {
 	dgFloat64 Q;
 	dgGoogol tmp;
-	MulFloat (m_elements[0], scale, Q, tmp.m_elements[0]);
+	tmp[m_significantCount + 2] = 0.0f;
+
+	dgFloat64* const dst = &tmp[0];
+	_ASSERTE (dst);
+
+	const dgFloat64* const src = &(*this)[0];
+	_ASSERTE (src);
+
+	MulFloat (src[0], scale, Q, dst[0]);
 
 	tmp.m_significantCount = 1;
 	for (dgInt32 i = 1; i < m_significantCount; i++) {
@@ -198,43 +232,58 @@ inline dgGoogol dgGoogol::ScaleFloat(dgFloat64 scale) const
 		dgFloat64 product0;
 		dgFloat64 product1;
 
-		dgFloat64 enow = m_elements[i];
+		dgFloat64 enow = src[i];
 		MulFloat (enow, scale, product1, product0);
 
-		AddFloat (Q, product0, sum, tmp.m_elements[tmp.m_significantCount]);
+		AddFloat (Q, product0, sum, dst[tmp.m_significantCount]);
 		tmp.m_significantCount++;
-		_ASSERTE (tmp.m_significantCount < DG_GOOGOL_SIZE);
+		_ASSERTE (tmp.m_significantCount < (m_significantCount + 2));
 
-		AddFloat (product1, sum, Q, tmp.m_elements[tmp.m_significantCount]);
+		AddFloat (product1, sum, Q, dst[tmp.m_significantCount]);
 		tmp.m_significantCount++;
-		_ASSERTE (tmp.m_significantCount <= DG_GOOGOL_SIZE);
+		_ASSERTE (tmp.m_significantCount <= (m_significantCount + 2));
 		
 		tmp.PackFloat ();
 	}
-	tmp.m_elements[tmp.m_significantCount] = Q;
+
+	dst[tmp.m_significantCount] = Q;
 	tmp.m_significantCount++;
-	_ASSERTE (tmp.m_significantCount <= DG_GOOGOL_SIZE);
+	_ASSERTE (tmp.m_significantCount <= (m_significantCount + 2));
 
 	tmp.PackFloat ();
-	_ASSERTE (tmp.m_significantCount <= DG_GOOGOL_SIZE);
+	_ASSERTE (tmp.m_significantCount <= (m_significantCount + 2));
+
 	return tmp;
 }
 
+dgGoogol dgGoogol::operator= (const dgGoogol &copy)
+{
+	m_significantCount = copy.m_significantCount;
+	if (m_significantCount) {
+		(*this)[m_significantCount - 1] = 0.0;
+		memcpy (&(*this)[0], &copy[0], m_significantCount * sizeof (dgFloat64));
+	}
+	return *this;
+}
 
 dgGoogol dgGoogol::operator+ (const dgGoogol &A) const
 {
 	dgGoogol tmp(*this);
+
+	const dgFloat64* const src = &A[0];
+	_ASSERTE (src);
 	for (dgInt32 i = 0; i < A.m_significantCount; i++) {
-		dgFloat64 q = A.m_elements[i];
+		dgFloat64 q = src[i];
+		dgFloat64* const dst = &tmp[0];
+		_ASSERTE (dst);
 		for (dgInt32 j = 0; j < tmp.m_significantCount; j++) {
 			dgFloat64 Qnew;
-			dgFloat64 hnow = tmp.m_elements[j];
-			AddFloat (q, hnow, Qnew, tmp.m_elements[j]);
+			dgFloat64 hnow = dst[j];
+			AddFloat (q, hnow, Qnew, dst[j]);
 			q = Qnew;
 		}
 		tmp.PackFloat ();
-		_ASSERTE (tmp.m_significantCount < DG_GOOGOL_SIZE);
-		tmp.m_elements[tmp.m_significantCount] = q;
+		tmp[tmp.m_significantCount] = q;
 		tmp.m_significantCount ++;
 	}
 
@@ -242,23 +291,53 @@ dgGoogol dgGoogol::operator+ (const dgGoogol &A) const
 	return tmp;
 }
 
+dgGoogol dgGoogol::operator- ()
+{
+	dgFloat64* const dst = &(*this)[0];
+	for (dgInt32 i = 0; i < m_significantCount; i ++) {
+		dst[i] = - dst[i];
+	}
+	return *this;
+}
 
 dgGoogol dgGoogol::operator- (const dgGoogol &A) const
 {
 	dgGoogol tmp (A);
+	dgFloat64* const dst = &tmp[0];
+	const dgFloat64* const src = &A[0];
+	_ASSERTE (dst);
+	_ASSERTE (src);
 	for (dgInt32 i = 0; i < tmp.m_significantCount; i ++) {
-		tmp.m_elements[i] = - tmp.m_elements[i];
+		dst[i] = - src[i];
 	}
 	return *this + tmp;
 }
 
 dgGoogol dgGoogol::operator* (const dgGoogol &A) const
 {
-	dgGoogol tmp (ScaleFloat(A.m_elements[0]));	
+	const dgFloat64* const src = &A[0];
+	_ASSERTE (src);
+
+
+	dgGoogol tmp (ScaleFloat(src[0]));	
 	for (dgInt32 i = 1; i < A.m_significantCount; i ++) {
-		tmp = tmp + ScaleFloat(A.m_elements[i]);
+		tmp = tmp + ScaleFloat(src[i]);
 	}
 	return tmp;
+}
+
+dgGoogol dgGoogol::operator/ (const dgGoogol &A) const
+{
+//  I still do not know why this Newton Raphson iteration is not yielding the expected result 
+//	dgGoogol tmp (1.0 / A.GetAproximateValue());
+//	dgGoogol two (2.0);
+//	for (dgInt32 i = 0; i < 3; i ++) {
+//		tmp = tmp * (two - A * tmp);
+//	}
+//	return (*this) * tmp;
+
+	// for now return the approximation
+	return dgGoogol (GetAproximateValue() / A.GetAproximateValue());
 }
 
 

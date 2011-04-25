@@ -24,39 +24,50 @@
 
 
 #include "dgStdafx.h"
+#include "dgMemory.h"
+#include "dgArray.h"
 #include "dgVector.h"
-//#define DG_GOOGOL_SIZE		32
-#define DG_GOOGOL_SIZE	16
 
 
 
-
-class dgGoogol
+class dgGoogol: public dgArray<dgFloat64>
 {
 	public:
 	dgGoogol(void);
 	dgGoogol(dgFloat64 value);
+	dgGoogol(const dgGoogol& copy);
 	~dgGoogol(void);
 
 	dgFloat64 GetAproximateValue() const;
 	void InitFloatFloat (dgFloat64 value);
 
+	dgGoogol operator- (); 
+	dgGoogol operator= (const dgGoogol &A); 
 	dgGoogol operator+ (const dgGoogol &A) const; 
 	dgGoogol operator- (const dgGoogol &A) const; 
 	dgGoogol operator* (const dgGoogol &A) const; 
+	dgGoogol operator/ (const dgGoogol &A) const; 
 
 	dgGoogol operator+= (const dgGoogol &A); 
 	dgGoogol operator-= (const dgGoogol &A); 
+	
+
+	void Trace () const
+	{
+		dgTrace (("%f ", GetAproximateValue()));
+	}
 
 	private:
-	inline void PackFloat ();
-	inline void AddFloat (dgFloat64 A, dgFloat64 B, dgFloat64& x, dgFloat64& y) const;
-	inline void MulFloat (dgFloat64 A, dgFloat64 B, dgFloat64& x, dgFloat64& y) const;
-	inline void SplitFloat (dgFloat64 A, dgFloat64& hi, dgFloat64& lo) const;
-	inline dgGoogol ScaleFloat(dgFloat64 scale) const;
-
+	void PackFloat ();
+	void AddFloat (dgFloat64 A, dgFloat64 B, dgFloat64& x, dgFloat64& y) const;
+	void MulFloat (dgFloat64 A, dgFloat64 B, dgFloat64& x, dgFloat64& y) const;
+	void SplitFloat (dgFloat64 A, dgFloat64& hi, dgFloat64& lo) const;
+	dgGoogol ScaleFloat(dgFloat64 scale) const;
+	static dgMemoryAllocator* GetAllocator ();
+	
+//	dgFloat64 m_elements[DG_GOOGOL_SIZE];
 	dgInt32 m_significantCount;
-	dgFloat64 m_elements[DG_GOOGOL_SIZE];
+	
 };
 
 class dgHugeVector: public dgTemplateVector<dgGoogol>
@@ -68,25 +79,26 @@ class dgHugeVector: public dgTemplateVector<dgGoogol>
 	}
 
 	dgHugeVector (const dgBigVector& a)
-		:dgTemplateVector<dgGoogol>()
+		:dgTemplateVector<dgGoogol>(dgGoogol (a.m_x), dgGoogol (a.m_y), dgGoogol (a.m_z), dgGoogol (a.m_w))
 	{
-		m_x = a.m_x;
-		m_y = a.m_y;
-		m_z = a.m_z;
-		m_w = a.m_w; 
 	}
+
 	dgHugeVector (const dgTemplateVector<dgGoogol>& a)
 		:dgTemplateVector<dgGoogol>(a)
 	{
 	}
 
 	dgHugeVector (dgFloat64 x, dgFloat64 y, dgFloat64 z, dgFloat64 w)
-		:dgTemplateVector<dgGoogol>()
+		:dgTemplateVector<dgGoogol>(x, y, z, w)
 	{
-		m_x = x;
-		m_y = y;
-		m_z = z;
-		m_w = w; 
+	}
+
+	void Trace () const
+	{
+		m_x.Trace();
+		m_y.Trace();
+		m_z.Trace();
+		dgTrace (("\n"));
 	}
 };
 
