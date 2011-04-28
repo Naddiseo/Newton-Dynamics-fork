@@ -4221,7 +4221,8 @@ void NewtonCollisionCalculateAABB(const NewtonCollision* collisionPtr, const dFl
 {
 	dgCollision* collision;
 	collision = (dgCollision*) collisionPtr;
-	const dgMatrix& matrix = *((dgMatrix*) offsetMatrix);
+	//const dgMatrix& matrix = *((dgMatrix*) offsetMatrix);
+	dgMatrix matrix (collision->GetOffsetMatrix () * (*((dgMatrix*) offsetMatrix)));
 
 	dgVector q0;
 	dgVector q1;
