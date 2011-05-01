@@ -21,7 +21,6 @@
 
 
 
-
 #include "dgStdafx.h"
 #include "dgGoogol.h"
 
