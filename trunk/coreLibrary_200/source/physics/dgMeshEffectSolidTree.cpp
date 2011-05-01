@@ -78,6 +78,187 @@ bool dgMeshTreeCSGFace::CheckConsistency () const
 	return (outFaceCount == 1) ? true : false;
 }
 
+
+//void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal, const dgHugeVector& origin, dgEdge** const poolReplacement, dgInt32 poolCount, dgEdge** leftOut, dgEdge** rightOut)
+void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal, const dgHugeVector& origin, dgEdge** leftOut, dgEdge** rightOut)
+{
+	dgEdge* left = NULL;
+	dgEdge* right = NULL;
+	dgEdge* ptr = face;
+	dgEdge* lastEdge = face;
+	dgMeshEffect::dgVertexAtribute p0 (m_points[ptr->m_incidentVertex]);
+	dgGoogol test0 = normal % (dgHugeVector(p0.m_vertex) - origin);
+	if (ptr->m_incidentVertex > m_baseCount) {
+		if (fabs (test0.GetAproximateValue()) < dgFloat64 (1.0e-12f)) {
+			test0 = dgGoogol(dgFloat64 (0.0f));
+		}
+	}
+
+	*leftOut = NULL; 
+	*rightOut = NULL;	
+	do {
+		dgMeshEffect::dgVertexAtribute p1 (m_points[ptr->m_next->m_incidentVertex]);
+		dgGoogol test1 = normal % (dgHugeVector (p1.m_vertex) - origin);
+		if (ptr->m_next->m_incidentVertex > m_baseCount) {
+			if (fabs (test1.GetAproximateValue()) < dgFloat64 (1.0e-12f)) {
+				test1 = dgGoogol(dgFloat64 (0.0f));
+			}
+		}
+
+		dgFloat64 val0 = test0.GetAproximateValue();
+		dgFloat64 val1 = test1.GetAproximateValue();
+		if (val0 < dgFloat64 (0.0f)) {
+			if (val1 > dgFloat64 (0.0f)) {
+				bool replaceface = false;
+				if (lastEdge == ptr) {
+					replaceface = true;
+				}
+
+				dgHugeVector dp (p1.m_vertex - p0.m_vertex);
+				dgGoogol den (normal % dp);
+				dgFloat64 t = -test0.GetAproximateValue() / den.GetAproximateValue();
+				dgHugeVector q (dgHugeVector(p0.m_vertex) + dp.Scale (t));
+
+				dgMeshEffect::dgVertexAtribute attr;
+				attr.m_vertex = dgBigVector (q.m_x.GetAproximateValue(), q.m_y.GetAproximateValue(), q.m_z.GetAproximateValue(), dgFloat64 (0.0f));
+
+				dgBigVector normal0(p0.m_normal_x, p0.m_normal_y, p0.m_normal_z, dgFloat64 (0.0f));
+				dgBigVector normal1(p1.m_normal_x, p1.m_normal_y, p1.m_normal_z, dgFloat64 (0.0f));
+				dgBigVector n (normal0 + (normal1 - normal0).Scale (t));
+				n = n.Scale (dgFloat64 (1.0f) / sqrt (n % n)); 
+
+				attr.m_normal_x = n.m_x;
+				attr.m_normal_y = n.m_y;
+				attr.m_normal_z = n.m_z; 
+
+				attr.m_u0 = p0.m_u0 + (p1.m_u0 - p0.m_u0) * t;
+				attr.m_v0 = p0.m_v0 + (p1.m_v0 - p0.m_v0) * t;
+
+				attr.m_u1 = p0.m_u1 + (p1.m_u1 - p0.m_u1) * t;
+				attr.m_v1 = p0.m_v1 + (p1.m_v1 - p0.m_v1) * t;
+
+				attr.m_material = p0.m_material;
+
+				ptr = SpliteEdge (m_count, ptr);
+				if (replaceface) {
+					lastEdge = ptr;
+				}
+
+				AddPoint (attr);
+				ptr = ptr->m_next;
+				right = ptr;
+
+			} else if (val1 < dgFloat64 (0.0f)) {
+				if (!left) {
+					left = ptr;
+				}
+				//			} else {
+				//				_ASSERTE (0);
+			}
+
+		} else if (val0 > dgFloat64 (0.0f)) {
+			if (val1 > dgFloat64 (0.0f)) {
+				if (!right) {
+					right = ptr;
+				}
+			} else if (val1 < dgFloat64 (0.0f)) {
+				bool replaceface = false;
+				if (lastEdge == ptr) {
+					replaceface = true;
+				}
+
+				dgHugeVector dp (p1.m_vertex - p0.m_vertex);
+				dgGoogol den (normal % dp);
+				dgFloat64 t = -test0.GetAproximateValue() / den.GetAproximateValue();
+				dgHugeVector q (dgHugeVector(p0.m_vertex) + dp.Scale (t));
+
+				dgMeshEffect::dgVertexAtribute attr;
+				attr.m_vertex = dgBigVector (q.m_x.GetAproximateValue(), q.m_y.GetAproximateValue(), q.m_z.GetAproximateValue(), dgFloat64 (0.0f));
+
+				dgBigVector normal0(p0.m_normal_x, p0.m_normal_y, p0.m_normal_z, dgFloat64 (0.0f));
+				dgBigVector normal1(p1.m_normal_x, p1.m_normal_y, p1.m_normal_z, dgFloat64 (0.0f));
+				dgBigVector n (normal0 + (normal1 - normal0).Scale (t));
+				n = n.Scale (dgFloat64 (1.0f) / sqrt (n % n)); 
+
+				attr.m_normal_x = n.m_x;
+				attr.m_normal_y = n.m_y;
+				attr.m_normal_z = n.m_z; 
+
+				attr.m_u0 = p0.m_u0 + (p1.m_u0 - p0.m_u0) * t;
+				attr.m_v0 = p0.m_v0 + (p1.m_v0 - p0.m_v0) * t;
+
+				attr.m_u1 = p0.m_u1 + (p1.m_u1 - p0.m_u1) * t;
+				attr.m_v1 = p0.m_v1 + (p1.m_v1 - p0.m_v1) * t;
+
+				attr.m_material = p0.m_material;
+
+				ptr = SpliteEdge (m_count, ptr);
+				if (replaceface) {
+					lastEdge = ptr;
+				}
+
+				AddPoint (attr);
+				ptr = ptr->m_next;
+				left = ptr;
+
+				//			} else {
+				//				_ASSERTE (0);
+			}
+
+		} else {
+			if (val1 > dgFloat64 (0.0f)) {
+				right = ptr;
+			} else if (val1 < dgFloat64 (0.0f)) {
+				left = ptr;
+			}
+		}
+
+		test0 = test1;
+		p0 = p1;
+
+		ptr = ptr->m_next;
+	} while (ptr != lastEdge);
+
+
+
+	_ASSERTE (left || right);
+	if (left && right) {
+		*leftOut = left; 
+		*rightOut = right;
+
+		dgEdge* const edge = AddHalfEdge (left->m_incidentVertex, right->m_incidentVertex);
+		dgEdge* const twin = AddHalfEdge (right->m_incidentVertex, left->m_incidentVertex);
+		_ASSERTE (edge);
+		_ASSERTE (twin);
+
+		edge->m_incidentFace = right->m_incidentFace;
+		twin->m_incidentFace = left->m_incidentFace;
+
+		edge->m_twin = twin;
+		twin->m_twin = edge;
+
+		edge->m_prev = left->m_prev;
+		left->m_prev->m_next = edge;
+
+		twin->m_prev = right->m_prev;
+		right->m_prev->m_next = twin;
+
+		edge->m_next = right;
+		right->m_prev = edge;
+
+		twin->m_next = left;
+		left->m_prev = twin;
+
+	} else if (left) {
+		_ASSERTE (!right);
+		*leftOut = left;
+	} else {
+		_ASSERTE (right);
+		*rightOut = right;
+	}
+}
+
+
 dgMeshEffectSolidTree::CSGConvexCurve::CSGConvexCurve ()
 	:dgList<dgHugeVector>(NULL)
 {
@@ -110,12 +291,9 @@ bool dgMeshEffectSolidTree::CSGConvexCurve::CheckConvex(const dgHugeVector& norm
 
 
 
-
 dgMeshEffectSolidTree::dgMeshEffectSolidTree (const dgMeshEffect& mesh, dgEdge* const face)
 {
 	BuildPlane (mesh, face, m_normal, m_origin);
-	//normal = normal.Scale (1.0f / sqrt (normal % normal));
-	//m_plane = dgBigPlane (normal, - (normal % origin));
 	m_front = NULL;
 	m_back = NULL;
 }
@@ -349,184 +527,6 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 
 
 
-//void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal, const dgHugeVector& origin, dgEdge** const poolReplacement, dgInt32 poolCount, dgEdge** leftOut, dgEdge** rightOut)
-void dgMeshTreeCSGFace::ClipFace (dgEdge* const face, const dgHugeVector& normal, const dgHugeVector& origin, dgEdge** leftOut, dgEdge** rightOut)
-{
-	dgEdge* left = NULL;
-	dgEdge* right = NULL;
-	dgEdge* ptr = face;
-	dgEdge* lastEdge = face;
-	dgMeshEffect::dgVertexAtribute p0 (m_points[ptr->m_incidentVertex]);
-	dgGoogol test0 = normal % (dgHugeVector(p0.m_vertex) - origin);
-	if (ptr->m_incidentVertex > m_baseCount) {
-		if (fabs (test0.GetAproximateValue()) < dgFloat64 (1.0e-12f)) {
-			test0 = dgGoogol(dgFloat64 (0.0f));
-		}
-	}
-
- 	*leftOut = NULL; 
-	*rightOut = NULL;	
-	do {
-		dgMeshEffect::dgVertexAtribute p1 (m_points[ptr->m_next->m_incidentVertex]);
-		dgGoogol test1 = normal % (dgHugeVector (p1.m_vertex) - origin);
-		if (ptr->m_next->m_incidentVertex > m_baseCount) {
-			if (fabs (test1.GetAproximateValue()) < dgFloat64 (1.0e-12f)) {
-				test1 = dgGoogol(dgFloat64 (0.0f));
-			}
-		}
-
-		dgFloat64 val0 = test0.GetAproximateValue();
-		dgFloat64 val1 = test1.GetAproximateValue();
-		if (val0 < dgFloat64 (0.0f)) {
-			if (val1 > dgFloat64 (0.0f)) {
-				bool replaceface = false;
-				if (lastEdge == ptr) {
-					replaceface = true;
-				}
-
-				dgHugeVector dp (p1.m_vertex - p0.m_vertex);
-				dgGoogol den (normal % dp);
-				dgFloat64 t = -test0.GetAproximateValue() / den.GetAproximateValue();
-				dgHugeVector q (dgHugeVector(p0.m_vertex) + dp.Scale (t));
-
-				dgMeshEffect::dgVertexAtribute attr;
-				attr.m_vertex = dgBigVector (q.m_x.GetAproximateValue(), q.m_y.GetAproximateValue(), q.m_z.GetAproximateValue(), dgFloat64 (0.0f));
-
-				dgBigVector normal0(p0.m_normal_x, p0.m_normal_y, p0.m_normal_z, dgFloat64 (0.0f));
-				dgBigVector normal1(p1.m_normal_x, p1.m_normal_y, p1.m_normal_z, dgFloat64 (0.0f));
-				dgBigVector n (normal0 + (normal1 - normal0).Scale (t));
-				n = n.Scale (dgFloat64 (1.0f) / sqrt (n % n)); 
-
-				attr.m_normal_x = n.m_x;
-				attr.m_normal_y = n.m_y;
-				attr.m_normal_z = n.m_z; 
-
-				attr.m_u0 = p0.m_u0 + (p1.m_u0 - p0.m_u0) * t;
-				attr.m_v0 = p0.m_v0 + (p1.m_v0 - p0.m_v0) * t;
-
-				attr.m_u1 = p0.m_u1 + (p1.m_u1 - p0.m_u1) * t;
-				attr.m_v1 = p0.m_v1 + (p1.m_v1 - p0.m_v1) * t;
-
-				attr.m_material = p0.m_material;
-
-				ptr = SpliteEdge (m_count, ptr);
-				if (replaceface) {
-					lastEdge = ptr;
-				}
-
-				AddPoint (attr);
-				ptr = ptr->m_next;
-				right = ptr;
-
-			} else if (val1 < dgFloat64 (0.0f)) {
-				if (!left) {
-					left = ptr;
-				}
-//			} else {
-//				_ASSERTE (0);
-			}
-
-		} else if (val0 > dgFloat64 (0.0f)) {
-			if (val1 > dgFloat64 (0.0f)) {
-				if (!right) {
-					right = ptr;
-				}
-			} else if (val1 < dgFloat64 (0.0f)) {
-				bool replaceface = false;
-				if (lastEdge == ptr) {
-					replaceface = true;
-				}
-
-				dgHugeVector dp (p1.m_vertex - p0.m_vertex);
-				dgGoogol den (normal % dp);
-				dgFloat64 t = -test0.GetAproximateValue() / den.GetAproximateValue();
-				dgHugeVector q (dgHugeVector(p0.m_vertex) + dp.Scale (t));
-
-				dgMeshEffect::dgVertexAtribute attr;
-				attr.m_vertex = dgBigVector (q.m_x.GetAproximateValue(), q.m_y.GetAproximateValue(), q.m_z.GetAproximateValue(), dgFloat64 (0.0f));
-
-				dgBigVector normal0(p0.m_normal_x, p0.m_normal_y, p0.m_normal_z, dgFloat64 (0.0f));
-				dgBigVector normal1(p1.m_normal_x, p1.m_normal_y, p1.m_normal_z, dgFloat64 (0.0f));
-				dgBigVector n (normal0 + (normal1 - normal0).Scale (t));
-				n = n.Scale (dgFloat64 (1.0f) / sqrt (n % n)); 
-
-				attr.m_normal_x = n.m_x;
-				attr.m_normal_y = n.m_y;
-				attr.m_normal_z = n.m_z; 
-
-				attr.m_u0 = p0.m_u0 + (p1.m_u0 - p0.m_u0) * t;
-				attr.m_v0 = p0.m_v0 + (p1.m_v0 - p0.m_v0) * t;
-
-				attr.m_u1 = p0.m_u1 + (p1.m_u1 - p0.m_u1) * t;
-				attr.m_v1 = p0.m_v1 + (p1.m_v1 - p0.m_v1) * t;
-
-				attr.m_material = p0.m_material;
-
-				ptr = SpliteEdge (m_count, ptr);
-				if (replaceface) {
-					lastEdge = ptr;
-				}
-
-				AddPoint (attr);
-				ptr = ptr->m_next;
-				left = ptr;
-
-//			} else {
-//				_ASSERTE (0);
-			}
-
-		} else {
-			if (val1 > dgFloat64 (0.0f)) {
-				right = ptr;
-			} else if (val1 < dgFloat64 (0.0f)) {
-				left = ptr;
-			}
-		}
-
-		test0 = test1;
-		p0 = p1;
-
-		ptr = ptr->m_next;
-	} while (ptr != lastEdge);
-
-
-
-	_ASSERTE (left || right);
-	if (left && right) {
-		*leftOut = left; 
-		*rightOut = right;
-
-		dgEdge* const edge = AddHalfEdge (left->m_incidentVertex, right->m_incidentVertex);
-		dgEdge* const twin = AddHalfEdge (right->m_incidentVertex, left->m_incidentVertex);
-		_ASSERTE (edge);
-		_ASSERTE (twin);
-
-		edge->m_incidentFace = right->m_incidentFace;
-		twin->m_incidentFace = left->m_incidentFace;
-
-		edge->m_twin = twin;
-		twin->m_twin = edge;
-
-		edge->m_prev = left->m_prev;
-		left->m_prev->m_next = edge;
-
-		twin->m_prev = right->m_prev;
-		right->m_prev->m_next = twin;
-
-		edge->m_next = right;
-		right->m_prev = edge;
-
-		twin->m_next = left;
-		left->m_prev = twin;
-
-	} else if (left) {
-		_ASSERTE (!right);
-		*leftOut = left;
-	} else {
-		_ASSERTE (right);
-		*rightOut = right;
-	}
-}
 
 
 
