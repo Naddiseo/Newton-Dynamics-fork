@@ -1906,21 +1906,8 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 		dgFloat64 y = floor (pointCloud[i * stride + 1] * quantizeFactor) * invQuantizeFactor;
 		dgFloat64 z = floor (pointCloud[i * stride + 2] * quantizeFactor) * invQuantizeFactor;
 		dgBigVector p (x, y, z, dgFloat64 (0.0f));
-		dgHugeVector p1 (p);
-		
-		bool pointSide = true;
-		for (dgMeshEffectSolidTree* ptr = tree; ptr; ) {
-			dgGoogol test (ptr->m_normal % (p1 - ptr->m_origin));
-			if (test.GetAproximateValue() < dgFloat64 (1.0f/32.0f)) {
-				pointSide = true;
-				ptr = ptr->m_back;
-			} else {
-				pointSide = false;
-				ptr = ptr->m_front;
-			}
-		}
 
-		if (pointSide) {
+		if (tree->GetPointSide (p) == dgMeshEffectSolidTree::m_solid) {
 			pool[count] = p;
 			count ++;
 		}

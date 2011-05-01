@@ -345,7 +345,29 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 	}
 }
 
+dgMeshEffectSolidTree::dgPlaneType dgMeshEffectSolidTree::GetPointSide (const dgBigVector& point) const
+{
+	const dgMeshEffectSolidTree* root = this;
 
+	dgHugeVector p (point);
+
+	_ASSERTE (root);
+	while (root->m_planeType == dgMeshEffectSolidTree::m_divider) { 
+		dgGoogol test = root->m_normal % (p - root->m_origin);
+		dgFloat64 dist = test.GetAproximateValue();
+
+		if (dist > dgFloat64 (0.0f)) {
+			root = root->m_front;
+		} else if (dist < dgFloat64 (0.0f)) {
+			root = root->m_back;
+		} else {
+			dgPlaneType isBack = root->m_back->GetPointSide (point);
+			dgPlaneType isFront = root->m_front->GetPointSide (point);
+			return (isBack == isFront) ? isFront : m_divider;
+		}
+	}
+	return root->m_planeType;
+}
 
 
 dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, const dgMeshEffect& mesh, dgEdge* const face)

@@ -139,6 +139,8 @@ class dgMeshEffectSolidTree
 	void BuildPlane (const dgMeshEffect& mesh, dgEdge* const face, dgHugeVector& normal, dgHugeVector& point) const;
 	void AddFace (const dgMeshEffect& mesh, dgEdge* const face);
 
+	dgPlaneType GetPointSide (const dgBigVector& point) const;
+
 #ifdef _DEBUG
 	dgInt32 m_id;
 	static dgInt32 m_enumerator;
