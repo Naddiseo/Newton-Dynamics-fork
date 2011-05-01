@@ -2031,10 +2031,6 @@ dgEdge* dgMeshEffect::ConectVertex (dgEdge* const e0, dgEdge* const e1)
 
 void* dgMeshEffect::GetFirstEdge ()
 {
-	_ASSERTE (0);
-	return 0;
-	/*
-
 	Iterator iter (*this);
 	iter.Begin();
 
@@ -2049,7 +2045,6 @@ void* dgMeshEffect::GetFirstEdge ()
 		edge->m_twin->m_mark = mark;
 	}
 	return node; 
-*/
 }
 
 void* dgMeshEffect::GetNextEdge (const void* edge)

@@ -25,7 +25,7 @@
 #define BREAK_FORCE_IN_GRAVITIES	10
 //#define BREAK_FORCE_IN_GRAVITIES	1
 
-#if 0
+#if 1
 static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 {
 	// create a collision primitive
@@ -73,7 +73,7 @@ count = 4;
 	NewtonMesh* const convexParts = NewtonMeshVoronoiDecomposition (mesh, count, sizeof (dVector), &points[0].m_x, interior, &textureMatrix[0][0]);
 //	NewtonMesh* const convexParts = NewtonMeshConvexDecomposition (mesh, 1000000);
 
-#if 0
+#if 1
 dScene xxxx(world);
 dScene::dTreeNode* const modelNode = xxxx.CreateSceneNode(xxxx.GetRootNode());
 dScene::dTreeNode* const meshNode = xxxx.CreateMeshNode(modelNode);
@@ -464,8 +464,8 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	CreateLevelMesh (scene, "sponza.ngd", false);
 
 	// create a shattered mesh array
-//    CreateSimpleVoronoiShatter (scene);
-
+    CreateSimpleVoronoiShatter (scene);
+/*
 	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (scene->GetNewton());
 	dVector location (0.0f, 0.0f, 0.0f, 0.0f);
 	dVector size (0.5f, 0.5f, 0.5f, 0.0f);
@@ -480,7 +480,7 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 
 //for (int i = 0; i < 1; i ++)
 //AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
-
+*/
 
 	// place camera into position
 	dQuaternion rot;

@@ -71,7 +71,7 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 	NewtonMesh* const mesh2 = NewtonMeshDifference (mesh1, brush, &matrix[0][0]);
 
 	matrix = dYawMatrix( 3.14159265f * 0.5f);
-//	NewtonMesh* const mesh3 = NewtonMeshDifference (mesh2, brush, &matrix[0][0]);
+	NewtonMesh* const mesh3 = NewtonMeshDifference (mesh2, brush, &matrix[0][0]);
 
 	dMatrix textureMatrix (GetIdentityMatrix());
 	textureMatrix[0][0] = 1.0f / size.m_x;
@@ -91,8 +91,8 @@ dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(meshNode);
 //modelMesh->ReplaceMesh (mesh);
 //modelMesh->ReplaceMesh (brush);
 //modelMesh->ReplaceMesh (mesh1);
-modelMesh->ReplaceMesh (mesh2);
-//modelMesh->ReplaceMesh (mesh3);
+//modelMesh->ReplaceMesh (mesh2);
+modelMesh->ReplaceMesh (mesh3);
 //modelMesh->ReplaceMesh (tetrahedras);
 
 xxxx.Serialize("../../../media/xxx.ngd");

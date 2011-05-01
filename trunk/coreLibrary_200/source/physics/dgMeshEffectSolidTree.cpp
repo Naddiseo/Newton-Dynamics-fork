@@ -373,6 +373,9 @@ dgMeshTreeCSGFace::dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, dgInt3
 //dgTrace (("\n"));
 }
 
+
+
+
 dgCSGFacePoint dgMeshTreeCSGFace::Interpolate (const dgHugeVector& normal, const dgHugeVector& origin, const dgCSGFacePoint& p0, const dgCSGFacePoint& p1) const
 {
 	dgCSGFacePoint attr;
@@ -382,10 +385,12 @@ dgCSGFacePoint dgMeshTreeCSGFace::Interpolate (const dgHugeVector& normal, const
 	dgGoogol num = normal % (dgHugeVector(p0.m_vertex) - origin);
 	_ASSERTE (fabs (num.GetAproximateValue()) > dgFloat64 (0.0f));
 
-	dgGoogol ti (- num / den);
-	attr.m_vertex  = p0.m_vertex + dp.Scale (ti);
 
-	dgFloat64 t = ti.GetAproximateValue();
+	dgGoogol ti (num / den);
+
+	attr.m_vertex  = p0.m_vertex - dp.Scale (ti);
+
+	dgFloat64 t = -ti.GetAproximateValue();
 	dgBigVector normal0(p0.m_normal_x, p0.m_normal_y, p0.m_normal_z, dgFloat64 (0.0f));
 	dgBigVector normal1(p1.m_normal_x, p1.m_normal_y, p1.m_normal_z, dgFloat64 (0.0f));
 	dgBigVector n (normal0 + (normal1 - normal0).Scale (t));

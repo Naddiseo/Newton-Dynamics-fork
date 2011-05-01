@@ -847,6 +847,7 @@ void dgMeshEffect::ConvertToPolygons ()
 			dgInt32 indexCount = 0;
 			do {
 				dgInt32 attribIndex = dgInt32 (ptr->m_userData);
+
 				m_attib[attribIndex].m_vertex.m_w = dgFloat32 (ptr->m_incidentVertex);
 				ptr->m_mark = mark;
 				index[indexCount] = attribIndex;
@@ -857,7 +858,6 @@ void dgMeshEffect::ConvertToPolygons ()
 		}
 	}
 	polygon.EndFace();
-
 
 	dgPolyhedra leftOversOut(GetAllocator());
 	polygon.ConvexPartition (&m_attib[0].m_vertex.m_x, sizeof (dgVertexAtribute), &leftOversOut);
@@ -2031,10 +2031,6 @@ dgEdge* dgMeshEffect::ConectVertex (dgEdge* const e0, dgEdge* const e1)
 
 void* dgMeshEffect::GetFirstEdge ()
 {
-	_ASSERTE (0);
-	return 0;
-	/*
-
 	Iterator iter (*this);
 	iter.Begin();
 
@@ -2049,7 +2045,6 @@ void* dgMeshEffect::GetFirstEdge ()
 		edge->m_twin->m_mark = mark;
 	}
 	return node; 
-*/
 }
 
 void* dgMeshEffect::GetNextEdge (const void* edge)
@@ -3175,9 +3170,6 @@ dgMeshEffect* dgMeshEffect::Difference (const dgMatrix& matrix, const dgMeshEffe
 	dgMeshEffect clipper (*clipMesh);
 	clipper.TransformMesh (matrix);
 
-static int xxx;
-xxx ++;
-
 	DG_MESG_EFFECT_BOOLEAN_INIT();
 	
 	ClipMesh (&clipper, &leftMeshSource, &rightMeshSource, &sourceCoplanar);
@@ -3185,14 +3177,12 @@ xxx ++;
 		result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 		result->BeginPolygon();
 		if (rightMeshSource) {
-if (xxx != 2)
 			result->MergeFaces(rightMeshSource);
 		}
 
 		clipper.ClipMesh (this, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
 		if (leftMeshClipper || clipperCoplanar) {
 			if (leftMeshClipper) {
-//if (xxx != 2)
 				result->ReverseMergeFaces(leftMeshClipper);
 			}
 			if (clipperCoplanar && sourceCoplanar) {
@@ -3201,6 +3191,7 @@ if (xxx != 2)
 				result->ReverseMergeFaces(clipperCoplanar);
 			}
 		}
+
 		result->EndPolygon(dgFloat64 (1.0e-5f));
 		if (!result->GetCount()) {
 			result->Release();
@@ -3208,32 +3199,7 @@ if (xxx != 2)
 		}
 	}
 
-//	DG_MESG_EFFECT_BOOLEAN_FINISH();
-
-	if (sourceCoplanar) {								
-		sourceCoplanar->Release();						
-	}													
-	if (clipperCoplanar) {								
-		clipperCoplanar->Release();						
-	}													
-	if (leftMeshClipper) {								
-		leftMeshClipper->Release();						
-	}													
-	if (rightMeshClipper) {								
-		rightMeshClipper->Release();					
-	}													
-	if (leftMeshSource) {								
-		leftMeshSource->Release();						
-	}													
-	if (rightMeshSource) {								
-		rightMeshSource->Release();						
-	}													
-	if (result) {										
-		result->ConvertToPolygons();					
-		dgStack<dgInt32> map(result->m_pointCount + 1);	
-		result->RemoveUnusedVertices(&map[0]);			
-	}													
-
+	DG_MESG_EFFECT_BOOLEAN_FINISH();
 	return result;
 }
 
@@ -4175,9 +4141,23 @@ xxx ++;
 				ptr = ptr->m_next;
 			} while (ptr != face);
 
+
+
 xxx2 ++;
 if (xxx2 == 42)
 xxx2 *=1;
+
+//if (xxx2 > 6)
+//break;
+//static int aaaaaaaaa;
+//dgBigVector xxxxx1 (FaceNormal(face, &m_points[0].m_x, sizeof (dgBigVector)));
+//if (xxxxx1.m_x < 0.1)
+//continue;
+//aaaaaaaaa ++;
+//if (aaaaaaaaa == 2)
+//continue;
+
+
 
 			dgList<dgMeshTreeCSGFace*> faceList(GetAllocator());
 			dgMeshTreeCSGFace* faceOnStack[DG_MESH_EFFECT_BOLLEAN_STACK];
@@ -4403,7 +4383,8 @@ if (leftFace && rightFace) {
 
 void dgMeshEffect::RepairTJoints (bool triangulate)
 {
-	
+//return;
+
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
 #ifdef _DEBUG
