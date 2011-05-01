@@ -1885,8 +1885,8 @@ class Tetrahedralization: public dgDelaunayTetrahedralization
 
 dgMeshEffect* dgMeshEffect::CreateDelanayTretrahedralization (dgInt32 interionMaterial, dgMatrix& matrix) const
 {
-	return NULL;
 	_ASSERTE (0);
+	return NULL;
 }
 
 #if 0

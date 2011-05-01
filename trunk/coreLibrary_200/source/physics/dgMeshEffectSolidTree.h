@@ -24,8 +24,8 @@
 
 #include <dgRefCounter.h>
 
-class dgCollision;
 class dgMeshEffect;
+class dgMeshEffectSolidTree;
 
 
 class dgMeshTreeCSGFace: public dgPolyhedra
