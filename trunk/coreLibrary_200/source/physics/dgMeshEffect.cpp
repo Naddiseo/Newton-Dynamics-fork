@@ -4124,11 +4124,6 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	rightMesh->BeginPolygon();
 	meshCoplanar->BeginPolygon();
 
-
-static int xxx;
-static int xxx2;
-xxx ++;
-
 	dgInt32 mark = mesh.IncLRU();
 	dgPolyhedra::Iterator iter (mesh);
 	for (iter.Begin(); iter; iter ++){
@@ -4140,24 +4135,6 @@ xxx ++;
 				ptr->m_mark = mark;
 				ptr = ptr->m_next;
 			} while (ptr != face);
-
-
-
-xxx2 ++;
-if (xxx2 == 42)
-xxx2 *=1;
-
-//if (xxx2 > 6)
-//break;
-//static int aaaaaaaaa;
-//dgBigVector xxxxx1 (FaceNormal(face, &m_points[0].m_x, sizeof (dgBigVector)));
-//if (xxxxx1.m_x < 0.1)
-//continue;
-//aaaaaaaaa ++;
-//if (aaaaaaaaa == 2)
-//continue;
-
-
 
 			dgList<dgMeshTreeCSGFace*> faceList(GetAllocator());
 			dgMeshTreeCSGFace* faceOnStack[DG_MESH_EFFECT_BOLLEAN_STACK];
@@ -4184,45 +4161,8 @@ xxx2 *=1;
 				dgMeshTreeCSGFace* leftFace; 
 				dgMeshTreeCSGFace* rightFace;
 
-
-if (xxx2 == 42){
-dgBigVector xxx1 (root->m_normal.m_x.GetAproximateValue(), root->m_normal.m_y.GetAproximateValue(), root->m_normal.m_z.GetAproximateValue(), 0.0);
-dgBigVector xxx2 (root->m_origin.m_x.GetAproximateValue(), root->m_origin.m_y.GetAproximateValue(), root->m_origin.m_z.GetAproximateValue(), 0.0);
-xxx1 = xxx1.Scale (1.0 / sqrt ((xxx1 % xxx1)));
-xxx1.m_w = - (xxx1 % xxx2);
-dgTrace (("%f %f %f %f\n", xxx1.m_x, xxx1.m_y, xxx1.m_z, xxx1.m_w));
-
-
-dgTrace (("\n"));	
-for (dgMeshTreeCSGFace::dgListNode* node = face->GetFirst(); node; node = node->GetNext()){
-dgBigVector p (node->GetInfo().GetPoint().m_vertex);
-dgTrace (("%f %f %f\n", p.m_x, p.m_y, p.m_z));	
-}
-dgTrace (("\n"));	
-}
-
-
-
-				face->Clip(root->m_normal, root->m_origin, &leftFace, &rightFace);
+				face->Clip(root->m_plane, &leftFace, &rightFace);
 				face->Release();
-
-
-if (xxx2 == 42){
-if (leftFace && rightFace) {
-	for (dgMeshTreeCSGFace::dgListNode* node = leftFace->GetFirst(); node; node = node->GetNext()){
-		dgBigVector p (node->GetInfo().GetPoint().m_vertex);
-		dgTrace (("%f %f %f\n", p.m_x, p.m_y, p.m_z));	
-	}
-	dgTrace (("\n"));	
-
-	for (dgMeshTreeCSGFace::dgListNode* node = rightFace->GetFirst(); node; node = node->GetNext()){
-		dgBigVector p (node->GetInfo().GetPoint().m_vertex);
-		dgTrace (("%f %f %f\n", p.m_x, p.m_y, p.m_z));	
-	}
-	dgTrace (("\n"));	
-}
-}
-
 
 				if (!(rightFace || leftFace)) {
 
@@ -4383,8 +4323,6 @@ if (leftFace && rightFace) {
 
 void dgMeshEffect::RepairTJoints (bool triangulate)
 {
-//return;
-
 	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
 #ifdef _DEBUG

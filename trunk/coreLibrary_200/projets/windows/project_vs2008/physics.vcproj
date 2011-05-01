@@ -1040,6 +1040,14 @@
 			<File
 				RelativePath="..\..\..\source\physics\dgMeshEffect.cpp"
 				>
+				<FileConfiguration
+					Name="release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\source\physics\dgMeshEffect.h"
@@ -1052,6 +1060,15 @@
 			<File
 				RelativePath="..\..\..\source\physics\dgMeshEffectSolidTree.cpp"
 				>
+				<FileConfiguration
+					Name="release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\source\physics\dgMeshEffectSolidTree.h"

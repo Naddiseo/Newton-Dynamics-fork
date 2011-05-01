@@ -1902,9 +1902,12 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 	dgFloat64 invQuantizeFactor = dgFloat64 (1.0f) / quantizeFactor;
 	dgInt32 stride = pointStrideInBytes / sizeof (dgFloat32); 
 	for (dgInt32 i = 0; i < pointsCount; i ++) {
-		dgFloat64 x = floor (pointCloud[i * stride + 0] * quantizeFactor) * invQuantizeFactor;
-		dgFloat64 y = floor (pointCloud[i * stride + 1] * quantizeFactor) * invQuantizeFactor;
-		dgFloat64 z = floor (pointCloud[i * stride + 2] * quantizeFactor) * invQuantizeFactor;
+		dgFloat64 x = pointCloud[i * stride + 0];
+		dgFloat64 y	= pointCloud[i * stride + 1];
+		dgFloat64 z	= pointCloud[i * stride + 2];
+		x = floor (x * quantizeFactor) * invQuantizeFactor;
+		y = floor (y * quantizeFactor) * invQuantizeFactor;
+		z = floor (z * quantizeFactor) * invQuantizeFactor;
 		dgBigVector p (x, y, z, dgFloat64 (0.0f));
 
 		if (tree->GetPointSide (p) == dgMeshEffectSolidTree::m_solid) {
@@ -1913,8 +1916,10 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 		}
 	}
 
+	_ASSERTE (count >= 4);
 	dgStack<dgInt32> indexList(count);
 	count = dgVertexListToIndexList(&pool[0].m_x, sizeof (dgBigVector), 3, count, &indexList[0], dgFloat64 (1.0e-5f));	
+	_ASSERTE (count >= 4);
 
 	dgDelaunayTetrahedralization delaunayTetrahedras (GetAllocator(), &pool[0].m_x, count, sizeof (dgBigVector), 0.0f);
 	delaunayTetrahedras.RemoveUpperHull ();

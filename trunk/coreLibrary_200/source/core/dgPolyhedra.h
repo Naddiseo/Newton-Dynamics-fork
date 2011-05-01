@@ -203,6 +203,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	//	dgEdge* GetBadEdge (dgList<dgEdge*>& faceList  const dgFloat64* const pool, dgInt32 strideInBytes) const; 
 
 	private:
+	
 	void RefineTriangulation (const dgFloat64* const vertex, dgInt32 stride);
 	void RefineTriangulation (const dgFloat64* const vertex, dgInt32 stride, dgBigVector* const normal, dgInt32 perimeterCount, dgEdge** const perimeter);
 	void OptimizeTriangulation (const dgFloat64* const vertex, dgInt32 strideInBytes);
@@ -210,7 +211,7 @@ class dgPolyhedra: public dgTree <dgEdge, dgEdgeKey>
 	dgEdge* FindEarTip (dgEdge* const face, const dgFloat64* const pool, dgInt32 stride, dgDownHeap<dgEdge*, dgFloat64>& heap, const dgBigVector &normal) const;
 	dgEdge* TriangulateFace (dgEdge* face, const dgFloat64* const pool, dgInt32 stride, dgDownHeap<dgEdge*, dgFloat64>& heap, dgBigVector* const faceNormalOut);
 	
-	
+	dgFloat64 EdgePenalty (const dgBigVector* const pool, dgEdge* const edge) const;
 
 	mutable dgInt32 m_baseMark;
 	mutable dgInt32 m_edgeMark;

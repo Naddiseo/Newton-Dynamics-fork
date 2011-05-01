@@ -96,10 +96,8 @@ class dgMeshTreeCSGFace: public dgList<dgCSGFacePoint>, public dgRefCounter
 	dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, const dgMeshEffect& mesh, dgEdge* const face);
 	dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, dgInt32 count, const dgCSGFacePoint* const points);
 
-
-	void Clip (const dgHugeVector& normal, const dgHugeVector& origin, dgMeshTreeCSGFace** leftOut, dgMeshTreeCSGFace** rightOut);
-
-	dgCSGFacePoint Interpolate (const dgHugeVector& normal, const dgHugeVector& origin, const dgCSGFacePoint& p0, const dgCSGFacePoint& p1) const;
+	void Clip (const dgHugeVector& plane, dgMeshTreeCSGFace** leftOut, dgMeshTreeCSGFace** rightOut);
+	dgCSGFacePoint Interpolate (const dgHugeVector& plane, const dgCSGFacePoint& p0, const dgCSGFacePoint& p1) const;
 
 	void MergeMissingVertex (const dgMeshTreeCSGFace* const face);
 	bool IsPointOnEdge (const dgBigVector& p0, const dgBigVector& p1, const dgBigVector& q) const;
@@ -128,15 +126,15 @@ class dgMeshEffectSolidTree
 		public:
 		CSGConvexCurve (dgMemoryAllocator* const allocator);
 		CSGConvexCurve (const dgMeshEffect& mesh, dgEdge* const face);
-		bool CheckConvex(const dgHugeVector& normal, const dgHugeVector& point) const;
+		bool CheckConvex(const dgHugeVector& plane) const;
 	};
 
 	dgMeshEffectSolidTree (dgPlaneType type);
 	dgMeshEffectSolidTree (const dgMeshEffect& mesh, dgEdge* const face);
-	dgMeshEffectSolidTree (const dgHugeVector& normal, const dgHugeVector& point, dgMemoryAllocator* const allocator);
+	dgMeshEffectSolidTree (const dgHugeVector& plane, dgMemoryAllocator* const allocator);
 	~dgMeshEffectSolidTree();
 
-	void BuildPlane (const dgMeshEffect& mesh, dgEdge* const face, dgHugeVector& normal, dgHugeVector& point) const;
+	dgHugeVector BuildPlane (const dgMeshEffect& mesh, dgEdge* const face) const;
 	void AddFace (const dgMeshEffect& mesh, dgEdge* const face);
 
 	dgPlaneType GetPointSide (const dgBigVector& point) const;
@@ -149,8 +147,6 @@ class dgMeshEffectSolidTree
 	dgPlaneType m_planeType;
 	dgMeshEffectSolidTree* m_back;
 	dgMeshEffectSolidTree* m_front;
-
-	dgHugeVector m_origin;
-	dgHugeVector m_normal;
+	dgHugeVector m_plane;
 };
 #endif

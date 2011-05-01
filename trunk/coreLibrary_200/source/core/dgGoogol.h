@@ -96,11 +96,17 @@ class dgHugeVector: public dgTemplateVector<dgGoogol>
 	{
 	}
 
+	dgGoogol EvaluePlane (const dgHugeVector& point) const 
+	{
+		return (point % (*this)) + m_w;
+	}
+
 	void Trace () const
 	{
 		m_x.Trace();
 		m_y.Trace();
 		m_z.Trace();
+		m_w.Trace();
 		dgTrace (("\n"));
 	}
 };
