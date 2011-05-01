@@ -44,39 +44,7 @@ class dgMeshTreeCSGEdgePool;
 #define DG_MESH_EFFECT_PRECISION_SCALE_INV	(dgFloat64 (1.0f) / DG_MESH_EFFECT_PRECISION_SCALE)
 
 
-#define DG_MESG_EFFECT_BOOLEAN_INIT()					\
-	dgMeshEffect* result = NULL;						\
-	dgMeshEffect* sourceCoplanar = NULL;				\
-	dgMeshEffect* leftMeshSource = NULL;				\
-	dgMeshEffect* rightMeshSource = NULL;				\
-	dgMeshEffect* clipperCoplanar = NULL;				\
-	dgMeshEffect* leftMeshClipper = NULL;				\
-	dgMeshEffect* rightMeshClipper = NULL;
 
-#define DG_MESG_EFFECT_BOOLEAN_FINISH()					\
-	if (sourceCoplanar) {								\
-		sourceCoplanar->Release();						\
-	}													\
-	if (clipperCoplanar) {								\
-		clipperCoplanar->Release();						\
-	}													\
-	if (leftMeshClipper) {								\
-		leftMeshClipper->Release();						\
-	}													\
-	if (rightMeshClipper) {								\
-		rightMeshClipper->Release();					\
-	}													\
-	if (leftMeshSource) {								\
-		leftMeshSource->Release();						\
-	}													\
-	if (rightMeshSource) {								\
-		rightMeshSource->Release();						\
-	}													\
-	if (result) {										\
-		result->ConvertToPolygons();					\
-		dgStack<dgInt32> map(result->m_pointCount + 1);	\
-		result->RemoveUnusedVertices(&map[0]);			\
-	}													
 
 
 
@@ -132,10 +100,10 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 
 	dgEdge* InsertEdgeVertex (dgEdge* const edge, dgFloat64 param);
 
-	dgMeshEffect* Union (const dgMatrix& matrix, const dgMeshEffect* const clip) const;
-	dgMeshEffect* Difference (const dgMatrix& matrix, const dgMeshEffect* const clip) const;
-	dgMeshEffect* Intersection (const dgMatrix& matrix, const dgMeshEffect* const clip) const;
-	void ClipMesh (const dgMatrix& matrix, const dgMeshEffect* const clip, dgMeshEffect** const top, dgMeshEffect** const bottom) const;
+	dgMeshEffect* Union (const dgMatrix& matrix, const dgMeshEffect* clip) const;
+	dgMeshEffect* Difference (const dgMatrix& matrix, const dgMeshEffect* clip) const;
+	dgMeshEffect* Intersection (const dgMatrix& matrix, const dgMeshEffect* clip) const;
+	void ClipMesh (const dgMatrix& matrix, const dgMeshEffect* clip, dgMeshEffect** top, dgMeshEffect** bottom) const;
 
 	bool CheckIntersection (const dgMeshEffectSolidTree* const solidTree, dgFloat64 scale) const;
 	dgMeshEffectSolidTree* CreateSolidTree() const;
@@ -264,17 +232,13 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 
 	dgMeshEffect* GetNextLayer (dgInt32 mark);
 
-	void FilterCoplanarFaces (const dgMeshEffect* const otherCap, dgFloat32 sign);
-	void ClipMesh (const dgMeshEffect* const clipMesh, dgMeshEffect** const left, dgMeshEffect** const right, dgMeshEffect** const coplanar) const;
-	void ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** const left, dgMeshEffect** const right, dgMeshEffect** const coplanar) const;
-
+	void ClipMesh (const dgMeshEffect* clipMesh, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
+	void ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
 	dgInt32 PlaneApplyCap (const dgMeshEffect* planeMesh, const dgPlane& normal);
 	void PlaneClipMesh (const dgMeshEffect* planeMesh, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
+	dgMeshEffect* CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
 
-	
-	dgMeshEffect* MakeDelanayIntersection (dgMeshEffectSolidTree* const tree, dgBigVector* const points, dgInt32 count, dgInt32 materialId, const dgMatrix& textureProjectionMatrix, dgFloat32 normalAngleInRadians) const;
 
-	
 
 	bool CheckSingleMesh() const;
 

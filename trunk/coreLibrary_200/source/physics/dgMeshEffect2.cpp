@@ -1880,157 +1880,18 @@ class Tetrahedralization: public dgDelaunayTetrahedralization
 };
 */
 
+
 #endif
 
-
-
-dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
+dgMeshEffect* dgMeshEffect::CreateDelanayTretrahedralization (dgInt32 interionMaterial, dgMatrix& matrix) const
 {
-#if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
-	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);
-	dgControlFP (_PC_53, _MCW_PC);
-#endif
-
-	dgMeshEffectSolidTree* const tree = CreateSolidTree();
-	_ASSERTE (tree);
-
-	dgStack<dgBigVector> buffer(pointsCount);
-	dgBigVector* const pool = &buffer[0];
-
-	dgInt32 count = 0;
-	dgFloat64 quantizeFactor = dgFloat64 (16.0f);
-	dgFloat64 invQuantizeFactor = dgFloat64 (1.0f) / quantizeFactor;
-	dgInt32 stride = pointStrideInBytes / sizeof (dgFloat32); 
-	for (dgInt32 i = 0; i < pointsCount; i ++) {
-		dgFloat64 x = pointCloud[i * stride + 0];
-		dgFloat64 y	= pointCloud[i * stride + 1];
-		dgFloat64 z	= pointCloud[i * stride + 2];
-		x = floor (x * quantizeFactor) * invQuantizeFactor;
-		y = floor (y * quantizeFactor) * invQuantizeFactor;
-		z = floor (z * quantizeFactor) * invQuantizeFactor;
-		dgBigVector p (x, y, z, dgFloat64 (0.0f));
-
-		if (tree->GetPointSide (p) == dgMeshEffectSolidTree::m_solid) {
-			pool[count] = p;
-			count ++;
-		}
-	}
-
-	_ASSERTE (count >= 4);
-	dgStack<dgInt32> indexList(count);
-	count = dgVertexListToIndexList(&pool[0].m_x, sizeof (dgBigVector), 3, count, &indexList[0], dgFloat64 (1.0e-5f));	
-	_ASSERTE (count >= 4);
-
-	dgDelaunayTetrahedralization delaunayTetrahedras (GetAllocator(), &pool[0].m_x, count, sizeof (dgBigVector), 0.0f);
-	delaunayTetrahedras.RemoveUpperHull ();
-
-	dgBigVector minBox;
-	dgBigVector maxBox;
-	CalculateAABB (minBox, maxBox);
-	maxBox -= minBox;
-	dgFloat32 bboxDiagnalFactor = 4.0f;
-	dgFloat64 perimeterConvexBound = bboxDiagnalFactor * sqrt(maxBox % maxBox);
-
-	dgInt32 tetraCount = delaunayTetrahedras.GetCount();
-	dgStack<dgBigVector> voronoiPoints(tetraCount);
-	dgStack<dgDelaunayTetrahedralization::dgListNode*> tetradrumNode(tetraCount);
-	dgTree<dgList<dgInt32>, dgInt32> delanayNodes (GetAllocator());	
-
-	dgInt32 index = 0;
-	const dgHullVector* const delanayPoints = delaunayTetrahedras.GetHullVertexArray();
-	for (dgDelaunayTetrahedralization::dgListNode* node = delaunayTetrahedras.GetFirst(); node; node = node->GetNext()) {
-		dgConvexHull4dTetraherum& tetra = node->GetInfo();
-		dgBigVector origin (tetra.CircumSphereCenter (delanayPoints));
-		voronoiPoints[index] = dgBigVector (dgFloat64 (origin.m_x), dgFloat64 (origin.m_y), dgFloat64 (origin.m_z), dgFloat64 (0.0f));
-		tetradrumNode[index] = node;
-
-		for (dgInt32 i = 0; i < 3; i ++) {
-			dgTree<dgList<dgInt32>, dgInt32>::dgTreeNode* header = delanayNodes.Find(tetra.m_faces[0].m_index[i]);
-			if (!header) {
-				dgList<dgInt32> list (GetAllocator());
-				header = delanayNodes.Insert(list, tetra.m_faces[0].m_index[i]);
-			}
-			header->GetInfo().Append (index);
-		}
-
-		dgTree<dgList<dgInt32>, dgInt32>::dgTreeNode* header = delanayNodes.Find(tetra.m_faces[0].m_otherVertex);
-		if (!header) {
-			dgList<dgInt32> list (GetAllocator());
-			header = delanayNodes.Insert(list, tetra.m_faces[0].m_otherVertex);
-		}
-		header->GetInfo().Append (index);
-		index ++;
-	}
-
-
-	dgMeshEffect* const voronoiPartion = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
-	voronoiPartion->BeginPolygon();
-	dgFloat64 layer = dgFloat64 (0.0f);
-
-	dgTree<dgList<dgInt32>, dgInt32>::Iterator iter (delanayNodes);
-	for (iter.Begin(); iter; iter ++) {
-
-		dgInt32 count = 0;
-		dgBigVector pointArray[256];
-		dgTree<dgList<dgInt32>, dgInt32>::dgTreeNode* const nodeNode = iter.GetNode();
-		
-		dgList<dgInt32>& list = nodeNode->GetInfo();
-
-		dgInt32 key = nodeNode->GetKey();
-
-		for (dgList<dgInt32>::dgListNode* ptr = list.GetFirst(); ptr; ptr = ptr->GetNext()) {
-			dgInt32 i = ptr->GetInfo();
-			dgConvexHull4dTetraherum* const tetrahedrum = &tetradrumNode[i]->GetInfo();
-			for (dgInt32 j = 0; j < 4; j ++) {
-				if (!tetrahedrum->m_faces[j].m_twin) {
-					if ((tetrahedrum->m_faces[j].m_index[0] == key) || (tetrahedrum->m_faces[j].m_index[1] == key) || (tetrahedrum->m_faces[j].m_index[2] == key)) {
-						dgBigVector p0 (delaunayTetrahedras.GetVertex(tetrahedrum->m_faces[j].m_index[0]));
-						dgBigVector p1 (delaunayTetrahedras.GetVertex(tetrahedrum->m_faces[j].m_index[1]));
-						dgBigVector p2 (delaunayTetrahedras.GetVertex(tetrahedrum->m_faces[j].m_index[2]));
-						dgBigVector n ((p1 - p0) * (p2 - p0));
-						n = n.Scale (dgFloat64 (1.0f) / sqrt(n % n));
-						dgBigVector normal (dgFloat64 (n.m_x), dgFloat64 (n.m_y), dgFloat64  (n.m_z), dgFloat64 (0.0f));
-						pointArray[count] = voronoiPoints[i] + normal.Scale (perimeterConvexBound);
-
-						count ++;
-						_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
-					}
-				}
-			}
-
-			pointArray[count] = voronoiPoints[i];
-			count ++;
-			_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
-		}
-
-		dgMeshEffect* const convexMesh = MakeDelanayIntersection (tree, &pointArray[0], count, interiorMaterial, textureProjectionMatrix, dgFloat64 (45.0f * 3.1416f / 180.0f));
-		if (convexMesh) {
-			for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
-				convexMesh->m_points[i].m_w = layer;
-			}
-			for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
-				convexMesh->m_attib[i].m_vertex.m_w = layer;
-			}
-
-			voronoiPartion->MergeFaces(convexMesh);
-			layer += dgFloat64 (1.0f);
-
-			convexMesh->Release();
-		}
-	}
-
-	voronoiPartion->EndPolygon(dgFloat64 (1.0e-5f));
-	
-#if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
-	dgControlFP (controlWorld, _MCW_PC);
-#endif
-
-	delete tree;
-	return voronoiPartion;
+	return NULL;
+	_ASSERTE (0);
 }
 
-
-dgMeshEffect* dgMeshEffect::CreateDelanayTretrahedralization (dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
+#if 0
+//dgCollision* dgMeshEffect::CreateConvexApproximationCollision(dgWorld* const world, dgInt32 maxCount, dgInt32 shapeId, dgInt32 childrenID) const
+dgMeshEffect* dgMeshEffect::CreateConvexApproximation(dgInt32 maxCount) const
 {
 /*
 	dgMeshEffect tmpMesh (*this);
@@ -2102,49 +1963,280 @@ for (iter.Begin(); iter; iter ++)
 	dgControlFP (_PC_53, _MCW_PC);
 #endif
 
+
+	dgDelaunayTetrahedralization delaunayTetrahedras (GetAllocator(), &m_points[0].m_x, m_pointCount, sizeof (dgBigVector), 0.0f);
+	delaunayTetrahedras.RemoveUpperHull ();
+
+	dgMeshEffect* const voronoiPartion = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+	voronoiPartion->BeginPolygon();
+	dgFloat64 layer = dgFloat64 (0.0f);
+
+//voronoiPartion->MergeFaces(this);
+//layer += dgFloat64 (1.0f);
+
+static int xxxx;
+
+	for (dgConvexHull4d::dgListNode* node = delaunayTetrahedras.GetFirst(); node; node = node->GetNext()) {
+
+		dgConvexHull4dTetraherum* const tetra = &node->GetInfo();
+		const dgConvexHull4dTetraherum::dgTetrahedrumFace& face0 = tetra->m_faces[0];
+
+		dgBigVector pointArray[4];
+		pointArray[0] = delaunayTetrahedras.GetVertex(face0.m_index[0]);
+		pointArray[1] = delaunayTetrahedras.GetVertex(face0.m_index[1]);
+		pointArray[2] = delaunayTetrahedras.GetVertex(face0.m_index[2]);
+		pointArray[3] = delaunayTetrahedras.GetVertex(face0.m_otherVertex);
+
+		dgMeshEffect* const convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, 4, sizeof (dgBigVector), dgFloat64 (1.0e-3f));
+
+
+#if 1
+dgBigVector xxx (0, 0, 0, 0);
+for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
+	xxx += convexMesh->m_points[i];
+}
+xxx = xxx.Scale (0.2f / convexMesh->m_pointCount);
+for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
+	convexMesh->m_points[i] += xxx;
+}
+for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
+	convexMesh->m_attib[i].m_vertex += xxx;
+}
+#endif
+
+
+		voronoiPartion->MergeFaces(convexMesh);
+		layer += dgFloat64 (1.0f);
+
+		convexMesh->Release();
+	}
+
+	voronoiPartion->EndPolygon(dgFloat64 (1.0e-5f));
+	
+#if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
+	dgControlFP (controlWorld, _MCW_PC);
+#endif
+
+	return voronoiPartion;
+}
+
+#endif
+
+dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const
+{
+//	dgMeshEffect copy (*this);
+//	copy.Triangulate();
+	return CreateVoronoiPartitionLow (pointsCount, pointStrideInBytes, pointCloud, interionMaterial, matrix);
+}
+
+
+dgMeshEffect* dgMeshEffect::CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
+{
+#if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
+	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);
+	dgControlFP (_PC_53, _MCW_PC);
+#endif
+
 	dgMeshEffectSolidTree* const tree = CreateSolidTree();
 	_ASSERTE (tree);
 
-	dgStack<dgBigVector> buffer(m_pointCount);
+	dgStack<dgBigVector> buffer(pointsCount + m_pointCount);
 	dgBigVector* const pool = &buffer[0];
 
-	for (dgInt32 i = 0; i < m_pointCount; i ++) {
-		pool[i] = m_points[i];
+	dgInt32 count = 0;
+	dgFloat64 quantizeFactor = dgFloat64 (16.0f);
+	dgFloat64 invQuantizeFactor = dgFloat64 (1.0f) / quantizeFactor;
+	dgInt32 stride = pointStrideInBytes / sizeof (dgFloat32); 
+	for (dgInt32 i = 0; i < pointsCount; i ++) {
+		dgFloat64 x = floor (pointCloud[i * stride + 0] * quantizeFactor) * invQuantizeFactor;
+		dgFloat64 y = floor (pointCloud[i * stride + 1] * quantizeFactor) * invQuantizeFactor;
+		dgFloat64 z = floor (pointCloud[i * stride + 2] * quantizeFactor) * invQuantizeFactor;
+		dgBigVector p (x, y, z, dgFloat64 (0.0f));
+		dgHugeVector p1 (p);
+		
+		bool pointSide = true;
+		for (dgMeshEffectSolidTree* ptr = tree; ptr; ) {
+			dgGoogol test (ptr->m_normal % (p1 - ptr->m_origin));
+			if (test.GetAproximateValue() < dgFloat64 (1.0f/32.0f)) {
+				pointSide = true;
+				ptr = ptr->m_back;
+			} else {
+				pointSide = false;
+				ptr = ptr->m_front;
+			}
+		}
+
+		if (pointSide) {
+			pool[count] = p;
+			count ++;
+		}
 	}
 
 
-	dgStack<dgInt32> indexList(m_pointCount);
-	int count = dgVertexListToIndexList(&pool[0].m_x, sizeof (dgBigVector), 3, m_pointCount, &indexList[0], dgFloat64 (1.0e-5f));	
+	dgStack<dgInt32> indexList(count);
+	dgStack<dgInt32> indexMap(count);
+	count = dgVertexListToIndexList(&pool[0].m_x, sizeof (dgBigVector), 3, count, &indexList[0], dgFloat64 (1.0e-5f));	
+	for (dgInt32 i = 0; i < count; i ++) {
+		indexMap[indexList[i]] = i;
+	}
 
 	dgDelaunayTetrahedralization delaunayTetrahedras (GetAllocator(), &pool[0].m_x, count, sizeof (dgBigVector), 0.0f);
 	delaunayTetrahedras.RemoveUpperHull ();
 
-	dgMeshEffect* const tetrahedralization = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
-	tetrahedralization->BeginPolygon();
+	dgBigVector minBox;
+	dgBigVector maxBox;
+	CalculateAABB (minBox, maxBox);
+	maxBox -= minBox;
+	dgFloat32 bboxDiagnalFactor = 4.0f;
+	dgFloat64 perimeterConvexBound = bboxDiagnalFactor * sqrt(maxBox % maxBox);
+
+	dgInt32 tetraCount = delaunayTetrahedras.GetCount();
+	dgStack<dgBigVector> voronoiPoints(tetraCount);
+	dgStack<dgDelaunayTetrahedralization::dgListNode*> tetradrumNode(tetraCount);
+	dgTree<dgList<dgInt32>, dgInt32> delanayNodes (GetAllocator());	
+
+	dgInt32 index = 0;
+	const dgHullVector* const delanayPoints = delaunayTetrahedras.GetHullVertexArray();
+	for (dgDelaunayTetrahedralization::dgListNode* node = delaunayTetrahedras.GetFirst(); node; node = node->GetNext()) {
+		dgConvexHull4dTetraherum& tetra = node->GetInfo();
+		dgBigVector origin (tetra.CircumSphereCenter (delanayPoints));
+		voronoiPoints[index] = dgBigVector (dgFloat64 (origin.m_x), dgFloat64 (origin.m_y), dgFloat64 (origin.m_z), dgFloat64 (0.0f));
+		tetradrumNode[index] = node;
+
+		for (dgInt32 i = 0; i < 3; i ++) {
+			dgTree<dgList<dgInt32>, dgInt32>::dgTreeNode* header = delanayNodes.Find(tetra.m_faces[0].m_index[i]);
+			if (!header) {
+				dgList<dgInt32> list (GetAllocator());
+				header = delanayNodes.Insert(list, tetra.m_faces[0].m_index[i]);
+			}
+			header->GetInfo().Append (index);
+		}
+
+		dgTree<dgList<dgInt32>, dgInt32>::dgTreeNode* header = delanayNodes.Find(tetra.m_faces[0].m_otherVertex);
+		if (!header) {
+			dgList<dgInt32> list (GetAllocator());
+			header = delanayNodes.Insert(list, tetra.m_faces[0].m_otherVertex);
+		}
+		header->GetInfo().Append (index);
+
+		index ++;
+	}
+
+
+	dgMeshEffect* const voronoiPartion = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+	voronoiPartion->BeginPolygon();
 	dgFloat64 layer = dgFloat64 (0.0f);
 
-static int xxx;
-	for (dgConvexHull4d::dgListNode* node = delaunayTetrahedras.GetFirst(); node; node = node->GetNext()) {
-		dgConvexHull4dTetraherum* const tetra = &node->GetInfo();
-		const dgConvexHull4dTetraherum::dgTetrahedrumFace& face = tetra->m_faces[0];
+	dgTree<dgList<dgInt32>, dgInt32>::Iterator iter (delanayNodes);
+	for (iter.Begin(); iter; iter ++) {
 
-xxx ++;
 
-		dgBigVector pointArray[4];
-		pointArray[0] = delaunayTetrahedras.GetVertex(face.m_index[0]);
-		pointArray[1] = delaunayTetrahedras.GetVertex(face.m_index[1]);
-		pointArray[2] = delaunayTetrahedras.GetVertex(face.m_index[2]);
-		pointArray[3] = delaunayTetrahedras.GetVertex(face.m_otherVertex);
+		int count = 0;
+		dgBigVector pointArray[256];
+		dgTree<dgList<dgInt32>, dgInt32>::dgTreeNode* const nodeNode = iter.GetNode();
+		
+		dgList<dgInt32>& list = nodeNode->GetInfo();
 
-dgMeshEffect* convexMesh = NULL;
-//if (xxx == 14)
-convexMesh = MakeDelanayIntersection (tree, &pointArray[0], 4, interiorMaterial, textureProjectionMatrix, dgFloat64 (45.0f * 3.1416f / 180.0f));
+		dgInt32 key = nodeNode->GetKey();
+		dgInt32 index = indexMap[key];
 
-//		dgMeshEffect* const convexMesh = MakeDelanayIntersection (tree, &pointArray[0], 4, interiorMaterial, textureProjectionMatrix, dgFloat64 (45.0f * 3.1416f / 180.0f));
+		for (dgList<dgInt32>::dgListNode* ptr = list.GetFirst(); ptr; ptr = ptr->GetNext()) {
+			dgInt32 i = ptr->GetInfo();
+			if (index < m_pointCount) {
+				dgConvexHull4dTetraherum* const tetrahedrum = &tetradrumNode[i]->GetInfo();
+				for (dgInt32 j = 0; j < 4; j ++) {
+					if (!tetrahedrum->m_faces[j].m_twin) {
+						if ((tetrahedrum->m_faces[j].m_index[0] == key) || (tetrahedrum->m_faces[j].m_index[1] == key) || (tetrahedrum->m_faces[j].m_index[2] == key)) {
+							dgBigVector p0 (delaunayTetrahedras.GetVertex(tetrahedrum->m_faces[j].m_index[0]));
+							dgBigVector p1 (delaunayTetrahedras.GetVertex(tetrahedrum->m_faces[j].m_index[1]));
+							dgBigVector p2 (delaunayTetrahedras.GetVertex(tetrahedrum->m_faces[j].m_index[2]));
+							dgBigVector n ((p1 - p0) * (p2 - p0));
+							n = n.Scale (dgFloat64 (1.0f) / sqrt(n % n));
+							dgBigVector normal (dgFloat64 (n.m_x), dgFloat64 (n.m_y), dgFloat64  (n.m_z), dgFloat64 (0.0f));
+							pointArray[count] = voronoiPoints[i] + normal.Scale (perimeterConvexBound);
 
-//if (xxx == 14)
+							count ++;
+							_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
+						}
+					}
+				}
+			}
+
+			pointArray[count] = voronoiPoints[i];
+			count ++;
+			_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
+		}
+
+		for (int i = 0; i < count; i ++)
+		{
+			volatile float x = dgFloat32 (pointArray[i].m_x);
+			volatile float y = dgFloat32 (pointArray[i].m_y);
+			volatile float z = dgFloat32 (pointArray[i].m_z);
+			pointArray[i].m_x = x;
+			pointArray[i].m_y = y;
+			pointArray[i].m_z = z;
+		}
+
+		dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgBigVector), dgFloat64 (0.0f));
 		if (convexMesh) {
+			convexMesh->CalculateNormals(dgFloat64 (45.0f * 3.1416f / 180.0f));
+			convexMesh->UniformBoxMapping (interiorMaterial, textureProjectionMatrix);
+
+			dgMeshEffect* leftConvexMesh = NULL;
+			dgMeshEffect* rightConvexMesh = NULL;
+			dgMeshEffect* leftMeshClipper = NULL;
+			dgMeshEffect* rightMeshClipper = NULL;
+
+			convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
+			if (leftConvexMesh && rightConvexMesh) {
+				ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
+				if (leftMeshClipper && rightMeshClipper) {
+					convexMesh->Release();
+					convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+
+					convexMesh->BeginPolygon();
+					convexMesh->MergeFaces(leftConvexMesh);
+					convexMesh->MergeFaces(leftMeshClipper);
+					convexMesh->EndPolygon(dgFloat64 (1.0e-5f));
+				}
+			} else if (rightConvexMesh) {
+				convexMesh->Release();
+				convexMesh = NULL;
+			}
+
+
+			if (leftConvexMesh) {
+				leftConvexMesh->Release();
+			}
+
+			if (rightConvexMesh) {
+				rightConvexMesh->Release();
+			}
+
+			if (leftMeshClipper) {
+				leftMeshClipper->Release();;
+			}
+
+			if (rightMeshClipper) {
+				rightMeshClipper->Release();
+			}
+
 			if (convexMesh) {
+
+#if 0
+dgBigVector xxx (0, 0, 0, 0);
+for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
+	xxx += convexMesh->m_points[i];
+}
+xxx = xxx.Scale (0.5f / convexMesh->m_pointCount);
+for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
+	convexMesh->m_points[i] += xxx;
+}
+for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
+	convexMesh->m_attib[i].m_vertex += xxx;
+}
+#endif
+
 				for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
 					convexMesh->m_points[i].m_w = layer;
 				}
@@ -2152,7 +2244,7 @@ convexMesh = MakeDelanayIntersection (tree, &pointArray[0], 4, interiorMaterial,
 					convexMesh->m_attib[i].m_vertex.m_w = layer;
 				}
 
-				tetrahedralization->MergeFaces(convexMesh);
+				voronoiPartion->MergeFaces(convexMesh);
 				layer += dgFloat64 (1.0f);
 
 				convexMesh->Release();
@@ -2160,86 +2252,12 @@ convexMesh = MakeDelanayIntersection (tree, &pointArray[0], 4, interiorMaterial,
 		}
 	}
 
-	 tetrahedralization->EndPolygon(dgFloat64 (1.0e-5f));
-
+	voronoiPartion->EndPolygon(dgFloat64 (1.0e-5f));
+	
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgControlFP (controlWorld, _MCW_PC);
 #endif
 
 	delete tree;
-	return tetrahedralization;
-}
-
-
-dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* const tree, dgBigVector* const points, dgInt32 count, dgInt32 materialId, const dgMatrix& textureProjectionMatrix, dgFloat32 normalAngleInRadians) const
-{
-
-	for (dgInt32 i = 0; i < count; i ++) {
-		points[i].m_x = QuantizeCordinade(points[i].m_x);
-		points[i].m_y = QuantizeCordinade(points[i].m_y);
-		points[i].m_z = QuantizeCordinade(points[i].m_z);
-		points[i].m_w = dgFloat64 (0.0f);
-	}
-
-	dgMeshEffect* intersection = NULL;
-	dgMeshEffect convexMesh (GetAllocator(), &points[0].m_x, count, sizeof (dgBigVector), dgFloat64 (0.0f));
-
-	if (convexMesh.GetCount()) {
-		convexMesh.CalculateNormals(normalAngleInRadians);
-		convexMesh.UniformBoxMapping (materialId, textureProjectionMatrix);
-
-#if 0
-intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
-#else
-
-		DG_MESG_EFFECT_BOOLEAN_INIT();
-
-		ClipMesh (&convexMesh, &leftMeshSource, &rightMeshSource, &sourceCoplanar);
-		convexMesh.ClipMesh (tree, &leftMeshClipper, &rightMeshClipper, &clipperCoplanar);
-		if (leftMeshSource || leftMeshClipper) {
-			result = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
-			result->BeginPolygon();
-
-			if (leftMeshSource) {
-				result->MergeFaces(leftMeshSource);
-			}
-
-			if (leftMeshClipper) {
-				result->MergeFaces(leftMeshClipper);
-			}
-
-			if (clipperCoplanar && sourceCoplanar) {
-				sourceCoplanar->FilterCoplanarFaces (clipperCoplanar, dgFloat32 (-1.0f));
-				result->MergeFaces(sourceCoplanar);
-			}
-
-			result->EndPolygon(dgFloat64 (1.0e-5f));
-			if (!result->GetCount()) {
-				result->Release();
-				result = NULL;
-			}
-		}
-		intersection = result;
-		DG_MESG_EFFECT_BOOLEAN_FINISH()
-#endif
-	}
-
-
-#if 0
-if (intersection) {
-	dgBigVector xxx (0, 0, 0, 0);
-	for (dgInt32 i = 0; i < intersection->m_pointCount; i ++) {
-		xxx += intersection->m_points[i];
-	}
-	xxx = xxx.Scale (0.5f / intersection->m_pointCount);
-	for (dgInt32 i = 0; i < intersection->m_pointCount; i ++) {
-		intersection->m_points[i] += xxx;
-	}
-	for (dgInt32 i = 0; i < intersection->m_atribCount; i ++) {
-		intersection->m_attib[i].m_vertex += xxx;
-	}
-}
-#endif
-
-	return intersection;
+	return voronoiPartion;
 }
