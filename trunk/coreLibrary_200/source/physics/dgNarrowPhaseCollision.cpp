@@ -2080,8 +2080,8 @@ dgInt32 dgWorld::Collide (dgCollision* const collisionA, const dgMatrix& matrixA
 //	collideBodyB.m_collisionWorldMatrix = collisionB->m_offset * matrixB;
 	collideBodyB.UpdateCollisionMatrix(dgFloat32 (0.0f), 0);
 
-//	bool isTriggerA = collisionA->IsTriggerVolume();
-//	bool isTriggerB = collisionB->IsTriggerVolume();
+//	isTriggerA = collisionA->IsTriggerVolume();
+//	isTriggerB = collisionB->IsTriggerVolume();
 
 	dgCollisionParamProxy proxy(threadIndex);
 	proxy.m_timestep = dgFloat32 (0.0f);

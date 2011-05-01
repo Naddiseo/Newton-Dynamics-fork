@@ -181,7 +181,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	dgInt32 GetTotalIndexCount() const;
 	void GetFaces (dgInt32* const faceCount, dgInt32* const materials, void** const faceNodeList) const;
 
-	void RepairTJoints (bool tringulate);
+	void RepairTJoints (bool triangulate);
 	bool SeparateDuplicateLoops (dgEdge* const edge);
 	bool HasOpenEdges () const;
 	dgFloat64 CalculateVolume () const;

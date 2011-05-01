@@ -98,7 +98,7 @@ void dgGoogol::InitFloatFloat (dgFloat64 value)
 
 
 
-inline void dgGoogol::AddFloat (dgFloat64 a, dgFloat64 b, dgFloat64& x, dgFloat64& y) const
+void dgGoogol::AddFloat (dgFloat64 a, dgFloat64 b, dgFloat64& x, dgFloat64& y) const
 {
 	x = a + b; 
 	dgFloat64 bvirt = x - a; 
@@ -108,7 +108,7 @@ inline void dgGoogol::AddFloat (dgFloat64 a, dgFloat64 b, dgFloat64& x, dgFloat6
 	y = around + bround;
 }
 
-inline void dgGoogol::PackFloat ()
+void dgGoogol::PackFloat ()
 {
 	if (m_significantCount > 1) {
 		dgFloat64 elements[DG_GOOGOL_SIZE];
@@ -153,7 +153,7 @@ inline void dgGoogol::PackFloat ()
 }
 
 
-inline void dgGoogol::SplitFloat (dgFloat64 a, dgFloat64& ahi, dgFloat64& alo) const
+void dgGoogol::SplitFloat (dgFloat64 a, dgFloat64& ahi, dgFloat64& alo) const
 {
 	dgFloat64 c = m_splitter * a;
 	dgFloat64 abig = c - a; 
@@ -161,7 +161,7 @@ inline void dgGoogol::SplitFloat (dgFloat64 a, dgFloat64& ahi, dgFloat64& alo) c
 	alo = a - ahi;
 }
 
-inline void dgGoogol::MulFloat (dgFloat64 a, dgFloat64 b, dgFloat64& x, dgFloat64& y) const
+void dgGoogol::MulFloat (dgFloat64 a, dgFloat64 b, dgFloat64& x, dgFloat64& y) const
 {
 	dgFloat64 ahi;
 	dgFloat64 alo;
@@ -180,7 +180,7 @@ inline void dgGoogol::MulFloat (dgFloat64 a, dgFloat64 b, dgFloat64& x, dgFloat6
 }
 
 
-inline dgGoogol dgGoogol::ScaleFloat(dgFloat64 scale) const
+dgGoogol dgGoogol::ScaleFloat(dgFloat64 scale) const
 {
 	dgFloat64 Q;
 	dgGoogol tmp;

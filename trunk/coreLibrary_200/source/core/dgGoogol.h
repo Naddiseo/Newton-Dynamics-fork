@@ -28,11 +28,12 @@
 #include "dgArray.h"
 #include "dgVector.h"
 
-#define DG_USE_FLOAT_BIG_NUMBERS
+
+//#define DG_USE_FLOAT_BIG_NUMBERS
 
 #ifdef DG_USE_FLOAT_BIG_NUMBERS
 
-	#define DG_GOOGOL_SIZE	32
+	#define DG_GOOGOL_SIZE	16
 
 	class dgGoogol
 	{
