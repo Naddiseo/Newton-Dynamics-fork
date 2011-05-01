@@ -1998,88 +1998,6 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 			_ASSERTE (count < sizeof (pointArray) / sizeof (pointArray[0]));
 		}
 
-#if 0
-		for (dgInt32 i = 0; i < count; i ++) {
-			pointArray[i].m_x = QuantizeCordinade(pointArray[i].m_x);
-			pointArray[i].m_y = QuantizeCordinade(pointArray[i].m_y);
-			pointArray[i].m_z = QuantizeCordinade(pointArray[i].m_z);
-		}
-
-		dgMeshEffect* convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, count, sizeof (dgBigVector), dgFloat64 (0.0f));
-		if (convexMesh) {
-			convexMesh->CalculateNormals(dgFloat64 (45.0f * 3.1416f / 180.0f));
-			convexMesh->UniformBoxMapping (interiorMaterial, textureProjectionMatrix);
-
-			dgMeshEffect* leftConvexMesh = NULL;
-			dgMeshEffect* rightConvexMesh = NULL;
-			dgMeshEffect* leftMeshClipper = NULL;
-			dgMeshEffect* rightMeshClipper = NULL;
-
-			convexMesh->ClipMesh (tree, &leftConvexMesh, &rightConvexMesh);
-			if (leftConvexMesh && rightConvexMesh) {
-				ClipMesh (convexMesh, &leftMeshClipper, &rightMeshClipper);
-				if (leftMeshClipper && rightMeshClipper) {
-					convexMesh->Release();
-					convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
-
-					convexMesh->BeginPolygon();
-					convexMesh->MergeFaces(leftConvexMesh);
-					convexMesh->MergeFaces(leftMeshClipper);
-					convexMesh->EndPolygon(dgFloat64 (1.0e-5f));
-				}
-			} else if (rightConvexMesh) {
-				convexMesh->Release();
-				convexMesh = NULL;
-			}
-
-
-			if (leftConvexMesh) {
-				leftConvexMesh->Release();
-			}
-
-			if (rightConvexMesh) {
-				rightConvexMesh->Release();
-			}
-
-			if (leftMeshClipper) {
-				leftMeshClipper->Release();;
-			}
-
-			if (rightMeshClipper) {
-				rightMeshClipper->Release();
-			}
-
-			if (convexMesh) {
-
-#if 0
-dgBigVector xxx (0, 0, 0, 0);
-for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
-	xxx += convexMesh->m_points[i];
-}
-xxx = xxx.Scale (0.5f / convexMesh->m_pointCount);
-for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
-	convexMesh->m_points[i] += xxx;
-}
-for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
-	convexMesh->m_attib[i].m_vertex += xxx;
-}
-#endif
-
-				for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
-					convexMesh->m_points[i].m_w = layer;
-				}
-				for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
-					convexMesh->m_attib[i].m_vertex.m_w = layer;
-				}
-
-				voronoiPartion->MergeFaces(convexMesh);
-				layer += dgFloat64 (1.0f);
-
-				convexMesh->Release();
-			}
-		}
-
-#else		
 		dgMeshEffect* const convexMesh = MakeDelanayIntersection (tree, &pointArray[0], count, interiorMaterial, textureProjectionMatrix, dgFloat64 (45.0f * 3.1416f / 180.0f));
 		if (convexMesh) {
 			for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
@@ -2094,8 +2012,6 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 
 			convexMesh->Release();
 		}
-#endif
-
 	}
 
 	voronoiPartion->EndPolygon(dgFloat64 (1.0e-5f));
@@ -2267,7 +2183,7 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 		convexMesh.CalculateNormals(normalAngleInRadians);
 		convexMesh.UniformBoxMapping (materialId, textureProjectionMatrix);
 
-#if 1
+#if 0
 intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
 #else
 
@@ -2304,7 +2220,7 @@ intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
 	}
 
 
-#if 1
+#if 0
 if (intersection) {
 	dgBigVector xxx (0, 0, 0, 0);
 	for (dgInt32 i = 0; i < intersection->m_pointCount; i ++) {
