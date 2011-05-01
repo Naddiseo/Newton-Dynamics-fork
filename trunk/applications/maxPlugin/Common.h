@@ -29,13 +29,11 @@
 
 
 #include <Max.h>
-#include <dMatrix.h>
 #include <io.h>
 #include <stdio.h>
 #include <notify.h> 
 #include <iparamb2.h>
 #include <iparamm2.h>
-//#include <simpmod.h> 
 #include <istdplug.h>
 #include <utilapi.h>
 #include <stdMat.h>

@@ -269,6 +269,7 @@ void Import::LoadMaterials (dScene& scene, MaterialCache& materialCache)
 }
 
 
+#if 0
 void Import::LoadGeometries (dScene& scene, GeometryCache& meshCache, const MaterialCache& materialCache)
 {
 	dScene::Iterator iter (scene);
@@ -279,7 +280,165 @@ void Import::LoadGeometries (dScene& scene, GeometryCache& meshCache, const Mate
 			if (info->GetTypeId() == dMeshNodeInfo::GetRttiType()) {
 
 				// add the vertices
-				TriObject* const geometry = CreateNewTriObject();
+				PolyObject* const geometry = (PolyObject*) CreateInstance (GEOMOBJECT_CLASS_ID, Class_ID(POLYOBJ_CLASS_ID, 0));
+				meshCache.AddMesh(geometry, geometryNode);
+
+				dMeshNodeInfo* const meshInfo = (dMeshNodeInfo*) scene.GetInfoFromNode(geometryNode);
+				NewtonMesh* const mesh = meshInfo->GetMesh();
+
+				//NewtonMeshTriangulate (mesh);
+
+				int vertexCount = NewtonMeshGetVertexCount(mesh);
+				int pointCount = NewtonMeshGetPointCount(mesh);
+
+				MNMesh& maxMesh = geometry->GetMesh();
+
+				// add all vertex
+				int vertexStride = NewtonMeshGetVertexStrideInByte(mesh) / sizeof (dFloat64);
+				dFloat64* const vertex = NewtonMeshGetVertexArray (mesh); 
+				for (int j = 0; j < vertexCount; j ++) {
+					Point3 vx (vertex[vertexStride * j + 0], vertex[vertexStride * j + 1], vertex[vertexStride * j + 2]);
+					maxMesh.NewVert(vx);
+				}
+
+				// count teh number of face and make a face map
+				dTree<int, LONG64> edgeToFaceMap;
+				int faceCount = 0;
+				for (void* face = NewtonMeshGetFirstFace(mesh); face; face = NewtonMeshGetNextFace(mesh, face)) {
+					if (!NewtonMeshIsFaceOpen(mesh, face)) {
+						int vertexInices[256];
+						int indexCount = NewtonMeshGetFaceIndexCount (mesh, face);
+						NewtonMeshGetFaceIndices (mesh, face, vertexInices);
+
+						LONG64 i0 = vertexInices[indexCount - 1];
+						for (int i = 0; i < indexCount; i ++) {
+							LONG64 i1 = vertexInices[i];
+							LONG64 key = (i1 << 32) + i0;
+							edgeToFaceMap.Insert(faceCount, key);
+							i0 = i1;
+						}
+						faceCount ++;
+					}
+				}
+				maxMesh.AppendNewFaces  (faceCount);
+
+				//now add all edges
+				int edgeCount = 0;
+				for (void* edge = NewtonMeshGetFirstEdge(mesh); edge; edge = NewtonMeshGetNextFace(mesh, edge)) {
+					int i0;
+					int i1;
+					NewtonMeshGetEdgeIndices (mesh, edge, &i0, &i1);
+					LONG64 key = (LONG64 (i1) << 32) + i0;
+					dTree<int, LONG64>::dTreeNode* const node0 = edgeToFaceMap.Find(key);
+
+					key = (LONG64 (i0) << 32) + i1;
+					dTree<int, LONG64>::dTreeNode* const node1 = edgeToFaceMap.Find(key);
+
+					if (node0) {
+						maxMesh.SimpleNewEdge (i0, i1); 
+						MNEdge* const maxEge = maxMesh.E(edgeCount);
+						maxEge->f1 = node0->GetInfo();
+						if (node1) {
+							maxEge->f2 = node1->GetInfo();
+						}
+						edgeCount ++;
+					}
+
+					if (node1) {
+						maxMesh.SimpleNewEdge (i1, i0); 
+						MNEdge* const maxEge = maxMesh.E(edgeCount);
+						maxEge->f1 = node1->GetInfo();
+						if (node0) {
+							maxEge->f2 = node0->GetInfo();
+						}
+						edgeCount ++;
+					}
+
+				}
+				
+
+
+
+/*
+				int pointStride = NewtonMeshGetPointStrideInByte(mesh) / sizeof (dFloat64);
+				dFloat64* const points = NewtonMeshGetUV0Array(mesh); 
+				for (int j = 0; j < pointCount; j ++) {
+					Point3 uv (dFloat(points[j * pointStride + 0]), dFloat(points[j * pointStride + 1]), 0.0f);
+					maxMesh.setTVert(j, uv);
+				}
+*/
+
+/*
+//				int faceIndex = 0;
+				for (void* face = NewtonMeshGetFirstFace(mesh); face; face = NewtonMeshGetNextFace(mesh, face)) {
+					if (!NewtonMeshIsFaceOpen(mesh, face)) {
+						int vertexInices[256];
+						int pointIndices[256];
+
+						int indexCount = NewtonMeshGetFaceIndexCount (mesh, face);
+						NewtonMeshGetFaceIndices (mesh, face, vertexInices);
+						NewtonMeshGetFacePointIndices (mesh, face, pointIndices);
+
+//						int matId = NewtonMeshGetFaceMaterial (mesh, face);
+//						MaterialProxi material;
+//						material.m_mtl = 0;
+//						material.m_matID = 0;
+//						MaterialCache::dTreeNode* const materialNode = materialCache.Find(matId);
+//						if (materialNode) {
+//							material = materialNode->GetInfo();
+//						}
+
+						maxMesh.NewFace (0, indexCount, vertexInices);
+
+						for (int i = 2; i < indexCount; i ++) {
+
+							Face* f = &maxMesh.faces[faceIndex];
+							TVFace* t = &maxMesh.tvFace[faceIndex];
+
+							f->v[0] = vertexInices[0];
+							f->v[1] = vertexInices[i - 1];
+							f->v[2] = vertexInices[i];
+
+							f->setEdgeVis(0, 1);
+							f->setEdgeVis(1, 1);
+							f->setEdgeVis(2, 1);
+							f->setSmGroup(0);
+
+							//f->setMatID((MtlID)matID);
+							f->setMatID(material.m_matID);
+
+							t->t[0] = pointIndices[0];
+							t->t[1] = pointIndices[i - 1];
+							t->t[2] = pointIndices[i];
+							faceIndex ++;
+						}
+					}
+				}
+
+//				SetSmoothingGroups (maxMesh);
+*/
+
+			} else {
+				_ASSERTE (0);
+			}
+		}
+	}
+}
+
+
+#else
+void Import::LoadGeometries (dScene& scene, GeometryCache& meshCache, const MaterialCache& materialCache)
+{
+	dScene::Iterator iter (scene);
+	for (iter.Begin(); iter; iter ++) {
+		dScene::dTreeNode* const geometryNode = iter.GetNode();
+		dNodeInfo* const info = scene.GetInfoFromNode(geometryNode);
+		if (info->IsType(dGeometryNodeInfo::GetRttiType())) {
+			if (info->GetTypeId() == dMeshNodeInfo::GetRttiType()) {
+
+				// add the vertices
+				//TriObject* const geometry = CreateNewTriObject();
+				TriObject* const geometry = (TriObject*) CreateInstance (GEOMOBJECT_CLASS_ID, Class_ID(TRIOBJ_CLASS_ID, 0));
 				meshCache.AddMesh(geometry, geometryNode);
 
 				dMeshNodeInfo* const meshInfo = (dMeshNodeInfo*) scene.GetInfoFromNode(geometryNode);
@@ -399,6 +558,7 @@ void Import::LoadGeometries (dScene& scene, GeometryCache& meshCache, const Mate
 		}
 	}
 }
+#endif
 
 INode* Import::CreateMaxHelperNode ()
 {
