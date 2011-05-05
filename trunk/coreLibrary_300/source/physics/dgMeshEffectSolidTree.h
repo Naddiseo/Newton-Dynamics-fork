@@ -56,7 +56,6 @@ class dgCSGFacePoint
 		,m_v1 (p.m_v1)
 		,m_material (p.m_material)
 	{
-
 	}
 
 	dgMeshEffect::dgVertexAtribute GetPoint() const
@@ -74,42 +73,11 @@ class dgCSGFacePoint
 		p.m_u1 = m_u1;
 		p.m_v1 = m_v1;
 		p.m_material = m_material;
-
 		return p;
 	}
-
 };
 
 
-class dgMeshTreeCSGFace: public dgList<dgCSGFacePoint>, public dgRefCounter
-{
-
-	public:
-
-	enum dgFaceCode
-	{
-		m_back = 1,
-		m_front,
-		m_coplanar,
-	};
-
-	dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, const dgMeshEffect& mesh, dgEdge* const face);
-	dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, dgInt32 count, const dgCSGFacePoint* const points);
-
-
-	void Clip (const dgHugeVector& normal, const dgHugeVector& origin, dgMeshTreeCSGFace** leftOut, dgMeshTreeCSGFace** rightOut);
-
-	dgCSGFacePoint Interpolate (const dgHugeVector& normal, const dgHugeVector& origin, const dgCSGFacePoint& p0, const dgCSGFacePoint& p1) const;
-
-	void MergeMissingVertex (const dgMeshTreeCSGFace* const face);
-	bool IsPointOnEdge (const dgBigVector& p0, const dgBigVector& p1, const dgBigVector& q) const;
-
-	dgFaceCode DetermineSide (const dgMeshEffectSolidTree* const bsp);
-
-	bool CheckFaceArea (dgInt32 count, const dgCSGFacePoint* const points) const;
-
-	dgFaceCode m_side;
-};
 
 class dgMeshEffectSolidTree
 {
@@ -128,27 +96,48 @@ class dgMeshEffectSolidTree
 		public:
 		CSGConvexCurve (dgMemoryAllocator* const allocator);
 		CSGConvexCurve (const dgMeshEffect& mesh, dgEdge* const face);
-		bool CheckConvex(const dgHugeVector& normal, const dgHugeVector& point) const;
+		bool CheckConvex(const dgHugeVector& plane) const;
 	};
 
 	dgMeshEffectSolidTree (dgPlaneType type);
 	dgMeshEffectSolidTree (const dgMeshEffect& mesh, dgEdge* const face);
-	dgMeshEffectSolidTree (const dgHugeVector& normal, const dgHugeVector& point, dgMemoryAllocator* const allocator);
+	dgMeshEffectSolidTree (const dgHugeVector& plane, dgMemoryAllocator* const allocator);
 	~dgMeshEffectSolidTree();
 
-	void BuildPlane (const dgMeshEffect& mesh, dgEdge* const face, dgHugeVector& normal, dgHugeVector& point) const;
+	dgHugeVector BuildPlane (const dgMeshEffect& mesh, dgEdge* const face) const;
 	void AddFace (const dgMeshEffect& mesh, dgEdge* const face);
 
-#ifdef _DEBUG
-	dgInt32 m_id;
-	static dgInt32 m_enumerator;
-#endif
+	dgPlaneType GetPointSide (const dgHugeVector& point) const;
+	dgPlaneType GetFaceSide (const dgMeshTreeCSGFace* const face) const;
 
 	dgPlaneType m_planeType;
 	dgMeshEffectSolidTree* m_back;
 	dgMeshEffectSolidTree* m_front;
-
-	dgHugeVector m_origin;
-	dgHugeVector m_normal;
+	dgHugeVector m_plane;
 };
+
+
+class dgMeshTreeCSGFace: public dgList<dgCSGFacePoint>, public dgRefCounter
+{
+	public:
+	dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, const dgMeshEffect& mesh, dgEdge* const face);
+	dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, dgInt32 count, const dgCSGFacePoint* const points);
+
+	void Clip (const dgHugeVector& plane, dgMeshTreeCSGFace** leftOut, dgMeshTreeCSGFace** rightOut);
+	dgCSGFacePoint Interpolate (const dgHugeVector& plane, const dgCSGFacePoint& p0, const dgCSGFacePoint& p1) const;
+
+	void MergeMissingVertex (const dgMeshTreeCSGFace* const face);
+	bool IsPointOnEdge (const dgBigVector& p0, const dgBigVector& p1, const dgBigVector& q) const;
+
+	bool CheckFaceArea (dgInt32 count, const dgCSGFacePoint* const points) const;
+	dgInt32 RemoveDulicates (dgInt32 count, dgCSGFacePoint* const points) const;
+
+#ifdef _DEBUG
+	dgMatrix DebugMatrix () const;
+	void Trace (const dgMatrix& matrix) const;
+#endif
+
+	dgMeshEffectSolidTree::dgPlaneType m_side;
+};
+
 #endif

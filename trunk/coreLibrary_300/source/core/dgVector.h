@@ -67,7 +67,12 @@ class dgTemplateVector
 	dgTemplateVector CompProduct4 (const dgTemplateVector &A) const;
 
 	// check validity of floats
-
+#ifdef _DEBUG
+	void Trace () const
+	{
+		dgTrace (("%f %f %f %f\n", m_x, m_y, m_z, m_w));
+	}
+#endif
 
 	DG_CLASS_ALLOCATOR(allocator)
 

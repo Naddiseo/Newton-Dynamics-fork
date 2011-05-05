@@ -39,7 +39,6 @@
 	#define DG_BUILD_SIMD_CODE
 #endif
 
-
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 
 	#pragma warning (disable: 4324) //structure was padded due to __declspec(align())

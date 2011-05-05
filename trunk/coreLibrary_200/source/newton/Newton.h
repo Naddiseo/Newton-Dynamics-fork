@@ -24,7 +24,7 @@
 
 
 #define NEWTON_MAJOR_VERSION 2 
-#define NEWTON_MINOR_VERSION 31 
+#define NEWTON_MINOR_VERSION 34 
 
 // force all not visual studio platform to be in library form
 #ifndef _MSC_VER

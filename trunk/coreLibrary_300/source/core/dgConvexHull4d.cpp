@@ -1020,7 +1020,6 @@ dgConvexHull4d::dgListNode* dgConvexHull4d::FindFacingNode(const dgBigVector& ve
 {
 	const dgHullVector* const hullVertexArray = &m_points[0];
 
-
 	dgListNode* bestNode = GetFirst();
 	dgConvexHull4dTetraherum* const tetra = &bestNode->GetInfo();
 	dgConvexHull4dTetraherum::dgTetrahedrumPlane plane (tetra->GetPlaneEquation (hullVertexArray));
