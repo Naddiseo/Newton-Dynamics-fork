@@ -4139,12 +4139,13 @@ static int xxx1;
 			bool hasCoplanar = false;
 
 			originalFace->AddRef();
-	
-xxx ++;
-dgMatrix xxxx (originalFace->DebugMatrix());
-if (xxx == 1582) {
-originalFace->Trace(xxxx);
-}
+
+
+//xxx ++;
+//dgMatrix xxxx (originalFace->DebugMatrix());
+//if (xxx == 1582) {
+//originalFace->Trace(xxxx);
+//}
 
 
 
@@ -4271,9 +4272,9 @@ xxx1 *= 1;
 				for (dgList<dgMeshTreeCSGFace*>::dgListNode* node1 = faceList.GetFirst(); node1; node1 = node1->GetNext()) {
 					dgMeshTreeCSGFace* const face = node1->GetInfo();
 
-xxx1 ++;
-if (xxx1 == 24310)
-face->Trace(xxxx);
+//xxx1 ++;
+//if (xxx1 == 24310)
+//face->Trace(xxxx);
 
 					dgInt32 count = 0;
 					dgVertexAtribute facePoints[256];

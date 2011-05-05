@@ -695,6 +695,8 @@ dgInt32 dgConvexHull4d::InitVertexArray(dgHullVector* const points, const dgBigV
 	}
 
 
+	dgInt32 bestIndex = -1;
+	dgFloat64 bestValue = dgFloat64 (1.0f);
 	validTetrahedrum = false;
 	dgFloat64 lenght2 = e1.DotProduct4(e1);
 	dgBigVector e2(dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));;
@@ -709,13 +711,24 @@ dgInt32 dgConvexHull4d::InitVertexArray(dgHullVector* const points, const dgBigV
 			den = sqrt (lenght2 * den);
 			dgFloat64 num = e2.DotProduct4(e1);
 			dgFloat64 cosAngle = fabs (num / den);
+			if (cosAngle < bestValue) {
+				bestValue = cosAngle;
+				bestIndex = index;
+			}
+
 			if (cosAngle < 0.9f) {
-				convexPoints[2] = points[index];
-				points[index].m_mark = 1;
-				validTetrahedrum = true;
+//				convexPoints[2] = points[index];
+//				points[index].m_mark = 1;
+//				validTetrahedrum = true;
 				break;
 			}
 		}
+	}
+
+	if (bestValue < dgFloat64 (0.999f)) {
+		convexPoints[2] = points[bestIndex];
+		points[bestIndex].m_mark = 1;
+		validTetrahedrum = true;
 	}
 
 	if (!validTetrahedrum) {
