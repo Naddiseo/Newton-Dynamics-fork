@@ -28,45 +28,116 @@ class dgMeshEffect;
 class dgMeshEffectSolidTree;
 
 
-class dgMeshTreeCSGFace: public dgPolyhedra
+class dgCSGFacePoint
 {
 	public:
-	dgMeshTreeCSGFace (const dgMeshEffect& mesh, dgEdge* const face);
-	void ClipFace (dgEdge* const face, const dgHugeVector& normal, const dgHugeVector& origin, dgEdge** leftOut, dgEdge** rightOut);
+	dgHugeVector m_vertex;
+	dgFloat64 m_normal_x;
+	dgFloat64 m_normal_y;
+	dgFloat64 m_normal_z;
+	dgFloat64 m_u0;
+	dgFloat64 m_v0;
+	dgFloat64 m_u1;
+	dgFloat64 m_v1;
+	dgFloat64 m_material;
 
+	dgCSGFacePoint()
+	{
+	}
 
+	dgCSGFacePoint(const dgMeshEffect::dgVertexAtribute& p)
+		:m_vertex (p.m_vertex)
+		,m_normal_x (p.m_normal_x)
+		,m_normal_y (p.m_normal_y)
+		,m_normal_z (p.m_normal_z)
+		,m_u0 (p.m_u0)
+		,m_v0 (p.m_v0)
+		,m_u1 (p.m_u1)
+		,m_v1 (p.m_v1)
+		,m_material (p.m_material)
+	{
+	}
 
-	dgInt32 AddPoint (const dgMeshEffect::dgVertexAtribute& point);
-	bool CheckConsistency () const;
-
-	dgInt32 m_count;
-	dgInt32 m_baseCount;
-	dgMeshEffect::dgVertexAtribute m_points[DG_MESH_EFFECT_POINT_SPLITED];
+	dgMeshEffect::dgVertexAtribute GetPoint() const
+	{
+		dgMeshEffect::dgVertexAtribute p;
+		p.m_vertex.m_x = m_vertex.m_x.GetAproximateValue();
+		p.m_vertex.m_y = m_vertex.m_y.GetAproximateValue();
+		p.m_vertex.m_z = m_vertex.m_z.GetAproximateValue();
+		p.m_vertex.m_w = m_vertex.m_w.GetAproximateValue();
+		p.m_normal_x = m_normal_x;
+		p.m_normal_y = m_normal_y;
+		p.m_normal_z = m_normal_z;
+		p.m_u0 = m_u0;
+		p.m_v0 = m_v0;
+		p.m_u1 = m_u1;
+		p.m_v1 = m_v1;
+		p.m_material = m_material;
+		return p;
+	}
 };
+
+
 
 class dgMeshEffectSolidTree
 {
 	public:
 	DG_CLASS_ALLOCATOR(allocator)
 
-	class CSGConvexCurve: public dgList<dgHugeVector>
+	enum dgPlaneType
 	{
-		public:
-		CSGConvexCurve ();
-		CSGConvexCurve (dgMemoryAllocator* const allocator);
-		bool CheckConvex(const dgHugeVector& normal, const dgHugeVector& point) const;
+		m_divider = 1,
+		m_empty,
+		m_solid,
 	};
 
+	class CSGConvexCurve: public dgList<dgHugeVector>, public dgRefCounter
+	{
+		public:
+		CSGConvexCurve (dgMemoryAllocator* const allocator);
+		CSGConvexCurve (const dgMeshEffect& mesh, dgEdge* const face);
+		bool CheckConvex(const dgHugeVector& plane) const;
+	};
+
+	dgMeshEffectSolidTree (dgPlaneType type);
 	dgMeshEffectSolidTree (const dgMeshEffect& mesh, dgEdge* const face);
-	dgMeshEffectSolidTree (const dgHugeVector& normal, const dgHugeVector& point);
+	dgMeshEffectSolidTree (const dgHugeVector& plane, dgMemoryAllocator* const allocator);
 	~dgMeshEffectSolidTree();
 
-	void BuildPlane (const dgMeshEffect& mesh, dgEdge* const face, dgHugeVector& normal, dgHugeVector& point) const;
+	dgHugeVector BuildPlane (const dgMeshEffect& mesh, dgEdge* const face) const;
 	void AddFace (const dgMeshEffect& mesh, dgEdge* const face);
 
-	dgHugeVector m_origin;
-	dgHugeVector m_normal;
+	dgPlaneType GetPointSide (const dgHugeVector& point) const;
+	dgPlaneType GetFaceSide (const dgMeshTreeCSGFace* const face) const;
+
+	dgPlaneType m_planeType;
 	dgMeshEffectSolidTree* m_back;
 	dgMeshEffectSolidTree* m_front;
+	dgHugeVector m_plane;
 };
+
+
+class dgMeshTreeCSGFace: public dgList<dgCSGFacePoint>, public dgRefCounter
+{
+	public:
+	dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, const dgMeshEffect& mesh, dgEdge* const face);
+	dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, dgInt32 count, const dgCSGFacePoint* const points);
+
+	void Clip (const dgHugeVector& plane, dgMeshTreeCSGFace** leftOut, dgMeshTreeCSGFace** rightOut);
+	dgCSGFacePoint Interpolate (const dgHugeVector& plane, const dgCSGFacePoint& p0, const dgCSGFacePoint& p1) const;
+
+	void MergeMissingVertex (const dgMeshTreeCSGFace* const face);
+	bool IsPointOnEdge (const dgBigVector& p0, const dgBigVector& p1, const dgBigVector& q) const;
+
+	bool CheckFaceArea (dgInt32 count, const dgCSGFacePoint* const points) const;
+	dgInt32 RemoveDulicates (dgInt32 count, dgCSGFacePoint* const points) const;
+
+#ifdef _DEBUG
+	dgMatrix DebugMatrix () const;
+	void Trace (const dgMatrix& matrix) const;
+#endif
+
+	dgMeshEffectSolidTree::dgPlaneType m_side;
+};
+
 #endif

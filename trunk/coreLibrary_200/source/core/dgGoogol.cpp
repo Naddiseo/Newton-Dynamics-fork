@@ -506,15 +506,20 @@ void dgGoogol::ScaleMantissa (dgUnsigned64* const dst, dgUnsigned64 scale) const
 {
 	dgUnsigned64 carrier = 0;
 	for (dgInt32 i = DG_GOOGOL_SIZE - 1; i >= 0; i --) {
-		dgUnsigned64 low;
-		dgUnsigned64 high;
-		ExtendeMultiply (scale, m_mantissa[i], high, low);
+		if (m_mantissa[i]) {
+			dgUnsigned64 low;
+			dgUnsigned64 high;
+			ExtendeMultiply (scale, m_mantissa[i], high, low);
+			dgUnsigned64 acc = low + carrier;
+			carrier = CheckCarrier (low, carrier);	
+			_ASSERTE (CheckCarrier (carrier, high) == 0);
+			carrier += high;
+			dst[i + 1] = acc;
+		} else {
+			dst[i + 1] = carrier;
+			carrier = 0;
+		}
 
-		dgUnsigned64 acc = low + carrier;
-		carrier = CheckCarrier (low, carrier);	
-		_ASSERTE (CheckCarrier (carrier, high) == 0);
-		carrier += high;
-		dst[i + 1] = acc;
 	}
 	dst[0] = carrier;
 }
@@ -566,14 +571,15 @@ dgGoogol dgGoogol::operator* (const dgGoogol &A) const
 
 dgGoogol dgGoogol::operator/ (const dgGoogol &A) const
 {
-	dgGoogol tmp (1.0f / A.GetAproximateValue());
+	dgGoogol tmp (1.0 / A.GetAproximateValue());
 	dgGoogol two (2.0);
 	
 	tmp = tmp * (two - A * tmp);
 	tmp = tmp * (two - A * tmp);
-	bool test = true;
+	
 	dgUnsigned64 copy[DG_GOOGOL_SIZE];
 
+	bool test = true;
 	int passes = 0;
 	do {
 		passes ++;

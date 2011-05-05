@@ -53,12 +53,12 @@
 		dgGoogol operator+= (const dgGoogol &A); 
 		dgGoogol operator-= (const dgGoogol &A); 
 
+#ifdef _DEBUG
 		void Trace () const
 		{
 			dgTrace (("%f ", GetAproximateValue()));
 		}
-
-
+#endif
 		private:
 		inline void PackFloat ();
 		inline void AddFloat (dgFloat64 A, dgFloat64 B, dgFloat64& x, dgFloat64& y) const;
@@ -93,11 +93,12 @@
 		dgGoogol operator+= (const dgGoogol &A); 
 		dgGoogol operator-= (const dgGoogol &A); 
 
-
+#ifdef _DEBUG
 		void Trace () const
 		{
 			dgTrace (("%f ", GetAproximateValue()));
 		}
+#endif
 
 		private:
 		void NegateMantissa (dgUnsigned64* const mantissa) const;
@@ -145,6 +146,7 @@ class dgHugeVector: public dgTemplateVector<dgGoogol>
 		return (point % (*this)) + m_w;
 	}
 
+#ifdef _DEBUG
 	void Trace () const
 	{
 		m_x.Trace();
@@ -153,6 +155,7 @@ class dgHugeVector: public dgTemplateVector<dgGoogol>
 		m_w.Trace();
 		dgTrace (("\n"));
 	}
+#endif
 };
 
 
