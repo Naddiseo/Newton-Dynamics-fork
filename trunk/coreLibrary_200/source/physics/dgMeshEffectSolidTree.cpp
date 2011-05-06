@@ -747,6 +747,8 @@ void dgMeshEffectSolidTree::AddFace (const dgMeshEffect& mesh, dgEdge* const fac
 
 
 			if ((minVal < dgFloat64 (0.0f)) && (maxVal > dgFloat64 (0.0f))) {
+
+				_ASSERTE (0);
 				if (root->m_back->m_planeType != m_divider) {
 					delete root->m_back;
 					root->m_back = new (mesh.GetAllocator()) dgMeshEffectSolidTree (plane, mesh.GetAllocator());

@@ -2063,6 +2063,8 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 	count = dgVertexListToIndexList(&pool[0].m_x, sizeof (dgBigVector), 3, count, &indexList[0], dgFloat64 (1.0e-5f));	
 	_ASSERTE (count >= 4);
 
+count = 4;
+
 	dgDelaunayTetrahedralization delaunayTetrahedras (GetAllocator(), &pool[0].m_x, count, sizeof (dgBigVector), 0.0f);
 	delaunayTetrahedras.RemoveUpperHull ();
 
@@ -2158,6 +2160,7 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 			layer += dgFloat64 (1.0f);
 
 			convexMesh->Release();
+break;
 		}
 	}
 
@@ -2190,7 +2193,7 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 		convexMesh.UniformBoxMapping (materialId, textureProjectionMatrix);
 
 #if 0
-		intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
+intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
 #else
 
 		DG_MESG_EFFECT_BOOLEAN_INIT();
@@ -2206,7 +2209,7 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 			}
 
 			if (leftMeshClipper) {
-				result->MergeFaces(leftMeshClipper);
+//				result->MergeFaces(leftMeshClipper);
 			}
 
 			if (clipperCoplanar && sourceCoplanar) {

@@ -365,12 +365,12 @@ dgInt32 dgGoogol::LeadinZeros (dgUnsigned64 a) const
 	}
 
 	dgInt32 n = 0;
-	dgCOUNTBIT (0xffffffff00000000ui64, 32);
-	dgCOUNTBIT (0xffff0000ffff0000ui64, 16);
-	dgCOUNTBIT (0xff00ff00ff00ff00ui64,  8);
-	dgCOUNTBIT (0xf0f0f0f0f0f0f0f0ui64,  4);
-	dgCOUNTBIT (0xccccccccccccccccui64,  2);
-	dgCOUNTBIT (0xaaaaaaaaaaaaaaaaui64,  1);
+	dgCOUNTBIT (0xffffffff00000000LL, 32);
+	dgCOUNTBIT (0xffff0000ffff0000LL, 16);
+	dgCOUNTBIT (0xff00ff00ff00ff00LL,  8);
+	dgCOUNTBIT (0xf0f0f0f0f0f0f0f0LL,  4);
+	dgCOUNTBIT (0xccccccccccccccccLL,  2);
+	dgCOUNTBIT (0xaaaaaaaaaaaaaaaaLL,  1);
 
 	return n;
 }

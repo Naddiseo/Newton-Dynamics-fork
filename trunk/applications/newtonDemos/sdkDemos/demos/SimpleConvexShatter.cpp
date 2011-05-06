@@ -25,7 +25,7 @@
 #define BREAK_FORCE_IN_GRAVITIES	10
 //#define BREAK_FORCE_IN_GRAVITIES	1
 
-#if 0
+#if 1
 static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 {
 	// create a collision primitive
@@ -34,7 +34,8 @@ static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 	dVector size = dVector (5.0f, 5.0f, 5.0f, 0.0f);
 	NewtonWorld* const world = scene->GetNewton();
 
-	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
+//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
+	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _CAPSULE_PRIMITIVE, 0);
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _SPHERE_PRIMITIVE, 0);
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _REGULAR_CONVEX_HULL_PRIMITIVE, 0);
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _RANDOM_CONVEX_HULL_PRIMITIVE, 0);
@@ -460,26 +461,26 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	scene->Append(new SkyBox());
 
 	// load the scene from and alchemedia file format
-//	CreateLevelMesh (scene, "flatPlane.ngd", false);
-	CreateLevelMesh (scene, "sponza.ngd", false);
+	CreateLevelMesh (scene, "flatPlane.ngd", false);
+//	CreateLevelMesh (scene, "sponza.ngd", false);
 //	CreateLevelMesh (scene, "sponza.ngd", true);
 
 	// create a shattered mesh array
-//    CreateSimpleVoronoiShatter (scene);
+ CreateSimpleVoronoiShatter (scene);
 
 	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (scene->GetNewton());
 	dVector location (0.0f, 0.0f, 0.0f, 0.0f);
 	dVector size (0.5f, 0.5f, 0.5f, 0.0f);
-	int count = 5;
+	int count = 1;
 
 
-	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _BOX_PRIMITIVE, defaultMaterialID);
-	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
-	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
+//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _BOX_PRIMITIVE, defaultMaterialID);
+//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
+//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
 //	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
-	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CYLINDER_PRIMITIVE, defaultMaterialID);
-	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CONE_PRIMITIVE, defaultMaterialID);
-//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CAPSULE_PRIMITIVE, defaultMaterialID);
+//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CYLINDER_PRIMITIVE, defaultMaterialID);
+//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CONE_PRIMITIVE, defaultMaterialID);
+	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CAPSULE_PRIMITIVE, defaultMaterialID);
 
 //for (int i = 0; i < 1; i ++)
 //AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID);

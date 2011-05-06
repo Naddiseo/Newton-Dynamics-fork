@@ -25,6 +25,7 @@
 #include <dgRefCounter.h>
 
 class dgMeshEffect;
+class dgMeshTreeCSGFace;
 class dgMeshEffectSolidTree;
 
 
