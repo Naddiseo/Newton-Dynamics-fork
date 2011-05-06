@@ -25,7 +25,7 @@
 #define BREAK_FORCE_IN_GRAVITIES	10
 //#define BREAK_FORCE_IN_GRAVITIES	1
 
-#if 1
+#if 0
 static void CreateSimpleVoronoiShatter (DemoEntityManager* const scene)
 {
 	// create a collision primitive
@@ -466,20 +466,20 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 //	CreateLevelMesh (scene, "sponza.ngd", true);
 
 	// create a shattered mesh array
- CreateSimpleVoronoiShatter (scene);
+//CreateSimpleVoronoiShatter (scene);
 
 	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (scene->GetNewton());
 	dVector location (0.0f, 0.0f, 0.0f, 0.0f);
 	dVector size (0.5f, 0.5f, 0.5f, 0.0f);
-	int count = 1;
+	int count = 5;
 
 
-//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _BOX_PRIMITIVE, defaultMaterialID);
-//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
-//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
-//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
-//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CYLINDER_PRIMITIVE, defaultMaterialID);
-//	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CONE_PRIMITIVE, defaultMaterialID);
+	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _BOX_PRIMITIVE, defaultMaterialID);
+	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
+	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID);
+	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _SPHERE_PRIMITIVE, defaultMaterialID);
+	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CYLINDER_PRIMITIVE, defaultMaterialID);
+	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CONE_PRIMITIVE, defaultMaterialID);
 	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _CAPSULE_PRIMITIVE, defaultMaterialID);
 
 //for (int i = 0; i < 1; i ++)

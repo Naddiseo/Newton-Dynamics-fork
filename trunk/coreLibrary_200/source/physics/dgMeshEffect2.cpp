@@ -2063,8 +2063,6 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 	count = dgVertexListToIndexList(&pool[0].m_x, sizeof (dgBigVector), 3, count, &indexList[0], dgFloat64 (1.0e-5f));	
 	_ASSERTE (count >= 4);
 
-count = 4;
-
 	dgDelaunayTetrahedralization delaunayTetrahedras (GetAllocator(), &pool[0].m_x, count, sizeof (dgBigVector), 0.0f);
 	delaunayTetrahedras.RemoveUpperHull ();
 
@@ -2160,7 +2158,6 @@ count = 4;
 			layer += dgFloat64 (1.0f);
 
 			convexMesh->Release();
-break;
 		}
 	}
 
@@ -2209,7 +2206,7 @@ intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
 			}
 
 			if (leftMeshClipper) {
-//				result->MergeFaces(leftMeshClipper);
+				result->MergeFaces(leftMeshClipper);
 			}
 
 			if (clipperCoplanar && sourceCoplanar) {

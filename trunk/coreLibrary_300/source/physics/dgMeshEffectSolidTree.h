@@ -25,58 +25,8 @@
 #include <dgRefCounter.h>
 
 class dgMeshEffect;
+class dgMeshTreeCSGFace;
 class dgMeshEffectSolidTree;
-
-
-class dgCSGFacePoint
-{
-	public:
-	dgHugeVector m_vertex;
-	dgFloat64 m_normal_x;
-	dgFloat64 m_normal_y;
-	dgFloat64 m_normal_z;
-	dgFloat64 m_u0;
-	dgFloat64 m_v0;
-	dgFloat64 m_u1;
-	dgFloat64 m_v1;
-	dgFloat64 m_material;
-
-	dgCSGFacePoint()
-	{
-	}
-
-	dgCSGFacePoint(const dgMeshEffect::dgVertexAtribute& p)
-		:m_vertex (p.m_vertex)
-		,m_normal_x (p.m_normal_x)
-		,m_normal_y (p.m_normal_y)
-		,m_normal_z (p.m_normal_z)
-		,m_u0 (p.m_u0)
-		,m_v0 (p.m_v0)
-		,m_u1 (p.m_u1)
-		,m_v1 (p.m_v1)
-		,m_material (p.m_material)
-	{
-	}
-
-	dgMeshEffect::dgVertexAtribute GetPoint() const
-	{
-		dgMeshEffect::dgVertexAtribute p;
-		p.m_vertex.m_x = m_vertex.m_x.GetAproximateValue();
-		p.m_vertex.m_y = m_vertex.m_y.GetAproximateValue();
-		p.m_vertex.m_z = m_vertex.m_z.GetAproximateValue();
-		p.m_vertex.m_w = m_vertex.m_w.GetAproximateValue();
-		p.m_normal_x = m_normal_x;
-		p.m_normal_y = m_normal_y;
-		p.m_normal_z = m_normal_z;
-		p.m_u0 = m_u0;
-		p.m_v0 = m_v0;
-		p.m_u1 = m_u1;
-		p.m_v1 = m_v1;
-		p.m_material = m_material;
-		return p;
-	}
-};
-
 
 
 class dgMeshEffectSolidTree
@@ -91,13 +41,13 @@ class dgMeshEffectSolidTree
 		m_solid,
 	};
 
-	class CSGConvexCurve: public dgList<dgHugeVector>, public dgRefCounter
-	{
-		public:
-		CSGConvexCurve (dgMemoryAllocator* const allocator);
-		CSGConvexCurve (const dgMeshEffect& mesh, dgEdge* const face);
-		bool CheckConvex(const dgHugeVector& plane) const;
-	};
+//	class CSGConvexCurve: public dgList<dgHugeVector>, public dgRefCounter
+//	{
+//		public:
+//		CSGConvexCurve (dgMemoryAllocator* const allocator);
+//		CSGConvexCurve (const dgMeshEffect& mesh, dgEdge* const face);
+//		bool CheckConvex(const dgHugeVector& plane) const;
+//	};
 
 	dgMeshEffectSolidTree (dgPlaneType type);
 	dgMeshEffectSolidTree (const dgMeshEffect& mesh, dgEdge* const face);
@@ -117,20 +67,22 @@ class dgMeshEffectSolidTree
 };
 
 
-class dgMeshTreeCSGFace: public dgList<dgCSGFacePoint>, public dgRefCounter
+
+class dgMeshTreeCSGFace: public dgList<dgHugeVector>, public dgRefCounter 
 {
 	public:
-	dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, const dgMeshEffect& mesh, dgEdge* const face);
-	dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, dgInt32 count, const dgCSGFacePoint* const points);
+	dgMeshTreeCSGFace (const dgMeshEffect& mesh, dgEdge* const face);
+	dgMeshTreeCSGFace (dgMemoryAllocator* const allocator, dgInt32 count, const dgHugeVector* const points);
 
 	void Clip (const dgHugeVector& plane, dgMeshTreeCSGFace** leftOut, dgMeshTreeCSGFace** rightOut);
-	dgCSGFacePoint Interpolate (const dgHugeVector& plane, const dgCSGFacePoint& p0, const dgCSGFacePoint& p1) const;
-
 	void MergeMissingVertex (const dgMeshTreeCSGFace* const face);
-	bool IsPointOnEdge (const dgBigVector& p0, const dgBigVector& p1, const dgBigVector& q) const;
+	bool IsPointOnEdge (const dgHugeVector& p0, const dgHugeVector& p1, const dgHugeVector& q) const;
+	bool CheckFaceArea (dgInt32 count, const dgHugeVector* const points) const;
+	dgInt32 RemoveDuplicates (dgInt32 count, dgHugeVector* const points) const;
 
-	bool CheckFaceArea (dgInt32 count, const dgCSGFacePoint* const points) const;
-	dgInt32 RemoveDulicates (dgInt32 count, dgCSGFacePoint* const points) const;
+	dgHugeVector FaceNormal () const;
+
+	bool CheckConvex(const dgHugeVector& normal) const;
 
 #ifdef _DEBUG
 	dgMatrix DebugMatrix () const;

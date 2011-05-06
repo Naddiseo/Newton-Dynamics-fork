@@ -4130,7 +4130,7 @@ static int xxx1;
 			dgMeshTreeCSGFace* faceOnStack[DG_MESH_EFFECT_BOLLEAN_STACK];
 			const dgMeshEffectSolidTree* stackPool[DG_MESH_EFFECT_BOLLEAN_STACK];
 			dgInt32 stack = 1;
-			dgMeshTreeCSGFace* const originalFace = new (GetAllocator()) dgMeshTreeCSGFace (GetAllocator(), mesh, face);
+			dgMeshTreeCSGFace* const originalFace = new (GetAllocator()) dgMeshTreeCSGFace (mesh, face);
 			faceOnStack[0] = originalFace;
 			stackPool[0] = clipper;
 
@@ -4152,7 +4152,7 @@ static int xxx1;
 			while (stack) {
 
 				stack --;
-				dgMeshTreeCSGFace* const face = faceOnStack[stack];
+				dgMeshTreeCSGFace* const treeFace = faceOnStack[stack];
 				const dgMeshEffectSolidTree* const root = stackPool[stack];
 
 				_ASSERTE (root->m_planeType == dgMeshEffectSolidTree::m_divider);
@@ -4163,8 +4163,8 @@ xxx1 *= 1;
 
 				dgMeshTreeCSGFace* backFace; 
 				dgMeshTreeCSGFace* frontFace;
-				face->Clip(root->m_plane, &backFace, &frontFace);
-				face->Release();
+				treeFace->Clip(root->m_plane, &backFace, &frontFace);
+				treeFace->Release();
 
 				if (!(frontFace || backFace)) {
 					_ASSERTE (0);
@@ -4237,7 +4237,10 @@ xxx1 *= 1;
 				dgInt32 count = 0;
 				dgMeshEffect::dgVertexAtribute facePoints[256];
 				for (dgMeshTreeCSGFace::dgListNode* node = originalFace->GetFirst(); node; node = node->GetNext()) {
-					facePoints[count] = node->GetInfo().GetPoint();
+					//facePoints[count] = node->GetInfo().GetPoint();
+					dgBigVector p (node->GetInfo().m_x.GetAproximateValue(), node->GetInfo().m_y.GetAproximateValue(), node->GetInfo().m_z.GetAproximateValue(), dgFloat64 (0.0));
+					facePoints[count] = mesh.InterpolateVertex(p, face);
+					facePoints[count].m_vertex = p;
 					count ++;
 				}
 
@@ -4270,7 +4273,7 @@ xxx1 *= 1;
 				}
 
 				for (dgList<dgMeshTreeCSGFace*>::dgListNode* node1 = faceList.GetFirst(); node1; node1 = node1->GetNext()) {
-					dgMeshTreeCSGFace* const face = node1->GetInfo();
+					dgMeshTreeCSGFace* const treFace = node1->GetInfo();
 
 //xxx1 ++;
 //if (xxx1 == 24310)
@@ -4278,12 +4281,14 @@ xxx1 *= 1;
 
 					dgInt32 count = 0;
 					dgVertexAtribute facePoints[256];
-					for (dgMeshTreeCSGFace::dgListNode* node = face->GetFirst(); node; node = node->GetNext()) {
-						facePoints[count] = node->GetInfo().GetPoint();
+					for (dgMeshTreeCSGFace::dgListNode* node = treFace->GetFirst(); node; node = node->GetNext()) {
+						dgBigVector p (node->GetInfo().m_x.GetAproximateValue(), node->GetInfo().m_y.GetAproximateValue(), node->GetInfo().m_z.GetAproximateValue(), dgFloat64 (0.0));
+						facePoints[count] = mesh.InterpolateVertex(p, face);
+						facePoints[count].m_vertex = p;
 						count ++;
 					}
 
-					switch (face->m_side) 
+					switch (treFace->m_side) 
 					{
 						case dgMeshEffectSolidTree::m_divider:
 						{

@@ -63,7 +63,7 @@ dgConvexHull4dTetraherum::dgTetrahedrumPlane::dgTetrahedrumPlane (const dgBigVec
 	dgBigVector& me = *this;
 //	_ASSERTE (me.DotProduct4(me) > dgFloat64 (1.0e-64f));
 	dgFloat64 invMag2 = dgFloat32 (0.0f);
-	if (me.DotProduct4(me) > dgFloat64 (1.0e-64f)) {
+	if (me.DotProduct4(me) > dgFloat64 (1.0e-64)) {
 		invMag2 = dgFloat64 (1.0f) / sqrt (me.DotProduct4(me));
 	} else {
 		invMag2 = dgFloat32 (0.0f);
@@ -131,7 +131,7 @@ void dgConvexHull4dTetraherum::Init (const dgHullVector* const points, dgInt32 v
 	dgBigVector p3p0 (points[v3].Sub4(points[v0]));
 	dgBigVector normal (p1p0.CrossProduct4(p2p0, p3p0));
 	dgFloat64 volume = normal.DotProduct4(normal);
-	_ASSERT (volume > dgFloat64 (0.0f));
+	_ASSERTE (volume > dgFloat64 (0.0f));
 #endif
 }
 
