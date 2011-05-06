@@ -29,94 +29,55 @@
 #include "dgVector.h"
 
 
-//#define DG_USE_FLOAT_BIG_NUMBERS
 
-#ifdef DG_USE_FLOAT_BIG_NUMBERS
+//#define DG_GOOGOL_SIZE	16
+#define DG_GOOGOL_SIZE		4
 
-	#define DG_GOOGOL_SIZE	16
+class dgGoogol
+{
+	public:
+	dgGoogol(void);
+	dgGoogol(dgFloat64 value);
+	~dgGoogol(void);
 
-	class dgGoogol
-	{
-		public:
-		dgGoogol(void);
-		dgGoogol(dgFloat64 value);
-		~dgGoogol(void);
+	dgFloat64 GetAproximateValue() const;
+	void InitFloatFloat (dgFloat64 value);
 
-		dgFloat64 GetAproximateValue() const;
-		void InitFloatFloat (dgFloat64 value);
+	dgGoogol operator+ (const dgGoogol &A) const; 
+	dgGoogol operator- (const dgGoogol &A) const; 
+	dgGoogol operator* (const dgGoogol &A) const; 
+	dgGoogol operator/ (const dgGoogol &A) const; 
 
-		dgGoogol operator+ (const dgGoogol &A) const; 
-		dgGoogol operator- (const dgGoogol &A) const; 
-		dgGoogol operator* (const dgGoogol &A) const; 
-		dgGoogol operator/ (const dgGoogol &A) const; 
+	dgGoogol operator+= (const dgGoogol &A); 
+	dgGoogol operator-= (const dgGoogol &A); 
 
-		dgGoogol operator+= (const dgGoogol &A); 
-		dgGoogol operator-= (const dgGoogol &A); 
-
-#ifdef _DEBUG
-		void Trace () const
-		{
-			dgTrace (("%f ", GetAproximateValue()));
-		}
-#endif
-		private:
-		inline void PackFloat ();
-		inline void AddFloat (dgFloat64 A, dgFloat64 B, dgFloat64& x, dgFloat64& y) const;
-		inline void MulFloat (dgFloat64 A, dgFloat64 B, dgFloat64& x, dgFloat64& y) const;
-		inline void SplitFloat (dgFloat64 A, dgFloat64& hi, dgFloat64& lo) const;
-		inline dgGoogol ScaleFloat(dgFloat64 scale) const;
-
-		dgInt32 m_significantCount;
-		dgFloat64 m_elements[DG_GOOGOL_SIZE];
-	};
-
-#else
-
-	//#define DG_GOOGOL_SIZE	16
-	#define DG_GOOGOL_SIZE		4
-
-	class dgGoogol
-	{
-		public:
-		dgGoogol(void);
-		dgGoogol(dgFloat64 value);
-		~dgGoogol(void);
-
-		dgFloat64 GetAproximateValue() const;
-		void InitFloatFloat (dgFloat64 value);
-
-		dgGoogol operator+ (const dgGoogol &A) const; 
-		dgGoogol operator- (const dgGoogol &A) const; 
-		dgGoogol operator* (const dgGoogol &A) const; 
-		dgGoogol operator/ (const dgGoogol &A) const; 
-
-		dgGoogol operator+= (const dgGoogol &A); 
-		dgGoogol operator-= (const dgGoogol &A); 
+	dgGoogol Floor () const;
 
 #ifdef _DEBUG
-		void Trace () const
-		{
-			dgTrace (("%f ", GetAproximateValue()));
-		}
+	void ToString (char* const string) const;
+
+	void Trace () const
+	{
+		dgTrace (("%f ", GetAproximateValue()));
+	}
 #endif
 
-		private:
-		void NegateMantissa (dgUnsigned64* const mantissa) const;
-		void CopySignedMantissa (dgUnsigned64* const mantissa) const;
-		dgInt32 NormalizeMantissa (dgUnsigned64* const mantissa) const;
-		dgUnsigned64 CheckCarrier (dgUnsigned64 a, dgUnsigned64 b) const;
-		void ShiftRightMantissa (dgUnsigned64* const mantissa, dgInt32 bits) const;
+	private:
+	void NegateMantissa (dgUnsigned64* const mantissa) const;
+	void CopySignedMantissa (dgUnsigned64* const mantissa) const;
+	dgInt32 NormalizeMantissa (dgUnsigned64* const mantissa) const;
+	dgUnsigned64 CheckCarrier (dgUnsigned64 a, dgUnsigned64 b) const;
+	void ShiftRightMantissa (dgUnsigned64* const mantissa, dgInt32 bits) const;
 
-		dgInt32 LeadinZeros (dgUnsigned64 a) const;
-		void ExtendeMultiply (dgUnsigned64 a, dgUnsigned64 b, dgUnsigned64& high, dgUnsigned64& low) const;
-		void ScaleMantissa (dgUnsigned64* const out, dgUnsigned64 scale) const;
+	dgInt32 LeadinZeros (dgUnsigned64 a) const;
+	void ExtendeMultiply (dgUnsigned64 a, dgUnsigned64 b, dgUnsigned64& high, dgUnsigned64& low) const;
+	void ScaleMantissa (dgUnsigned64* const out, dgUnsigned64 scale) const;
 
-		dgInt8 m_sign;
-		dgInt16 m_exponent;
-		dgUnsigned64 m_mantissa[DG_GOOGOL_SIZE];
-	};
+	dgInt8 m_sign;
+	dgInt16 m_exponent;
+	dgUnsigned64 m_mantissa[DG_GOOGOL_SIZE];
+};
 
-#endif
 
 class dgHugeVector: public dgTemplateVector<dgGoogol>
 {
@@ -145,6 +106,9 @@ class dgHugeVector: public dgTemplateVector<dgGoogol>
 	{
 		return (point % (*this)) + m_w;
 	}
+
+
+
 
 #ifdef _DEBUG
 	void Trace () const

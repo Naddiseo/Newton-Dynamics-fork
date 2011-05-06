@@ -223,7 +223,7 @@ bool dgMeshTreeCSGFace::CheckFaceArea (dgInt32 count, const dgHugeVector* const 
 	return (val > dgFloat64 (1.0e-12f)) ? true : false;
 }
 
-/*
+
 //dgGoogol xxx1(dgGoogol v)
 dgGoogol xxx1(dgInt32 x)
 {
@@ -240,17 +240,17 @@ dgGoogol xxx1(dgInt32 x)
 
 void xxxx()
 {
-	dgGoogol a (xxx1(100));
-	dgFloat64 xxxxx = a.GetAproximateValue();
-//	dgInt32  a (xxx1(40));
-//	a = xxx1(10);
-//	xxx1(dgGoogol (11));
+	char text[256];
+//	dgGoogol a (xxx1(100));
+	dgGoogol a (1.05);
+	a.ToString(text);
+//	dgFloat64 xxxxx = a.GetAproximateValue();
 }
-*/
+
 
 void dgMeshTreeCSGFace::Clip (const dgHugeVector& plane, dgMeshTreeCSGFace** leftOut, dgMeshTreeCSGFace** rightOut)
 {
-//xxxx ();
+xxxx ();
 
 	dgInt8 pointSide[256];
 
