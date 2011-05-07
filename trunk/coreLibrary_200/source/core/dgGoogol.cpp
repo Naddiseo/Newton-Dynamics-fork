@@ -380,6 +380,7 @@ dgGoogol dgGoogol::Floor () const
 	return tmp;
 }
 
+#ifdef _DEBUG
 void dgGoogol::ToString (char* const string) const
 {
 	dgGoogol tmp (*this);
@@ -414,3 +415,9 @@ a = tmp.GetAproximateValue();
 	string[index] = 0;
 }
 
+void dgGoogol::Trace () const
+{
+	dgTrace (("%f ", GetAproximateValue()));
+}
+
+#endif

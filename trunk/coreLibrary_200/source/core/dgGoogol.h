@@ -54,12 +54,8 @@ class dgGoogol
 	dgGoogol Floor () const;
 
 #ifdef _DEBUG
+	void Trace () const;
 	void ToString (char* const string) const;
-
-	void Trace () const
-	{
-		dgTrace (("%f ", GetAproximateValue()));
-	}
 #endif
 
 	private:
