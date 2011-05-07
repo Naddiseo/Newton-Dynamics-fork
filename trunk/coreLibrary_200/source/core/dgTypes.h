@@ -124,11 +124,13 @@
 #endif
 
 #ifdef _MAC_VER
-	#ifndef _MAC_IPHONE
-		#include <pthread.h>
-		#include <semaphore.h>
-	#endif	
+//	#ifndef _MAC_IPHONE
+//		#include <pthread.h>
+//		#include <semaphore.h>
+//	#endif	
 
+	#include <pthread.h>
+	#include <semaphore.h>
 	#include <unistd.h>
 	#include <libkern/OSAtomic.h>
 	#include <sys/sysctl.h>
