@@ -2028,6 +2028,8 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 
 dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
 {
+//return new (GetAllocator()) dgMeshEffect (*this);
+
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);
 	dgControlFP (_PC_53, _MCW_PC);
@@ -2190,7 +2192,7 @@ dgMeshEffect* dgMeshEffect::MakeDelanayIntersection (dgMeshEffectSolidTree* cons
 		convexMesh.UniformBoxMapping (materialId, textureProjectionMatrix);
 
 #if 0
-		intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
+intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
 #else
 
 		DG_MESG_EFFECT_BOOLEAN_INIT();

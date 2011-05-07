@@ -238,13 +238,26 @@ dgGoogol xxx1(dgInt32 x)
 	return ans;
 }
 
+dgGoogol xxx2(dgInt32 x)
+{
+	dgGoogol one (1);
+	dgGoogol n (x);
+	dgGoogol a (1);
+	for (int i = x; i >= 1; i --) {
+		a = a * n;
+		n -= one;
+	}
+	return a;
+}
+
 void xxxx()
 {
-	dgGoogol a (xxx1(100));
-	dgFloat64 xxxxx = a.GetAproximateValue();
-//	dgInt32  a (xxx1(40));
-//	a = xxx1(10);
-//	xxx1(dgGoogol (11));
+	char text[256];
+//	dgGoogol a (xxx1(100));
+//	dgGoogol a (1.05);
+	dgGoogol a (xxx2 (60));
+	a.ToString(text);
+//	dgFloat64 xxxxx = a.GetAproximateValue();
 }
 */
 

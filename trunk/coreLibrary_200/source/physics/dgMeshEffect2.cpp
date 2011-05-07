@@ -2028,7 +2028,7 @@ for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
 
 dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
 {
-return new (GetAllocator()) dgMeshEffect (*this);
+//return new (GetAllocator()) dgMeshEffect (*this);
 
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);
