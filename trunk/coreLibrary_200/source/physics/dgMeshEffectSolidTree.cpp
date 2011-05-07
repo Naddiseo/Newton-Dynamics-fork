@@ -238,11 +238,24 @@ dgGoogol xxx1(dgInt32 x)
 	return ans;
 }
 
+dgGoogol xxx2(dgInt32 x)
+{
+	dgGoogol one (1);
+	dgGoogol n (x);
+	dgGoogol a (1);
+	for (int i = x; i >= 1; i --) {
+		a = a * n;
+		n -= one;
+	}
+	return a;
+}
+
 void xxxx()
 {
 	char text[256];
 //	dgGoogol a (xxx1(100));
-	dgGoogol a (1.05);
+//	dgGoogol a (1.05);
+	dgGoogol a (xxx2 (60));
 	a.ToString(text);
 //	dgFloat64 xxxxx = a.GetAproximateValue();
 }

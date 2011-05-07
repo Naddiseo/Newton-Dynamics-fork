@@ -385,19 +385,31 @@ void dgGoogol::ToString (char* const string) const
 	dgGoogol tmp (*this);
 	dgGoogol base (10.0);
 
+//char aaaa[256];
+dgFloat64 a = tmp.GetAproximateValue(); 
+
+	while (tmp.GetAproximateValue() > 1.0) {
+		tmp = tmp/base;
+	}
+a = tmp.GetAproximateValue(); 
 
 	dgInt32 index = 0;
-	tmp.m_exponent = 1;
+//	tmp.m_exponent = 1;
 	while (tmp.m_mantissa[0]) {
-dgFloat64 xxx = tmp.GetAproximateValue();
+		
+//dgFloat64 xxx = tmp.GetAproximateValue();
+//dgFloat64 xxx1 = digit.GetAproximateValue();
+//dgFloat64 m = floor (a);
+//a = a - m;
+//a = a * 10;
+//aaaa[index] = char (m) + '0';
+
+		tmp = tmp * base;
 		dgGoogol digit (tmp.Floor());
-dgFloat64 xxx1 = digit.GetAproximateValue();
 		tmp -= digit;
 		dgFloat64 val = digit.GetAproximateValue();
 		string[index] = char (val) + '0';
 		index ++;
-
-		tmp = tmp * base;
 	}
 	string[index] = 0;
 }
