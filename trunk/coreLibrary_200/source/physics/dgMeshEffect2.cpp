@@ -2165,6 +2165,8 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 
 	voronoiPartion->EndPolygon(dgFloat64 (1.0e-5f));
 
+	voronoiPartion->ConvertToPolygons();
+
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgControlFP (controlWorld, _MCW_PC);
 #endif
