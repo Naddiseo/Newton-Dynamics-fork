@@ -205,89 +205,7 @@ class AnimationClip: public dList<AnimationNode>
 
 
 
-dVector Export::CalcVertexNormal (Mesh& max5Mesh, int faceNo, int faceIndex) const
-{
-	int i;
-	int vertexIndex;
-	int numNormals;
-	Face* face;
-	RVertex* rv;
-	DWORD smGroup;
-	Point3 normal;
-	dVector vertexNormal (0.0f, 0.0f, 0.0f, 0.0f);
-	
-	face = &max5Mesh.faces[faceNo];
 
-	vertexIndex = face->v[faceIndex];
-
-	smGroup = face->getSmGroup();
-	rv	= max5Mesh.getRVertPtr(vertexIndex);
-
-	numNormals = rv->rFlags & NORCT_MASK;
-	// Is normal specified
-	// SPCIFIED is not currently used, but may be used in future versions.
-	if (rv->rFlags & SPECIFIED_NORMAL) {
-		_ASSERTE (0);
-		normal = rv->rn.getNormal();
-		vertexNormal.m_x = normal.x;
-		vertexNormal.m_y = normal.y;
-		vertexNormal.m_z = normal.z;
-
-	} else if (numNormals && smGroup) {
-		// If normal is not specified it's only available if the face belongs
-		// to a smoothing group
-	
-		if (numNormals == 1) {
-			// If there is only one vertex is found in the rn member.
-			normal = rv->rn.getNormal();
-			vertexNormal.m_x = normal.x;
-			vertexNormal.m_y = normal.y;
-			vertexNormal.m_z = normal.z;
-
-		} else {
-			// If two or more vertices are there you need to step through them
-			// and find the vertex with the same smoothing group as the current face.
-			// You will find multiple normals in the ern member.
-			for (i = 0; i < numNormals; i++) {
-				if (rv->ern[i].getSmGroup() & smGroup) {
-					normal = rv->ern[i].getNormal();
-					vertexNormal.m_x += normal.x;
-					vertexNormal.m_y += normal.y;
-                    vertexNormal.m_z += normal.z;
-				}
-			}
-		}
-	} else {
-		// Get the normal from the Face if no smoothing groups are there
-		normal = max5Mesh.getFaceNormal(faceNo);
-		vertexNormal.m_x = normal.x;
-		vertexNormal.m_y = normal.y;
-		vertexNormal.m_z = normal.z;
-	}
-
-	return vertexNormal;
-}
-
-
-TriObject* Export::GetTriObject (ObjectState* const os, int deleteIt) 
-{
-	Object *obj;
-	TriObject *poly;
-
-	poly = NULL;
-	deleteIt = FALSE;
-	obj = os->obj;
-	if (obj->CanConvertToType(Class_ID(POLYOBJ_CLASS_ID, 0))) { 
-		poly = (TriObject *) obj->ConvertToType(0, Class_ID(TRIOBJ_CLASS_ID, 0));
-		// Note that the TriObject should only be deleted
-		// if the pointer to it is not equal to the object
-		// pointer that called ConvertToType()
-		if (obj != poly) {
-			deleteIt = TRUE;
-		}
-	}
-	return poly;
-}
 
 
 
@@ -496,6 +414,538 @@ void Export::LoadGeometries (INode* const node, dScene& scene, NodeMap& nodeMap)
 			_ASSERTE (stackIndex * sizeof (INode*) < sizeof (stack));	
 		}
 	}
+}
+
+
+#if 1
+
+dVector Export::CalcVertexNormal (MNMesh& mesh, int faceNo, int faceIndex) const
+{
+	//I can no figure out how to get the vertex normal for a NNMesn
+	return dVector (0.0f, 0.0f, 0.0f, 0.0f);
+/*
+//	int i;
+//	int vertexIndex;
+//	int numNormals;
+//	Face* face;
+//	RVertex* rv;
+//	DWORD smGroup;
+//	Point3 normal;
+	dVector vertexNormal (0.0f, 0.0f, 0.0f, 0.0f);
+
+	MNFace* const face = mesh.F(faceNo);
+
+	int vertexIndex = face->vtx[faceIndex];
+
+	DWORD smGroup = face->smGroup;
+//	RVertex* const rv = mesh.rVerts;
+//	_ASSERTE (rv);
+
+//	int numNormals = rv->rFlags & NORCT_MASK;
+
+	// Is normal specified
+	// SPCIFIED is not currently used, but may be used in future versions.
+	if (rv->rFlags & SPECIFIED_NORMAL) {
+		_ASSERTE (0);
+		normal = rv->rn.getNormal();
+		vertexNormal.m_x = normal.x;
+		vertexNormal.m_y = normal.y;
+		vertexNormal.m_z = normal.z;
+
+	} else if (numNormals && smGroup) {
+		// If normal is not specified it's only available if the face belongs
+		// to a smoothing group
+
+		if (numNormals == 1) {
+			// If there is only one vertex is found in the rn member.
+			normal = rv->rn.getNormal();
+			vertexNormal.m_x = normal.x;
+			vertexNormal.m_y = normal.y;
+			vertexNormal.m_z = normal.z;
+
+		} else {
+			// If two or more vertices are there you need to step through them
+			// and find the vertex with the same smoothing group as the current face.
+			// You will find multiple normals in the ern member.
+			for (i = 0; i < numNormals; i++) {
+				if (rv->ern[i].getSmGroup() & smGroup) {
+					normal = rv->ern[i].getNormal();
+					vertexNormal.m_x += normal.x;
+					vertexNormal.m_y += normal.y;
+					vertexNormal.m_z += normal.z;
+				}
+			}
+		}
+	} else {
+		// Get the normal from the Face if no smoothing groups are there
+		normal = max5Mesh.getFaceNormal(faceNo);
+		vertexNormal.m_x = normal.x;
+		vertexNormal.m_y = normal.y;
+		vertexNormal.m_z = normal.z;
+	}
+
+	return vertexNormal;
+*/
+}
+
+
+
+PolyObject* Export::GetPolyObject (ObjectState* const os, int& deleteIt)
+{
+	PolyObject* poly = NULL;
+	deleteIt = FALSE;
+	Object* const obj = os->obj;
+	if (obj->CanConvertToType(Class_ID(POLYOBJ_CLASS_ID, 0))) { 
+		poly = (PolyObject *) obj->ConvertToType(0, Class_ID(POLYOBJ_CLASS_ID, 0));
+		// Note that the TriObject should only be deleted
+		// if the pointer to it is not equal to the object
+		// pointer that called ConvertToType()
+		if (obj != poly) {
+			deleteIt = TRUE;
+		}
+	}
+	return poly;
+}
+
+
+dScene::dTreeNode* Export::LoadTriangleObject(INode* const node, ObjectState* const os, dScene& scene, NodeMap& nodeMap, ImageCache& imageCache, int& materialID)
+{
+	// Targets are actually geomobjects, but we will export them
+	// from the camera and light objects, so we skip them here.
+	if (os->obj->ClassID() == Class_ID(TARGET_CLASS_ID, 0)) {
+		return NULL;
+	}
+
+	BOOL needDel = FALSE;
+	PolyObject* const poly = GetPolyObject (os, needDel); 
+	if (!poly) {
+		return NULL;
+	}
+
+	MNMesh& maxMesh = poly->GetMesh();
+
+	int facesCount = maxMesh.FNum();
+	int vertexCount = maxMesh.VNum();
+	if (!facesCount) {
+		if (needDel) {
+			delete poly;
+		}
+		return NULL;
+	}
+
+	_ASSERTE (nodeMap.Find (node));
+	dScene::dTreeNode* const parentNode = nodeMap.Find (node)->GetInfo();
+	dSceneNodeInfo* const parent = (dSceneNodeInfo*) scene.GetInfoFromNode(parentNode);
+
+
+	dScene::dTreeNode* const meshNode = scene.CreateMeshNode(parentNode);
+	dMeshNodeInfo* const instance = (dMeshNodeInfo*) scene.GetInfoFromNode(meshNode);
+
+	char name[256];
+	sprintf (name, "%s_mesh", parent->GetName());
+	instance->SetName(name);
+
+
+//	maxMesh.buildNormals();
+	dMatrix objectMatrix (GetMatrixFromMaxMatrix (node->GetObjectTM(0)));
+	dMatrix nodeMatrix (parent->GetTransform());
+	dMatrix scaleTransform2 (objectMatrix * nodeMatrix.Inverse4x4());
+
+	dVector scale;
+	dMatrix matrix;
+	dMatrix stretchAxis;
+	scaleTransform2.PolarDecomposition (matrix, scale, stretchAxis);
+	dMatrix scaleTransform (dMatrix (GetIdentityMatrix(), scale, stretchAxis));
+
+	instance->SetPivotMatrix(matrix);
+
+
+	int* const faceIndexCount = new int [facesCount];
+	int* const materialIndex = new int [facesCount];
+
+	Mtl* const mtl = node->GetMtl();
+	int facesMasked = facesCount;
+	memset (materialIndex, -1, facesCount * sizeof (int));
+
+	if (mtl) {
+		int subMatCount = mtl->NumSubMtls() ? mtl->NumSubMtls() : 1;
+
+		for (int i = 0; i < subMatCount; i ++) {
+			Mtl* const maxMaterial = mtl->NumSubMtls() ? mtl->GetSubMtl(i) : mtl;
+
+			bool materialIsUsed = false;
+			for (int j = 0; j < facesCount; j ++) {
+				MNFace* const maxFace = maxMesh.F(j);
+				if (maxFace->material == i) {
+					materialIsUsed = true;
+					facesMasked --;
+					materialIndex[j] = materialID;
+				}
+			}
+
+			if (materialIsUsed) {
+				dScene::dTreeNode* const matNode = scene.CreateMaterialNode(meshNode, materialID);
+				dMaterialNodeInfo* const material = (dMaterialNodeInfo*) scene.GetInfoFromNode(matNode);
+
+				materialID ++;
+				if (mtl->NumSubMtls()) {
+					//MSTR materialName = maxMaterial->GetSubMtlSlotName(i);
+					MSTR materialName = mtl->GetName();
+					char name[256];
+					sprintf (name, "%s_%d", materialName, i);
+					//material->SetName(materialName);
+					material->SetName(name);
+				} else {
+					MSTR materialName = mtl->GetName();
+					material->SetName(materialName);
+				}
+
+				Color ambient (maxMaterial->GetAmbient());
+				Color difusse (maxMaterial->GetDiffuse());
+				Color specular (maxMaterial->GetSpecular());
+				float shininess (maxMaterial->GetShininess());
+				float shininessStr (maxMaterial->GetShinStr());      
+				float tranparency (maxMaterial->GetXParency());
+
+				material->SetAmbientColor (dVector (ambient.r, ambient.g, ambient.b, 1.0f));
+				material->SetDiffuseColor (dVector (difusse.r, difusse.g, difusse.b, 1.0f));
+				material->SetSpecularColor(dVector (specular.r * shininess, specular.g * shininess, specular.b * shininess, 1.0f));
+				material->SetShininess(shininessStr * 100.0f);
+				material->SetOpacity (1.0f - tranparency);
+
+				Texmap* const tex = maxMaterial->GetSubTexmap(1);
+				if (tex) {
+					Class_ID texId (tex->ClassID());
+					if (texId != Class_ID(BMTEX_CLASS_ID, 0x00)) {
+						_ASSERTE (0);
+						//					continue;
+					}
+					BitmapTex* const bitmapTex = (BitmapTex *)tex;
+					const char* const texPathName = bitmapTex->GetMapName();
+
+					const char* texName = strrchr (texPathName, '\\');
+					if (texName) {
+						texName ++;
+					} else {
+						texName = strrchr (texPathName, '/');
+						if (texName) {
+							texName ++;
+						} else {
+							texName = texPathName;
+						}
+					}
+
+					int crc = dCRC(texName);
+					dTree<dScene::dTreeNode*, int>::dTreeNode* cacheNode = imageCache.Find(crc);
+					if (!cacheNode) {
+						dScene::dTreeNode* textNode = scene.CreateTextureNode(texName);
+						cacheNode = imageCache.Insert(textNode, crc);
+					}
+					dScene::dTreeNode* const textNode = cacheNode->GetInfo();
+					scene.AddReference(matNode, textNode);
+					dTextureNodeInfo* const texture = (dTextureNodeInfo*) scene.GetInfoFromNode(textNode);
+					//texture->SetName("texture");
+					texture->SetName(texName);
+					material->SetDiffuseTextId(texture->GetId());
+					material->SetAmbientTextId(texture->GetId());
+					material->SetSpecularTextId(texture->GetId());
+				}
+			}
+		}
+
+		if (facesMasked) {
+			dScene::dTreeNode* const matNode = scene.CreateMaterialNode(meshNode, materialID);
+			for (int j = 0; j < facesCount; j ++) {
+				if (materialIndex[j] == -1) {
+					materialIndex[j] = materialID;
+				}
+			}
+			materialID ++;
+			dMaterialNodeInfo* const material = (dMaterialNodeInfo*) scene.GetInfoFromNode(matNode);
+			material->SetName("default material");
+		}
+	} else {
+
+		dScene::dTreeNode* const matNode = scene.CreateMaterialNode(meshNode, materialID);
+		for (int j = 0; j < facesCount; j ++) {
+			materialIndex[j] = materialID;
+		}
+		materialID ++;
+		dMaterialNodeInfo* const material = (dMaterialNodeInfo*) scene.GetInfoFromNode(matNode);
+		material->SetName("default material");
+	}
+
+
+	int indexCount = 0;
+	for (int i = 0; i < facesCount; i ++) {
+		MNFace* const face = maxMesh.F(i);
+		faceIndexCount[i] = face->deg;
+		indexCount += face->deg;
+	}
+
+	int* const vertexIndex = new int[vertexCount];
+	dVector* const vertex = new dVector[vertexCount];
+	for (int i = 0; i < vertexCount; i ++) {
+		vertexIndex[i] = i;
+		Point3 p (maxMesh.P(i));
+		vertex[i] = scaleTransform.TransformVector (dVector (p.x, p.y, p.z, 0.0f));
+	}
+	vertexCount = dPackVertexArray (&vertex[0].m_x, 3, sizeof (dVector), vertexCount, vertexIndex);
+
+
+	dVector* UV0 = NULL;
+	MNMapFace* tvFaceArray = NULL;  	 
+
+	int uvCount = 1;
+	if (maxMesh.M(1)) {
+		MNMap* const mapChannel = maxMesh.M(1);
+		uvCount = mapChannel->VNum();
+		if (uvCount) {
+			tvFaceArray = mapChannel->f;
+			UVVert* const tVertsArray = mapChannel->v;
+			UV0 = new dVector[uvCount];
+			for (int i = 0; i < uvCount; i ++) {
+				UVVert& uv = tVertsArray[i];
+				UV0[i] = dVector (uv.x, uv.y, 0.0f, 0.0f);
+			}
+		} else {
+			uvCount = 1;
+			UV0 = new dVector[1];
+			UV0[0] = dVector (0.0f, 0.0f, 0.0f, 0.0f);
+		}
+	}
+
+
+	dVector* const normal = new dVector[indexCount];
+	dVector UV1 (0.0f, 0.0f, 0.0f, 0.0f);
+
+	int* const uv0List = new int [indexCount]; 
+	int* const uv1List = new int [indexCount]; 
+	int* const normalList = new int [indexCount];
+	int* const vertexList = new int [indexCount];
+
+	int index = 0;
+	dMatrix normalMatrix (scaleTransform.Inverse4x4().Transpose() * scaleTransform);
+	scaleTransform.m_posit = dVector (0.0f, 0.0f, 0.0f, 1.0f);
+
+	for (int i = 0; i < facesCount; i ++) {
+		MNFace* const maxFace = maxMesh.F(i);
+		MNMapFace* tvFace = NULL;
+		if (tvFaceArray) {
+			tvFace = &tvFaceArray[i];  	 
+			_ASSERTE (tvFace->deg == maxFace->deg);
+		}
+
+		for (int j = 0; j < maxFace->deg; j ++) {
+
+			vertexList[index] = vertexIndex[maxFace->vtx[j]];
+
+//			dVector n (normalMatrix.RotateVector(CalcVertexNormal (maxMesh, i, j)));
+//			normal[index] = n.Scale (1.0f / dSqrt (n % n));
+//			normalList[index] = index;
+			normal[0] = dVector (0.0f, 0.0f, 0.0f, 0.0f);
+			normalList[index] = 0;
+
+			uv0List[index] = 0;
+			if (tvFaceArray) {
+				uv0List[index] = tvFace->tv[j];
+			}
+
+			uv1List[index] = 0;
+
+			index ++;
+		}
+	}
+
+
+	instance->BuildFromVertexListIndexList(facesCount, faceIndexCount, materialIndex, 
+										   &vertex[0].m_x, sizeof (dVector), vertexList,
+										   &normal[0].m_x, sizeof (dVector), normalList,
+										   &UV0[0].m_x, sizeof (dVector), uv0List,
+										   &UV1.m_x, sizeof (dVector), uv1List);
+
+	instance->SmoothNormals (3.1416f * 45.0f / 180.0f);
+
+	delete[] vertexIndex;
+	delete[] UV0;
+	delete[] normal;
+	delete[] vertex;
+	delete[] uv1List; 
+	delete[] uv0List; 
+	delete[] normalList;
+	delete[] vertexList;
+	delete[] materialIndex;
+	delete[] faceIndexCount;
+	if (needDel) {
+		delete poly;
+	}
+
+	// get the object reference of the node
+	Modifier* modifier = NULL;
+	Object* pObject = node->GetObjectRef();
+	if(pObject) {
+
+		// loop through all derived objects
+		while((pObject->SuperClassID() == GEN_DERIVOB_CLASS_ID))
+		{
+			IDerivedObject* const pDerivedObject = static_cast<IDerivedObject *>(pObject);
+
+			// loop through all modifiers
+			for(int stackId = 0; stackId < pDerivedObject->NumModifiers(); stackId++)
+			{
+				// get the modifier
+				Modifier* const pModifier = pDerivedObject->GetModifier(stackId);
+
+				// check if we found the skin modifier
+				if(pModifier->ClassID() == SKIN_CLASSID) {
+					modifier = pModifier;
+					break;
+				}
+			}
+
+			if (modifier) {
+				break;
+			}
+			// continue with next derived object
+			pObject = pDerivedObject->GetObjRef();
+		}
+	}
+
+	if (modifier) {
+		// create a skin interface
+		ISkin* const pSkin = (ISkin*)modifier->GetInterface(I_SKIN);
+		_ASSERTE (pSkin);
+
+		// create a skin context data interface
+		ISkinContextData* const pSkinContextData = (ISkinContextData *)pSkin->GetContextInterface(node);
+		_ASSERTE (pSkinContextData);
+
+
+		int weightDataCount = 0;
+		dScene::dTreeNode* const skinNode = scene.CreateSkinModifierNode(meshNode);
+		dGeometryNodeSkinModifierInfo::dBoneVertexWeightData* const skindata = new dGeometryNodeSkinModifierInfo::dBoneVertexWeightData[vertexCount * 4];
+
+		dMeshNodeInfo* const info = (dMeshNodeInfo*) scene.GetInfoFromNode (meshNode);
+		NewtonMesh* const mesh = info->GetMesh();
+		int stride = NewtonMeshGetVertexStrideInByte(mesh) / sizeof (dFloat64);
+		int vCount = NewtonMeshGetVertexCount(mesh);
+		const dFloat64* const vertex = NewtonMeshGetVertexArray(mesh);
+
+		int layersCount = 1;
+		for (int i = 0; i < vCount; i ++) {
+			layersCount = max (layersCount, int (vertex[i * stride + 3]) + 1);
+		}
+		int vertexBaseCount = vertexCount / layersCount;
+		_ASSERTE (vertexBaseCount == vertexCount);
+		for (int layer = 0; layer < layersCount; layer ++) {
+			for (int i = 0; i < vertexCount; i ++) {
+				int nodeIDCount = pSkinContextData->GetNumAssignedBones(i);
+				for(int nodeId = 0; nodeId < nodeIDCount; nodeId++) {
+					int boneId = pSkinContextData->GetAssignedBone(i, nodeId);
+					dFloat weight = pSkinContextData->GetBoneWeight(i, nodeId);
+					INode* const maxBone = pSkin->GetBone(boneId);
+					_ASSERTE (nodeMap.Find(maxBone));
+					dScene::dTreeNode* const bone = nodeMap.Find(maxBone)->GetInfo();
+
+					if (dFloat (weight) > 1.0e-6f) {
+						skindata[weightDataCount].m_boneNode = bone;
+						skindata[weightDataCount].m_weight = weight;
+						skindata[weightDataCount].m_vertexIndex = i + layer * vertexBaseCount;
+						weightDataCount ++;
+					}
+				}
+			}
+		}
+
+		dGeometryNodeSkinModifierInfo* const skinInfo = (dGeometryNodeSkinModifierInfo*) scene.GetInfoFromNode(skinNode);
+		skinInfo->SkinMesh(skinNode, &scene, skindata, weightDataCount);
+		delete[] skindata;
+	}
+
+	return meshNode;
+
+}
+
+#else 
+
+
+dVector Export::CalcVertexNormal (Mesh& mesh, int faceNo, int faceIndex) const
+{
+	Point3 normal;
+	dVector vertexNormal (0.0f, 0.0f, 0.0f, 0.0f);
+
+	Face* const face = &mesh.faces[faceNo];
+
+	int vertexIndex = face->v[faceIndex];
+
+	DWORD smGroup = face->getSmGroup();
+	RVertex* const rv	= mesh.getRVertPtr(vertexIndex);
+
+	int numNormals = rv->rFlags & NORCT_MASK;
+	// Is normal specified
+	// SPCIFIED is not currently used, but may be used in future versions.
+	if (rv->rFlags & SPECIFIED_NORMAL) {
+		_ASSERTE (0);
+		normal = rv->rn.getNormal();
+		vertexNormal.m_x = normal.x;
+		vertexNormal.m_y = normal.y;
+		vertexNormal.m_z = normal.z;
+
+	} else if (numNormals && smGroup) {
+		// If normal is not specified it's only available if the face belongs
+		// to a smoothing group
+
+		if (numNormals == 1) {
+			// If there is only one vertex is found in the rn member.
+			normal = rv->rn.getNormal();
+			vertexNormal.m_x = normal.x;
+			vertexNormal.m_y = normal.y;
+			vertexNormal.m_z = normal.z;
+
+		} else {
+			// If two or more vertices are there you need to step through them
+			// and find the vertex with the same smoothing group as the current face.
+			// You will find multiple normals in the ern member.
+			for (int i = 0; i < numNormals; i++) {
+				if (rv->ern[i].getSmGroup() & smGroup) {
+					normal = rv->ern[i].getNormal();
+					vertexNormal.m_x += normal.x;
+					vertexNormal.m_y += normal.y;
+					vertexNormal.m_z += normal.z;
+				}
+			}
+		}
+	} else {
+		// Get the normal from the Face if no smoothing groups are there
+		normal = max5Mesh.getFaceNormal(faceNo);
+		vertexNormal.m_x = normal.x;
+		vertexNormal.m_y = normal.y;
+		vertexNormal.m_z = normal.z;
+	}
+
+	return vertexNormal;
+}
+
+
+
+TriObject* Export::GetTriObject (ObjectState* const os, int& deleteIt) 
+{
+	Object *obj;
+	TriObject *poly;
+
+	poly = NULL;
+	deleteIt = FALSE;
+	obj = os->obj;
+	if (obj->CanConvertToType(Class_ID(POLYOBJ_CLASS_ID, 0))) { 
+		poly = (TriObject *) obj->ConvertToType(0, Class_ID(TRIOBJ_CLASS_ID, 0));
+		// Note that the TriObject should only be deleted
+		// if the pointer to it is not equal to the object
+		// pointer that called ConvertToType()
+		if (obj != poly) {
+			deleteIt = TRUE;
+		}
+	}
+	return poly;
 }
 
 
@@ -832,7 +1282,7 @@ dScene::dTreeNode* Export::LoadTriangleObject(INode* const node, ObjectState* co
 	}
 	return meshNode;
 }
-
+#endif
 
 Export::Export(const char* const pathName, ExpInterface* const expip, Interface* const ip, const Options& options)
 {

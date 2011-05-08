@@ -69,8 +69,12 @@ class Export
 	dScene::dTreeNode* LoadTriangleObject(INode* const node, ObjectState* const os, dScene& scene, NodeMap& nodeMap, ImageCache& imageCache, int& materialID);
 
 	void GetNodeList (Tab<INode *> &nodeTab);
-	TriObject* GetTriObject (ObjectState* const os, int deleteIt);
+
+	TriObject* GetTriObject (ObjectState* const os, int& deleteIt);
 	dVector CalcVertexNormal (Mesh& max5Mesh, int faceNo, int faceIndex) const;
+
+	PolyObject* GetPolyObject (ObjectState* const os, int& deleteIt);
+	dVector CalcVertexNormal (MNMesh& max5Mesh, int faceNo, int faceIndex) const;
 
 	Interface* m_ip;
 	ExpInterface* m_expip;

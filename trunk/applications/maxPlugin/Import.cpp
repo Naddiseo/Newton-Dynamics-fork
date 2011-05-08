@@ -281,8 +281,6 @@ void Import::LoadGeometries (dScene& scene, GeometryCache& meshCache, const Mate
 		if (info->IsType(dGeometryNodeInfo::GetRttiType())) {
 			if (info->GetTypeId() == dMeshNodeInfo::GetRttiType()) {
 
-//				PolyObject* const geometry = (PolyObject*)CreateMNMeshTest();
-
 				// add the vertices
 				PolyObject* const geometry = (PolyObject*) CreateInstance (GEOMOBJECT_CLASS_ID, Class_ID(POLYOBJ_CLASS_ID, 0));
 
@@ -294,7 +292,7 @@ void Import::LoadGeometries (dScene& scene, GeometryCache& meshCache, const Mate
 				NewtonMesh* const mesh = meshInfo->GetMesh();
 
 				//NewtonMeshTriangulate (mesh);
-				NewtonMeshPolygonize (mesh);
+				//NewtonMeshPolygonize (mesh);
 
 				int faceCount = 0;
 				int vertexCount = NewtonMeshGetVertexCount(mesh);
