@@ -292,7 +292,7 @@ void Import::LoadGeometries (dScene& scene, GeometryCache& meshCache, const Mate
 				NewtonMesh* const mesh = meshInfo->GetMesh();
 
 				//NewtonMeshTriangulate (mesh);
-				NewtonMeshPolygonize (mesh);
+				//NewtonMeshPolygonize (mesh);
 
 				int faceCount = 0;
 				int vertexCount = NewtonMeshGetVertexCount(mesh);
