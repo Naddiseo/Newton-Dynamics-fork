@@ -35,6 +35,8 @@ dQuaternion::dQuaternion (const dMatrix &matrix)
 
 	trace = matrix[0][0] + matrix[1][1] + matrix[2][2];
 
+	_ASSERTE (((matrix[0] * matrix[1]) % matrix[2]) > 0.0f);
+
 	if (trace > dFloat(0.0f)) {
 		trace = dSqrt (trace + dFloat(1.0f));
 		m_q0 = dFloat (0.5f) * trace;
