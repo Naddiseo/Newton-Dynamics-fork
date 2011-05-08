@@ -272,9 +272,6 @@ void Import::LoadMaterials (dScene& scene, MaterialCache& materialCache)
 
 #if 1
 
-
-Object *BuildPolyBox (TimeValue t) ;
-
 void Import::LoadGeometries (dScene& scene, GeometryCache& meshCache, const MaterialCache& materialCache)
 {
 	dScene::Iterator iter (scene);
@@ -284,65 +281,105 @@ void Import::LoadGeometries (dScene& scene, GeometryCache& meshCache, const Mate
 		if (info->IsType(dGeometryNodeInfo::GetRttiType())) {
 			if (info->GetTypeId() == dMeshNodeInfo::GetRttiType()) {
 
+//				PolyObject* const geometry = (PolyObject*)CreateMNMeshTest();
+
 				// add the vertices
 				PolyObject* const geometry = (PolyObject*) CreateInstance (GEOMOBJECT_CLASS_ID, Class_ID(POLYOBJ_CLASS_ID, 0));
-//				PolyObject* const geometry = (PolyObject*) BuildPolyBox (TimeValue (0));
 
 				meshCache.AddMesh(geometry, geometryNode);
 
-
 				MNMesh& maxMesh = geometry->GetMesh();
-
-
-//				float points[][3] = {{-20, 0, -20}, {20, 0, -20}, {20, 0, 20}, {-20, 0, 20}};				
-//				// Do this just to make sure the mesh is clean to start with.
-//				maxMesh.Clear();
-//				// add all vertex as before
-//				for (int j = 0; j < 4; j ++) {
-//					Point3 vx (points[j][0], points[j][1], points[j][2]);
-//					maxMesh.NewVert(vx);
-//				}
-//				// rather than create the edges manually, use the mesh to build it
-//				// this basically creates the poly face
-//				//maxMesh.NewQuad(0,1,2,3);
-//				int f[] = {0, 1, 2, 3};
-//				maxMesh.NewFace (0, 4, f, NULL, NULL);
-//				// These are typically called to ensure integrity in the mesh.
-//				maxMesh.InvalidateGeomCache();
-//				maxMesh.InvalidateTopoCache();
-//				// And this builds it based on the geometry setup previously.
-//				maxMesh.FillInMesh();
 
 				dMeshNodeInfo* const meshInfo = (dMeshNodeInfo*) scene.GetInfoFromNode(geometryNode);
 				NewtonMesh* const mesh = meshInfo->GetMesh();
 
 				//NewtonMeshTriangulate (mesh);
+				NewtonMeshPolygonize (mesh);
 
+				int faceCount = 0;
 				int vertexCount = NewtonMeshGetVertexCount(mesh);
-				int pointCount = NewtonMeshGetPointCount(mesh);
+				for (void* face = NewtonMeshGetFirstFace(mesh); face; face = NewtonMeshGetNextFace(mesh, face)) {
+					if (!NewtonMeshIsFaceOpen(mesh, face)) {
+						faceCount ++;
+					}
+				}
+
+				maxMesh.Clear();
+				maxMesh.setNumVerts(vertexCount);
+				maxMesh.setNumFaces(faceCount);
 
 				// add all vertex
 				int vertexStride = NewtonMeshGetVertexStrideInByte(mesh) / sizeof (dFloat64);
 				dFloat64* const vertex = NewtonMeshGetVertexArray (mesh); 
 				for (int j = 0; j < vertexCount; j ++) {
-					Point3 vx (vertex[vertexStride * j + 0], vertex[vertexStride * j + 1], vertex[vertexStride * j + 2]);
-					maxMesh.NewVert(vx);
+					maxMesh.P(j) = Point3 (vertex[vertexStride * j + 0], vertex[vertexStride * j + 1], vertex[vertexStride * j + 2]);
 				}
 
+
 				// count the number of face and make a face map
+				int faceIndex = 0;
 				for (void* face = NewtonMeshGetFirstFace(mesh); face; face = NewtonMeshGetNextFace(mesh, face)) {
 					if (!NewtonMeshIsFaceOpen(mesh, face)) {
 						int faceIndices[256];
+
 						int indexCount = NewtonMeshGetFaceIndexCount (mesh, face);
+						int matId = NewtonMeshGetFaceMaterial (mesh, face);
+
+						MaterialProxi material;
+						material.m_mtl = 0;
+						material.m_matID = 0;
+						MaterialCache::dTreeNode* const materialNode = materialCache.Find(matId);
+						if (materialNode) {
+							material = materialNode->GetInfo();
+						}
+
 						NewtonMeshGetFaceIndices (mesh, face, faceIndices);
-						maxMesh.NewFace (0, indexCount, faceIndices, NULL, NULL);
+						MNFace* const face = maxMesh.F(faceIndex);
+						face->MakePoly(indexCount, faceIndices, NULL, NULL);
+						face->material = material.m_matID;
+
+						faceIndex ++;
+					}
+				}
+
+
+
+				int pointCount = NewtonMeshGetPointCount(mesh);
+				int texChannels = 2;
+				maxMesh.SetMapNum (texChannels);
+				maxMesh.M(texChannels - 1)->ClearFlag (MN_DEAD);
+				maxMesh.M(texChannels - 1)->setNumFaces (faceCount);
+				maxMesh.M(texChannels - 1)->setNumVerts (pointCount);
+
+				UVVert* const tv = maxMesh.M(texChannels - 1)->v;
+				MNMapFace* const tf = maxMesh.M(texChannels - 1)->f;
+
+
+				// add uvs
+				dFloat64* const uv0 = NewtonMeshGetUV0Array(mesh); 
+				int pointStride = NewtonMeshGetPointStrideInByte(mesh) / sizeof (dFloat64);
+				for (int j = 0; j < pointCount; j ++) {
+					tv[j] = Point3 (uv0[pointStride * j + 0], uv0[pointStride * j + 1], 0.0);
+				}
+
+				faceIndex = 0;
+				for (void* face = NewtonMeshGetFirstFace(mesh); face; face = NewtonMeshGetNextFace(mesh, face)) {
+					if (!NewtonMeshIsFaceOpen(mesh, face)) {
+						int faceIndices[256];
+
+						int indexCount = NewtonMeshGetFaceIndexCount (mesh, face);
+
+						NewtonMeshGetFacePointIndices (mesh, face, faceIndices);
+						MNMapFace* const textFace = &tf[faceIndex];
+						textFace->MakePoly (indexCount, faceIndices);
+						faceIndex ++;
 					}
 				}
 
 				maxMesh.InvalidateGeomCache();
 				maxMesh.InvalidateTopoCache();
-				// And this builds it based on the geometry setup previously.
 				maxMesh.FillInMesh();
+
 
 			} else {
 				_ASSERTE (0);
@@ -837,7 +874,7 @@ Object *BuildPolyBox (TimeValue t)
 	float w = 40; 
 	float h = 40;
 
-	int genUVs = 0;
+	int genUVs = 1;
 	int bias = 0;
 
 	// Start the validity interval at forever and widdle it down.
@@ -890,12 +927,13 @@ Object *BuildPolyBox (TimeValue t)
 	mm.InvalidateTopoCache();
 
 	// Do mapping verts first, since they're easy.
-//	int uvStart[6];
-//	int ix, iy, iz;
+	
+
 	int nv;
 	MNMapFace *tf = NULL;
 	if (genUVs) {
-/*
+		int uvStart[6];
+		int ix, iy, iz;
 		int ls = lsegs+1;
 		int ws = wsegs+1;
 		int hs = hsegs+1;
@@ -911,7 +949,8 @@ Object *BuildPolyBox (TimeValue t)
 		int ybase = ls*hs;
 		int zbase = ls*hs + hs*ws;
 
-		BOOL usePhysUVs = GetUsePhysicalScaleUVs();
+		//BOOL usePhysUVs = GetUsePhysicalScaleUVs();
+		BOOL usePhysUVs = FALSE;
 		float maxW = usePhysUVs ? w : 1.0f;
 		float maxL = usePhysUVs ? l : 1.0f;
 		float maxH = usePhysUVs ? h : 1.0f;
@@ -999,7 +1038,6 @@ Object *BuildPolyBox (TimeValue t)
 		}
 
 		assert(nv==ntverts);
-*/
 	}
 
 	nv = 0;
