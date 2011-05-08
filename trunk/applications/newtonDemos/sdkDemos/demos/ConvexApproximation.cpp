@@ -91,8 +91,8 @@ dMeshNodeInfo* const modelMesh = (dMeshNodeInfo*)xxxx.GetInfoFromNode(meshNode);
 //modelMesh->ReplaceMesh (mesh);
 //modelMesh->ReplaceMesh (brush);
 //modelMesh->ReplaceMesh (mesh1);
-//modelMesh->ReplaceMesh (mesh2);
-modelMesh->ReplaceMesh (mesh3);
+modelMesh->ReplaceMesh (mesh2);
+//modelMesh->ReplaceMesh (mesh3);
 //modelMesh->ReplaceMesh (tetrahedras);
 
 xxxx.Serialize("../../../media/xxx.ngd");
