@@ -58,7 +58,6 @@
 extern "C" {
 #endif
 
-
 	#define NEWTON_PROFILER_WORLD_UPDATE					0
 
 	#define NEWTON_PROFILER_COLLISION_UPDATE				1
@@ -98,12 +97,20 @@ extern "C" {
 	#define SERIALIZE_ID_SCENE					13
 	#define SERIALIZE_ID_COMPOUND_BREAKABLE		14
 
-	struct NewtonCollisionInfoRecord
-	{
-		dFloat m_offsetMatrix[4][4];
-		int m_collisionType;				// tag id to identify the collision primitive
-		int m_referenceCount;				// the current reference count for this collision		
-		int m_collisionUserID;				
+	typedef struct NewtonBoxParam NewtonBoxParam;
+	typedef struct NewtonConeParam NewtonConeParam;
+	typedef struct NewtonSphereParam NewtonSphereParam;
+	typedef struct NewtonCapsuleParam NewtonCapsuleParam;
+	typedef struct NewtonCylinderParam NewtonCylinderParam;
+	typedef struct NewtonConvexHullParam NewtonConvexHullParam;
+	typedef struct NewtonCollisionTreeParam NewtonCollisionTreeParam;
+	typedef struct NewtonSceneCollisionParam NewtonSceneCollisionParam;
+	typedef struct NewtonChamferCylinderParam NewtonChamferCylinderParam;
+	typedef struct NewtonCompoundCollisionParam NewtonCompoundCollisionParam;
+	typedef struct NewtonConvexHullModifierParam NewtonConvexHullModifierParam;
+	typedef struct NewtonHeightFieldCollisionParam NewtonHeightFieldCollisionParam;
+
+	typedef struct NewtonCollisionInfoRecord NewtonCollisionInfoRecord;
 
 		struct NewtonBoxParam
 		{
@@ -187,6 +194,13 @@ extern "C" {
 			int m_childrenProxyCount;
 		};
 
+	struct NewtonCollisionInfoRecord
+	{
+		dFloat m_offsetMatrix[4][4];
+		int m_collisionType;				// tag id to identify the collision primitive
+		int m_referenceCount;				// the current reference count for this collision		
+		int m_collisionUserID;				
+		
 		union {
 			NewtonBoxParam m_box;									
 			NewtonConeParam m_cone;
@@ -203,6 +217,14 @@ extern "C" {
 			dFloat m_paramArray[64];		    // user define collision can use this to store information
 		};
 	};
+
+
+	typedef struct NewtonJointRecord NewtonJointRecord;
+	typedef struct NewtonHingeSliderUpdateDesc NewtonHingeSliderUpdateDesc;
+	typedef struct NewtonUserMeshCollisionRayHitDesc NewtonUserMeshCollisionRayHitDesc;
+	typedef struct NewtonUserMeshCollisionCollideDesc NewtonUserMeshCollisionCollideDesc;
+	typedef struct NewtonWorldConvexCastReturnInfo NewtonWorldConvexCastReturnInfo;
+
 
 	struct NewtonJointRecord
 	{
