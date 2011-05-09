@@ -2865,17 +2865,22 @@ NewtonCollision* NewtonCreateCompoundCollision(const NewtonWorld* const newtonWo
 // Neglecting to release references to collision primitives is a common cause of memory leaks.
 //
 // See also: NewtonCreateCompoundCollision
-/*
-NewtonCollision* NewtonCreateCompoundCollisionFromMesh(const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, int maxSubShapesCount, int shapeID, int subShapeID)
+NEWTON_API NewtonCollision* NewtonCreateCompoundAproximation (const NewtonWorld* const newtonWorld, 
+															  const dFloat* const points, int pointCount, int pointStride, 
+															  const int* const triangleIndex, int indexCount, 
+															  dFloat concavity, int shapeID, int subShapeID)
 {
-	TRACE_FUNTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	dgMeshEffect* effectMesh = (dgMeshEffect*) mesh;
-	dgCollision* collision = effectMesh->CreateConvexApproximationCollision(world, maxSubShapesCount, shapeID, subShapeID);
+//	TRACE_FUNTION(__FUNCTION__);
+//	Newton* const world = (Newton *)newtonWorld;
+//	dgMeshEffect* effectMesh = (dgMeshEffect*) mesh;
+//	dgCollision* collision = effectMesh->CreateConvexApproximationCollision(world, maxSubShapesCount, shapeID, subShapeID);
+//	return (NewtonCollision*) collision;
 
-	return (NewtonCollision*) collision;
 
 
+	return NULL;
+
+/*
 	NewtonMesh* convexAproximation = NewtonMeshConvexApproximation (mesh, concavity);
 	dgList<NewtonCollision*> list(world->dgWorld::GetAllocator());
 
@@ -2905,8 +2910,9 @@ NewtonCollision* NewtonCreateCompoundCollisionFromMesh(const NewtonWorld* const 
 
 	NewtonMeshDestroy(convexAproximation);
 	return collision;
-}
 */
+}
+
 
 NEWTON_API NewtonCollision* NewtonCreateCompoundBreakable (const NewtonWorld* const newtonWorld, int meshCount, 
 														   const NewtonMesh** const solids, const int* const shapeIDArray, 
@@ -8163,6 +8169,14 @@ void NewtonMeshClip (const NewtonMesh* const mesh, const NewtonMesh* const clipp
 	dgMatrix& matrix = *((dgMatrix*)clipperMatrix);
 	
 	((dgMeshEffect*) mesh)->ClipMesh (matrix, (dgMeshEffect*)clipper, (dgMeshEffect**) topMesh, (dgMeshEffect**) bottomMesh);
+}
+
+
+NewtonMesh* NewtonMeshApproximateConvexDecomposition (const NewtonMesh* const mesh)
+{
+	TRACE_FUNTION(__FUNCTION__);
+
+	return (NewtonMesh*) ((dgMeshEffect*) mesh)->CreateConvexApproximation (10);
 }
 
 

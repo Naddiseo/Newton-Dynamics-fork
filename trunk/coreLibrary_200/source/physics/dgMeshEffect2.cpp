@@ -26,6 +26,14 @@
 #include "dgCollisionConvexHull.h"
 #include "dgMeshEffectSolidTree.h"
 
+
+#include "hacdCircularList.h"
+#include "hacdVector.h"
+#include "hacdICHull.h"
+#include "hacdGraph.h"
+#include "hacdHACD.h"
+
+
 // create a convex hull
 dgMeshEffect::dgMeshEffect (dgMemoryAllocator* const allocator, const dgFloat64* const vertexCloud, dgInt32 count, dgInt32 strideInByte, dgFloat64 distTol)
 	:dgPolyhedra(allocator)
@@ -1889,142 +1897,6 @@ dgMeshEffect* dgMeshEffect::CreateDelanayTretrahedralization (dgInt32 interionMa
 	return NULL;
 }
 
-#if 0
-//dgCollision* dgMeshEffect::CreateConvexApproximationCollision(dgWorld* const world, dgInt32 maxCount, dgInt32 shapeId, dgInt32 childrenID) const
-dgMeshEffect* dgMeshEffect::CreateConvexApproximation(dgInt32 maxCount) const
-{
-/*
-	dgMeshEffect tmpMesh (*this);
-
-_ASSERTE (!tmpMesh.HasOpenEdges ());
-tmpMesh.ConvertToPolygons();
-_ASSERTE (!tmpMesh.HasOpenEdges ());
-//tmpMesh.Triangulate();
-	dgStack<dgInt32> vertexMap(tmpMesh.GetVertexCount());
-	tmpMesh.RemoveUnusedVertices(&vertexMap[0]);
-
-Iterator iter(tmpMesh);
-for (iter.Begin(); iter; iter ++)
-{
-//  dgEdge* const xxxx = &iter.GetNode()->GetInfo();
-//  _ASSERTE (xxxx->m_incidentFace > 0);
-}
-
-
-	dgCollision* compound = NULL;
-	Tetrahedralization convexHull (tmpMesh);
-	if (convexHull.GetCount()) {
-
-		dgInt32 count = 0;
-		dgStack<dgCollision*> collisionArray(convexHull.GetCount());
-
-		for (dgConvexHull4d::dgListNode* node = convexHull.GetFirst(); node; node = node->GetNext()) {
-			dgVector vertexPool[4];
-			dgConvexHull4dTetraherum* const tetra = &node->GetInfo();
-			const dgConvexHull4dTetraherum::dgTetrahedrumFace& face0 = tetra->m_faces[0];
-
-			const dgBigVector& p0 (convexHull.GetVertex(face0.m_index[0]));
-			const dgBigVector& p1 (convexHull.GetVertex(face0.m_index[1]));
-			const dgBigVector& p2 (convexHull.GetVertex(face0.m_index[2]));
-			const dgBigVector& p3 (convexHull.GetVertex(face0.m_otherVertex));
-
-			vertexPool[0] = dgVector (dgFloat32 (p0.m_x), dgFloat32 (p0.m_y), dgFloat32 (p0.m_z), dgFloat32 (0.0f));
-			vertexPool[1] = dgVector (dgFloat32 (p1.m_x), dgFloat32 (p1.m_y), dgFloat32 (p1.m_z), dgFloat32 (0.0f));
-			vertexPool[2] = dgVector (dgFloat32 (p2.m_x), dgFloat32 (p2.m_y), dgFloat32 (p2.m_z), dgFloat32 (0.0f));
-			vertexPool[3] = dgVector (dgFloat32 (p3.m_x), dgFloat32 (p3.m_y), dgFloat32 (p3.m_z), dgFloat32 (0.0f));
-
-			dgVector origin (vertexPool[0] + vertexPool[1] + vertexPool[2] + vertexPool[3]);
-			origin = origin.Scale (0.25f);
-			dgFloat32 xxx = 0.9f;
-			vertexPool[0] = (vertexPool[0] - origin).Scale (xxx) + origin;
-			vertexPool[1] = (vertexPool[1] - origin).Scale (xxx) + origin;
-			vertexPool[2] = (vertexPool[2] - origin).Scale (xxx) + origin;
-			vertexPool[3] = (vertexPool[3] - origin).Scale (xxx) + origin;
-
-			dgCollision* collision = world->CreateConvexHull(4, &vertexPool[0].m_x, sizeof (dgVector), dgFloat32 (0.0f), childrenID);
-			if (collision) {
-				collisionArray[count] = collision;
-				count ++;
-			}
-		}
-
-		compound = world->CreateCollisionCompound(count, &collisionArray[0]);
-		for (dgInt32 i = 0; i < count; i ++) {
-			world->ReleaseCollision(collisionArray[i]);
-		}
-	}
-
-	return compound;
-*/
-
-
-#if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
-	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);
-	dgControlFP (_PC_53, _MCW_PC);
-#endif
-
-
-	dgDelaunayTetrahedralization delaunayTetrahedras (GetAllocator(), &m_points[0].m_x, m_pointCount, sizeof (dgBigVector), 0.0f);
-	delaunayTetrahedras.RemoveUpperHull ();
-
-	dgMeshEffect* const voronoiPartion = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
-	voronoiPartion->BeginPolygon();
-	dgFloat64 layer = dgFloat64 (0.0f);
-
-//voronoiPartion->MergeFaces(this);
-//layer += dgFloat64 (1.0f);
-
-static int xxxx;
-
-	for (dgConvexHull4d::dgListNode* node = delaunayTetrahedras.GetFirst(); node; node = node->GetNext()) {
-
-		dgConvexHull4dTetraherum* const tetra = &node->GetInfo();
-		const dgConvexHull4dTetraherum::dgTetrahedrumFace& face0 = tetra->m_faces[0];
-
-		dgBigVector pointArray[4];
-		pointArray[0] = delaunayTetrahedras.GetVertex(face0.m_index[0]);
-		pointArray[1] = delaunayTetrahedras.GetVertex(face0.m_index[1]);
-		pointArray[2] = delaunayTetrahedras.GetVertex(face0.m_index[2]);
-		pointArray[3] = delaunayTetrahedras.GetVertex(face0.m_otherVertex);
-
-		dgMeshEffect* const convexMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), &pointArray[0].m_x, 4, sizeof (dgBigVector), dgFloat64 (1.0e-3f));
-
-
-#if 1
-dgBigVector xxx (0, 0, 0, 0);
-for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
-	xxx += convexMesh->m_points[i];
-}
-xxx = xxx.Scale (0.2f / convexMesh->m_pointCount);
-for (dgInt32 i = 0; i < convexMesh->m_pointCount; i ++) {
-	convexMesh->m_points[i] += xxx;
-}
-for (dgInt32 i = 0; i < convexMesh->m_atribCount; i ++) {
-	convexMesh->m_attib[i].m_vertex += xxx;
-}
-#endif
-
-
-		voronoiPartion->MergeFaces(convexMesh);
-		layer += dgFloat64 (1.0f);
-
-		convexMesh->Release();
-	}
-
-	voronoiPartion->EndPolygon(dgFloat64 (1.0e-5f));
-	
-#if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
-	dgControlFP (controlWorld, _MCW_PC);
-#endif
-
-	return voronoiPartion;
-}
-
-#endif
-
-
-
-
 
 dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interiorMaterial, dgMatrix& textureProjectionMatrix) const
 {
@@ -2107,8 +1979,8 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 	}
 
 
-	dgMeshEffect* const voronoiPartion = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
-	voronoiPartion->BeginPolygon();
+	dgMeshEffect* const voronoiPartition = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+	voronoiPartition->BeginPolygon();
 	dgFloat64 layer = dgFloat64 (0.0f);
 
 	dgTree<dgList<dgInt32>, dgInt32>::Iterator iter (delanayNodes);
@@ -2156,23 +2028,23 @@ dgMeshEffect* dgMeshEffect::CreateVoronoiPartition (dgInt32 pointsCount, dgInt32
 				convexMesh->m_attib[i].m_vertex.m_w = layer;
 			}
 
-			voronoiPartion->MergeFaces(convexMesh);
+			voronoiPartition->MergeFaces(convexMesh);
 			layer += dgFloat64 (1.0f);
 
 			convexMesh->Release();
 		}
 	}
 
-	voronoiPartion->EndPolygon(dgFloat64 (1.0e-5f));
+	voronoiPartition->EndPolygon(dgFloat64 (1.0e-5f));
 
-	voronoiPartion->ConvertToPolygons();
+	voronoiPartition->ConvertToPolygons();
 
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgControlFP (controlWorld, _MCW_PC);
 #endif
 
 	delete tree;
-	return voronoiPartion;
+	return voronoiPartition;
 }
 
 
@@ -2247,4 +2119,293 @@ intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
 #endif
 
 	return intersection;
+}
+
+
+
+
+
+
+
+
+
+
+// 
+
+static void CallBack(const char * msg, double progress, double concavity, size_t nVertices)
+{
+	std::cout << msg;
+}
+
+#include <iostream>
+#include <fstream>
+#include <string>
+
+
+
+
+static bool SaveVRML2(std::ofstream &fout, const HACD::Vec3<double>* const points, int pointCount,
+										   const HACD::Vec3<long>* const triangles, int triangleCount,
+										   const HACD::Material & material, const HACD::Vec3<double>* const colors)
+{
+	if (fout.is_open()) 
+	{
+		size_t nV = pointCount;
+		size_t nT = triangleCount;            
+		fout <<"#VRML V2.0 utf8" << std::endl;	    	
+		fout <<"" << std::endl;
+		fout <<"# Vertices: " << nV << std::endl;		
+		fout <<"# Triangles: " << nT << std::endl;		
+		fout <<"" << std::endl;
+		fout <<"Group {" << std::endl;
+		fout <<"	children [" << std::endl;
+		fout <<"		Shape {" << std::endl;
+		fout <<"			appearance Appearance {" << std::endl;
+		fout <<"				material Material {" << std::endl;
+		fout <<"					diffuseColor "      << material.m_diffuseColor.X()      << " " 
+			<< material.m_diffuseColor.Y()      << " "
+			<< material.m_diffuseColor.Z()      << std::endl;  
+		fout <<"					ambientIntensity "  << material.m_ambientIntensity      << std::endl;
+		fout <<"					specularColor "     << material.m_specularColor.X()     << " " 
+			<< material.m_specularColor.Y()     << " "
+			<< material.m_specularColor.Z()     << std::endl; 
+		fout <<"					emissiveColor "     << material.m_emissiveColor.X()     << " " 
+			<< material.m_emissiveColor.Y()     << " "
+			<< material.m_emissiveColor.Z()     << std::endl; 
+		fout <<"					shininess "         << material.m_shininess             << std::endl;
+		fout <<"					transparency "      << material.m_transparency          << std::endl;
+		fout <<"				}" << std::endl;
+		fout <<"			}" << std::endl;
+		fout <<"			geometry IndexedFaceSet {" << std::endl;
+		fout <<"				ccw TRUE" << std::endl;
+		fout <<"				solid TRUE" << std::endl;
+		fout <<"				convex TRUE" << std::endl;
+		if (colors && nT>0)
+		{
+			fout <<"				colorPerVertex FALSE" << std::endl;
+			fout <<"				color Color {" << std::endl;
+			fout <<"					color [" << std::endl;
+			for(size_t c = 0; c < nT; c++)
+			{
+				fout <<"						" << colors[c].X() << " " 
+					<< colors[c].Y() << " " 
+					<< colors[c].Z() << "," << std::endl;
+			}
+			fout <<"					]" << std::endl;
+			fout <<"				}" << std::endl;
+		}
+		if (nV > 0) 
+		{
+			fout <<"				coord DEF co Coordinate {" << std::endl;
+			fout <<"					point [" << std::endl;
+			for(size_t v = 0; v < nV; v++)
+			{
+				fout <<"						" << points[v].X() << " " 
+					<< points[v].Y() << " " 
+					<< points[v].Z() << "," << std::endl;
+			}
+			fout <<"					]" << std::endl;
+			fout <<"				}" << std::endl;
+		}
+		if (nT > 0) 
+		{
+			fout <<"				coordIndex [ " << std::endl;
+			for(size_t f = 0; f < nT; f++)
+			{
+				fout <<"						" << triangles[f].X() << ", " 
+					<< triangles[f].Y() << ", "                                                  
+					<< triangles[f].Z() << ", -1," << std::endl;
+			}
+			fout <<"				]" << std::endl;
+		}
+		fout <<"			}" << std::endl;
+		fout <<"		}" << std::endl;
+		fout <<"	]" << std::endl;
+		fout <<"}" << std::endl;	
+		return true;
+	}
+	return false;
+}
+
+static bool SaveVRML2(const std::string & fileName, HACD::Vec3<double>* const points, int pointCount, 
+												    HACD::Vec3<long>* const triangles, int triangleCount, 
+													const HACD::Vec3<double>* const colors)
+{
+	std::cout << "Saving " <<  fileName << std::endl;
+	std::ofstream fout(fileName.c_str());
+	if (fout.is_open()) 
+	{
+		const HACD::Material material;
+
+		if (SaveVRML2(fout, points, pointCount, triangles, triangleCount, material, colors))
+		{
+			fout.close();
+			return true;
+		}
+		return false;
+	}
+	return false;
+}
+
+
+
+
+
+static void SaveWRL (const std::string & fileName, dgMeshEffect* const mesh)
+{
+
+	dgInt32 faceCount = mesh->GetTotalFaceCount();
+	dgStack< HACD::Vec3<double> > points (mesh->GetVertexCount());
+	dgStack<  HACD::Vec3<long> > triangles (faceCount);
+	dgStack< HACD::Vec3<double> > colors (faceCount);
+
+	dgBigVector* const vertex = (dgBigVector*) mesh->GetVertexPool();
+	for (dgInt32 i = 0; i < mesh->GetVertexCount(); i ++) {
+		points[i].X() = vertex[i].m_x;
+		points[i].Y() = vertex[i].m_y;
+		points[i].Z() = vertex[i].m_z;
+	}
+
+	dgInt32 triangleCount = 0;
+	dgInt32 mark = mesh->IncLRU();
+	dgPolyhedra::Iterator iter (*mesh);
+	for (iter.Begin(); iter; iter ++) {
+		dgEdge* const face = &(*iter);
+		if ((face->m_mark != mark) && (face->m_incidentFace > 0)) {
+			_ASSERTE (face->m_next->m_next->m_next == face);
+			triangles[triangleCount].X() = face->m_incidentVertex;
+			triangles[triangleCount].Y() = face->m_next->m_incidentVertex;
+			triangles[triangleCount].Z() = face->m_prev->m_incidentVertex;
+
+			colors[triangleCount].X() = 1;
+			colors[triangleCount].Y() = 1;
+			colors[triangleCount].Z() = 1;
+
+			triangleCount ++;
+			_ASSERTE (triangleCount  <= faceCount);
+			face->m_mark = mark;
+			face->m_next->m_mark = mark;
+			face->m_prev->m_mark = mark;
+		}
+	}
+	SaveVRML2(fileName, &points[0], mesh->GetVertexCount(), &triangles[0], triangleCount, &colors[0]);
+
+}
+
+
+
+
+
+
+
+dgMeshEffect* dgMeshEffect::CreateConvexApproximation (dgInt32 maxCount) const
+{
+	dgMeshEffect triangleMesh (*this);
+	triangleMesh.Triangulate();
+
+	dgInt32 faceCount = triangleMesh.GetTotalFaceCount();
+	dgStack< HACD::Vec3<double> > points (triangleMesh.m_pointCount);
+	dgStack<  HACD::Vec3<long> > triangles (faceCount);
+
+	for (dgInt32 i = 0; i < triangleMesh.m_pointCount; i ++) {
+		points[i].X() = triangleMesh.m_points[i].m_x;
+		points[i].Y() = triangleMesh.m_points[i].m_y;
+		points[i].Z() = triangleMesh.m_points[i].m_z;
+	}
+
+	dgInt32 triangleCount = 0;
+	dgInt32 mark = triangleMesh.IncLRU();
+	dgPolyhedra::Iterator iter (triangleMesh);
+	for (iter.Begin(); iter; iter ++) {
+		dgEdge* const face = &(*iter);
+		if ((face->m_mark != mark) && (face->m_incidentFace > 0)) {
+			_ASSERTE (face->m_next->m_next->m_next == face);
+			triangles[triangleCount].X() = face->m_incidentVertex;
+			triangles[triangleCount].Y() = face->m_next->m_incidentVertex;
+			triangles[triangleCount].Z() = face->m_prev->m_incidentVertex;
+
+			triangleCount ++;
+			_ASSERTE (triangleCount  <= faceCount);
+			face->m_mark = mark;
+			face->m_next->m_mark = mark;
+			face->m_prev->m_mark = mark;
+		}
+	}
+
+
+// save the input mesk		
+SaveWRL("../../../media/input.wrl", &triangleMesh);
+
+
+
+	dgInt32 nClusters = 10;
+	dgInt32 maxVertcesPerConvex = 200;
+	dgFloat64 concavity = 100;
+	bool addExtraDistPoints = false;
+
+	HACD::HACD myHACD;
+	myHACD.SetPoints(&points[0]);
+	myHACD.SetNPoints(triangleMesh.m_pointCount);
+	myHACD.SetTriangles(&triangles[0]);
+	myHACD.SetNTriangles(triangleCount);
+	myHACD.SetCompacityWeight(0.1);
+	myHACD.SetVolumeWeight(0.1);	
+
+	myHACD.SetNClusters(nClusters);                     // minimum number of clusters
+	myHACD.SetNVerticesPerCH(maxVertcesPerConvex);      // max of 100 vertices per convex-hull
+	myHACD.SetConcavity(concavity);                     // maximum concavity
+	myHACD.SetCallBack(&CallBack);
+	myHACD.SetAddExtraDistPoints(addExtraDistPoints);                 
+
+
+	// connect CCs, do not generate CHs with a full number of vertices (i.e. max of 100 vertices per CH)
+	myHACD.Compute(false, false);                  
+
+
+	dgMeshEffect* const convexPartition = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+	convexPartition->BeginPolygon();
+
+
+	// recreate the mesh of convex pieces
+
+
+	// for now just add the cluster to see see what is wrong
+	nClusters = myHACD.GetNClusters();
+	dgVertexAtribute triangle[3];
+	memset (triangle, 0, sizeof (triangle));
+	for(dgInt32 i = 0; i < nClusters; i ++) {
+		myHACD.GetCH(i, &points[0], &triangles[0]);
+
+//		dgInt32 nPoints = myHACD.GetNPointsCH(i);
+		dgInt32 nTriangles = myHACD.GetNTrianglesCH(i);
+		
+		for (dgInt32 j = 0; j < nTriangles; j ++) {
+			dgInt32 index = triangles[j].X();
+			triangle[0].m_vertex.m_x = points[index].X();
+			triangle[0].m_vertex.m_y = points[index].Y();
+			triangle[0].m_vertex.m_z = points[index].Z();
+			triangle[0].m_vertex.m_w = i;
+
+			index = triangles[j].Y();
+			triangle[1].m_vertex.m_x = points[index].X();
+			triangle[1].m_vertex.m_y = points[index].Y();
+			triangle[1].m_vertex.m_z = points[index].Z();
+			triangle[1].m_vertex.m_w = i;
+
+			index = triangles[j].Z();
+			triangle[2].m_vertex.m_x = points[index].X();
+			triangle[2].m_vertex.m_y = points[index].Y();
+			triangle[2].m_vertex.m_z = points[index].Z();
+			triangle[2].m_vertex.m_w = i;
+
+			convexPartition->AddPolygon(3, &triangle[0].m_vertex.m_x, sizeof (dgVertexAtribute), 0);
+		}
+	}
+	convexPartition->EndPolygon(dgFloat64 (1.0e-5f));
+
+	
+SaveWRL("../../../media/output.wrl", convexPartition);
+
+
+	return convexPartition;
 }

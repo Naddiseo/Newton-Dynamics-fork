@@ -49,6 +49,7 @@
 	#pragma warning (disable: 4061) //enumerator 'm_convexConvexIntance' in switch of enum 'dgCollisionID' is not explicitly handled by a case label
 	#pragma warning (disable: 4191) //'type cast' : unsafe conversion from 'NewtonWorldRayFilterCallback' to 'OnRayCastAction'
 	#pragma warning (disable: 4711) //function 'float const & __thiscall dgTemplateVector<float>::operator[](int)const ' selected for automatic inline expansion
+	#pragma warning (disable: 4530) //C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
 
 	#include <io.h> 
 	#include <direct.h> 
