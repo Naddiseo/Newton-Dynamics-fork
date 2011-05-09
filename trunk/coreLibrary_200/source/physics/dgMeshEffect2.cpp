@@ -2325,7 +2325,7 @@ dgMeshEffect* dgMeshEffect::CreateConvexApproximation (dgInt32 maxCount) const
 			triangles[triangleCount].Z() = face->m_prev->m_incidentVertex;
 
 			triangleCount ++;
-			_ASSERTE (triangleCount  <= faceCount);
+			_ASSERTE (triangleCount <= faceCount);
 			face->m_mark = mark;
 			face->m_next->m_mark = mark;
 			face->m_prev->m_mark = mark;
@@ -2338,9 +2338,9 @@ SaveWRL("../../../media/input.wrl", &triangleMesh);
 
 
 
-	dgInt32 nClusters = 10;
+	dgInt32 nClusters = 1;
 	dgInt32 maxVertcesPerConvex = 200;
-	dgFloat64 concavity = 100;
+	dgFloat64 concavity = 0.1;
 	bool addExtraDistPoints = false;
 
 	HACD::HACD myHACD;
@@ -2374,9 +2374,10 @@ SaveWRL("../../../media/input.wrl", &triangleMesh);
 	dgVertexAtribute triangle[3];
 	memset (triangle, 0, sizeof (triangle));
 	for(dgInt32 i = 0; i < nClusters; i ++) {
+//	for(dgInt32 i = 0; i < 1; i ++) {
 		myHACD.GetCH(i, &points[0], &triangles[0]);
 
-//		dgInt32 nPoints = myHACD.GetNPointsCH(i);
+		dgInt32 nPoints = myHACD.GetNPointsCH(i);
 		dgInt32 nTriangles = myHACD.GetNTrianglesCH(i);
 		
 		for (dgInt32 j = 0; j < nTriangles; j ++) {

@@ -550,12 +550,105 @@ namespace HACD
 			}
 		}
 
+        //CleanClusters(fullCH);
         if (m_callBack)
         {
 			sprintf(msg, "# clusters =  %lu \t C = %f\n", m_nClusters, globalConcavity);
 			(*m_callBack)(msg, progress, globalConcavity,  m_graph.GetNVertices());
         }
         return true;
+    }
+    void HACD::CleanClusters(bool fullCH)
+    {
+        if (m_nClusters < 1)
+        {
+            return;
+        }
+        std::vector<long>::const_iterator it;
+        long * partition = new long [m_nTriangles];
+        memset(partition, sizeof(long) * m_nTriangles, 0); 
+        long v;
+        long i, j, k;
+        m_nClusters = 0;
+        for (size_t p = 0; p != m_cVertices.size(); ++p) 
+		{
+            bool empty = true;
+            v = m_cVertices[0];
+            m_graph.m_vertices[v].m_ancestors.push_back(v);
+            for (it =  m_graph.m_vertices[v].m_ancestors.begin();
+                 it != m_graph.m_vertices[v].m_ancestors.end(); ++it) 
+            {
+                if (partition[*it] == 0)
+                {
+                    partition[*it] = p+1;
+                    empty = false;
+                }
+            }
+            
+            for (size_t p1 = p+1; p1 != m_cVertices.size(); ++p1) 
+            {
+
+                if (1/* intersection between CH(p) and CH(p1)*/)
+                {
+                    v = m_cVertices[p1];
+                    m_graph.m_vertices[v].m_ancestors.push_back(v);
+                    for (it =  m_graph.m_vertices[v].m_ancestors.begin();
+                         it != m_graph.m_vertices[v].m_ancestors.end(); ++it) 
+                    {
+                        if (partition[*it] == 0)
+                        {
+                            i = m_triangles[*it].X();
+                            j = m_triangles[*it].Y();
+                            k = m_triangles[*it].Z();
+                            if (m_convexHulls[p].IsInside(m_points[i]) &&
+                                m_convexHulls[p].IsInside(m_points[j]) &&
+                                m_convexHulls[p].IsInside(m_points[k])   ) //if triangle *it inside CH(p) add it to CH(p)
+                            {
+                                partition[*it] = p+1;
+                                empty = false;
+                            }
+                        }
+                    }
+                }
+            }
+            if (!empty)
+            {
+                m_nClusters++;
+            }
+        }
+        delete [] m_convexHulls;
+        m_graph.Clear();
+        std::set<long> * c2v = new std::set<long>[m_nClusters];
+        for(size_t t = 0; t < m_nTriangles; ++t)
+        {
+            i = m_triangles[*it].X();
+            j = m_triangles[*it].Y();
+            k = m_triangles[*it].Z();
+            c2v[partition[t]-1].insert(i);
+            c2v[partition[t]-1].insert(j);
+            c2v[partition[t]-1].insert(k);
+        }
+        m_convexHulls = new ICHull[m_nClusters];
+        for(size_t p = 0; p < m_nClusters; ++p)
+        {
+            std::set<long>::const_iterator itP(c2v[p].begin()), 
+                                           itPEnd(c2v[p].end());
+            for(; itP != itPEnd; ++itP)
+            {
+                m_convexHulls[p].AddPoint(m_points[*itP]);
+            }
+            if (fullCH)
+            {
+                m_convexHulls[p].Process();
+            }
+            else
+            {
+                m_convexHulls[p].Process(m_nVerticesPerCH);
+            }
+        }
+        
+        delete [] partition;
+        delete [] c2v;
     }
     void HACD::ComputePartition(long * partition) const
     {

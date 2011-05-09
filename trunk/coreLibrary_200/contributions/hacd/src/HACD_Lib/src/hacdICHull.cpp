@@ -555,5 +555,23 @@ namespace HACD
         }
         return totalVolume;
     }
+    bool ICHull::IsInside(const Vec3<double> pt)
+    {
+        size_t nT = m_mesh.m_vertices.GetSize();
+        Vec3<double> ver0, ver1, ver2;
+        for(size_t t = 0; t < nT; t++)
+        {
+            ver0 = m_mesh.m_triangles.GetHead()->GetData().m_vertices[0]->GetData().m_pos;
+			ver1 = m_mesh.m_triangles.GetHead()->GetData().m_vertices[1]->GetData().m_pos;
+			ver2 = m_mesh.m_triangles.GetHead()->GetData().m_vertices[2]->GetData().m_pos;
+            if (Volume(ver0, ver1, ver2, pt) < 0.0)
+            {
+                return false;
+            }
+			m_mesh.m_triangles.Next();
+        }
+        return true;
+    }
+    
 }
 

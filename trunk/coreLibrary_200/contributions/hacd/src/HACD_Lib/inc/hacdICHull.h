@@ -49,6 +49,8 @@ namespace HACD
             //!
             double                                              ComputeVolume();
             //!
+            bool                                                IsInside(const Vec3<double> pt);
+            //!
             const ICHull &                                      operator=(ICHull & rhs);        
 
 			//!	Constructor

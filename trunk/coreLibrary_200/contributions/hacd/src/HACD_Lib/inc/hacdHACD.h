@@ -209,6 +209,9 @@ namespace HACD
 		//! Initializes the priority queue
 		//! @return true if success
         bool                                        InitializePQ();
+        //! Cleans the intersection between convex-hulls
+        //! @param fullCH specifies whether to generate convex-hulls with a full or limited (i.e. < m_nVerticesPerCH) number of vertices
+        void                                        CleanClusters(bool fullCH);
 
 	private:
 		double										m_scale;					//>! scale factor used for NormalizeData() and DenormalizeData()
