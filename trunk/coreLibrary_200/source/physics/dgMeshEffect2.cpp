@@ -379,6 +379,8 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 				Swap (listA, listB);
 			}
 
+if ((faceIndexA == 16) || (faceIndexA == 17) || (faceIndexB == 16) || (faceIndexB == 17))
+faceIndexA *=1;
 
 			while (listB->GetFirst()) {
 				dgClusterList::dgListNode* const nodeB = listB->GetFirst();
