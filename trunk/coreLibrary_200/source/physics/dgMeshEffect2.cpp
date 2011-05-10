@@ -206,7 +206,6 @@ class dgClusterList: public dgList <dgClusterFace>
 
 		const dgBigVector* const points = (dgBigVector*)mesh.GetVertexPool();
 
-static int xxx = 0;
 		vertexMark ++;
 		int vertexCount = AddVertexToPool (mesh, vertexPool, vertexMarks, vertexMark);
 		dgClusterFace& clusterFaceA = GetFirst()->GetInfo();
