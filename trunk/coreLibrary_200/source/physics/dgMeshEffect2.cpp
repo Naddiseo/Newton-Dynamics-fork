@@ -349,7 +349,7 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 			dgClusterList& listB = clusters[faceIndexB];
 
 			while (listB.GetFirst()) {
-				dgClusterList::dgListNode* nodeB = listB.GetFirst();
+				dgClusterList::dgListNode* const nodeB = listB.GetFirst();
 				listB.Unlink(nodeB);
 				dgClusterFace& faceB = nodeB->GetInfo();
 
