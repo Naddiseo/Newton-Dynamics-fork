@@ -222,14 +222,10 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 		edge->m_userData = 0;
 		if ((edge->m_mark != meshMask) && (edge->m_incidentFace > 0)) {
 			dgFloat64 perimeter = dgFloat64 (0.0f);
-			dgBigVector p0 (points[edge->m_prev->m_incidentVertex]);
 			dgEdge* ptr = edge;
 			do {
-				dgBigVector p1 (points[ptr->m_incidentVertex]);
-				dgBigVector p1p0 (p1 - p0);
+				dgBigVector p1p0 (points[ptr->m_incidentVertex] - points[ptr->m_prev->m_incidentVertex]);
 				perimeter += sqrt (p1p0 % p1p0);
-				p0 = p1;
-
 				ptr->m_incidentFace = faceIndex;
 
 				ptr->m_mark = meshMask;	
@@ -237,14 +233,14 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 			} while (ptr != edge);
 
 			dgBigVector normal = mesh.FaceNormal(edge, &points[0][0], sizeof (dgBigVector));
-			dgFloat64 mag = dgSqrt (normal % normal);
+			dgFloat64 mag = sqrt (normal % normal);
 
 			dgClusterFace& faceInfo = clusters[faceIndex].Append()->GetInfo();
 
 			faceInfo.m_edge = edge;
 			faceInfo.m_perimeter = perimeter;
 			faceInfo.m_area = dgFloat64 (0.5f) * mag;
-			faceInfo.m_normal = normal.Scale (1.0f / mag);
+			faceInfo.m_normal = normal.Scale (dgFloat64(1.0f) / mag);
 
 			clusters[faceIndex].m_perimeter = perimeter; 
 			clusters[faceIndex].m_area = faceInfo.m_area;
