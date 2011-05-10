@@ -175,7 +175,7 @@ class dgClusterList: public dgList <dgClusterFace>
 
 class dgPairProxi
 {
-public:
+	public:
 	dgPairProxi()
 	{
 		m_edgeA = NULL;
@@ -330,7 +330,6 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 
 			edge = edge->m_next;
 		} while (edge != clusterFaceA.m_edge);
-
 	}
 
 
@@ -374,7 +373,6 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 				dgEdge* ptr = face.m_edge;
 				do {
 					if (ptr->m_userData) {
-//						dgPairProxi& pairNode = *((dgPairProxi*)ptr->m_userData);
 						dgList<dgPairProxi>::dgListNode* const pairNode = (dgList<dgPairProxi>::dgListNode*)ptr->m_userData;
 						dgPairProxi& pairProxy = pairNode->GetInfo();
 						pairProxy.m_edgeA = NULL;
@@ -385,9 +383,7 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 
 					if ((ptr->m_twin->m_incidentFace == faceIndexA) || (ptr->m_twin->m_incidentFace < 0)){
 						ptr->m_mark = mark;
-						//ptr->m_userData = 0;
 						ptr->m_twin->m_mark = mark;
-						//ptr->m_twin->m_userData = 0;
 					}	
 
 					if (ptr->m_mark != mark) {
@@ -491,44 +487,57 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 
 
 	BeginPolygon();
-
 	dgFloat32 layer = dgFloat32 (0.0f);
-	dgVertexAtribute polygon[128];
+
+	dgVertexAtribute polygon[3];
 	memset (polygon, 0, sizeof (polygon));
+	dgArray<dgBigVector> convexVertexBuffer (1024, GetAllocator());
 	for (dgInt32 i = 0; i < faceCount; i ++) {
 		dgClusterList& clusterList = clusters[i];
 
 		if (clusterList.GetCount()) {
+			dgInt32 count = 0;
 			for (dgClusterList::dgListNode* node = clusterList.GetFirst(); node; node = node->GetNext()) {
 				dgClusterFace& face = node->GetInfo();
 				dgEdge* edge = face.m_edge;
 				dgEdge* sourceEdge = source.FindEdge(edge->m_incidentVertex, edge->m_twin->m_incidentVertex);
-				int count = 0;
 				do {
 					dgInt32 index = edge->m_incidentVertex;
-					polygon[count] = source.m_attib[dgInt32 (sourceEdge->m_userData)];
-					polygon[count].m_vertex = points[index];
-					polygon[count].m_vertex.m_w = layer;
-
+					convexVertexBuffer[count] = points[index];
 					count ++;
 					sourceEdge = sourceEdge->m_next;
 					edge = edge->m_next;
 				} while (edge != face.m_edge);
-				AddPolygon(count, &polygon[0].m_vertex.m_x, sizeof (dgVertexAtribute), 0);
 			}
-			layer += dgFloat32 (1.0f);
+
+			dgConvexHull3d convexHull (mesh.GetAllocator(), &convexVertexBuffer[0].m_x, sizeof (dgBigVector), count, 0.0);
+			if (convexHull.GetCount()) {
+				const dgBigVector* const vertex = convexHull.GetVertexPool();
+				for (dgConvexHull3d::dgListNode* node = convexHull.GetFirst(); node; node = node->GetNext()) {
+					const dgConvexHull3DFace* const face = &node->GetInfo();
+
+					dgInt32 i0 = face->m_index[0];
+					dgInt32 i1 = face->m_index[1];
+					dgInt32 i2 = face->m_index[2];
+
+					polygon[0].m_vertex = vertex[i0];
+					polygon[0].m_vertex.m_w = layer;
+
+					polygon[1].m_vertex = vertex[i1];
+					polygon[1].m_vertex.m_w = layer;
+
+					polygon[2].m_vertex = vertex[i2];
+					polygon[2].m_vertex.m_w = layer;
+
+					AddPolygon(3, &polygon[0].m_vertex.m_x, sizeof (dgVertexAtribute), 0);
+				}
+
+				layer += dgFloat32 (1.0f);
+			}
 		}
-		clusters[i].~dgClusterList();
 	}
-
 	EndPolygon(1.0e-5f);
-	ConvertToPolygons();
 }
-
-
-
-
-
 
 
 
@@ -2801,11 +2810,17 @@ static void SaveWRL (const std::string & fileName, dgMeshEffect* const mesh)
 dgMeshEffect* dgMeshEffect::CreateConvexApproximation (dgInt32 maxCount) const
 {
 	dgMeshEffect triangleMesh (*this);
-	triangleMesh.Triangulate();
+//	triangleMesh.Triangulate();
+
+//return new (GetAllocator()) dgMeshEffect (GetAllocator(), &m_points[0].m_x, m_pointCount, sizeof (dgBigVector), 0.0);
+
+dgMeshEffect* const convexPartion = new (GetAllocator()) dgMeshEffect (triangleMesh, 0.1);
+convexPartion->Triangulate();
+//SaveWRL("../../../media/output.wrl", convexPartion);
+return convexPartion;
 
 
-dgMeshEffect convexPartion (triangleMesh, 0.1);
-
+/*
 	dgInt32 faceCount = triangleMesh.GetTotalFaceCount();
 	dgStack< HACD::Vec3<double> > points (triangleMesh.m_pointCount);
 	dgStack<  HACD::Vec3<long> > triangles (faceCount);
@@ -2906,10 +2921,10 @@ SaveWRL("../../../media/input.wrl", &triangleMesh);
 		}
 	}
 	convexPartition->EndPolygon(dgFloat64 (1.0e-5f));
-
 	
 SaveWRL("../../../media/output.wrl", convexPartition);
+*/
 
-
-	return convexPartition;
+//	return convexPartition;
+return NULL;
 }

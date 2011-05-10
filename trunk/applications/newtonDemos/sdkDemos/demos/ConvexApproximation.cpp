@@ -188,6 +188,7 @@ void SimpleConvexAproximation (DemoEntityManager* const scene)
 	dVector size (0.5f, 0.5f, 0.5f, 0.0f);
 //	int count = 5;
 //	LoadCompoundModel ("box_1.ngd", scene, location);
+	LoadCompoundModel ("xxx_.ngd", scene, location);
 //	LoadCompoundModel ("xxx.ngd", scene, location);
 //	LoadCompoundModel ("lshape.ngd", scene, location);
 //	LoadCompoundModel ("box_2.ngd", scene, location);
