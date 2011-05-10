@@ -113,9 +113,12 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	dgMeshEffect(dgCollision* const collision);
 	dgMeshEffect(const dgMeshEffect& source);
 	dgMeshEffect(dgPolyhedra& mesh, const dgMeshEffect& source);
-	
+
 	// Create a convex hull Mesh form point cloud
 	dgMeshEffect (dgMemoryAllocator* const allocator, const dgFloat64* const vertexCloud, dgInt32 count, dgInt32 strideInByte, dgFloat64 distTol);
+
+	// create a convex approximation
+	dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcavity);
 
 	// create a planar Mesh
 	dgMeshEffect(dgMemoryAllocator* const allocator, const dgMatrix& planeMatrix, dgFloat32 witdth, dgFloat32 breadth, dgInt32 material, const dgMatrix& textureMatrix0, const dgMatrix& textureMatrix1);
@@ -209,7 +212,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	
 	dgCollision* CreateConvexCollision(dgFloat64 tolerance, dgInt32 shapeID, const dgMatrix& matrix = dgGetIdentityMatrix()) const;
 
-	//dgMeshEffect* CreateConvexApproximation (dgInt32 maxCount) const;
+	dgMeshEffect* CreateConvexApproximation (dgInt32 maxCount) const;
 	dgMeshEffect* CreateDelanayTretrahedralization (dgInt32 interionMaterial, dgMatrix& matrix) const;
 	dgMeshEffect* CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
 
@@ -269,7 +272,6 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** const back, dgMeshEffect** const front, dgMeshEffect** const coplanar) const;
 	dgInt32 PlaneApplyCap (const dgMeshEffect* planeMesh, const dgPlane& normal);
 	void PlaneClipMesh (const dgMeshEffect* planeMesh, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
-	dgMeshEffect* CreateVoronoiPartitionLow (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
 
 	dgMeshEffect* MakeDelanayIntersection (dgMeshEffectSolidTree* const tree, dgBigVector* const points, dgInt32 count, dgInt32 materialId, const dgMatrix& textureProjectionMatrix, dgFloat32 normalAngleInRadians) const;
 

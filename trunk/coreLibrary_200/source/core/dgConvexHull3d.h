@@ -59,12 +59,14 @@ class dgConvexHull3d: public dgList<dgConvexHull3DFace>
 	dgInt32 GetVertexCount() const;
 	const dgBigVector* GetVertexPool() const;
 	const dgBigVector& GetVertex(dgInt32 i) const;
-	
+
+	dgFloat64 GetDiagonal() const;
+	dgFloat64 RayCast (const dgBigVector& localP0, const dgBigVector& localP1) const;
 
 	protected:
 	
 	dgConvexHull3d(dgMemoryAllocator* const allocator);
-	void BuildHUll (const dgFloat64* const vertexCloud, dgInt32 strideInBytes, dgInt32 count, dgFloat64 distTol, dgInt32 maxVertexCount);
+	void BuildHull (const dgFloat64* const vertexCloud, dgInt32 strideInBytes, dgInt32 count, dgFloat64 distTol, dgInt32 maxVertexCount);
 
 	virtual dgListNode* AddFace (dgInt32 i0, dgInt32 i1, dgInt32 i2);
 	virtual void DeleteFace (dgListNode* const node) ;
@@ -102,5 +104,9 @@ inline const dgBigVector& dgConvexHull3d::GetVertex(dgInt32 index) const
 	return m_points[index];
 }
 
+inline dgFloat64 dgConvexHull3d::GetDiagonal() const
+{
+	return m_diag;
+}
 
 #endif

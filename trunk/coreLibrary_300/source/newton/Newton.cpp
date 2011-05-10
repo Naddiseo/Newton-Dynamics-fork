@@ -8150,7 +8150,7 @@ void NewtonMeshFixTJoints (const NewtonMesh* const mesh)
 {
 	TRACE_FUNTION(__FUNCTION__);
 
-	return ((dgMeshEffect*) mesh)->RepairTJoints();
+	return ((dgMeshEffect*) mesh)->RepairTJoints(false);
 }
 
 
@@ -8163,6 +8163,14 @@ void NewtonMeshClip (const NewtonMesh* const mesh, const NewtonMesh* const clipp
 	dgMatrix& matrix = *((dgMatrix*)clipperMatrix);
 	
 	((dgMeshEffect*) mesh)->ClipMesh (matrix, (dgMeshEffect*)clipper, (dgMeshEffect**) topMesh, (dgMeshEffect**) bottomMesh);
+}
+
+
+NewtonMesh* NewtonMeshApproximateConvexDecomposition (const NewtonMesh* const mesh)
+{
+	TRACE_FUNTION(__FUNCTION__);
+
+	return (NewtonMesh*) ((dgMeshEffect*) mesh)->CreateConvexApproximation (10);
 }
 
 

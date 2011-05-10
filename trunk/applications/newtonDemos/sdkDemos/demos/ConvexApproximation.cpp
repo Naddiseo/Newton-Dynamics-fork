@@ -156,7 +156,7 @@ static void LoadCompoundModel (const char* const name, DemoEntityManager* const 
 	NewtonMesh* const convexDocomposition = NewtonMeshApproximateConvexDecomposition (mesh->GetMesh());
 
 mesh->ReplaceMesh (convexDocomposition);
-compoundTestMesh.Serialize("../../../media/xxx.ngd");
+compoundTestMesh.Serialize("../../../media/xxx1.ngd");
 
 
 		
@@ -187,7 +187,9 @@ void SimpleConvexAproximation (DemoEntityManager* const scene)
 	dVector location (0.0f, 0.0f, 0.0f, 0.0f);
 	dVector size (0.5f, 0.5f, 0.5f, 0.0f);
 //	int count = 5;
-	LoadCompoundModel ("lshape.ngd", scene, location);
+//	LoadCompoundModel ("box_1.ngd", scene, location);
+//	LoadCompoundModel ("xxx.ngd", scene, location);
+//	LoadCompoundModel ("lshape.ngd", scene, location);
 //	LoadCompoundModel ("box_2.ngd", scene, location);
 //	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _BOX_PRIMITIVE, defaultMaterialID);
 //	AddShatterPrimitive(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID);

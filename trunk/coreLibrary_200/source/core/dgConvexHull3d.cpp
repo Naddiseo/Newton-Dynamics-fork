@@ -120,14 +120,14 @@ dgConvexHull3d::dgConvexHull3d (dgMemoryAllocator* const allocator)
 dgConvexHull3d::dgConvexHull3d(dgMemoryAllocator* const allocator, const dgFloat64* const vertexCloud, dgInt32 strideInBytes, dgInt32 count, dgFloat64 distTol, dgInt32 maxVertexCount)
 	:dgList<dgConvexHull3DFace>(allocator),  m_count (0), m_diag(), m_points(count, allocator) 
 {
-	BuildHUll (vertexCloud, strideInBytes, count, distTol, maxVertexCount);
+	BuildHull (vertexCloud, strideInBytes, count, distTol, maxVertexCount);
 }
 
 dgConvexHull3d::~dgConvexHull3d(void)
 {
 }
 
-void dgConvexHull3d::BuildHUll (const dgFloat64* const vertexCloud, dgInt32 strideInBytes, dgInt32 count, dgFloat64 distTol, dgInt32 maxVertexCount)
+void dgConvexHull3d::BuildHull (const dgFloat64* const vertexCloud, dgInt32 strideInBytes, dgInt32 count, dgFloat64 distTol, dgInt32 maxVertexCount)
 {
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
 	dgUnsigned32 controlWorld = dgControlFP (0xffffffff, 0);
@@ -403,8 +403,8 @@ dgInt32 dgConvexHull3d::InitVertexArray(dgHullVertex* const points, const dgFloa
 		//make sure the volume of the fist tetrahedral is no negative
 		e3 = points[index] - m_points[0];
 		dgFloat64 error2 = normal % e3;
-//		if (fabs (error2) > (dgFloat64 (1.0e-4f) * m_diag * m_diag * m_diag)) {
-		if (fabs (error2) > (dgFloat64 (1.0e-4f) * m_diag * m_diag)) {
+//dgFloat64 xxx = dgFloat64 (1.0e-6f) * m_diag * m_diag;
+		if (fabs (error2) > (dgFloat64 (1.0e-6f) * m_diag * m_diag)) {
 			// we found a valid tetrahedra, about and start build the hull by adding the rest of the points
 			m_points[3] = points[index];
 			points[index].m_index = 1;
@@ -835,5 +835,62 @@ void dgConvexHull3d::CalculateConvexHull (dgAABBPointTree3d* vertexTree, dgHullV
 	m_count = currentIndex;
 }
 
+
+
+dgFloat64 dgConvexHull3d::RayCast (const dgBigVector& localP0, const dgBigVector& localP1) const
+{
+	dgFloat64 interset = dgFloat32 (1.2f);
+
+	dgFloat64 tE = dgFloat64 (0.0f);           //for the maximum entering segment parameter;
+	dgFloat64 tL = dgFloat64 (1.0f);           //for the minimum leaving segment parameter;
+	dgBigVector dS (localP1 - localP0); // is the segment direction vector;
+
+	dgInt32 hasHit = 0;
+	for (dgListNode* node = GetFirst(); node; node = node->GetNext()) {
+		const dgConvexHull3DFace* const face = &node->GetInfo();
+
+		dgInt32 i0 = face->m_index[0];
+		dgInt32 i1 = face->m_index[1];
+		dgInt32 i2 = face->m_index[2];
+
+		const dgBigVector& p0 = m_points[i0];
+		dgBigVector normal ((m_points[i1] - p0) * (m_points[i2] - p0));
+
+		dgFloat64 N = -((localP0 - p0) % normal);
+		dgFloat64 D = dS % normal;
+
+		if (fabs(D) < dgFloat64 (1.0e-12f)) { // 
+			if (N < dgFloat64 (0.0f)) {
+				return dgFloat64 (1.2f);
+			} else {
+				continue; 
+			}
+		}
+
+		dgFloat64 t = N / D;
+		if (D < dgFloat64 (0.0f)) {
+			if (t > tE) {
+				tE = t;
+				hasHit = 1;
+//				hitNormal = normal;
+			}
+			if (tE > tL) {
+				return dgFloat64 (1.2f);
+			}
+		} else {
+			_ASSERTE (D >= dgFloat64 (0.0f));
+			tL = GetMin (tL, t);
+			if (tL < tE) {
+				return dgFloat64 (1.2f);
+			}
+		}
+	}
+
+	if (hasHit) {
+		interset = tE;	
+	}
+
+	return interset;
+}
 
 
