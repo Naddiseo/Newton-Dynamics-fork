@@ -25,7 +25,7 @@
 #define BREAK_FORCE_IN_GRAVITIES	10
 //#define BREAK_FORCE_IN_GRAVITIES	1
 
-#if 0
+#if 1
 static void TestConvexApproximation (DemoEntityManager* const scene)
 {
 	// create a collision primitive
@@ -42,9 +42,25 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 	// create a newton mesh from the collision primitive
 	NewtonMesh* const mesh = NewtonMeshCreateFromCollision(collision);
 
+
+
 	// apply a simple Box Mapping
 	int tex0 = LoadTexture("reljef.tga");
 	NewtonMeshApplyBoxMapping(mesh, tex0, tex0, tex0);
+
+
+NewtonMesh* xxxxx0;
+NewtonMesh* xxxxx1;
+dMatrix planeMatrix (GetIdentityMatrix());
+planeMatrix.m_front = dVector (0, 1, 0, 0); // this is the plane normal
+planeMatrix.m_up = dVector (1, 0, 0, 0); // the alignment on the plane normal 
+planeMatrix.m_right = planeMatrix.m_front * planeMatrix.m_up;
+planeMatrix.m_posit = dVector (0, 0, 0, 1.0); // this is the plane origin
+
+dMatrix texMatrix (GetIdentityMatrix());
+texMatrix[0][0] = 4;
+texMatrix[1][1] = 4;
+NewtonMeshPlaneClip(mesh, &planeMatrix[0][0], &texMatrix[0][0], tex0, &xxxxx0, &xxxxx1);
 
 
 	// create a thing box;
@@ -180,7 +196,7 @@ void SimpleConvexAproximation (DemoEntityManager* const scene)
 //	CreateLevelMesh (scene, "sponza.ngd", false);
 
 	// create a shattered mesh array
-//    TestConvexApproximation (scene);
+  TestConvexApproximation (scene);
 
 
 //	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (scene->GetNewton());
@@ -188,7 +204,8 @@ void SimpleConvexAproximation (DemoEntityManager* const scene)
 	dVector size (0.5f, 0.5f, 0.5f, 0.0f);
 //	int count = 5;
 //	LoadCompoundModel ("box_1.ngd", scene, location);
-	LoadCompoundModel ("box_2.ngd", scene, location);
+//	LoadCompoundModel ("box_2.ngd", scene, location);
+	LoadCompoundModel ("box_3.ngd", scene, location);
 //	LoadCompoundModel ("xxx_.ngd", scene, location);
 //	LoadCompoundModel ("xxx.ngd", scene, location);
 //	LoadCompoundModel ("lshape.ngd", scene, location);

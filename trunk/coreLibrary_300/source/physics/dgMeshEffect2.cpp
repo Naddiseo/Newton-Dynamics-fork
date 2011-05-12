@@ -51,6 +51,28 @@ class dgClusterFace
 	dgBigVector m_normal;
 };
 
+class dgPairProxi
+{
+	public:
+	dgPairProxi()
+	{
+		m_edgeA = NULL;
+		m_edgeB = NULL;
+		m_area = dgFloat64 (0.0f);
+		m_perimeter = dgFloat64 (0.0f);
+	}
+
+	~dgPairProxi()
+	{
+	}
+
+	dgEdge* m_edgeA;
+	dgEdge* m_edgeB;
+	dgFloat64 m_area;
+	dgFloat64 m_perimeter;
+};
+
+
 class dgClusterList: public dgList <dgClusterFace>
 {	
 	public:
@@ -87,7 +109,7 @@ class dgClusterList: public dgList <dgClusterFace>
 	}
 
 
-	dgFloat64 CalculateTriagleConcavity2 (const dgConvexHull3d& convexHull, dgClusterFace& info, const dgEdge* const triangle, const dgBigVector* const points) const 
+	dgFloat64 CalculateTriangleConcavity2 (const dgConvexHull3d& convexHull, dgClusterFace& info, const dgEdge* const triangle, const dgBigVector* const points) const 
 	{
 		int stack = 1;
 		dgBigVector pool[256][3];
@@ -157,7 +179,7 @@ class dgClusterList: public dgList <dgClusterFace>
 		for (dgListNode* node = GetFirst(); node; node = node->GetNext()) {
 			dgClusterFace& info = node->GetInfo();
 			for (dgEdge* edge = info.m_edge->m_next->m_next; edge != info.m_edge; edge = edge = edge->m_next) {
-				dgFloat64 val = CalculateTriagleConcavity2 (convexHull, info, edge->m_prev->m_prev, points); 
+				dgFloat64 val = CalculateTriangleConcavity2 (convexHull, info, edge->m_prev->m_prev, points); 
 				if (val > concavity) {
 					concavity = val;
 				}
@@ -168,31 +190,146 @@ class dgClusterList: public dgList <dgClusterFace>
 	}
 
 
+	bool IsClusterCoplanar (const dgBigPlane& plane, const dgMeshEffect& mesh) const
+	{
+		const dgBigVector* const points = (dgBigVector*) mesh.GetVertexPool();
+		for (dgListNode* node = GetFirst(); node; node = node->GetNext()) {
+			dgClusterFace& info = node->GetInfo();
+
+			dgEdge* ptr = info.m_edge;
+			do {
+				const dgBigVector& p = points[ptr->m_incidentVertex];
+				dgFloat64 dist = fabs (plane.Evalue(p));
+				if (dist > dgFloat64 (1.0e-5f)) {
+					return false; 
+				}
+				ptr = ptr->m_next;
+			} while (ptr != info.m_edge);
+		}
+
+		return true;
+	}
+
+
+	bool IsEdgeConvex (const dgBigPlane& plane, const dgMeshEffect& mesh, dgEdge* const edge) const
+	{
+		const dgBigVector* const points = (dgBigVector*) mesh.GetVertexPool();
+		dgEdge* const edge0 = edge->m_next;
+		dgEdge* ptr = edge0->m_twin->m_next;
+		do {
+			if (ptr->m_twin->m_incidentFace == edge->m_twin->m_incidentFace) {
+				_ASSERTE (edge0->m_incidentVertex == ptr->m_incidentVertex);
+				dgBigVector e0 (points[edge0->m_twin->m_incidentVertex] - points[edge0->m_incidentVertex]);
+				dgBigVector e1 (points[ptr->m_twin->m_incidentVertex] - points[edge0->m_incidentVertex]);
+				dgBigVector normal (e0 * e1);
+				return (normal % plane) > dgFloat64 (0.0f);
+			}
+			ptr = ptr->m_twin->m_next;
+		} while (ptr != edge->m_twin);
+
+		_ASSERTE (0);
+		return true;
+	}
+
+
+	void CalculateNodeCost (
+		dgMeshEffect& mesh, 
+		dgInt32 meshMask,
+		dgBigVector* const vertexPool, 
+		dgInt32* const vertexMarks, 
+		dgInt32& vertexMark,
+		dgClusterList* const clusters,
+		dgFloat64 diagonalInv,
+		dgFloat64 aspectRatioCoeficent,
+		dgList<dgPairProxi>& proxyList,
+		dgUpHeap<dgList<dgPairProxi>::dgListNode*, dgFloat64>& heap)
+	{
+		dgInt32 faceIndex = GetFirst()->GetInfo().m_edge->m_incidentFace;
+
+		const dgBigVector* const points = (dgBigVector*)mesh.GetVertexPool();
+
+		bool flatStrip = true;
+		dgBigPlane plane (GetFirst()->GetInfo().m_normal, - (points[GetFirst()->GetInfo().m_edge->m_incidentVertex] % GetFirst()->GetInfo().m_normal));
+		if (GetCount() > 1) {
+			flatStrip = IsClusterCoplanar (plane, mesh);
+		}
+
+
+		vertexMark ++;
+		int vertexCount = AddVertexToPool (mesh, vertexPool, vertexMarks, vertexMark);
+		dgClusterFace& clusterFaceA = GetFirst()->GetInfo();
+		dgEdge* edge = clusterFaceA.m_edge;
+		do {
+			dgInt32 twinFaceIndex = edge->m_twin->m_incidentFace;
+
+			if ((edge->m_mark != meshMask) && (twinFaceIndex != faceIndex) && (twinFaceIndex > 0)) {
+
+				dgClusterList& clusterListB = clusters[twinFaceIndex];
+
+				vertexMark ++;
+				int extraCount = clusterListB.AddVertexToPool (mesh, &vertexPool[vertexCount], &vertexMarks[0], vertexMark);
+
+				int count = vertexCount + extraCount;
+				dgConvexHull3d convexHull (mesh.GetAllocator(), &vertexPool[0].m_x, sizeof (dgBigVector), count, 0.0);
+
+				dgFloat64 concavity = dgFloat64 (0.0f);
+				if (convexHull.GetVertexCount()) {
+					concavity = sqrt (GetMax(CalculateConcavity2 (convexHull, mesh), clusterListB.CalculateConcavity2 (convexHull, mesh)));
+					if (concavity < dgFloat64 (1.0e-3f)) {
+						concavity = dgFloat64 (0.0f);
+					}
+				}
+				if ((concavity == dgFloat64 (0.0f)) && flatStrip) {
+					if (clusterListB.IsClusterCoplanar (plane, mesh)) {
+						bool concaveEdge = !(IsEdgeConvex (plane, mesh, edge) && IsEdgeConvex (plane, mesh, edge->m_twin));
+						if (concaveEdge) {
+							concavity += 1000.0f;
+						}
+					}
+				}
+
+				dgBigVector p1p0 (points[edge->m_twin->m_incidentVertex] - points[edge->m_incidentVertex]);
+				dgFloat64 edgeLength = dgFloat64 (2.0f) * sqrt (p1p0 % p1p0);
+
+				dgFloat64 area = m_area + clusterListB.m_area;
+				dgFloat64 perimeter = m_perimeter + clusterListB.m_perimeter - edgeLength;
+				dgFloat64 edgeCost = perimeter * perimeter / (dgFloat64 (4.0f * 3.141592f) * area);
+				dgFloat64 cost = diagonalInv * (concavity + edgeCost * aspectRatioCoeficent);
+
+				if ((heap.GetCount() + 20) > heap.GetMaxCount()) {
+					for (dgInt32 i = heap.GetCount() - 1; i >= 0; i --) {
+						dgList<dgPairProxi>::dgListNode* emptyNode = heap[i];
+						dgPairProxi& emptyPair = emptyNode->GetInfo();
+						if ((emptyPair.m_edgeA == NULL) && (emptyPair.m_edgeB == NULL)) {
+							heap.Remove(i);
+						}
+					}
+				}
+
+
+				dgList<dgPairProxi>::dgListNode* pairNode = proxyList.Append();
+				dgPairProxi& pair = pairNode->GetInfo();
+				pair.m_edgeA = edge;
+				pair.m_edgeB = edge->m_twin;
+				pair.m_area = area;
+				pair.m_perimeter = perimeter;
+				edge->m_userData = dgUnsigned64 (pairNode);
+				edge->m_twin->m_userData = dgUnsigned64 (pairNode);
+				heap.Push(pairNode, cost);
+			}
+
+			edge->m_mark = meshMask;
+			edge->m_twin->m_mark = meshMask;
+
+			edge = edge->m_next;
+		} while (edge != clusterFaceA.m_edge);
+	}
+
 	dgFloat64 m_area;
 	dgFloat64 m_perimeter;
 };
 
 
-class dgPairProxi
-{
-public:
-	dgPairProxi()
-	{
-		m_edgeA = NULL;
-		m_edgeB = NULL;
-		m_area = dgFloat64 (0.0f);
-		m_perimeter = dgFloat64 (0.0f);
-	}
-
-	~dgPairProxi()
-	{
-	}
-
-	dgEdge* m_edgeA;
-	dgEdge* m_edgeB;
-	dgFloat64 m_area;
-	dgFloat64 m_perimeter;
-};
 
 
 
@@ -222,14 +359,10 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 		edge->m_userData = 0;
 		if ((edge->m_mark != meshMask) && (edge->m_incidentFace > 0)) {
 			dgFloat64 perimeter = dgFloat64 (0.0f);
-			dgBigVector p0 (points[edge->m_prev->m_incidentVertex]);
 			dgEdge* ptr = edge;
 			do {
-				dgBigVector p1 (points[ptr->m_incidentVertex]);
-				dgBigVector p1p0 (p1 - p0);
+				dgBigVector p1p0 (points[ptr->m_incidentVertex] - points[ptr->m_prev->m_incidentVertex]);
 				perimeter += sqrt (p1p0 % p1p0);
-				p0 = p1;
-
 				ptr->m_incidentFace = faceIndex;
 
 				ptr->m_mark = meshMask;	
@@ -237,14 +370,14 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 			} while (ptr != edge);
 
 			dgBigVector normal = mesh.FaceNormal(edge, &points[0][0], sizeof (dgBigVector));
-			dgFloat64 mag = dgSqrt (normal % normal);
+			dgFloat64 mag = sqrt (normal % normal);
 
 			dgClusterFace& faceInfo = clusters[faceIndex].Append()->GetInfo();
 
 			faceInfo.m_edge = edge;
 			faceInfo.m_perimeter = perimeter;
 			faceInfo.m_area = dgFloat64 (0.5f) * mag;
-			faceInfo.m_normal = normal.Scale (1.0f / mag);
+			faceInfo.m_normal = normal.Scale (dgFloat64(1.0f) / mag);
 
 			clusters[faceIndex].m_perimeter = perimeter; 
 			clusters[faceIndex].m_area = faceInfo.m_area;
@@ -256,7 +389,7 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 	_ASSERTE (faceCount == faceIndex);
 
 	// recalculate all edge cost
-	dgStack<int> vertexMarks (mesh.GetVertexCount());
+	dgStack<dgInt32> vertexMarks (mesh.GetVertexCount());
 	dgStack<dgBigVector> vertexArray (mesh.GetVertexCount() * 2);
 
 	dgBigVector* const vertexPool = &vertexArray[0];
@@ -268,69 +401,16 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 	int vertexMark = 0;
 
 	dgFloat64 diagonalInv = dgFloat32 (1.0f);
-	dgFloat64 aspectRatioCoeficent = absoluteconcavity / dgFloat32 (100.0f);
+	dgFloat64 aspectRatioCoeficent = absoluteconcavity / dgFloat32 (10.0f);
 	meshMask = mesh.IncLRU();
 
+
 	for (int faceIndex = 1; faceIndex < faceCount; faceIndex ++) {
-
-		dgClusterList& clusterListA = clusters[faceIndex];
-		_ASSERTE (clusterListA.GetFirst()->GetInfo().m_edge->m_incidentFace == faceIndex); 
-
 		vertexMark ++;
-		int vertexCount = clusterListA.AddVertexToPool (mesh, &vertexPool[0], &vertexMarks[0], vertexMark);
-		dgClusterFace& clusterFaceA = clusterListA.GetFirst()->GetInfo();
-		dgEdge* edge = clusterFaceA.m_edge;
-
-		do {
-			dgInt32 twinFaceIndex = edge->m_twin->m_incidentFace;
-
-			if ((edge->m_mark != meshMask) && (twinFaceIndex != faceIndex) && (twinFaceIndex > 0)) {
-
-				dgClusterList& clusterListB = clusters[twinFaceIndex];
-
-				vertexMark ++;
-				int extraCount = clusterListB.AddVertexToPool (mesh, &vertexPool[vertexCount], &vertexMarks[0], vertexMark);
-
-				int count = vertexCount + extraCount;
-
-				//dgCollisionConvexHull collision (mesh.GetAllocator(), 0, count, sizeof (dgVector), 0.0f, &vertexPool[0].m_x, matrix);
-				dgConvexHull3d convexHull (mesh.GetAllocator(), &vertexPool[0].m_x, sizeof (dgBigVector), count, 0.0);
-
-				dgFloat64 concavity = dgFloat64 (0.0f);
-				if (convexHull.GetVertexCount()) {
-					concavity = sqrt (GetMax(clusterListA.CalculateConcavity2 (convexHull, mesh), clusterListB.CalculateConcavity2 (convexHull, mesh)));
-					if (concavity < dgFloat64 (1.0e-3f)) {
-						concavity = dgFloat64 (0.0f);
-					}
-				}
-
-				dgBigVector p0 (points[edge->m_incidentVertex]);
-				dgBigVector p1 (points[edge->m_twin->m_incidentVertex]);
-				dgBigVector p1p0 (p1 - p0);
-				dgFloat64 edgeLength = dgFloat64 (2.0f) * sqrt (p1p0 % p1p0);
-
-				dgFloat64 area = clusterListA.m_area + clusterListB.m_area;
-				dgFloat64 perimeter = clusterListA.m_perimeter + clusterListB.m_perimeter - edgeLength;
-				dgFloat64 edgeCost = perimeter * perimeter / (dgFloat64 (4.0f * 3.141592f) * area);
-				dgFloat64 cost = diagonalInv * (concavity + edgeCost * aspectRatioCoeficent);
-
-				dgList<dgPairProxi>::dgListNode* pairNode = proxyList.Append();
-				dgPairProxi& pair = pairNode->GetInfo();
-				pair.m_edgeA = edge;
-				pair.m_edgeB = edge->m_twin;
-				pair.m_area = area;
-				pair.m_perimeter = perimeter;
-				edge->m_userData = dgUnsigned64 (pairNode);
-				edge->m_twin->m_userData = dgUnsigned64 (pairNode);
-				heap.Push(pairNode, cost);
-			}
-
-			edge->m_mark = meshMask;
-			edge->m_twin->m_mark = meshMask;
-
-			edge = edge->m_next;
-		} while (edge != clusterFaceA.m_edge);
-
+		dgClusterList& clusterList = clusters[faceIndex];
+		_ASSERTE (clusterList.GetFirst()->GetInfo().m_edge->m_incidentFace == faceIndex); 
+		clusterList.CalculateNodeCost (mesh, meshMask, &vertexPool[0], &vertexMarks[0], vertexMark,
+								       &clusters[0], diagonalInv, aspectRatioCoeficent, proxyList, heap);
 	}
 
 
@@ -344,18 +424,23 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 		if (pair.m_edgeA && pair.m_edgeB) {
 
 			_ASSERTE (pair.m_edgeA->m_incidentFace != pair.m_edgeB->m_incidentFace);
-			if (pair.m_edgeA->m_incidentFace > pair.m_edgeB->m_incidentFace) {
-				Swap (pair.m_edgeA->m_incidentFace, pair.m_edgeB->m_incidentFace);			
-			}
 
 			dgInt32 faceIndexA = pair.m_edgeA->m_incidentFace;
 			dgInt32 faceIndexB = pair.m_edgeB->m_incidentFace;
-			dgClusterList& listA = clusters[faceIndexA];
-			dgClusterList& listB = clusters[faceIndexB];
+			dgClusterList* listA = &clusters[faceIndexA];
+			dgClusterList* listB = &clusters[faceIndexB];
+			if (pair.m_edgeA->m_incidentFace > pair.m_edgeB->m_incidentFace) {
+				Swap (faceIndexA, faceIndexB);
+				Swap (listA, listB);
+			}
 
-			while (listB.GetFirst()) {
-				dgClusterList::dgListNode* nodeB = listB.GetFirst();
-				listB.Unlink(nodeB);
+//if ((faceIndexA == 16) || (faceIndexA == 17) || (faceIndexB == 16) || (faceIndexB == 17))
+//if ((faceIndexA == 2) || (faceIndexA == 2) || (faceIndexB == 2) || (faceIndexB == 2))
+//faceIndexA *=1;
+
+			while (listB->GetFirst()) {
+				dgClusterList::dgListNode* const nodeB = listB->GetFirst();
+				listB->Unlink(nodeB);
 				dgClusterFace& faceB = nodeB->GetInfo();
 
 				dgEdge* ptr = faceB.m_edge;
@@ -363,18 +448,17 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 					ptr->m_incidentFace = faceIndexA;
 					ptr = ptr->m_next;
 				} while (ptr != faceB.m_edge);
-				listA.Append (nodeB);
+				listA->Append (nodeB);
 			}
-			listA.m_area = pair.m_area; 
-			listA.m_perimeter = pair.m_perimeter;
+			listA->m_area = pair.m_area; 
+			listA->m_perimeter = pair.m_perimeter;
 
 			dgInt32 mark = mesh.IncLRU();
-			for (dgClusterList::dgListNode* node = listA.GetFirst(); node; node = node->GetNext()) {
+			for (dgClusterList::dgListNode* node = listA->GetFirst(); node; node = node->GetNext()) {
 				dgClusterFace& face = node->GetInfo();
 				dgEdge* ptr = face.m_edge;
 				do {
 					if (ptr->m_userData) {
-//						dgPairProxi& pairNode = *((dgPairProxi*)ptr->m_userData);
 						dgList<dgPairProxi>::dgListNode* const pairNode = (dgList<dgPairProxi>::dgListNode*)ptr->m_userData;
 						dgPairProxi& pairProxy = pairNode->GetInfo();
 						pairProxy.m_edgeA = NULL;
@@ -385,9 +469,7 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 
 					if ((ptr->m_twin->m_incidentFace == faceIndexA) || (ptr->m_twin->m_incidentFace < 0)){
 						ptr->m_mark = mark;
-						//ptr->m_userData = 0;
 						ptr->m_twin->m_mark = mark;
-						//ptr->m_twin->m_userData = 0;
 					}	
 
 					if (ptr->m_mark != mark) {
@@ -409,81 +491,8 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 			}
 
 			vertexMark ++;
-			int vertexCount = listA.AddVertexToPool (mesh, &vertexPool[0], &vertexMarks[0], vertexMark);
-			for (dgClusterList::dgListNode* node = listA.GetFirst(); node; node = node->GetNext()) {
-				dgClusterFace& face = node->GetInfo();
-				dgEdge* edge = face.m_edge;
-				do {
-					if ((edge->m_mark != mark) && (edge->m_twin->m_incidentFace > 0)) {
-						dgEdge* twin = edge->m_twin;
-						_ASSERTE (edge->m_userData == 0);
-						_ASSERTE (twin->m_userData == 0);
-						dgClusterList& neighbourgCluster = clusters[twin->m_incidentFace];
-
-
-						vertexMark ++;
-						int extraCount = neighbourgCluster.AddVertexToPool (mesh, &vertexPool[vertexCount], &vertexMarks[0], vertexMark);
-						int count = vertexCount + extraCount;
-
-						dgConvexHull3d convexHull (mesh.GetAllocator(), &vertexPool[0].m_x, sizeof (dgBigVector), count, 0.0);
-
-						dgFloat64 concavity = dgFloat32 (0.0f);
-						if (convexHull.GetVertexCount()) {
-							concavity = sqrt (GetMax(listA.CalculateConcavity2 (convexHull, mesh), neighbourgCluster.CalculateConcavity2 (convexHull, mesh)));
-							if (concavity < dgFloat64 (1.0e-3f)) {
-								concavity = dgFloat64 (0.0f);
-							} else {
-								concavity *= dgFloat64 (1.0f);
-							}
-						}
-
-						dgFloat64 edgeLength = dgFloat64 (0.0f);
-						dgClusterList& adjacentList = clusters[edge->m_twin->m_incidentFace];
-						for (dgClusterList::dgListNode* adjacentNode = adjacentList.GetFirst(); adjacentNode; adjacentNode = adjacentNode->GetNext()) {
-							dgClusterFace& adjacentFace = adjacentNode->GetInfo();
-							dgEdge* adjecentEdge = adjacentFace.m_edge;
-							do {
-								if (adjecentEdge->m_twin->m_incidentFace == faceIndexA) {
-									dgBigVector p0 (points[adjecentEdge->m_incidentVertex]);
-									dgBigVector p1 (points[adjecentEdge->m_twin->m_incidentVertex]);
-									dgBigVector p1p0 (p1 - p0);
-									edgeLength += dgFloat64 (2.0f) * sqrt (p1p0 % p1p0);
-								}
-								adjecentEdge = adjecentEdge->m_next;
-							} while (adjecentEdge != adjacentFace.m_edge);
-						}
-
-
-						dgFloat64 area = listA.m_area + adjacentList.m_area;
-						dgFloat64 perimeter = listA.m_perimeter + adjacentList.m_perimeter - edgeLength;
-						dgFloat64 edgeCost = perimeter * perimeter / (dgFloat64 (4.0f * 3.141592f) * area);
-						dgFloat64 cost = diagonalInv * (concavity + edgeCost * aspectRatioCoeficent);
-
-						dgList<dgPairProxi>::dgListNode* pairNode = proxyList.Append();
-
-						dgPairProxi& pair = pairNode->GetInfo();
-						pair.m_edgeA = edge;
-						pair.m_edgeB = edge->m_twin;
-						pair.m_area = area;
-						pair.m_perimeter = perimeter;
-						edge->m_userData = dgUnsigned64 (pairNode);
-						edge->m_twin->m_userData = dgUnsigned64 (pairNode);
-
-						if ((heap.GetCount() + 20) > heap.GetMaxCount()) {
-							for (dgInt32 i = heap.GetCount() - 1; i >= 0; i --) {
-								dgList<dgPairProxi>::dgListNode* emptyNode = heap[i];
-								dgPairProxi& emptyPair = emptyNode->GetInfo();
-								if ((emptyPair.m_edgeA == NULL) && (emptyPair.m_edgeB == NULL)) {
-									heap.Remove(i);
-								}
-							}
-						}
-						heap.Push(pairNode, cost);
-					}
-
-					edge = edge->m_next;						
-				} while (edge != face.m_edge);
-			}
+			listA->CalculateNodeCost (mesh, mark, &vertexPool[0], &vertexMarks[0], vertexMark,
+									  &clusters[0], diagonalInv, aspectRatioCoeficent, proxyList, heap);
 		}
 
 		proxyList.Remove(pairNode);
@@ -491,44 +500,74 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 
 
 	BeginPolygon();
-
 	dgFloat32 layer = dgFloat32 (0.0f);
-	dgVertexAtribute polygon[128];
+
+
+int xxxxx = 0;
+	dgVertexAtribute polygon[256];
 	memset (polygon, 0, sizeof (polygon));
+	dgArray<dgBigVector> convexVertexBuffer (1024, GetAllocator());
 	for (dgInt32 i = 0; i < faceCount; i ++) {
 		dgClusterList& clusterList = clusters[i];
 
 		if (clusterList.GetCount()) {
+xxxxx ++;
+
+			dgInt32 count = 0;
 			for (dgClusterList::dgListNode* node = clusterList.GetFirst(); node; node = node->GetNext()) {
 				dgClusterFace& face = node->GetInfo();
 				dgEdge* edge = face.m_edge;
+dgInt32 xxx1 =  0;
 				dgEdge* sourceEdge = source.FindEdge(edge->m_incidentVertex, edge->m_twin->m_incidentVertex);
-				int count = 0;
 				do {
 					dgInt32 index = edge->m_incidentVertex;
-					polygon[count] = source.m_attib[dgInt32 (sourceEdge->m_userData)];
-					polygon[count].m_vertex = points[index];
-					polygon[count].m_vertex.m_w = layer;
+					convexVertexBuffer[count] = points[index];
+
+polygon[xxx1].m_vertex = points[index];
+polygon[xxx1].m_vertex.m_w = layer;
+xxx1 ++;
+
 
 					count ++;
 					sourceEdge = sourceEdge->m_next;
 					edge = edge->m_next;
 				} while (edge != face.m_edge);
-				AddPolygon(count, &polygon[0].m_vertex.m_x, sizeof (dgVertexAtribute), 0);
-			}
-			layer += dgFloat32 (1.0f);
-		}
-		clusters[i].~dgClusterList();
-	}
-
-	EndPolygon(1.0e-5f);
-	ConvertToPolygons();
+if (xxxxx == 3){
+//AddPolygon(xxx1, &polygon[0].m_vertex.m_x, sizeof (dgVertexAtribute), 0);
 }
 
+			}
 
+			dgConvexHull3d convexHull (mesh.GetAllocator(), &convexVertexBuffer[0].m_x, sizeof (dgBigVector), count, 0.0);
+//if (xxxxx == 3)
+			if (convexHull.GetCount()) {
+				const dgBigVector* const vertex = convexHull.GetVertexPool();
+				for (dgConvexHull3d::dgListNode* node = convexHull.GetFirst(); node; node = node->GetNext()) {
+					const dgConvexHull3DFace* const face = &node->GetInfo();
 
+					dgInt32 i0 = face->m_index[0];
+					dgInt32 i1 = face->m_index[1];
+					dgInt32 i2 = face->m_index[2];
 
+					polygon[0].m_vertex = vertex[i0];
+					polygon[0].m_vertex.m_w = layer;
 
+					polygon[1].m_vertex = vertex[i1];
+					polygon[1].m_vertex.m_w = layer;
+
+					polygon[2].m_vertex = vertex[i2];
+					polygon[2].m_vertex.m_w = layer;
+
+					AddPolygon(3, &polygon[0].m_vertex.m_x, sizeof (dgVertexAtribute), 0);
+				}
+
+				layer += dgFloat32 (1.0f);
+//break;
+			}
+		}
+	}
+	EndPolygon(1.0e-5f);
+}
 
 
 
@@ -2632,12 +2671,12 @@ intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
 
 
 // 
-
+/*
 static void CallBack(const char * msg, double progress, double concavity, size_t nVertices)
 {
 	std::cout << msg;
 }
-
+*/
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -2645,131 +2684,26 @@ static void CallBack(const char * msg, double progress, double concavity, size_t
 
 
 
-static bool SaveVRML2(std::ofstream &fout, const HACD::Vec3<double>* const points, int pointCount,
-										   const HACD::Vec3<long>* const triangles, int triangleCount,
-										   const HACD::Material & material, const HACD::Vec3<double>* const colors)
+static void SaveOFF (const std::string & fileName, dgMeshEffect* const mesh_)
 {
-	if (fout.is_open()) 
-	{
-		size_t nV = pointCount;
-		size_t nT = triangleCount;            
-		fout <<"#VRML V2.0 utf8" << std::endl;	    	
-		fout <<"" << std::endl;
-		fout <<"# Vertices: " << nV << std::endl;		
-		fout <<"# Triangles: " << nT << std::endl;		
-		fout <<"" << std::endl;
-		fout <<"Group {" << std::endl;
-		fout <<"	children [" << std::endl;
-		fout <<"		Shape {" << std::endl;
-		fout <<"			appearance Appearance {" << std::endl;
-		fout <<"				material Material {" << std::endl;
-		fout <<"					diffuseColor "      << material.m_diffuseColor.X()      << " " 
-			<< material.m_diffuseColor.Y()      << " "
-			<< material.m_diffuseColor.Z()      << std::endl;  
-		fout <<"					ambientIntensity "  << material.m_ambientIntensity      << std::endl;
-		fout <<"					specularColor "     << material.m_specularColor.X()     << " " 
-			<< material.m_specularColor.Y()     << " "
-			<< material.m_specularColor.Z()     << std::endl; 
-		fout <<"					emissiveColor "     << material.m_emissiveColor.X()     << " " 
-			<< material.m_emissiveColor.Y()     << " "
-			<< material.m_emissiveColor.Z()     << std::endl; 
-		fout <<"					shininess "         << material.m_shininess             << std::endl;
-		fout <<"					transparency "      << material.m_transparency          << std::endl;
-		fout <<"				}" << std::endl;
-		fout <<"			}" << std::endl;
-		fout <<"			geometry IndexedFaceSet {" << std::endl;
-		fout <<"				ccw TRUE" << std::endl;
-		fout <<"				solid TRUE" << std::endl;
-		fout <<"				convex TRUE" << std::endl;
-		if (colors && nT>0)
-		{
-			fout <<"				colorPerVertex FALSE" << std::endl;
-			fout <<"				color Color {" << std::endl;
-			fout <<"					color [" << std::endl;
-			for(size_t c = 0; c < nT; c++)
-			{
-				fout <<"						" << colors[c].X() << " " 
-					<< colors[c].Y() << " " 
-					<< colors[c].Z() << "," << std::endl;
-			}
-			fout <<"					]" << std::endl;
-			fout <<"				}" << std::endl;
-		}
-		if (nV > 0) 
-		{
-			fout <<"				coord DEF co Coordinate {" << std::endl;
-			fout <<"					point [" << std::endl;
-			for(size_t v = 0; v < nV; v++)
-			{
-				fout <<"						" << points[v].X() << " " 
-					<< points[v].Y() << " " 
-					<< points[v].Z() << "," << std::endl;
-			}
-			fout <<"					]" << std::endl;
-			fout <<"				}" << std::endl;
-		}
-		if (nT > 0) 
-		{
-			fout <<"				coordIndex [ " << std::endl;
-			for(size_t f = 0; f < nT; f++)
-			{
-				fout <<"						" << triangles[f].X() << ", " 
-					<< triangles[f].Y() << ", "                                                  
-					<< triangles[f].Z() << ", -1," << std::endl;
-			}
-			fout <<"				]" << std::endl;
-		}
-		fout <<"			}" << std::endl;
-		fout <<"		}" << std::endl;
-		fout <<"	]" << std::endl;
-		fout <<"}" << std::endl;	
-		return true;
-	}
-	return false;
-}
+	dgMeshEffect mesh (*mesh_);
+	mesh.Triangulate();
 
-static bool SaveVRML2(const std::string & fileName, HACD::Vec3<double>* const points, int pointCount, 
-												    HACD::Vec3<long>* const triangles, int triangleCount, 
-													const HACD::Vec3<double>* const colors)
-{
-	std::cout << "Saving " <<  fileName << std::endl;
-	std::ofstream fout(fileName.c_str());
-	if (fout.is_open()) 
-	{
-		const HACD::Material material;
-
-		if (SaveVRML2(fout, points, pointCount, triangles, triangleCount, material, colors))
-		{
-			fout.close();
-			return true;
-		}
-		return false;
-	}
-	return false;
-}
-
-
-
-
-
-static void SaveWRL (const std::string & fileName, dgMeshEffect* const mesh)
-{
-
-	dgInt32 faceCount = mesh->GetTotalFaceCount();
-	dgStack< HACD::Vec3<double> > points (mesh->GetVertexCount());
+	dgInt32 faceCount = mesh.GetTotalFaceCount();
+	dgStack< HACD::Vec3<double> > points (mesh.GetVertexCount());
 	dgStack<  HACD::Vec3<long> > triangles (faceCount);
 	dgStack< HACD::Vec3<double> > colors (faceCount);
 
-	dgBigVector* const vertex = (dgBigVector*) mesh->GetVertexPool();
-	for (dgInt32 i = 0; i < mesh->GetVertexCount(); i ++) {
+	dgBigVector* const vertex = (dgBigVector*) mesh.GetVertexPool();
+	for (dgInt32 i = 0; i < mesh.GetVertexCount(); i ++) {
 		points[i].X() = vertex[i].m_x;
 		points[i].Y() = vertex[i].m_y;
 		points[i].Z() = vertex[i].m_z;
 	}
 
 	dgInt32 triangleCount = 0;
-	dgInt32 mark = mesh->IncLRU();
-	dgPolyhedra::Iterator iter (*mesh);
+	dgInt32 mark = mesh.IncLRU();
+	dgPolyhedra::Iterator iter (mesh);
 	for (iter.Begin(); iter; iter ++) {
 		dgEdge* const face = &(*iter);
 		if ((face->m_mark != mark) && (face->m_incidentFace > 0)) {
@@ -2789,23 +2723,80 @@ static void SaveWRL (const std::string & fileName, dgMeshEffect* const mesh)
 			face->m_prev->m_mark = mark;
 		}
 	}
-	SaveVRML2(fileName, &points[0], mesh->GetVertexCount(), &triangles[0], triangleCount, &colors[0]);
+//	SaveVRML2(fileName, &points[0], mesh->GetVertexCount(), &triangles[0], triangleCount, &colors[0]);
+
+
+	std::cout << "Saving " <<  fileName << std::endl;
+	std::ofstream fout(fileName.c_str());
+	if (fout.is_open()) 
+	{
+		size_t nV = mesh.GetVertexCount();
+		size_t nT = triangleCount;            
+		fout <<"OFF" << std::endl;	    	
+		fout << nV << " " << nT << " " << 0<< std::endl;		
+		for(size_t v = 0; v < nV; v++)
+		{
+			fout << points[v].X() << " " 
+				<< points[v].Y() << " " 
+				<< points[v].Z() << std::endl;
+		}
+		for(size_t f = 0; f < nT; f++)
+		{
+			fout <<"3 " << triangles[f].X() << " " 
+				<< triangles[f].Y() << " "                                                  
+				<< triangles[f].Z() << std::endl;
+		}
+		fout.close();
+	}
 }
 
 
-
-
+/*
+static bool SaveOFF(const std::string & fileName, const std::vector< HACD::Vec3<double> > & points, const std::vector< HACD::Vec3<long> > & triangles)
+{
+	std::cout << "Saving " <<  fileName << std::endl;
+	std::ofstream fout(fileName.c_str());
+	if (fout.is_open()) 
+	{
+		size_t nV = points.size();
+		size_t nT = triangles.size();            
+		fout <<"OFF" << std::endl;	    	
+		fout << nV << " " << nT << " " << 0<< std::endl;		
+		for(size_t v = 0; v < nV; v++)
+		{
+			fout << points[v].X() << " " 
+				<< points[v].Y() << " " 
+				<< points[v].Z() << std::endl;
+		}
+		for(size_t f = 0; f < nT; f++)
+		{
+			fout <<"3 " << triangles[f].X() << " " 
+				<< triangles[f].Y() << " "                                                  
+				<< triangles[f].Z() << std::endl;
+		}
+		fout.close();
+		return true;
+	}
+	return false;
+}
+*/
 
 
 
 dgMeshEffect* dgMeshEffect::CreateConvexApproximation (dgInt32 maxCount) const
 {
 	dgMeshEffect triangleMesh (*this);
-	triangleMesh.Triangulate();
+//	triangleMesh.Triangulate();
+SaveOFF("C:/Users/Julio/Desktop/hacd/data/boxWithNick2.off", &triangleMesh);
+//return new (GetAllocator()) dgMeshEffect (GetAllocator(), &m_points[0].m_x, m_pointCount, sizeof (dgBigVector), 0.0);
+
+dgMeshEffect* const convexPartion = new (GetAllocator()) dgMeshEffect (triangleMesh, 0.01);
+//convexPartion->Triangulate();
+//SaveWRL("../../../media/output.wrl", convexPartion);
+return convexPartion;
 
 
-dgMeshEffect convexPartion (triangleMesh, 0.1);
-
+/*
 	dgInt32 faceCount = triangleMesh.GetTotalFaceCount();
 	dgStack< HACD::Vec3<double> > points (triangleMesh.m_pointCount);
 	dgStack<  HACD::Vec3<long> > triangles (faceCount);
@@ -2906,10 +2897,10 @@ SaveWRL("../../../media/input.wrl", &triangleMesh);
 		}
 	}
 	convexPartition->EndPolygon(dgFloat64 (1.0e-5f));
-
 	
 SaveWRL("../../../media/output.wrl", convexPartition);
+*/
 
-
-	return convexPartition;
+//	return convexPartition;
+return NULL;
 }

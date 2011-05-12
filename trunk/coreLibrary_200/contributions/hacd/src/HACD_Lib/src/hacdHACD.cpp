@@ -20,34 +20,28 @@
 #include <string.h>
 namespace HACD
 { 
+//	int debug = 0;
 	double  HACD::Concavity(ICHull & ch, std::map<long, DPoint> & distPoints)
     {
-		TMMesh & meshCH = ch.GetMesh();
 		double concavity = 0.0;
 		double distance = 0.0;       
 		std::map<long, DPoint>::iterator itDP(distPoints.begin());
 		std::map<long, DPoint>::iterator itDPEnd(distPoints.end());
-		std::map<long, DPoint>::iterator itDP1;
-//        const double EPS = 0.1;
-//        const Vec3<double> e[3] = {Vec3<double>(EPS, 0.0, 0.0), Vec3<double>(0.0, EPS, 0.0), Vec3<double>(0.0, 0.0, EPS) };
-//        Vec3<double> normal1;
 		for(; itDP != itDPEnd; ++itDP) 
 		{
             if (!(itDP->second).m_computed)
             {
-                (itDP->second).m_dist = meshCH.ComputeDistance(itDP->first, m_points[itDP->first], m_normals[itDP->first],
-                                                               (itDP->second).m_computed, true);
-/*
-                for(int k = 0; k < 3 && !(itDP->second).m_computed; k++)
+                if (itDP->first >= 0)
                 {
-                    normal1 = m_normals[itDP->first] + e[k];
-                    normal1.Normalize();
-                    (itDP->second).m_dist = meshCH.ComputeDistance(itDP->first, m_points[itDP->first], normal1,
-                                                                   (itDP->second).m_computed, true);
+                    ch.ComputeDistance(itDP->first, m_points[itDP->first], m_normals[itDP->first], (itDP->second).m_computed, true, false);
                 }
- */
+                else
+                {
+                     ch.ComputeDistance(itDP->first, m_facePoints[-itDP->first-1], m_faceNormals[-itDP->first-1], (itDP->second).m_computed, true, false);
+                }
             }
 			distance = (itDP->second).m_dist;
+//			if (debug) std::cout << itDP->first << " " << distance << std::endl;
 			concavity = std::max<double>(concavity, distance);
 		}
 		return concavity;
@@ -67,28 +61,32 @@ namespace HACD
     void HACD::CreateGraph(bool connectCCs)
     {
 		ComputeV2T();
+		m_t2T.resize(m_nTriangles);
 		m_graph.Clear();
 		m_graph.Allocate(m_nTriangles, 3 * m_nTriangles);
 		unsigned long long tr1[3];
 		unsigned long long tr2[3];
         long i1, j1, k1, i2, j2, k2;
+        long t1, t2;
         for (size_t v = 0; v < m_nPoints; v++) 
 		{
 			std::set<long>::const_iterator it1(m_v2T[v].begin()), itEnd(m_v2T[v].end()); 
 			for(; it1 != itEnd; ++it1)
 			{
-                i1 = m_triangles[*it1].X();
-                j1 = m_triangles[*it1].Y();
-                k1 = m_triangles[*it1].Z();
+                t1 = *it1;
+                i1 = m_triangles[t1].X();
+                j1 = m_triangles[t1].Y();
+                k1 = m_triangles[t1].Z();
 				tr1[0] = GetEdgeIndex(i1, j1);
 				tr1[1] = GetEdgeIndex(j1, k1);
 				tr1[2] = GetEdgeIndex(k1, i1);
 				std::set<long>::const_iterator it2(it1);
 				for(++it2; it2 != itEnd; ++it2)
 				{
-                    i2 = m_triangles[*it2].X();
-                    j2 = m_triangles[*it2].Y();
-                    k2 = m_triangles[*it2].Z();
+                    t2 = *it2;
+                    i2 = m_triangles[t2].X();
+                    j2 = m_triangles[t2].Y();
+                    k2 = m_triangles[t2].Z();
 					tr2[0] = GetEdgeIndex(i2, j2);
 					tr2[1] = GetEdgeIndex(j2, k2);
 					tr2[2] = GetEdgeIndex(k2, i2);
@@ -105,7 +103,9 @@ namespace HACD
 					}
 					if (shared == 1) // two triangles are connected if they share exactly one edge
 					{
-						m_graph.AddEdge(*it1, *it2);
+						m_graph.AddEdge(t1, t2);
+						m_t2T[t1].insert(t2);
+						m_t2T[t2].insert(t1);
 					}
 				}
 			}
@@ -124,7 +124,17 @@ namespace HACD
         Vec3<double> u, v, w, normal;
 		delete [] m_normals;
 		m_normals = new Vec3<double>[m_nPoints];
-
+//		if (m_addExtraDistPoints)
+//		{
+//			m_distPointsMapping.resize(m_nTriangles, -1);
+//		}
+        if (m_addFacesPoints)
+        {
+            delete [] m_facePoints;
+            delete [] m_faceNormals;
+            m_facePoints = new Vec3<double>[m_nTriangles];
+            m_faceNormals = new Vec3<double>[m_nTriangles];
+        }
 		memset(m_normals, 0, sizeof(Vec3<double>) * m_nPoints);
         for(unsigned long f = 0; f < m_nTriangles; f++)
         {
@@ -142,6 +152,10 @@ namespace HACD
             ch->AddPoint(m_points[j], j);
             ch->AddPoint(m_points[k], k);
 			ch->SetDistPoints(&m_graph.m_vertices[f].m_distPoints);
+            ch->SetDistPointsPositions(m_points);
+            ch->SetDistPointsNormals(m_normals);
+            ch->SetFacePointsPositions(m_facePoints);
+            ch->SetFacePointsNormals(m_faceNormals);
 
 			u = m_points[j] - m_points[i];
 			v = m_points[k] - m_points[i];
@@ -154,18 +168,28 @@ namespace HACD
 
 			m_graph.m_vertices[f].m_surf = normal.GetNorm();
 			m_graph.m_vertices[f].m_perimeter = u.GetNorm() + v.GetNorm() + w.GetNorm();
+            
+            normal.Normalize();
 
 			m_graph.m_vertices[f].m_boudaryEdges.insert(GetEdgeIndex(i,j));
 			m_graph.m_vertices[f].m_boudaryEdges.insert(GetEdgeIndex(j,k));
 			m_graph.m_vertices[f].m_boudaryEdges.insert(GetEdgeIndex(k,i));
-            if (m_addExteraDistPoints)	
+            if(m_addFacesPoints)
+            {
+                m_faceNormals[f] = normal;
+                m_facePoints[f] = (m_points[i] + m_points[j] + m_points[k]) / 3.0;
+                m_graph.m_vertices[f].m_distPoints[-f-1].m_distOnly = true;
+                m_graph.m_vertices[f].m_distPoints[-f-1].m_distOnly = true;
+                m_graph.m_vertices[f].m_distPoints[-f-1].m_distOnly = true;
+            }
+            if (m_addExtraDistPoints)	
             {// we need a kd-tree structure to accelerate this part!
                 long i1, j1, k1;
                 Vec3<double> u1, v1, normal1;
-                double distance;
-                double distMin;
+                double distance = 0.0;
+                double distMin = 0.0;
                 size_t faceIndex = m_nTriangles;
-                Vec3<double> seedPoint((m_points[i] + m_points[i] + m_points[k]) / 3.0);
+                Vec3<double> seedPoint((m_points[i] + m_points[j] + m_points[k]) / 3.0);
                 long nhit = 0;
                 for(size_t f1 = 0; f1 < m_nTriangles; f1++)
                 {
@@ -188,6 +212,7 @@ namespace HACD
                 }
                 if (faceIndex < m_nTriangles )
                 {
+//					m_distPointsMapping[f] = faceIndex;
                     i1 = m_triangles[faceIndex].X();
                     j1 = m_triangles[faceIndex].Y();
                     k1 = m_triangles[faceIndex].Z();
@@ -268,15 +293,24 @@ namespace HACD
         m_beta = 0.1;
         m_nVerticesPerCH = 30;
 		m_callBack = 0;
-        m_addExteraDistPoints = false;
+        m_addExtraDistPoints = false;
+		m_addNeighboursDistPoints = false;
 		m_scale = 1000.0;
+		m_partition = 0;
+		m_nMinClusters = 3;
+        m_facePoints = 0;
+        m_faceNormals = 0;
 	}																
 	HACD::~HACD(void)
 	{
 		delete [] m_normals;
         delete [] m_convexHulls;
+		delete [] m_partition;
+        delete [] m_facePoints;
+        delete [] m_faceNormals;
 	}
-    void HACD::ComputeEdgeCost(size_t e)
+	int iteration = 0;
+    bool HACD::ComputeEdgeCost(size_t e, bool fast)
     {
 		GraphEdge & gE = m_graph.m_edges[e];
         long v1 = gE.m_v1;
@@ -324,13 +358,15 @@ namespace HACD
                 }
             }
 		}
-
+		
 		ch->SetDistPoints(&gE.m_distPoints);
+        ch->SetDistPointsPositions(m_points);
+        ch->SetDistPointsNormals(m_normals);
+        ch->SetFacePointsPositions(m_facePoints);
+        ch->SetFacePointsNormals(m_faceNormals);
 
         // create the convex-hull
-
-			
-        while (!ch->Process())		// if we face problems when constructing the visual-hull. really ugly!!!!
+        while (ch->Process() == ICHullErrorInconsistent)		// if we face problems when constructing the visual-hull. really ugly!!!!
 		{
 //			if (m_callBack) (*m_callBack)("\t Problem with convex-hull construction [HACD::ComputeEdgeCost]\n", 0.0, 0.0, 0);
 			ch = new ICHull;
@@ -347,94 +383,130 @@ namespace HACD
 			delete gE.m_convexHull;
 			gE.m_convexHull = ch;
 		}
-
-		// compute boudary edges
-        double perimeter = 0.0;
-		gE.m_boudaryEdges.clear();
-		std::set_symmetric_difference (gV1.m_boudaryEdges.begin(), 
-							  gV1.m_boudaryEdges.end(), 
-							  gV2.m_boudaryEdges.begin(), 
-							  gV2.m_boudaryEdges.end(),
-							  std::inserter( gE.m_boudaryEdges, 
-											 gE.m_boudaryEdges.begin() ) );
-
-		std::set<unsigned long long>::const_iterator itBE(gE.m_boudaryEdges.begin());
-		std::set<unsigned long long>::const_iterator itBEEnd(gE.m_boudaryEdges.end());
-		for(; itBE != itBEEnd; ++itBE)
+		double volume = ch->ComputeVolume();
+        double concavity = 0.0;
+		if (volume == 0.0)
 		{
-                perimeter += (m_points[static_cast<long>((*itBE) >> 32)] - 
-							   m_points[static_cast<long>((*itBE) & 0xFFFFFFFFULL)]).GetNorm();
+			bool insideHull;
+            std::map<long, DPoint>::iterator itDP(gE.m_distPoints.begin());
+            std::map<long, DPoint>::iterator itDPEnd(gE.m_distPoints.end());
+            for(; itDP != itDPEnd; ++itDP) 
+            {	
+                if (itDP->first >= 0)
+                {
+                    concavity = std::max<double>(concavity, ch->ComputeDistance(itDP->first, m_points[itDP->first], m_normals[itDP->first], insideHull, false, false));
+                }
+			}
 		}
-        double surf      = gV1.m_surf + gV2.m_surf;
-        double ratio     = perimeter * perimeter / (4.0 * sc_pi * surf);
-        double concavity = Concavity(*ch, gE.m_distPoints);
-        double volume = ch->ComputeVolume() / pow(m_scale, 3.0);
+        else
+        {
+            if (m_addNeighboursDistPoints)
+            {  // add distance points from adjacent clusters
+                std::set<long> eEdges;
+                std::set_union(gV1.m_edges.begin(), 
+                               gV1.m_edges.end(), 
+                               gV2.m_edges.begin(), 
+                               gV2.m_edges.end(),
+                               std::inserter( eEdges, eEdges.begin() ) );
+                
+                std::set<long>::const_iterator ed(eEdges.begin());
+                std::set<long>::const_iterator itEnd(eEdges.end());
+                long a, b, c;
+                for(; ed != itEnd; ++ed) 
+                {
+                    a = m_graph.m_edges[*ed].m_v1;
+                    b = m_graph.m_edges[*ed].m_v2;
+                    if ( a != v2 && a != v1)
+                    {
+                        c = a;
+                    }
+                    else if ( b != v2 && b != v1)
+                    {
+                        c = b;
+                    }
+                    else
+                    {
+                        c = -1;
+                    }
+                    if ( c > 0)
+                    {
+                        GraphVertex & gVC = m_graph.m_vertices[c];
+                        std::map<long, DPoint>::iterator itDP(gVC.m_distPoints.begin());
+                        std::map<long, DPoint>::iterator itDPEnd(gVC.m_distPoints.end());
+                        std::map<long, DPoint>::iterator itDP1;
+                        for(; itDP != itDPEnd; ++itDP) 
+                        {
+                            itDP1 = gE.m_distPoints.find(itDP->first);
+                            if (itDP->first >= 0 && itDP1 == gE.m_distPoints.end() && ch->IsInside(m_points[itDP->first]))
+                            {
+                                gE.m_distPoints[itDP->first].m_distOnly = true;
+                            }
+                        }
+                    }
+                }
+            }
+            concavity = Concavity(*ch, gE.m_distPoints);
+            volume /= pow(m_scale, 3.0);
+        }
         
-        gE.m_surf      = surf;                          // clusterSurf  
-        gE.m_perimeter = perimeter;                     // recompute the perimeter
-        gE.m_concavity = concavity;                     // concavity
-        gE.m_error     = concavity +  m_alpha * ratio + m_beta * volume;	// priority 
-    }
-    bool HACD::InitializePQ()
+
+		
+        double perimeter = 0.0;
+		double surf = 1.0;
+		if (!fast)
+		{
+			// compute boudary edges
+			gE.m_boudaryEdges.clear();
+			std::set_symmetric_difference (gV1.m_boudaryEdges.begin(), 
+								  gV1.m_boudaryEdges.end(), 
+								  gV2.m_boudaryEdges.begin(), 
+								  gV2.m_boudaryEdges.end(),
+								  std::inserter( gE.m_boudaryEdges, 
+												 gE.m_boudaryEdges.begin() ) );
+
+			std::set<unsigned long long>::const_iterator itBE(gE.m_boudaryEdges.begin());
+			std::set<unsigned long long>::const_iterator itBEEnd(gE.m_boudaryEdges.end());
+			for(; itBE != itBEEnd; ++itBE)
+			{
+					perimeter += (m_points[static_cast<long>((*itBE) >> 32)] - 
+								   m_points[static_cast<long>((*itBE) & 0xFFFFFFFFULL)]).GetNorm();
+			}
+			surf      = gV1.m_surf + gV2.m_surf;
+		}
+        double ratio     = perimeter * perimeter / (4.0 * sc_pi * surf);
+        gE.m_volume	   = volume;						// cluster's volume
+        gE.m_surf      = surf;                          // cluster's area  
+        gE.m_perimeter = perimeter;                     // cluster's perimeter
+        gE.m_concavity = concavity;                     // cluster's concavity
+        gE.m_error     = concavity +  m_alpha * ratio + m_beta * volume;	// cluster's priority
+		return true;
+	}
+    bool HACD::InitializePQ(bool fast)
     {
         for (size_t e=0; e < m_graph.m_nE; ++e) 
         {
-            ComputeEdgeCost(e);
-            m_pqueue.push(GraphEdgePQ(e, m_graph.m_edges[e].m_error));
+            if (ComputeEdgeCost(e, fast))
+			{
+				m_pqueue.push(GraphEdgePQ(e, m_graph.m_edges[e].m_error));
+			}
         }
 		return true;
     }
-    bool HACD::Compute(bool connectCCs, bool fullCH, bool exportDistPoints)
-    {
-		if ( !m_points || !m_triangles || !m_nPoints || !m_nTriangles)
-		{
-			return false;
-		}
-		size_t nV = m_nTriangles;
-		if (m_callBack)
-		{
-			std::ostringstream msg;
-			msg << "+ Mesh" << std::endl;
-			msg << "\t # vertices                \t" << m_nPoints << std::endl;
-			msg << "\t # triangles               \t" << m_nTriangles << std::endl;
-			msg << "+ Parameters" << std::endl;
-			msg << "\t min # of clusters         \t" << m_nClusters << std::endl;
-			msg << "\t max concavity             \t" << m_concavity << std::endl;
-			msg << "\t compacity weigth          \t" << m_alpha << std::endl;
-            msg << "\t volume weigth             \t" << m_beta << std::endl;
-			msg << "\t # vertices per convex-hull\t" << m_nVerticesPerCH << std::endl;
-			msg << "\t Scale                     \t" << m_scale << std::endl;
-			msg << "\t Add extra distance points \t" << m_addExteraDistPoints << std::endl;
-			msg << "\t Connect CCs               \t" << connectCCs << std::endl;
-			msg << "\t Produce full convex-hulls \t" << fullCH << std::endl;		
-			(*m_callBack)(msg.str().c_str(), 0.0, 0.0, nV);
-		}
-		if (m_callBack) (*m_callBack)("+ Normalizing Data\n", 0.0, 0.0, nV);
-		NormalizeData();
-		if (m_callBack) (*m_callBack)("+ Creating Graph\n", 0.0, 0.0, nV);
-		CreateGraph(connectCCs);
-        // Compute the surfaces and perimeters of all the faces
-		if (m_callBack) (*m_callBack)("+ Initializing Graph\n", 0.0, 0.0, nV);
-		InitializeGraph();
-		if (m_callBack) (*m_callBack)("+ Initializing PQ\n", 0.0, 0.0, nV);
-        InitializePQ();
-        
-        //--- we simplify the stuff
-		
-        long v1 = -1;
-        long v2 = -1;
-        
+	void HACD::Simplify(bool fast)
+	{
+		long v1 = -1;
+        long v2 = -1;        
         double progressOld = -1.0;
         double progress = 0.0;
-		if (m_callBack) (*m_callBack)("+ Simplification ...\n", 0.0, 0.0, nV);
+		if (m_callBack) (*m_callBack)("+ Simplification ...\n", 0.0, 0.0, m_nTriangles);
 
         double globalConcavity  = 0.0;     
 		char msg[1024];
         while ( (globalConcavity < m_concavity) && 
-				(m_graph.GetNVertices() > m_nClusters) && 
+				(m_graph.GetNVertices() > m_nMinClusters) && 
 				(m_graph.GetNEdges()> 1)) 
 		{
-            progress = 100.0-m_graph.GetNVertices() * 100.0 / nV;
+            progress = 100.0-m_graph.GetNVertices() * 100.0 / m_nTriangles;
             if (fabs(progress-progressOld) > 0.1 && m_callBack)
             {
 				sprintf(msg, "%3.2f %% V = %lu \t C = %f \t \t \r", progress, m_graph.GetNVertices(), globalConcavity);
@@ -461,8 +533,6 @@ namespace HACD
 			while (  m_graph.m_edges[currentEdge.m_name].m_deleted || 
 					 m_graph.m_edges[currentEdge.m_name].m_error != currentEdge.m_priority);
 
-			
-
 			if (m_graph.m_edges[currentEdge.m_name].m_concavity < m_concavity && !done)
 			{
                 globalConcavity = std::max<double>(globalConcavity ,m_graph.m_edges[currentEdge.m_name].m_concavity);
@@ -471,11 +541,16 @@ namespace HACD
 				// update vertex info
 				m_graph.m_vertices[v1].m_error     = m_graph.m_edges[currentEdge.m_name].m_error;
 				m_graph.m_vertices[v1].m_surf	   = m_graph.m_edges[currentEdge.m_name].m_surf;
+				m_graph.m_vertices[v1].m_volume	   = m_graph.m_edges[currentEdge.m_name].m_volume;
 				m_graph.m_vertices[v1].m_concavity = m_graph.m_edges[currentEdge.m_name].m_concavity;
 				m_graph.m_vertices[v1].m_perimeter = m_graph.m_edges[currentEdge.m_name].m_perimeter;
                 m_graph.m_vertices[v1].m_distPoints   = m_graph.m_edges[currentEdge.m_name].m_distPoints;
                 (*m_graph.m_vertices[v1].m_convexHull) = (*m_graph.m_edges[currentEdge.m_name].m_convexHull);
 				(m_graph.m_vertices[v1].m_convexHull)->SetDistPoints(&(m_graph.m_vertices[v1].m_distPoints));
+                (m_graph.m_vertices[v1].m_convexHull)->SetDistPointsPositions(m_points);
+                (m_graph.m_vertices[v1].m_convexHull)->SetDistPointsNormals(m_normals);
+                (m_graph.m_vertices[v1].m_convexHull)->SetFacePointsPositions(m_facePoints);
+                (m_graph.m_vertices[v1].m_convexHull)->SetFacePointsNormals(m_faceNormals);
 				m_graph.m_vertices[v1].m_boudaryEdges   = m_graph.m_edges[currentEdge.m_name].m_boudaryEdges;
 				
 				// We apply the optimal ecol
@@ -486,8 +561,10 @@ namespace HACD
 				for(; itE != itEEnd; ++itE)
 				{
 					size_t e = *itE;
-					ComputeEdgeCost(e);
-					m_pqueue.push(GraphEdgePQ(e, m_graph.m_edges[e].m_error));
+					if (ComputeEdgeCost(e, fast))
+					{
+						m_pqueue.push(GraphEdgePQ(e, m_graph.m_edges[e].m_error));
+					}
 				}
 			}
             else
@@ -495,17 +572,15 @@ namespace HACD
                 break;
             }
         }
-        m_nClusters = m_graph.GetNVertices();
-		if (m_callBack) (*m_callBack)("+ Denormalizing Data\n", 0.0, 0.0, m_nClusters);
-		DenormalizeData();
-
-		if (m_callBack) (*m_callBack)("+ Computing final convex-hulls\n", 0.0, 0.0, m_nClusters);
-        delete [] m_convexHulls;
-        m_convexHulls = new ICHull[m_nClusters];
+		while (!m_pqueue.empty())
+		{
+			m_pqueue.pop();
+		}
+		
         m_cVertices.clear();
         m_cVertices.reserve(m_nClusters);
-        size_t p=0;
-        for (size_t v = 0; v != m_graph.m_vertices.size(); ++v) 
+		m_nClusters = m_graph.GetNVertices();
+		for (size_t p=0, v = 0; v != m_graph.m_vertices.size(); ++v) 
 		{
 			if (!m_graph.m_vertices[v].m_deleted)
 			{
@@ -513,159 +588,130 @@ namespace HACD
                 {
                     char msg[1024];
                     sprintf(msg, "\t CH \t %lu \t %lf \t %lf\n", p, m_graph.m_vertices[v].m_concavity, m_graph.m_vertices[v].m_error);
-                    (*m_callBack)(msg, 0.0, 0.0, m_nClusters);
+					(*m_callBack)(msg, 0.0, 0.0, m_nClusters);
+					p++;
                 }
                 m_cVertices.push_back(v);			
-                // compute the convex-hull
-                const std::map<long, DPoint> & pointsCH =  m_graph.m_vertices[v].m_distPoints;
-                std::map<long, DPoint>::const_iterator itCH(pointsCH.begin());
-                std::map<long, DPoint>::const_iterator itCHEnd(pointsCH.end());
-                for(; itCH != itCHEnd; ++itCH) 
-                {
-                    if (!(itCH->second).m_distOnly)
-                    {
-                        m_convexHulls[p].AddPoint(m_points[itCH->first], itCH->first);
-                    }
-                }
-                if (fullCH)
-                {
-                    m_convexHulls[p].Process();
-                }
-                else
-                {
-                    m_convexHulls[p].Process(m_nVerticesPerCH);
-                }
-                if (exportDistPoints)
-                {
-                    itCH = pointsCH.begin();
-                    for(; itCH != itCHEnd; ++itCH) 
-                    {
-                        if ((itCH->second).m_distOnly)
-                        {
-                            m_convexHulls[p].AddPoint(m_points[itCH->first], itCH->first);
-                        }
-                    }
-                }
-                p++;
 			}
 		}
-
-        //CleanClusters(fullCH);
         if (m_callBack)
         {
 			sprintf(msg, "# clusters =  %lu \t C = %f\n", m_nClusters, globalConcavity);
 			(*m_callBack)(msg, progress, globalConcavity,  m_graph.GetNVertices());
         }
-        return true;
-    }
-    void HACD::CleanClusters(bool fullCH)
+
+	}
+    bool HACD::Compute(bool connectCCs, bool fullCH, bool exportDistPoints)
     {
-        if (m_nClusters < 1)
-        {
-            return;
-        }
-        std::vector<long>::const_iterator it;
-        long * partition = new long [m_nTriangles];
-        memset(partition, sizeof(long) * m_nTriangles, 0); 
-        long v;
-        long i, j, k;
-        m_nClusters = 0;
-        for (size_t p = 0; p != m_cVertices.size(); ++p) 
+		if ( !m_points || !m_triangles || !m_nPoints || !m_nTriangles)
 		{
-            bool empty = true;
-            v = m_cVertices[0];
-            m_graph.m_vertices[v].m_ancestors.push_back(v);
-            for (it =  m_graph.m_vertices[v].m_ancestors.begin();
-                 it != m_graph.m_vertices[v].m_ancestors.end(); ++it) 
+			return false;
+		}
+		size_t nV = m_nTriangles;
+		if (m_callBack)
+		{
+			std::ostringstream msg;
+			msg << "+ Mesh" << std::endl;
+			msg << "\t # vertices                     \t" << m_nPoints << std::endl;
+			msg << "\t # triangles                    \t" << m_nTriangles << std::endl;
+			msg << "+ Parameters" << std::endl;
+			msg << "\t min # of clusters              \t" << m_nClusters << std::endl;
+			msg << "\t max concavity                  \t" << m_concavity << std::endl;
+			msg << "\t compacity weigth               \t" << m_alpha << std::endl;
+            msg << "\t volume weigth                  \t" << m_beta << std::endl;
+			msg << "\t # vertices per convex-hull     \t" << m_nVerticesPerCH << std::endl;
+			msg << "\t Scale                          \t" << m_scale << std::endl;
+			msg << "\t Add extra distance points      \t" << m_addExtraDistPoints << std::endl;
+            msg << "\t Add neighbours distance points \t" << m_addNeighboursDistPoints << std::endl;
+            msg << "\t Add face distance points       \t" << m_addFacesPoints << std::endl;
+			msg << "\t Connect CCs                    \t" << connectCCs << std::endl;
+			msg << "\t Produce full convex-hulls      \t" << fullCH << std::endl;		
+			(*m_callBack)(msg.str().c_str(), 0.0, 0.0, nV);
+		}
+		if (m_callBack) (*m_callBack)("+ Normalizing Data\n", 0.0, 0.0, nV);
+		NormalizeData();
+		if (m_callBack) (*m_callBack)("+ Creating Graph\n", 0.0, 0.0, nV);
+		CreateGraph(connectCCs);
+        // Compute the surfaces and perimeters of all the faces
+		if (m_callBack) (*m_callBack)("+ Initializing Graph\n", 0.0, 0.0, nV);
+		InitializeGraph();
+		if (m_callBack) (*m_callBack)("+ Initializing PQ\n", 0.0, 0.0, nV);
+        InitializePQ(false);
+        
+        // we simplify the stuff		
+		Simplify(false);
+//		CleanClusters();
+
+
+		if (m_callBack) (*m_callBack)("+ Denormalizing Data\n", 0.0, 0.0, m_nClusters);
+		DenormalizeData();
+
+		if (m_callBack) (*m_callBack)("+ Computing final convex-hulls\n", 0.0, 0.0, m_nClusters);
+        delete [] m_convexHulls;
+        m_convexHulls = new ICHull[m_nClusters];
+		delete [] m_partition;
+	    m_partition = new long [m_nTriangles];
+		for (size_t p = 0; p != m_cVertices.size(); ++p) 
+		{
+			size_t v = m_cVertices[p];
+			m_partition[v] = p;
+			for(size_t a = 0; a < m_graph.m_vertices[v].m_ancestors.size(); a++)
+			{
+				m_partition[m_graph.m_vertices[v].m_ancestors[a]] = p;
+			}
+            // compute the convex-hull
+            const std::map<long, DPoint> & pointsCH =  m_graph.m_vertices[v].m_distPoints;
+            std::map<long, DPoint>::const_iterator itCH(pointsCH.begin());
+            std::map<long, DPoint>::const_iterator itCHEnd(pointsCH.end());
+            for(; itCH != itCHEnd; ++itCH) 
             {
-                if (partition[*it] == 0)
+                if (!(itCH->second).m_distOnly)
                 {
-                    partition[*it] = p+1;
-                    empty = false;
+                    m_convexHulls[p].AddPoint(m_points[itCH->first], itCH->first);
                 }
             }
-            
-            for (size_t p1 = p+1; p1 != m_cVertices.size(); ++p1) 
+			m_convexHulls[p].SetDistPoints(&m_graph.m_vertices[v].m_distPoints);
+			m_convexHulls[p].SetDistPointsPositions(m_points);
+			m_convexHulls[p].SetDistPointsNormals(m_normals);
+			m_convexHulls[p].SetFacePointsPositions(m_facePoints);
+			m_convexHulls[p].SetFacePointsNormals(m_faceNormals);            
+            if (fullCH)
             {
-
-                if (1/* intersection between CH(p) and CH(p1)*/)
+	            m_convexHulls[p].Process();
+            }
+            else
+            {
+	            m_convexHulls[p].Process(m_nVerticesPerCH);
+            }
+            if (exportDistPoints)
+            {
+                itCH = pointsCH.begin();
+                for(; itCH != itCHEnd; ++itCH) 
                 {
-                    v = m_cVertices[p1];
-                    m_graph.m_vertices[v].m_ancestors.push_back(v);
-                    for (it =  m_graph.m_vertices[v].m_ancestors.begin();
-                         it != m_graph.m_vertices[v].m_ancestors.end(); ++it) 
+                    if ((itCH->second).m_distOnly)
                     {
-                        if (partition[*it] == 0)
+                        if (itCH->first >= 0)
                         {
-                            i = m_triangles[*it].X();
-                            j = m_triangles[*it].Y();
-                            k = m_triangles[*it].Z();
-                            if (m_convexHulls[p].IsInside(m_points[i]) &&
-                                m_convexHulls[p].IsInside(m_points[j]) &&
-                                m_convexHulls[p].IsInside(m_points[k])   ) //if triangle *it inside CH(p) add it to CH(p)
-                            {
-                                partition[*it] = p+1;
-                                empty = false;
-                            }
+                            m_convexHulls[p].AddPoint(m_points[itCH->first], itCH->first);
+                        }
+                        else
+                        {
+                            m_convexHulls[p].AddPoint(m_facePoints[-itCH->first-1], itCH->first);
                         }
                     }
                 }
             }
-            if (!empty)
-            {
-                m_nClusters++;
-            }
-        }
-        delete [] m_convexHulls;
-        m_graph.Clear();
-        std::set<long> * c2v = new std::set<long>[m_nClusters];
-        for(size_t t = 0; t < m_nTriangles; ++t)
-        {
-            i = m_triangles[*it].X();
-            j = m_triangles[*it].Y();
-            k = m_triangles[*it].Z();
-            c2v[partition[t]-1].insert(i);
-            c2v[partition[t]-1].insert(j);
-            c2v[partition[t]-1].insert(k);
-        }
-        m_convexHulls = new ICHull[m_nClusters];
-        for(size_t p = 0; p < m_nClusters; ++p)
-        {
-            std::set<long>::const_iterator itP(c2v[p].begin()), 
-                                           itPEnd(c2v[p].end());
-            for(; itP != itPEnd; ++itP)
-            {
-                m_convexHulls[p].AddPoint(m_points[*itP]);
-            }
-            if (fullCH)
-            {
-                m_convexHulls[p].Process();
-            }
-            else
-            {
-                m_convexHulls[p].Process(m_nVerticesPerCH);
-            }
-        }
-        
-        delete [] partition;
-        delete [] c2v;
+		}       
+        return true;
     }
-    void HACD::ComputePartition(long * partition) const
+    
+    size_t HACD::GetNTrianglesCH(size_t numCH) const
     {
-        // we fill the partition       
-        if (m_callBack) (*m_callBack)("+ Filling partition...\n", 0.0, 0.0, m_graph.GetNVertices());
-		std::vector<long>::const_iterator it;
-        size_t v;
-        for (size_t p = 0; p != m_cVertices.size(); ++p) 
-		{
-            v = m_cVertices[p];
-            partition[v] = static_cast<long>(p);            
-            for (it =  m_graph.m_vertices[v].m_ancestors.begin();
-                 it != m_graph.m_vertices[v].m_ancestors.end(); ++it) 
-            {
-                partition[*it] = static_cast<long>(p);
-            }
+        if (numCH >= m_nClusters)
+        {
+            return 0;
         }
+        return m_convexHulls[numCH].GetMesh().GetNTriangles();
     }
     size_t HACD::GetNPointsCH(size_t numCH) const
     {
@@ -675,14 +721,7 @@ namespace HACD
         }
         return m_convexHulls[numCH].GetMesh().GetNVertices();
     }
-    size_t HACD::GetNTrianglesCH(size_t numCH) const
-    {
-        if (numCH >= m_nClusters)
-        {
-            return 0;
-        }
-        return m_convexHulls[numCH].GetMesh().GetNTriangles();
-    }
+
     bool HACD::GetCH(size_t numCH, Vec3<double> * const points, Vec3<long> * const triangles)
     {
         if (numCH >= m_nClusters)
@@ -707,7 +746,7 @@ namespace HACD
             Material mat;
             if (numCluster < 0)
             {
-                for (size_t p = 0; p != m_cVertices.size(); ++p) 
+                for (size_t p = 0; p != m_nClusters; ++p) 
                 {
                     if (!uniColor)
                     {
@@ -743,3 +782,200 @@ namespace HACD
         }
     }
 }
+
+
+
+/*
+ void HACD::CleanClusters()
+ {
+ if (m_nClusters < 1)
+ {
+ return;
+ }
+ std::vector<long>::const_iterator it;
+ delete [] m_partition;
+ m_partition = new long [m_nTriangles];
+ memset(m_partition, 0, sizeof(long) * m_nTriangles); 
+ 
+ m_nClusters = 0;
+ bool empty;
+ for (size_t p = 0; p != m_cVertices.size(); ++p) 
+ {
+ m_graph.m_vertices[m_cVertices[p]].m_ancestors.push_back(m_cVertices[p]);
+ }
+ 
+ 
+ 
+ for (size_t p = 0; p != m_cVertices.size(); ++p) 
+ {
+ long v, vn;
+ long i, j, k;
+ empty = true;
+ v = m_cVertices[p];
+ ICHull  * ch = m_graph.m_vertices[v].m_convexHull;
+ for (it =  m_graph.m_vertices[v].m_ancestors.begin();
+ it != m_graph.m_vertices[v].m_ancestors.end(); ++it) 
+ {
+ if (m_partition[*it] == 0)
+ {
+ m_partition[*it] = p+1;
+ empty = false;
+ }
+ }
+ std::set<long>::const_iterator itDE(m_graph.m_vertices[v].m_edges.begin());
+ std::set<long>::const_iterator itDEEnd(m_graph.m_vertices[v].m_edges.end());
+ for(; itDE != itDEEnd; ++itDE) 
+ {
+ vn = (m_graph.m_edges[*itDE].m_v1 != v)? m_graph.m_edges[*itDE].m_v1 : m_graph.m_edges[*itDE].m_v2;
+ if (vn > v)
+ {
+ for (it =  m_graph.m_vertices[vn].m_ancestors.begin();
+ it != m_graph.m_vertices[vn].m_ancestors.end(); ++it) 
+ {
+ if (m_partition[*it] == 0)
+ {
+ i = m_triangles[*it].X();
+ j = m_triangles[*it].Y();
+ k = m_triangles[*it].Z();
+ if (ch->IsInside(m_points[i]) &&
+ ch->IsInside(m_points[j]) &&
+ ch->IsInside(m_points[k])   ) //if triangle *it inside CH(p) add it to CH(p)
+ {
+ m_partition[*it] = p+1;
+ empty = false;
+ }
+ }
+ }
+ }
+ }
+ if (!empty)
+ {
+ m_nClusters++;
+ }
+ }
+ m_graph.Clear();
+ m_cVertices.clear();
+ 
+ // update partition to have each CC in a different cluster
+ std::vector<long> T;
+ char * tags = new char [m_nTriangles];
+ memset(tags, 0, m_nTriangles);
+ size_t nClusters = 0;
+ for(size_t t = 0; t < m_nTriangles; ++t)
+ {
+ if (tags[t] == 0)
+ {
+ long currentCluster = m_partition[t];
+ m_partition[t] = nClusters;
+ tags[t] = 1;
+ T.push_back(t);
+ long currentTriangle;
+ while(T.size() > 0)
+ {
+ currentTriangle = T.back();
+ T.pop_back();
+ std::set<long>::const_iterator itN(m_t2T[currentTriangle].begin());
+ std::set<long>::const_iterator itNEnd(m_t2T[currentTriangle].end());
+ for(; itN != itNEnd; ++itN) 
+ {
+ if (tags[*itN] == 0 && m_partition[*itN]==currentCluster)
+ {
+ m_partition[*itN] = nClusters;
+ tags[*itN] = 1;
+ T.push_back(*itN);
+ }
+ }
+ }
+ T.clear();
+ nClusters++;
+ }
+ }
+ delete [] tags;
+ m_nClusters = nClusters;
+ 
+ // create graph
+ m_graph.Allocate(m_nClusters, m_nClusters * (m_nClusters+1) / 2);
+ for (size_t p0 = 0; p0 != nClusters; ++p0) 
+ {
+ ICHull  * ch = new ICHull;
+ m_graph.m_vertices[p0].m_convexHull = ch;
+ ch->SetDistPoints(&m_graph.m_vertices[p0].m_distPoints);
+ ch->SetDistPointsPositions(m_points);
+ ch->SetDistPointsNormals(m_normals);
+ ch->SetFacePointsPositions(m_facePoints);
+ ch->SetFacePointsNormals(m_faceNormals);
+ }
+ 
+ long currentCluster;
+ long neighbourCluster;
+ std::map<long, DPoint>::iterator itMap;
+ long ver[3];
+ long ver1[3];
+ for(size_t t = 0; t < m_nTriangles; ++t)
+ {
+ ver[0] = m_triangles[t].X();
+ ver[1] = m_triangles[t].Y();
+ ver[2] = m_triangles[t].Z();
+ currentCluster = m_partition[t];
+ m_graph.m_vertices[currentCluster].m_ancestors.push_back(t);
+ 
+ std::set<long>::const_iterator itN(m_t2T[t].begin());
+ std::set<long>::const_iterator itNEnd(m_t2T[t].end());
+ for(; itN != itNEnd; ++itN) 
+ {
+ neighbourCluster = m_partition[*itN];
+ if (neighbourCluster != currentCluster && m_graph.GetEdgeID(neighbourCluster, currentCluster) < 0)
+ {
+ m_graph.AddEdge(neighbourCluster, currentCluster);
+ }
+ }
+ 
+ for (int k = 0; k < 3; k++)
+ {
+ itMap = m_graph.m_vertices[currentCluster].m_distPoints.find(ver[k]);
+ if (itMap == m_graph.m_vertices[currentCluster].m_distPoints.end() || (itMap->second).m_distOnly)
+ {
+ m_graph.m_vertices[currentCluster].m_convexHull->AddPoint(m_points[ver[k]], ver[k]);
+ }
+ m_graph.m_vertices[currentCluster].m_distPoints[ver[k]].m_distOnly = false;
+ }
+ 
+ if (m_addExtraDistPoints && m_distPointsMapping[t]>=0)
+ {
+ ver1[0] = m_triangles[m_distPointsMapping[t]].X();
+ ver1[1] = m_triangles[m_distPointsMapping[t]].Y();
+ ver1[2] = m_triangles[m_distPointsMapping[t]].Z();
+ for(int k = 0; k < 3; k++)
+ {
+ if (m_graph.m_vertices[currentCluster].m_distPoints.find(ver1[k]) == m_graph.m_vertices[currentCluster].m_distPoints.end())
+ {
+ m_graph.m_vertices[currentCluster].m_distPoints[ver1[k]].m_distOnly = true;
+ }
+ }
+ }
+ }
+ for (size_t p0 = 0; p0 != nClusters; ++p0) 
+ {
+ m_graph.m_vertices[p0].m_convexHull->Process();
+ double concavity = Concavity((*m_graph.m_vertices[p0].m_convexHull), m_graph.m_vertices[p0].m_distPoints);
+ double volume = m_graph.m_vertices[p0].m_convexHull->ComputeVolume() / pow(m_scale, 3.0);
+ m_graph.m_vertices[p0].m_volume =  volume;
+ m_graph.m_vertices[p0].m_surf      = 1.0;
+ m_graph.m_vertices[p0].m_perimeter = 0.0;
+ m_graph.m_vertices[p0].m_concavity = concavity;
+ m_graph.m_vertices[p0].m_error     = concavity +  m_beta * volume;
+ }
+ for (size_t p0 = 0; p0 != nClusters; ++p0) 
+ {
+ if (m_callBack) 
+ {
+ char msg[1024];
+ sprintf(msg, "\t CH \t %lu \t %lf \t %lf\n", p0, m_graph.m_vertices[p0].m_concavity, m_graph.m_vertices[p0].m_error);
+ (*m_callBack)(msg, 0.0, 0.0, m_nClusters);
+ }
+ }
+ 
+ InitializePQ(true);
+ Simplify(true);
+ }
+ */

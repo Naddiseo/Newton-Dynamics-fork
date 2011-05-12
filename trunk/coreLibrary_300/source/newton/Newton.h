@@ -929,7 +929,7 @@ extern "C" {
 	NEWTON_API NewtonMesh* NewtonMeshCreateFromMesh(const NewtonMesh* const mesh);
 	NEWTON_API NewtonMesh* NewtonMeshCreateFromCollision(const NewtonCollision* const collision);
 	NEWTON_API NewtonMesh* NewtonMeshConvexHull (const NewtonWorld* const newtonWorld, int count, const dFloat* const vertexCloud, int strideInBytes, dFloat tolerance);
-	NEWTON_API NewtonMesh* NewtonMeshCreatePlane (const NewtonWorld* const newtonWorld, const dFloat* const locationMatrix, dFloat witdth, dFloat breadth, int material, const dFloat* const textureMatrix0, const dFloat* const textureMatrix1);
+//	NEWTON_API NewtonMesh* NewtonMeshCreatePlane (const NewtonWorld* const newtonWorld, const dFloat* const locationMatrix, dFloat witdth, dFloat breadth, int material, const dFloat* const textureMatrix0, const dFloat* const textureMatrix1);
 	
 	NEWTON_API void NewtonMeshDestroy(const NewtonMesh* const mesh);
 
@@ -950,6 +950,7 @@ extern "C" {
 	NEWTON_API NewtonMesh* NewtonMeshDifference (const NewtonMesh* const mesh, const NewtonMesh* const clipper, const dFloat* const clipperMatrix);
 	NEWTON_API NewtonMesh* NewtonMeshIntersection (const NewtonMesh* const mesh, const NewtonMesh* const clipper, const dFloat* const clipperMatrix);
 	NEWTON_API void NewtonMeshClip (const NewtonMesh* const mesh, const NewtonMesh* const clipper, const dFloat* const clipperMatrix, NewtonMesh** const topMesh, NewtonMesh** const bottomMesh);
+	NEWTON_API void NewtonMeshPlaneClip (const NewtonMesh* const mesh, dFloat* const planeMatrix, const dFloat* const planeTextureMatrix, int planeMaterial, NewtonMesh** const topMesh, NewtonMesh** const bottomMesh);
 
 	NEWTON_API NewtonMesh* NewtonMeshApproximateConvexDecomposition (const NewtonMesh* const mesh);
 	NEWTON_API NewtonMesh* NewtonMeshTetrahedralization (const NewtonMesh* const mesh, int internalMaterial, const dFloat* const textureMatrix);

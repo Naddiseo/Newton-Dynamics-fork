@@ -31,7 +31,7 @@
 
 
 
-/*
+
 class dgFlatClipEdgeAttr
 {
 	public:
@@ -44,7 +44,6 @@ class dgFlatClipEdgeAttr
 	dgEdge* m_edge;
 	dgEdge* m_twin;
 };
-*/
 
 
 
@@ -59,33 +58,31 @@ dgMeshEffect::dgMeshEffect(dgMemoryAllocator* const allocator, bool preAllocaBuf
 dgMeshEffect::dgMeshEffect (dgMemoryAllocator* const allocator, const dgMatrix& planeMatrix, dgFloat32 witdth, dgFloat32 breadth, dgInt32 material, const dgMatrix& textureMatrix0, const dgMatrix& textureMatrix1)
 	:dgPolyhedra(allocator)
 {
-	_ASSERTE (0);
-/*
-	dgVector face[4];
 	dgInt32 index[4];
 	dgInt64 attrIndex[4];
+	dgBigVector face[4];
 
 	Init(true);
 
-	m_isFlagFace = 1;
-	face[0] = dgVector (dgFloat32 (0.0f), -witdth, -breadth, dgFloat32 (0.0f));
-	face[1] = dgVector (dgFloat32 (0.0f),  witdth, -breadth, dgFloat32 (0.0f));
-	face[2] = dgVector (dgFloat32 (0.0f),  witdth,  breadth, dgFloat32 (0.0f));
-	face[3] = dgVector (dgFloat32 (0.0f), -witdth,  breadth, dgFloat32 (0.0f));
+	face[0] = dgBigVector (dgFloat32 (0.0f), -witdth, -breadth, dgFloat32 (0.0f));
+	face[1] = dgBigVector (dgFloat32 (0.0f),  witdth, -breadth, dgFloat32 (0.0f));
+	face[2] = dgBigVector (dgFloat32 (0.0f),  witdth,  breadth, dgFloat32 (0.0f));
+	face[3] = dgBigVector (dgFloat32 (0.0f), -witdth,  breadth, dgFloat32 (0.0f));
 
 	for (dgInt32 i = 0; i < 4; i ++) {
-		dgVector uv0 (textureMatrix0.TransformVector(face[i]));
-		dgVector uv1 (textureMatrix1.TransformVector(face[i]));
+		dgBigVector uv0 (textureMatrix0.TransformVector(face[i]));
+		dgBigVector uv1 (textureMatrix1.TransformVector(face[i]));
 
 		m_points[i] = planeMatrix.TransformVector(face[i]);
 
 		m_attib[i].m_vertex.m_x = m_points[i].m_x;
 		m_attib[i].m_vertex.m_y = m_points[i].m_y;
 		m_attib[i].m_vertex.m_z = m_points[i].m_z;
+		m_attib[i].m_vertex.m_w = dgFloat64 (0.0f);
 
-		m_attib[i].m_normal.m_x = planeMatrix.m_front.m_x;
-		m_attib[i].m_normal.m_y = planeMatrix.m_front.m_y;
-		m_attib[i].m_normal.m_z = planeMatrix.m_front.m_z;
+		m_attib[i].m_normal_x = planeMatrix.m_front.m_x;
+		m_attib[i].m_normal_y = planeMatrix.m_front.m_y;
+		m_attib[i].m_normal_z = planeMatrix.m_front.m_z;
 		
 		m_attib[i].m_u0 = uv0.m_y;
 		m_attib[i].m_v0 = uv0.m_z;
@@ -104,7 +101,6 @@ dgMeshEffect::dgMeshEffect (dgMemoryAllocator* const allocator, const dgMatrix& 
 	BeginFace();
 	AddFace (4, index, attrIndex);
 	EndFace();
-*/
 }
 
 
@@ -3050,17 +3046,8 @@ _ASSERTE (0);
 }
 
 
-void dgMeshEffect::PlaneClipMesh (const dgPlane& plane, dgMeshEffect** left, dgMeshEffect** right)
+void dgMeshEffect::PlaneClipMesh (const dgMatrix& planeMatrix, const dgMatrix& planeTextMatrix, dgInt32 planeMaterial, dgMeshEffect** const left, dgMeshEffect** const right) const 
 {
-_ASSERTE (0);
- /*
-
-	dgInt32 mark;	
-	dgInt32 frontCount;
-	dgInt32 backCount;
-	dgMeshEffect* backMesh;
-	dgMeshEffect* frontMesh;
-
 	*left = NULL;
 	*right = NULL;
 
@@ -3069,25 +3056,27 @@ _ASSERTE (0);
 	dgStack<dgInt8> vertexSidePool(GetCount() * 2 + 256);
 	dgInt8* const vertexSide = &vertexSidePool[0];
 
-	backCount = 0;
-	frontCount = 0;
-	mark = IncLRU();
-	dgPolyhedra::Iterator iter (*this);
+	dgBigPlane plane (planeMatrix.m_front, - (planeMatrix.m_front % planeMatrix.m_posit));
+	plane = plane.Scale (dgFloat64 (1.0) / sqrt (plane % plane));
+
+	dgMeshEffect mesh (*this);
+
+	dgInt32 backCount = 0;
+	dgInt32 frontCount = 0;
+
+	
+	dgPolyhedra::Iterator iter (mesh);
+	dgInt32 mark = mesh.IncLRU();
 	for (iter.Begin(); iter; iter ++){
-		dgEdge* vertex;
-
-		vertex = &(*iter);
+		dgEdge* const vertex = &(*iter);
 		if (vertex->m_mark != mark) {
-			dgEdge* ptr;
-			dgFloat32 test;
-
-			ptr = vertex;
+			dgEdge* ptr = vertex;
 			do {
 				ptr->m_mark = mark;
 				ptr = ptr->m_twin->m_next;
 			} while (ptr != vertex);
 
-			test = plane.Evalue(m_points[vertex->m_incidentVertex]);
+			dgFloat64 test = plane.Evalue(mesh.m_points[vertex->m_incidentVertex]);
 			if (test >= dgFloat32 (1.0e-3f)) {
 				frontCount ++;
 				vertexSide[vertex->m_incidentVertex] = 1;
@@ -3097,58 +3086,50 @@ _ASSERTE (0);
 			} else {
 				vertexSide[vertex->m_incidentVertex] = 0;
 			}
-			m_points[vertex->m_incidentVertex].m_w = test;
+			mesh.m_points[vertex->m_incidentVertex].m_w = test;
 		}
 	}
-
 
 	if ((frontCount == 0) || (backCount == 0)) {
 		return;
 	}
 
-	mark = IncLRU();
+	mark = mesh.IncLRU();
 	for (iter.Begin(); iter; ){
-		dgEdge* edge;
+		dgEdge* const edge = &(*iter);
 
-		edge = &(*iter);
 		iter ++;
 		if (&(*iter) == edge->m_twin) {
 			iter ++;
 		}
+
 		if (edge->m_mark != mark) {
 			edge->m_twin->m_mark = mark;
-
 			if (vertexSide[edge->m_incidentVertex] * vertexSide[edge->m_twin->m_incidentVertex] < 0) {
-				dgFloat32 test0;
-				dgFloat32 param;
 
-				test0 = m_points[edge->m_incidentVertex].m_w;
+				dgFloat64 test0 = mesh.m_points[edge->m_incidentVertex].m_w;
 
-				dgVector dp (m_points[edge->m_twin->m_incidentVertex] - m_points[edge->m_incidentVertex]);
-				param = -test0 / (plane % dp);
+				dgBigVector dp (mesh.m_points[edge->m_twin->m_incidentVertex] - mesh.m_points[edge->m_incidentVertex]);
+				dgFloat64 param = -test0 / (plane % dp);
 
-				InsertEdgeVertex (edge, param);
-				vertexSide[m_pointCount - 1] = 0;
+				mesh.InsertEdgeVertex (edge, param);
+				vertexSide[mesh.m_pointCount - 1] = 0;
 			}
 		}
 	}
 
-	mark = IncLRU();
+	mark = mesh.IncLRU();
 	for (iter.Begin(); iter; iter ++){
-		dgEdge* face;
+		dgEdge* const face = &(*iter);
 
-		face = &(*iter);
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark) && (vertexSide[face->m_incidentVertex] == 0)) {
-			dgInt32 side;
-			dgEdge* ptr;
-
-			ptr = face;
+			dgEdge* ptr = face;
 			do {
 				ptr->m_mark = mark;
 				ptr = ptr->m_next;
 			} while (ptr != face);
 
-			side = 0;
+			dgInt32 side = 0;
 			ptr = face->m_next;
 			do {
 				side |= vertexSide[ptr->m_incidentVertex];
@@ -3156,11 +3137,8 @@ _ASSERTE (0);
 					_ASSERTE (side != -1);
 					if (side > 0) {
 						if (ptr->m_next != face) {
-							dgEdge* back;
-							dgEdge* front;
-
-							front = AddHalfEdge(ptr->m_incidentVertex, face->m_incidentVertex);
-							back = AddHalfEdge(face->m_incidentVertex, ptr->m_incidentVertex);
+							dgEdge* const front = mesh.AddHalfEdge(ptr->m_incidentVertex, face->m_incidentVertex);
+							dgEdge* const back = mesh.AddHalfEdge(face->m_incidentVertex, ptr->m_incidentVertex);
 							_ASSERTE (back);
 							_ASSERTE (front);
 
@@ -3191,11 +3169,8 @@ _ASSERTE (0);
 
 					} else if (side < 0){
 						if (ptr->m_next != face) {
-							dgEdge* back;
-							dgEdge* front;
-
-							back = AddHalfEdge(ptr->m_incidentVertex, face->m_incidentVertex);
-							front = AddHalfEdge(face->m_incidentVertex, ptr->m_incidentVertex);
+							dgEdge* const back = mesh.AddHalfEdge(ptr->m_incidentVertex, face->m_incidentVertex);
+							dgEdge* const front = mesh.AddHalfEdge(face->m_incidentVertex, ptr->m_incidentVertex);
 							_ASSERTE (back);
 							_ASSERTE (front);
 
@@ -3227,44 +3202,41 @@ _ASSERTE (0);
 					break;
 				}
 				ptr = ptr->m_next;
+
 			} while (ptr != face);
 		}
 	}
 
-	backMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
-	frontMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+	dgMeshEffect* backMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
+	dgMeshEffect* frontMesh = new (GetAllocator()) dgMeshEffect (GetAllocator(), true);
 
-	mark = IncLRU();
+	mark = mesh.IncLRU();
 	backMesh->BeginPolygon();
 	frontMesh->BeginPolygon(); 
 	for (iter.Begin(); iter; iter ++){
-		dgEdge* face;
-
-		face = &(*iter);
+		dgEdge* const face = &(*iter);
 		if ((face->m_incidentFace > 0) && (face->m_mark != mark) && (vertexSide[face->m_incidentVertex] != 0)) {
-			dgInt32 count;
-			dgEdge* ptr;
 			dgVertexAtribute att[128];
 
-			count = 0;
-			ptr = face;
+			dgInt32 count = 0;
+			dgEdge* ptr = face;
 			do {
-				att[count] = m_attib[ptr->m_userData];
+				att[count] = mesh.m_attib[ptr->m_userData];
 				count ++;
 				ptr->m_mark = mark;
 				ptr = ptr->m_next;
 			} while (ptr != face);
 
 			if (vertexSide[face->m_incidentVertex] > 0) {
-				frontMesh->AddPolygon(count, &att[0].m_vertex.m_x, sizeof (dgVertexAtribute), att[0].m_material);
+				frontMesh->AddPolygon(count, &att[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (att[0].m_material));
 			} else {
-				backMesh->AddPolygon(count, &att[0].m_vertex.m_x, sizeof (dgVertexAtribute), att[0].m_material);
+				backMesh->AddPolygon(count, &att[0].m_vertex.m_x, sizeof (dgVertexAtribute), dgFastInt (att[0].m_material));
 			}
 		}
 	}
 
-	backMesh->EndPolygon();
-	frontMesh->EndPolygon(); 
+	backMesh->EndPolygon(dgFloat64 (1.0e-5f));
+	frontMesh->EndPolygon(dgFloat64 (1.0e-5f)); 
 
 	if (!(backMesh->GetCount() && frontMesh->GetCount())) {
 		backMesh->Release();
@@ -3273,9 +3245,30 @@ _ASSERTE (0);
 		backMesh = NULL;
 	}
 
+	if (backMesh && frontMesh) {
+		_ASSERTE (backMesh->GetCount());
+		_ASSERTE (frontMesh->GetCount());
+
+		dgBigVector min;
+		dgBigVector max;
+		CalculateAABB (min, max);
+		max -= min;
+		dgFloat64 size = GetMax (max.m_x, max.m_y, max.m_z);
+		dgMeshEffect planeMesh (GetAllocator(), planeMatrix, dgFloat32(size), dgFloat32(size), planeMaterial, planeTextMatrix, planeTextMatrix);
+
+		if (!(backMesh->PlaneApplyCap (&planeMesh, plane) && frontMesh->PlaneApplyCap (&planeMesh, plane.Scale (dgFloat32 (-1.0f))))) {
+			backMesh->Release();
+			frontMesh->Release();
+			*left = NULL;
+			*right = NULL;
+//		} else {
+//			backMesh->Triangulate ();
+//			frontMesh->Triangulate ();
+		}
+	}
+
 	*left = backMesh;
 	*right = frontMesh;
-*/
 }
 
 
@@ -3311,84 +3304,61 @@ return false;
 */
 }
 
-dgInt32 dgMeshEffect::PlaneApplyCap (const dgMeshEffect* planeMesh, const dgPlane& faceNormal)
+dgInt32 dgMeshEffect::PlaneApplyCap (const dgMeshEffect* planeMesh, const dgBigPlane& faceNormal)
 {
-_ASSERTE (0);
-return 0;
-/*
-
-	dgInt32 ret;
-	dgInt32 mark;
-
-	dgEdge* plane;
-	plane = &planeMesh->GetRoot()->GetInfo();
+	dgEdge* plane = &planeMesh->GetRoot()->GetInfo();
 	if (plane->m_incidentFace < 0) {
 		plane = plane->m_twin;
 	}
 	_ASSERTE (plane->m_incidentFace > 0);
 
-	ret = 0;
-	mark = IncLRU();
+	dgInt32 ret = 0;
+	dgInt32 mark = IncLRU();
 	dgPolyhedra::Iterator iter (*this);
 	for (iter.Begin(); iter; ) {
-		dgInt32 isBorder;
-		dgEdge* face;
-		face = &(*iter);
+		dgEdge* face = &(*iter);
 
 		iter++;
 
-		isBorder = 0;
 		if ((face->m_incidentFace < 0) && (face->m_mark != mark)) {
-			dgFloat32 maxDist;
-			dgEdge* ptr;
-
-			maxDist = dgFloat32 (0.0f);
-			ptr = face;
+			dgFloat64 maxDist = dgFloat32 (0.0f);
+			dgEdge* ptr = face;
 			do {
-				maxDist = GetMax (maxDist, dgAbsf (faceNormal.Evalue(m_points[ptr->m_incidentVertex])));
+				maxDist = GetMax (maxDist, fabs (faceNormal.Evalue(m_points[ptr->m_incidentVertex])));
 				ptr->m_mark = mark;
 				ptr = ptr->m_next;
 			} while (ptr != face); 
 
 			if (maxDist <= dgFloat32 (1.5e-3f)) {
-				bool haveColinear;
-
-				haveColinear = true;
+				bool haveColinear = true;
 				ptr = face;
 				while (haveColinear) {
 					haveColinear = false;
 					do {
 						if (ptr->m_next->m_twin->m_next->m_twin != ptr) {
-							dgFloat32 err;
-							dgFloat32 mag00;
-							dgFloat32 mag11;
-							dgFloat32 mag01;
-							dgFloat32 epsilon;
+							dgBigVector e0 (m_points[ptr->m_next->m_incidentVertex] - m_points[ptr->m_incidentVertex]);
+							dgBigVector e1 (m_points[ptr->m_next->m_next->m_incidentVertex] - m_points[ptr->m_next->m_incidentVertex]);
 
-							dgVector e0 (m_points[ptr->m_next->m_incidentVertex] - m_points[ptr->m_incidentVertex]);
-							dgVector e1 (m_points[ptr->m_next->m_next->m_incidentVertex] - m_points[ptr->m_next->m_incidentVertex]);
+							dgFloat64 mag00 = e0 % e0;
+							dgFloat64 mag11 = e1 % e1;
+							dgFloat64 mag01 = e0 % e1;
 
-							mag00 = e0 % e0;
-							mag11 = e1 % e1;
-							mag01 = e0 % e1;
-
-							epsilon = dgFloat32 (1.0e-6f) * mag00 * mag11;
-							err = mag01 * mag01 - mag00 * mag11;
-							if (dgAbsf (err) < epsilon) {
-								dgEdge* ptr1;
+							dgFloat64 epsilon = dgFloat64 (1.0e-6f) * mag00 * mag11;
+							dgFloat64 err = mag01 * mag01 - mag00 * mag11;
+							if (fabs (err) < epsilon) {
 								_ASSERTE (ptr->m_twin->m_incidentFace >= 0);
 
-								dgVector normal0 (FaceNormal(ptr->m_twin, &m_points[0].m_x, sizeof (dgVector)));
+								dgBigVector normal0 (FaceNormal(ptr->m_twin, &m_points[0].m_x, sizeof (dgBigVector)));
 								mag00 = normal0 % normal0;
-								ptr1 = ptr->m_twin->m_prev->m_twin;
+								dgEdge* ptr1 = ptr->m_twin->m_prev->m_twin;
 								do {
-									dgVector normal1 (FaceNormal(ptr1->m_twin, &m_points[0].m_x, sizeof (dgVector)));
+									dgBigVector normal1 (FaceNormal(ptr1->m_twin, &m_points[0].m_x, sizeof (dgBigVector)));
 								
 									mag11 = normal1 % normal1;
 									mag01 = normal0 % normal1;
-									epsilon = dgFloat32 (1.0e-6f) * mag00 * mag11;
+									epsilon = dgFloat64 (1.0e-6f) * mag00 * mag11;
 									err = mag01 * mag01 - mag00 * mag11;
-									if (dgAbsf (err) < epsilon) {
+									if (fabs (err) < epsilon) {
 										if (iter && ((&(*iter) == ptr1) || (&(*iter) == ptr1->m_twin))) {
 											iter --;
 										}
@@ -3406,9 +3376,6 @@ return 0;
 								} while (ptr1 != ptr->m_next);
 
 								if (ptr->m_next->m_twin->m_next->m_twin == ptr) {
-									dgEdge* next;
-									dgTreeNode* node;
-
 									if (iter && ((&(*iter) == ptr->m_next) || (&(*iter) == ptr->m_next->m_twin))) {
 										iter --;
 										if (iter && ((&(*iter) == ptr->m_next) || (&(*iter) == ptr->m_next->m_twin))) {
@@ -3423,7 +3390,7 @@ return 0;
 									ptr->m_twin->m_userData = ptr->m_next->m_twin->m_userData;
 									ptr->m_twin->m_incidentVertex = ptr->m_next->m_twin->m_incidentVertex;
 
-									next = ptr->m_next;
+									dgEdge* const next = ptr->m_next;
 									ptr->m_next->m_next->m_prev = ptr;
 									ptr->m_next = ptr->m_next->m_next;
 									ptr->m_twin->m_prev->m_prev->m_next = ptr->m_twin;
@@ -3435,7 +3402,7 @@ return 0;
 									next->m_twin->m_prev = next;
 									DeleteEdge (next);
 
-									node = GetNodeFromInfo(*ptr);
+									dgTreeNode* node = GetNodeFromInfo(*ptr);
 									dgPairKey key0 (ptr->m_incidentVertex, ptr->m_twin->m_incidentVertex);
 									if (Find(key0.GetVal())) {
 										return 0;
@@ -3460,9 +3427,9 @@ return 0;
 				ptr = face;
 				do {
 					dgVertexAtribute attrib (planeMesh->InterpolateVertex (m_points[ptr->m_incidentVertex], plane));
-					attrib.m_normal.m_x = faceNormal.m_x;
-					attrib.m_normal.m_y = faceNormal.m_y;
-					attrib.m_normal.m_z = faceNormal.m_z;
+					attrib.m_normal_x = faceNormal.m_x;
+					attrib.m_normal_y = faceNormal.m_y;
+					attrib.m_normal_z = faceNormal.m_z;
 
 					AddAtribute(attrib);
 
@@ -3478,7 +3445,6 @@ return 0;
 		}
 	}
 	return ret;
-*/
 }
 
 bool dgMeshEffect::HasOpenEdges () const

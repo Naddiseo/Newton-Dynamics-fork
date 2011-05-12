@@ -190,6 +190,48 @@ class dgClusterList: public dgList <dgClusterFace>
 	}
 
 
+	bool IsClusterCoplanar (const dgBigPlane& plane, const dgMeshEffect& mesh) const
+	{
+		const dgBigVector* const points = (dgBigVector*) mesh.GetVertexPool();
+		for (dgListNode* node = GetFirst(); node; node = node->GetNext()) {
+			dgClusterFace& info = node->GetInfo();
+
+			dgEdge* ptr = info.m_edge;
+			do {
+				const dgBigVector& p = points[ptr->m_incidentVertex];
+				dgFloat64 dist = fabs (plane.Evalue(p));
+				if (dist > dgFloat64 (1.0e-5f)) {
+					return false; 
+				}
+				ptr = ptr->m_next;
+			} while (ptr != info.m_edge);
+		}
+
+		return true;
+	}
+
+
+	bool IsEdgeConvex (const dgBigPlane& plane, const dgMeshEffect& mesh, dgEdge* const edge) const
+	{
+		const dgBigVector* const points = (dgBigVector*) mesh.GetVertexPool();
+		dgEdge* const edge0 = edge->m_next;
+		dgEdge* ptr = edge0->m_twin->m_next;
+		do {
+			if (ptr->m_twin->m_incidentFace == edge->m_twin->m_incidentFace) {
+				_ASSERTE (edge0->m_incidentVertex == ptr->m_incidentVertex);
+				dgBigVector e0 (points[edge0->m_twin->m_incidentVertex] - points[edge0->m_incidentVertex]);
+				dgBigVector e1 (points[ptr->m_twin->m_incidentVertex] - points[edge0->m_incidentVertex]);
+				dgBigVector normal (e0 * e1);
+				return (normal % plane) > dgFloat64 (0.0f);
+			}
+			ptr = ptr->m_twin->m_next;
+		} while (ptr != edge->m_twin);
+
+		_ASSERTE (0);
+		return true;
+	}
+
+
 	void CalculateNodeCost (
 		dgMeshEffect& mesh, 
 		dgInt32 meshMask,
@@ -205,6 +247,13 @@ class dgClusterList: public dgList <dgClusterFace>
 		dgInt32 faceIndex = GetFirst()->GetInfo().m_edge->m_incidentFace;
 
 		const dgBigVector* const points = (dgBigVector*)mesh.GetVertexPool();
+
+		bool flatStrip = true;
+		dgBigPlane plane (GetFirst()->GetInfo().m_normal, - (points[GetFirst()->GetInfo().m_edge->m_incidentVertex] % GetFirst()->GetInfo().m_normal));
+		if (GetCount() > 1) {
+			flatStrip = IsClusterCoplanar (plane, mesh);
+		}
+
 
 		vertexMark ++;
 		int vertexCount = AddVertexToPool (mesh, vertexPool, vertexMarks, vertexMark);
@@ -230,10 +279,16 @@ class dgClusterList: public dgList <dgClusterFace>
 						concavity = dgFloat64 (0.0f);
 					}
 				}
+				if ((concavity == dgFloat64 (0.0f)) && flatStrip) {
+					if (clusterListB.IsClusterCoplanar (plane, mesh)) {
+						bool concaveEdge = !(IsEdgeConvex (plane, mesh, edge) && IsEdgeConvex (plane, mesh, edge->m_twin));
+						if (concaveEdge) {
+							concavity += 1000.0f;
+						}
+					}
+				}
 
-				dgBigVector p0 (points[edge->m_incidentVertex]);
-				dgBigVector p1 (points[edge->m_twin->m_incidentVertex]);
-				dgBigVector p1p0 (p1 - p0);
+				dgBigVector p1p0 (points[edge->m_twin->m_incidentVertex] - points[edge->m_incidentVertex]);
 				dgFloat64 edgeLength = dgFloat64 (2.0f) * sqrt (p1p0 % p1p0);
 
 				dgFloat64 area = m_area + clusterListB.m_area;
@@ -380,8 +435,8 @@ dgMeshEffect::dgMeshEffect (const dgMeshEffect& source, dgFloat32 absoluteconcav
 			}
 
 //if ((faceIndexA == 16) || (faceIndexA == 17) || (faceIndexB == 16) || (faceIndexB == 17))
-if ((faceIndexA == 2) || (faceIndexA == 2) || (faceIndexB == 2) || (faceIndexB == 2))
-faceIndexA *=1;
+//if ((faceIndexA == 2) || (faceIndexA == 2) || (faceIndexB == 2) || (faceIndexB == 2))
+//faceIndexA *=1;
 
 			while (listB->GetFirst()) {
 				dgClusterList::dgListNode* const nodeB = listB->GetFirst();
@@ -477,13 +532,14 @@ xxx1 ++;
 					sourceEdge = sourceEdge->m_next;
 					edge = edge->m_next;
 				} while (edge != face.m_edge);
-if (xxxxx == 2)
-AddPolygon(xxx1, &polygon[0].m_vertex.m_x, sizeof (dgVertexAtribute), 0);
+if (xxxxx == 3){
+//AddPolygon(xxx1, &polygon[0].m_vertex.m_x, sizeof (dgVertexAtribute), 0);
+}
 
 			}
 
 			dgConvexHull3d convexHull (mesh.GetAllocator(), &convexVertexBuffer[0].m_x, sizeof (dgBigVector), count, 0.0);
-if (xxxxx == 2)
+//if (xxxxx == 3)
 			if (convexHull.GetCount()) {
 				const dgBigVector* const vertex = convexHull.GetVertexPool();
 				for (dgConvexHull3d::dgListNode* node = convexHull.GetFirst(); node; node = node->GetNext()) {
@@ -506,7 +562,7 @@ if (xxxxx == 2)
 				}
 
 				layer += dgFloat32 (1.0f);
-break;
+//break;
 			}
 		}
 	}
@@ -2615,12 +2671,12 @@ intersection =  new (GetAllocator()) dgMeshEffect (convexMesh);
 
 
 // 
-
+/*
 static void CallBack(const char * msg, double progress, double concavity, size_t nVertices)
 {
 	std::cout << msg;
 }
-
+*/
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -2628,131 +2684,26 @@ static void CallBack(const char * msg, double progress, double concavity, size_t
 
 
 
-static bool SaveVRML2(std::ofstream &fout, const HACD::Vec3<double>* const points, int pointCount,
-										   const HACD::Vec3<long>* const triangles, int triangleCount,
-										   const HACD::Material & material, const HACD::Vec3<double>* const colors)
+static void SaveOFF (const std::string & fileName, dgMeshEffect* const mesh_)
 {
-	if (fout.is_open()) 
-	{
-		size_t nV = pointCount;
-		size_t nT = triangleCount;            
-		fout <<"#VRML V2.0 utf8" << std::endl;	    	
-		fout <<"" << std::endl;
-		fout <<"# Vertices: " << nV << std::endl;		
-		fout <<"# Triangles: " << nT << std::endl;		
-		fout <<"" << std::endl;
-		fout <<"Group {" << std::endl;
-		fout <<"	children [" << std::endl;
-		fout <<"		Shape {" << std::endl;
-		fout <<"			appearance Appearance {" << std::endl;
-		fout <<"				material Material {" << std::endl;
-		fout <<"					diffuseColor "      << material.m_diffuseColor.X()      << " " 
-			<< material.m_diffuseColor.Y()      << " "
-			<< material.m_diffuseColor.Z()      << std::endl;  
-		fout <<"					ambientIntensity "  << material.m_ambientIntensity      << std::endl;
-		fout <<"					specularColor "     << material.m_specularColor.X()     << " " 
-			<< material.m_specularColor.Y()     << " "
-			<< material.m_specularColor.Z()     << std::endl; 
-		fout <<"					emissiveColor "     << material.m_emissiveColor.X()     << " " 
-			<< material.m_emissiveColor.Y()     << " "
-			<< material.m_emissiveColor.Z()     << std::endl; 
-		fout <<"					shininess "         << material.m_shininess             << std::endl;
-		fout <<"					transparency "      << material.m_transparency          << std::endl;
-		fout <<"				}" << std::endl;
-		fout <<"			}" << std::endl;
-		fout <<"			geometry IndexedFaceSet {" << std::endl;
-		fout <<"				ccw TRUE" << std::endl;
-		fout <<"				solid TRUE" << std::endl;
-		fout <<"				convex TRUE" << std::endl;
-		if (colors && nT>0)
-		{
-			fout <<"				colorPerVertex FALSE" << std::endl;
-			fout <<"				color Color {" << std::endl;
-			fout <<"					color [" << std::endl;
-			for(size_t c = 0; c < nT; c++)
-			{
-				fout <<"						" << colors[c].X() << " " 
-					<< colors[c].Y() << " " 
-					<< colors[c].Z() << "," << std::endl;
-			}
-			fout <<"					]" << std::endl;
-			fout <<"				}" << std::endl;
-		}
-		if (nV > 0) 
-		{
-			fout <<"				coord DEF co Coordinate {" << std::endl;
-			fout <<"					point [" << std::endl;
-			for(size_t v = 0; v < nV; v++)
-			{
-				fout <<"						" << points[v].X() << " " 
-					<< points[v].Y() << " " 
-					<< points[v].Z() << "," << std::endl;
-			}
-			fout <<"					]" << std::endl;
-			fout <<"				}" << std::endl;
-		}
-		if (nT > 0) 
-		{
-			fout <<"				coordIndex [ " << std::endl;
-			for(size_t f = 0; f < nT; f++)
-			{
-				fout <<"						" << triangles[f].X() << ", " 
-					<< triangles[f].Y() << ", "                                                  
-					<< triangles[f].Z() << ", -1," << std::endl;
-			}
-			fout <<"				]" << std::endl;
-		}
-		fout <<"			}" << std::endl;
-		fout <<"		}" << std::endl;
-		fout <<"	]" << std::endl;
-		fout <<"}" << std::endl;	
-		return true;
-	}
-	return false;
-}
+	dgMeshEffect mesh (*mesh_);
+	mesh.Triangulate();
 
-static bool SaveVRML2(const std::string & fileName, HACD::Vec3<double>* const points, int pointCount, 
-												    HACD::Vec3<long>* const triangles, int triangleCount, 
-													const HACD::Vec3<double>* const colors)
-{
-	std::cout << "Saving " <<  fileName << std::endl;
-	std::ofstream fout(fileName.c_str());
-	if (fout.is_open()) 
-	{
-		const HACD::Material material;
-
-		if (SaveVRML2(fout, points, pointCount, triangles, triangleCount, material, colors))
-		{
-			fout.close();
-			return true;
-		}
-		return false;
-	}
-	return false;
-}
-
-
-
-
-
-static void SaveWRL (const std::string & fileName, dgMeshEffect* const mesh)
-{
-
-	dgInt32 faceCount = mesh->GetTotalFaceCount();
-	dgStack< HACD::Vec3<double> > points (mesh->GetVertexCount());
+	dgInt32 faceCount = mesh.GetTotalFaceCount();
+	dgStack< HACD::Vec3<double> > points (mesh.GetVertexCount());
 	dgStack<  HACD::Vec3<long> > triangles (faceCount);
 	dgStack< HACD::Vec3<double> > colors (faceCount);
 
-	dgBigVector* const vertex = (dgBigVector*) mesh->GetVertexPool();
-	for (dgInt32 i = 0; i < mesh->GetVertexCount(); i ++) {
+	dgBigVector* const vertex = (dgBigVector*) mesh.GetVertexPool();
+	for (dgInt32 i = 0; i < mesh.GetVertexCount(); i ++) {
 		points[i].X() = vertex[i].m_x;
 		points[i].Y() = vertex[i].m_y;
 		points[i].Z() = vertex[i].m_z;
 	}
 
 	dgInt32 triangleCount = 0;
-	dgInt32 mark = mesh->IncLRU();
-	dgPolyhedra::Iterator iter (*mesh);
+	dgInt32 mark = mesh.IncLRU();
+	dgPolyhedra::Iterator iter (mesh);
 	for (iter.Begin(); iter; iter ++) {
 		dgEdge* const face = &(*iter);
 		if ((face->m_mark != mark) && (face->m_incidentFace > 0)) {
@@ -2772,12 +2723,63 @@ static void SaveWRL (const std::string & fileName, dgMeshEffect* const mesh)
 			face->m_prev->m_mark = mark;
 		}
 	}
-	SaveVRML2(fileName, &points[0], mesh->GetVertexCount(), &triangles[0], triangleCount, &colors[0]);
+//	SaveVRML2(fileName, &points[0], mesh->GetVertexCount(), &triangles[0], triangleCount, &colors[0]);
+
+
+	std::cout << "Saving " <<  fileName << std::endl;
+	std::ofstream fout(fileName.c_str());
+	if (fout.is_open()) 
+	{
+		size_t nV = mesh.GetVertexCount();
+		size_t nT = triangleCount;            
+		fout <<"OFF" << std::endl;	    	
+		fout << nV << " " << nT << " " << 0<< std::endl;		
+		for(size_t v = 0; v < nV; v++)
+		{
+			fout << points[v].X() << " " 
+				<< points[v].Y() << " " 
+				<< points[v].Z() << std::endl;
+		}
+		for(size_t f = 0; f < nT; f++)
+		{
+			fout <<"3 " << triangles[f].X() << " " 
+				<< triangles[f].Y() << " "                                                  
+				<< triangles[f].Z() << std::endl;
+		}
+		fout.close();
+	}
 }
 
 
-
-
+/*
+static bool SaveOFF(const std::string & fileName, const std::vector< HACD::Vec3<double> > & points, const std::vector< HACD::Vec3<long> > & triangles)
+{
+	std::cout << "Saving " <<  fileName << std::endl;
+	std::ofstream fout(fileName.c_str());
+	if (fout.is_open()) 
+	{
+		size_t nV = points.size();
+		size_t nT = triangles.size();            
+		fout <<"OFF" << std::endl;	    	
+		fout << nV << " " << nT << " " << 0<< std::endl;		
+		for(size_t v = 0; v < nV; v++)
+		{
+			fout << points[v].X() << " " 
+				<< points[v].Y() << " " 
+				<< points[v].Z() << std::endl;
+		}
+		for(size_t f = 0; f < nT; f++)
+		{
+			fout <<"3 " << triangles[f].X() << " " 
+				<< triangles[f].Y() << " "                                                  
+				<< triangles[f].Z() << std::endl;
+		}
+		fout.close();
+		return true;
+	}
+	return false;
+}
+*/
 
 
 
@@ -2785,7 +2787,7 @@ dgMeshEffect* dgMeshEffect::CreateConvexApproximation (dgInt32 maxCount) const
 {
 	dgMeshEffect triangleMesh (*this);
 //	triangleMesh.Triangulate();
-//SaveWRL("../../../media/input.wrl", &triangleMesh);
+SaveOFF("C:/Users/Julio/Desktop/hacd/data/boxWithNick2.off", &triangleMesh);
 //return new (GetAllocator()) dgMeshEffect (GetAllocator(), &m_points[0].m_x, m_pointCount, sizeof (dgBigVector), 0.0);
 
 dgMeshEffect* const convexPartion = new (GetAllocator()) dgMeshEffect (triangleMesh, 0.01);

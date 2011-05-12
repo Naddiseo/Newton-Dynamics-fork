@@ -216,7 +216,7 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	dgMeshEffect* CreateDelanayTretrahedralization (dgInt32 interionMaterial, dgMatrix& matrix) const;
 	dgMeshEffect* CreateVoronoiPartition (dgInt32 pointsCount, dgInt32 pointStrideInBytes, const dgFloat32* const pointCloud, dgInt32 interionMaterial, dgMatrix& matrix) const;
 
-	void PlaneClipMesh (const dgPlane& plane, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource);
+	void PlaneClipMesh (const dgMatrix& planeMatrix, const dgMatrix& planeTextMatrix, dgInt32 planeMaterial, dgMeshEffect** const leftMeshSource, dgMeshEffect** const rightMeshSource) const;
 
 	dgVertexAtribute& GetAttribute (dgInt32 index) const;
 	void TransformMesh (const dgMatrix& matrix);
@@ -270,7 +270,8 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	void FilterCoplanarFaces (const dgMeshEffect* const otherCap, dgFloat32 sign);
 	void ClipMesh (const dgMeshEffect* const clipMesh, dgMeshEffect** const back, dgMeshEffect** const front, dgMeshEffect** const coplanar) const;
 	void ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshEffect** const back, dgMeshEffect** const front, dgMeshEffect** const coplanar) const;
-	dgInt32 PlaneApplyCap (const dgMeshEffect* planeMesh, const dgPlane& normal);
+
+	dgInt32 PlaneApplyCap (const dgMeshEffect* planeMesh, const dgBigPlane& normal);
 	void PlaneClipMesh (const dgMeshEffect* planeMesh, dgMeshEffect** leftMeshSource, dgMeshEffect** rightMeshSource) const;
 
 	dgMeshEffect* MakeDelanayIntersection (dgMeshEffectSolidTree* const tree, dgBigVector* const points, dgInt32 count, dgInt32 materialId, const dgMatrix& textureProjectionMatrix, dgFloat32 normalAngleInRadians) const;

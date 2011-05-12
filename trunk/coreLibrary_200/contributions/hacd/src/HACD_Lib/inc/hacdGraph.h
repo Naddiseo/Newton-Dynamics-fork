@@ -50,6 +50,7 @@ namespace HACD
 
         double                                  m_error;
         double                                  m_surf;
+		double                                  m_volume;
         double                                  m_perimeter;
         double                                  m_concavity;
         ICHull *                                m_convexHull;
@@ -74,10 +75,12 @@ namespace HACD
 		std::map<long, DPoint>					m_distPoints;
         double                                  m_error;
         double                                  m_surf;
+		double                                  m_volume;
         double                                  m_perimeter;
         double                                  m_concavity;
         ICHull *                                m_convexHull;
 		std::set<unsigned long long>			m_boudaryEdges;
+		
 
         
         friend class GraphVertex;

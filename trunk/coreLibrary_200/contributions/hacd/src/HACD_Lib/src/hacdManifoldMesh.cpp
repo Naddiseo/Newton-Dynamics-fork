@@ -27,9 +27,9 @@ namespace HACD
         m_specularColor.Y() = 0.5;
         m_specularColor.Z() = 0.5;
         m_ambientIntensity  = 0.4;
-        m_emissiveColor.X() = 0.5;
-        m_emissiveColor.Y() = 0.5;
-        m_emissiveColor.Z() = 0.5;
+        m_emissiveColor.X() = 0.0;
+        m_emissiveColor.Y() = 0.0;
+        m_emissiveColor.Z() = 0.0;
         m_shininess         = 0.4;
         m_transparency      = 0.0;
     }
@@ -305,13 +305,16 @@ namespace HACD
             {
                 edgeMap[e]->GetData().m_newFace = triangleMap[edgeMap[e]->GetData().m_newFace->GetData().m_id];
             }
-            for(int f = 0; f < 2; f++)
-            {
-                if (edgeMap[e]->GetData().m_triangles[f])
-                {
-                    edgeMap[e]->GetData().m_triangles[f] = triangleMap[edgeMap[e]->GetData().m_triangles[f]->GetData().m_id];
-                }
-            }            
+			if (nT > 0)
+			{
+				for(int f = 0; f < 2; f++)
+				{
+					if (edgeMap[e]->GetData().m_triangles[f])
+					{
+						edgeMap[e]->GetData().m_triangles[f] = triangleMap[edgeMap[e]->GetData().m_triangles[f]->GetData().m_id];
+					}
+				}            
+			}
             for(int v = 0; v < 2; v++)
             {
                 if (edgeMap[e]->GetData().m_vertices[v])
@@ -322,13 +325,16 @@ namespace HACD
         }        
         for(size_t f = 0; f < nT; f++)
         {
-            for(int e = 0; e < 3; e++)
-            {
-                if (triangleMap[f]->GetData().m_edges[e])
-                {
-                    triangleMap[f]->GetData().m_edges[e] = edgeMap[triangleMap[f]->GetData().m_edges[e]->GetData().m_id];
-                }
-            }            
+			if (nE > 0)
+			{
+				for(int e = 0; e < 3; e++)
+				{
+					if (triangleMap[f]->GetData().m_edges[e])
+					{
+						triangleMap[f]->GetData().m_edges[e] = edgeMap[triangleMap[f]->GetData().m_edges[e]->GetData().m_id];
+					}
+				}            
+			}
             for(int v = 0; v < 3; v++)
             {
                 if (triangleMap[f]->GetData().m_vertices[v])
@@ -342,43 +348,11 @@ namespace HACD
         delete [] triangleMap;
         
     }
-	double TMMesh::ComputeDistance(long name, const Vec3<double> & pt, const Vec3<double> & normal, bool & insideHull, bool updateIncidentPoints)
-	{
-        Vec3<double> impact;
-		Vec3<double> vec;
-        long nhit = 0;
-        double distance = 0.0;
-		double dist = 0.0;
-		size_t nT = GetNTriangles();
-		insideHull = false;
-		CircularListElement<TMMTriangle> * face = 0;
-		for(size_t f = 0; f < nT; f++)
-        {
-			TMMTriangle & currentTriangle = m_triangles.GetData();
-            nhit = IntersectRayTriangle(pt, normal, 
-											currentTriangle.m_vertices[0]->GetData().m_pos, 
-											currentTriangle.m_vertices[1]->GetData().m_pos, 
-											currentTriangle.m_vertices[2]->GetData().m_pos, dist);
-
-            if (nhit == 1 && distance < dist )
-            {
-                distance = dist;
-                insideHull = true;
-                face = m_triangles.GetHead();
-            }
-            m_triangles.Next();
-		}
-		if (updateIncidentPoints && face )
-		{
-			face->GetData().m_incidentPoints.insert(name);
-		}
-        return distance;
-	}
 	long  IntersectRayTriangle(const Vec3<double> & P0, const Vec3<double> & dir, 
 							   const Vec3<double> & V0, const Vec3<double> & V1, 
 							   const Vec3<double> & V2, double &t)
 	{
-		const double EPS = 0.000001;
+        const double EPS = 0.0000001;
 		Vec3<double> edge1, edge2, tvec, pvec, qvec;
 		double det, invDet;
 
@@ -394,17 +368,68 @@ namespace HACD
 		tvec = P0 - V0;
 
 		double u = tvec * pvec * invDet;
-		if (u < -0.05 || u > 1.05)
+		if (u < -0.0 || u > 1.0)
 			return 0;
 
 		qvec = tvec ^ edge1;
 		double v = dir * qvec * invDet;
-		if (v < -0.05 || v+u>1.1)
+		if (v < -0.0 || v+u>1.0)
 			return 0;
 
 		t = (edge2 * qvec) * invDet;
 		return 1;
 	}
+
+    bool IntersectLineLine(const Vec3<double> & p1, const Vec3<double> & p2, 
+                          const Vec3<double> & p3, const Vec3<double> & p4,
+                          Vec3<double> & pa, Vec3<double> & pb, 
+                          double & mua, double & mub)
+    {
+        const double EPS = 0.0000001;
+        Vec3<double> p13,p43,p21;
+        double d1343,d4321,d1321,d4343,d2121;
+        double numer,denom;
+        
+        p13.X() = p1.X() - p3.X();
+        p13.Y() = p1.Y() - p3.Y();
+        p13.Z() = p1.Z() - p3.Z();
+        p43.X() = p4.X() - p3.X();
+        p43.Y() = p4.Y() - p3.Y();
+        p43.Z() = p4.Z() - p3.Z();
+        if (fabs(p43.X()) < EPS && fabs(p43.Y()) < EPS && fabs(p43.Z()) < EPS)
+            return false;
+        p21.X() = p2.X() - p1.X();
+        p21.Y() = p2.Y() - p1.Y();
+        p21.Z() = p2.Z() - p1.Z();
+        if (fabs(p21.X()) < EPS && fabs(p21.Y()) < EPS && fabs(p21.Z()) < EPS)
+            return false;
+        
+        d1343 = p13.X() * p43.X() + p13.Y() * p43.Y() + p13.Z() * p43.Z();
+        d4321 = p43.X() * p21.X() + p43.Y() * p21.Y() + p43.Z() * p21.Z();
+        d1321 = p13.X() * p21.X() + p13.Y() * p21.Y() + p13.Z() * p21.Z();
+        d4343 = p43.X() * p43.X() + p43.Y() * p43.Y() + p43.Z() * p43.Z();
+        d2121 = p21.X() * p21.X() + p21.Y() * p21.Y() + p21.Z() * p21.Z();
+        
+        denom = d2121 * d4343 - d4321 * d4321;
+        if (fabs(denom) < EPS)
+            return false;
+        numer = d1343 * d4321 - d1321 * d4343;
+        
+        mua = numer / denom;
+        mub = (d1343 + d4321 * (mua)) / d4343;
+        
+        pa.X() = p1.X() + mua * p21.X();
+        pa.Y() = p1.Y() + mua * p21.Y();
+        pa.Z() = p1.Z() + mua * p21.Z();
+        pb.X() = p3.X() + mub * p43.X();
+        pb.Y() = p3.Y() + mub * p43.Y();
+        pb.Z() = p3.Z() + mub * p43.Z();
+        
+        return true;
+    }
+
+    
+    
 	bool TMMesh::CheckConsistancy()
     {
         size_t nE = m_edges.GetSize();

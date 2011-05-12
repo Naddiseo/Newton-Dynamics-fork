@@ -2877,7 +2877,7 @@ NEWTON_API NewtonCollision* NewtonCreateCompoundAproximation (const NewtonWorld*
 //	return (NewtonCollision*) collision;
 
 
-
+_ASSERTE (0);
 	return NULL;
 
 /*
@@ -8053,15 +8053,21 @@ NewtonMesh* NewtonMeshCreateFromCollision(const NewtonCollision* const collision
 NewtonMesh* NewtonMeshConvexHull (const NewtonWorld* const newtonWorld, int count, const dFloat* const vertexCloud, int strideInBytes, dFloat tolerance)
 {
 	TRACE_FUNTION(__FUNCTION__);
-	_ASSERTE (0);
-	return NULL;
-/*
-	Newton* world = (Newton *) newtonWorld;
-	dgMeshEffect* mesh = new (world->dgWorld::GetAllocator()) dgMeshEffect (world->dgWorld::GetAllocator(), vertexCloud, count, strideInBytes, tolerance);
+	Newton* const world = (Newton *) newtonWorld;
+	dgStack<dgBigVector> pool (count);
+
+	dgInt32 stride = strideInBytes / sizeof (dgFloat32);
+	for (dgInt32 i = 0; i < count; i ++) {
+		pool[i].m_x = vertexCloud[i * stride + 0];
+		pool[i].m_y = vertexCloud[i * stride + 1];
+		pool[i].m_z = vertexCloud[i * stride + 2];
+		pool[i].m_w = dgFloat64 (0.0);
+	}
+	dgMeshEffect* const mesh = new (world->dgWorld::GetAllocator()) dgMeshEffect (world->dgWorld::GetAllocator(), &pool[0].m_x, count, sizeof (dgBigVector), tolerance);
 	return (NewtonMesh*) mesh;
-*/
 }
 
+/*
 NewtonMesh* NewtonMeshCreatePlane (const NewtonWorld* const newtonWorld, const dFloat* const locationMatrix, dFloat witdth, dFloat breadth, int material, const dFloat* const textureMatrix0, const dFloat* const textureMatrix1)
 {
 	TRACE_FUNTION(__FUNCTION__);
@@ -8070,7 +8076,7 @@ NewtonMesh* NewtonMeshCreatePlane (const NewtonWorld* const newtonWorld, const d
 	dgMeshEffect* mesh = new (world->dgWorld::GetAllocator()) dgMeshEffect (world->dgWorld::GetAllocator(), *(dgMatrix*)locationMatrix, witdth, breadth, material, *(dgMatrix*)textureMatrix0, *(dgMatrix*)textureMatrix1);
 	return (NewtonMesh*) mesh;
 }
-
+*/
 
 void NewtonMeshDestroy(const NewtonMesh* const mesh)
 {
@@ -8171,6 +8177,15 @@ void NewtonMeshClip (const NewtonMesh* const mesh, const NewtonMesh* const clipp
 	((dgMeshEffect*) mesh)->ClipMesh (matrix, (dgMeshEffect*)clipper, (dgMeshEffect**) topMesh, (dgMeshEffect**) bottomMesh);
 }
 
+void NewtonMeshPlaneClip (const NewtonMesh* const mesh, dFloat* const planeMatrix, const dFloat* const planeTextureMatrix, int planeMaterial, NewtonMesh** const topMesh, NewtonMesh** const bottomMesh)
+{
+	TRACE_FUNTION(__FUNCTION__);
+	*topMesh = NULL;
+	*bottomMesh = NULL;
+	dgMatrix& matrix = *((dgMatrix*)planeMatrix);
+	dgMatrix& texMatrix = *((dgMatrix*)planeTextureMatrix);
+	((dgMeshEffect*) mesh)->PlaneClipMesh (matrix, texMatrix, planeMaterial, (dgMeshEffect**) topMesh, (dgMeshEffect**) bottomMesh);
+}
 
 NewtonMesh* NewtonMeshApproximateConvexDecomposition (const NewtonMesh* const mesh)
 {

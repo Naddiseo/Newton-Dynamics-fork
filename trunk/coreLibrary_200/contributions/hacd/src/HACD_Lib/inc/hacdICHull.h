@@ -24,6 +24,14 @@ namespace HACD
 {
 	class DPoint;
 	//!	Incremental Convex Hull algorithm (cf. http://maven.smith.edu/~orourke/books/ftp.html ).
+	enum ICHullError
+	{
+		ICHullErrorOK = 0,
+		ICHullErrorCoplanarPoints,
+		ICHullErrorNoVolume,
+		ICHullErrorInconsistent,
+		ICHullErrorNotEnoughPoints
+	};
 	class ICHull
 	{
 		public:
@@ -32,7 +40,22 @@ namespace HACD
             std::map<long, DPoint> *							GetDistPoints() const { return m_distPoints;}
 			//!
 			void												SetDistPoints(std::map<long, DPoint> * distPoints) { m_distPoints = distPoints;}
-
+            //!
+            Vec3<double> *                                      GetFacePointsPositions() const { return m_facePointsPositions;}
+            //!
+            void												SetFacePointsPositions(Vec3<double> * distPointsPositions) { m_facePointsPositions = distPointsPositions;}
+            //!
+            Vec3<double> *                                      GetFacePointsNormals() const { return m_facePointsNormals;}
+            //!
+            void												SetFacePointsNormals(Vec3<double> * distPointsNormals) { m_facePointsNormals = distPointsNormals;}
+            //!
+            Vec3<double> *                                      GetDistPointsPositions() const { return m_distPointsPositions;}
+            //!
+            void												SetDistPointsPositions(Vec3<double> * distPointsPositions) { m_distPointsPositions = distPointsPositions;}
+            //!
+            Vec3<double> *                                      GetDistPointsNormals() const { return m_distPointsNormals;}
+            //!
+            void												SetDistPointsNormals(Vec3<double> * distPointsNormals) { m_distPointsNormals = distPointsNormals;}
 			//! Returns the computed mesh
             TMMesh &                                            GetMesh() { return m_mesh;}
 			//!	Add one point to the convex-hull    
@@ -43,13 +66,15 @@ namespace HACD
 			bool                                                AddPoints(const Vec3<double> * points, size_t nPoints);	
 			bool												AddPoints(std::vector< Vec3<double> > points);
 			//!	
-			bool                                                Process();
+			ICHullError                                         Process();
             //! 
-            bool                                                Process(unsigned long nPointsCH);
+            ICHullError                                         Process(unsigned long nPointsCH);
             //!
             double                                              ComputeVolume();
             //!
             bool                                                IsInside(const Vec3<double> pt);
+			//!
+			double												ComputeDistance(long name, const Vec3<double> & pt, const Vec3<double> & normal, bool & insideHull, bool updateIncidentPoints, bool debug = false);
             //!
             const ICHull &                                      operator=(ICHull & rhs);        
 
@@ -60,7 +85,7 @@ namespace HACD
 
 		private:
             //!	DoubleTriangle builds the initial double triangle.  It first finds 3 noncollinear points and makes two faces out of them, in opposite order. It then finds a fourth point that is not coplanar with that face.  The vertices are stored in the face structure in counterclockwise order so that the volume between the face and the point is negative. Lastly, the 3 newfaces to the fourth point are constructed and the data structures are cleaned up. 
-			bool                                                DoubleTriangle();
+			ICHullError                                         DoubleTriangle();
             //!	MakeFace creates a new face structure from three vertices (in ccw order).  It returns a pointer to the face.
             CircularListElement<TMMTriangle> *                  MakeFace(CircularListElement<TMMVertex> * v0,  
                                                                          CircularListElement<TMMVertex> * v1,
@@ -87,14 +112,26 @@ namespace HACD
                                                                         CircularListElement<TMMEdge> * e, 
                                                                         CircularListElement<TMMVertex> * v);
 			void												Clear(); 
+            void                                                UpdateFaceDistances(CircularListElement<TMMTriangle> * face);
 		private:
+            static const long                                   sc_dummyIndex;
 			TMMesh                                              m_mesh;
             std::vector<CircularListElement<TMMEdge> *>         m_edgesToDelete;
             std::vector<CircularListElement<TMMEdge> *>         m_edgesToUpdate;
             std::vector<CircularListElement<TMMTriangle> *>     m_trianglesToDelete; 
 			std::map<long, DPoint> *							m_distPoints;
+            Vec3<double> *                                      m_distPointsPositions;
+            Vec3<double> *                                      m_distPointsNormals;
+            Vec3<double> *                                      m_facePointsPositions;
+            Vec3<double> *                                      m_facePointsNormals;
+			bool												m_isFlat;
+			CircularListElement<TMMVertex> *					m_dummyVertex;
+			Vec3<double>										m_normal;
+        
 					                                           
 																ICHull(const ICHull & rhs);
+        
+			friend class HACD;
 	};
 
 }

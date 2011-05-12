@@ -49,27 +49,33 @@ bool SavePartition(const std::string & fileName, const std::vector< HACD::Vec3<d
                    const long * partition, const size_t nClusters);
 
 int main(int argc, char * argv[])
-{  
-    if (argc != 6)
-    {
-        std::cout << "Usage: ./testHACD fileName.off minNClusters maxConcavity invertInputFaces addExtraDistPoints"<< std::endl;
-		std::cout << "Recommended parameters: ./testHACD fileName.off 3 100 0 0"<< std::endl;
+{ 
+    
+    if (argc != 8)
+    { 
+        std::cout << "Usage: ./testHACD fileName.off minNClusters maxConcavity invertInputFaces addExtraDistPoints addNeighboursDistPoints addFacesPoints"<< std::endl;
+		std::cout << "Recommended parameters: ./testHACD fileName.off 2 100 0 0 0 1"<< std::endl;
         return -1;
     }
-
 	const std::string fileName(argv[1]);
     size_t nClusters = atoi(argv[2]);
     double concavity = atof(argv[3]);
 	bool invert = (atoi(argv[4]) == 0)?false:true;
 	bool addExtraDistPoints = (atoi(argv[5]) == 0)?false:true;
+	bool addNeighboursDistPoints = (atoi(argv[6]) == 0)?false:true;
+    bool addFacesPoints = (atoi(argv[7]) == 0)?false:true;
     
+
     /*
-    const std::string fileName("../../../../data/test.off");
+    const std::string fileName("../../../../data/test2.off");
     size_t nClusters =6;
-    double concavity = 1000.0;
+    double concavity = 100.0;
 	bool invert = false;
-	bool addExtraDistPoints = true;
+	bool addExtraDistPoints = false;
+    bool addNeighboursDistPoints = true;
+    bool addFacesPoints = true;
     */
+    
     
 	std::string folder;
 	int found = fileName.find_last_of(PATH_SEP);
@@ -105,7 +111,10 @@ int main(int argc, char * argv[])
     myHACD.SetNVerticesPerCH(100);                      // max of 100 vertices per convex-hull
 	myHACD.SetConcavity(concavity);                     // maximum concavity
 	myHACD.SetCallBack(&CallBack);
-    myHACD.SetAddExtraDistPoints(addExtraDistPoints);                 
+    myHACD.SetAddExtraDistPoints(addExtraDistPoints);   
+	myHACD.SetAddNeighboursDistPoints(addNeighboursDistPoints);   
+    myHACD.SetAddFacesPoints(addFacesPoints); 
+    
     clock_t start, end;
     double elapsed;
     start = clock();
@@ -164,10 +173,9 @@ int main(int argc, char * argv[])
     }
     
     std::string outFileNamePartition = folder + PATH_SEP + file.substr(0, file.find_last_of(".")) + "_partition.wrl";
-    long * partition = new long [triangles.size()];
-    myHACD.ComputePartition(partition);
+	const long * const partition = myHACD.GetPartition();
     SavePartition(outFileNamePartition, points, triangles, partition, nClusters);
-    delete [] partition;
+	
 	return 0;
 }
 bool SaveVRML2(const std::string & fileName, const std::vector< HACD::Vec3<double> > & points, 

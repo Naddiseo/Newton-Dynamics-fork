@@ -26,6 +26,7 @@ namespace HACD
         m_surf = 0.0;
         m_perimeter = 0.0;
         m_concavity = 0.0;
+		m_volume = 0.0;
         m_deleted = false;
 	}
    
@@ -38,6 +39,7 @@ namespace HACD
         m_surf = 0.0;
         m_perimeter = 0.0;
         m_concavity = 0.0;
+		m_volume = 0.0;
         m_deleted = false;
     }
     

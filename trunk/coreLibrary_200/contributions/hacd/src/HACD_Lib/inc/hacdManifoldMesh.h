@@ -74,7 +74,7 @@ namespace HACD
         
         private:
 			Vec3<double>										m_pos;
-			size_t												m_name;
+			long												m_name;
             size_t												m_id;
 			CircularListElement<TMMEdge> *						m_duplicate;		// pointer to incident cone edge (or NULL)
 			bool												m_onHull;
@@ -193,8 +193,6 @@ namespace HACD
             //!
             void                                                Copy(TMMesh & mesh);
 			//!
-			double												ComputeDistance(long name, const Vec3<double> & pt, const Vec3<double> & normal, bool & insideHull, bool updateIncidentPoints);
-			//!
 			bool												CheckConsistancy();
 			//!
 			bool												Normalize();
@@ -225,5 +223,16 @@ namespace HACD
 	long														IntersectRayTriangle( const Vec3<double> & P0, const Vec3<double> & dir, 
 																					  const Vec3<double> & V0, const Vec3<double> & V1, 
 																					  const Vec3<double> & V2, double &t);
+    /*
+     Calculate the line segment PaPb that is the shortest route between
+     two lines P1P2 and P3P4. Calculate also the values of mua and mub where
+     Pa = P1 + mua (P2 - P1)
+     Pb = P3 + mub (P4 - P3)
+     Return FALSE if no solution exists.
+     */
+    bool                                                        IntersectLineLine(const Vec3<double> & p1, const Vec3<double> & p2, 
+                                                                                  const Vec3<double> & p3, const Vec3<double> & p4,
+                                                                                  Vec3<double> & pa, Vec3<double> & pb, 
+                                                                                  double & mua, double &mub);
 }
 #endif

@@ -141,22 +141,11 @@ void dgConvexHull3d::BuildHull (const dgFloat64* const vertexCloud, dgInt32 stri
 	treeCount *= 2;
 
 	dgStack<dgHullVertex> points (count);
-//	dgStack<dgBigVector> convexPoints (count);
 	dgStack<dgAABBPointTree3dClump> treePool (treeCount + 256);
-
-//	count = InitVertexArray(&convexPoints[0], &points[0], vertexCloud, strideInBytes, count, &treePool[0], treePool.GetSizeInBytes());
 	count = InitVertexArray(&points[0], vertexCloud, strideInBytes, count, &treePool[0], treePool.GetSizeInBytes());
 
 	if (m_count >= 4) {
 		CalculateConvexHull (&treePool[0], &points[0], count, distTol, maxVertexCount);
-
-//		m_points[m_count].m_x = 0.0f;
-//		dgBigVector* const points = &m_points[0];
-//		const dgBigVector* const hullPoints = &convexPoints[0];
-//		for (dgInt32 i = 0; i < m_count; i ++) {
-//			points[i] = hullPoints[i];
-//			_ASSERTE (points[i].m_w == dgFloat64 (0.0f));
-//		}
 	}
 
 #if (defined (_WIN_32_VER) || defined (_WIN_64_VER))
@@ -303,8 +292,8 @@ dgInt32 dgConvexHull3d::InitVertexArray(dgHullVertex* const points, const dgFloa
 		for (dgInt32 i = 0; i < count; i ++) {
 			dgInt32 index = i * stride;
 			dgBigVector& vertex = points[i];
-			//vertex = dgBigVector (vertexCloud[index], vertexCloud[index + 1], vertexCloud[index + 2], dgFloat64 (0.0f));
 			vertex = dgBigVector (vertexCloud[index], vertexCloud[index + 1], vertexCloud[index + 2], vertexCloud[index + 3]);
+			_ASSERTE (dgCheckVector(vertex));
 			points[i].m_index = 0;
 		}
 	} else {
@@ -312,6 +301,7 @@ dgInt32 dgConvexHull3d::InitVertexArray(dgHullVertex* const points, const dgFloa
 			dgInt32 index = i * stride;
 			dgBigVector& vertex = points[i];
 			vertex = dgBigVector (vertexCloud[index], vertexCloud[index + 1], vertexCloud[index + 2], dgFloat64 (0.0f));
+			_ASSERTE (dgCheckVector(vertex));
 			points[i].m_index = 0;
 		}
 	}
@@ -345,7 +335,6 @@ dgInt32 dgConvexHull3d::InitVertexArray(dgHullVertex* const points, const dgFloa
 	dgInt32 normalCount = BuildNormalList (&normalArray[0]);
 
 	dgInt32 index = SupportVertex (&tree, points, normalArray[0]);
-	//convexPoints[0] = points[index];
 	m_points[0] = points[index];
 	points[index].m_index = 1;
 
