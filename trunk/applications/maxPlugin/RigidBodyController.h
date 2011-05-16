@@ -56,6 +56,17 @@ class RigidBodyController: public Control, public RigidBodyData
 	virtual void SetValue(TimeValue t, void* val, int commit=1, GetSetMethod method=CTRL_ABSOLUTE);
 
 	virtual int Display(TimeValue t, INode* inode, ViewExp *vpt, int flags);
+
+
+	virtual int NumSubs();
+	virtual Animatable* SubAnim(int i);
+	virtual BOOL IsKeyAtTime(TimeValue t,DWORD flags);
+	virtual int NumRefs();    
+	virtual RefTargetHandle GetReference(int i);
+	virtual void SetReference(int i, RefTargetHandle rtarg);
+	virtual int RemapRefOnLoad(int iref);
+
+
 	
 	virtual IOResult Load(ILoad* iload);
 	virtual IOResult Save(ISave* isave);

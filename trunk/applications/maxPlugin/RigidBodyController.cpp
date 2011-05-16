@@ -25,6 +25,10 @@
 
 #define RIGIDBODY_CONTROLLER_ID Class_ID(0x6e6c6a1b, 0x6c7d3fb9)
 
+#define SCALE_CONTROL 0
+#define POSIT_CONTROL 1
+#define ROTAT_CONTROL 2
+
 
 int RigidBodyControllerDesc::IsPublic() 
 {
@@ -505,4 +509,64 @@ RefTargetHandle RigidBodyController::Clone(RemapDir& remap)
 	RigidBodyController* ctrl = new RigidBodyController(*this);
 	CloneControl(ctrl, remap);
 	return ctrl;
+}
+
+
+
+int RigidBodyController::NumSubs()  
+{ 
+	return 3;
+}
+
+Animatable* RigidBodyController::SubAnim(int i)
+{
+	switch (i) 
+	{
+		case SCALE_CONTROL:
+		{
+			return m_scaleControl;
+		}
+		case POSIT_CONTROL:
+		{
+			return m_positionControl;
+		}
+
+		case ROTAT_CONTROL:
+		{
+			return m_rotationControl;
+		}
+
+		default:
+			return NULL;
+	}
+	return NULL;
+}
+
+BOOL RigidBodyController::IsKeyAtTime(TimeValue t,DWORD flags)
+{
+//	_ASSERTE (0);
+	return TRUE;
+}
+
+int RigidBodyController::NumRefs() 
+{ 
+	_ASSERTE (0);
+	return 3; 
+}    
+
+RefTargetHandle RigidBodyController::GetReference(int i)
+{
+	_ASSERTE (0);
+	return NULL;
+}
+
+void RigidBodyController::SetReference(int i, RefTargetHandle rtarg)
+{
+	_ASSERTE (0);
+}
+
+int RigidBodyController::RemapRefOnLoad(int iref)
+{
+	_ASSERTE (0);
+	return 0;
 }
