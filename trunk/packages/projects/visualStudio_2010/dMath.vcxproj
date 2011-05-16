@@ -70,6 +70,7 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='release|Win32'">$(Platform)/$(ProjectName)/$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='release|x64'">$(Platform)/$(ProjectName)/$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='release|x64'">$(Platform)/$(ProjectName)/$(Configuration)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='debug|x64'">$(ProjectName)_d</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -114,7 +115,7 @@
       <OutputFile>$(OutDir)$(ProjectName)_d.lib</OutputFile>
     </Lib>
     <PostBuildEvent>
-      <Command>xcopy  "$(OutDir)$(TargetName).lib" "../../$(Platform)/$(Configuration)/*.*"  /F /Y /R</Command>
+      <Command>xcopy "$(OutDir)$(TargetName).lib" "../../$(Platform)/$(Configuration)/*.*"  /F /Y /R</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'">

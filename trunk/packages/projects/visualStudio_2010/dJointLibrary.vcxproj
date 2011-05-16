@@ -128,6 +128,7 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='releaseDll|x64'">$(Platform)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='releaseDll|x64'">$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='releaseDll|x64'">false</LinkIncremental>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='debug|x64'">$(ProjectName)_d</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -172,9 +173,11 @@ xcopy "$(OutDir)$(TargetName).lib" "../../$(Platform)/$(Configuration)/*.*"  /F 
     </ClCompile>
     <PostBuildEvent>
       <Command>xcopy "../../dCustomJoints/JointLibrary.h" "../../*.*"  /F /Y
-xcopy "$(OutDir)$(TargetName).lib" "../../$(Platform)/$(Configuration)/*.*"  /F /Y
-</Command>
+xcopy "$(OutDir)$(TargetName).lib" "../../$(Platform)/$(Configuration)/*.*"  /F /Y /R</Command>
     </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName)_d.lib</OutputFile>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='release|Win32'">
     <ClCompile>
@@ -216,6 +219,9 @@ xcopy "$(OutDir)$(TargetName).lib" "../../$(Platform)/$(Configuration)/*.*"  /F 
 xcopy "$(OutDir)$(TargetName).lib" "../../$(Platform)/$(Configuration)/*.*"  /F /Y
 </Command>
     </PostBuildEvent>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='debugDll|Win32'">
     <ClCompile>

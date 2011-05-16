@@ -400,7 +400,7 @@ void RigidBodyWorld::EndEditParams (Interface *ip, IUtil *iu)
 
 INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	RigidBodyWorld* const world = (RigidBodyWorld *)GetWindowLong (hWnd, GWL_USERDATA);
+	RigidBodyWorld* const world = (RigidBodyWorld *)GetWindowLong (hWnd, GWLP_USERDATA);
 	RigidBodyWorldDesc* const desc = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
 
 	switch (msg) 
@@ -408,7 +408,7 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 		case WM_INITDIALOG:
 		{
 			RigidBodyWorld* const world = (RigidBodyWorld *)lParam;
-			SetWindowLong(hWnd, GWL_USERDATA, (LONG)world);
+			SetWindowLong(hWnd, GWLP_USERDATA, (LONG)world);
 			world->RigidBodyWorld::InitUI(hWnd);
 			break;
 		}

@@ -86,7 +86,7 @@ void RigidBodyUIPane::DestroyUI(HWND hWnd)
 
 INT_PTR CALLBACK RigidBodyUIPane::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	RigidBodyWorld* const world = (RigidBodyWorld *)GetWindowLong (hWnd, GWL_USERDATA);
+	RigidBodyWorld* const world = (RigidBodyWorld *)GetWindowLong (hWnd, GWLP_USERDATA);
 	RigidBodyWorldDesc* const desc = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
 
 	switch (msg) 
@@ -94,7 +94,7 @@ INT_PTR CALLBACK RigidBodyUIPane::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 		case WM_INITDIALOG:
 		{
 			RigidBodyWorld* const world = (RigidBodyWorld *)lParam;
-			SetWindowLong(hWnd, GWL_USERDATA, (LONG)world);
+			SetWindowLong(hWnd, GWLP_USERDATA, (LONG)world);
 			world->RigidBodyUIPane::InitUI(hWnd);
 			break;
 		}

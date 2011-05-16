@@ -172,7 +172,7 @@ int AlchemediaMaxExport::DoExport(const TCHAR *name,ExpInterface *ei,Interface *
 {
 	m_options.Load();
 	if(!suppressPrompts)	{
-		if (!DialogBoxParam(hInstance, MAKEINTRESOURCE(IDD_EXPORT_DIALOG), GetActiveWindow(), ExportDescOptionsDlgProc, (LPARAM)this)) {
+		if (!DialogBoxParam(hInstance, MAKEINTRESOURCE(IDD_EXPORT_DIALOG), GetActiveWindow(), (DLGPROC) ExportDescOptionsDlgProc, (LPARAM)this)) {
 			return TRUE;
 		}
 	}
@@ -202,7 +202,7 @@ BOOL CALLBACK AlchemediaMaxExport::ExportDescOptionsDlgProc(HWND hWnd,UINT messa
 		case WM_INITDIALOG:
 		{
 			AlchemediaMaxExport* const scene = (AlchemediaMaxExport *)lParam;
-			SetWindowLong(hWnd, GWL_USERDATA, (LONG)scene);
+			SetWindowLong(hWnd, GWLP_USERDATA, (LONG)scene);
 
 			CenterWindow(hWnd,GetParent(hWnd));
 
@@ -215,7 +215,7 @@ BOOL CALLBACK AlchemediaMaxExport::ExportDescOptionsDlgProc(HWND hWnd,UINT messa
 
 		case WM_COMMAND:
 		{
-			AlchemediaMaxExport* const scene = (AlchemediaMaxExport *)GetWindowLong (hWnd, GWL_USERDATA);
+			AlchemediaMaxExport* const scene = (AlchemediaMaxExport *)GetWindowLong (hWnd, GWLP_USERDATA);
 			switch (LOWORD(wParam)) 
 			{
 				case IDC_EXPORT_MODEL:
