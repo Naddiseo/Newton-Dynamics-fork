@@ -34,8 +34,8 @@ static void TestConvexApproximation (DemoEntityManager* const scene)
 	dVector size = dVector (4.0f, 4.0f, 4.0f, 0.0f);
 	NewtonWorld* const world = scene->GetNewton();
 
-	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
-//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _SPHERE_PRIMITIVE, 0);
+//	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _BOX_PRIMITIVE, 0);
+	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _SPHERE_PRIMITIVE, 0);
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _REGULAR_CONVEX_HULL_PRIMITIVE, 0);
 //	NewtonCollision* const collision = CreateConvexCollision (world, GetIdentityMatrix(), size, _RANDOM_CONVEX_HULL_PRIMITIVE, 0);
 	
@@ -60,7 +60,18 @@ planeMatrix.m_posit = dVector (0, 0, 0, 1.0); // this is the plane origin
 dMatrix texMatrix (GetIdentityMatrix());
 texMatrix[0][0] = 4;
 texMatrix[1][1] = 4;
-NewtonMeshPlaneClip(mesh, &planeMatrix[0][0], &texMatrix[0][0], tex0, &xxxxx0, &xxxxx1);
+for (int i = 0; i < 1000; i ++) {
+	dFloat pitch = RandomVariable(2.0f * 3.1416f) ;
+	dFloat yaw = RandomVariable(2.0f * 3.1416f) ;
+	dFloat roll = RandomVariable(2.0f * 3.1416f) ;
+	dMatrix matrix (dPitchMatrix(pitch) * dYawMatrix(yaw) * dRollMatrix(roll));
+	
+	//NewtonMeshPlaneClip(mesh, &planeMatrix[0][0], &texMatrix[0][0], tex0, &xxxxx0, &xxxxx1);
+	NewtonMeshPlaneClip(mesh, &matrix[0][0], &texMatrix[0][0], tex0, &xxxxx0, &xxxxx1);
+	NewtonMeshDestroy(xxxxx0);
+	NewtonMeshDestroy(xxxxx1);
+}
+
 
 
 	// create a thing box;

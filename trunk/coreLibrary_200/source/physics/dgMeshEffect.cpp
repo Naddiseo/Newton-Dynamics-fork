@@ -3104,6 +3104,7 @@ void dgMeshEffect::PlaneClipMesh (const dgMatrix& planeMatrix, const dgMatrix& p
 		}
 
 		if (edge->m_mark != mark) {
+			edge->m_mark = mark;
 			edge->m_twin->m_mark = mark;
 			if (vertexSide[edge->m_incidentVertex] * vertexSide[edge->m_twin->m_incidentVertex] < 0) {
 
@@ -3112,7 +3113,12 @@ void dgMeshEffect::PlaneClipMesh (const dgMatrix& planeMatrix, const dgMatrix& p
 				dgBigVector dp (mesh.m_points[edge->m_twin->m_incidentVertex] - mesh.m_points[edge->m_incidentVertex]);
 				dgFloat64 param = -test0 / (plane % dp);
 
-				mesh.InsertEdgeVertex (edge, param);
+				dgEdge* const ptr = mesh.InsertEdgeVertex (edge, param);
+				ptr->m_mark = mark;
+				ptr->m_next->m_mark = mark;
+				ptr->m_twin->m_mark = mark;
+				ptr->m_twin->m_prev->m_mark = mark;
+
 				vertexSide[mesh.m_pointCount - 1] = 0;
 			}
 		}
@@ -3165,6 +3171,8 @@ void dgMeshEffect::PlaneClipMesh (const dgMatrix& planeMatrix, const dgMatrix& p
 
 							face->m_prev->m_next = back;
 							face->m_prev = front;
+						} else {
+							_ASSERTE (0);
 						}
 
 					} else if (side < 0){
@@ -3197,6 +3205,8 @@ void dgMeshEffect::PlaneClipMesh (const dgMatrix& planeMatrix, const dgMatrix& p
 
 							face->m_prev->m_next = front;
 							face->m_prev = back;
+						} else {
+							_ASSERTE (0);
 						}
 					}
 					break;
