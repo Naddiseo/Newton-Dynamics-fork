@@ -26,13 +26,13 @@
 #include "dgCollisionConvexHull.h"
 #include "dgMeshEffectSolidTree.h"
 
-
+/*
 #include "hacdCircularList.h"
 #include "hacdVector.h"
 #include "hacdICHull.h"
 #include "hacdGraph.h"
 #include "hacdHACD.h"
-
+*/
 
 
 class dgClusterFace
@@ -2676,13 +2676,10 @@ static void CallBack(const char * msg, double progress, double concavity, size_t
 {
 	std::cout << msg;
 }
-*/
+
 #include <iostream>
 #include <fstream>
 #include <string>
-
-
-
 
 static void SaveOFF (const std::string & fileName, dgMeshEffect* const mesh_)
 {
@@ -2749,37 +2746,8 @@ static void SaveOFF (const std::string & fileName, dgMeshEffect* const mesh_)
 		fout.close();
 	}
 }
-
-
-/*
-static bool SaveOFF(const std::string & fileName, const std::vector< HACD::Vec3<double> > & points, const std::vector< HACD::Vec3<long> > & triangles)
-{
-	std::cout << "Saving " <<  fileName << std::endl;
-	std::ofstream fout(fileName.c_str());
-	if (fout.is_open()) 
-	{
-		size_t nV = points.size();
-		size_t nT = triangles.size();            
-		fout <<"OFF" << std::endl;	    	
-		fout << nV << " " << nT << " " << 0<< std::endl;		
-		for(size_t v = 0; v < nV; v++)
-		{
-			fout << points[v].X() << " " 
-				<< points[v].Y() << " " 
-				<< points[v].Z() << std::endl;
-		}
-		for(size_t f = 0; f < nT; f++)
-		{
-			fout <<"3 " << triangles[f].X() << " " 
-				<< triangles[f].Y() << " "                                                  
-				<< triangles[f].Z() << std::endl;
-		}
-		fout.close();
-		return true;
-	}
-	return false;
-}
 */
+
 
 
 
@@ -2787,7 +2755,8 @@ dgMeshEffect* dgMeshEffect::CreateConvexApproximation (dgInt32 maxCount) const
 {
 	dgMeshEffect triangleMesh (*this);
 //	triangleMesh.Triangulate();
-SaveOFF("C:/Users/Julio/Desktop/hacd/data/boxWithNick2.off", &triangleMesh);
+//SaveOFF("C:/Users/Julio/Desktop/hacd/data/boxWithNick2.off", &triangleMesh);
+
 //return new (GetAllocator()) dgMeshEffect (GetAllocator(), &m_points[0].m_x, m_pointCount, sizeof (dgBigVector), 0.0);
 
 dgMeshEffect* const convexPartion = new (GetAllocator()) dgMeshEffect (triangleMesh, 0.01);

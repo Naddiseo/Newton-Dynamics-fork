@@ -1000,10 +1000,10 @@ void dgMeshEffect::AddPoint(const dgFloat64* vertex, dgInt32 material)
 	dgVertexAtribute attib;
 	AddVertex(dgBigVector (vertex[0], vertex[1], vertex[2], vertex[3]));
 	
-	attib.m_vertex.m_x = m_points[m_pointCount -1].m_x;
-	attib.m_vertex.m_y = m_points[m_pointCount -1].m_y;
-	attib.m_vertex.m_z = m_points[m_pointCount -1].m_z;
-	attib.m_vertex.m_w = m_points[m_pointCount -1].m_w;
+	attib.m_vertex.m_x = m_points[m_pointCount - 1].m_x;
+	attib.m_vertex.m_y = m_points[m_pointCount - 1].m_y;
+	attib.m_vertex.m_z = m_points[m_pointCount - 1].m_z;
+	attib.m_vertex.m_w = m_points[m_pointCount - 1].m_w;
 
 	attib.m_normal_x = vertex[4];
 	attib.m_normal_y = vertex[5];
@@ -1115,6 +1115,29 @@ void dgMeshEffect::AddPolygon (dgInt32 count, const dgFloat64* const vertexList,
 	}
 }
 
+
+void dgMeshEffect::AddPolygon (dgInt32 count, const dgFloat32* const vertexList, dgInt32 strideIndBytes, dgInt32 material)
+{
+	dgVertexAtribute points[256];
+	_ASSERTE (count < sizeof (points)/sizeof (points[0]));
+
+	dgInt32 stride = strideIndBytes / sizeof (dgFloat32);
+	for (dgInt32 i = 0; i < count; i ++) {
+		points[i].m_vertex.m_x = vertexList[i * stride + 0];
+		points[i].m_vertex.m_y = vertexList[i * stride + 1];
+		points[i].m_vertex.m_z = vertexList[i * stride + 2];
+		points[i].m_vertex.m_w = vertexList[i * stride + 3];
+		points[i].m_normal_x = vertexList[i * stride + 4];
+		points[i].m_normal_y = vertexList[i * stride + 5];
+		points[i].m_normal_z = vertexList[i * stride + 6];
+		points[i].m_u0 = vertexList[i * stride + 7];
+		points[i].m_v0 = vertexList[i * stride + 8];
+		points[i].m_u1 = vertexList[i * stride + 9];
+		points[i].m_u1 = vertexList[i * stride + 10];
+	}
+
+	AddPolygon (count, &points[0].m_vertex.m_x, sizeof (dgVertexAtribute), material);
+}
 
 void dgMeshEffect::EndPolygon (dgFloat64 tol)
 {

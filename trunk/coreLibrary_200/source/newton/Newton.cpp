@@ -8255,14 +8255,10 @@ void NewtonMeshBeginFace(const NewtonMesh* const mesh)
 
 void NewtonMeshAddFace(const NewtonMesh* const mesh, int vertexCount, const dFloat* const vertex, int strideInBytes, int materialIndex)
 {
-	_ASSERTE (0);
-/*
-	
 	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
 
 	TRACE_FUNTION(__FUNCTION__);
 	meshEffect->AddPolygon (vertexCount, vertex, strideInBytes, materialIndex);
-*/
 }
 
 

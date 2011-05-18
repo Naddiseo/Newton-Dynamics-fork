@@ -639,14 +639,16 @@ void dgMeshEffect::SphericalMapping (dgInt32 material)
 		dgBigVector point (m_points[i] - origin);
 		point = point.Scale (1.0f / dgSqrt (point % point));
 
-		dgFloat64 u = dgAtan2 (point.m_z, point.m_y);
-		if (u < dgFloat32 (0.0f)) {
-			u += dgFloat32 (3.141592f * 2.0f);
-		}
-		dgFloat64 v = ClampValue(point.m_x, dgFloat64(-0.9999f), dgFloat64(0.9999f)) * dgFloat64 (0.5f * 3.141592f);
+//		dgFloat64 u = dgAtan2 (point.m_z, point.m_y);
+//		if (u < dgFloat32 (0.0f)) {
+//			u += dgFloat32 (3.141592f * 2.0f);
+//		}
+//		dgFloat64 v = ClampValue(point.m_x, dgFloat64(-0.9999f), dgFloat64(0.9999f)) * dgFloat64 (0.5f * 3.141592f);
+//		sphere[i].m_x = dgFloat64 (1.0f) - u * dgFloat64 (1.0f / (2.0f * 3.141592f));
+//		sphere[i].m_y = dgFloat64 (0.5f) * (dgFloat64 (1.0f) + v / dgFloat64 (0.5f * 3.141592f));
 
-		sphere[i].m_x = dgFloat64 (1.0f) - u * dgFloat64 (1.0f / (2.0f * 3.141592f));
-		sphere[i].m_y = dgFloat64 (0.5f) * (dgFloat64 (1.0f) + v / dgFloat64 (0.5f * 3.141592f));
+		sphere[i].m_x = (dgFloat64 (1.0f) - point.m_x) * dgFloat64 (0.5f);
+		sphere[i].m_y = (dgFloat64 (1.0f) - point.m_y) * dgFloat64 (0.5f);
 	}
 
 
@@ -998,10 +1000,10 @@ void dgMeshEffect::AddPoint(const dgFloat64* vertex, dgInt32 material)
 	dgVertexAtribute attib;
 	AddVertex(dgBigVector (vertex[0], vertex[1], vertex[2], vertex[3]));
 	
-	attib.m_vertex.m_x = m_points[m_pointCount -1].m_x;
-	attib.m_vertex.m_y = m_points[m_pointCount -1].m_y;
-	attib.m_vertex.m_z = m_points[m_pointCount -1].m_z;
-	attib.m_vertex.m_w = m_points[m_pointCount -1].m_w;
+	attib.m_vertex.m_x = m_points[m_pointCount - 1].m_x;
+	attib.m_vertex.m_y = m_points[m_pointCount - 1].m_y;
+	attib.m_vertex.m_z = m_points[m_pointCount - 1].m_z;
+	attib.m_vertex.m_w = m_points[m_pointCount - 1].m_w;
 
 	attib.m_normal_x = vertex[4];
 	attib.m_normal_y = vertex[5];
@@ -1113,6 +1115,29 @@ void dgMeshEffect::AddPolygon (dgInt32 count, const dgFloat64* const vertexList,
 	}
 }
 
+
+void dgMeshEffect::AddPolygon (dgInt32 count, const dgFloat32* const vertexList, dgInt32 strideIndBytes, dgInt32 material)
+{
+	dgVertexAtribute points[256];
+	_ASSERTE (count < sizeof (points)/sizeof (points[0]));
+
+	dgInt32 stride = strideIndBytes / sizeof (dgFloat32);
+	for (dgInt32 i = 0; i < count; i ++) {
+		points[i].m_vertex.m_x = vertexList[i * stride + 0];
+		points[i].m_vertex.m_y = vertexList[i * stride + 1];
+		points[i].m_vertex.m_z = vertexList[i * stride + 2];
+		points[i].m_vertex.m_w = vertexList[i * stride + 3];
+		points[i].m_normal_x = vertexList[i * stride + 4];
+		points[i].m_normal_y = vertexList[i * stride + 5];
+		points[i].m_normal_z = vertexList[i * stride + 6];
+		points[i].m_u0 = vertexList[i * stride + 7];
+		points[i].m_v0 = vertexList[i * stride + 8];
+		points[i].m_u1 = vertexList[i * stride + 9];
+		points[i].m_u1 = vertexList[i * stride + 10];
+	}
+
+	AddPolygon (count, &points[0].m_vertex.m_x, sizeof (dgVertexAtribute), material);
+}
 
 void dgMeshEffect::EndPolygon (dgFloat64 tol)
 {
@@ -3104,6 +3129,7 @@ void dgMeshEffect::PlaneClipMesh (const dgMatrix& planeMatrix, const dgMatrix& p
 		}
 
 		if (edge->m_mark != mark) {
+			edge->m_mark = mark;
 			edge->m_twin->m_mark = mark;
 			if (vertexSide[edge->m_incidentVertex] * vertexSide[edge->m_twin->m_incidentVertex] < 0) {
 
@@ -3112,7 +3138,12 @@ void dgMeshEffect::PlaneClipMesh (const dgMatrix& planeMatrix, const dgMatrix& p
 				dgBigVector dp (mesh.m_points[edge->m_twin->m_incidentVertex] - mesh.m_points[edge->m_incidentVertex]);
 				dgFloat64 param = -test0 / (plane % dp);
 
-				mesh.InsertEdgeVertex (edge, param);
+				dgEdge* const ptr = mesh.InsertEdgeVertex (edge, param);
+				ptr->m_mark = mark;
+				ptr->m_next->m_mark = mark;
+				ptr->m_twin->m_mark = mark;
+				ptr->m_twin->m_prev->m_mark = mark;
+
 				vertexSide[mesh.m_pointCount - 1] = 0;
 			}
 		}
@@ -3122,7 +3153,8 @@ void dgMeshEffect::PlaneClipMesh (const dgMatrix& planeMatrix, const dgMatrix& p
 	for (iter.Begin(); iter; iter ++){
 		dgEdge* const face = &(*iter);
 
-		if ((face->m_incidentFace > 0) && (face->m_mark != mark) && (vertexSide[face->m_incidentVertex] == 0)) {
+
+		if ((face->m_incidentFace > 0) && (face->m_mark != mark) && (vertexSide[face->m_incidentVertex] == 0) && (vertexSide[face->m_next->m_incidentVertex] < 0)) {
 			dgEdge* ptr = face;
 			do {
 				ptr->m_mark = mark;
@@ -3135,39 +3167,8 @@ void dgMeshEffect::PlaneClipMesh (const dgMatrix& planeMatrix, const dgMatrix& p
 				side |= vertexSide[ptr->m_incidentVertex];
 				if (vertexSide[ptr->m_incidentVertex] == 0) {
 					_ASSERTE (side != -1);
-					if (side > 0) {
-						if (ptr->m_next != face) {
-							dgEdge* const front = mesh.AddHalfEdge(ptr->m_incidentVertex, face->m_incidentVertex);
-							dgEdge* const back = mesh.AddHalfEdge(face->m_incidentVertex, ptr->m_incidentVertex);
-							_ASSERTE (back);
-							_ASSERTE (front);
-
-							back->m_mark = mark;
-							front->m_mark = mark;
-
-							back->m_incidentFace = face->m_incidentFace;
-							front->m_incidentFace = face->m_incidentFace;
-
-							back->m_userData = face->m_userData;
-							front->m_userData = ptr->m_userData;
-
-							back->m_twin = front;
-							front->m_twin = back;
-
-							back->m_next = ptr;
-							front->m_next = face;
-
-							back->m_prev = face->m_prev;
-							front->m_prev = ptr->m_prev;
-
-							ptr->m_prev->m_next = front;
-							ptr->m_prev = back;
-
-							face->m_prev->m_next = back;
-							face->m_prev = front;
-						}
-
-					} else if (side < 0){
+					_ASSERTE (side <= 0);
+					if (side < 0) {
 						if (ptr->m_next != face) {
 							dgEdge* const back = mesh.AddHalfEdge(ptr->m_incidentVertex, face->m_incidentVertex);
 							dgEdge* const front = mesh.AddHalfEdge(face->m_incidentVertex, ptr->m_incidentVertex);
@@ -3197,6 +3198,16 @@ void dgMeshEffect::PlaneClipMesh (const dgMatrix& planeMatrix, const dgMatrix& p
 
 							face->m_prev->m_next = front;
 							face->m_prev = back;
+						} else {
+							dgEdge* const back = ptr;
+							dgEdge* const front = ptr->m_twin;
+							_ASSERTE (back);
+							_ASSERTE (front);
+							dgEdge* ptr1 = front;
+							do {
+								ptr1->m_mark = mark;
+								ptr1 = ptr1->m_next;
+							} while (ptr1 != front);
 						}
 					}
 					break;
