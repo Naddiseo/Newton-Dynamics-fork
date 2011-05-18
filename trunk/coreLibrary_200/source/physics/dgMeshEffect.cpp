@@ -639,6 +639,10 @@ void dgMeshEffect::SphericalMapping (dgInt32 material)
 		dgBigVector point (m_points[i] - origin);
 		point = point.Scale (1.0f / dgSqrt (point % point));
 
+		dgFloat64 u = dgAsin (point.m_y);
+		dgFloat64 v = dgAtan2 (point.m_x, point.m_z);
+
+
 //		dgFloat64 u = dgAtan2 (point.m_z, point.m_y);
 //		if (u < dgFloat32 (0.0f)) {
 //			u += dgFloat32 (3.141592f * 2.0f);
@@ -647,8 +651,11 @@ void dgMeshEffect::SphericalMapping (dgInt32 material)
 //		sphere[i].m_x = dgFloat64 (1.0f) - u * dgFloat64 (1.0f / (2.0f * 3.141592f));
 //		sphere[i].m_y = dgFloat64 (0.5f) * (dgFloat64 (1.0f) + v / dgFloat64 (0.5f * 3.141592f));
 
-		sphere[i].m_x = (dgFloat64 (1.0f) - point.m_x) * dgFloat64 (0.5f);
-		sphere[i].m_y = (dgFloat64 (1.0f) - point.m_y) * dgFloat64 (0.5f);
+//		sphere[i].m_x = (dgFloat64 (1.0f) - point.m_x) * dgFloat64 (0.5f);
+//		sphere[i].m_y = (dgFloat64 (1.0f) - point.m_y) * dgFloat64 (0.5f);
+
+		sphere[i].m_x = (dgFloat64 (3.1416f/2.0f) - u) * dgFloat64 (3.1416f);
+		sphere[i].m_y = (dgFloat64 (3.1416f) - v) / dgFloat64 (2.0f * 3.1416f);
 	}
 
 
