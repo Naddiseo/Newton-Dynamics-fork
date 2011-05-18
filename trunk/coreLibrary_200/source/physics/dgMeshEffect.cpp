@@ -3130,7 +3130,8 @@ void dgMeshEffect::PlaneClipMesh (const dgMatrix& planeMatrix, const dgMatrix& p
 	for (iter.Begin(); iter; iter ++){
 		dgEdge* const face = &(*iter);
 
-		if ((face->m_incidentFace > 0) && (face->m_mark != mark) && (vertexSide[face->m_incidentVertex] == 0)) {
+
+		if ((face->m_incidentFace > 0) && (face->m_mark != mark) && (vertexSide[face->m_incidentVertex] == 0) && (vertexSide[face->m_next->m_incidentVertex] < 0)) {
 			dgEdge* ptr = face;
 			do {
 				ptr->m_mark = mark;
@@ -3143,41 +3144,8 @@ void dgMeshEffect::PlaneClipMesh (const dgMatrix& planeMatrix, const dgMatrix& p
 				side |= vertexSide[ptr->m_incidentVertex];
 				if (vertexSide[ptr->m_incidentVertex] == 0) {
 					_ASSERTE (side != -1);
-					if (side > 0) {
-						if (ptr->m_next != face) {
-							dgEdge* const front = mesh.AddHalfEdge(ptr->m_incidentVertex, face->m_incidentVertex);
-							dgEdge* const back = mesh.AddHalfEdge(face->m_incidentVertex, ptr->m_incidentVertex);
-							_ASSERTE (back);
-							_ASSERTE (front);
-
-							back->m_mark = mark;
-							front->m_mark = mark;
-
-							back->m_incidentFace = face->m_incidentFace;
-							front->m_incidentFace = face->m_incidentFace;
-
-							back->m_userData = face->m_userData;
-							front->m_userData = ptr->m_userData;
-
-							back->m_twin = front;
-							front->m_twin = back;
-
-							back->m_next = ptr;
-							front->m_next = face;
-
-							back->m_prev = face->m_prev;
-							front->m_prev = ptr->m_prev;
-
-							ptr->m_prev->m_next = front;
-							ptr->m_prev = back;
-
-							face->m_prev->m_next = back;
-							face->m_prev = front;
-						} else {
-							_ASSERTE (0);
-						}
-
-					} else if (side < 0){
+					_ASSERTE (side <= 0);
+					if (side < 0) {
 						if (ptr->m_next != face) {
 							dgEdge* const back = mesh.AddHalfEdge(ptr->m_incidentVertex, face->m_incidentVertex);
 							dgEdge* const front = mesh.AddHalfEdge(face->m_incidentVertex, ptr->m_incidentVertex);
@@ -3208,7 +3176,15 @@ void dgMeshEffect::PlaneClipMesh (const dgMatrix& planeMatrix, const dgMatrix& p
 							face->m_prev->m_next = front;
 							face->m_prev = back;
 						} else {
-							_ASSERTE (0);
+							dgEdge* const back = ptr;
+							dgEdge* const front = ptr->m_twin;
+							_ASSERTE (back);
+							_ASSERTE (front);
+							dgEdge* ptr1 = front;
+							do {
+								ptr1->m_mark = mark;
+								ptr1 = ptr1->m_next;
+							} while (ptr1 != front);
 						}
 					}
 					break;
