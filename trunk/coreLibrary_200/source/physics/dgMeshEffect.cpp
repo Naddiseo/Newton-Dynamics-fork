@@ -653,9 +653,11 @@ void dgMeshEffect::SphericalMapping (dgInt32 material)
 
 //		sphere[i].m_x = (dgFloat64 (1.0f) - point.m_x) * dgFloat64 (0.5f);
 //		sphere[i].m_y = (dgFloat64 (1.0f) - point.m_y) * dgFloat64 (0.5f);
-
-		sphere[i].m_x = (dgFloat64 (3.1416f/2.0f) - u) * dgFloat64 (3.1416f);
-		sphere[i].m_y = (dgFloat64 (3.1416f) - v) / dgFloat64 (2.0f * 3.1416f);
+		
+		u = (dgFloat64 (3.1416f/2.0f) - u) / dgFloat64 (3.1416f);
+		v = (dgFloat64 (3.1416f) - v) / dgFloat64 (2.0f * 3.1416f);
+		sphere[i].m_x = u;
+		sphere[i].m_y = v;
 	}
 
 
