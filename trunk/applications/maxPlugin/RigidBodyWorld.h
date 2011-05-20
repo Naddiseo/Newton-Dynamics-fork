@@ -39,16 +39,18 @@ class RigidBodyData
 		m_collisionTree,
 	};
 
-	RigidBodyData()
-	{
-		memset (this, 0, sizeof (RigidBodyData));
-		m_oldControlerID = Class_ID (PRS_CONTROL_CLASS_ID, 0);
-	}	
+	RigidBodyData();
+	~RigidBodyData();
+	void DeleteBody();
+	void Load(ILoad* const iload);
+	void Save(ISave* const isave);
 
-	Point3 m_position;
-	Point3 m_basePosition;
+	
+
+//	Point3 m_position;
+//	Point3 m_basePosition;
+
 	Class_ID m_oldControlerID;
-
 	CollisionShape m_collisionShape;
 	int m_hideGizmos;
 	dFloat m_mass;
@@ -79,23 +81,26 @@ class RigidBodyWorldDesc: public ClassDesc2
 	virtual IOResult Load(ILoad *iload);
 	virtual IOResult Save(ISave *isave);
 	
-
 //	void AttachRigiBodyController (INode* const node, bool createBody);
 //	void DetachRigiBodyController (INode* const node, bool deleteBody);
 
+	void GetNodeList (dList<INode*>& list);
 	
 	RigidBodyController* GetRigidBodyControl(INode* const node) const;
 	
 	static ClassDesc* GetDescriptor();
-	static void OnPreCloneNode(void* param, NotifyInfo* info);
+
+	static void OnPreDeleteNode(void* param, NotifyInfo* info);
 	static void OnPostCloneNode(void* param, NotifyInfo* info);
+	static void OnPostLoadScene(void *param, NotifyInfo *info);
+
+
 
 	float m_minFps;
 	dVector m_gravity;
 	dMatrix m_systemMatrix;
 	dMatrix m_systemMatrixInv;
 	NewtonWorld* m_newton;
-	dTree<INode*, INode*> m_savedCloneList;
 };
 
 
@@ -123,7 +128,7 @@ class RigidBodyWorld: public UtilityObj, public RigidBodyUIPane
 
 	void UpdateViewPorts ();
 
-
+	
 
 
 
@@ -131,9 +136,7 @@ class RigidBodyWorld: public UtilityObj, public RigidBodyUIPane
 /*
 	virtual void SelectionSetChanged (Interface *ip, IUtil *iu); 
 	virtual void SetStartupParam (MSTR param); 
-	void GetNodeList (dList<INode*>& list);
-	static void OnPostLoadScene(void *param, NotifyInfo *info);
-	static void OnPreLoadScene(void *param, NotifyInfo *info);
+	
 	IUtil* m_iu;
 	Interface *m_ip;
 	NewtonWorld* m_newton;

@@ -63,38 +63,6 @@ void RigidBodyController::Copy(Control *from)
 }
 
 
-IOResult RigidBodyController::Load(ILoad *iload)
-{
-	IOResult ret = Control::Load(iload);
-
-	ULONG nread;
-	iload->OpenChunk();
-
-	iload->Read(&m_position, sizeof (m_position), &nread);
-	iload->Read(&m_basePosition, sizeof (m_basePosition), &nread);
-	iload->Read(&m_oldControlerID, sizeof (m_oldControlerID), &nread);
-
-	iload->CloseChunk();
-
-	return ret;
-}
-
-IOResult RigidBodyController::Save(ISave *isave)
-{
-	IOResult ret = Control::Save(isave);
-
-	ULONG nwrit;
-	Class_ID id (RigidBodyController::ClassID());
-	isave->BeginChunk(USHORT (id.PartB()));
-
-	isave->Write(&m_position, sizeof (m_position), &nwrit);
-	isave->Write(&m_basePosition, sizeof (m_basePosition), &nwrit);
-	isave->Write(&m_oldControlerID, sizeof (m_oldControlerID), &nwrit);
-
-	isave->EndChunk();
-
-	return ret;
-}
 
 
 RefResult RigidBodyController::NotifyRefChanged(Interval,RefTargetHandle,PartID &,RefMessage)
@@ -109,75 +77,6 @@ void RigidBodyController::MouseCycleStarted(TimeValue t)
 	m_position = Point3(0.0f, 0.0f, 0.0f);
 	Control::MouseCycleStarted (t);
 }
-
-void RigidBodyController::GetValue(TimeValue t, void* val, Interval &valid, GetSetMethod method)
-{
-	_ASSERTE (0);
-	Matrix3& matrix = *(Matrix3*)val;		
-	if (method == CTRL_ABSOLUTE) {
-		_ASSERTE (0);
-		//matrix.PreTranslate (m_position + m_basePosition);
-	} else {
-		matrix.PreTranslate (m_position + m_basePosition);
-	}
-}
-
-void RigidBodyController::SetValue(TimeValue t, void* val, int commit, GetSetMethod method)
-{
-//	<b>Important Note for Matrix3 Controllers:</b>When <b>SetValue()</b> is
-//		called the <b>method</b> parameter is ignored. The <b>*val</b> pointer
-//		passed to <b>SetValue()</b> points to an instance of Class SetXFormPacket. See that
-//	class for more details on how it is used.
-
-	SetXFormPacket* const xform = (SetXFormPacket*) val;
-	
-
-	switch (xform->command) 
-	{
-	  case XFORM_MOVE:
-	  {
-//		  _ASSERTE (0);
-//		  Move(t,ptr->tmParent,ptr->tmAxis,ptr->p,ptr->localOrigin,commit);
-		  Point3 posit (1, 1, 1);
-		  m_positionControl->SetValue(t, &posit, commit, CTRL_RELATIVE);
-		  break;
-	  }
-
-	  case XFORM_ROTATE:
-	  {
-		  _ASSERTE (0);
-//		  Rotate(t,ptr->tmParent,ptr->tmAxis,ptr->q,ptr->localOrigin,commit);
-		  break;
-	  }
-
-	  case XFORM_SCALE:
-	  {
-		  _ASSERTE (0);
-//		  Scale(t,ptr->tmParent,ptr->tmAxis,ptr->p,ptr->localOrigin,commit);
-		  break;
-	  }
-
-	  case XFORM_SET:
-	  {
-		  Point3 posit (xform->tmAxis.GetTrans());
-		  Quat rotation (xform->tmAxis);
-		  m_positionControl->SetValue(t, &posit, commit, CTRL_ABSOLUTE);
-		  m_rotationControl->SetValue(t, &rotation, commit, CTRL_ABSOLUTE);
-		  break;
-	  }
-	}
-/*
-	Point3& posit = *(Point3*)val;		
-	if (method == CTRL_ABSOLUTE) {
-		m_basePosition = posit;
-		m_position = Point3(0.0f, 0.0f, 0.0f);
-	} else {
-		m_position = posit;
-	}
-*/
-}
-	
-
 
 
 void RigidBodyController::RemoveRigidBody(INode* const myNode)
@@ -288,9 +187,33 @@ RigidBodyController::RigidBodyController(BOOL loading)
 RigidBodyController::~RigidBodyController()
 {
 	DeleteAllRefsFromMe();
-//	_ASSERTE (m_body);
-//	RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
-//	NewtonDestroyBody(plugin->m_newton, m_body);
+}
+
+
+IOResult RigidBodyController::Load(ILoad *iload)
+{
+	IOResult ret = Control::Load(iload);
+	RigidBodyData* const data = this;
+
+	iload->OpenChunk();
+	data->Load(iload);
+	iload->CloseChunk();
+
+	return ret;
+}
+
+IOResult RigidBodyController::Save(ISave *isave)
+{
+	IOResult ret = Control::Save(isave);
+
+	RigidBodyData* const data = this;
+	Class_ID id (RigidBodyController::ClassID());
+
+	isave->BeginChunk(USHORT (id.PartB()));
+	data->Save(isave);
+	isave->EndChunk();
+
+	return ret;
 }
 
 
@@ -473,6 +396,14 @@ RefTargetHandle RigidBodyController::Clone(RemapDir& remap)
 	myctrl->ReplaceReference(2, remap.CloneRef(m_scaleControl));
 
 	BaseClone(this, myctrl, remap);
+	RigidBodyControllerDesc& controlDesc = *(RigidBodyControllerDesc*)RigidBodyControllerDesc::GetDescriptor();
+
+	RigidBodyData* const srcData = this;
+	RigidBodyData* const dstData = myctrl;
+
+	memcpy (dstData, srcData, sizeof (RigidBodyData));
+	dstData->m_body = NULL;
+
 	return myctrl;
 }
 

@@ -28,6 +28,50 @@
 #define RIGIDBOGY_WORLD_CLASS_ID Class_ID(0x6185a57, 0x3a1f2f69)
 
 
+RigidBodyData::RigidBodyData()
+{
+	memset (this, 0, sizeof (RigidBodyData));
+	m_oldControlerID = Class_ID (PRS_CONTROL_CLASS_ID, 0);
+}	
+
+RigidBodyData::~RigidBodyData()
+{
+	DeleteBody();
+}
+
+void RigidBodyData::DeleteBody()
+{
+	if (m_body) {
+		RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+		NewtonDestroyBody(NewtonBodyGetWorld(m_body), m_body);
+	}
+	m_body = NULL;
+}
+
+void RigidBodyData::Load(ILoad* const iload)
+{
+	ULONG nwrit;
+	iload->Read(&m_oldControlerID, sizeof (m_oldControlerID), &nwrit);
+	iload->Read(&m_collisionShape, sizeof (m_collisionShape), &nwrit);
+	iload->Read(&m_hideGizmos, sizeof (m_hideGizmos), &nwrit);
+	iload->Read(&m_mass, sizeof (m_mass), &nwrit);
+	iload->Read(&m_inertia, sizeof (m_inertia), &nwrit);
+	iload->Read(&m_origin, sizeof (m_origin), &nwrit);
+}
+
+void RigidBodyData::Save(ISave* const isave)
+{
+	ULONG nwrit;
+	isave->Write(&m_oldControlerID, sizeof (m_oldControlerID), &nwrit);
+	isave->Write(&m_collisionShape, sizeof (m_collisionShape), &nwrit);
+	isave->Write(&m_hideGizmos, sizeof (m_hideGizmos), &nwrit);
+	isave->Write(&m_mass, sizeof (m_mass), &nwrit);
+	isave->Write(&m_inertia, sizeof (m_inertia), &nwrit);
+	isave->Write(&m_origin, sizeof (m_origin), &nwrit);
+}
+
+
+
 
 RigidBodyWorldDesc::RigidBodyWorldDesc ()
 	:ClassDesc2()
@@ -36,11 +80,9 @@ RigidBodyWorldDesc::RigidBodyWorldDesc ()
 	,m_systemMatrix (dVector (0.0f, 0.0f, 1.0f, 0.0f), dVector (1.0f, 0.0f, 0.0f, 0.0f), dVector (0.0f, 1.0f, 0.0f, 0.0f), dVector (0.0f, 0.0f, 0.0f, 1.0f))
 	,m_systemMatrixInv (m_systemMatrix.Inverse())
 {
-	RegisterNotification(OnPreCloneNode, this, NOTIFY_PRE_NODES_CLONED);
 	RegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
-
-//	RegisterNotification(OnPreLoadScene, this, NOTIFY_FILE_PRE_OPEN);
-//	RegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
+	RegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
+	RegisterNotification(OnPreDeleteNode, this, NOTIFY_SCENE_PRE_DELETED_NODE);
 
 	m_newton = NewtonCreate();
 }
@@ -50,11 +92,10 @@ RigidBodyWorldDesc::~RigidBodyWorldDesc ()
 	_ASSERTE (m_newton);
 	NewtonDestroy (m_newton);
 
-	UnRegisterNotification(OnPreCloneNode, this, NOTIFY_PRE_NODES_CLONED);
-	UnRegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
 
-//	UnRegisterNotification(OnPreLoadScene, this, NOTIFY_FILE_PRE_OPEN);
-//	UnRegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
+	UnRegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
+	UnRegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
+	UnRegisterNotification(OnPreDeleteNode, this, NOTIFY_SCENE_PRE_DELETED_NODE);
 }
 
 int RigidBodyWorldDesc::IsPublic() 
@@ -102,7 +143,6 @@ HINSTANCE RigidBodyWorldDesc::HInstance()
 
 void RigidBodyWorldDesc::ResetClassParams (BOOL fileReset)
 {
-	_ASSERTE (0);
 	ClassDesc2::ResetClassParams (fileReset);
 }
 
@@ -147,9 +187,9 @@ IOResult RigidBodyWorldDesc::Save(ISave* isave)
 RigidBodyController* RigidBodyWorldDesc::GetRigidBodyControl(INode* const node) const
 {
 	Control* const control = node->GetTMController();
-	_ASSERTE (control);
 	RigidBodyControllerDesc& controlDesc = *(RigidBodyControllerDesc*)RigidBodyControllerDesc::GetDescriptor();
-	if (control->ClassID() == controlDesc.ClassID()) {
+
+	if (control && (control->ClassID() == controlDesc.ClassID())) {
 		return (RigidBodyController*)control;
 	}
 	return NULL;
@@ -157,38 +197,17 @@ RigidBodyController* RigidBodyWorldDesc::GetRigidBodyControl(INode* const node) 
 
 
 
-void RigidBodyWorldDesc::OnPreCloneNode(void* param, NotifyInfo* info)
+void RigidBodyWorldDesc::OnPreDeleteNode(void* param, NotifyInfo* info)
 {
 	RigidBodyWorldDesc* const me = (RigidBodyWorldDesc*) param;
-	const INodeTab& origNodes = *(INodeTab*) info->callParam;
+	INode* const node = (INode*)info->callParam;
 
-	RigidBodyControllerDesc& controlDesc = *(RigidBodyControllerDesc*)RigidBodyControllerDesc::GetDescriptor();
-
-	me->m_savedCloneList.RemoveAll();
-	TimeValue t (GetCOREInterface()->GetTime());
-
-	for (int i = 0; i < origNodes.Count(); i ++) {
-		INode* const node = origNodes[i];
-		Control* const control = node->GetTMController();
-		_ASSERTE (control);
-		if (control->ClassID() == controlDesc.ClassID()) {
-//			data.m_bodyData = *positController;
-
-//			data.m_matrix = node->GetNodeTM(t);
-			me->m_savedCloneList.Insert(node, node);
-/*
-			Control* const regularPositionController = (Control*) CreateInstance (CTRL_POSITION_CLASS_ID, positController->m_oldControlerID);
-			Control* const regularRotationController = (Control*) CreateInstance (CTRL_ROTATION_CLASS_ID, rotationController->m_oldControlerID);
-
-			control->SetPositionController(regularPositionController);
-			control->SetRotationController(regularRotationController);
-
-			node->SetNodeTM(t, data.m_matrix);
-*/
-		}
+	RigidBodyController* const myControl = me->GetRigidBodyControl(node);
+	if (myControl) {
+		RigidBodyControllerDesc& desc = *(RigidBodyControllerDesc*)RigidBodyControllerDesc::GetDescriptor();
+		myControl->DeleteBody();
 	}
 }
-
 
 void RigidBodyWorldDesc::OnPostCloneNode(void* param, NotifyInfo* info)
 {
@@ -252,16 +271,49 @@ void RigidBodyWorldDesc::OnPostCloneNode(void* param, NotifyInfo* info)
 			dVector omega;
 			NewtonBodyGetOmega(origData->m_body, &omega[0]);
 			NewtonBodySetOmega(cloneData->m_body, &omega[0]);
-//			cloneNode->SetNodeTM(t, cloneMatrix);
-//			_ASSERTE (me->GetRigidBodyControl (cloneNode));
+		}
+	}
+}
+
+void RigidBodyWorldDesc::OnPostLoadScene (void* param, NotifyInfo* info)
+{
+	RigidBodyWorldDesc& me = *(RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+
+	dList<INode*> list;
+	me.GetNodeList (list);
+	for (dList<INode*>::dListNode* ptr = list.GetFirst(); ptr; ptr = ptr->GetNext()) {
+		INode* const node = ptr->GetInfo();
+		RigidBodyController* const control = me.GetRigidBodyControl(node);
+		if (control && (control->m_body == NULL)) {
+			RigidBodyData data = *control;
+			control->Init (data, node);
 		}
 	}
 
-	me->m_savedCloneList.RemoveAll();
+	GetCOREInterface()->ForceCompleteRedraw(); 
 }
 
+void RigidBodyWorldDesc::GetNodeList (dList<INode*>& list)
+{
+	int stackIndex;
+	INode* stack[4096];
 
+	stackIndex = 1;
+	Interface* const ip = GetCOREInterface();
+	stack[0] = ip->GetRootNode();
 
+	while (stackIndex) {
+		stackIndex --;
+		INode* const node = stack[stackIndex];
+		list.Append(node); 
+
+		for (int i = 0; i < node->NumberOfChildren(); i ++) {
+			stack[stackIndex] = node->GetChildNode(i);
+			stackIndex ++;
+			_ASSERTE (stackIndex * sizeof (INode*) < sizeof (stack));	
+		}
+	}
+}
 
 
 

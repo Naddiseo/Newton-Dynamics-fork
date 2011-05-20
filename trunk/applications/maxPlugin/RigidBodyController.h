@@ -43,8 +43,6 @@ class RigidBodyController: public Control, public RigidBodyData
 /*
 	RigidBodyController();
 	RigidBodyController(const RigidBodyController& clone);
-	virtual IOResult Load(ILoad* iload);
-	virtual IOResult Save(ISave* isave);
 	RefTargetHandle Clone(RemapDir& remap=DefaultRemapDir());
 	void AddRigidBody(INode* const myNode);
 	void RemoveRigidBody(INode* const myNode);
@@ -61,10 +59,6 @@ class RigidBodyController: public Control, public RigidBodyData
 	void Move (TimeValue t, Matrix3& partm, Matrix3& tmAxis, Point3& v, BOOL localOrigin, int commit);
 	void SetAbsValue(TimeValue t, const Matrix3 &val, const Matrix3 &parent, int commit);
 
-
-	// Loading/Saving
-	IOResult Load(ILoad *iload) {return IO_OK;}
-	IOResult Save(ISave *isave) {return IO_OK;}
 
 	//From Animatable
 	Class_ID ClassID();
@@ -97,6 +91,9 @@ class RigidBodyController: public Control, public RigidBodyData
 	static void ApplyGravityForce (const NewtonBody* const body, dFloat timestep, int threadIndex);
 	static void RenderGizmo (void* const userData, int vertexCount, const dFloat* const faceArray, int faceId);
 	virtual int Display(TimeValue t, INode* inode, ViewExp *vpt, int flags);
+	virtual IOResult Load(ILoad* iload);
+	virtual IOResult Save(ISave* isave);
+
 
 	Control* m_scaleControl;
 	Control* m_positionControl;
