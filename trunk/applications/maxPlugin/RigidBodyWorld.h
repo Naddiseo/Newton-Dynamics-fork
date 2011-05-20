@@ -25,6 +25,8 @@
 
 #include "RigidBodyUIPane.h"
 
+#define D_FILE_REVISION		0
+
 class RigidBodyController;
 
 class RigidBodyData
@@ -44,6 +46,9 @@ class RigidBodyData
 	void DeleteBody();
 	void Load(ILoad* const iload);
 	void Save(ISave* const isave);
+
+	static void LoadCollision (void* const serializeHandle, void* buffer, int size);
+	static void SaveCollision (void* const serializeHandle, const void* buffer, int size);
 
 	
 

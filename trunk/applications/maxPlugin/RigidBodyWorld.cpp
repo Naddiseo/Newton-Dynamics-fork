@@ -25,6 +25,7 @@
 #include "RigidBodyController.h"
 
 
+
 #define RIGIDBOGY_WORLD_CLASS_ID Class_ID(0x6185a57, 0x3a1f2f69)
 
 
@@ -48,26 +49,54 @@ void RigidBodyData::DeleteBody()
 	m_body = NULL;
 }
 
+void RigidBodyData::LoadCollision (void* const serializeHandle, void* buffer, int size)
+{
+	ULONG nwrit;
+	ILoad* const iload = (ILoad*)serializeHandle;
+	iload->Read(buffer, sizeof (size), &nwrit);
+}
+
+void RigidBodyData::SaveCollision (void* const serializeHandle, const void* buffer, int size)
+{
+	ULONG nwrit;
+	ISave* const isave = (ISave*)serializeHandle;
+	isave->Write(buffer, size, &nwrit);
+}
+
+
 void RigidBodyData::Load(ILoad* const iload)
 {
 	ULONG nwrit;
+	int revision;
+	iload->Read(&revision, sizeof (revision), &nwrit);
 	iload->Read(&m_oldControlerID, sizeof (m_oldControlerID), &nwrit);
 	iload->Read(&m_collisionShape, sizeof (m_collisionShape), &nwrit);
 	iload->Read(&m_hideGizmos, sizeof (m_hideGizmos), &nwrit);
 	iload->Read(&m_mass, sizeof (m_mass), &nwrit);
 	iload->Read(&m_inertia, sizeof (m_inertia), &nwrit);
 	iload->Read(&m_origin, sizeof (m_origin), &nwrit);
+
+	RigidBodyWorldDesc& me = *(RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+	NewtonCollision* const collision = NewtonCreateCollisionFromSerialization (me.m_newton, LoadCollision, iload);
+	NewtonReleaseCollision(me.m_newton, collision);
 }
+
 
 void RigidBodyData::Save(ISave* const isave)
 {
 	ULONG nwrit;
+	int revision = D_FILE_REVISION;
+	isave->Write(&revision, sizeof (revision), &nwrit);
 	isave->Write(&m_oldControlerID, sizeof (m_oldControlerID), &nwrit);
 	isave->Write(&m_collisionShape, sizeof (m_collisionShape), &nwrit);
 	isave->Write(&m_hideGizmos, sizeof (m_hideGizmos), &nwrit);
 	isave->Write(&m_mass, sizeof (m_mass), &nwrit);
 	isave->Write(&m_inertia, sizeof (m_inertia), &nwrit);
 	isave->Write(&m_origin, sizeof (m_origin), &nwrit);
+
+	RigidBodyWorldDesc& me = *(RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+	NewtonCollision* const collision = NewtonBodyGetCollision(m_body);
+	NewtonCollisionSerialize (me.m_newton, collision, SaveCollision, isave);
 }
 
 
@@ -91,7 +120,6 @@ RigidBodyWorldDesc::~RigidBodyWorldDesc ()
 {
 	_ASSERTE (m_newton);
 	NewtonDestroy (m_newton);
-
 
 	UnRegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
 	UnRegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);

@@ -518,7 +518,8 @@ void RigidBodyController::RenderGizmo (void* const userData, int vertexCount, co
 
 int RigidBodyController::Display(TimeValue t, INode* inode, ViewExp *vpt, int flags)
 {
-	if (!m_hideGizmos && m_body) {
+	if (!m_hideGizmos && m_body && NewtonBodyGetUserData(m_body)) {
+		_ASSERTE (NewtonBodyGetUserData(m_body) == inode);
 		GraphicsWindow* const gw = vpt->getGW();
 		float scale = float (GetMasterScale(UNITS_METERS));
 
