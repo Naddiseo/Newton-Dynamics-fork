@@ -23,60 +23,16 @@
 #include "RigidBodyWorld.h"
 #include "RigidBodyController.h"
 
-#define RIGIDBODY_CONTROLLER_ID Class_ID(0x6e6c6a1b, 0x6c7d3fb9)
 
-#define SCALE_CONTROL 0
-#define POSIT_CONTROL 1
-#define ROTAT_CONTROL 2
-
-
-int RigidBodyControllerDesc::IsPublic() 
+struct RendefGizmoInfo
 {
-	return 1;
-}
-
-void* RigidBodyControllerDesc::Create(BOOL loading) 
-{
-	return new RigidBodyController();
-}
-
-/*
-void* RigidBodyControllerDesc::Create()
-{
-	return new RigidBodyController();
-}
-*/
-
-const TCHAR* RigidBodyControllerDesc::ClassName() 
-{
-	return _T("RigidBody Controller");
-}
-
-SClass_ID RigidBodyControllerDesc::SuperClassID() 
-{
-	return CTRL_MATRIX3_CLASS_ID;
-}
-
-Class_ID RigidBodyControllerDesc::ClassID() 
-{
-	return RIGIDBODY_CONTROLLER_ID;
-}
-
-const TCHAR* RigidBodyControllerDesc::Category() 
-{
-	return _T("");
-}
-
-ClassDesc* RigidBodyControllerDesc::GetDescriptor() 
-{
-	static RigidBodyControllerDesc controllerDesc;
-	return &controllerDesc;
-}
+	dMatrix m_matrix;
+	GraphicsWindow* m_graphicWindow;
+	RigidBodyController* m_me;
+};
 
 
-
-
-
+#if 0
 RigidBodyController::RigidBodyController()
 	:Control(), RigidBodyData()
 {
@@ -91,88 +47,6 @@ RigidBodyController::RigidBodyController(const RigidBodyController& clone)
 	m_body = NULL;
 }
 
-void RigidBodyController::PostInit (const RigidBodyData& data, INode* const node)
-{
-	RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
-
-	RigidBodyData* const myData = this;
-	memcpy (myData, &data, sizeof (RigidBodyData));
-
-	float scale = float (GetMasterScale(UNITS_METERS));
-	ObjectState os (node->EvalWorldState(0)); 
-	_ASSERTE (os.obj);
-
-	Box3 box;
-	os.obj->GetLocalBoundBox(0, node, NULL, box); 
-
-	Point3 center (box.Center());
-	Point3 boxSize (box.Width());
-
-	dMatrix GeoMatrix (GetMatrixFromMaxMatrix (node->GetObjectTM(GetCOREInterface()->GetTime())));
-	dMatrix nodeMatrix (GetMatrixFromMaxMatrix (node->GetNodeTM(GetCOREInterface()->GetTime())));
-
-	dMatrix offset (GeoMatrix * nodeMatrix.Inverse4x4());
-
-	offset.m_posit.m_x += center.x;
-	offset.m_posit.m_y += center.y;
-	offset.m_posit.m_z += center.z;
-	offset = plugin->m_systemMatrixInv * offset * plugin->m_systemMatrix;
-
-	offset.m_posit = offset.m_posit.Scale (scale);
-
-	dVector size (plugin->m_systemMatrix.RotateVector(dVector(boxSize.x, boxSize.y, boxSize.z, 0.0f)));
-	size = size.Scale (scale);
-
-	NewtonCollision* collision = NULL;
-	switch (m_collisionShape) 
-	{
-		case m_box:
-		{
-			collision = NewtonCreateBox(plugin->m_newton, size.m_x, size.m_y, size.m_z, 0, &offset[0][0]);
-			break;
-		}
-
-		case m_convexHull:
-		{
-			_ASSERTE (0);
-			break;
-		}
-
-		default:;
-		{
-			_ASSERTE (0);
-		}
-	}
-
-	nodeMatrix = plugin->m_systemMatrixInv * nodeMatrix * plugin->m_systemMatrix;
-	nodeMatrix.m_posit = nodeMatrix.m_posit.Scale (scale);
-
-	m_body = NewtonCreateBody(plugin->m_newton, collision, &nodeMatrix[0][0]);
-	NewtonBodySetUserData(m_body, node);
-
-	NewtonConvexCollisionCalculateInertialMatrix (collision, &m_inertia[0], &m_origin[0]);	
-
-	NewtonBodySetCentreOfMass(m_body, &m_origin[0]);
-	NewtonBodySetMassMatrix(m_body, m_mass, m_mass * m_inertia.m_x, m_mass * m_inertia.m_y, m_mass * m_inertia.m_z);
-
-	NewtonBodySetForceAndTorqueCallback(m_body, ApplyGravityForce);
-
-	NewtonReleaseCollision(plugin->m_newton, collision);
-
-	Control* const control = node->GetTMController();
-	RemapDir* const remap1 = NewRemapDir();
-//	SetScaleController((Control*) control->GetScaleController()->Clone());
-	SetScaleController((Control*) remap1->CloneRef(control->GetScaleController()));
-	remap1->DeleteThis(); 
-
-	RemapDir* const remap2 = NewRemapDir();
-//	SetPositionController ((Control*) control->GetPositionController()->Clone());
-	SetPositionController((Control*) remap2->CloneRef(control->GetPositionController()));
-
-	RemapDir* const remap3 = NewRemapDir();
-//	SetRotationController((Control*) control->GetRotationController()->Clone());
-	SetRotationController((Control*) remap3->CloneRef(control->GetRotationController()));
-}
 
 RigidBodyController::~RigidBodyController()
 {
@@ -181,15 +55,7 @@ RigidBodyController::~RigidBodyController()
 	NewtonDestroyBody(plugin->m_newton, m_body);
 }
 
-Class_ID RigidBodyController::ClassID()
-{
-	return RigidBodyControllerDesc::GetDescriptor()->ClassID();
-}
 
-SClass_ID RigidBodyController::SuperClassID()
-{
-	return RigidBodyControllerDesc::GetDescriptor()->SuperClassID(); 
-}
 
 void RigidBodyController::Copy(Control *from)
 {
@@ -312,19 +178,6 @@ void RigidBodyController::SetValue(TimeValue t, void* val, int commit, GetSetMet
 }
 	
 
-void RigidBodyController::ApplyGravityForce (const NewtonBody* const body, dFloat timestep, int threadIndex)
-{
-	dFloat Ixx;
-	dFloat Iyy;
-	dFloat Izz;
-	dFloat mass;
-
-	NewtonBodyGetMassMatrix (body, &mass, &Ixx, &Iyy, &Izz);
-
-	RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
-	dVector gravity (plugin->m_gravity.Scale (mass));
-	NewtonBodySetForce (body, &gravity.m_x);
-}
 
 
 void RigidBodyController::RemoveRigidBody(INode* const myNode)
@@ -402,12 +255,324 @@ void RigidBodyController::AddRigidBody(INode* const myNode)
 	NewtonReleaseCollision(plugin->m_newton, collision);
 }
 
-struct RendefGizmoInfo
+
+
+
+
+
+
+#else
+
+RigidBodyController::RigidBodyController(BOOL loading)
+	:Control()
+	,RigidBodyData()
+	,m_scaleControl(NULL)
+	,m_positionControl(NULL)
+	,m_rotationControl(NULL)
+	,pblock(NULL)
 {
-	dMatrix m_matrix;
-	GraphicsWindow* m_graphicWindow;
-	RigidBodyController* m_me;
-};
+	curval = Matrix3(1);
+	blockUpdate = FALSE;
+
+	if(!loading) {
+		ReplaceReference(0, NewDefaultPositionController());
+		ReplaceReference(1, NewDefaultRotationController());
+		ReplaceReference(2, NewDefaultScaleController());
+		ivalid = FOREVER;
+	} else {
+		ivalid.SetEmpty();
+	}
+}
+
+
+RigidBodyController::~RigidBodyController()
+{
+	DeleteAllRefsFromMe();
+//	_ASSERTE (m_body);
+//	RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+//	NewtonDestroyBody(plugin->m_newton, m_body);
+}
+
+
+
+void RigidBodyController::Init (const RigidBodyData& data, INode* const node)
+{
+	RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+
+	RigidBodyData* const myData = this;
+	memcpy (myData, &data, sizeof (RigidBodyData));
+
+	float scale = float (GetMasterScale(UNITS_METERS));
+	ObjectState os (node->EvalWorldState(0)); 
+	_ASSERTE (os.obj);
+
+	Box3 box;
+	os.obj->GetLocalBoundBox(0, node, NULL, box); 
+
+	Point3 center (box.Center());
+	Point3 boxSize (box.Width());
+
+	dMatrix GeoMatrix (GetMatrixFromMaxMatrix (node->GetObjectTM(GetCOREInterface()->GetTime())));
+	dMatrix nodeMatrix (GetMatrixFromMaxMatrix (node->GetNodeTM(GetCOREInterface()->GetTime())));
+
+	dMatrix offset (GeoMatrix * nodeMatrix.Inverse4x4());
+
+	offset.m_posit.m_x += center.x;
+	offset.m_posit.m_y += center.y;
+	offset.m_posit.m_z += center.z;
+	offset = plugin->m_systemMatrixInv * offset * plugin->m_systemMatrix;
+
+	offset.m_posit = offset.m_posit.Scale (scale);
+
+	dVector size (plugin->m_systemMatrix.RotateVector(dVector(boxSize.x, boxSize.y, boxSize.z, 0.0f)));
+	size = size.Scale (scale);
+
+	NewtonCollision* collision = NULL;
+	switch (m_collisionShape) 
+	{
+		case m_box:
+		{
+			collision = NewtonCreateBox(plugin->m_newton, size.m_x, size.m_y, size.m_z, 0, &offset[0][0]);
+			break;
+		}
+
+		case m_convexHull:
+		{
+			_ASSERTE (0);
+			break;
+		}
+
+		default:;
+		{
+			_ASSERTE (0);
+		}
+	}
+
+	nodeMatrix = plugin->m_systemMatrixInv * nodeMatrix * plugin->m_systemMatrix;
+	nodeMatrix.m_posit = nodeMatrix.m_posit.Scale (scale);
+
+	m_body = NewtonCreateBody(plugin->m_newton, collision, &nodeMatrix[0][0]);
+	NewtonBodySetUserData(m_body, node);
+
+	NewtonConvexCollisionCalculateInertialMatrix (collision, &m_inertia[0], &m_origin[0]);	
+
+	NewtonBodySetCentreOfMass(m_body, &m_origin[0]);
+	NewtonBodySetMassMatrix(m_body, m_mass, m_mass * m_inertia.m_x, m_mass * m_inertia.m_y, m_mass * m_inertia.m_z);
+
+	NewtonBodySetForceAndTorqueCallback(m_body, ApplyGravityForce);
+	NewtonReleaseCollision(plugin->m_newton, collision);
+
+}
+
+
+void RigidBodyController::DeleteThis() 
+{ 
+	delete this; 
+}		
+
+
+// return number of ParamBlocks in this instance
+int	RigidBodyController::NumParamBlocks() 
+{ 
+	return 1; 
+}					
+
+// return i'th ParamBlock
+IParamBlock2* RigidBodyController::GetParamBlock(int i) 
+{ 
+	return pblock; 
+} 
+
+// return id'd ParamBlock
+IParamBlock2* RigidBodyController::GetParamBlockByID(BlockID id) 
+{ 
+	return (pblock->ID() == id) ? pblock : NULL; 
+} 
+
+
+void RigidBodyController::GetClassName(TSTR& s) 
+{
+	s = GetString(IDS_CLASS_NAME);
+}
+
+Class_ID RigidBodyController::ClassID()
+{
+	return RigidBodyControllerDesc::GetDescriptor()->ClassID();
+}
+
+
+SClass_ID RigidBodyController::SuperClassID()
+{
+	return RigidBodyControllerDesc::GetDescriptor()->SuperClassID(); 
+}
+
+int RigidBodyController::NumSubs() 
+{ 
+	return 3; 
+}
+
+Animatable* RigidBodyController::SubAnim(int i)
+{
+	return GetReference(i);
+}
+
+TSTR RigidBodyController::SubAnimName(int i)
+{
+	switch (i) 
+	{
+	  case 0: return _T("POS");
+	  case 1: return _T("ROT");
+	  case 2: return _T("SCL");
+	  default: return _T("");
+	}
+}
+
+int RigidBodyController::NumRefs() 
+{ 
+	return 1; 
+}
+
+RefTargetHandle RigidBodyController::GetReference(int i)
+{
+	switch (i) 
+	{
+	  case 0: return m_positionControl;
+	  case 1: return m_rotationControl;
+	  case 2: return m_scaleControl;
+	  default: return NULL;
+	}
+}
+
+void RigidBodyController::SetReference(int i, RefTargetHandle rtarg)
+{
+	switch (i) 
+	{
+	  case 0: m_positionControl = (Control*)rtarg; break;
+	  case 1: m_rotationControl = (Control*)rtarg; break;
+	  case 2: m_scaleControl = (Control*)rtarg; break;
+	}
+}
+
+RefResult RigidBodyController::NotifyRefChanged(Interval iv, RefTargetHandle hTarg, PartID& partID, RefMessage msg) 
+{
+	ivalid.SetEmpty();
+	return REF_SUCCEED;
+}
+
+void RigidBodyController::PostCloneNode()
+{
+}
+
+
+RefTargetHandle RigidBodyController::Clone(RemapDir& remap) 
+{
+	RigidBodyController* const myctrl = new RigidBodyController(); 
+
+	myctrl->ReplaceReference(0, remap.CloneRef(m_positionControl));
+	myctrl->ReplaceReference(1, remap.CloneRef(m_rotationControl));
+	myctrl->ReplaceReference(2, remap.CloneRef(m_scaleControl));
+
+	BaseClone(this, myctrl, remap);
+	return myctrl;
+}
+
+void RigidBodyController::Copy(Control* from)
+{
+	if (from->ClassID()==ClassID()) {
+		RigidBodyController *ctrl = (RigidBodyController*)from;
+		ReplaceReference(0, ctrl->m_positionControl);
+		ReplaceReference(1, ctrl->m_rotationControl);
+		ReplaceReference(2, ctrl->m_scaleControl);
+		curval = ctrl->curval;
+		ivalid = ctrl->ivalid;
+	} else {
+		SetXFormPacket pckt;
+		Interval iv;
+		pckt.tmAxis.IdentityMatrix();			
+		pckt.tmParent.IdentityMatrix();
+		from->GetValue(0, &pckt.tmAxis, iv, CTRL_RELATIVE);			
+		pckt.command = XFORM_SET;						 
+		SetValue(0, &pckt, TRUE, CTRL_ABSOLUTE);	
+	}
+	NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
+}
+
+void RigidBodyController::Move(TimeValue t, Matrix3& partm, Matrix3& tmAxis, Point3& v, BOOL localOrigin, int commit)
+{
+	Point3 p = VectorTransform( tmAxis*Inverse(partm), v );
+	m_positionControl->SetValue(t, &p, commit, CTRL_RELATIVE);	
+} 
+
+void RigidBodyController::SetAbsValue(TimeValue t, const Matrix3 &val, const Matrix3 &parent, int commit)
+{
+	Matrix3 pparent = ApplyInheritance(t, parent, m_positionControl);
+	AffineParts parts;
+	Matrix3 mat = val * Inverse(pparent);
+
+	decomp_affine(mat, &parts);	
+
+	m_positionControl->SetValue(t,&parts.t,commit,CTRL_ABSOLUTE);
+	m_rotationControl->SetValue(t,&parts.q,commit,CTRL_ABSOLUTE);
+	ScaleValue sv;
+	sv.s = parts.k * parts.f;
+	sv.q = parts.u;
+	m_scaleControl->SetValue(t,&sv,commit,CTRL_ABSOLUTE);
+}				
+
+
+
+void RigidBodyController::SetValue(TimeValue t, void *val, int commit, GetSetMethod method)
+{
+	PreRefNotifyDependents();
+
+	SetXFormPacket* ptr = (SetXFormPacket*)val;
+
+	Matrix3 ptm = ApplyInheritance(t, ptr->tmParent, m_positionControl);	
+
+	switch (ptr->command)
+	{
+		case XFORM_MOVE:
+			Move(t, ptm, ptr->tmAxis, ptr->p, ptr->localOrigin, commit);
+			break;
+		case XFORM_SET:
+			SetAbsValue(t, ptr->tmAxis, ptm, commit);
+			break;
+	}
+
+	NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
+
+	PostRefNotifyDependents();
+}
+
+Matrix3 RigidBodyController::ApplyInheritance(TimeValue t, const Matrix3 &ptm, Control *pos, Point3 cpos, BOOL usecpos)
+{
+	return ptm;
+}
+
+
+void RigidBodyController::GetValue(TimeValue t, void *val, Interval &valid, GetSetMethod method)
+{
+	*((Matrix3*)val) = ApplyInheritance(t, *((Matrix3*)val), m_positionControl);	
+	m_positionControl->GetValue(t, val, valid, method);
+	m_rotationControl->GetValue(t, val, valid, method);
+	m_scaleControl->GetValue(t, val, valid, method);
+}
+
+
+void RigidBodyController::ApplyGravityForce (const NewtonBody* const body, dFloat timestep, int threadIndex)
+{
+	dFloat Ixx;
+	dFloat Iyy;
+	dFloat Izz;
+	dFloat mass;
+
+	NewtonBodyGetMassMatrix (body, &mass, &Ixx, &Iyy, &Izz);
+
+	RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+	dVector gravity (plugin->m_gravity.Scale (mass));
+	NewtonBodySetForce (body, &gravity.m_x);
+}
+
 
 void RigidBodyController::RenderGizmo (void* const userData, int vertexCount, const dFloat* const faceArray, int faceId)
 {
@@ -419,12 +584,10 @@ void RigidBodyController::RenderGizmo (void* const userData, int vertexCount, co
 	gw->polyline (vertexCount, point3, NULL, NULL, TRUE, NULL);
 }
 
+
 int RigidBodyController::Display(TimeValue t, INode* inode, ViewExp *vpt, int flags)
 {
-	
-
-	if (!m_hideGizmos) {
-		_ASSERTE (m_body);
+	if (!m_hideGizmos && m_body) {
 		GraphicsWindow* const gw = vpt->getGW();
 		float scale = float (GetMasterScale(UNITS_METERS));
 
@@ -462,111 +625,4 @@ int RigidBodyController::Display(TimeValue t, INode* inode, ViewExp *vpt, int fl
 }
 
 
-Control* RigidBodyController::GetPositionController()
-{
-	return m_positionControl;
-}
-
-Control* RigidBodyController::GetRotationController()
-{
-	return m_rotationControl;
-}
-
-Control* RigidBodyController::GetScaleController()
-{
-	return m_scaleControl;
-}
-
-
-BOOL RigidBodyController::SetPositionController(Control* control)
-{
-	m_positionControl = control;
-	return TRUE;
-}
-
-BOOL RigidBodyController::SetRotationController(Control* control)
-{
-	m_rotationControl = control;
-	return TRUE;
-}
-
-BOOL RigidBodyController::SetScaleController(Control* control)
-{
-	m_scaleControl = control;
-	return TRUE;
-}
-
-
-void RigidBodyController::PostCloneNode()
-{
-
-	_ASSERTE (0);
-}
-
-RefTargetHandle RigidBodyController::Clone(RemapDir& remap)
-{
-	_ASSERTE (0);
-	RigidBodyController* ctrl = new RigidBodyController(*this);
-	CloneControl(ctrl, remap);
-	return ctrl;
-}
-
-
-
-int RigidBodyController::NumSubs()  
-{ 
-	return 3;
-}
-
-Animatable* RigidBodyController::SubAnim(int i)
-{
-	switch (i) 
-	{
-		case SCALE_CONTROL:
-		{
-			return m_scaleControl;
-		}
-		case POSIT_CONTROL:
-		{
-			return m_positionControl;
-		}
-
-		case ROTAT_CONTROL:
-		{
-			return m_rotationControl;
-		}
-
-		default:
-			return NULL;
-	}
-	return NULL;
-}
-
-BOOL RigidBodyController::IsKeyAtTime(TimeValue t,DWORD flags)
-{
-//	_ASSERTE (0);
-	return TRUE;
-}
-
-int RigidBodyController::NumRefs() 
-{ 
-	_ASSERTE (0);
-	return 3; 
-}    
-
-RefTargetHandle RigidBodyController::GetReference(int i)
-{
-	_ASSERTE (0);
-	return NULL;
-}
-
-void RigidBodyController::SetReference(int i, RefTargetHandle rtarg)
-{
-	_ASSERTE (0);
-}
-
-int RigidBodyController::RemapRefOnLoad(int iref)
-{
-	_ASSERTE (0);
-	return 0;
-}
+#endif

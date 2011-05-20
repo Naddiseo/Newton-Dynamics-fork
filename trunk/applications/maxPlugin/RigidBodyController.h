@@ -23,7 +23,7 @@
 #ifndef __RIGIDBODY_CONTROLLER_H__
 #define __RIGIDBODY_CONTROLLER_H__
 
-
+#define RIGIDBODY_CONTROLLER_ID Class_ID(0x6e6c6a1b, 0x6c7d3fb9)
 
 class RigidBodyControllerDesc: public ClassDesc2 
 {
@@ -40,60 +40,111 @@ class RigidBodyControllerDesc: public ClassDesc2
 class RigidBodyController: public Control, public RigidBodyData
 {
 	public:
-	RigidBodyController(const RigidBodyController& clone);
+/*
 	RigidBodyController();
-
-	void PostInit (const RigidBodyData& data, INode* const myNode);
-
-	~RigidBodyController();
-
-	virtual Class_ID ClassID();
-	virtual SClass_ID SuperClassID();
-	virtual void Copy(Control *from);
-	virtual RefResult NotifyRefChanged(Interval,RefTargetHandle,PartID &,RefMessage);
-	virtual void MouseCycleStarted(TimeValue t);
-	virtual void GetValue(TimeValue t, void* val, Interval &valid, GetSetMethod method=CTRL_ABSOLUTE);
-	virtual void SetValue(TimeValue t, void* val, int commit=1, GetSetMethod method=CTRL_ABSOLUTE);
-
-	virtual int Display(TimeValue t, INode* inode, ViewExp *vpt, int flags);
-
-
-	virtual int NumSubs();
-	virtual Animatable* SubAnim(int i);
-	virtual BOOL IsKeyAtTime(TimeValue t,DWORD flags);
-	virtual int NumRefs();    
-	virtual RefTargetHandle GetReference(int i);
-	virtual void SetReference(int i, RefTargetHandle rtarg);
-	virtual int RemapRefOnLoad(int iref);
-
-
-	
+	RigidBodyController(const RigidBodyController& clone);
 	virtual IOResult Load(ILoad* iload);
 	virtual IOResult Save(ISave* isave);
-
-	virtual Control* GetPositionController();
-	virtual Control* GetRotationController();
-	virtual Control* GetScaleController();
-
-	virtual BOOL SetPositionController(Control* control);
-	virtual BOOL SetRotationController(Control* control);
-	virtual BOOL SetScaleController(Control* control);
-
-
-	virtual void PostCloneNode();
 	RefTargetHandle Clone(RemapDir& remap=DefaultRemapDir());
-	
+	void AddRigidBody(INode* const myNode);
+	void RemoveRigidBody(INode* const myNode);
+*/
+
+	//Constructor/Destructor
+	RigidBodyController(BOOL loading=FALSE);
+	~RigidBodyController();
+
+	void Init (const RigidBodyData& data, INode* const myNode);
+	void DeleteThis();
+
+	Matrix3 ApplyInheritance(TimeValue t,const Matrix3 &ptm,Control *pos,Point3 cpos=Point3(0,0,0),BOOL usecpos=FALSE);
+	void Move (TimeValue t, Matrix3& partm, Matrix3& tmAxis, Point3& v, BOOL localOrigin, int commit);
+	void SetAbsValue(TimeValue t, const Matrix3 &val, const Matrix3 &parent, int commit);
+
+
+	// Loading/Saving
+	IOResult Load(ILoad *iload) {return IO_OK;}
+	IOResult Save(ISave *isave) {return IO_OK;}
+
+	//From Animatable
+	Class_ID ClassID();
+	SClass_ID SuperClassID();
+	void GetClassName(TSTR& s);
+
+	void PostCloneNode();
+	RefTargetHandle Clone( RemapDir &remap );
+	RefResult NotifyRefChanged(Interval changeInt, RefTargetHandle hTarget, 
+	PartID& partID,  RefMessage message);
+
+	int NumSubs();
+	TSTR SubAnimName(int i);				
+	Animatable* SubAnim(int i);
+
+	// TODO: Maintain the number or references here
+	int NumRefs();
+	RefTargetHandle GetReference(int i);
+	void SetReference(int i, RefTargetHandle rtarg);
+
+	int	NumParamBlocks();
+	IParamBlock2* GetParamBlock(int i);
+	IParamBlock2* GetParamBlockByID(BlockID id);
+
+	void Copy(Control *from);
+	void GetValue(TimeValue t, void *val, Interval &valid, GetSetMethod method);
+	void SetValue(TimeValue t, void *val, int commit, GetSetMethod method);
+	void Update(TimeValue t);
 
 	static void ApplyGravityForce (const NewtonBody* const body, dFloat timestep, int threadIndex);
 	static void RenderGizmo (void* const userData, int vertexCount, const dFloat* const faceArray, int faceId);
-
-	void AddRigidBody(INode* const myNode);
-	void RemoveRigidBody(INode* const myNode);
+	virtual int Display(TimeValue t, INode* inode, ViewExp *vpt, int flags);
 
 	Control* m_scaleControl;
 	Control* m_positionControl;
 	Control* m_rotationControl;
+	IParamBlock2 *pblock;	//// Parameter block,  ref 0
+
+	Matrix3 curval;
+	Interval ivalid;
+	BOOL blockUpdate;
 };
+
+
+inline int RigidBodyControllerDesc::IsPublic() 
+{
+	return 1;
+}
+
+inline void* RigidBodyControllerDesc::Create(BOOL loading) 
+{
+	return new RigidBodyController();
+}
+
+inline const TCHAR* RigidBodyControllerDesc::ClassName() 
+{
+	return _T("RigidBody Controller");
+}
+
+inline SClass_ID RigidBodyControllerDesc::SuperClassID() 
+{
+	return CTRL_MATRIX3_CLASS_ID;
+}
+
+inline Class_ID RigidBodyControllerDesc::ClassID() 
+{
+	return RIGIDBODY_CONTROLLER_ID;
+}
+
+inline const TCHAR* RigidBodyControllerDesc::Category() 
+{
+	return _T("");
+}
+
+inline ClassDesc* RigidBodyControllerDesc::GetDescriptor() 
+{
+	static RigidBodyControllerDesc controllerDesc;
+	return &controllerDesc;
+}
+
 
 
 #endif

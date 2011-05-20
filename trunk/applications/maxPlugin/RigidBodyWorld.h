@@ -62,12 +62,6 @@ class RigidBodyWorldDesc: public ClassDesc2
 {
 	public:
 
-	class SavedData
-	{
-		public:
-		RigidBodyData m_bodyData;
-		Matrix3 m_matrix;
-	};
 
 	RigidBodyWorldDesc ();
 	~RigidBodyWorldDesc ();
@@ -93,15 +87,15 @@ class RigidBodyWorldDesc: public ClassDesc2
 	RigidBodyController* GetRigidBodyControl(INode* const node) const;
 	
 	static ClassDesc* GetDescriptor();
-//	static void OnPreCloneNode(void* param, NotifyInfo* info);
-//	static void OnPostCloneNode(void* param, NotifyInfo* info);
+	static void OnPreCloneNode(void* param, NotifyInfo* info);
+	static void OnPostCloneNode(void* param, NotifyInfo* info);
 
 	float m_minFps;
 	dVector m_gravity;
 	dMatrix m_systemMatrix;
 	dMatrix m_systemMatrixInv;
 	NewtonWorld* m_newton;
-	dTree<SavedData, INode*> m_savedCloneList;
+	dTree<INode*, INode*> m_savedCloneList;
 };
 
 

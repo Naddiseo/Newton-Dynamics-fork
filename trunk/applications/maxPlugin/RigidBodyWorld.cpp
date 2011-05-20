@@ -36,8 +36,8 @@ RigidBodyWorldDesc::RigidBodyWorldDesc ()
 	,m_systemMatrix (dVector (0.0f, 0.0f, 1.0f, 0.0f), dVector (1.0f, 0.0f, 0.0f, 0.0f), dVector (0.0f, 1.0f, 0.0f, 0.0f), dVector (0.0f, 0.0f, 0.0f, 1.0f))
 	,m_systemMatrixInv (m_systemMatrix.Inverse())
 {
-//	RegisterNotification(OnPreCloneNode, this, NOTIFY_PRE_NODES_CLONED);
-//	RegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
+	RegisterNotification(OnPreCloneNode, this, NOTIFY_PRE_NODES_CLONED);
+	RegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
 
 //	RegisterNotification(OnPreLoadScene, this, NOTIFY_FILE_PRE_OPEN);
 //	RegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
@@ -50,8 +50,8 @@ RigidBodyWorldDesc::~RigidBodyWorldDesc ()
 	_ASSERTE (m_newton);
 	NewtonDestroy (m_newton);
 
-//	UnRegisterNotification(OnPreCloneNode, this, NOTIFY_PRE_NODES_CLONED);
-//	UnRegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
+	UnRegisterNotification(OnPreCloneNode, this, NOTIFY_PRE_NODES_CLONED);
+	UnRegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
 
 //	UnRegisterNotification(OnPreLoadScene, this, NOTIFY_FILE_PRE_OPEN);
 //	UnRegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
@@ -146,64 +146,52 @@ IOResult RigidBodyWorldDesc::Save(ISave* isave)
 
 RigidBodyController* RigidBodyWorldDesc::GetRigidBodyControl(INode* const node) const
 {
-	_ASSERTE (0);
-	return NULL;
-/*
 	Control* const control = node->GetTMController();
-	if (control) {
-		RigidBodyControllerDesc& RigidBodyControllerDesc = *(RigidBodyControllerDesc*)RigidBodyControllerDesc::GetDescriptor();
-		RigidBodyController* const positController = (RigidBodyController*) control->GetPositionController();
-		if (positController && (positController->ClassID() == RigidBodyControllerDesc.ClassID())) {
-			return positController;
-		}
+	_ASSERTE (control);
+	RigidBodyControllerDesc& controlDesc = *(RigidBodyControllerDesc*)RigidBodyControllerDesc::GetDescriptor();
+	if (control->ClassID() == controlDesc.ClassID()) {
+		return (RigidBodyController*)control;
 	}
-*/
 	return NULL;
 }
 
 
-/*
+
 void RigidBodyWorldDesc::OnPreCloneNode(void* param, NotifyInfo* info)
 {
 	RigidBodyWorldDesc* const me = (RigidBodyWorldDesc*) param;
 	const INodeTab& origNodes = *(INodeTab*) info->callParam;
 
-	RigidBodyControllerDesc& RigidBodyControllerDesc = *(RigidBodyControllerDesc*)RigidBodyControllerDesc::GetDescriptor();
-	RigidBodyRotationControllerDesc& rigidBodyRotationControllerDesc = *(RigidBodyRotationControllerDesc*)RigidBodyRotationControllerDesc::GetDescriptor();
+	RigidBodyControllerDesc& controlDesc = *(RigidBodyControllerDesc*)RigidBodyControllerDesc::GetDescriptor();
 
 	me->m_savedCloneList.RemoveAll();
 	TimeValue t (GetCOREInterface()->GetTime());
+
 	for (int i = 0; i < origNodes.Count(); i ++) {
 		INode* const node = origNodes[i];
-
 		Control* const control = node->GetTMController();
-		if (control) {
-			RigidBodyController* const positController = (RigidBodyController*) control->GetPositionController();
-			RigidBodyRotationController* const rotationController = (RigidBodyRotationController*) control->GetRotationController();
-			if (positController && rotationController) {
-				if (positController->ClassID() == RigidBodyControllerDesc.ClassID()) {
-					SavedData data;
-					data.m_bodyData = *positController;
+		_ASSERTE (control);
+		if (control->ClassID() == controlDesc.ClassID()) {
+//			data.m_bodyData = *positController;
 
-					data.m_matrix = node->GetNodeTM(t);
-					me->m_savedCloneList.Insert(data, node);
+//			data.m_matrix = node->GetNodeTM(t);
+			me->m_savedCloneList.Insert(node, node);
+/*
+			Control* const regularPositionController = (Control*) CreateInstance (CTRL_POSITION_CLASS_ID, positController->m_oldControlerID);
+			Control* const regularRotationController = (Control*) CreateInstance (CTRL_ROTATION_CLASS_ID, rotationController->m_oldControlerID);
 
-					Control* const regularPositionController = (Control*) CreateInstance (CTRL_POSITION_CLASS_ID, positController->m_oldControlerID);
-					Control* const regularRotationController = (Control*) CreateInstance (CTRL_ROTATION_CLASS_ID, rotationController->m_oldControlerID);
+			control->SetPositionController(regularPositionController);
+			control->SetRotationController(regularRotationController);
 
-					control->SetPositionController(regularPositionController);
-					control->SetRotationController(regularRotationController);
-
-					node->SetNodeTM(t, data.m_matrix);
-				}
-			}
+			node->SetNodeTM(t, data.m_matrix);
+*/
 		}
 	}
 }
 
+
 void RigidBodyWorldDesc::OnPostCloneNode(void* param, NotifyInfo* info)
 {
-
 	struct CloneData
 	{ 
 		INodeTab* origNodes; 
@@ -219,59 +207,20 @@ void RigidBodyWorldDesc::OnPostCloneNode(void* param, NotifyInfo* info)
 	const INodeTab& clonedNodes = *data->clonedNodes; 
 	_ASSERTE (origNodes.Count() == clonedNodes.Count());
 
-	RigidBodyControllerDesc& RigidBodyControllerDesc = *(RigidBodyControllerDesc*)RigidBodyControllerDesc::GetDescriptor();
-	RigidBodyRotationControllerDesc& rigidBodyRotationControllerDesc = *(RigidBodyRotationControllerDesc*)RigidBodyRotationControllerDesc::GetDescriptor();
+	RigidBodyControllerDesc& controlDesc = *(RigidBodyControllerDesc*)RigidBodyControllerDesc::GetDescriptor();
 
 	TimeValue t (GetCOREInterface()->GetTime());
-	for (int i = 0; i < origNodes.Count(); i ++) {
-		INode* const node = origNodes[i];
-		dTree<SavedData, INode*>::dTreeNode* const nodeData = me->m_savedCloneList.Find(node);
-		if (nodeData) {
-			SavedData& data = nodeData->GetInfo();
-
-			Control* const control = node->GetTMController();
-			_ASSERTE (control);
-
-			Control* const positController = control->GetPositionController();
-			Control* const rotationController = control->GetRotationController();
-
-			_ASSERTE (positController);
-			_ASSERTE (rotationController);
-			_ASSERTE (positController->ClassID() != RigidBodyControllerDesc.ClassID()) ;
-
-			RigidBodyController* const RigidBodyController = (RigidBodyController*) RigidBodyControllerDesc.Create(positController->ClassID());
-			RigidBodyRotationController* const rigidBodyRotationController = (RigidBodyRotationController*) rigidBodyRotationControllerDesc.Create(rotationController->ClassID());
-
-			control->SetPositionController(RigidBodyController);
-			control->SetRotationController(rigidBodyRotationController);
-
-			RigidBodyData* const nodeData = RigidBodyController;
-			memcpy (nodeData, &data.m_bodyData, sizeof (RigidBodyData));
-
-			node->SetNodeTM(t, data.m_matrix);
-		}
-	}
-
-
 	for (int i = 0; i < origNodes.Count(); i ++) {
 		INode* const origNode = origNodes[i];
 
 		RigidBodyData* const origData = me->GetRigidBodyControl(origNode);
+		_ASSERTE (origData);
 		if (origData) {
+
 			INode* const cloneNode = clonedNodes[i];
-			Control* const cloneControl = cloneNode->GetTMController();
-			Control* const oldPositControl = cloneControl->GetPositionController();
-			Control* const oldRotationControl = cloneControl->GetRotationController();
+			RigidBodyData* const cloneData = me->GetRigidBodyControl(cloneNode);
+			_ASSERTE (cloneData);
 
-			Matrix3 cloneMatrix (cloneNode->GetNodeTM(t));
-			
-			RigidBodyController* const clonePositionController = (RigidBodyController*) RigidBodyControllerDesc.Create(oldPositControl->ClassID());
-			RigidBodyRotationController* const cloneRotationController = (RigidBodyRotationController*) rigidBodyRotationControllerDesc.Create(oldRotationControl->ClassID());
-
-			cloneControl->SetPositionController(clonePositionController);
-			cloneControl->SetRotationController(cloneRotationController);
-
-			RigidBodyData* const cloneData = clonePositionController;
 			memcpy (cloneData, origData, sizeof (RigidBodyData));
 
 			NewtonCollision* const collision = NewtonBodyGetCollision(origData->m_body);
@@ -303,17 +252,14 @@ void RigidBodyWorldDesc::OnPostCloneNode(void* param, NotifyInfo* info)
 			dVector omega;
 			NewtonBodyGetOmega(origData->m_body, &omega[0]);
 			NewtonBodySetOmega(cloneData->m_body, &omega[0]);
-
-			cloneNode->SetNodeTM(t, cloneMatrix);
-
-			_ASSERTE (me->GetRigidBodyControl (cloneNode));
-
+//			cloneNode->SetNodeTM(t, cloneMatrix);
+//			_ASSERTE (me->GetRigidBodyControl (cloneNode));
 		}
 	}
 
 	me->m_savedCloneList.RemoveAll();
 }
-*/
+
 
 
 
@@ -596,45 +542,24 @@ void RigidBodyWorld::AttachRigiBodyController (INode* const node)
 	if (control->ClassID() != desc.ClassID()) {
 		Matrix3 matrix (node->GetNodeTM (GetCOREInterface()->GetTime()));		
 
-		Interval thisValidity (FOREVER);
+		//Interval thisValidity (FOREVER);
 		//desc.GetValidity (node, GetCOREInterface()->GetTime(), thisValidity);
-
 
 		RigidBodyData data;
 		data.m_oldControlerID = control->ClassID();
 
-#if 1
 		// this create the matrix controller but for some reason that I cannot explain I can no move the body with the navigation 
 		RigidBodyController* const rigidBodyController = (RigidBodyController*)CreateInstance(desc.SuperClassID(), desc.ClassID());
-//		RigidBodyController* const rigidBodyController = (RigidBodyController*)CreateInstance(CTRL_MATRIX3_CLASS_ID, RIGIDBODY_CONTROLLER_ID);
 		_ASSERTE (rigidBodyController);
-		rigidBodyController->PostInit (data, node);
-#else
-		// this creates a proper CTRL_MATRIX3_CLASS_ID and everything work as it should, therefore I most be missing something in my implementation
-		// but I do not know what, please help 
-		RigidBodyController* const rigidBodyController = (RigidBodyController*)CreateInstance(CTRL_MATRIX3_CLASS_ID, Class_ID(PRS_CONTROL_CLASS_ID, 0));
-		_ASSERTE (rigidBodyController);
-#endif
+		rigidBodyController->Init (data, node);
 
 		node->SetTMController (rigidBodyController);
 		_ASSERTE (node->GetTMController());
 		_ASSERTE (node->GetTMController() == rigidBodyController);
 
-
-        BOOL updateObjTM = FALSE;
-        node->SetAFlag(A_INODE_IN_UPDATE_TM); //flag to fix #592326. exposeTM's check this for loops.
-
-//		Interval tmValid() const { return tmvi; }
-//        if (!node->tmValid().InInterval(GetCOREInterface()->GetTime()))  {
-	          // This is the case before initial pose is introduced.
-              // Add in TM controller's relative TM
-              rigidBodyController->GetValue(GetCOREInterface()->GetTime(), &matrix, thisValidity, CTRL_RELATIVE);
-              //tmValid = thisValidity
-
-Matrix3 matrix1 (node->GetNodeTM (GetCOREInterface()->GetTime(), &FOREVER));		
-
+        //BOOL updateObjTM = FALSE;
+        //node->SetAFlag(A_INODE_IN_UPDATE_TM); //flag to fix #592326. exposeTM's check this for loops.
 		node->SetNodeTM(GetCOREInterface()->GetTime(), matrix);
-		
 	}
 }
 
