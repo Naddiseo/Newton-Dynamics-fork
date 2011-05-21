@@ -64,12 +64,19 @@ class RigidBodyData
 	NewtonBody* m_body;
 };
 
-
-class RigidBodyWorldDesc: public ClassDesc2 
+/*
+class RigBodyWorldUpdate: public TimeChangeCallback 
 {
 	public:
+	RigBodyWorldUpdate();
+	virtual ~RigBodyWorldUpdate();
+	virtual void TimeChanged(TimeValue t);
+};
+*/
 
-
+class RigidBodyWorldDesc: public ClassDesc2//, public RigBodyWorldUpdate 
+{
+	public:
 	RigidBodyWorldDesc ();
 	~RigidBodyWorldDesc ();
 	int IsPublic();
@@ -98,8 +105,6 @@ class RigidBodyWorldDesc: public ClassDesc2
 	static void OnPreDeleteNode(void* param, NotifyInfo* info);
 	static void OnPostCloneNode(void* param, NotifyInfo* info);
 	static void OnPostLoadScene(void *param, NotifyInfo *info);
-
-
 
 	float m_minFps;
 	dVector m_gravity;
@@ -132,10 +137,6 @@ class RigidBodyWorld: public UtilityObj, public RigidBodyUIPane
 	
 
 	void UpdateViewPorts ();
-
-	
-
-
 
 
 /*

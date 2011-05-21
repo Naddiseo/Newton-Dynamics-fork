@@ -135,8 +135,23 @@ void RigidBodyData::Save(ISave* const isave)
 	NewtonCollisionSerialize (me.m_newton, collision, SaveCollision, isave);
 }
 
+/*
+RigBodyWorldUpdate::RigBodyWorldUpdate()
+{
 
+}
 
+RigBodyWorldUpdate::~RigBodyWorldUpdate()
+{
+}
+
+void RigBodyWorldUpdate::TimeChanged(TimeValue t)
+{
+	RigidBodyWorldDesc* const me = (RigidBodyWorldDesc*) this;
+
+	me->m_minFps *= 1.0f;
+}
+*/
 
 RigidBodyWorldDesc::RigidBodyWorldDesc ()
 	:ClassDesc2()
@@ -149,6 +164,10 @@ RigidBodyWorldDesc::RigidBodyWorldDesc ()
 	RegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
 	RegisterNotification(OnPreDeleteNode, this, NOTIFY_SCENE_PRE_DELETED_NODE);
 
+//	Interface* const inteface = GetCOREInterface();
+//	RigBodyWorldUpdate* const timeCallback = this;
+//	inteface->RegisterTimeChangeCallback(timeCallback);	
+
 	m_newton = NewtonCreate();
 }
 
@@ -160,6 +179,10 @@ RigidBodyWorldDesc::~RigidBodyWorldDesc ()
 	UnRegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
 	UnRegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
 	UnRegisterNotification(OnPreDeleteNode, this, NOTIFY_SCENE_PRE_DELETED_NODE);
+
+//	Interface* const inteface = GetCOREInterface();
+//	RigBodyWorldUpdate* const timeCallback = this;
+//	inteface->UnRegisterTimeChangeCallback(timeCallback);	
 }
 
 int RigidBodyWorldDesc::IsPublic() 
@@ -597,27 +620,32 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 					break;
 				}
 
-/*
+
 				case IDC_PREVIEW_WORLD:
 				{
+					GetCOREInterface()->SetTime(TimeValue (10));
+/*
 					if (IsDlgButtonChecked(hWnd, IDC_PREVIEW_WORLD) == BST_CHECKED) {
 						obj->StartUpdates();
 					} else {
 						obj->StopUpdates();
 					}
+*/
 					break;
 				}
 
 				case IDC_STEP_WORLD:
 				{
+					_ASSERTE (0);
+/*
 					if (!obj->m_updateState) {
 						obj->SaveState ();
 						obj->Update();
 					}
+*/
 					break;
 				}
 
-*/
 			}
 
 			break;
