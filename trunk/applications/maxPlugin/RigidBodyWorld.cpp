@@ -53,7 +53,7 @@ void RigidBodyData::LoadCollision (void* const serializeHandle, void* buffer, in
 {
 	ULONG nwrit;
 	ILoad* const iload = (ILoad*)serializeHandle;
-	iload->Read(buffer, sizeof (size), &nwrit);
+	iload->Read(buffer, size, &nwrit);
 }
 
 void RigidBodyData::SaveCollision (void* const serializeHandle, const void* buffer, int size)
@@ -68,6 +68,13 @@ void RigidBodyData::Load(ILoad* const iload)
 {
 	ULONG nwrit;
 	int revision;
+	dVector mass;
+	dVector com;
+	dVector veloc;
+	dVector omega;
+	dMatrix matrix;
+	RigidBodyWorldDesc& me = *(RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+
 	iload->Read(&revision, sizeof (revision), &nwrit);
 	iload->Read(&m_oldControlerID, sizeof (m_oldControlerID), &nwrit);
 	iload->Read(&m_collisionShape, sizeof (m_collisionShape), &nwrit);
@@ -76,8 +83,19 @@ void RigidBodyData::Load(ILoad* const iload)
 	iload->Read(&m_inertia, sizeof (m_inertia), &nwrit);
 	iload->Read(&m_origin, sizeof (m_origin), &nwrit);
 
-	RigidBodyWorldDesc& me = *(RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+	iload->Read(&matrix, sizeof (matrix), &nwrit);
+	iload->Read(&mass, sizeof (mass), &nwrit);
+	iload->Read(&veloc, sizeof (veloc), &nwrit);
+	iload->Read(&omega, sizeof (omega), &nwrit);
+	iload->Read(&com, sizeof (com), &nwrit);
 	NewtonCollision* const collision = NewtonCreateCollisionFromSerialization (me.m_newton, LoadCollision, iload);
+
+	m_body = NewtonCreateBody(me.m_newton, collision, &matrix[0][0]);
+	NewtonBodySetMassMatrix(m_body, mass.m_w, mass.m_x, mass.m_y, mass.m_z);
+	NewtonBodySetVelocity(m_body, &veloc[0]);
+	NewtonBodySetOmega(m_body, &omega[0]);
+	NewtonBodySetCentreOfMass(m_body, &com[0]);
+
 	NewtonReleaseCollision(me.m_newton, collision);
 }
 
@@ -86,6 +104,21 @@ void RigidBodyData::Save(ISave* const isave)
 {
 	ULONG nwrit;
 	int revision = D_FILE_REVISION;
+	dVector mass;
+	dVector com;
+	dVector veloc;
+	dVector omega;
+	dMatrix matrix;
+
+	RigidBodyWorldDesc& me = *(RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+
+	NewtonBodyGetMatrix(m_body, &matrix[0][0]);
+	NewtonBodyGetMassMatrix(m_body, &mass.m_w, &mass.m_x, &mass.m_y, &mass.m_z);
+	NewtonBodyGetVelocity(m_body, &veloc[0]);
+	NewtonBodyGetOmega(m_body, &omega[0]);
+	NewtonBodyGetCentreOfMass(m_body, &com[0]);
+	NewtonCollision* const collision = NewtonBodyGetCollision(m_body);
+
 	isave->Write(&revision, sizeof (revision), &nwrit);
 	isave->Write(&m_oldControlerID, sizeof (m_oldControlerID), &nwrit);
 	isave->Write(&m_collisionShape, sizeof (m_collisionShape), &nwrit);
@@ -94,8 +127,11 @@ void RigidBodyData::Save(ISave* const isave)
 	isave->Write(&m_inertia, sizeof (m_inertia), &nwrit);
 	isave->Write(&m_origin, sizeof (m_origin), &nwrit);
 
-	RigidBodyWorldDesc& me = *(RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
-	NewtonCollision* const collision = NewtonBodyGetCollision(m_body);
+	isave->Write(&matrix, sizeof (matrix), &nwrit);
+	isave->Write(&mass, sizeof (mass), &nwrit);
+	isave->Write(&veloc, sizeof (veloc), &nwrit);
+	isave->Write(&omega, sizeof (omega), &nwrit);
+	isave->Write(&com, sizeof (com), &nwrit);
 	NewtonCollisionSerialize (me.m_newton, collision, SaveCollision, isave);
 }
 
@@ -312,9 +348,9 @@ void RigidBodyWorldDesc::OnPostLoadScene (void* param, NotifyInfo* info)
 	for (dList<INode*>::dListNode* ptr = list.GetFirst(); ptr; ptr = ptr->GetNext()) {
 		INode* const node = ptr->GetInfo();
 		RigidBodyController* const control = me.GetRigidBodyControl(node);
-		if (control && (control->m_body == NULL)) {
-			RigidBodyData data = *control;
-			control->Init (data, node);
+		if (control) {
+			_ASSERTE (control->m_body);
+			NewtonBodySetUserData(control->m_body, node);
 		}
 	}
 

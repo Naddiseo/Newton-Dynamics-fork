@@ -4268,10 +4268,8 @@ void NewtonCollisionCalculateAABB(const NewtonCollision* collisionPtr, const dFl
 // See also: NewtonWorldGetFirstBody, NewtonWorldForEachBodyInAABBDo
 void NewtonCollisionForEachPolygonDo(const NewtonCollision* collisionPtr, const dFloat* const matrixPtr, NewtonCollisionIterator callback, void* const userDataPtr)
 {
-	dgCollision *collision;
-
 	TRACE_FUNTION(__FUNCTION__);
-	collision = (dgCollision *) (collisionPtr);
+	dgCollision* const collision = (dgCollision *) (collisionPtr);
 	dgMatrix matrix = *((dgMatrix*) matrixPtr);
 
 	collision->DebugCollision (matrix, (OnDebugCollisionMeshCallback) callback, userDataPtr);
@@ -4296,12 +4294,9 @@ void NewtonCollisionForEachPolygonDo(const NewtonCollision* collisionPtr, const 
 // Neglecting to release references to collision primitives is a common cause of memory leaks.
 void NewtonCollisionMakeUnique(const NewtonWorld* const newtonWorld, const NewtonCollision* const collisionPtr)
 {
-	Newton* world;
-	dgCollision* collision;
-
 	TRACE_FUNTION(__FUNCTION__);
-	world = (Newton *)newtonWorld;
-	collision = (dgCollision*) collisionPtr;
+	Newton* const world = (Newton *)newtonWorld;
+	dgCollision* const collision = (dgCollision*) collisionPtr;
 	world->RemoveFromCache (collision);
 }
 
@@ -4323,10 +4318,8 @@ void NewtonCollisionMakeUnique(const NewtonWorld* const newtonWorld, const Newto
 // See also: NewtonReleaseCollision , NewtonCollisionGetInfo, NewtonCollisionSerialize  
 int NewtonAddCollisionReference(const NewtonCollision* collisionPtr)
 {
-	dgCollision* collision;
-	collision = (dgCollision*) collisionPtr;
-
 	TRACE_FUNTION(__FUNCTION__);
+	dgCollision* const collision = (dgCollision*) collisionPtr;
 	collision->AddRef();
 	return collision->GetRefCount();
 }
@@ -4350,13 +4343,9 @@ int NewtonAddCollisionReference(const NewtonCollision* collisionPtr)
 // See also: NewtonAddCollisionReference, NewtonCollisionGetInfo, NewtonCollisionSerialize  
 void NewtonReleaseCollision(const NewtonWorld* const newtonWorld, const NewtonCollision* const collisionPtr)
 {
-	Newton* world;
-	dgCollision* collision;
-
-
 	TRACE_FUNTION(__FUNCTION__);
-	world = (Newton *)newtonWorld;
-	collision = (dgCollision*) collisionPtr;
+	Newton* const world = (Newton *)newtonWorld;
+	dgCollision* const collision = (dgCollision*) collisionPtr;
 	world->ReleaseCollision (collision);
 }
 
@@ -4379,10 +4368,8 @@ void NewtonReleaseCollision(const NewtonWorld* const newtonWorld, const NewtonCo
 // See also: NewtonCollisionGetInfo 
 void NewtonCollisionSerialize(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, NewtonSerialize serializeFunction, void* const serializeHandle)
 {
-	Newton* world;
-	
 	TRACE_FUNTION(__FUNCTION__);
-	world = (Newton *)newtonWorld;
+	Newton* const world = (Newton *)newtonWorld;
 	world->Serialize((dgCollision*) collision, (dgSerialize) serializeFunction, serializeHandle);
 }
 
@@ -4407,9 +4394,8 @@ void NewtonCollisionSerialize(const NewtonWorld* const newtonWorld, const Newton
 // See also: NewtonAddCollisionReference, NewtonReleaseCollision, NewtonCollisionSerialize, NewtonCollisionGetInfo
 NewtonCollision* NewtonCreateCollisionFromSerialization(const NewtonWorld* const newtonWorld, NewtonDeserialize deserializeFunction, void* const serializeHandle)
 {
-	Newton* world;
 	TRACE_FUNTION(__FUNCTION__);
-	world = (Newton *)newtonWorld;
+	Newton* const world = (Newton *)newtonWorld;
 	return  (NewtonCollision*) world->CreateFromSerialization ((dgDeserialize) deserializeFunction, serializeHandle);
 }
 
