@@ -33,6 +33,16 @@ dMatrix GetMatrixFromMaxMatrix (const Matrix3& pivot)
 	return matrix;
 }
 
+Matrix3 GetMatrixFromdMatrix (const dMatrix& matrix)
+{
+	Matrix3 maxMatrix;
+	maxMatrix.SetRow (0, *((Point3*) &matrix[0]));
+	maxMatrix.SetRow (1, *((Point3*) &matrix[1]));
+	maxMatrix.SetRow (2, *((Point3*) &matrix[2]));
+	maxMatrix.SetRow (3, *((Point3*) &matrix[3]));
+	return maxMatrix;
+}
+
 
 void GetNodeName (INode* node, char* name)
 {

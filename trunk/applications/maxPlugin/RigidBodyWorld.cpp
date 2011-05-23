@@ -25,7 +25,7 @@
 #include "RigidBodyController.h"
 
 
-
+#define TIMER_ID	1
 #define RIGIDBOGY_WORLD_CLASS_ID Class_ID(0x6185a57, 0x3a1f2f69)
 
 
@@ -155,6 +155,7 @@ void RigBodyWorldUpdate::TimeChanged(TimeValue t)
 
 RigidBodyWorldDesc::RigidBodyWorldDesc ()
 	:ClassDesc2()
+	,m_updateRigidBodyMatrix(true)
 	,m_minFps (120.0f)
 	,m_gravity(0.0f, -9.8f, 0.0f, 0.0f)
 	,m_systemMatrix (dVector (0.0f, 0.0f, 1.0f, 0.0f), dVector (1.0f, 0.0f, 0.0f, 0.0f), dVector (0.0f, 1.0f, 0.0f, 0.0f), dVector (0.0f, 0.0f, 0.0f, 1.0f))
@@ -500,6 +501,10 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 		case WM_DESTROY:
 		{
+			if (IsDlgButtonChecked(hWnd, IDC_PREVIEW_WORLD) == BST_CHECKED) {
+				KillTimer(hWnd, TIMER_ID);
+			}
+
 			world->RigidBodyWorld::DestroyUI(hWnd);
 			break;
 		}
@@ -512,8 +517,7 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 		case WM_TIMER:
 		{
-			_ASSERTE (0);
-			//obj->Update();
+			world->UpdatePhysics ();
 			break;
 		}
 
@@ -623,26 +627,21 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 				case IDC_PREVIEW_WORLD:
 				{
-					GetCOREInterface()->SetTime(TimeValue (10));
-/*
+//					GetCOREInterface()->SetTime(TimeValue (10));
+
 					if (IsDlgButtonChecked(hWnd, IDC_PREVIEW_WORLD) == BST_CHECKED) {
-						obj->StartUpdates();
+						unsigned timeOut = unsigned (1000.0f / desc->m_minFps);
+						SetTimer(hWnd, TIMER_ID, timeOut, NULL);
 					} else {
-						obj->StopUpdates();
+						KillTimer(hWnd, TIMER_ID);
 					}
-*/
+
 					break;
 				}
 
 				case IDC_STEP_WORLD:
 				{
-					_ASSERTE (0);
-/*
-					if (!obj->m_updateState) {
-						obj->SaveState ();
-						obj->Update();
-					}
-*/
+					world->UpdatePhysics ();
 					break;
 				}
 
@@ -686,9 +685,6 @@ void RigidBodyWorld::AttachRigiBodyController (INode* const node)
 	if (control->ClassID() != desc.ClassID()) {
 		Matrix3 matrix (node->GetNodeTM (GetCOREInterface()->GetTime()));		
 
-		//Interval thisValidity (FOREVER);
-		//desc.GetValidity (node, GetCOREInterface()->GetTime(), thisValidity);
-
 		RigidBodyData data;
 		data.m_oldControlerID = control->ClassID();
 
@@ -701,8 +697,6 @@ void RigidBodyWorld::AttachRigiBodyController (INode* const node)
 		_ASSERTE (node->GetTMController());
 		_ASSERTE (node->GetTMController() == rigidBodyController);
 
-        //BOOL updateObjTM = FALSE;
-        //node->SetAFlag(A_INODE_IN_UPDATE_TM); //flag to fix #592326. exposeTM's check this for loops.
 		node->SetNodeTM(GetCOREInterface()->GetTime(), matrix);
 	}
 }
@@ -730,4 +724,36 @@ void RigidBodyWorld::UpdateViewPorts ()
 {
 	//GetCOREInterface()->RedrawViews(GetCOREInterface()->GetTime());
 	GetCOREInterface()->ForceCompleteRedraw(); 
+}
+
+void RigidBodyWorld::UpdatePhysics ()
+{
+	RigidBodyWorldDesc* const desc = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+
+	float timestep = 1.0f / desc->m_minFps;
+	if (timestep > 1.0f / 60.0f) {
+		timestep = 1.0f / 60.0f;
+	}
+
+
+	desc->m_updateRigidBodyMatrix = false;
+	NewtonUpdate(desc->m_newton, timestep);
+	TimeValue t (GetCOREInterface()->GetTime());
+
+	float scale = 1.0f / float (GetMasterScale(UNITS_METERS));
+	for (NewtonBody* body = NewtonWorldGetFirstBody(desc->m_newton); body; body = NewtonWorldGetNextBody(desc->m_newton, body))	{
+		dMatrix matrix;
+		INode* const node = (INode*)NewtonBodyGetUserData(body);
+		NewtonBodyGetMatrix(body, &matrix[0][0]);
+
+		matrix = desc->m_systemMatrix * matrix * desc->m_systemMatrixInv;
+		matrix.m_posit = matrix.m_posit.Scale (scale);
+
+		Matrix3 maxMatrix (GetMatrixFromdMatrix (matrix));
+		node->SetNodeTM(t, maxMatrix);
+	}
+	
+	UpdateViewPorts ();
+
+	desc->m_updateRigidBodyMatrix = true;
 }

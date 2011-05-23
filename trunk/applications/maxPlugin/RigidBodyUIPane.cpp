@@ -169,9 +169,6 @@ INT_PTR CALLBACK RigidBodyUIPane::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 
 void RigidBodyUIPane::SetSelectionMass (dFloat mass)
 {
-return;
-//	RigidBodyWorld& world = *(RigidBodyWorld*)this;
-
 	RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
 	Interface* const ip = GetCOREInterface();
 	int selectionCount = ip->GetSelNodeCount();

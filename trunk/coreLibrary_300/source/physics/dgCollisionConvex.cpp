@@ -319,29 +319,22 @@ bool dgCollisionConvex::SanityCheck (dgPolyhedra& hull) const
 //void dgCollisionConvex::DebugCollision (const dgBody& myBody, DebugCollisionMeshCallback callback) const
 void dgCollisionConvex::DebugCollision (const dgMatrix& matrixPtr, OnDebugCollisionMeshCallback callback, void* const userData) const
 {
-	dgInt32 i;
-	dgInt32 index;
-	dgInt32 count;
-	dgConvexSimplexEdge *edge;
-	dgConvexSimplexEdge *face;
 	dgInt8 mark[DG_MAX_EDGE_COUNT];
 	dgVector tmp[DG_MAX_EDGE_COUNT];
 	dgTriplex vertex[DG_MAX_EDGE_COUNT];
 
-//	_ASSERTE (myBody.m_collision == this);
-//	dgMatrix matrix (GetOffsetMatrix() * myBody.m_matrix);
 	dgMatrix matrix (GetOffsetMatrix() * matrixPtr);
 	matrix.TransformTriplex (&tmp[0].m_x, sizeof (dgVector), &m_vertex[0].m_x, sizeof (dgVector), m_vertexCount);
 
 	memset (mark, 0, sizeof (mark));
-	for (i = 0; i < m_edgeCount; i ++) {
+	for (dgInt32 i = 0; i < m_edgeCount; i ++) {
 		if (!mark[i]) {
-			face = &m_simplex[i];
-			edge = face;
-			count = 0;
+			dgConvexSimplexEdge* const face = &m_simplex[i];
+			dgConvexSimplexEdge* edge = face;
+			dgInt32 count = 0;
 			do {
 				mark[edge - m_simplex] = '1';
-				index = edge->m_vertex;
+				dgInt32 index = edge->m_vertex;
 				vertex[count].m_x = tmp[index].m_x;
 				vertex[count].m_y = tmp[index].m_y;
 				vertex[count].m_z = tmp[index].m_z;
@@ -399,18 +392,13 @@ void dgCollisionConvex::CalcAABBSimd (const dgMatrix &matrix, dgVector& p0, dgVe
 
 dgConvexSimplexEdge *dgCollisionConvex::GetSupportEdge (const dgVector& dir) const
 {
-	dgFloat32 side0;
-	dgFloat32 side1;
-	dgConvexSimplexEdge *ptr;
-	dgConvexSimplexEdge *edge;
-
 	_ASSERTE (dgAbsf(dir % dir - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
 	
-	edge = &m_simplex[0];
-	side0 = m_vertex[edge->m_vertex] % dir;
-	ptr = edge;
+	dgConvexSimplexEdge* edge = &m_simplex[0];
+	dgFloat32 side0 = m_vertex[edge->m_vertex] % dir;
+	dgConvexSimplexEdge* ptr = edge;
 	do {
-		side1 = m_vertex[ptr->m_twin->m_vertex] % dir;
+		dgFloat32 side1 = m_vertex[ptr->m_twin->m_vertex] % dir;
 		if (side1 > side0) {
 			side0 = side1;
 			edge = ptr->m_twin;

@@ -40,14 +40,6 @@ class RigidBodyControllerDesc: public ClassDesc2
 class RigidBodyController: public Control, public RigidBodyData
 {
 	public:
-/*
-	RigidBodyController();
-	RigidBodyController(const RigidBodyController& clone);
-	RefTargetHandle Clone(RemapDir& remap=DefaultRemapDir());
-	void AddRigidBody(INode* const myNode);
-	void RemoveRigidBody(INode* const myNode);
-*/
-
 	//Constructor/Destructor
 	RigidBodyController(BOOL loading=FALSE);
 	~RigidBodyController();
@@ -100,7 +92,7 @@ class RigidBodyController: public Control, public RigidBodyData
 	Control* m_rotationControl;
 	IParamBlock2 *pblock;	//// Parameter block,  ref 0
 
-	Matrix3 curval;
+//	Matrix3 curval;
 	Interval ivalid;
 	BOOL blockUpdate;
 };

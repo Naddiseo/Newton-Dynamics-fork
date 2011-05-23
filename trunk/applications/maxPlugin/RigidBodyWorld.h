@@ -92,6 +92,8 @@ class RigidBodyWorldDesc: public ClassDesc2//, public RigBodyWorldUpdate
 	virtual BOOL NeedsToSave();
 	virtual IOResult Load(ILoad *iload);
 	virtual IOResult Save(ISave *isave);
+
+
 	
 //	void AttachRigiBodyController (INode* const node, bool createBody);
 //	void DetachRigiBodyController (INode* const node, bool deleteBody);
@@ -101,11 +103,11 @@ class RigidBodyWorldDesc: public ClassDesc2//, public RigBodyWorldUpdate
 	RigidBodyController* GetRigidBodyControl(INode* const node) const;
 	
 	static ClassDesc* GetDescriptor();
-
 	static void OnPreDeleteNode(void* param, NotifyInfo* info);
 	static void OnPostCloneNode(void* param, NotifyInfo* info);
 	static void OnPostLoadScene(void *param, NotifyInfo *info);
 
+	bool m_updateRigidBodyMatrix;
 	float m_minFps;
 	dVector m_gravity;
 	dMatrix m_systemMatrix;
@@ -137,7 +139,7 @@ class RigidBodyWorld: public UtilityObj, public RigidBodyUIPane
 	
 
 	void UpdateViewPorts ();
-
+	void UpdatePhysics ();
 
 /*
 	virtual void SelectionSetChanged (Interface *ip, IUtil *iu); 
@@ -154,6 +156,7 @@ class RigidBodyWorld: public UtilityObj, public RigidBodyUIPane
 
 	void AttachRigiBodyController (INode* const node);
 	void DetachRigiBodyController (INode* const node);
+
 
 	
 	bool m_selectionChange;

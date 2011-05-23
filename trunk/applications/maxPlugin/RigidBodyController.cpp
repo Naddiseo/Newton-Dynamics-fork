@@ -24,6 +24,31 @@
 #include "RigidBodyController.h"
 
 
+class RigidBodyUndo: public RestoreObj 
+{
+	public:
+	virtual void Restore(int undo);
+	virtual void Redo();
+	virtual int Size();
+	virtual TSTR Description();
+
+//	static void Hold(GeneralLight* light, int newVal, int oldVal)
+//	{
+//		if (theHold.Holding())
+//			theHold.Put(new SimpleLightUndo<set, notify>(light, newVal, oldVal));
+//	}
+
+private:
+//	RigidBodyUndo()
+
+//	GeneralLight*		_light;
+//	int					_redo;
+//	int					_undo;
+};
+
+
+
+
 struct RendefGizmoInfo
 {
 	dMatrix m_matrix;
@@ -32,135 +57,6 @@ struct RendefGizmoInfo
 };
 
 
-#if 0
-RigidBodyController::RigidBodyController()
-	:Control(), RigidBodyData()
-{
-	m_scaleControl = NULL;
-	m_positionControl = NULL;
-	m_rotationControl = NULL;
-}
-
-RigidBodyController::RigidBodyController(const RigidBodyController& clone)
-	:Control(), RigidBodyData(clone)
-{
-	m_body = NULL;
-}
-
-
-RigidBodyController::~RigidBodyController()
-{
-	_ASSERTE (m_body);
-	RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
-	NewtonDestroyBody(plugin->m_newton, m_body);
-}
-
-
-
-void RigidBodyController::Copy(Control *from)
-{
-	_ASSERTE (0);
-}
-
-
-
-
-RefResult RigidBodyController::NotifyRefChanged(Interval,RefTargetHandle,PartID &,RefMessage)
-{
-	_ASSERTE (0);
-	return REF_SUCCEED;
-}
-
-void RigidBodyController::MouseCycleStarted(TimeValue t)
-{
-	m_basePosition += m_position;
-	m_position = Point3(0.0f, 0.0f, 0.0f);
-	Control::MouseCycleStarted (t);
-}
-
-
-void RigidBodyController::RemoveRigidBody(INode* const myNode)
-{
-	RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
-	_ASSERTE (m_body);
-	NewtonDestroyBody(plugin->m_newton, m_body);
-	plugin->m_newton = NULL;
-}
-
-void RigidBodyController::AddRigidBody(INode* const myNode)
-{
-	RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
-
-	float scale = float (GetMasterScale(UNITS_METERS));
-	ObjectState os (myNode->EvalWorldState(0)); 
-	_ASSERTE (os.obj);
-
-	Box3 box;
-	os.obj->GetLocalBoundBox(0, myNode, NULL, box); 
-
-	Point3 center (box.Center());
-	Point3 boxSize (box.Width());
-
-	dMatrix GeoMatrix (GetMatrixFromMaxMatrix (myNode->GetObjectTM(GetCOREInterface()->GetTime())));
-	dMatrix nodeMatrix (GetMatrixFromMaxMatrix (myNode->GetNodeTM(GetCOREInterface()->GetTime())));
-
-	dMatrix offset (GeoMatrix * nodeMatrix.Inverse4x4());
-
-	offset.m_posit.m_x += center.x;
-	offset.m_posit.m_y += center.y;
-	offset.m_posit.m_z += center.z;
-	offset = plugin->m_systemMatrixInv * offset * plugin->m_systemMatrix;
-
-	offset.m_posit = offset.m_posit.Scale (scale);
-
-	dVector size (plugin->m_systemMatrix.RotateVector(dVector(boxSize.x, boxSize.y, boxSize.z, 0.0f)));
-	size = size.Scale (scale);
-
-	NewtonCollision* collision = NULL;
-	switch (m_collisionShape) 
-	{
-		case m_box:
-		{
-			collision = NewtonCreateBox(plugin->m_newton, size.m_x, size.m_y, size.m_z, 0, &offset[0][0]);
-			break;
-		}
-
-		case m_convexHull:
-		{
-			_ASSERTE (0);
-			break;
-		}
-
-		default:;
-		{
-			_ASSERTE (0);
-		}
-	}
-
-
-	nodeMatrix = plugin->m_systemMatrixInv * nodeMatrix * plugin->m_systemMatrix;
-	nodeMatrix.m_posit = nodeMatrix.m_posit.Scale (scale);
-
-	m_body = NewtonCreateBody(plugin->m_newton, collision, &nodeMatrix[0][0]);
-	NewtonBodySetUserData(m_body, myNode);
-
-	NewtonConvexCollisionCalculateInertialMatrix (collision, &m_inertia[0], &m_origin[0]);	
-
-	NewtonBodySetCentreOfMass(m_body, &m_origin[0]);
-	NewtonBodySetMassMatrix(m_body, m_mass, m_mass * m_inertia.m_x, m_mass * m_inertia.m_y, m_mass * m_inertia.m_z);
-
-	NewtonBodySetForceAndTorqueCallback(m_body, ApplyGravityForce);
-
-	NewtonReleaseCollision(plugin->m_newton, collision);
-}
-
-
-
-
-
-
-
-#else
 
 RigidBodyController::RigidBodyController(BOOL loading)
 	:Control()
@@ -170,7 +66,7 @@ RigidBodyController::RigidBodyController(BOOL loading)
 	,m_rotationControl(NULL)
 	,pblock(NULL)
 {
-	curval = Matrix3(1);
+//	curval = Matrix3(1);
 	blockUpdate = FALSE;
 
 	if(!loading) {
@@ -414,7 +310,7 @@ void RigidBodyController::Copy(Control* from)
 		ReplaceReference(0, ctrl->m_positionControl);
 		ReplaceReference(1, ctrl->m_rotationControl);
 		ReplaceReference(2, ctrl->m_scaleControl);
-		curval = ctrl->curval;
+//		curval = ctrl->curval;
 		ivalid = ctrl->ivalid;
 	} else {
 		SetXFormPacket pckt;
@@ -460,14 +356,31 @@ void RigidBodyController::SetValue(TimeValue t, void *val, int commit, GetSetMet
 
 	Matrix3 ptm = ApplyInheritance(t, ptr->tmParent, m_positionControl);	
 
+	RigidBodyWorldDesc* const desc = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+	float scale = float (GetMasterScale(UNITS_METERS));
 	switch (ptr->command)
 	{
 		case XFORM_MOVE:
+		{
 			Move(t, ptm, ptr->tmAxis, ptr->p, ptr->localOrigin, commit);
 			break;
-		case XFORM_SET:
+		}
+		case XFORM_SET: 
+		{
 			SetAbsValue(t, ptr->tmAxis, ptm, commit);
+
+			if (desc->m_updateRigidBodyMatrix) {
+				dMatrix matrix (GetMatrixFromMaxMatrix (ptr->tmAxis));
+				matrix = desc->m_systemMatrixInv * matrix * desc->m_systemMatrix;
+				matrix.m_posit = matrix.m_posit.Scale (scale);
+
+				// this does not handle scale yet, remember to extra scale for the matrix, 
+				// the simplest way is removing the scale controller form the PRS controller
+				NewtonBodySetMatrix (m_body, &matrix[0][0]);
+			}
+
 			break;
+		}
 	}
 
 	NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
@@ -521,33 +434,27 @@ int RigidBodyController::Display(TimeValue t, INode* inode, ViewExp *vpt, int fl
 	if (!m_hideGizmos && m_body && NewtonBodyGetUserData(m_body)) {
 		_ASSERTE (NewtonBodyGetUserData(m_body) == inode);
 		GraphicsWindow* const gw = vpt->getGW();
-		float scale = float (GetMasterScale(UNITS_METERS));
+		float scale = 1.0f / float (GetMasterScale(UNITS_METERS));
+		
 
-		RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
-		dMatrix matrix (GetMatrixFromMaxMatrix (inode->GetNodeTM(t)));
-		matrix = plugin->m_systemMatrixInv * matrix * plugin->m_systemMatrix;
-		matrix.m_posit = matrix.m_posit.Scale (scale);
-
-		// this does not handle scale yet, 
-		// remember to extra scale for the matrix, 
-		// the simplest way is removing the scale controller form the PRS controller
-		NewtonBodySetMatrix (m_body, &matrix[0][0]);
+		RigidBodyWorldDesc* const desc = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
 
 		gw->setColor (LINE_COLOR, Point3 (1.0f, 0.5f, 0.0f));
 
-
 		RendefGizmoInfo info;
 		dMatrix scaleMtarix (GetIdentityMatrix());
-		scaleMtarix[0][0] = 1.0f / scale;
-		scaleMtarix[1][1] = 1.0f / scale;
-		scaleMtarix[2][2] = 1.0f / scale;
+		scaleMtarix[0][0] = scale;
+		scaleMtarix[1][1] = scale;
+		scaleMtarix[2][2] = scale;
 
 		info.m_me = this;
-		info.m_matrix = scaleMtarix * plugin->m_systemMatrixInv;
+		info.m_matrix = scaleMtarix * desc->m_systemMatrixInv;
 		info.m_graphicWindow = gw;
 
 		gw->setTransform(Matrix3(TRUE)); 
 		NewtonCollision* const collision = NewtonBodyGetCollision(m_body);
+		dMatrix matrix;
+		NewtonBodyGetMatrix (m_body, &matrix[0][0]);
 		NewtonCollisionForEachPolygonDo (collision, &matrix[0][0], RenderGizmo, &info);
 
 		return 1;
@@ -555,6 +462,3 @@ int RigidBodyController::Display(TimeValue t, INode* inode, ViewExp *vpt, int fl
 		return 0;
 	}
 }
-
-
-#endif

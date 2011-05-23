@@ -86,6 +86,8 @@ TCHAR *GetString(int id);
 void GetNodeName (INode* node, char* name);
 dMatrix GetMatrixFromMaxMatrix (const Matrix3& pivot);
 
+Matrix3 GetMatrixFromdMatrix (const dMatrix& matrix);
+
 int FindFilePath (const char *name, const char *path,  char *fullPathName);
 
 void GetNameFromPath (const char* pathName, char* name);

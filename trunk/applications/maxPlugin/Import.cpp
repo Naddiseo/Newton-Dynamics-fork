@@ -618,11 +618,11 @@ void Import::LoadNode (dScene& scene, INode* maxParent, dScene::dTreeNode* node,
 		}
 	}
 
-	Matrix3 maxMatrix;
-	maxMatrix.SetRow (0, *((Point3*) &matrix[0]));
-	maxMatrix.SetRow (1, *((Point3*) &matrix[1]));
-	maxMatrix.SetRow (2, *((Point3*) &matrix[2]));
-	maxMatrix.SetRow (3, *((Point3*) &matrix[3]));
+	Matrix3 maxMatrix (GetMatrixFromdMatrix (matrix));
+//	maxMatrix.SetRow (0, *((Point3*) &matrix[0]));
+//	maxMatrix.SetRow (1, *((Point3*) &matrix[1]));
+//	maxMatrix.SetRow (2, *((Point3*) &matrix[2]));
+//	maxMatrix.SetRow (3, *((Point3*) &matrix[3]));
 	maxNode->SetNodeTM(0, maxMatrix);
 
 	for (void* ptr = scene.GetFirstChild(node); ptr; ptr = scene.GetNextChild(node, ptr) ) {
