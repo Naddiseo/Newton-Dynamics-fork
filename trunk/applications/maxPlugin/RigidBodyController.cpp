@@ -360,6 +360,16 @@ void RigidBodyController::SetValue(TimeValue t, void *val, int commit, GetSetMet
 	float scale = float (GetMasterScale(UNITS_METERS));
 	switch (ptr->command)
 	{
+		case XFORM_ROTATE:
+		{
+			_ASSERTE (0);
+			break;
+		}
+		case XFORM_SCALE:
+		{
+			_ASSERTE (0);
+			break;
+		}
 		case XFORM_MOVE:
 		{
 			Move(t, ptm, ptr->tmAxis, ptr->p, ptr->localOrigin, commit);
@@ -368,25 +378,35 @@ void RigidBodyController::SetValue(TimeValue t, void *val, int commit, GetSetMet
 		case XFORM_SET: 
 		{
 			SetAbsValue(t, ptr->tmAxis, ptm, commit);
-
-			if (desc->m_updateRigidBodyMatrix) {
-				dMatrix matrix (GetMatrixFromMaxMatrix (ptr->tmAxis));
-				matrix = desc->m_systemMatrixInv * matrix * desc->m_systemMatrix;
-				matrix.m_posit = matrix.m_posit.Scale (scale);
-
-				// this does not handle scale yet, remember to extra scale for the matrix, 
-				// the simplest way is removing the scale controller form the PRS controller
-				NewtonBodySetMatrix (m_body, &matrix[0][0]);
-			}
-
 			break;
 		}
+	}
+
+
+	if (desc->m_updateRigidBodyMatrix) {
+		Interval valid;
+		Point3 posit;
+		Quat rotation;
+
+		//dMatrix matrix1 (GetMatrixFromMaxMatrix (ptr->tmAxis));
+
+		m_positionControl->GetValue(t, &posit, valid, CTRL_ABSOLUTE);
+		m_rotationControl->GetValue(t, &rotation, valid, CTRL_ABSOLUTE);
+		dMatrix matrix (dQuaternion (rotation.w, rotation.x, rotation.y, rotation.z), dVector (posit.x, posit.y, posit.z, 1.0f));
+		
+		matrix = desc->m_systemMatrixInv * matrix * desc->m_systemMatrix;
+		matrix.m_posit = matrix.m_posit.Scale (scale);
+
+		// this does not handle scale yet, remember to extra scale for the matrix, 
+		// the simplest way is removing the scale controller form the PRS controller
+		NewtonBodySetMatrix (m_body, &matrix[0][0]);
 	}
 
 	NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
 
 	PostRefNotifyDependents();
 }
+
 
 Matrix3 RigidBodyController::ApplyInheritance(TimeValue t, const Matrix3 &ptm, Control *pos, Point3 cpos, BOOL usecpos)
 {
@@ -396,7 +416,8 @@ Matrix3 RigidBodyController::ApplyInheritance(TimeValue t, const Matrix3 &ptm, C
 
 void RigidBodyController::GetValue(TimeValue t, void *val, Interval &valid, GetSetMethod method)
 {
-	*((Matrix3*)val) = ApplyInheritance(t, *((Matrix3*)val), m_positionControl);	
+	Matrix3& matrix = *((Matrix3*)val);
+	matrix = ApplyInheritance(t, matrix, m_positionControl);	
 	m_positionControl->GetValue(t, val, valid, method);
 	m_rotationControl->GetValue(t, val, valid, method);
 	m_scaleControl->GetValue(t, val, valid, method);
