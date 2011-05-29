@@ -146,7 +146,12 @@ IOResult RigidBodyController::Save(ISave *isave)
 	return ret;
 }
 
-
+void RigidBodyController::MouseCycleStarted  (TimeValue t)
+{
+	if ( theHold.Holding() ) {
+		theHold.Put(new RigidBodyControllerUndoRedo (this, t));
+	}
+}
 
 void RigidBodyController::Init (const RigidBodyData& data, INode* const node)
 {
@@ -389,21 +394,22 @@ void RigidBodyController::SetAbsValue(TimeValue t, const Matrix3 &val, const Mat
 
 void RigidBodyController::UpdateRigidBodyMatrix(TimeValue  t)
 {
-	Interval valid;
-	Matrix3 maxMatrix;
-	GetValue(t, &maxMatrix, valid, CTRL_ABSOLUTE);
-	dMatrix matrix (GetMatrixFromMaxMatrix (maxMatrix));
+	if (m_body) {
+		Interval valid;
+		Matrix3 maxMatrix;
+		GetValue(t, &maxMatrix, valid, CTRL_ABSOLUTE);
+		dMatrix matrix (GetMatrixFromMaxMatrix (maxMatrix));
 
-	RigidBodyWorldDesc* const desc = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
-	float scale = float (GetMasterScale(UNITS_METERS));
+		RigidBodyWorldDesc* const desc = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+		float scale = float (GetMasterScale(UNITS_METERS));
 
-	matrix = desc->m_systemMatrixInv * matrix * desc->m_systemMatrix;
-	matrix.m_posit = matrix.m_posit.Scale (scale);
+		matrix = desc->m_systemMatrixInv * matrix * desc->m_systemMatrix;
+		matrix.m_posit = matrix.m_posit.Scale (scale);
 
-	// this does not handle scale yet, remember to extra scale for the matrix, 
-	// the simplest way is removing the scale controller form the PRS controller
-	NewtonBodySetMatrix (m_body, &matrix[0][0]);
-
+		// this does not handle scale yet, remember to extra scale for the matrix, 
+		// the simplest way is removing the scale controller form the PRS controller
+		NewtonBodySetMatrix (m_body, &matrix[0][0]);
+	}
 }
 
 void RigidBodyController::SetValue(TimeValue t, void *val, int commit, GetSetMethod method)
@@ -548,9 +554,3 @@ int RigidBodyController::Display(TimeValue t, INode* inode, ViewExp *vpt, int fl
 	}
 }
 
-void RigidBodyController::MouseCycleStarted  (TimeValue t)
-{
-	if ( theHold.Holding() ) {
-		theHold.Put(new RigidBodyControllerUndoRedo (this, t));
-	}
-}
