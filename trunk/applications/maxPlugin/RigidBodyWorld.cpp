@@ -96,6 +96,8 @@ void RigidBodyData::Load(ILoad* const iload)
 	NewtonBodySetOmega(m_body, &omega[0]);
 	NewtonBodySetCentreOfMass(m_body, &com[0]);
 
+	NewtonBodySetForceAndTorqueCallback(m_body, RigidBodyController::ApplyGravityForce);
+
 	NewtonReleaseCollision(me.m_newton, collision);
 }
 
@@ -627,8 +629,6 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 				case IDC_PREVIEW_WORLD:
 				{
-//					GetCOREInterface()->SetTime(TimeValue (10));
-
 					if (IsDlgButtonChecked(hWnd, IDC_PREVIEW_WORLD) == BST_CHECKED) {
 						unsigned timeOut = unsigned (1000.0f / desc->m_minFps);
 						SetTimer(hWnd, TIMER_ID, timeOut, NULL);
@@ -641,6 +641,7 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 				case IDC_STEP_WORLD:
 				{
+					world->Undo();
 					world->UpdatePhysics ();
 					break;
 				}
@@ -756,4 +757,10 @@ void RigidBodyWorld::UpdatePhysics ()
 	UpdateViewPorts ();
 
 	desc->m_updateRigidBodyMatrix = true;
+}
+
+
+void RigidBodyWorld::Undo() const
+{
+
 }

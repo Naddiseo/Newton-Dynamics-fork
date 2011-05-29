@@ -23,7 +23,10 @@
 #ifndef __RIGIDBODY_CONTROLLER_H__
 #define __RIGIDBODY_CONTROLLER_H__
 
+
+
 #define RIGIDBODY_CONTROLLER_ID Class_ID(0x6e6c6a1b, 0x6c7d3fb9)
+
 
 class RigidBodyControllerDesc: public ClassDesc2 
 {
@@ -48,6 +51,8 @@ class RigidBodyController: public Control, public RigidBodyData
 	void DeleteThis();
 
 	Matrix3 ApplyInheritance(TimeValue t,const Matrix3 &ptm,Control *pos,Point3 cpos=Point3(0,0,0),BOOL usecpos=FALSE);
+
+	void Rotate(TimeValue t, const AngAxis& aa, int commit);
 	void Move (TimeValue t, Matrix3& partm, Matrix3& tmAxis, Point3& v, BOOL localOrigin, int commit);
 	void SetAbsValue(TimeValue t, const Matrix3 &val, const Matrix3 &parent, int commit);
 
@@ -85,6 +90,9 @@ class RigidBodyController: public Control, public RigidBodyData
 	virtual int Display(TimeValue t, INode* inode, ViewExp *vpt, int flags);
 	virtual IOResult Load(ILoad* iload);
 	virtual IOResult Save(ISave* isave);
+
+	virtual void MouseCycleStarted  (TimeValue  t);
+
 
 
 	Control* m_scaleControl;

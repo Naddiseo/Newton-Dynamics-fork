@@ -24,26 +24,57 @@
 #include "RigidBodyController.h"
 
 
-class RigidBodyUndo: public RestoreObj 
+
+
+class RigidBodyControllerUndoRedo: public RestoreObj 
 {
-	public:
-	virtual void Restore(int undo);
-	virtual void Redo();
-	virtual int Size();
-	virtual TSTR Description();
+	public:     
 
-//	static void Hold(GeneralLight* light, int newVal, int oldVal)
-//	{
-//		if (theHold.Holding())
-//			theHold.Put(new SimpleLightUndo<set, notify>(light, newVal, oldVal));
-//	}
+	RigidBodyControllerUndoRedo(RigidBodyController* const control, TimeValue t) 
+		:m_undotime (t)
+		,m_redotime (t)
+		,m_control (control)
+	{
+		Interval valid;		
+		m_control->GetValue(t, &m_undoMatrix, valid, CTRL_ABSOLUTE);
+	}              
 
-private:
-//	RigidBodyUndo()
+	void Restore(int isUndo) 
+	{       
+		if (isUndo) {
+			Interval valid;
+			m_redotime = m_undotime;
+			m_control->GetValue(m_redotime, &m_redoMatrix, valid, CTRL_ABSOLUTE);
+		}
 
-//	GeneralLight*		_light;
-//	int					_redo;
-//	int					_undo;
+		SetXFormPacket transform (m_undoMatrix);
+		m_control->SetValue(m_undotime, &transform, 1, CTRL_ABSOLUTE);
+
+		m_control->NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
+	}
+
+	void Redo() 
+	{
+		SetXFormPacket transform (m_redoMatrix);
+		m_control->SetValue(m_redotime, &transform, 1, CTRL_ABSOLUTE);
+		m_control->NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
+	}
+
+	int Size() 
+	{
+		return sizeof(RigidBodyControllerUndoRedo);
+	}
+
+	void EndHold() 
+	{ 
+		m_control->ClearAFlag(A_HELD); 
+	}    
+
+	TimeValue m_undotime;
+	TimeValue m_redotime;
+	Matrix3 m_undoMatrix;
+	Matrix3 m_redoMatrix;
+	RigidBodyController* m_control;
 };
 
 
@@ -330,6 +361,13 @@ void RigidBodyController::Move(TimeValue t, Matrix3& partm, Matrix3& tmAxis, Poi
 	m_positionControl->SetValue(t, &p, commit, CTRL_RELATIVE);	
 } 
 
+void RigidBodyController::Rotate(TimeValue t, const AngAxis& aa, int commit)
+{
+	Quat quat (aa);
+	m_rotationControl->SetValue (t, &quat, commit, CTRL_RELATIVE);	
+}
+
+
 void RigidBodyController::SetAbsValue(TimeValue t, const Matrix3 &val, const Matrix3 &parent, int commit)
 {
 	Matrix3 pparent = ApplyInheritance(t, parent, m_positionControl);
@@ -352,7 +390,7 @@ void RigidBodyController::SetValue(TimeValue t, void *val, int commit, GetSetMet
 {
 	PreRefNotifyDependents();
 
-	SetXFormPacket* ptr = (SetXFormPacket*)val;
+	SetXFormPacket* const ptr = (SetXFormPacket*)val;
 
 	Matrix3 ptm = ApplyInheritance(t, ptr->tmParent, m_positionControl);	
 
@@ -360,16 +398,17 @@ void RigidBodyController::SetValue(TimeValue t, void *val, int commit, GetSetMet
 	float scale = float (GetMasterScale(UNITS_METERS));
 	switch (ptr->command)
 	{
-		case XFORM_ROTATE:
-		{
-			_ASSERTE (0);
-			break;
-		}
 		case XFORM_SCALE:
 		{
-			_ASSERTE (0);
 			break;
 		}
+
+		case XFORM_ROTATE:
+		{
+			Rotate(t, ptr->aa, commit);
+			break;
+		}
+
 		case XFORM_MOVE:
 		{
 			Move(t, ptm, ptr->tmAxis, ptr->p, ptr->localOrigin, commit);
@@ -385,14 +424,15 @@ void RigidBodyController::SetValue(TimeValue t, void *val, int commit, GetSetMet
 
 	if (desc->m_updateRigidBodyMatrix) {
 		Interval valid;
-		Point3 posit;
-		Quat rotation;
+		//Point3 posit;
+		//Quat rotation;
+		//m_positionControl->GetValue(t, &posit, valid, CTRL_ABSOLUTE);
+		//m_rotationControl->GetValue(t, &rotation, valid, CTRL_ABSOLUTE);
+		//dMatrix matrix (dQuaternion (rotation.w, -rotation.x, -rotation.y, -rotation.z), dVector (posit.x, posit.y, posit.z, 1.0f));
 
-		//dMatrix matrix1 (GetMatrixFromMaxMatrix (ptr->tmAxis));
-
-		m_positionControl->GetValue(t, &posit, valid, CTRL_ABSOLUTE);
-		m_rotationControl->GetValue(t, &rotation, valid, CTRL_ABSOLUTE);
-		dMatrix matrix (dQuaternion (rotation.w, rotation.x, rotation.y, rotation.z), dVector (posit.x, posit.y, posit.z, 1.0f));
+		Matrix3 maxMatrix;
+		GetValue(t, &maxMatrix, valid, CTRL_ABSOLUTE);
+		dMatrix matrix (GetMatrixFromMaxMatrix (maxMatrix));
 		
 		matrix = desc->m_systemMatrixInv * matrix * desc->m_systemMatrix;
 		matrix.m_posit = matrix.m_posit.Scale (scale);
@@ -416,11 +456,24 @@ Matrix3 RigidBodyController::ApplyInheritance(TimeValue t, const Matrix3 &ptm, C
 
 void RigidBodyController::GetValue(TimeValue t, void *val, Interval &valid, GetSetMethod method)
 {
-	Matrix3& matrix = *((Matrix3*)val);
-	matrix = ApplyInheritance(t, matrix, m_positionControl);	
-	m_positionControl->GetValue(t, val, valid, method);
-	m_rotationControl->GetValue(t, val, valid, method);
-	m_scaleControl->GetValue(t, val, valid, method);
+	if (method == CTRL_ABSOLUTE) {
+		Interval valid;
+		Point3 posit;
+		Quat rotation;
+		m_positionControl->GetValue(t, &posit, valid, CTRL_ABSOLUTE);
+		m_rotationControl->GetValue(t, &rotation, valid, CTRL_ABSOLUTE);
+		dMatrix controlMatrix (dQuaternion (rotation.w, -rotation.x, -rotation.y, -rotation.z), dVector (posit.x, posit.y, posit.z, 1.0f));
+
+		Matrix3& matrix = *((Matrix3*)val);
+		matrix = GetMatrixFromdMatrix (controlMatrix);
+
+	} else {
+		Matrix3& matrix = *((Matrix3*)val);
+		matrix = ApplyInheritance(t, matrix, m_positionControl);	
+		m_positionControl->GetValue(t, val, valid, method);
+		m_rotationControl->GetValue(t, val, valid, method);
+		m_scaleControl->GetValue(t, val, valid, method);
+	}
 }
 
 
@@ -481,5 +534,12 @@ int RigidBodyController::Display(TimeValue t, INode* inode, ViewExp *vpt, int fl
 		return 1;
 	} else {
 		return 0;
+	}
+}
+
+void RigidBodyController::MouseCycleStarted  (TimeValue t)
+{
+	if ( theHold.Holding() ) {
+		theHold.Put(new RigidBodyControllerUndoRedo (this, t));
 	}
 }

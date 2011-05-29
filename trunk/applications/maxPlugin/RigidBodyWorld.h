@@ -158,6 +158,9 @@ class RigidBodyWorld: public UtilityObj, public RigidBodyUIPane
 	void DetachRigiBodyController (INode* const node);
 
 
+	void Undo() const;
+//	void Redo() const;
+
 	
 	bool m_selectionChange;
 	HWND m_newtonBodyUI;
