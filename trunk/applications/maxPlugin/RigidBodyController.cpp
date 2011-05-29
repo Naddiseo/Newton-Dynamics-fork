@@ -58,6 +58,8 @@ class RigidBodyControllerUndoRedo: public RestoreObj
 		SetXFormPacket transform (m_redoMatrix);
 		m_control->SetValue(m_redotime, &transform, 1, CTRL_ABSOLUTE);
 		m_control->NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
+
+		m_control->m_updateMatrixFormRedo = true;
 	}
 
 	int Size() 
@@ -96,6 +98,7 @@ RigidBodyController::RigidBodyController(BOOL loading)
 	,m_positionControl(NULL)
 	,m_rotationControl(NULL)
 	,pblock(NULL)
+	,m_updateMatrixFormRedo(false)
 {
 //	curval = Matrix3(1);
 	blockUpdate = FALSE;
@@ -384,7 +387,24 @@ void RigidBodyController::SetAbsValue(TimeValue t, const Matrix3 &val, const Mat
 	m_scaleControl->SetValue(t,&sv,commit,CTRL_ABSOLUTE);
 }				
 
+void RigidBodyController::UpdateRigidBodyMatrix(TimeValue  t)
+{
+	Interval valid;
+	Matrix3 maxMatrix;
+	GetValue(t, &maxMatrix, valid, CTRL_ABSOLUTE);
+	dMatrix matrix (GetMatrixFromMaxMatrix (maxMatrix));
 
+	RigidBodyWorldDesc* const desc = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+	float scale = float (GetMasterScale(UNITS_METERS));
+
+	matrix = desc->m_systemMatrixInv * matrix * desc->m_systemMatrix;
+	matrix.m_posit = matrix.m_posit.Scale (scale);
+
+	// this does not handle scale yet, remember to extra scale for the matrix, 
+	// the simplest way is removing the scale controller form the PRS controller
+	NewtonBodySetMatrix (m_body, &matrix[0][0]);
+
+}
 
 void RigidBodyController::SetValue(TimeValue t, void *val, int commit, GetSetMethod method)
 {
@@ -423,23 +443,7 @@ void RigidBodyController::SetValue(TimeValue t, void *val, int commit, GetSetMet
 
 
 	if (desc->m_updateRigidBodyMatrix) {
-		Interval valid;
-		//Point3 posit;
-		//Quat rotation;
-		//m_positionControl->GetValue(t, &posit, valid, CTRL_ABSOLUTE);
-		//m_rotationControl->GetValue(t, &rotation, valid, CTRL_ABSOLUTE);
-		//dMatrix matrix (dQuaternion (rotation.w, -rotation.x, -rotation.y, -rotation.z), dVector (posit.x, posit.y, posit.z, 1.0f));
-
-		Matrix3 maxMatrix;
-		GetValue(t, &maxMatrix, valid, CTRL_ABSOLUTE);
-		dMatrix matrix (GetMatrixFromMaxMatrix (maxMatrix));
-		
-		matrix = desc->m_systemMatrixInv * matrix * desc->m_systemMatrix;
-		matrix.m_posit = matrix.m_posit.Scale (scale);
-
-		// this does not handle scale yet, remember to extra scale for the matrix, 
-		// the simplest way is removing the scale controller form the PRS controller
-		NewtonBodySetMatrix (m_body, &matrix[0][0]);
+		UpdateRigidBodyMatrix(t);
 	}
 
 	NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
@@ -506,6 +510,13 @@ void RigidBodyController::RenderGizmo (void* const userData, int vertexCount, co
 int RigidBodyController::Display(TimeValue t, INode* inode, ViewExp *vpt, int flags)
 {
 	if (!m_hideGizmos && m_body && NewtonBodyGetUserData(m_body)) {
+
+		if (m_updateMatrixFormRedo) {
+			UpdateRigidBodyMatrix(t);
+			m_updateMatrixFormRedo = false;
+		}
+
+
 		_ASSERTE (NewtonBodyGetUserData(m_body) == inode);
 		GraphicsWindow* const gw = vpt->getGW();
 		float scale = 1.0f / float (GetMasterScale(UNITS_METERS));

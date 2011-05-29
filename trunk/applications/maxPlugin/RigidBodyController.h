@@ -91,18 +91,19 @@ class RigidBodyController: public Control, public RigidBodyData
 	virtual IOResult Load(ILoad* iload);
 	virtual IOResult Save(ISave* isave);
 
-	virtual void MouseCycleStarted  (TimeValue  t);
+	virtual void MouseCycleStarted (TimeValue  t);
 
 
+	void UpdateRigidBodyMatrix(TimeValue  t);
 
 	Control* m_scaleControl;
 	Control* m_positionControl;
 	Control* m_rotationControl;
 	IParamBlock2 *pblock;	//// Parameter block,  ref 0
 
-//	Matrix3 curval;
 	Interval ivalid;
 	BOOL blockUpdate;
+	bool m_updateMatrixFormRedo;
 };
 
 
