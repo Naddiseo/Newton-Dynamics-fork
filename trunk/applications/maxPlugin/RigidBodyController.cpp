@@ -37,7 +37,18 @@ class RigidBodyControllerUndoRedo: public RestoreObj
 	{
 		Interval valid;		
 		m_control->GetValue(t, &m_undoMatrix, valid, CTRL_ABSOLUTE);
+		m_undoCollision = NewtonBodyGetCollision (control->m_body);
+		NewtonBodyGetVelocity(control->m_body, &m_undoveloc[0]);
+		NewtonBodyGetOmega(control->m_body, &m_undoomega[0]);
+		NewtonAddCollisionReference (m_undoCollision);
 	}              
+
+	~RigidBodyControllerUndoRedo()
+	{
+		_ASSERTE (m_undoCollision);
+		RigidBodyWorldDesc* const me = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+		NewtonReleaseCollision (me->m_newton, m_undoCollision);
+	}
 
 	void Restore(int isUndo) 
 	{       
@@ -45,9 +56,17 @@ class RigidBodyControllerUndoRedo: public RestoreObj
 			Interval valid;
 			m_redotime = m_undotime;
 			m_control->GetValue(m_redotime, &m_redoMatrix, valid, CTRL_ABSOLUTE);
+
+			NewtonBodyGetVelocity(m_control->m_body, &m_redoveloc[0]);
+			NewtonBodyGetOmega(m_control->m_body, &m_redoomega[0]);
 		}
 
+		m_control->m_undoCollision = m_undoCollision;
 		SetXFormPacket transform (m_undoMatrix);
+
+		NewtonBodySetVelocity(m_control->m_body, &m_undoveloc[0]);
+		NewtonBodySetOmega(m_control->m_body, &m_undoomega[0]);
+
 		m_control->SetValue(m_undotime, &transform, 1, CTRL_ABSOLUTE);
 
 		m_control->NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
@@ -56,9 +75,13 @@ class RigidBodyControllerUndoRedo: public RestoreObj
 	void Redo() 
 	{
 		SetXFormPacket transform (m_redoMatrix);
+
+		NewtonBodySetVelocity(m_control->m_body, &m_redoveloc[0]);
+		NewtonBodySetOmega(m_control->m_body, &m_redoomega[0]);
 		m_control->SetValue(m_redotime, &transform, 1, CTRL_ABSOLUTE);
 		m_control->NotifyDependents(FOREVER, PART_ALL, REFMSG_CHANGE);
 
+		m_control->m_undoCollision = m_undoCollision;
 		m_control->m_updateMatrixFormRedo = true;
 	}
 
@@ -76,7 +99,12 @@ class RigidBodyControllerUndoRedo: public RestoreObj
 	TimeValue m_redotime;
 	Matrix3 m_undoMatrix;
 	Matrix3 m_redoMatrix;
+	dVector m_undoveloc;
+	dVector m_redoveloc;
+	dVector m_undoomega;
+	dVector m_redoomega;
 	RigidBodyController* m_control;
+	NewtonCollision* m_undoCollision;
 };
 
 
@@ -146,11 +174,16 @@ IOResult RigidBodyController::Save(ISave *isave)
 	return ret;
 }
 
-void RigidBodyController::MouseCycleStarted  (TimeValue t)
+void RigidBodyController::SaveUndoState(TimeValue t)
 {
 	if ( theHold.Holding() ) {
 		theHold.Put(new RigidBodyControllerUndoRedo (this, t));
 	}
+}
+
+void RigidBodyController::MouseCycleStarted  (TimeValue t)
+{
+	SaveUndoState(t);
 }
 
 void RigidBodyController::Init (const RigidBodyData& data, INode* const node)
@@ -209,17 +242,17 @@ void RigidBodyController::Init (const RigidBodyData& data, INode* const node)
 	nodeMatrix = plugin->m_systemMatrixInv * nodeMatrix * plugin->m_systemMatrix;
 	nodeMatrix.m_posit = nodeMatrix.m_posit.Scale (scale);
 
-	m_body = NewtonCreateBody(plugin->m_newton, collision, &nodeMatrix[0][0]);
-	NewtonBodySetUserData(m_body, node);
-
 	NewtonConvexCollisionCalculateInertialMatrix (collision, &m_inertia[0], &m_origin[0]);	
 
-	NewtonBodySetCentreOfMass(m_body, &m_origin[0]);
-	NewtonBodySetMassMatrix(m_body, m_mass, m_mass * m_inertia.m_x, m_mass * m_inertia.m_y, m_mass * m_inertia.m_z);
-
-	NewtonBodySetForceAndTorqueCallback(m_body, ApplyGravityForce);
+	CreateBody (collision, dVector (0.0f, 0.0f, 0.0f, 0.0f), dVector (0.0f, 0.0f, 0.0f, 0.0f)); 
+	
+//	m_body = NewtonCreateBody(plugin->m_newton, collision, &nodeMatrix[0][0]);
+	NewtonBodySetUserData(m_body, node);
+	NewtonBodySetMatrix(m_body, &nodeMatrix[0][0]);
+//	NewtonBodySetCentreOfMass(m_body, &m_origin[0]);
+//	NewtonBodySetMassMatrix(m_body, m_mass, m_mass * m_inertia.m_x, m_mass * m_inertia.m_y, m_mass * m_inertia.m_z);
+//	NewtonBodySetForceAndTorqueCallback(m_body, ApplyGravityForce);
 	NewtonReleaseCollision(plugin->m_newton, collision);
-
 }
 
 
@@ -337,6 +370,7 @@ RefTargetHandle RigidBodyController::Clone(RemapDir& remap)
 	RigidBodyData* const dstData = myctrl;
 
 	memcpy (dstData, srcData, sizeof (RigidBodyData));
+	dstData->m_undoCollision = NewtonBodyGetCollision(srcData->m_body);
 	dstData->m_body = NULL;
 
 	return myctrl;

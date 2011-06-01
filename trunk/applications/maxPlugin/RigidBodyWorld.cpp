@@ -40,10 +40,26 @@ RigidBodyData::~RigidBodyData()
 	DeleteBody();
 }
 
+void RigidBodyData::CreateBody(NewtonCollision* const collision, const dVector& veloc, const dVector& omega)
+{
+	_ASSERTE (!m_body);
+	RigidBodyWorldDesc& me = *(RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+	
+	dMatrix matrix (GetIdentityMatrix()); 
+	m_body = NewtonCreateBody(me.m_newton, collision, &matrix[0][0]);
+
+	NewtonBodySetMassMatrix(m_body, m_mass, m_mass * m_inertia.m_x, m_mass * m_inertia.m_y, m_mass * m_inertia.m_z);
+	NewtonBodySetCentreOfMass(m_body, &m_origin[0]);
+
+	NewtonBodySetVelocity(m_body, &veloc[0]);
+	NewtonBodySetOmega(m_body, &omega[0]);
+	NewtonBodySetForceAndTorqueCallback(m_body, RigidBodyController::ApplyGravityForce);
+}
+
 void RigidBodyData::DeleteBody()
 {
 	if (m_body) {
-		RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+	RigidBodyWorldDesc* const plugin = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
 		NewtonDestroyBody(NewtonBodyGetWorld(m_body), m_body);
 	}
 	m_body = NULL;
@@ -68,8 +84,6 @@ void RigidBodyData::Load(ILoad* const iload)
 {
 	ULONG nwrit;
 	int revision;
-	dVector mass;
-	dVector com;
 	dVector veloc;
 	dVector omega;
 	dMatrix matrix;
@@ -84,20 +98,13 @@ void RigidBodyData::Load(ILoad* const iload)
 	iload->Read(&m_origin, sizeof (m_origin), &nwrit);
 
 	iload->Read(&matrix, sizeof (matrix), &nwrit);
-	iload->Read(&mass, sizeof (mass), &nwrit);
 	iload->Read(&veloc, sizeof (veloc), &nwrit);
 	iload->Read(&omega, sizeof (omega), &nwrit);
-	iload->Read(&com, sizeof (com), &nwrit);
 	NewtonCollision* const collision = NewtonCreateCollisionFromSerialization (me.m_newton, LoadCollision, iload);
 
-	m_body = NewtonCreateBody(me.m_newton, collision, &matrix[0][0]);
-	NewtonBodySetMassMatrix(m_body, mass.m_w, mass.m_x, mass.m_y, mass.m_z);
-	NewtonBodySetVelocity(m_body, &veloc[0]);
-	NewtonBodySetOmega(m_body, &omega[0]);
-	NewtonBodySetCentreOfMass(m_body, &com[0]);
 
-	NewtonBodySetForceAndTorqueCallback(m_body, RigidBodyController::ApplyGravityForce);
-
+	CreateBody(collision, veloc, omega);
+	NewtonBodySetMatrix(m_body, &matrix[0][0]);
 	NewtonReleaseCollision(me.m_newton, collision);
 }
 
@@ -115,10 +122,9 @@ void RigidBodyData::Save(ISave* const isave)
 	RigidBodyWorldDesc& me = *(RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
 
 	NewtonBodyGetMatrix(m_body, &matrix[0][0]);
-	NewtonBodyGetMassMatrix(m_body, &mass.m_w, &mass.m_x, &mass.m_y, &mass.m_z);
 	NewtonBodyGetVelocity(m_body, &veloc[0]);
 	NewtonBodyGetOmega(m_body, &omega[0]);
-	NewtonBodyGetCentreOfMass(m_body, &com[0]);
+
 	NewtonCollision* const collision = NewtonBodyGetCollision(m_body);
 
 	isave->Write(&revision, sizeof (revision), &nwrit);
@@ -130,30 +136,11 @@ void RigidBodyData::Save(ISave* const isave)
 	isave->Write(&m_origin, sizeof (m_origin), &nwrit);
 
 	isave->Write(&matrix, sizeof (matrix), &nwrit);
-	isave->Write(&mass, sizeof (mass), &nwrit);
 	isave->Write(&veloc, sizeof (veloc), &nwrit);
 	isave->Write(&omega, sizeof (omega), &nwrit);
-	isave->Write(&com, sizeof (com), &nwrit);
 	NewtonCollisionSerialize (me.m_newton, collision, SaveCollision, isave);
 }
 
-/*
-RigBodyWorldUpdate::RigBodyWorldUpdate()
-{
-
-}
-
-RigBodyWorldUpdate::~RigBodyWorldUpdate()
-{
-}
-
-void RigBodyWorldUpdate::TimeChanged(TimeValue t)
-{
-	RigidBodyWorldDesc* const me = (RigidBodyWorldDesc*) this;
-
-	me->m_minFps *= 1.0f;
-}
-*/
 
 RigidBodyWorldDesc::RigidBodyWorldDesc ()
 	:ClassDesc2()
@@ -163,8 +150,9 @@ RigidBodyWorldDesc::RigidBodyWorldDesc ()
 	,m_systemMatrix (dVector (0.0f, 0.0f, 1.0f, 0.0f), dVector (1.0f, 0.0f, 0.0f, 0.0f), dVector (0.0f, 1.0f, 0.0f, 0.0f), dVector (0.0f, 0.0f, 0.0f, 1.0f))
 	,m_systemMatrixInv (m_systemMatrix.Inverse())
 {
-	RegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
+//	RegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
 	RegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
+	RegisterNotification(OnAddedNode, this, NOTIFY_SCENE_ADDED_NODE);
 	RegisterNotification(OnPreDeleteNode, this, NOTIFY_SCENE_PRE_DELETED_NODE);
 
 //	Interface* const inteface = GetCOREInterface();
@@ -179,7 +167,7 @@ RigidBodyWorldDesc::~RigidBodyWorldDesc ()
 	_ASSERTE (m_newton);
 	NewtonDestroy (m_newton);
 
-	UnRegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
+//	UnRegisterNotification(OnPostCloneNode, this, NOTIFY_POST_NODES_CLONED);
 	UnRegisterNotification(OnPostLoadScene, this, NOTIFY_FILE_POST_OPEN);
 	UnRegisterNotification(OnPreDeleteNode, this, NOTIFY_SCENE_PRE_DELETED_NODE);
 
@@ -286,6 +274,25 @@ RigidBodyController* RigidBodyWorldDesc::GetRigidBodyControl(INode* const node) 
 }
 
 
+void RigidBodyWorldDesc::OnAddedNode(void* param, NotifyInfo* info)
+{
+	RigidBodyWorldDesc* const me = (RigidBodyWorldDesc*) param;
+	INode* const node = (INode*)info->callParam;
+
+	RigidBodyController* const myControl = me->GetRigidBodyControl(node);
+	if (myControl) {
+		_ASSERTE (myControl->m_undoCollision);
+
+		TimeValue t (GetCOREInterface()->GetTime());
+		Matrix3 matrix (node->GetNodeTM (t));		
+
+		myControl->CreateBody (myControl->m_undoCollision, dVector (0.0f, 0.0f, 0.0f, 0.0f), dVector (0.0f, 0.0f, 0.0f, 0.0f)); 
+		NewtonBodySetUserData(myControl->m_body, node);
+
+		node->SetNodeTM(t, matrix);
+	}
+
+}
 
 void RigidBodyWorldDesc::OnPreDeleteNode(void* param, NotifyInfo* info)
 {
@@ -294,11 +301,11 @@ void RigidBodyWorldDesc::OnPreDeleteNode(void* param, NotifyInfo* info)
 
 	RigidBodyController* const myControl = me->GetRigidBodyControl(node);
 	if (myControl) {
-		RigidBodyControllerDesc& desc = *(RigidBodyControllerDesc*)RigidBodyControllerDesc::GetDescriptor();
 		myControl->DeleteBody();
 	}
 }
 
+/*
 void RigidBodyWorldDesc::OnPostCloneNode(void* param, NotifyInfo* info)
 {
 	struct CloneData
@@ -310,7 +317,6 @@ void RigidBodyWorldDesc::OnPostCloneNode(void* param, NotifyInfo* info)
 
 	RigidBodyWorldDesc* const me = (RigidBodyWorldDesc*) param;
 	CloneData* const data = (CloneData*)info->callParam;
-//	me->StopUpdates();
 	
 	const INodeTab& origNodes = *data->origNodes; 
 	const INodeTab& clonedNodes = *data->clonedNodes; 
@@ -323,7 +329,6 @@ void RigidBodyWorldDesc::OnPostCloneNode(void* param, NotifyInfo* info)
 		INode* const origNode = origNodes[i];
 
 		RigidBodyData* const origData = me->GetRigidBodyControl(origNode);
-		_ASSERTE (origData);
 		if (origData) {
 
 			INode* const cloneNode = clonedNodes[i];
@@ -336,34 +341,20 @@ void RigidBodyWorldDesc::OnPostCloneNode(void* param, NotifyInfo* info)
 
 			dMatrix matrix;
 			NewtonBodyGetMatrix(origData->m_body, &matrix[0][0]);
-			cloneData->m_body = NewtonCreateBody (me->m_newton, collision, &matrix[0][0]);
 
-			NewtonBodySetUserData(cloneData->m_body, cloneNode);
-
-			float mass;
-			float Ixx;
-			float Iyy;
-			float Izz;
-			NewtonBodyGetMassMatrix(origData->m_body, &mass, &Ixx, &Iyy, &Izz);
-			NewtonBodySetMassMatrix(cloneData->m_body, mass, Ixx, Iyy, Izz);
-
-			NewtonBodySetMaterialGroupID(cloneData->m_body, NewtonBodyGetMaterialGroupID(origData->m_body));
-			NewtonBodySetForceAndTorqueCallback(cloneData->m_body, NewtonBodyGetForceAndTorqueCallback(origData->m_body));
-
-			dVector com;
-			NewtonBodyGetCentreOfMass(origData->m_body, &com[0]);
-			NewtonBodySetCentreOfMass(cloneData->m_body, &com[0]);
-			
 			dVector veloc;
 			NewtonBodyGetVelocity(origData->m_body, &veloc[0]);
-			NewtonBodySetVelocity(cloneData->m_body, &veloc[0]);
-
 			dVector omega;
 			NewtonBodyGetOmega(origData->m_body, &omega[0]);
-			NewtonBodySetOmega(cloneData->m_body, &omega[0]);
+
+			cloneData->CreateBody(collision, veloc, omega);
+			NewtonBodySetUserData(cloneData->m_body, cloneNode);
+			Matrix3 cloneMatrix (cloneNode->GetNodeTM (t));		
+			cloneNode->SetNodeTM(t, cloneMatrix);
 		}
 	}
 }
+*/
 
 void RigidBodyWorldDesc::OnPostLoadScene (void* param, NotifyInfo* info)
 {
@@ -457,6 +448,9 @@ void RigidBodyWorld::InitUI(HWND hWnd)
 	m_gravity[0]->SetText(gravity.m_x, 1);
 	m_gravity[1]->SetText(gravity.m_y, 1);
 	m_gravity[2]->SetText(gravity.m_z, 1);
+
+	RegisterNotification(OnUndoRedo, this, NOTIFY_SCENE_UNDO);
+	RegisterNotification (OnUndoRedo, this, NOTIFY_SCENE_REDO);
 }
 
 void RigidBodyWorld::DestroyUI(HWND hWnd)
@@ -465,6 +459,10 @@ void RigidBodyWorld::DestroyUI(HWND hWnd)
 	ReleaseICustEdit (m_gravity[0]);
 	ReleaseICustEdit (m_gravity[1]);
 	ReleaseICustEdit (m_gravity[2]);
+
+	UnRegisterNotification(OnUndoRedo, this, NOTIFY_SCENE_UNDO);
+	UnRegisterNotification (OnUndoRedo, this, NOTIFY_SCENE_REDO);
+
 }
 
 
@@ -495,18 +493,18 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 	{
 		case WM_INITDIALOG:
 		{
+			
 			RigidBodyWorld* const world = (RigidBodyWorld *)lParam;
 			SetWindowLong(hWnd, GWLP_USERDATA, (LONG)world);
+
+			world->m_myWindow = hWnd;
 			world->RigidBodyWorld::InitUI(hWnd);
 			break;
 		}
 
 		case WM_DESTROY:
 		{
-			if (IsDlgButtonChecked(hWnd, IDC_PREVIEW_WORLD) == BST_CHECKED) {
-				KillTimer(hWnd, TIMER_ID);
-			}
-
+			world->StopsSimulation ();
 			world->RigidBodyWorld::DestroyUI(hWnd);
 			break;
 		}
@@ -530,6 +528,7 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 			{
 				case IDC_MAKE_RIGIDBODY:
 				{
+					world->StopsSimulation ();
 					Interface* const ip = GetCOREInterface();
 					int selectionCount = ip->GetSelNodeCount();
 					for (int i = 0; i < selectionCount; i ++) {
@@ -545,6 +544,7 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 				case IDC_DELETE_RIGIDBODY:
 				{
+					world->StopsSimulation ();
 					Interface* const ip = GetCOREInterface();
 					int selectionCount = ip->GetSelNodeCount();
 					for (int i = 0; i < selectionCount; i ++) {
@@ -558,6 +558,7 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 				case IDC_SHOW_GIZMOS:
 				{
+					world->StopsSimulation ();
 					for (NewtonBody* body = NewtonWorldGetFirstBody(desc->m_newton); body; body = NewtonWorldGetNextBody(desc->m_newton, body)) {
 						INode* const node = (INode*)NewtonBodyGetUserData(body);
 						RigidBodyController* const bodyInfo = (RigidBodyController*)desc->GetRigidBodyControl(node);
@@ -570,6 +571,7 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 				case IDC_HIDE_GIZMOS:
 				{
+					world->StopsSimulation ();
 					for (NewtonBody* body = NewtonWorldGetFirstBody(desc->m_newton); body; body = NewtonWorldGetNextBody(desc->m_newton, body)) {
 						INode* const node = (INode*)NewtonBodyGetUserData(body);
 						RigidBodyController* const bodyInfo = (RigidBodyController*)desc->GetRigidBodyControl(node);
@@ -582,6 +584,7 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 				case IDC_SELECT_ALL:
 				{
+					world->StopsSimulation ();
 					world->m_selectionChange = false;
 					Interface* const ip = GetCOREInterface();
 					ip->ClearNodeSelection(FALSE);
@@ -597,6 +600,7 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 				case IDC_REMOVE_ALL:
 				{
+					world->StopsSimulation ();
 					Interface* const ip = GetCOREInterface();
 					ip->ClearNodeSelection(FALSE);
 					for (NewtonBody* body = NewtonWorldGetFirstBody(desc->m_newton); body; ) {
@@ -610,6 +614,7 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 				case IDC_MINUMIN_SIMULATION_RATE:
 				{
+					world->StopsSimulation ();
 					desc->m_minFps = world->m_minFps->GetFloat();
 					break;
 				}
@@ -618,6 +623,7 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 				case IDC_GRAVITY_Y:
 				case IDC_GRAVITY_Z:
 				{
+					world->StopsSimulation ();
 					dVector gravity (world->m_gravity[0]->GetFloat(), world->m_gravity[1]->GetFloat(), world->m_gravity[2]->GetFloat(), 0.0f);
 					//world->m_gravity[0]->SetText(gravity.m_x, 1);
 					//world->m_gravity[1]->SetText(gravity.m_y, 1);
@@ -630,10 +636,11 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 				case IDC_PREVIEW_WORLD:
 				{
 					if (IsDlgButtonChecked(hWnd, IDC_PREVIEW_WORLD) == BST_CHECKED) {
+						world->Undo();
 						unsigned timeOut = unsigned (1000.0f / desc->m_minFps);
 						SetTimer(hWnd, TIMER_ID, timeOut, NULL);
 					} else {
-						KillTimer(hWnd, TIMER_ID);
+						world->StopsSimulation ();
 					}
 
 					break;
@@ -641,11 +648,11 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 				case IDC_STEP_WORLD:
 				{
+					world->StopsSimulation ();
 					world->Undo();
 					world->UpdatePhysics ();
 					break;
 				}
-
 			}
 
 			break;
@@ -759,8 +766,33 @@ void RigidBodyWorld::UpdatePhysics ()
 	desc->m_updateRigidBodyMatrix = true;
 }
 
+void RigidBodyWorld::StopsSimulation ()
+{
+	KillTimer(m_myWindow, TIMER_ID);
+	Sleep (100);
+	if (IsDlgButtonChecked(m_myWindow, IDC_PREVIEW_WORLD) == BST_CHECKED) {
+		CheckDlgButton(m_myWindow, IDC_PREVIEW_WORLD, BST_UNCHECKED);
+	}
+}
+
+void RigidBodyWorld::OnUndoRedo(void* param, NotifyInfo* info)
+{
+	RigidBodyWorld* const me = (RigidBodyWorld*) param;
+	me->StopsSimulation();
+
+}
 
 void RigidBodyWorld::Undo() const
 {
+	TimeValue t (GetCOREInterface()->GetTime());
 
+	theHold.Begin();  
+	RigidBodyWorldDesc* const desc = (RigidBodyWorldDesc*) RigidBodyWorldDesc::GetDescriptor();
+	for (NewtonBody* body = NewtonWorldGetFirstBody(desc->m_newton); body; body = NewtonWorldGetNextBody(desc->m_newton, body))	{
+		INode* const node = (INode*)NewtonBodyGetUserData(body);
+
+		RigidBodyController* const control = desc->GetRigidBodyControl(node);
+		control->SaveUndoState(t);
+	}
+	theHold.Accept ("newton Undo");
 }

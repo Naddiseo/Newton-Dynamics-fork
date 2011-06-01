@@ -93,7 +93,7 @@ class RigidBodyController: public Control, public RigidBodyData
 
 	virtual void MouseCycleStarted (TimeValue  t);
 
-
+	void SaveUndoState(TimeValue t);
 	void UpdateRigidBodyMatrix(TimeValue  t);
 
 	Control* m_scaleControl;

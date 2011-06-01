@@ -43,17 +43,16 @@ class RigidBodyData
 
 	RigidBodyData();
 	~RigidBodyData();
-	void DeleteBody();
+	
 	void Load(ILoad* const iload);
 	void Save(ISave* const isave);
+
+	void CreateBody(NewtonCollision* const collision, const dVector& veloc, const dVector& omega);
+	void DeleteBody();
 
 	static void LoadCollision (void* const serializeHandle, void* buffer, int size);
 	static void SaveCollision (void* const serializeHandle, const void* buffer, int size);
 
-	
-
-//	Point3 m_position;
-//	Point3 m_basePosition;
 
 	Class_ID m_oldControlerID;
 	CollisionShape m_collisionShape;
@@ -62,6 +61,7 @@ class RigidBodyData
 	dVector m_inertia; 
 	dVector m_origin; 
 	NewtonBody* m_body;
+	NewtonCollision* m_undoCollision;
 };
 
 /*
@@ -93,18 +93,14 @@ class RigidBodyWorldDesc: public ClassDesc2//, public RigBodyWorldUpdate
 	virtual IOResult Load(ILoad *iload);
 	virtual IOResult Save(ISave *isave);
 
-
-	
-//	void AttachRigiBodyController (INode* const node, bool createBody);
-//	void DetachRigiBodyController (INode* const node, bool deleteBody);
-
 	void GetNodeList (dList<INode*>& list);
 	
+	void InitBody ();
 	RigidBodyController* GetRigidBodyControl(INode* const node) const;
 	
 	static ClassDesc* GetDescriptor();
+	static void OnAddedNode(void* param, NotifyInfo* info);
 	static void OnPreDeleteNode(void* param, NotifyInfo* info);
-	static void OnPostCloneNode(void* param, NotifyInfo* info);
 	static void OnPostLoadScene(void *param, NotifyInfo *info);
 
 	bool m_updateRigidBodyMatrix;
@@ -140,6 +136,7 @@ class RigidBodyWorld: public UtilityObj, public RigidBodyUIPane
 
 	void UpdateViewPorts ();
 	void UpdatePhysics ();
+	void StopsSimulation ();
 
 /*
 	virtual void SelectionSetChanged (Interface *ip, IUtil *iu); 
@@ -161,8 +158,10 @@ class RigidBodyWorld: public UtilityObj, public RigidBodyUIPane
 	void Undo() const;
 //	void Redo() const;
 
+	static void OnUndoRedo(void* param, NotifyInfo* info);
 	
 	bool m_selectionChange;
+	HWND m_myWindow;
 	HWND m_newtonBodyUI;
 	HWND m_newtonWorldUI;
 
