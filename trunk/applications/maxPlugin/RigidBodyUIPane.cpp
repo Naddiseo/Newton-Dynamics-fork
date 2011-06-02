@@ -117,9 +117,13 @@ INT_PTR CALLBACK RigidBodyUIPane::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 			{
 				case IDC_RIGID_BODY_MASS_PINNER:
 				{
-					float mass = world->m_massEdit->GetFloat();
-					world->m_massEdit->SetText(mass, 1);
-					world->SetSelectionMass (mass);
+					MCHAR text [256];
+					world->m_massEdit->GetText (text, sizeof (text));	
+					if (text[0] != '?') {
+						float mass = world->m_massEdit->GetFloat();
+						world->m_massEdit->SetText(mass, 1);
+						world->SetSelectionMass (mass);
+					}
 					break;
 				}
 			}
@@ -132,8 +136,12 @@ INT_PTR CALLBACK RigidBodyUIPane::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 
 			case IDC_RIGID_BODY_MASS:
 			{
-				float mass = world->m_massEdit->GetFloat();
-				world->SetSelectionMass (mass);
+				MCHAR text [256];
+				world->m_massEdit->GetText (text, sizeof (text));	
+				if (text[0] != '?') {
+					float mass = world->m_massEdit->GetFloat();
+					world->SetSelectionMass (mass);
+				}
 				break;
 			}
 
@@ -222,19 +230,33 @@ void RigidBodyUIPane::SelectionSetChanged ()
 
 	RigidBodyWorld& me = *(RigidBodyWorld*)this;
 
-	int count = 0;
-	RigidBodyController* bodyInfo = NULL; 
+	dList<RigidBodyController*> selectionList;
 	for (int i = 0; i < selectionCount; i ++) {
 		INode* const node = ip->GetSelNode(i);
-		RigidBodyController* const info = (RigidBodyController*)plugin->GetRigidBodyControl(node);
+		RigidBodyController* const info = plugin->GetRigidBodyControl(node);
 		if (info) {
-			count ++;
-			bodyInfo = info;
+			selectionList.Append (info);
 		}
 	}
 
-	if (count == 1) {
-		m_massEdit->SetText(bodyInfo->m_mass);
-//		SendMessage (me.m_newtonBodyUI, WM_COMMAND, 0, 0);
+	if (selectionList.GetCount()) {
+		dList<RigidBodyController*>::dListNode* first = selectionList.GetFirst(); 
+		bool showMass = true;
+		RigidBodyController* const control = first->GetInfo();
+		for (dList<RigidBodyController*>::dListNode* ptr = first->GetNext(); ptr; ptr = ptr->GetNext()) {
+			RigidBodyController* const control1 = ptr->GetInfo();
+			if (control->m_mass != control1->m_mass) {
+				showMass = false;
+			}
+			
+		}
+
+		if (showMass) {
+			m_massEdit->SetText(control->m_mass);
+		} else {
+			m_massEdit->SetText("??????");
+		}
+		SendMessage (me.m_newtonBodyUI, WM_COMMAND, 0, 0);
+		
 	} 
 }

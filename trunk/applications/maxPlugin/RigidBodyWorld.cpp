@@ -593,6 +593,7 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 						ip->SelectNode(node, 0); 
 					}
 					world->m_selectionChange = true;
+					world->SelectionSetChanged (ip, NULL);
 					world->UpdateViewPorts();
 					break;
 				}
@@ -667,19 +668,15 @@ INT_PTR CALLBACK RigidBodyWorld::Proc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM
 
 void RigidBodyWorld::SelectionSetChanged (Interface *ip, IUtil *iu)
 {
-return ;
 	if (m_selectionChange) {
 		RigidBodyUIPane::SelectionSetChanged();
-/*
-		m_currentSelection.RemoveAll();
-		int selectionCount = m_ip->GetSelNodeCount();
-		for (int i = 0; i < selectionCount; i ++) {
-			INode* const node = m_ip->GetSelNode(i);
-			m_currentSelection.Append(node);
-		}
-
-		NewtonRigidBodyInfoPane::SelectionHasChanged();
-*/
+//		m_currentSelection.RemoveAll();
+//		int selectionCount = m_ip->GetSelNodeCount();
+//		for (int i = 0; i < selectionCount; i ++) {
+//			INode* const node = m_ip->GetSelNode(i);
+//			m_currentSelection.Append(node);
+//		}
+//		NewtonRigidBodyInfoPane::SelectionHasChanged();
 	}
 }
 
