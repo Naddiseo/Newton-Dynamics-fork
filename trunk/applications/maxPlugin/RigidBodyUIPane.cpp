@@ -187,11 +187,11 @@ void RigidBodyUIPane::SetSelectionMass (dFloat mass)
 			bodyInfo->m_mass = mass;
 			_ASSERTE (bodyInfo->m_body);
 
-			dVector inertia (bodyInfo->m_inertia.Scale (mass));
-			NewtonBodySetMassMatrix(bodyInfo->m_body, mass, inertia.m_x, inertia.m_y, inertia.m_z);
-/*
+//			dVector inertia (bodyInfo->m_inertia.Scale (mass));
+//			NewtonBodySetMassMatrix(bodyInfo->m_body, mass, inertia.m_x, inertia.m_y, inertia.m_z);
+
 			NewtonCollisionInfoRecord info;
-			NewtonCollision* const collision = NewtonBodyGetCollision(bodyData->m_body);
+			NewtonCollision* const collision = NewtonBodyGetCollision(bodyInfo->m_body);
 			NewtonCollisionGetInfo (collision, &info);
 
 			switch (info.m_collisionType)
@@ -206,18 +206,12 @@ void RigidBodyUIPane::SetSelectionMass (dFloat mass)
 				case SERIALIZE_ID_CONVEXMODIFIER:
 				case SERIALIZE_ID_CHAMFERCYLINDER:
 				{
-					dVector origin;
-					dVector inertia;
-					NewtonConvexCollisionCalculateInertialMatrix (collision, &inertia[0], &origin[0]);	
-					bodyData->m_Ixx = inertia.m_x;
-					bodyData->m_Iyy = inertia.m_y;
-					bodyData->m_Izz = inertia.m_z;
+					NewtonConvexCollisionCalculateInertialMatrix (collision, &bodyInfo->m_inertia[0], &bodyInfo->m_origin[0]);	
 
-					NewtonBodySetCentreOfMass(bodyData->m_body, &origin[0]);
-					NewtonBodySetMassMatrix(bodyData->m_body, bodyData->m_mass, bodyData->m_mass * inertia.m_x, bodyData->m_mass * inertia.m_y, bodyData->m_mass * inertia.m_z);
+					NewtonBodySetCentreOfMass(bodyInfo->m_body, &bodyInfo->m_origin[0]);
+					NewtonBodySetMassMatrix(bodyInfo->m_body, bodyInfo->m_mass, bodyInfo->m_mass * bodyInfo->m_inertia.m_x, bodyInfo->m_mass * bodyInfo->m_inertia.m_y, bodyInfo->m_mass * bodyInfo->m_inertia.m_z);
 				}
 			}
-*/
 		}
 	}
 }
