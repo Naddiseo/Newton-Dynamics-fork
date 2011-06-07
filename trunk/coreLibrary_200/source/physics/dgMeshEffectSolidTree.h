@@ -41,14 +41,6 @@ class dgMeshEffectSolidTree
 		m_solid,
 	};
 
-//	class CSGConvexCurve: public dgList<dgHugeVector>, public dgRefCounter
-//	{
-//		public:
-//		CSGConvexCurve (dgMemoryAllocator* const allocator);
-//		CSGConvexCurve (const dgMeshEffect& mesh, dgEdge* const face);
-//		bool CheckConvex(const dgHugeVector& plane) const;
-//	};
-
 	dgMeshEffectSolidTree (dgPlaneType type);
 	dgMeshEffectSolidTree (const dgMeshEffect& mesh, dgEdge* const face);
 	dgMeshEffectSolidTree (const dgHugeVector& plane, dgMemoryAllocator* const allocator);
