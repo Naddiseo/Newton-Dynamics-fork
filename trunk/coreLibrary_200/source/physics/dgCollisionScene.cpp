@@ -82,14 +82,14 @@ dgCollisionScene::dgNode::~dgNode ()
 
 dgCollisionScene::dgProxy::dgProxy (dgCollision* m_shape, const dgMatrix& matrix, dgCollisionScene* const owner)
 	:dgNode ()
+	,m_matrix (m_shape->GetOffsetMatrix() * matrix)
+	,m_userData(NULL)
 	,m_shape (m_shape)
 	,m_owner (owner)
-	,m_userData(NULL)
+	,m_myNode (NULL)
 {
 	dgVector boxP0;
 	dgVector boxP1;
-
-	m_matrix = m_shape->GetOffsetMatrix() * matrix;
 	m_shape->CalcAABB (m_matrix, boxP0, boxP1);
 
 	dgVector p0 (boxP0.CompProduct(dgVector (DG_SCENE_AABB_SCALE, DG_SCENE_AABB_SCALE, DG_SCENE_AABB_SCALE, dgFloat32 (0.0f))));
