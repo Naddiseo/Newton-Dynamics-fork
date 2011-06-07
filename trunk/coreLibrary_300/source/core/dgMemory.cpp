@@ -51,7 +51,8 @@ class dgGlobalAllocator: public dgMemoryAllocator, public dgList<dgMemoryAllocat
 	void operator delete (void *ptr)
 	{
 		_ASSERTE (0);
-		::delete (ptr);
+		//::delete (ptr);
+		free (ptr);
 	}
 
 

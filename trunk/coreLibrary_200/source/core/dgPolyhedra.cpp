@@ -1972,7 +1972,7 @@ void dgPolyhedra::EndFace ()
 	for (dgInt32 i = 0; i < edgeCount; i ++) {
 		dgEdge* const edge = edgeArray[i];
 		_ASSERTE (!edge->m_prev);
-		dgEdge *ptr = ptr = edge->m_twin;
+		dgEdge *ptr = edge->m_twin;
 		for (; ptr->m_next; ptr = ptr->m_next->m_twin){}
 		ptr->m_next = edge;
 		edge->m_prev = ptr;
