@@ -1111,7 +1111,7 @@ void dgPolyhedra::InvertWinding ()
 	_ASSERTE (SanityCheck());
 
 }
-
+*/
 
 /*
 
