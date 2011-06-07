@@ -63,7 +63,8 @@ dgConvexHull4dTetraherum::dgTetrahedrumPlane::dgTetrahedrumPlane (const dgBigVec
 	dgBigVector& me = *this;
 //	_ASSERTE (me.DotProduct4(me) > dgFloat64 (1.0e-64f));
 	dgFloat64 invMag2 = dgFloat32 (0.0f);
-	if (me.DotProduct4(me) > dgFloat64 (1.0e-64)) {
+//	if (me.DotProduct4(me) > dgFloat64 (1.0e-64)) {
+	if (me.DotProduct4(me) > dgFloat64 (1.0e-38)) {
 		invMag2 = dgFloat64 (1.0f) / sqrt (me.DotProduct4(me));
 	} else {
 		invMag2 = dgFloat32 (0.0f);

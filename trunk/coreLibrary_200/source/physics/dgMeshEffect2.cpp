@@ -142,7 +142,7 @@ class dgClusterList: public dgList <dgClusterFace>
 			}
 
 
-			if ((stack + 3) <= sizeof (pool) / (3 * sizeof (pool[0][0]))) {
+			if ((stack + 3) <= dgInt32 (sizeof (pool) / (3 * sizeof (pool[0][0])))) {
 				dgBigVector edge10 (p1 - p0);
 				dgBigVector edge20 (p2 - p0);
 				dgBigVector n (edge10 * edge20);
@@ -178,7 +178,7 @@ class dgClusterList: public dgList <dgClusterFace>
 		const dgBigVector* const points = (dgBigVector*) mesh.GetVertexPool();
 		for (dgListNode* node = GetFirst(); node; node = node->GetNext()) {
 			dgClusterFace& info = node->GetInfo();
-			for (dgEdge* edge = info.m_edge->m_next->m_next; edge != info.m_edge; edge = edge = edge->m_next) {
+			for (dgEdge* edge = info.m_edge->m_next->m_next; edge != info.m_edge; edge = edge->m_next) {
 				dgFloat64 val = CalculateTriangleConcavity2 (convexHull, info, edge->m_prev->m_prev, points); 
 				if (val > concavity) {
 					concavity = val;
