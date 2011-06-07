@@ -487,7 +487,7 @@ dgInt32 dgCollisionBox::CalculatePlaneIntersection (const dgVector& normal, cons
 				contactsOut[count] = m_vertex[ptr->m_vertex] - dp.Scale (t);
 				count ++;
 
-				dgConvexSimplexEdge* ptr1 = ptr1 = ptr->m_next;
+				dgConvexSimplexEdge* ptr1 = ptr->m_next;
 				for (; ptr1 != ptr; ptr1 = ptr1->m_next) {
 					dgInt32 index0 = ptr1->m_twin->m_vertex;
 					if (test[index0] >= dgFloat32 (0.0f)) {

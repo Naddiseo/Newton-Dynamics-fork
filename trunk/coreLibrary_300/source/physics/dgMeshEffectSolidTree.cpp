@@ -385,8 +385,8 @@ void dgMeshTreeCSGFace::Clip (const dgHugeVector& plane, dgMeshTreeCSGFace** lef
 
 dgMeshEffectSolidTree::dgMeshEffectSolidTree (dgPlaneType type)
 	:m_planeType(type)
-	,m_front(NULL)
 	,m_back(NULL)
+	,m_front(NULL)
 	,m_plane(0.0, 0.0, 0.0, 0.0)
 {
 }

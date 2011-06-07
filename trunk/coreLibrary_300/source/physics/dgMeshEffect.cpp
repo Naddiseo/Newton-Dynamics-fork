@@ -3196,9 +3196,9 @@ void dgMeshEffect::PlaneClipMesh (const dgMatrix& planeMatrix, const dgMatrix& p
 							face->m_prev->m_next = front;
 							face->m_prev = back;
 						} else {
-							dgEdge* const back = ptr;
+							//dgEdge* const back = ptr;
+							_ASSERTE (ptr);
 							dgEdge* const front = ptr->m_twin;
-							_ASSERTE (back);
 							_ASSERTE (front);
 							dgEdge* ptr1 = front;
 							do {
@@ -3606,10 +3606,6 @@ void dgMeshEffect::ClipMesh (const dgMeshEffectSolidTree* const clipper, dgMeshE
 	frontMesh->BeginPolygon();
 	meshCoplanar->BeginPolygon();
 
-
-static int xxx;
-static int xxx1;
-
 	dgInt32 mark = mesh.IncLRU();
 	dgPolyhedra::Iterator iter (mesh);
 	for (iter.Begin(); iter; iter ++) {
@@ -3653,9 +3649,6 @@ static int xxx1;
 
 				_ASSERTE (root->m_planeType == dgMeshEffectSolidTree::m_divider);
 
-xxx1 ++;
-if (xxx1 == 23516)
-xxx1 *= 1;
 
 				dgMeshTreeCSGFace* backFace; 
 				dgMeshTreeCSGFace* frontFace;
