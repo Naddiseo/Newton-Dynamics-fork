@@ -81,8 +81,8 @@ class DemoEntityManager: public QGLWidget,  public dList <DemoEntity*>, public d
 
 	QFont m_font;
 
-	int m_navegationQueueCount;
 	unsigned m_navegationQueueLock;
+	unsigned m_navegationQueueCount;
 	int m_navegationQueue[32];
 	int m_timerId;
 

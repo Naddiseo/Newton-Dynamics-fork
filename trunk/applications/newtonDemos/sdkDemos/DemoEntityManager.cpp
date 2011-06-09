@@ -359,7 +359,7 @@ void DemoEntityManager::UpdateCamera (float timestep)
 		float sideSpeed = mainWindow->m_sidewaysSpeed;
 		float linearSpeed = mainWindow->m_cameraFrontSpeed;
 		dMatrix targetMatrix (m_camera->GetNextMatrix());
-		for (int i = 0; i < m_navegationQueueCount; i ++) {
+		for (unsigned i = 0; i < m_navegationQueueCount; i ++) {
 
 			int code = m_navegationQueue[i];
 			switch (code)
