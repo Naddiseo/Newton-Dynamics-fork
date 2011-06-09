@@ -187,7 +187,7 @@ class ShatterEffect: public dList<ShatterAtom>
 	}
 
 	ShatterEffect (const ShatterEffect& list)
-		:dList(), m_world(list.m_world)
+		:dList<ShatterAtom>(), m_world(list.m_world)
 	{
 		for (dListNode* node = list.GetFirst(); node; node = node->GetNext()) {
 			ShatterAtom& atom = Append(node->GetInfo())->GetInfo();
