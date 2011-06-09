@@ -152,7 +152,6 @@ unsigned dRand ()
 dVector WorldToScreen (const dVector& world)
 {
 	_ASSERTE (0);
-world;
 return dVector (0, 0, 0, 0);
 /*
 	int win[4]; 
