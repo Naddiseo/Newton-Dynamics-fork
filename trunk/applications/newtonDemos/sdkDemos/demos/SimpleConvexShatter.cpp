@@ -129,7 +129,7 @@ class ShatterEffect: public dList<ShatterAtom>
 	public:
 
 	ShatterEffect(NewtonWorld* const world, NewtonMesh* const mesh, int interiorMaterial)
-		:dList(), m_world (world)
+		:dList<ShatterAtom>(), m_world (world)
 	{
 		// first we populate the bounding Box area with few random point to get some interior subdivisions.
 		// the subdivision are local to the point placement, by placing these points visual ally with a 3d tool
