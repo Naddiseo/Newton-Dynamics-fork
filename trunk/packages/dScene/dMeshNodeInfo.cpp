@@ -605,7 +605,10 @@ void dMeshNodeInfo::CalculateOOBBGizmo (const dMatrix& matrix, dVector& p0, dVec
 	for (void* vertex = NewtonMeshGetFirstVertex(m_mesh); vertex; vertex = NewtonMeshGetNextVertex(m_mesh, vertex)) {
 		int index = NewtonMeshGetVertexIndex(m_mesh, vertex) * stride;
 
-		dVector p (dFloat(vertexList[index + 0]), dFloat(vertexList[index + 1]), dFloat(vertexList[index + 2]), 1.0f);
+		dFloat x = dFloat(vertexList[index + 0]);
+		dFloat y = dFloat(vertexList[index + 1]);
+		dFloat z = dFloat(vertexList[index + 2]);
+		dVector p (x, y, z, 1.0f);
 		p = tranform.TransformVector(p);
 		p0.m_x = min (p.m_x, p0.m_x);
 		p0.m_y = min (p.m_y, p0.m_y);
