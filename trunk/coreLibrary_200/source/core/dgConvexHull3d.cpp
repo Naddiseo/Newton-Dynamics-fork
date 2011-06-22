@@ -384,21 +384,44 @@ dgInt32 dgConvexHull3d::InitVertexArray(dgHullVertex* const points, const dgFloa
 
 	// find the largest possible tetrahedron
 	validTetrahedrum = false;
-	dgBigVector e3(dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));;
-	for (dgInt32 i = 3; i < normalCount; i ++) {
-		dgInt32 index = SupportVertex (&tree, points, normalArray[i]);
-		_ASSERTE (index >= 0);
+	dgBigVector e3(dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 
-		//make sure the volume of the fist tetrahedral is no negative
+	index = SupportVertex (&tree, points, normal);
+	e3 = points[index] - m_points[0];
+	dgFloat64 error2 = normal % e3;
+	if (fabs (error2) > (dgFloat64 (1.0e-6f) * m_diag * m_diag)) {
+		// we found a valid tetrahedra, about and start build the hull by adding the rest of the points
+		m_points[3] = points[index];
+		points[index].m_index = 1;
+		validTetrahedrum = true;
+	}
+	if (!validTetrahedrum) {
+		dgVector n (normal.Scale(dgFloat64 (-1.0f)));
+		dgInt32 index = SupportVertex (&tree, points, n);
 		e3 = points[index] - m_points[0];
 		dgFloat64 error2 = normal % e3;
-//dgFloat64 xxx = dgFloat64 (1.0e-6f) * m_diag * m_diag;
 		if (fabs (error2) > (dgFloat64 (1.0e-6f) * m_diag * m_diag)) {
 			// we found a valid tetrahedra, about and start build the hull by adding the rest of the points
 			m_points[3] = points[index];
 			points[index].m_index = 1;
 			validTetrahedrum = true;
-			break;
+		}
+	}
+	if (!validTetrahedrum) {
+		for (dgInt32 i = 3; i < normalCount; i ++) {
+			dgInt32 index = SupportVertex (&tree, points, normalArray[i]);
+			_ASSERTE (index >= 0);
+
+			//make sure the volume of the fist tetrahedral is no negative
+			e3 = points[index] - m_points[0];
+			dgFloat64 error2 = normal % e3;
+			if (fabs (error2) > (dgFloat64 (1.0e-6f) * m_diag * m_diag)) {
+				// we found a valid tetrahedra, about and start build the hull by adding the rest of the points
+				m_points[3] = points[index];
+				points[index].m_index = 1;
+				validTetrahedrum = true;
+				break;
+			}
 		}
 	}
 	if (!validTetrahedrum) {
