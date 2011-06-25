@@ -67,6 +67,8 @@ class dgPolygonSoupDatabaseBuilder
 	dgInt32 AddConvexFace (dgInt32 count, dgInt32* const indexArray, dgInt32* const  facesArray);
 	void OptimizeByGroupID (dgPolygonSoupDatabaseBuilder& source, dgInt32 faceNumber, dgInt32 faceIndexNumber, dgPolygonSoupDatabaseBuilder& leftOver); 
 
+	void PackArray();
+
 //	void WriteDebugOutput (const char* name);
 
 	public:
@@ -86,6 +88,7 @@ class dgPolygonSoupDatabaseBuilder
 		}
 	};
 
+	dgInt32 m_run;
 	dgInt32 m_faceCount;
 	dgInt32 m_indexCount;
 	dgInt32 m_vertexCount;
