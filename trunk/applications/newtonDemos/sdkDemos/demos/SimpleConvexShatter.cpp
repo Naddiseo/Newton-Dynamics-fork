@@ -450,7 +450,7 @@ static void AddShatterPrimitive (DemoEntityManager* const scene, dFloat mass, co
 }
 
 
-
+/*
 void xxxxx (NewtonWorld* const world)
 {
 	float points[] = {
@@ -479,7 +479,7 @@ void xxxxx (NewtonWorld* const world)
 		0.15, 0.10, 0.15,
 		0.15, 0.10, 0.15};
 
-/*
+
 		NewtonCollision* const collision = NewtonCreateTreeCollision(scene->GetNewton(), 0);
 		NewtonTreeCollisionBeginBuild(collision);
 		float xx[] = {-50.000, 0.000, 50.000,
@@ -492,7 +492,6 @@ void xxxxx (NewtonWorld* const world)
 		NewtonTreeCollisionAddFace(collision, 3, &xx[0], 3 * sizeof (float), 0);
 		//NewtonTreeCollisionAddFace(collision, 3, &xx[3], 3 * sizeof (float), 0);
 		NewtonTreeCollisionEndBuild(collision, 1);
-*/
 
 
 		NewtonCollision* coll = NewtonCreateConvexHull(world, sizeof (points) / (3 * sizeof (points[0])), points, 3 * sizeof (float), 0.0f, 0, NULL );
@@ -500,7 +499,7 @@ void xxxxx (NewtonWorld* const world)
 		NewtonReleaseCollision(world, coll);
 
 }
-
+*/
 
 
 void SimpleConvexShatter (DemoEntityManager* const scene)
@@ -511,7 +510,7 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	// load the skybox
 	scene->Append(new SkyBox());
 
-xxxxx(scene->GetNewton());
+//xxxxx(scene->GetNewton());
 
 
 	// load the scene from and alchemedia file format
