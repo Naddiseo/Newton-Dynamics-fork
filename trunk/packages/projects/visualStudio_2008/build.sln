@@ -51,6 +51,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "physics", "..\..\..\coreLib
 		{57AC4F2D-B115-4931-8F6E-AF8AD616B6AA} = {57AC4F2D-B115-4931-8F6E-AF8AD616B6AA}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dAnimation", "dAnimation.vcproj", "{E3C14351-BAD1-4ADD-AB9A-31054D6E7CDB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CBE9E751-E58B-46C1-B6B0-873670D0F981} = {CBE9E751-E58B-46C1-B6B0-873670D0F981}
+		{F67C4593-A914-4DDF-8CB5-C59A3EF3ECE0} = {F67C4593-A914-4DDF-8CB5-C59A3EF3ECE0}
+		{18E509CF-46D2-4749-B3BB-160937CF2481} = {18E509CF-46D2-4749-B3BB-160937CF2481}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		debug|Win32 = debug|Win32
@@ -207,6 +214,18 @@ Global
 		{39737A8F-6151-4259-8E39-25530345D4B4}.releaseDll|Win32.Build.0 = releaseDll|Win32
 		{39737A8F-6151-4259-8E39-25530345D4B4}.releaseDll|x64.ActiveCfg = releaseDll|x64
 		{39737A8F-6151-4259-8E39-25530345D4B4}.releaseDll|x64.Build.0 = releaseDll|x64
+		{E3C14351-BAD1-4ADD-AB9A-31054D6E7CDB}.debug|Win32.ActiveCfg = Debug|Win32
+		{E3C14351-BAD1-4ADD-AB9A-31054D6E7CDB}.debug|Win32.Build.0 = Debug|Win32
+		{E3C14351-BAD1-4ADD-AB9A-31054D6E7CDB}.debug|x64.ActiveCfg = Debug|Win32
+		{E3C14351-BAD1-4ADD-AB9A-31054D6E7CDB}.debugDll|Win32.ActiveCfg = Debug|Win32
+		{E3C14351-BAD1-4ADD-AB9A-31054D6E7CDB}.debugDll|Win32.Build.0 = Debug|Win32
+		{E3C14351-BAD1-4ADD-AB9A-31054D6E7CDB}.debugDll|x64.ActiveCfg = Debug|Win32
+		{E3C14351-BAD1-4ADD-AB9A-31054D6E7CDB}.release|Win32.ActiveCfg = Release|Win32
+		{E3C14351-BAD1-4ADD-AB9A-31054D6E7CDB}.release|Win32.Build.0 = Release|Win32
+		{E3C14351-BAD1-4ADD-AB9A-31054D6E7CDB}.release|x64.ActiveCfg = Release|Win32
+		{E3C14351-BAD1-4ADD-AB9A-31054D6E7CDB}.releaseDll|Win32.ActiveCfg = Release|Win32
+		{E3C14351-BAD1-4ADD-AB9A-31054D6E7CDB}.releaseDll|Win32.Build.0 = Release|Win32
+		{E3C14351-BAD1-4ADD-AB9A-31054D6E7CDB}.releaseDll|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

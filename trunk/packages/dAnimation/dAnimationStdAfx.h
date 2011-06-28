@@ -14,12 +14,11 @@
 // are changed infrequently
 //
 
-#ifndef __D_CONTAINERS_STDAFX__
-#define __D_CONTAINERS_STDAFX__
+#ifndef __D_ANIMATION_STDAFX__
+#define __D_ANIMATION_STDAFX__
 
 #include <stdlib.h>
 #include <string.h>
-//#include <windows.h>
 
 
 #ifdef _MSC_VER
@@ -32,7 +31,7 @@
 
 
 #if (defined (_LINUX_VER) || defined (_MAC_VER))
-#define _ASSERTE(x)
+	#define _ASSERTE(x)
 #endif
 
 
@@ -46,6 +45,34 @@
 	#include <libkern/OSAtomic.h>
 	#include <sys/sysctl.h>
 #endif
+
+
+#include <dStdAfxMath.h>
+#include <dContainersStdAfx.h>
+
+#include <dMathDefines.h>
+#include <dVector.h>
+#include <dMatrix.h>
+#include <dQuaternion.h>
+ 
+#include <dCRC.h>
+#include <dRefCounter.h>
+#include <dHeap.h>
+#include <dList.h>
+#include <dTree.h>
+#include <dBaseHierarchy.h>
+#include <dRtti.h>
+#include <dClassInfo.h>
+
+#include <tinyxml.h>
+
+
+#define D_DEFINE_ANIMATION_NODE_DEFINE(className,baseClass)	\
+	dAddRtti(baseClass);									
+
+#define D_DEFINE_ANIMATION_NODE_DECLARE(className)	\
+	dInitRtti(className);							\
+
 
 
 #endif
