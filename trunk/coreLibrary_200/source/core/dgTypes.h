@@ -620,7 +620,7 @@ DG_INLINE dgFloat32 dgAbsf(dgFloat32 x)
 #endif
 }
 
-
+#ifndef __USE_DOUBLE_PRECISION__
 DG_INLINE dgInt32 dgFastInt (dgFloat64 x)
 {
 	dgInt32 i = dgInt32 (x);
@@ -629,10 +629,10 @@ DG_INLINE dgInt32 dgFastInt (dgFloat64 x)
 	}
 	return i;
 }
+#endif
 
 DG_INLINE dgInt32 dgFastInt (dgFloat32 x)
 {
-//#ifdef _MSC_VER
 #if 0
 	volatile dgDoubleInt val;
 	volatile dgDoubleInt round;

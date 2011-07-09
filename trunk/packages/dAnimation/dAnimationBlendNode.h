@@ -20,6 +20,15 @@ class dAnimationBlendNode: public dAnimationNode
 
 	dAnimationBlendNode(void);
 	virtual ~dAnimationBlendNode(void);
+
+	void AddChild(dAnimationNode* const child);
+	void RemoveChild(dAnimationNode* const child);
+
+	virtual void Update (dAnimationTransform* const palette, int transformCount);
+
+	protected:
+	dList<dAnimationNode*> m_children;
+
 };
 
 

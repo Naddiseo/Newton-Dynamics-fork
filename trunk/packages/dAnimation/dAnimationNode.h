@@ -12,6 +12,7 @@
 #ifndef __dAnimationNode_h__
 #define __dAnimationNode_h__
 
+class dAnimationTransform;
 
 class dAnimationNode: public dClassInfo
 {
@@ -20,6 +21,8 @@ class dAnimationNode: public dClassInfo
 
 	dAnimationNode(void);
 	virtual ~dAnimationNode(void);
+
+	virtual void Update (dAnimationTransform* const palette, int transformCount) = 0;
 
 	virtual void  SerializeXml (TiXmlElement* const rootNode) const = 0;
 	virtual void  DeSerializeXml (TiXmlElement* const rootNode) const = 0;

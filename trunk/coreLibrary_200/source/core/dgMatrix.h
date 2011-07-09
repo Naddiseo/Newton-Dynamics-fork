@@ -64,15 +64,17 @@ class dgMatrix
 	void TransformBBox (const dgVector& p0local, const dgVector& p1local, dgVector& p0, dgVector& p1) const; 
 
 	dgVector CalcPitchYawRoll () const;
+
+
 	void TransformTriplex (dgFloat32* const dst, dgInt32 dstStrideInBytes,
 						   const dgFloat32* const src, dgInt32 srcStrideInBytes, dgInt32 count) const;
 
+#ifndef	__USE_DOUBLE_PRECISION__
 	void TransformTriplex (dgFloat64* const dst, dgInt32 dstStrideInBytes,
 						   const dgFloat64* const src, dgInt32 srcStrideInBytes, dgInt32 count) const;
-
 	void TransformTriplex (dgFloat64* const dst, dgInt32 dstStrideInBytes,
 						   const dgFloat32* const src, dgInt32 srcStrideInBytes, dgInt32 count) const;
-
+#endif
 
 	dgMatrix operator* (const dgMatrix &B) const;
 	

@@ -20,7 +20,13 @@ class dAnimationPlayer: public dAnimationNode
 	D_DEFINE_ANIMATION_NODE_DEFINE(dAnimationPlayer, dAnimationNode);
 	dAnimationPlayer(void);
 	virtual ~dAnimationPlayer(void);
+
+	virtual void Update (dAnimationTransform* const palette, int transformCount);
+
+
 };
+
+
 
 
 #endif

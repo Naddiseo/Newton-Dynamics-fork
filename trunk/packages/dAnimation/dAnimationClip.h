@@ -12,6 +12,7 @@
 #ifndef __dAnimationClip_h__
 #define __dAnimationClip_h__
 
+class dAnimationTransform;
 
 class dAnimationClip: public dClassInfo
 {
@@ -20,6 +21,9 @@ class dAnimationClip: public dClassInfo
 
 	dAnimationClip(void);
 	virtual ~dAnimationClip(void);
+
+	virtual void Update (dAnimationTransform* const palette, int transformCount);
+
 };
 
 

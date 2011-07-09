@@ -1034,8 +1034,11 @@ void dgMeshEffect::PackVertexArrays ()
 	}
 };
 
-
+#ifdef	__USE_DOUBLE_PRECISION__ 
+void dgMeshEffect::AddPolygon (dgInt32 count, const dgFloat32* const vertexList, dgInt32 strideIndBytes, dgInt32 material)
+#else
 void dgMeshEffect::AddPolygon (dgInt32 count, const dgFloat64* const vertexList, dgInt32 strideIndBytes, dgInt32 material)
+#endif
 {
 	dgInt32 stride = dgInt32 (strideIndBytes / sizeof (dgFloat64));
 
@@ -1112,7 +1115,7 @@ void dgMeshEffect::AddPolygon (dgInt32 count, const dgFloat64* const vertexList,
 	}
 }
 
-
+#ifndef	__USE_DOUBLE_PRECISION__
 void dgMeshEffect::AddPolygon (dgInt32 count, const dgFloat32* const vertexList, dgInt32 strideIndBytes, dgInt32 material)
 {
 	dgVertexAtribute points[256];
@@ -1135,6 +1138,7 @@ void dgMeshEffect::AddPolygon (dgInt32 count, const dgFloat32* const vertexList,
 
 	AddPolygon (count, &points[0].m_vertex.m_x, sizeof (dgVertexAtribute), material);
 }
+#endif
 
 void dgMeshEffect::EndPolygon (dgFloat64 tol)
 {

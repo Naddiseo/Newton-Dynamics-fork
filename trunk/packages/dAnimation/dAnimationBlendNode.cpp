@@ -21,3 +21,18 @@ dAnimationBlendNode::dAnimationBlendNode(void)
 dAnimationBlendNode::~dAnimationBlendNode(void)
 {
 }
+
+
+void dAnimationBlendNode::Update (dAnimationTransform* const palette, int transformCount)
+{
+
+	if (m_children.GetCount() == 1) {
+		m_children.GetFirst()->GetInfo()->Update(palette, transformCount);
+	} else {
+
+		
+
+	}
+			
+
+}
