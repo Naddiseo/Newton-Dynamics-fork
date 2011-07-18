@@ -378,7 +378,6 @@ void dgCollisionConvex::CalcAABB (const dgMatrix &matrix, dgVector& p0, dgVector
 void dgCollisionConvex::CalcAABBSimd (const dgMatrix &matrix, dgVector& p0, dgVector& p1) const
 {
 #ifdef DG_BUILD_SIMD_CODE
-	simd_type tmp;
 	dgVector origin (matrix.TransformVectorSimd(m_boxOrigin));
 
 //	dgVector size (m_boxSize.m_x * dgAbsf(matrix[0][0]) + m_boxSize.m_y * dgAbsf(matrix[1][0]) + m_boxSize.m_z * dgAbsf(matrix[2][0]) + DG_MAX_COLLISION_PADDING,  
@@ -386,11 +385,11 @@ void dgCollisionConvex::CalcAABBSimd (const dgMatrix &matrix, dgVector& p0, dgVe
 //		           m_boxSize.m_x * dgAbsf(matrix[0][2]) + m_boxSize.m_y * dgAbsf(matrix[1][2]) + m_boxSize.m_z * dgAbsf(matrix[2][2]) + DG_MAX_COLLISION_PADDING,
 //		           dgFloat32 (0.0f));
 
-	tmp = simd_mul_add_v (
-			simd_mul_add_v (
-				simd_mul_add_v ((simd_type&) m_aabb_padd, (simd_type&) m_size_x, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[0])),
-														  (simd_type&) m_size_y, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[1])),		   
-														  (simd_type&) m_size_z, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[2]));
+	simd_type tmp = simd_mul_add_v (
+						simd_mul_add_v (
+							simd_mul_add_v ((simd_type&) m_aabb_padd, (simd_type&) m_size_x, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[0])),
+																      (simd_type&) m_size_y, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[1])),		   
+																      (simd_type&) m_size_z, simd_and_v((simd_type&) m_signMask, (simd_type&) matrix[2]));
 
 
 //	p0 = origin - size;
@@ -914,6 +913,7 @@ dgVector dgCollisionConvex::SupportVertex (const dgVector& direction) const
 
 dgVector dgCollisionConvex::SupportVertexSimd (const dgVector& direction) const
 {
+#ifdef DG_BUILD_SIMD_CODE
 	_ASSERTE (dgAbsf(direction % direction - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
 
 	simd_type dir_x = simd_set1 (direction.m_x);
@@ -965,6 +965,9 @@ dgVector dgCollisionConvex::SupportVertexSimd (const dgVector& direction) const
 
 	_ASSERTE (index != -1);
 	return m_vertex[index];
+#else
+	return 0;
+#endif 
 }
 
 
