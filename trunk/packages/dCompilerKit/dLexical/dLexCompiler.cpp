@@ -105,10 +105,11 @@ dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outpu
 						"\tpublic:\n"
 						"\t%s(const char* const data);\n"
 						"\t~%s();\n\n"
-						"\tint NextToken ();\n"
-						"\tconst char* GetTokeString () const;\n\n"
-						"\tprotected:\n"
 						"\tchar NextChar ();\n"
+						"\tint NextToken ();\n"
+						"\tvoid GetLexString ();\n"
+						"\tconst char* GetTokeString () const;\n\n"
+//						"\tprotected:\n"
 						"\tint NextPattern ();\n"
 						"\tbool IsCharInSet (int ch, const char* const set);\n\n"
 						"\t// local lexical variables\n"	
@@ -398,7 +399,6 @@ void dLexCompiler::ParseDefinitions (FILE* const file, const char* const classNa
 	supportFuntions += "}\n\n";
 
 
-
 	supportFuntions += "bool ";
 	supportFuntions += className;
 	supportFuntions += "::IsCharInSet (int ch, const char* const set)\n";
@@ -410,6 +410,17 @@ void dLexCompiler::ParseDefinitions (FILE* const file, const char* const classNa
 	supportFuntions += "\t}\n";
 	supportFuntions += "\treturn false;\n";
 	supportFuntions += "}\n\n";
+
+	supportFuntions += "void ";
+	supportFuntions += className;
+	supportFuntions += "::GetLexString ()\n";
+	supportFuntions += "{\n";
+	supportFuntions += "\tint length = m_index - m_startIndex;\n";
+	supportFuntions += "\tm_tokenString = string (&m_data[m_startIndex], length);\n";
+	supportFuntions += "\tm_startIndex = m_index;\n";
+	supportFuntions += "\tm_state = NextPattern();\n";
+	supportFuntions += "}\n\n";
+
 
 
 //	DTRACE ((supportFuntions.c_str()));

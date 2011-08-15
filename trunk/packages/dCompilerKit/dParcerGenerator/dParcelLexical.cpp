@@ -20,10 +20,87 @@
 #include <dParcelCompiler.h>
 #include "dParcelLexical.h"
 
+// read the user action 
+void ReadUserAction(dParcelLexical& lexical)
+{
+
+	int state = 0;
+	while (state != 14) 
+	{
+		switch (state) {
+
+			// ([\}]+[ \n]*[;\|])|([\"][^"]*[\"])
+			case 0:
+			{
+				char ch = lexical.NextChar();
+				if (ch == '\"') state = 1;
+				else if (ch == '}') state = 10;
+				else state = 0;
+				break;
+			}
+
+			case 1:
+			{
+				char ch = lexical.NextChar();
+				if (ch == '\"') state = 0;
+				else if (ch != '\n') state = 2;
+				else state = 0;
+				break;
+			}
+
+			case 2:
+			{
+				char ch = lexical.NextChar();
+				if (ch == '\"') {
+					if (lexical.m_data[lexical.m_index-2] == '\\') state = 2;
+					else state = 0;
+				}
+				
+				else if (ch != '\n') state = 2;
+				else state = 0;
+				break;
+			}
+
+
+			case 10:
+			{
+				char ch = lexical.NextChar();
+				if (ch == '}') state = 10;
+				else if (ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r') state = 12;
+				else if (ch == '|' || ch == ';') state = 13;
+				else state = 0;
+				break;
+			}
+
+			case 12:
+			{
+				char ch = lexical.NextChar();
+				if (ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r') state = 12;
+				else if (ch == '|' || ch == ';') state = 13;
+				else state = 0;
+				break;
+			}
+
+			case 13:
+			{
+				lexical.m_index --;
+				state = 14;
+				break;
+			}
+		}
+	}
+
+	lexical.GetLexString();
+	lexical.m_tokenString = "{" + lexical.m_tokenString;
+}
+
+
+#include "dParcelLexical.h"
+
 dParcelLexical::dParcelLexical(const char* const data)
 	:m_token(0)
 	,m_state(0)
-	,m_lastState(155)
+	,m_lastState(161)
 	,m_startState(0)
 	,m_index(0)
 	,m_startIndex(0)
@@ -54,6 +131,14 @@ bool dParcelLexical::IsCharInSet (int ch, const char* const set)
 		}
 	}
 	return false;
+}
+
+void dParcelLexical::GetLexString ()
+{
+	int length = m_index - m_startIndex;
+	m_tokenString = string (&m_data[m_startIndex], length);
+	m_startIndex = m_index;
+	m_state = NextPattern();
 }
 
 int dParcelLexical::NextPattern ()
@@ -89,14 +174,16 @@ int dParcelLexical::NextPattern ()
 			case 92: m_startState = 96; break;
 			case 96: m_startState = 100; break;
 			case 100: m_startState = 104; break;
-			case 104: m_startState = 107; break;
-			case 107: m_startState = 114; break;
-			case 114: m_startState = 120; break;
-			case 120: m_startState = 127; break;
-			case 127: m_startState = 134; break;
-			case 134: m_startState = 137; break;
-			case 137: m_startState = 146; break;
-			case 146: m_startState = 155; break;
+			case 104: m_startState = 108; break;
+			case 108: m_startState = 111; break;
+			case 111: m_startState = 118; break;
+			case 118: m_startState = 124; break;
+			case 124: m_startState = 131; break;
+			case 131: m_startState = 138; break;
+			case 138: m_startState = 141; break;
+			case 141: m_startState = 150; break;
+			case 150: m_startState = 152; break;
+			case 152: m_startState = 161; break;
 	}
 	return m_startState;
 }
@@ -143,10 +230,7 @@ int dParcelLexical::NextToken ()
 				if (IsCharInSet (ch, text_0)) m_state = 1;
 				else {
 					m_index --;
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{}
 				}
@@ -163,10 +247,7 @@ int dParcelLexical::NextToken ()
 			case 3:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return(dParcelCompiler::OR); }
 				}
@@ -183,10 +264,7 @@ int dParcelLexical::NextToken ()
 			case 5:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return(dParcelCompiler::COLOM); }
 				}
@@ -203,10 +281,7 @@ int dParcelLexical::NextToken ()
 			case 7:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return(dParcelCompiler::SIMICOLOM); }
 				}
@@ -237,10 +312,7 @@ int dParcelLexical::NextToken ()
 			case 11:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return(';'); }
 				}
@@ -271,10 +343,7 @@ int dParcelLexical::NextToken ()
 			case 15:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return('{'); }
 				}
@@ -305,10 +374,7 @@ int dParcelLexical::NextToken ()
 			case 19:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return('}'); }
 				}
@@ -339,10 +405,7 @@ int dParcelLexical::NextToken ()
 			case 23:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return(','); }
 				}
@@ -373,10 +436,7 @@ int dParcelLexical::NextToken ()
 			case 27:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return(':'); }
 				}
@@ -407,10 +467,7 @@ int dParcelLexical::NextToken ()
 			case 31:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return('='); }
 				}
@@ -441,10 +498,7 @@ int dParcelLexical::NextToken ()
 			case 35:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return('&'); }
 				}
@@ -475,10 +529,7 @@ int dParcelLexical::NextToken ()
 			case 39:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return('!'); }
 				}
@@ -509,10 +560,7 @@ int dParcelLexical::NextToken ()
 			case 43:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return('~'); }
 				}
@@ -543,10 +591,7 @@ int dParcelLexical::NextToken ()
 			case 47:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return('-'); }
 				}
@@ -577,10 +622,7 @@ int dParcelLexical::NextToken ()
 			case 51:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return('%'); }
 				}
@@ -611,10 +653,7 @@ int dParcelLexical::NextToken ()
 			case 55:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return('<'); }
 				}
@@ -645,16 +684,13 @@ int dParcelLexical::NextToken ()
 			case 59:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
 					{ return('>'); }
 				}
 				break;
 			}
-			// "'^'"
+			// "'/'"
 			case 60:
 			{
 				char ch = NextChar();
@@ -665,7 +701,7 @@ int dParcelLexical::NextToken ()
 			case 61:
 			{
 				char ch = NextChar();
-				if (ch == 94) m_state = 62;
+				if (ch == 47) m_state = 62;
 				else m_state = NextPattern();
 				break;
 			}
@@ -679,16 +715,13 @@ int dParcelLexical::NextToken ()
 			case 63:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
-					{ return('^'); }
+					{ return('/'); }
 				}
 				break;
 			}
-			// "'\.'"
+			// "'^'"
 			case 64:
 			{
 				char ch = NextChar();
@@ -699,7 +732,7 @@ int dParcelLexical::NextToken ()
 			case 65:
 			{
 				char ch = NextChar();
-				if (ch == 46) m_state = 66;
+				if (ch == 94) m_state = 66;
 				else m_state = NextPattern();
 				break;
 			}
@@ -713,16 +746,13 @@ int dParcelLexical::NextToken ()
 			case 67:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
-					{ return('.'); }
+					{ return('^'); }
 				}
 				break;
 			}
-			// "'\|'"
+			// "'\.'"
 			case 68:
 			{
 				char ch = NextChar();
@@ -733,7 +763,7 @@ int dParcelLexical::NextToken ()
 			case 69:
 			{
 				char ch = NextChar();
-				if (ch == 124) m_state = 70;
+				if (ch == 46) m_state = 70;
 				else m_state = NextPattern();
 				break;
 			}
@@ -747,16 +777,13 @@ int dParcelLexical::NextToken ()
 			case 71:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
-					{ return('|'); }
+					{ return('.'); }
 				}
 				break;
 			}
-			// "'\?'"
+			// "'\|'"
 			case 72:
 			{
 				char ch = NextChar();
@@ -767,7 +794,7 @@ int dParcelLexical::NextToken ()
 			case 73:
 			{
 				char ch = NextChar();
-				if (ch == 63) m_state = 74;
+				if (ch == 124) m_state = 74;
 				else m_state = NextPattern();
 				break;
 			}
@@ -781,16 +808,13 @@ int dParcelLexical::NextToken ()
 			case 75:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
-					{ return('?'); }
+					{ return('|'); }
 				}
 				break;
 			}
-			// "'\\'"
+			// "'\?'"
 			case 76:
 			{
 				char ch = NextChar();
@@ -801,7 +825,7 @@ int dParcelLexical::NextToken ()
 			case 77:
 			{
 				char ch = NextChar();
-				if (ch == 92) m_state = 78;
+				if (ch == 63) m_state = 78;
 				else m_state = NextPattern();
 				break;
 			}
@@ -815,16 +839,13 @@ int dParcelLexical::NextToken ()
 			case 79:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
-					{ return('\\'); }
+					{ return('?'); }
 				}
 				break;
 			}
-			// "'\('"
+			// "'\\'"
 			case 80:
 			{
 				char ch = NextChar();
@@ -835,7 +856,7 @@ int dParcelLexical::NextToken ()
 			case 81:
 			{
 				char ch = NextChar();
-				if (ch == 40) m_state = 82;
+				if (ch == 92) m_state = 82;
 				else m_state = NextPattern();
 				break;
 			}
@@ -849,16 +870,13 @@ int dParcelLexical::NextToken ()
 			case 83:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
-					{ return('('); }
+					{ return('\\'); }
 				}
 				break;
 			}
-			// "'\)'"
+			// "'\('"
 			case 84:
 			{
 				char ch = NextChar();
@@ -869,7 +887,7 @@ int dParcelLexical::NextToken ()
 			case 85:
 			{
 				char ch = NextChar();
-				if (ch == 41) m_state = 86;
+				if (ch == 40) m_state = 86;
 				else m_state = NextPattern();
 				break;
 			}
@@ -883,16 +901,13 @@ int dParcelLexical::NextToken ()
 			case 87:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
-					{ return(')'); }
+					{ return('('); }
 				}
 				break;
 			}
-			// "'\+'"
+			// "'\)'"
 			case 88:
 			{
 				char ch = NextChar();
@@ -903,7 +918,7 @@ int dParcelLexical::NextToken ()
 			case 89:
 			{
 				char ch = NextChar();
-				if (ch == 43) m_state = 90;
+				if (ch == 41) m_state = 90;
 				else m_state = NextPattern();
 				break;
 			}
@@ -917,16 +932,13 @@ int dParcelLexical::NextToken ()
 			case 91:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
-					{ return('+'); }
+					{ return(')'); }
 				}
 				break;
 			}
-			// "'\*'"
+			// "'\+'"
 			case 92:
 			{
 				char ch = NextChar();
@@ -937,7 +949,7 @@ int dParcelLexical::NextToken ()
 			case 93:
 			{
 				char ch = NextChar();
-				if (ch == 42) m_state = 94;
+				if (ch == 43) m_state = 94;
 				else m_state = NextPattern();
 				break;
 			}
@@ -951,16 +963,13 @@ int dParcelLexical::NextToken ()
 			case 95:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
-					{ return('*'); }
+					{ return('+'); }
 				}
 				break;
 			}
-			// "'\['"
+			// "'\*'"
 			case 96:
 			{
 				char ch = NextChar();
@@ -971,7 +980,7 @@ int dParcelLexical::NextToken ()
 			case 97:
 			{
 				char ch = NextChar();
-				if (ch == 91) m_state = 98;
+				if (ch == 42) m_state = 98;
 				else m_state = NextPattern();
 				break;
 			}
@@ -985,16 +994,13 @@ int dParcelLexical::NextToken ()
 			case 99:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
-					{ return('['); }
+					{ return('*'); }
 				}
 				break;
 			}
-			// "'\]'"
+			// "'\['"
 			case 100:
 			{
 				char ch = NextChar();
@@ -1005,7 +1011,7 @@ int dParcelLexical::NextToken ()
 			case 101:
 			{
 				char ch = NextChar();
-				if (ch == 93) m_state = 102;
+				if (ch == 91) m_state = 102;
 				else m_state = NextPattern();
 				break;
 			}
@@ -1019,212 +1025,197 @@ int dParcelLexical::NextToken ()
 			case 103:
 			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
-					{ return(']'); }
+					{ return('['); }
 				}
 				break;
 			}
-			// "%%"
+			// "'\]'"
 			case 104:
 			{
 				char ch = NextChar();
-				if (ch == 37) m_state = 105;
+				if (ch == 39) m_state = 105;
 				else m_state = NextPattern();
 				break;
 			}
 			case 105:
 			{
 				char ch = NextChar();
-				if (ch == 37) m_state = 106;
+				if (ch == 93) m_state = 106;
 				else m_state = NextPattern();
 				break;
 			}
 			case 106:
 			{
-				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
-					//user specified action
-					{ return dParcelCompiler::GRAMMAR_SEGEMENT;}
-				}
-				break;
-			}
-			// "%token"
-			case 107:
-			{
 				char ch = NextChar();
-				if (ch == 37) m_state = 108;
+				if (ch == 39) m_state = 107;
 				else m_state = NextPattern();
 				break;
 			}
+			case 107:
+			{
+				{
+					GetLexString ();
+					//user specified action
+					{ return(']'); }
+				}
+				break;
+			}
+			// "%%"
 			case 108:
 			{
 				char ch = NextChar();
-				if (ch == 116) m_state = 109;
+				if (ch == 37) m_state = 109;
 				else m_state = NextPattern();
 				break;
 			}
 			case 109:
 			{
 				char ch = NextChar();
-				if (ch == 111) m_state = 110;
+				if (ch == 37) m_state = 110;
 				else m_state = NextPattern();
 				break;
 			}
 			case 110:
 			{
-				char ch = NextChar();
-				if (ch == 107) m_state = 111;
-				else m_state = NextPattern();
+				{
+					GetLexString ();
+					//user specified action
+					{ return dParcelCompiler::GRAMMAR_SEGEMENT;}
+				}
 				break;
 			}
+			// "%token"
 			case 111:
 			{
 				char ch = NextChar();
-				if (ch == 101) m_state = 112;
+				if (ch == 37) m_state = 112;
 				else m_state = NextPattern();
 				break;
 			}
 			case 112:
 			{
 				char ch = NextChar();
-				if (ch == 110) m_state = 113;
+				if (ch == 116) m_state = 113;
 				else m_state = NextPattern();
 				break;
 			}
 			case 113:
 			{
-				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
-					//user specified action
-					{ return dParcelCompiler::TOKEN;}
-				}
+				char ch = NextChar();
+				if (ch == 111) m_state = 114;
+				else m_state = NextPattern();
 				break;
 			}
-			// "%left"
 			case 114:
 			{
 				char ch = NextChar();
-				if (ch == 37) m_state = 115;
+				if (ch == 107) m_state = 115;
 				else m_state = NextPattern();
 				break;
 			}
 			case 115:
 			{
 				char ch = NextChar();
-				if (ch == 108) m_state = 116;
+				if (ch == 101) m_state = 116;
 				else m_state = NextPattern();
 				break;
 			}
 			case 116:
 			{
 				char ch = NextChar();
-				if (ch == 101) m_state = 117;
+				if (ch == 110) m_state = 117;
 				else m_state = NextPattern();
 				break;
 			}
 			case 117:
 			{
-				char ch = NextChar();
-				if (ch == 102) m_state = 118;
-				else m_state = NextPattern();
+				{
+					GetLexString ();
+					//user specified action
+					{ return dParcelCompiler::TOKEN;}
+				}
 				break;
 			}
+			// "%left"
 			case 118:
 			{
 				char ch = NextChar();
-				if (ch == 116) m_state = 119;
+				if (ch == 37) m_state = 119;
 				else m_state = NextPattern();
 				break;
 			}
 			case 119:
 			{
-				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
-					//user specified action
-					{ return dParcelCompiler::LEFT;}
-				}
+				char ch = NextChar();
+				if (ch == 108) m_state = 120;
+				else m_state = NextPattern();
 				break;
 			}
-			// "%right"
 			case 120:
 			{
 				char ch = NextChar();
-				if (ch == 37) m_state = 121;
+				if (ch == 101) m_state = 121;
 				else m_state = NextPattern();
 				break;
 			}
 			case 121:
 			{
 				char ch = NextChar();
-				if (ch == 114) m_state = 122;
+				if (ch == 102) m_state = 122;
 				else m_state = NextPattern();
 				break;
 			}
 			case 122:
 			{
 				char ch = NextChar();
-				if (ch == 105) m_state = 123;
+				if (ch == 116) m_state = 123;
 				else m_state = NextPattern();
 				break;
 			}
 			case 123:
 			{
-				char ch = NextChar();
-				if (ch == 103) m_state = 124;
-				else m_state = NextPattern();
+				{
+					GetLexString ();
+					//user specified action
+					{ return dParcelCompiler::LEFT;}
+				}
 				break;
 			}
+			// "%right"
 			case 124:
 			{
 				char ch = NextChar();
-				if (ch == 104) m_state = 125;
+				if (ch == 37) m_state = 125;
 				else m_state = NextPattern();
 				break;
 			}
 			case 125:
 			{
 				char ch = NextChar();
-				if (ch == 116) m_state = 126;
+				if (ch == 114) m_state = 126;
 				else m_state = NextPattern();
 				break;
 			}
 			case 126:
 			{
-				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
-					//user specified action
-					{ return dParcelCompiler::RIGHT;}
-				}
+				char ch = NextChar();
+				if (ch == 105) m_state = 127;
+				else m_state = NextPattern();
 				break;
 			}
-			// "%start"
 			case 127:
 			{
 				char ch = NextChar();
-				if (ch == 37) m_state = 128;
+				if (ch == 103) m_state = 128;
 				else m_state = NextPattern();
 				break;
 			}
 			case 128:
 			{
 				char ch = NextChar();
-				if (ch == 115) m_state = 129;
+				if (ch == 104) m_state = 129;
 				else m_state = NextPattern();
 				break;
 			}
@@ -1237,227 +1228,245 @@ int dParcelLexical::NextToken ()
 			}
 			case 130:
 			{
-				char ch = NextChar();
-				if (ch == 97) m_state = 131;
-				else m_state = NextPattern();
+				{
+					GetLexString ();
+					//user specified action
+					{ return dParcelCompiler::RIGHT;}
+				}
 				break;
 			}
+			// "%start"
 			case 131:
 			{
 				char ch = NextChar();
-				if (ch == 114) m_state = 132;
+				if (ch == 37) m_state = 132;
 				else m_state = NextPattern();
 				break;
 			}
 			case 132:
 			{
 				char ch = NextChar();
-				if (ch == 116) m_state = 133;
+				if (ch == 115) m_state = 133;
 				else m_state = NextPattern();
 				break;
 			}
 			case 133:
 			{
-				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
-					//user specified action
-					{ return dParcelCompiler::START;}
-				}
+				char ch = NextChar();
+				if (ch == 116) m_state = 134;
+				else m_state = NextPattern();
 				break;
 			}
-			// {Literal}
 			case 134:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_4)) m_state = 135;
+				if (ch == 97) m_state = 135;
 				else m_state = NextPattern();
 				break;
 			}
 			case 135:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_5)) m_state = 136;
-				else {
-					m_index --;
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
-					//user specified action
-					{ return dParcelCompiler::LITERAL;}
-				}
+				if (ch == 114) m_state = 136;
+				else m_state = NextPattern();
 				break;
 			}
 			case 136:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_5)) m_state = 136;
-				else {
-					m_index --;
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
-					//user specified action
-					{ return dParcelCompiler::LITERAL;}
-				}
-				break;
-			}
-			// {CodeBlock}
-			case 137:
-			{
-				char ch = NextChar();
-				if (IsCharInSet (ch, text_6)) m_state = 138;
+				if (ch == 116) m_state = 137;
 				else m_state = NextPattern();
 				break;
 			}
+			case 137:
+			{
+				{
+					GetLexString ();
+					//user specified action
+					{ return dParcelCompiler::START;}
+				}
+				break;
+			}
+			// {Literal}
 			case 138:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_7)) m_state = 139;
+				if (IsCharInSet (ch, text_4)) m_state = 139;
 				else m_state = NextPattern();
 				break;
 			}
 			case 139:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_6)) m_state = 140;
-				else if (IsCharInSet (ch, text_8)) m_state = 141;
-				else if (IsCharInSet (ch, text_9)) m_state = 142;
+				if (IsCharInSet (ch, text_5)) m_state = 140;
+				else {
+					m_index --;
+					GetLexString ();
+					//user specified action
+					{ return dParcelCompiler::LITERAL;}
+				}
+				break;
+			}
+			case 140:
+			{
+				char ch = NextChar();
+				if (IsCharInSet (ch, text_5)) m_state = 140;
+				else {
+					m_index --;
+					GetLexString ();
+					//user specified action
+					{ return dParcelCompiler::LITERAL;}
+				}
+				break;
+			}
+			// {CodeBlock}
+			case 141:
+			{
+				char ch = NextChar();
+				if (IsCharInSet (ch, text_6)) m_state = 142;
 				else m_state = NextPattern();
 				break;
 			}
 			case 142:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_6)) m_state = 140;
-				else if (IsCharInSet (ch, text_8)) m_state = 141;
-				else if (IsCharInSet (ch, text_9)) m_state = 142;
-				else m_state = NextPattern();
-				break;
-			}
-			case 141:
-			{
-				char ch = NextChar();
-				if (IsCharInSet (ch, text_6)) m_state = 140;
-				else if (IsCharInSet (ch, text_8)) m_state = 141;
-				else if (IsCharInSet (ch, text_9)) m_state = 142;
-				else m_state = NextPattern();
-				break;
-			}
-			case 140:
-			{
-				char ch = NextChar();
-				if (IsCharInSet (ch, text_6)) m_state = 140;
-				else if (IsCharInSet (ch, text_8)) m_state = 143;
-				else if (IsCharInSet (ch, text_10)) m_state = 144;
-				else if (IsCharInSet (ch, text_11)) m_state = 145;
-				else m_state = NextPattern();
-				break;
-			}
-			case 145:
-			{
-				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
-					//user specified action
-					{ return dParcelCompiler::CODE_BLOCK;}
-				}
-				break;
-			}
-			case 144:
-			{
-				char ch = NextChar();
-				if (IsCharInSet (ch, text_6)) m_state = 140;
-				else if (IsCharInSet (ch, text_8)) m_state = 141;
-				else if (IsCharInSet (ch, text_9)) m_state = 142;
+				if (IsCharInSet (ch, text_7)) m_state = 143;
 				else m_state = NextPattern();
 				break;
 			}
 			case 143:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_6)) m_state = 140;
-				else if (IsCharInSet (ch, text_8)) m_state = 141;
-				else if (IsCharInSet (ch, text_9)) m_state = 142;
+				if (IsCharInSet (ch, text_6)) m_state = 144;
+				else if (IsCharInSet (ch, text_8)) m_state = 145;
+				else if (IsCharInSet (ch, text_9)) m_state = 146;
 				else m_state = NextPattern();
 				break;
 			}
-			// {Comment}
 			case 146:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_12)) m_state = 147;
+				if (IsCharInSet (ch, text_6)) m_state = 144;
+				else if (IsCharInSet (ch, text_8)) m_state = 145;
+				else if (IsCharInSet (ch, text_9)) m_state = 146;
 				else m_state = NextPattern();
 				break;
 			}
-			case 147:
+			case 145:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_12)) m_state = 148;
-				else if (IsCharInSet (ch, text_13)) m_state = 149;
+				if (IsCharInSet (ch, text_6)) m_state = 144;
+				else if (IsCharInSet (ch, text_8)) m_state = 145;
+				else if (IsCharInSet (ch, text_9)) m_state = 146;
+				else m_state = NextPattern();
+				break;
+			}
+			case 144:
+			{
+				char ch = NextChar();
+				if (IsCharInSet (ch, text_6)) m_state = 144;
+				else if (IsCharInSet (ch, text_8)) m_state = 147;
+				else if (IsCharInSet (ch, text_10)) m_state = 148;
+				else if (IsCharInSet (ch, text_11)) m_state = 149;
 				else m_state = NextPattern();
 				break;
 			}
 			case 149:
 			{
-				char ch = NextChar();
-				if (IsCharInSet (ch, text_13)) m_state = 150;
-				else if (IsCharInSet (ch, text_14)) m_state = 151;
-				else m_state = NextPattern();
-				break;
-			}
-			case 151:
-			{
-				char ch = NextChar();
-				if (IsCharInSet (ch, text_13)) m_state = 150;
-				else if (IsCharInSet (ch, text_14)) m_state = 151;
-				else m_state = NextPattern();
-				break;
-			}
-			case 150:
-			{
-				char ch = NextChar();
-				if (IsCharInSet (ch, text_12)) m_state = 152;
-				else if (IsCharInSet (ch, text_15)) m_state = 153;
-				else m_state = NextPattern();
-				break;
-			}
-			case 153:
-			{
-				char ch = NextChar();
-				if (IsCharInSet (ch, text_13)) m_state = 150;
-				else if (IsCharInSet (ch, text_14)) m_state = 151;
-				else m_state = NextPattern();
-				break;
-			}
-			case 152:
-			{
 				{
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
 					//user specified action
-					{}
+					{ return dParcelCompiler::CODE_BLOCK;}
 				}
 				break;
 			}
 			case 148:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_16)) m_state = 154;
-				else {
-					m_index --;
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+				if (IsCharInSet (ch, text_6)) m_state = 144;
+				else if (IsCharInSet (ch, text_8)) m_state = 145;
+				else if (IsCharInSet (ch, text_9)) m_state = 146;
+				else m_state = NextPattern();
+				break;
+			}
+			case 147:
+			{
+				char ch = NextChar();
+				if (IsCharInSet (ch, text_6)) m_state = 144;
+				else if (IsCharInSet (ch, text_8)) m_state = 145;
+				else if (IsCharInSet (ch, text_9)) m_state = 146;
+				else m_state = NextPattern();
+				break;
+			}
+			// [{]
+			case 150:
+			{
+				char ch = NextChar();
+				if (IsCharInSet (ch, text_7)) m_state = 151;
+				else m_state = NextPattern();
+				break;
+			}
+			case 151:
+			{
+				{
+					GetLexString ();
+					//user specified action
+					{ ReadUserAction(*this); return dParcelCompiler::USER_ACTION;}
+				}
+				break;
+			}
+			// {Comment}
+			case 152:
+			{
+				char ch = NextChar();
+				if (IsCharInSet (ch, text_12)) m_state = 153;
+				else m_state = NextPattern();
+				break;
+			}
+			case 153:
+			{
+				char ch = NextChar();
+				if (IsCharInSet (ch, text_12)) m_state = 154;
+				else if (IsCharInSet (ch, text_13)) m_state = 155;
+				else m_state = NextPattern();
+				break;
+			}
+			case 155:
+			{
+				char ch = NextChar();
+				if (IsCharInSet (ch, text_13)) m_state = 156;
+				else if (IsCharInSet (ch, text_14)) m_state = 157;
+				else m_state = NextPattern();
+				break;
+			}
+			case 157:
+			{
+				char ch = NextChar();
+				if (IsCharInSet (ch, text_13)) m_state = 156;
+				else if (IsCharInSet (ch, text_14)) m_state = 157;
+				else m_state = NextPattern();
+				break;
+			}
+			case 156:
+			{
+				char ch = NextChar();
+				if (IsCharInSet (ch, text_12)) m_state = 158;
+				else if (IsCharInSet (ch, text_15)) m_state = 159;
+				else m_state = NextPattern();
+				break;
+			}
+			case 159:
+			{
+				char ch = NextChar();
+				if (IsCharInSet (ch, text_13)) m_state = 156;
+				else if (IsCharInSet (ch, text_14)) m_state = 157;
+				else m_state = NextPattern();
+				break;
+			}
+			case 158:
+			{
+				{
+					GetLexString ();
 					//user specified action
 					{}
 				}
@@ -1466,13 +1475,22 @@ int dParcelLexical::NextToken ()
 			case 154:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_16)) m_state = 154;
+				if (IsCharInSet (ch, text_16)) m_state = 160;
 				else {
 					m_index --;
-					int length = m_index - m_startIndex;
-					m_tokenString = string (&m_data[m_startIndex], length);
-					m_startIndex = m_index;
-					m_state = NextPattern();
+					GetLexString ();
+					//user specified action
+					{}
+				}
+				break;
+			}
+			case 160:
+			{
+				char ch = NextChar();
+				if (IsCharInSet (ch, text_16)) m_state = 160;
+				else {
+					m_index --;
+					GetLexString ();
 					//user specified action
 					{}
 				}

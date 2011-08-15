@@ -32,6 +32,7 @@ class dParcelCompiler
 		START,
 		LITERAL,
 		CODE_BLOCK,
+		USER_ACTION,
 		GRAMMAR_SEGEMENT,
 	};
 /*

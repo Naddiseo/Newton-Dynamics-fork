@@ -212,7 +212,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="dLexCompiler.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="..\dLexical\bin\dLexCompiler.exe $(InputFileName) $(InputPath)"
+					CommandLine="..\dLexical\bin\dLexCompiler.exe $(InputFileName) $(InputPath)&#x0D;&#x0A;"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>
@@ -222,7 +222,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="dLexCompiler.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="..\dLexical\bin\dLexCompiler.exe $(InputFileName) $(InputPath)"
+					CommandLine="..\dLexical\bin\dLexCompiler.exe $(InputFileName) $(InputPath)&#x0D;&#x0A;"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>

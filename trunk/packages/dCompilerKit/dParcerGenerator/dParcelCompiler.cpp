@@ -667,7 +667,7 @@ dParcelCompiler::dParcelCompiler(const char* const inputRules, const char* const
 {
 	dParcelLexical lexical (inputRules);
 
-	for  (int token = lexical.NextToken (); token; token = lexical.NextToken ()) {
+	for  (int token = lexical.NextToken (); token != -1; token = lexical.NextToken ()) {
 		DTRACE (("%s\n", lexical.GetTokeString()));
 	}
 }

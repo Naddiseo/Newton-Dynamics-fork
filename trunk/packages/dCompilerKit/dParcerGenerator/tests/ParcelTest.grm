@@ -1,4 +1,17 @@
-'/'
+		{
+			sprintf ($$.m_literal, "%s}\";\n", tabs);
+		}|
+
+
+		{"abcd"
+			aa			
+		}}
+		;
+
+
+
+
+
 
 %{
 	#include <stdafx.h>
