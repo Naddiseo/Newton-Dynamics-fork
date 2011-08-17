@@ -672,10 +672,8 @@ dParcelCompiler::dParcelCompiler(const char* const inputRules, const char* const
 //		DTRACE (("%s\n", lexical.GetTokeString()));
 //	}
 
-	char* xxx[] = {"", "TextFile.y", 0};
-	
-
-	xmain(2, xxx);
+//	char* xxx[] = {"", "TextFile.y", 0};
+//	xmain(2, xxx);
 
 
 }
