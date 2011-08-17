@@ -662,14 +662,22 @@ void dParcelCompiler::ExpandedNFA::ShiftID()
 }
 #endif
 
+extern "C" int  xmain(int argc, char **argv);
 
 dParcelCompiler::dParcelCompiler(const char* const inputRules, const char* const outputFileName)
 {
 	dParcelLexical lexical (inputRules);
 
-	for  (int token = lexical.NextToken (); token != -1; token = lexical.NextToken ()) {
-		DTRACE (("%s\n", lexical.GetTokeString()));
-	}
+//	for  (int token = lexical.NextToken (); token != -1; token = lexical.NextToken ()) {
+//		DTRACE (("%s\n", lexical.GetTokeString()));
+//	}
+
+	char* xxx[] = {"", "TextFile.y", 0};
+	
+
+	xmain(2, xxx);
+
+
 }
 
 
