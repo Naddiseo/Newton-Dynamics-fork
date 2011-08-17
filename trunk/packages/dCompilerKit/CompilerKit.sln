@@ -14,6 +14,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dContainers", "..\projects\visualStudio_2008\dContainers.vcproj", "{F67C4593-A914-4DDF-8CB5-C59A3EF3ECE0}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dLexicalGenerator", "dLexicalGenerator\dLexicalGenerator.vcproj", "{6FB5BEB5-2A22-42E6-A575-6BCE0DA07684}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A84E1056-FD95-416B-BADD-E180E8BE7AEC} = {A84E1056-FD95-416B-BADD-E180E8BE7AEC}
+		{F67C4593-A914-4DDF-8CB5-C59A3EF3ECE0} = {F67C4593-A914-4DDF-8CB5-C59A3EF3ECE0}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

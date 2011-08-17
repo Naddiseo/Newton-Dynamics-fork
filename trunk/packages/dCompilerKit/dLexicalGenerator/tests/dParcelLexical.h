@@ -24,11 +24,11 @@ class dParcelLexical
 	dParcelLexical(const char* const data);
 	~dParcelLexical();
 
+	char NextChar ();
 	int NextToken ();
+	void GetLexString ();
 	const char* GetTokeString () const;
 
-	protected:
-	char NextChar ();
 	int NextPattern ();
 	bool IsCharInSet (int ch, const char* const set);
 
