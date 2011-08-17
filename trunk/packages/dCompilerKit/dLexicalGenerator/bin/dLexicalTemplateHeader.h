@@ -12,17 +12,17 @@
 //
 //Auto generated Lexical Analyzer class: dParcelLexical.h
 //
-#ifndef __dParcelLexical_h__
-#define __dParcelLexical_h__
+#ifndef __$(className)_h__
+#define __$(className)_h__
 
 #include <string>
 using namespace std;
 
-class dParcelLexical
+class $(className)
 {
 	public:
-	dParcelLexical(const char* const data);
-	virtual ~dParcelLexical();
+	$(className)(const char* const data);
+	virtual ~$(className)();
 
 	int NextToken ();
 	const char* GetTokenString () const;

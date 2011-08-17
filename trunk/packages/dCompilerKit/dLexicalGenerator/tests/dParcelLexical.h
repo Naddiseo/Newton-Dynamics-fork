@@ -12,8 +12,8 @@
 //
 //Auto generated Lexical Analyzer class: dParcelLexical.h
 //
-#ifndef __dParcelLexical_d__
-#define __dParcelLexical_d__
+#ifndef __dParcelLexical_h__
+#define __dParcelLexical_h__
 
 #include <string>
 using namespace std;
@@ -22,15 +22,18 @@ class dParcelLexical
 {
 	public:
 	dParcelLexical(const char* const data);
-	~dParcelLexical();
+	virtual ~dParcelLexical();
 
-	char NextChar ();
 	int NextToken ();
+	const char* GetTokenString () const;
+	
+
+	protected:
+	char NextChar ();
 	void GetLexString ();
-	const char* GetTokeString () const;
 
 	int NextPattern ();
-	bool IsCharInSet (int ch, const char* const set);
+	bool IsCharInSet (int ch, const char* const set) const;
 
 	// local lexical variables
 	int m_token;

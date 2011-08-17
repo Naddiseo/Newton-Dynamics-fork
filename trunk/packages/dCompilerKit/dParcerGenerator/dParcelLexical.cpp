@@ -13,87 +13,9 @@
 //Auto generated Lexical Analyzer class: dParcelLexical.cpp
 //
 
-//
-// Parcel Generator Lexical
-//
 
 #include <dParcelCompiler.h>
-#include "dParcelLexical.h"
-
-// read the user action 
-void ReadUserAction(dParcelLexical& lexical)
-{
-
-	int state = 0;
-	while (state != 14) 
-	{
-		switch (state) {
-
-			// ([\}]+[ \n]*[;\|])|([\"][^"]*[\"])
-			case 0:
-			{
-				char ch = lexical.NextChar();
-				if (ch == '\"') state = 1;
-				else if (ch == '}') state = 10;
-				else state = 0;
-				break;
-			}
-
-			case 1:
-			{
-				char ch = lexical.NextChar();
-				if (ch == '\"') state = 0;
-				else if (ch != '\n') state = 2;
-				else state = 0;
-				break;
-			}
-
-			case 2:
-			{
-				char ch = lexical.NextChar();
-				if (ch == '\"') {
-					if (lexical.m_data[lexical.m_index-2] == '\\') state = 2;
-					else state = 0;
-				}
-				
-				else if (ch != '\n') state = 2;
-				else state = 0;
-				break;
-			}
-
-
-			case 10:
-			{
-				char ch = lexical.NextChar();
-				if (ch == '}') state = 10;
-				else if (ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r') state = 12;
-				else if (ch == '|' || ch == ';') state = 13;
-				else state = 0;
-				break;
-			}
-
-			case 12:
-			{
-				char ch = lexical.NextChar();
-				if (ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r') state = 12;
-				else if (ch == '|' || ch == ';') state = 13;
-				else state = 0;
-				break;
-			}
-
-			case 13:
-			{
-				lexical.m_index --;
-				state = 14;
-				break;
-			}
-		}
-	}
-
-	lexical.GetLexString();
-	lexical.m_tokenString = "{" + lexical.m_tokenString;
-}
-
+#include "dGrammarLexical.h"
 
 #include "dParcelLexical.h"
 
@@ -118,12 +40,12 @@ char dParcelLexical::NextChar()
 	return m_data[m_index++];
 }
 
-const char* dParcelLexical::GetTokeString() const
+const char* dParcelLexical::GetTokenString() const
 {
 	return m_tokenString.c_str();
 }
 
-bool dParcelLexical::IsCharInSet (int ch, const char* const set)
+bool dParcelLexical::IsCharInSet (int ch, const char* const set) const
 {
 	for (int i = 0; i < set[i]; i ++) {
 		if (ch == set[i]) {
@@ -184,6 +106,7 @@ int dParcelLexical::NextPattern ()
 			case 141: m_startState = 150; break;
 			case 150: m_startState = 152; break;
 			case 152: m_startState = 161; break;
+
 	}
 	return m_startState;
 }
@@ -208,6 +131,7 @@ int dParcelLexical::NextToken ()
 	static char text_14[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 0};
 	static char text_15[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 0};
 	static char text_16[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 0};
+
 	
 	m_state = 0;
 	m_startState = 0;
@@ -1411,7 +1335,7 @@ int dParcelLexical::NextToken ()
 				{
 					GetLexString ();
 					//user specified action
-					{ ReadUserAction(*this); return dParcelCompiler::USER_ACTION;}
+					{ ((dGrammarLexical*)this)->ReadUserAction(); return dParcelCompiler::USER_ACTION;}
 				}
 				break;
 			}
@@ -1496,6 +1420,7 @@ int dParcelLexical::NextToken ()
 				}
 				break;
 			}
+
 		}
 	}
 	m_tokenString = "";

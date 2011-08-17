@@ -18,6 +18,7 @@
 #include <ctype.h>
 #include <tchar.h>
 #include <crtdbg.h>
+#include <direct.h>
 
 #include <dTree.h>
 #include <dList.h>
@@ -132,9 +133,13 @@ class dLexCompiler
 	void NextToken ();
 	void MatchToken (Token token);
 	void CopyTokenStream (char* const buffer) const;
-	void ParseDefinitions (FILE* const file, const char* const className);
+	void ParseDefinitions (string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet);
 	void ParseDefinitionExpression (string& preheaderCode);
 	void ParseDefinitionBlock (string& preheaderCode);
+
+	
+	void CreateHeaderFile (const char* const fileName, const char* const className) const;
+	void CreateCodeFile (const char* const fileName, const char* const className, string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet) const;
 
 
 	Token m_token;

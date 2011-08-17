@@ -15,6 +15,8 @@
 #include "dLexCompiler.h"
 #include "dCompilerCore.h"
 
+
+
 //The flex input file consists of three sections, separated by a line containing only `%%'. 
 //
 //	definitions
@@ -23,10 +25,6 @@
 //	%%
 //	user code
 
-
-
-
-
 dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outputFileName)
 	:m_token (m_end)
 	,m_grammarTokenStart(0)
@@ -34,20 +32,11 @@ dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outpu
 	,m_grammar (inputRules)
 	,m_tokenList()
 {
-	char* const legal = "/* Copych1 (c) <2009> <Newton Game Dynamics>\n"
-						"*\n" 
-						"* This software is provided 'as-is', without any express or implied\n" 
-						"* warranty. In no event will the authors be held liable for any damages\n" 
-						"* arising from the use of this software.\n" 
-						"*\n"  
-						"* Permission is granted to anyone to use this software for any purpose,\n" 
-						"* including commercial applications, and to alter it and redistribute it\n" 
-						"* freely\n" 
-						"*/\n\n"
-						"//\n" 
-						"//Auto generated Lexical Analyzer class: %s\n"
-						"//\n";
-
+	string automataCode ("");
+	string nextCodeCases ("");
+	string userPreheaderCode (""); 
+	dChatertSetMap characterSet;
+	ParseDefinitions (userPreheaderCode, nextCodeCases, automataCode, characterSet);
 
 	char cppFileName[256];
 	strcpy (cppFileName, outputFileName);
@@ -55,81 +44,152 @@ dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outpu
 	if (dot) {
 		*dot = 0;
 	}
-	strcat (cppFileName, ".cpp");
 
-
-	FILE* const cppFile = fopen (cppFileName, "w");
-	_ASSERTE (cppFile);
-
-
-	const char* fileName = strrchr (cppFileName, '/');
-	if (fileName) {
-		fileName ++;
+	char className[256];
+	const char* ptr = strrchr (cppFileName, '/');
+	if (ptr) {
+		ptr ++;
 	} else {
-		fileName = strrchr (cppFileName, '\\');
-		if (fileName) {
-			fileName ++;
+		ptr = strrchr (cppFileName, '\\');
+		if (ptr) {
+			ptr ++;
 		} else {
-			fileName = cppFileName;
+			ptr = cppFileName;
 		}
 	}
 
-	fprintf (cppFile, legal, fileName);
+	strcpy (className, ptr);
 
-
-	char className[256];
-	strcpy (className, fileName);
-	strtok (className, ".");
-
-	ParseDefinitions (cppFile, className);
-	fclose (cppFile);
-
-
+	strcat (cppFileName, ".cpp");
+	CreateCodeFile (cppFileName, className, userPreheaderCode, nextCodeCases, automataCode, characterSet);
 
 	*dot = 0;
 	strcat (cppFileName, ".h");
-	FILE* const headerFile = fopen (cppFileName, "w");
-	_ASSERTE (headerFile);
-
-	fprintf (headerFile, legal, fileName);
-
-	fprintf (headerFile, "#ifndef __%s_d__\n"
-						 "#define __%s_d__\n\n", className, className);
-
-
-	fprintf (headerFile, "#include <string>\n"
-						 "using namespace std;\n\n");
-
-	fprintf (headerFile,"class %s\n" 
-						"{\n"
-						"\tpublic:\n"
-						"\t%s(const char* const data);\n"
-						"\t~%s();\n\n"
-						"\tchar NextChar ();\n"
-						"\tint NextToken ();\n"
-						"\tvoid GetLexString ();\n"
-						"\tconst char* GetTokeString () const;\n\n"
-//						"\tprotected:\n"
-						"\tint NextPattern ();\n"
-						"\tbool IsCharInSet (int ch, const char* const set);\n\n"
-						"\t// local lexical variables\n"	
-						"\tint m_token;\n"
-						"\tint m_state;\n"
-						"\tint m_lastState;\n"
-						"\tint m_startState;\n"
-						"\tint m_index;\n"
-						"\tint m_startIndex;\n"
-						"\tconst char* m_data;\n"
-						"\tstring m_tokenString;\n"
-						"};\n", className, className, className);
-
-	fprintf (headerFile, "#endif\n");
-
-	fclose (headerFile);
+	CreateHeaderFile (cppFileName, className);
 }
 
 dLexCompiler::~dLexCompiler()
 {
+}
+
+void dLexCompiler::CreateCodeFile (const char* const fileName, const char* const className, string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet) const
+{
+	char path[2048];
+
+	// in windows
+	GetModuleFileName(NULL, path, sizeof(path)); 
+
+	//	for Linux:
+	//	char szTmp[32]; 
+	//	sprintf(szTmp, "/proc/%d/exe", getpid()); 
+	//	int bytes = MIN(readlink(szTmp, pBuf, len), len - 1); 
+	//	if(bytes >= 0)
+	//		pBuf[bytes] = '\0'; 
+
+
+	char* const ptr = strrchr (path, '\\');
+	sprintf (ptr, "/dLexicalTemplateCode.cpp");
+
+	FILE* const templateFile = fopen (path, "r");
+	_ASSERTE (templateFile);
+
+	fseek (templateFile, 0, SEEK_END);
+	int size = ftell (templateFile) + 1;
+	fseek (templateFile, 0, SEEK_SET);
+
+	string templateHeader ("") ;
+	templateHeader.resize(size);
+	fread ((void*)templateHeader.c_str(), 1, size, templateFile);
+	fclose (templateFile);	
+
+	string name (className);
+	for (size_t position = templateHeader.find ("$(className)"); position != -1; position = templateHeader.find ("$(className)")) {
+		templateHeader.replace(position, 12, name);
+	}
+
+	
+	size_t position = templateHeader.find ("$(nextTokenStart)");
+	templateHeader.replace(position, 17, nextCodeCases);
+
+	position = templateHeader.find ("$(userIncludeCode)");
+	templateHeader.replace(position, 18, userPreheaderCode);
+
+	position = templateHeader.find ("$(finiteAutomataCode)");
+	templateHeader.replace(position, 21, automataCode);
+
+	
+	string characterSetList ("");
+	dTree<dList <dChatertSetMap::ChatertSet>::dListNode*, int>::Iterator iter (characterSet.GetSets());
+	for (iter.Begin(); iter; iter ++) {
+		char name[2048];
+		dChatertSetMap::ChatertSet& set = iter.GetNode()->GetInfo()->GetInfo();
+
+		int count = set.GetLength();
+
+		sprintf (name, "\tstatic char text_%d[] = {", set.GetId() & 0x7fff);
+		int length = strlen (name);
+		const char* const str = set.GetSet();
+		for (int i = 0; i < count; i ++) {
+			char tmp[128];
+			sprintf (tmp, "%d, ", str[i]);
+			sprintf (&name[length], "%s", tmp);
+			length += strlen (tmp);
+		}
+		sprintf (&name[length], "0};\n");
+		characterSetList += name;
+	}
+	position = templateHeader.find ("$(characterSets)");
+	templateHeader.replace(position, 16, characterSetList);
+
+
+	FILE* const headerFile = fopen (fileName, "w");
+	_ASSERTE (headerFile);
+	fprintf (headerFile, "%s", templateHeader.c_str());
+
+	fclose (headerFile);
+}
+
+void dLexCompiler::CreateHeaderFile (const char* const fileName, const char* const className) const
+{
+	char path[2048];
+
+	// in windows
+	GetModuleFileName(NULL, path, sizeof(path)); 
+
+//	for Linux:
+//	char szTmp[32]; 
+//	sprintf(szTmp, "/proc/%d/exe", getpid()); 
+//	int bytes = MIN(readlink(szTmp, pBuf, len), len - 1); 
+//	if(bytes >= 0)
+//		pBuf[bytes] = '\0'; 
+
+
+	char* const ptr = strrchr (path, '\\');
+	sprintf (ptr, "/dLexicalTemplateHeader.h");
+
+	FILE* const templateFile = fopen (path, "r");
+	_ASSERTE (templateFile);
+
+	fseek (templateFile, 0, SEEK_END);
+	int size = ftell (templateFile) + 1;
+	fseek (templateFile, 0, SEEK_SET);
+
+	string templateHeader ("") ;
+	templateHeader.resize(size);
+	fread ((void*)templateHeader.c_str(), 1, size, templateFile);
+	fclose (templateFile);	
+
+	string name (className);
+	for (size_t position = templateHeader.find ("$(className)"); position != -1; position = templateHeader.find ("$(className)")) {
+		templateHeader.replace(position, 12, name);
+	}
+
+
+	FILE* const headerFile = fopen (fileName, "w");
+	_ASSERTE (headerFile);
+	fprintf (headerFile, "%s", templateHeader.c_str());
+
+	fclose (headerFile);
 }
 
 void dLexCompiler::CopyTokenStream (char* const buffer) const
@@ -190,10 +250,8 @@ void dLexCompiler::MatchToken (Token token)
 // id							: m_openParentesis DefinitionExpression m_closeParentesis
 // id							: .
 // id							: CHARACTER 
-void dLexCompiler::ParseDefinitions (FILE* const file, const char* const className)
+void dLexCompiler::ParseDefinitions (string& preheaderCode, string& nextTokeCode, string& automataCode, dChatertSetMap& characterSet)
 {
-
-	string preheaderCode ("") ;
 	// parse definitions
 	{
 		m_tokenList.AddTokenData (m_whiteSpace, "[ \t\v\n\f]+");
@@ -212,6 +270,7 @@ void dLexCompiler::ParseDefinitions (FILE* const file, const char* const classNa
 	}
 
 	// parse rules
+/*
 	string nextTokeCode ("int ");
 	nextTokeCode += className;
 	nextTokeCode += "::NextPattern ()\n";
@@ -219,11 +278,9 @@ void dLexCompiler::ParseDefinitions (FILE* const file, const char* const classNa
 	nextTokeCode += "\tm_index = m_startIndex;\n";
 	nextTokeCode += "\tswitch (m_startState)\n";
 	nextTokeCode += "\t{\n";
-
-	string automataCode ("");
+*/
 
 	int initialState = 0;
-	dChatertSetMap characterSet; 
 	{
 		//	0	m_whiteSpace,				
 		//	1   m_action
@@ -302,7 +359,7 @@ void dLexCompiler::ParseDefinitions (FILE* const file, const char* const classNa
 		}
 	}
 
-
+/*
 	string automataCodeStart ("int ");
 	automataCodeStart += className;
 	automataCodeStart += "::NextToken ()\n";
@@ -315,8 +372,6 @@ void dLexCompiler::ParseDefinitions (FILE* const file, const char* const classNa
 		dChatertSetMap::ChatertSet& set = iter.GetNode()->GetInfo()->GetInfo();
 
 		int count = set.GetLength();
-//		sprintf (name, "\tstatic int textSize_%d = %d;\n", set.GetId() & 0x7fff, count);
-//		automataCodeStart += name;
 
 		sprintf (name, "\tstatic char text_%d[] = {", set.GetId() & 0x7fff);
 		int length = strlen (name);
@@ -433,11 +488,10 @@ void dLexCompiler::ParseDefinitions (FILE* const file, const char* const classNa
 	fwrite (nextTokeCode.c_str(), nextTokeCode.length(), sizeof (char), file);
 	fwrite (automataCodeStart.c_str(), automataCodeStart.length(), sizeof (char), file);
 	fwrite (automataCode.c_str(), automataCode.length(), sizeof (char), file);
-
+*/
 	if (m_token != m_delimiter) {
 		NextToken();
 	}
-
 }
 
 

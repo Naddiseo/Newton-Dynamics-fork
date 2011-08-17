@@ -172,6 +172,14 @@
 	</References>
 	<Files>
 		<File
+			RelativePath=".\dGrammarLexical.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dGrammarLexical.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dParcelCompiler.cpp"
 			>
 			<FileConfiguration
