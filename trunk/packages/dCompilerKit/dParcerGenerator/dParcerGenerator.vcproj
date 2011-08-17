@@ -231,6 +231,18 @@
 			RelativePath=".\dParcerGenerator.cpp"
 			>
 		</File>
+		<File
+			RelativePath=".\lemon.c"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="0"
+				/>
+			</FileConfiguration>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

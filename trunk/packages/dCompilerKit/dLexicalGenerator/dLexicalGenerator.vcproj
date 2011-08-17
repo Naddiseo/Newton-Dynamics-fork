@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="dLexCompiler"
+	Name="dLexicalGenerator"
 	ProjectGUID="{6FB5BEB5-2A22-42E6-A575-6BCE0DA07684}"
 	RootNamespace="dLexical"
 	Keyword="Win32Proj"
