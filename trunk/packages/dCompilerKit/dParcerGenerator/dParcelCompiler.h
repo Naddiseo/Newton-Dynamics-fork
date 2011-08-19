@@ -18,6 +18,11 @@
 #include <dCRC.h>
 #include <dCompilerCore.h>
 
+#include <string>
+using namespace std;
+
+class dGrammarLexical;
+
 class dParcelCompiler
 {
 	public:
@@ -35,104 +40,26 @@ class dParcelCompiler
 		USER_ACTION,
 		GRAMMAR_SEGEMENT,
 	};
-/*
-	class TokenData: public dDeterministicFiniteAutonataCompiler
-	{
-		public:
-		TokenData (Token token, const char* const regulatExpresion)
-			:dDeterministicFiniteAutonataCompiler (regulatExpresion)
-			,m_token(token)
-		{
-		}
 
-		~TokenData()
-		{
+	class dItem;
+	class dState;
+	class dSymbol;
+	class dRuleInfo;
+	class dProductionRules;
 
-		}
-		Token m_token;
-	};
-
-	class TokenDataList: public dList<TokenData*>
-	{
-		public:
-		TokenDataList ()
-			:dList<TokenData*>()
-		{
-		}
-
-		~TokenDataList ()
-		{
-			DeleteAll();
-		}
-
-		void AddTokenData (Token token, const char* const regulatExpresion)
-		{
-			TokenData* const data = new TokenData (token, regulatExpresion);
-			Append (data);
-		}
-
-		void DeleteAll()
-		{
-			for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
-				delete node->GetInfo();
-			}
-			dList<TokenData*>::RemoveAll();
-		}
-	};
-
-	class DefinitionsMap;
-	class ExpandedNFA: public dNonDeterministicFiniteAutonataCompiler
-	{
-		public:
-		ExpandedNFA (const char* const regulatExpresion, DefinitionsMap* const map);
-
-		virtual void ShiftID();
-		virtual bool IsOperator (int charater) const;
-		virtual bool CheckInsertConcatenation (int left, int right) const;
-		virtual void PreProcessExpression (const char* const regularExpression);
-
-		void PushNFA (ExpandedNFA* const nfa, const char* const label);
-
-		DefinitionsMap* m_map;
-
-	};
-
-	class DefinitionsMap: public dTree<ExpandedNFA*,int>
-	{
-
-		public:
-		DefinitionsMap ()
-			:dTree<ExpandedNFA*,int>()
-		{
-		}
-
-		
-		void AddDefinition (const char* const label, const char* const regulatExpresion);
-		ExpandedNFA* FindNDAExpresion (const char* const label) const;
-	};
-*/
-
+	
+	
 
 	dParcelCompiler(const char* const inputRules, const char* const outputFileName);
 	~dParcelCompiler();
 
-	private:
-/*
-	void NextToken ();
-	void MatchToken (Token token);
-	void CopyTokenStream (char* const buffer) const;
-	void ParseDefinitions (FILE* const file, const char* const className);
-	void ParseDefinitionExpression (string& preheaderCode);
-	void ParseDefinitionBlock (string& preheaderCode);
+	protected:
+	void ScanGrammarFile(const char* const inputRules, dProductionRules& rules);
+	Token ScanGrammarRule(dGrammarLexical& lexical, dProductionRules& rules);
 
-
-	Token m_token;
-	int m_grammarTokenStart;
-	int m_grammarTokenLength;
-	const char* m_grammar;
-	TokenDataList m_tokenList;
-	DefinitionsMap m_defintions;
-*/	
+	
+	dState* GenerateDFA (dProductionRules& rules);
+	dState* Closure (dProductionRules& rulesList, dList<dItem>& items);
 };
 
 

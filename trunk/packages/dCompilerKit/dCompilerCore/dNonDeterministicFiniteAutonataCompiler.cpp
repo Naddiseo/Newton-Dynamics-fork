@@ -556,7 +556,7 @@ void dNonDeterministicFiniteAutonataCompiler::ShiftID()
 		Match (m_closeSquareBrakect);
 
 	} else if (m_token == '.') {
-		PushSet (m_asciiSet, strlen (m_asciiSetButNewLine));
+		PushSet (m_asciiSetButNewLine, strlen (m_asciiSetButNewLine));
 
 		Match (m_token);
 

@@ -232,15 +232,14 @@ int dDeterministicFiniteAutonataCompiler::ConvertSwitchCaseStatements (string& p
 			if (state->m_transtions.GetCount()) {
 				AddText (parseTokenOutput, "\t\tm_index --;\n");
 			}
-			//AddText (parseTokenOutput, "\t\tint length = m_index - m_startIndex;\n");
-			//AddText (parseTokenOutput, "\t\tm_tokenString = string (&m_data[m_startIndex], length);\n");
-			//AddText (parseTokenOutput, "\t\tm_startIndex = m_index;\n");
-			//AddText (parseTokenOutput, "\t\tm_state = NextPattern();\n");
 			AddText (parseTokenOutput, "\t\tGetLexString ();\n");
 			
 			//AddText (parseTokenOutput, "\t\t{\n");
 				AddText (parseTokenOutput, "\t\t//user specified action\n");
+				AddText (parseTokenOutput, "\t\tm_state = 0;\n");
+				AddText (parseTokenOutput, "\t\tm_startState = 0;\n");
 				AddText (parseTokenOutput, "\t\t%s\n", action.c_str());
+				
 			//AddText (parseTokenOutput, "\t\t}\n");
 
 			
