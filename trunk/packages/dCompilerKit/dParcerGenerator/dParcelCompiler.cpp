@@ -29,14 +29,30 @@ class dParcelCompiler::dSymbol
 	Token m_type;
 	string m_name;
 };
-class dParcelCompiler::dRuleInfo: public dParcelCompiler::dSymbol
+
+class dParcelCompiler::dSentenceSymbol: public dParcelCompiler::dSymbol
+{
+};
+
+
+class dParcelCompiler::dRuleInfo: public dParcelCompiler::dSymbol, public dList<dParcelCompiler::dSentenceSymbol>
 {
 	public:
-	class dRuleSentence: public dSymbol
-	{
-	};
 	string m_userActionCode;
-	dList<dRuleSentence> m_sentence;
+
+	dListNode* GetSymbolNodeByIndex (int index) const
+	{
+		int i = 0;
+		for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
+			if (index == i) {
+				return node;
+			}
+			i ++;
+		}
+		_ASSERTE (0);
+		return NULL;
+	}
+
 };
 
 
@@ -75,6 +91,44 @@ class dParcelCompiler::dState: public dList<dParcelCompiler::dItem>
 			Append(node->GetInfo());
 		}
 	}
+
+	bool FindItem (dProductionRules::dListNode* const rule) const
+	{
+		for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
+			if (node->GetInfo().m_rule == rule) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void Trace() const
+	{
+		for (dState::dListNode* itemNode = GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
+			dItem& item = itemNode->GetInfo();
+			DTRACE(("%s -> ", item.m_rule->GetInfo().m_name.c_str()));
+
+			int index = 0;
+			dRuleInfo::dListNode* node = item.m_rule->GetInfo().GetFirst();
+			for (; node; node = node->GetNext()) {
+
+				if (index == item.m_indexMarker) {
+					DTRACE((". "));
+					break;
+				}
+				const dSentenceSymbol& info = node->GetInfo();
+				DTRACE(("%s ", info.m_name.c_str()));
+				index ++;
+			}
+
+			for (; node; node = node->GetNext()) {
+				const dSentenceSymbol& info = node->GetInfo();
+				DTRACE(("%s ", info.m_name.c_str()));
+			}
+			DTRACE(("\n"));
+		}
+	}
+
 };
 
 
@@ -151,10 +205,6 @@ void dParcelCompiler::ScanGrammarFile(const char* const inputRules, dProductionR
 				token = Token(lexical.NextToken());
 				_ASSERTE (token == COLOM);
 				for (Token token = ScanGrammarRule(lexical, ruleList); token != SIMICOLOM; token = ScanGrammarRule(lexical, ruleList)); 
-
-//				dRuleInfo& start = ruleList.Addtop()->GetInfo();
-
-
 				break;
 			}
 			default:
@@ -171,9 +221,9 @@ void dParcelCompiler::ScanGrammarFile(const char* const inputRules, dProductionR
 
 	dRuleInfo& rule = ruleList.Addtop()->GetInfo();
 	rule.m_type = firstRule.m_type;
-	rule.m_name = string("__") + firstRule.m_name;
+	rule.m_name = firstRule.m_name + string("\'");
 
-	dRuleInfo::dRuleSentence& symbol = rule.m_sentence.Append()->GetInfo();
+	dSentenceSymbol& symbol = rule.Append()->GetInfo();
 	symbol.m_type = firstRule.m_type;
 	symbol.m_name = firstRule.m_name;
 
@@ -193,7 +243,7 @@ dParcelCompiler::Token dParcelCompiler::ScanGrammarRule(dGrammarLexical& lexical
 		{
 			case LITERAL:
 			{
-				dRuleInfo::dRuleSentence& symbol = currentRule->m_sentence.Append()->GetInfo();
+				dSentenceSymbol& symbol = currentRule->Append()->GetInfo();
 				symbol.m_type = token;
 				symbol.m_name = lexical.GetTokenString();
 				break;
@@ -218,7 +268,7 @@ dParcelCompiler::Token dParcelCompiler::ScanGrammarRule(dGrammarLexical& lexical
 
 			default:
 				if (isascii (token)) {
-					dRuleInfo::dRuleSentence& symbol = currentRule->m_sentence.Append()->GetInfo();
+					dSentenceSymbol& symbol = currentRule->Append()->GetInfo();
 					symbol.m_type = LITERAL;
 					symbol.m_name = lexical.GetTokenString();
 				} else {
@@ -238,19 +288,30 @@ dParcelCompiler::dState* dParcelCompiler::GenerateDFA (dProductionRules& ruleLis
 	item.m_rule = ruleList.GetFirst();
 
 	dState* const rootState = Closure (ruleList, firstItemSet);
-
-
+	rootState->Trace();
 
 	return rootState;
 }
 
 dParcelCompiler::dState* dParcelCompiler::Closure (dProductionRules& rulesList, dList<dItem>& itemSet)
 {
-//	int itemCount = 0;
-//	dState::dItem items[2048];
-//	items[]
-
 	dState* const state = new dState (itemSet);
+	for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
+		dItem& item = itemNode->GetInfo();
+
+		dSentenceSymbol& sentenceSymbol = item.m_rule->GetInfo().GetSymbolNodeByIndex (item.m_indexMarker)->GetInfo();
+
+		for (dProductionRules::dListNode* node = rulesList.GetFirst(); node; node = node->GetNext()) {
+			const dRuleInfo& info = node->GetInfo();
+			if (info.m_name == sentenceSymbol.m_name) {
+				if (!state->FindItem (node)) {
+					dItem& newItem = state->Append()->GetInfo();
+					newItem.m_indexMarker = item.m_indexMarker;
+					newItem.m_rule = node;
+				}
+			}
+		}
+	}
 
 	return state;
 }

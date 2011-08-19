@@ -44,6 +44,7 @@ class dParcelCompiler
 	class dItem;
 	class dState;
 	class dSymbol;
+	class dSentenceSymbol;
 	class dRuleInfo;
 	class dProductionRules;
 
