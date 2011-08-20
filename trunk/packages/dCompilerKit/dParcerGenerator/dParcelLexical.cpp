@@ -121,8 +121,6 @@ int dParcelLexical::NextToken ()
 	m_startState = 0;
 	m_startIndex = m_index;
 
-int xxx = sizeof (transitionsCount) / sizeof (transitionsCount[0]);
-
 	while (m_state != m_lastState)
 	{
 		switch (m_state)
