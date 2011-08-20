@@ -13,7 +13,6 @@
 //Auto generated Lexical Analyzer class: dParcelLexical.cpp
 //
 
-
 #include <dParcelCompiler.h>
 #include "dGrammarLexical.h"
 
@@ -630,7 +629,6 @@ int dParcelLexical::NextToken ()
 				break;
 			}
 
-
 			default:;
 			{
 				char ch = NextChar();
@@ -662,8 +660,6 @@ int dParcelLexical::NextToken ()
 			}
 		}
 	}
-	
-
 	m_tokenString = "";
 	return -1;
 }

@@ -12,7 +12,6 @@
 //
 //Auto generated Lexical Analyzer class: $(className).cpp
 //
-
 $(userIncludeCode)
 #include "$(className).h"
 
