@@ -11,16 +11,7 @@
 */
 
 
-%{
-//
-// Newton Scrip Lex parcel
-// based on a subset of Java language specification 1.0 
-//
-%}
-
-%{
-#include <dCompilerKit.h>
-%}
+// lexical analizero fo and assembly compiler
 
 AnyButAstr		[^\*]
 AnyButSlash		[^\/]
@@ -30,5 +21,6 @@ Comment			({Comment1}|{Comment2})
 
 
 %%
-{Comment}		{}
+(a|A)(d|D)(d|D)		{ return ADD;}
+
 

@@ -64,18 +64,12 @@ void dParcelLexical::GetLexString ()
 
 int dParcelLexical::NextPattern ()
 {
-//	m_index = m_startIndex;
-//	switch (m_startState)
-//	{
-//$(n___extTokenStart)
-//	}
-//	return m_startState;
-
 	static int nextState[] = {2, 0, 4, 0, 6, 0, 8, 0, 12, 0, 0, 0, 16, 0, 0, 0, 20, 0, 0, 0, 24, 0, 0, 0, 28, 0, 0, 0, 32, 0, 0, 0, 36, 0, 0, 0, 40, 0, 0, 0, 44, 0, 0, 0, 48, 0, 0, 0, 52, 0, 0, 0, 56, 0, 0, 0, 60, 0, 0, 0, 64, 0, 0, 0, 68, 0, 0, 0, 72, 0, 0, 0, 76, 0, 0, 0, 80, 0, 0, 0, 84, 0, 0, 0, 88, 0, 0, 0, 92, 0, 0, 0, 96, 0, 0, 0, 100, 0, 0, 0, 104, 0, 0, 0, 108, 0, 0, 0, 111, 0, 0, 118, 0, 0, 0, 0, 0, 0, 124, 0, 0, 0, 0, 0, 131, 0, 0, 0, 0, 0, 0, 138, 0, 0, 0, 0, 0, 0, 141, 0, 0, 150, 0, 0, 0, 0, 0, 0, 0, 0, 152, 0, 161, 0, 0, 0, 0, 0, 0, 0, 0, };
 
 	m_index = m_startIndex;
-	_ASSERTE (sizeof (nextState) / sizeof (nextState[0]) < nextState[m_startState]);
-	return  nextState[m_startState];
+	_ASSERTE (nextState[m_startState] <= (sizeof (nextState) / sizeof (nextState[0])));
+	m_startState = nextState[m_startState];
+	return m_startState;
 }
 
 int dParcelLexical::NextToken ()
@@ -103,11 +97,24 @@ int dParcelLexical::NextToken ()
 	m_state = 0;
 	m_startState = 0;
 	m_startIndex = m_index;
+
+/*
 	while (m_state != m_lastState)
 	{
 		switch (m_state)
 		{
-			// [ \t\n\r]+
+$(__finiteAutomataCode)
+		}
+	}
+*/
+
+	
+
+	while (m_state != m_lastState)
+	{
+		switch (m_state)
+		{
+						// [ \t\n\r]+
 			case 0:
 			{
 				char ch = NextChar();
@@ -1470,8 +1477,38 @@ int dParcelLexical::NextToken ()
 				break;
 			}
 
+
+			default:;
+			{
+				char ch = NextChar();
+				int count = transitionsCount[m_state];
+				bool stateChanged = false;
+				for (int i = 0; i < count; i ++) {
+					if (character[i][m_state]) {
+						if (ch == character[i][m_state]) {
+							m_state = nextState[i][m_state];
+							stateChanged = true;
+							break;
+						}
+					} else {
+						int index = textArrayIndex[i][m_state];
+						const char* text = textArray[index];
+						if (IsCharInSet (ch, text)) {
+							m_state = nextState[i][m_state];
+							stateChanged = true;
+							break;
+						}
+					}
+				}
+				if (!stateChanged) {
+					m_state = NextPattern();
+				}
+				break;
+			}
 		}
 	}
+	
+
 	m_tokenString = "";
 	return -1;
 }
