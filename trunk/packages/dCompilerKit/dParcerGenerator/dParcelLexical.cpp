@@ -65,49 +65,11 @@ void dParcelLexical::GetLexString ()
 
 int dParcelLexical::NextPattern ()
 {
-	m_index = m_startIndex;
-	switch (m_startState)
-	{
-			case 0: m_startState = 2; break;
-			case 2: m_startState = 4; break;
-			case 4: m_startState = 6; break;
-			case 6: m_startState = 8; break;
-			case 8: m_startState = 12; break;
-			case 12: m_startState = 16; break;
-			case 16: m_startState = 20; break;
-			case 20: m_startState = 24; break;
-			case 24: m_startState = 28; break;
-			case 28: m_startState = 32; break;
-			case 32: m_startState = 36; break;
-			case 36: m_startState = 40; break;
-			case 40: m_startState = 44; break;
-			case 44: m_startState = 48; break;
-			case 48: m_startState = 52; break;
-			case 52: m_startState = 56; break;
-			case 56: m_startState = 60; break;
-			case 60: m_startState = 64; break;
-			case 64: m_startState = 68; break;
-			case 68: m_startState = 72; break;
-			case 72: m_startState = 76; break;
-			case 76: m_startState = 80; break;
-			case 80: m_startState = 84; break;
-			case 84: m_startState = 88; break;
-			case 88: m_startState = 92; break;
-			case 92: m_startState = 96; break;
-			case 96: m_startState = 100; break;
-			case 100: m_startState = 104; break;
-			case 104: m_startState = 108; break;
-			case 108: m_startState = 111; break;
-			case 111: m_startState = 118; break;
-			case 118: m_startState = 124; break;
-			case 124: m_startState = 131; break;
-			case 131: m_startState = 138; break;
-			case 138: m_startState = 141; break;
-			case 141: m_startState = 150; break;
-			case 150: m_startState = 152; break;
-			case 152: m_startState = 161; break;
+	static int nextState[] = {2, 0, 4, 0, 6, 0, 8, 0, 12, 0, 0, 0, 16, 0, 0, 0, 20, 0, 0, 0, 24, 0, 0, 0, 28, 0, 0, 0, 32, 0, 0, 0, 36, 0, 0, 0, 40, 0, 0, 0, 44, 0, 0, 0, 48, 0, 0, 0, 52, 0, 0, 0, 56, 0, 0, 0, 60, 0, 0, 0, 64, 0, 0, 0, 68, 0, 0, 0, 72, 0, 0, 0, 76, 0, 0, 0, 80, 0, 0, 0, 84, 0, 0, 0, 88, 0, 0, 0, 92, 0, 0, 0, 96, 0, 0, 0, 100, 0, 0, 0, 104, 0, 0, 0, 108, 0, 0, 0, 111, 0, 0, 118, 0, 0, 0, 0, 0, 0, 124, 0, 0, 0, 0, 0, 131, 0, 0, 0, 0, 0, 0, 138, 0, 0, 0, 0, 0, 0, 141, 0, 0, 150, 0, 0, 0, 0, 0, 0, 0, 0, 152, 0, 161, 0, 0, 0, 0, 0, 0, 0, 0, };
 
-	}
+	m_index = m_startIndex;
+	_ASSERTE (nextState[m_startState] <= (sizeof (nextState) / sizeof (nextState[0])));
+	m_startState = nextState[m_startState];
 	return m_startState;
 }
 

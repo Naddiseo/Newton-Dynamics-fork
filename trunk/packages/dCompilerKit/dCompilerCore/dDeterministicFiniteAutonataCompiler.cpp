@@ -161,11 +161,8 @@ int dDeterministicFiniteAutonataCompiler::ConvertSwitchCaseStatements (string& p
 	pool[0] = m_deterministicFiniteAutomata;
 	filter.Insert(pool[0], pool[0]);
 
-//	int lastState = m_deterministicFiniteAutomata + initialState;
 	int lastState = m_deterministicFiniteAutomata->m_id;
-//	int length = 0;
 
-//	parseTokenOutput = "";
 	while (stack) {
 		stack --;
 
@@ -255,7 +252,17 @@ int dDeterministicFiniteAutonataCompiler::ConvertSwitchCaseStatements (string& p
 		AddText (parseTokenOutput, "}\n");
 	}
 
-	AddText (nextTokenOutput, "case %d: m_startState = %d; break;\n", m_deterministicFiniteAutomata->m_id + stateIdBase, lastState + stateIdBase + 1);
+//	AddText (nextTokenOutput, "case %d: m_startState = %d; break;\n", m_deterministicFiniteAutomata->m_id + stateIdBase, lastState + stateIdBase + 1);
+
+	char nextJump[256];
+	static string filler ("0, ");
+	sprintf (nextJump, "%d, ", lastState + stateIdBase + 1);
+	nextTokenOutput += nextJump;
+	for (int i = 0; i < lastState; i ++) {
+		nextTokenOutput += filler;
+	}
+	
+	
 
 //	DTRACE ((parseTokenOutput.c_str()));
 	return stateIdBase + lastState + 1;

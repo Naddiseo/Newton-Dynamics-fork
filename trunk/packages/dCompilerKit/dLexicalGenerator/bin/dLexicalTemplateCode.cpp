@@ -62,11 +62,11 @@ void $(className)::GetLexString ()
 
 int $(className)::NextPattern ()
 {
+	static int nextState[] = {$(nextTokenStart)};
+
 	m_index = m_startIndex;
-	switch (m_startState)
-	{
-$(nextTokenStart)
-	}
+	_ASSERTE (nextState[m_startState] <= (sizeof (nextState) / sizeof (nextState[0])));
+	m_startState = nextState[m_startState];
 	return m_startState;
 }
 
