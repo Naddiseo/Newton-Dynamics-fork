@@ -91,7 +91,6 @@ $(characterSets)
 		switch (m_state)
 		{
 			$(finiteAutomataCode)
-
 			default:;
 			{
 				char ch = NextChar();
@@ -123,8 +122,6 @@ $(characterSets)
 			}
 		}
 	}
-	
-
 	m_tokenString = "";
 	return -1;
 }
