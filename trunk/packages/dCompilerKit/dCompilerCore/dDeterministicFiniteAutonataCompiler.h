@@ -25,7 +25,12 @@ class dDeterministicFiniteAutonataCompiler
 	virtual ~dDeterministicFiniteAutonataCompiler(void);
 
 	int FindMatch(const char* const text) const;
-	int ConvertSwitchCaseStatements (string& parseTokenOutput, string& nextTokenOutput, int initialState, dChatertSetMap& characterSet, const string& action) const;
+	int ConvertSwitchCaseStatements (string& parseTokenOutput, string& nextTokenOutput, int initialState, 
+									dChatertSetMap& characterSet, const string& action,
+									dTree<int, int>& transitionsCountMap,
+									dTree<dTree<int, int>, int>& nextState,
+									dTree<dTree<char, int>, int>& characterTestMap,
+									dTree<dTree<int, int>, int>& testSetArrayIndexMap) const;
 
 	private:
 	void CopySet (const dNonDeterministicFiniteAutonataCompiler& nfa);

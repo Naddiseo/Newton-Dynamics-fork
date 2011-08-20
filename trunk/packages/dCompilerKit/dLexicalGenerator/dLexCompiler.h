@@ -110,16 +110,12 @@ class dLexCompiler
 
 	};
 
+
 	class DefinitionsMap: public dTree<ExpandedNFA*,int>
 	{
-
 		public:
-		DefinitionsMap ()
-			:dTree<ExpandedNFA*,int>()
-		{
-		}
-
-		
+		DefinitionsMap ();
+		~DefinitionsMap ();
 		void AddDefinition (const char* const label, const char* const regulatExpresion);
 		ExpandedNFA* FindNDAExpresion (const char* const label) const;
 	};
@@ -133,13 +129,18 @@ class dLexCompiler
 	void NextToken ();
 	void MatchToken (Token token);
 	void CopyTokenStream (char* const buffer) const;
-	void ParseDefinitions (string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet);
 	void ParseDefinitionExpression (string& preheaderCode);
 	void ParseDefinitionBlock (string& preheaderCode);
+	int ParseDefinitions (string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet, 
+						   dTree<int, int>& transitionsCountMap, dTree<dTree<int, int>, int>& nextState,
+						   dTree<dTree<char, int>, int>& characterTestMap, dTree<dTree<int, int>, int>& testSetArrayIndexMap);
 
 	
 	void CreateHeaderFile (const char* const fileName, const char* const className) const;
-	void CreateCodeFile (const char* const fileName, const char* const className, string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet) const;
+	void CreateCodeFile (const char* const fileName, const char* const className, int stateCount,
+						 string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet,
+						 dTree<int, int>& transitionsCountMap, dTree<dTree<int, int>, int>& nextState,
+						 dTree<dTree<char, int>, int>& characterTestMap, dTree<dTree<int, int>, int>& testSetArrayIndexMap) const;
 
 
 	Token m_token;

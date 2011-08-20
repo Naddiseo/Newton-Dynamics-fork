@@ -70,21 +70,61 @@ int $(className)::NextPattern ()
 	return m_startState;
 }
 
+
+
 int $(className)::NextToken ()
 {
 	//static strings patterns
 $(characterSets)
-	
+	static char* testSetArray[] = {$(characterSetArray)};
+	static int transitionsCount[] = {$(transitionsCount)};
+	static int nextState[][$(statesCount)] = {$(nextState)};
+	static int charaterTests[][$(statesCount)] = {$(charactesTest)};
+	static int testSetArrayIndex[][$(statesCount)] = {$(testSetArrayIndex)};
+
 	m_state = 0;
 	m_startState = 0;
 	m_startIndex = m_index;
+
 	while (m_state != m_lastState)
 	{
 		switch (m_state)
 		{
-$(finiteAutomataCode)
+			$(finiteAutomataCode)
+
+			default:;
+			{
+				char ch = NextChar();
+				int count = transitionsCount[m_state];
+				bool stateChanged = false;
+				for (int i = 0; i < count; i ++) {
+					int test = charaterTests[i][m_state];
+					if (test) {
+						if (ch == test) {
+							m_state = nextState[i][m_state];
+							stateChanged = true;
+							break;
+						}
+					} else {
+						int index = testSetArrayIndex[i][m_state];
+						const char* text = testSetArray[index];
+						if (IsCharInSet (ch, text)) {
+							m_state = nextState[i][m_state];
+							stateChanged = true;
+							break;
+						}
+					}
+				}
+
+				if (!stateChanged) {
+					m_state = NextPattern();
+				}
+				break;
+			}
 		}
 	}
+	
+
 	m_tokenString = "";
 	return -1;
 }

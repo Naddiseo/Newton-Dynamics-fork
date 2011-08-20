@@ -138,8 +138,8 @@ void dNonDeterministicFiniteAutonataCompiler::CompileExpression(const char* cons
 
 
 	// build an NFA graph
-	DTRACE(("\n"));
-	DTRACE(("Expression: %s\n", regularExpression));
+//	DTRACE(("\n"));
+//	DTRACE(("Expression: %s\n", regularExpression));
 
 	ParseExpresionToNFA ();
 }
@@ -241,7 +241,7 @@ void dNonDeterministicFiniteAutonataCompiler::Match (int token)
 	if (m_token == token) {
 		m_token = GetChar();
 	} else {
-		DTRACE(("parse error\n"));
+//		DTRACE(("parse error\n"));
 		m_error = true;
 	}
 }
@@ -257,11 +257,11 @@ void dNonDeterministicFiniteAutonataCompiler::PushId (int charater)
 
 	m_stack.Push(start, accepting);
 
-	DTRACE(("Push ", charater));
-	if (charater > 256) {
-		DTRACE(("\\"));
-	}
-	DTRACE(("%c\n", charater));
+//	DTRACE(("Push ", charater));
+//	if (charater > 256) {
+//		DTRACE(("\\"));
+//	}
+//	DTRACE(("%c\n", charater));
 }
 
 void dNonDeterministicFiniteAutonataCompiler::PushSet (const char* const set, int size)
@@ -269,15 +269,12 @@ void dNonDeterministicFiniteAutonataCompiler::PushSet (const char* const set, in
 	dAutomataState* const start = new dAutomataState (m_stateID ++);
 	dAutomataState* const accepting = new dAutomataState (m_stateID ++);
 	
-//	for (int i = 0; i < size; i ++) {
-//		start->m_transtions.Append(dAutomataState::Transition(set[i], accepting));
-//	}
 	int ch = m_charaterSetMap.AddSet(set, size);
 	start->m_transtions.Append(dAutomataState::Transition(ch, accepting));
 
 	m_stack.Push(start, accepting);
 
-	DTRACE(("Push charSet%d\n", ch & (0x7fff)));
+//	DTRACE(("Push charSet%d\n", ch & (0x7fff)));
 }
 
 
@@ -308,7 +305,7 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceUnionDiagram()
 	rightOperand.GetAccepting()->m_transtions.Append(dAutomataState::Transition(0, accepting));
 
 	m_stack.Push(start, accepting);
-	DTRACE(("operator union\n"));
+//	DTRACE(("operator union\n"));
 }
 
 void dNonDeterministicFiniteAutonataCompiler::ReduceConcatenationDiagram()
@@ -331,7 +328,7 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceConcatenationDiagram()
 	leftOperand.GetAccepting()->m_transtions.Append(dAutomataState::Transition(0, rightOperand.GetStart()));
 
 	m_stack.Push(leftOperand.GetStart(), rightOperand.GetAccepting());
-	DTRACE(("operator concatenation\n"));
+//	DTRACE(("operator concatenation\n"));
 }
 
 void dNonDeterministicFiniteAutonataCompiler::ReduceZeroOrMoreDiagram()
@@ -353,7 +350,7 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceZeroOrMoreDiagram()
 
 	m_stack.Push(start, accepting);
 
-	DTRACE(("operator zeroOrMore\n"));
+//	DTRACE(("operator zeroOrMore\n"));
 }
 
 void dNonDeterministicFiniteAutonataCompiler::ReduceOneOrMoreDiagram()
@@ -374,14 +371,14 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceOneOrMoreDiagram()
 
 	m_stack.Push(start, accepting);
 
-	DTRACE(("operator oneOrMore\n"));
+//	DTRACE(("operator oneOrMore\n"));
 }
 
 void dNonDeterministicFiniteAutonataCompiler::ReduceZeroOrOneDiagram()
 {
 	if (m_stack.IsEmpty()) {
 		m_error = true;
-		DTRACE(("Parce stack underflow error\n"));
+//		DTRACE(("Parce stack underflow error\n"));
 		return;
 	}
 	StateConstructPair operand (m_stack.Pop());
@@ -395,7 +392,7 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceZeroOrOneDiagram()
 
 	m_stack.Push(start, accepting);
 
-	DTRACE(("operator zeroOrOne\n"));
+//	DTRACE(("operator zeroOrOne\n"));
 }
 
 

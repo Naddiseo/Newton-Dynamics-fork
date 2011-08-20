@@ -21,6 +21,6 @@ Comment			({Comment1}|{Comment2})
 
 
 %%
-(a|A)(d|D)(d|D)		{ return ADD;}
+[aA](d|D)[dD]		{ return ADD;}
 
 

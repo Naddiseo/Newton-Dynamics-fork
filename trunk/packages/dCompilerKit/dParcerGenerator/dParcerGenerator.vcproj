@@ -206,6 +206,14 @@
 		<File
 			RelativePath=".\dParcelLexical.cpp"
 			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					AssemblerOutput="1"
+				/>
+			</FileConfiguration>
 		</File>
 		<File
 			RelativePath=".\dParcelLexical.h"
@@ -230,7 +238,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="dLexicalGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="..\dLexicalGenerator\bin\dLexicalGenerator.exe $(InputFileName) $(InputPath)&#x0D;&#x0A;"
+					CommandLine="..\dLexicalGenerator\bin\dLexicalGenerator.exe $(InputFileName) $(InputPath)"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>
