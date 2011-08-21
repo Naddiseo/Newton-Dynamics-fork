@@ -49,7 +49,6 @@ class dParcelCompiler::dRuleInfo: public dParcelCompiler::dSymbol, public dList<
 			}
 			i ++;
 		}
-		_ASSERTE (0);
 		return NULL;
 	}
 
@@ -77,7 +76,7 @@ class dParcelCompiler::dItem
 {
 	public:
 	int m_indexMarker;
-	dProductionRule::dListNode* m_rule;
+	dProductionRule::dListNode* m_ruleNode;
 };
 
 
@@ -92,28 +91,31 @@ class dParcelCompiler::dState: public dList<dParcelCompiler::dItem>
 		}
 	}
 
-	bool FindItem (dProductionRule::dListNode* const rule) const
+	dListNode* FindItem (dProductionRule::dListNode* const rule) const
 	{
 		for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
-			if (node->GetInfo().m_rule == rule) {
-				return true;
+			dItem& item = node->GetInfo();
+			if ((item.m_ruleNode == rule) && (item.m_indexMarker == 0)) {
+				return node;
 			}
 		}
-		return false;
+		return NULL;
 	}
 
 	void Trace() const
 	{
 		for (dState::dListNode* itemNode = GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
 			dItem& item = itemNode->GetInfo();
-			DTRACE(("%s -> ", item.m_rule->GetInfo().m_name.c_str()));
+			DTRACE(("%s -> ", item.m_ruleNode->GetInfo().m_name.c_str()));
 
 			int index = 0;
-			dRuleInfo::dListNode* node = item.m_rule->GetInfo().GetFirst();
+			bool hasIndex = false;
+			dRuleInfo::dListNode* node = item.m_ruleNode->GetInfo().GetFirst();
 			for (; node; node = node->GetNext()) {
 
 				if (index == item.m_indexMarker) {
 					DTRACE((". "));
+					hasIndex = true;
 					break;
 				}
 				const dSentenceSymbol& info = node->GetInfo();
@@ -124,6 +126,9 @@ class dParcelCompiler::dState: public dList<dParcelCompiler::dItem>
 			for (; node; node = node->GetNext()) {
 				const dSentenceSymbol& info = node->GetInfo();
 				DTRACE(("%s ", info.m_name.c_str()));
+			}
+			if (!hasIndex) {
+				DTRACE(("."));
 			}
 			DTRACE(("\n"));
 		}
@@ -151,11 +156,13 @@ dParcelCompiler::dParcelCompiler(const char* const inputRules, const char* const
 
 	// convert the rules into a DFA.
 	dList<dState*> stateList;
-	GenerateDFAStates (stateList, ruleList, symbolList);
+	CanonicalItemSets (stateList, ruleList, symbolList);
 
 
-
-//	delete state;
+	for (dList<dState*>::dListNode* node = stateList.GetFirst(); node; node = node->GetNext()) {
+		dState* const state = node->GetInfo();
+		delete state;
+	}
 }
 
 
@@ -299,30 +306,35 @@ dParcelCompiler::dState* dParcelCompiler::Closure (dProductionRule& rulesList, d
 	for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
 		dItem& item = itemNode->GetInfo();
 
-		dSentenceSymbol& sentenceSymbol = item.m_rule->GetInfo().GetSymbolNodeByIndex (item.m_indexMarker)->GetInfo();
+		dRuleInfo::dListNode* const symbolNode = item.m_ruleNode->GetInfo().GetSymbolNodeByIndex (item.m_indexMarker);
+		if (symbolNode) {
+			dSentenceSymbol& sentenceSymbol = symbolNode->GetInfo();
 
-		for (dProductionRule::dListNode* node = rulesList.GetFirst(); node; node = node->GetNext()) {
-			const dRuleInfo& info = node->GetInfo();
-			if (info.m_name == sentenceSymbol.m_name) {
-				if (!state->FindItem (node)) {
-					dItem& newItem = state->Append()->GetInfo();
-					newItem.m_indexMarker = item.m_indexMarker;
-					newItem.m_rule = node;
+			for (dProductionRule::dListNode* node = rulesList.GetFirst(); node; node = node->GetNext()) {
+				const dRuleInfo& info = node->GetInfo();
+				if (info.m_name == sentenceSymbol.m_name) {
+					dState::dListNode* const itemNode = state->FindItem(node);
+					if (!itemNode) {
+						dItem& newItem = state->Append()->GetInfo();
+						newItem.m_indexMarker = 0;
+						newItem.m_ruleNode = node;
+					}
 				}
 			}
 		}
 	}
-
+	
+	state->Trace();
 	return state;
 }
 
-// generates Set of Items for a LR(1) grammar
-void dParcelCompiler::GenerateDFAStates (dList<dState*>& stateList, dProductionRule& ruleList, dTree<void*, string>& symbolList)
+// generates teh canonical Items set for a LR(1) grammar
+void dParcelCompiler::CanonicalItemSets (dList<dState*>& stateList, dProductionRule& ruleList, dTree<void*, string>& symbolList)
 {
 	dList<dItem> itemSet;
 	dItem& item = itemSet.Append()->GetInfo();
 	item.m_indexMarker = 0;
-	item.m_rule = ruleList.GetFirst();
+	item.m_ruleNode = ruleList.GetFirst();
 
 	
 	stateList.Append (Closure (ruleList, itemSet));
@@ -333,9 +345,14 @@ void dParcelCompiler::GenerateDFAStates (dList<dState*>& stateList, dProductionR
 		for (iter.Begin(); iter; iter ++) {
 			
 			string symbol (iter.GetKey());
-		symbol = "E";
+//		symbol = "'('";
 			itemSet.RemoveAll();
 			dState* const newState = Goto (ruleList, state, symbol);
+			if (newState->GetCount() && !IsStateInList (stateList)) {
+				stateList.Append(newState);
+			} else {
+				delete newState;
+			}
 		}
 	}
 
@@ -347,7 +364,27 @@ dParcelCompiler::dState* dParcelCompiler::Goto (dProductionRule& rulesList, dSta
 
 	for (dState::dListNode* node = state->GetFirst(); node; node = node->GetNext()) {
 		dItem& item = node->GetInfo();
+
+		int index = 0;
+		const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();;
+		for (dRuleInfo::dListNode* infoSymbolNode = ruleInfo.GetFirst(); infoSymbolNode; infoSymbolNode = infoSymbolNode->GetNext()) {
+			const dSentenceSymbol& infoSymbol = infoSymbolNode->GetInfo();
+			if (infoSymbol.m_name == symbol) {
+				if (index == item.m_indexMarker) {
+					dItem& newItem = itemSet.Append()->GetInfo();
+					newItem.m_indexMarker = index + 1;
+					newItem.m_ruleNode = item.m_ruleNode;
+					break;
+				}
+			}
+			index ++;
+		}
 	}
 
-	return NULL;
+	return Closure (rulesList, itemSet);
+}
+
+bool dParcelCompiler::IsStateInList (dList<dState*>& stateList) const
+{
+	return false;
 }

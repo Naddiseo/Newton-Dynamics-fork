@@ -59,9 +59,11 @@ class dParcelCompiler
 	Token ScanGrammarRule(dGrammarLexical& lexical, dProductionRule& rules, dTree<void*, string>& symbolList);
 
 	
-	void GenerateDFAStates (dList<dState*>& states, dProductionRule& rules, dTree<void*, string>& symbolList);
+	void CanonicalItemSets (dList<dState*>& states, dProductionRule& rules, dTree<void*, string>& symbolList);
 	dState* Goto (dProductionRule& rulesList, dState* const state, const string& symbol);
 	dState* Closure (dProductionRule& rulesList, dList<dItem>& itemSet);
+
+	bool IsStateInList (dList<dState*>& stateList) const;
 };
 
 
