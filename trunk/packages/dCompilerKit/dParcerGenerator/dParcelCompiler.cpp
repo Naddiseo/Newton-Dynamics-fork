@@ -56,7 +56,7 @@ class dParcelCompiler::dRuleInfo: public dParcelCompiler::dSymbol, public dList<
 };
 
 
-class dParcelCompiler::dProductionRules: public dList<dParcelCompiler::dRuleInfo>
+class dParcelCompiler::dProductionRule: public dList<dParcelCompiler::dRuleInfo>
 {
 	public:
 
@@ -77,7 +77,7 @@ class dParcelCompiler::dItem
 {
 	public:
 	int m_indexMarker;
-	dProductionRules::dListNode* m_rule;
+	dProductionRule::dListNode* m_rule;
 };
 
 
@@ -92,7 +92,7 @@ class dParcelCompiler::dState: public dList<dParcelCompiler::dItem>
 		}
 	}
 
-	bool FindItem (dProductionRules::dListNode* const rule) const
+	bool FindItem (dProductionRule::dListNode* const rule) const
 	{
 		for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
 			if (node->GetInfo().m_rule == rule) {
@@ -127,6 +127,7 @@ class dParcelCompiler::dState: public dList<dParcelCompiler::dItem>
 			}
 			DTRACE(("\n"));
 		}
+		DTRACE(("\n"));
 	}
 
 };
@@ -144,15 +145,17 @@ dParcelCompiler::dParcelCompiler(const char* const inputRules, const char* const
 //xmain(2, xxx);
 
 	// scan the grammar into a list of rules.
-	dProductionRules ruleList;
-	ScanGrammarFile(inputRules, ruleList);
+	dProductionRule ruleList;
+	dTree<void*, string> symbolList;
+	ScanGrammarFile(inputRules, ruleList, symbolList);
 
 	// convert the rules into a DFA.
-	dState* state = GenerateDFA (ruleList);
+	dList<dState*> stateList;
+	GenerateDFAStates (stateList, ruleList, symbolList);
 
 
 
-	delete state;
+//	delete state;
 }
 
 
@@ -163,7 +166,7 @@ dParcelCompiler::~dParcelCompiler()
 {
 }
 
-void dParcelCompiler::ScanGrammarFile(const char* const inputRules, dProductionRules& ruleList)
+void dParcelCompiler::ScanGrammarFile(const char* const inputRules, dProductionRule& ruleList, dTree<void*, string>& symbolList)
 {
 	dGrammarLexical lexical (inputRules);
 
@@ -171,7 +174,7 @@ void dParcelCompiler::ScanGrammarFile(const char* const inputRules, dProductionR
 
 	// scan the definition segment
 	for (Token token = Token(lexical.NextToken()); token != GRAMMAR_SEGEMENT; token = Token(lexical.NextToken())) {
-		DTRACE (("%s\n", lexical.GetTokenString()));
+//		DTRACE (("%s\n", lexical.GetTokenString()));
 		switch (int (token)) {
 
 			case TOKEN:
@@ -193,7 +196,7 @@ void dParcelCompiler::ScanGrammarFile(const char* const inputRules, dProductionR
 
 	// scan the production rules segment
 	for (Token token = Token(lexical.NextToken()); token != GRAMMAR_SEGEMENT; token = Token(lexical.NextToken())) {
-		DTRACE (("%s\n", lexical.GetTokenString()));
+//		DTRACE (("%s\n", lexical.GetTokenString()));
 		switch (int (token)) 
 		{
 			case LITERAL:
@@ -204,7 +207,7 @@ void dParcelCompiler::ScanGrammarFile(const char* const inputRules, dProductionR
 				rule.m_name += lexical.GetTokenString();
 				token = Token(lexical.NextToken());
 				_ASSERTE (token == COLOM);
-				for (Token token = ScanGrammarRule(lexical, ruleList); token != SIMICOLOM; token = ScanGrammarRule(lexical, ruleList)); 
+				for (Token token = ScanGrammarRule(lexical, ruleList, symbolList); token != SIMICOLOM; token = ScanGrammarRule(lexical, ruleList, symbolList)); 
 				break;
 			}
 			default:
@@ -212,7 +215,7 @@ void dParcelCompiler::ScanGrammarFile(const char* const inputRules, dProductionR
 		}
 	}
 
-	dProductionRules::dListNode* firtRuleNode = ruleList.GetFirst();	
+	dProductionRule::dListNode* firtRuleNode = ruleList.GetFirst();	
 	if (startSymbol != "") {
 		firtRuleNode = ruleList.Find (startSymbol);	
 	}
@@ -231,14 +234,14 @@ void dParcelCompiler::ScanGrammarFile(const char* const inputRules, dProductionR
 
 }
 
-dParcelCompiler::Token dParcelCompiler::ScanGrammarRule(dGrammarLexical& lexical, dProductionRules& rules)
+dParcelCompiler::Token dParcelCompiler::ScanGrammarRule(dGrammarLexical& lexical, dProductionRule& rules, dTree<void*, string>& symbolList)
 {
 
 	dRuleInfo* currentRule = &rules.GetLast()->GetInfo();
 
 	Token token = Token(lexical.NextToken());
 	for ( ;token != SIMICOLOM; token = Token(lexical.NextToken())) {
-		DTRACE (("%s\n", lexical.GetTokenString()));
+//		DTRACE (("%s\n", lexical.GetTokenString()));
 		switch (int (token)) 
 		{
 			case LITERAL:
@@ -257,7 +260,7 @@ dParcelCompiler::Token dParcelCompiler::ScanGrammarRule(dGrammarLexical& lexical
 
 			case OR:
 			{
-				// this is a rule with multiples sentences, add new rule withe the same name
+				// this is a rule with multiples sentences, add new rule with the same name
 				dRuleInfo& rule = rules.Append()->GetInfo();
 				rule.m_type = currentRule->m_type;
 				rule.m_name += currentRule->m_name;
@@ -267,6 +270,7 @@ dParcelCompiler::Token dParcelCompiler::ScanGrammarRule(dGrammarLexical& lexical
 
 
 			default:
+			{
 				if (isascii (token)) {
 					dSentenceSymbol& symbol = currentRule->Append()->GetInfo();
 					symbol.m_type = LITERAL;
@@ -274,26 +278,22 @@ dParcelCompiler::Token dParcelCompiler::ScanGrammarRule(dGrammarLexical& lexical
 				} else {
 					_ASSERTE (0);
 				}
+			}
 		}
+
+		dRuleInfo::dListNode* const symbolNode = currentRule->GetLast();
+		if (symbolNode) {
+			dSentenceSymbol* const symbol = &symbolNode->GetInfo();
+			symbolList.Insert((void*)NULL, symbol->m_name);
+		}
+
 	}
 
 	return token;
 }
 
-dParcelCompiler::dState* dParcelCompiler::GenerateDFA (dProductionRules& ruleList)
-{
-	dList<dItem> firstItemSet;
-	dItem& item =  firstItemSet.Append()->GetInfo();
-	item.m_indexMarker = 0;
-	item.m_rule = ruleList.GetFirst();
-
-	dState* const rootState = Closure (ruleList, firstItemSet);
-	rootState->Trace();
-
-	return rootState;
-}
-
-dParcelCompiler::dState* dParcelCompiler::Closure (dProductionRules& rulesList, dList<dItem>& itemSet)
+// Generate the closure for a Set of Item  
+dParcelCompiler::dState* dParcelCompiler::Closure (dProductionRule& rulesList, dList<dItem>& itemSet)
 {
 	dState* const state = new dState (itemSet);
 	for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
@@ -301,7 +301,7 @@ dParcelCompiler::dState* dParcelCompiler::Closure (dProductionRules& rulesList, 
 
 		dSentenceSymbol& sentenceSymbol = item.m_rule->GetInfo().GetSymbolNodeByIndex (item.m_indexMarker)->GetInfo();
 
-		for (dProductionRules::dListNode* node = rulesList.GetFirst(); node; node = node->GetNext()) {
+		for (dProductionRule::dListNode* node = rulesList.GetFirst(); node; node = node->GetNext()) {
 			const dRuleInfo& info = node->GetInfo();
 			if (info.m_name == sentenceSymbol.m_name) {
 				if (!state->FindItem (node)) {
@@ -314,4 +314,40 @@ dParcelCompiler::dState* dParcelCompiler::Closure (dProductionRules& rulesList, 
 	}
 
 	return state;
+}
+
+// generates Set of Items for a LR(1) grammar
+void dParcelCompiler::GenerateDFAStates (dList<dState*>& stateList, dProductionRule& ruleList, dTree<void*, string>& symbolList)
+{
+	dList<dItem> itemSet;
+	dItem& item = itemSet.Append()->GetInfo();
+	item.m_indexMarker = 0;
+	item.m_rule = ruleList.GetFirst();
+
+	
+	stateList.Append (Closure (ruleList, itemSet));
+	for (dList<dState*>::dListNode* node = stateList.GetFirst(); node; node = node->GetNext()) {
+		dState* const state = node->GetInfo();
+
+		dTree<void*, string>::Iterator iter (symbolList);
+		for (iter.Begin(); iter; iter ++) {
+			
+			string symbol (iter.GetKey());
+		symbol = "E";
+			itemSet.RemoveAll();
+			dState* const newState = Goto (ruleList, state, symbol);
+		}
+	}
+
+}
+
+dParcelCompiler::dState* dParcelCompiler::Goto (dProductionRule& rulesList, dState* const state, const string& symbol)
+{
+	dList<dItem> itemSet;
+
+	for (dState::dListNode* node = state->GetFirst(); node; node = node->GetNext()) {
+		dItem& item = node->GetInfo();
+	}
+
+	return NULL;
 }

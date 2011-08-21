@@ -46,7 +46,7 @@ class dParcelCompiler
 	class dSymbol;
 	class dSentenceSymbol;
 	class dRuleInfo;
-	class dProductionRules;
+	class dProductionRule;
 
 	
 	
@@ -55,12 +55,13 @@ class dParcelCompiler
 	~dParcelCompiler();
 
 	protected:
-	void ScanGrammarFile(const char* const inputRules, dProductionRules& rules);
-	Token ScanGrammarRule(dGrammarLexical& lexical, dProductionRules& rules);
+	void ScanGrammarFile(const char* const inputRules, dProductionRule& rules, dTree<void*, string>& symbolList);
+	Token ScanGrammarRule(dGrammarLexical& lexical, dProductionRule& rules, dTree<void*, string>& symbolList);
 
 	
-	dState* GenerateDFA (dProductionRules& rules);
-	dState* Closure (dProductionRules& rulesList, dList<dItem>& items);
+	void GenerateDFAStates (dList<dState*>& states, dProductionRule& rules, dTree<void*, string>& symbolList);
+	dState* Goto (dProductionRule& rulesList, dState* const state, const string& symbol);
+	dState* Closure (dProductionRule& rulesList, dList<dItem>& itemSet);
 };
 
 
