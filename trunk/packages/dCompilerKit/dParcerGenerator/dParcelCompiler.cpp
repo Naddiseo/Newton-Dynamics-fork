@@ -139,15 +139,8 @@ class dParcelCompiler::dState: public dList<dParcelCompiler::dItem>
 
 
 
-
-
-extern "C" int  xmain(int argc, char **argv);
-
 dParcelCompiler::dParcelCompiler(const char* const inputRules, const char* const outputFileName)
 {
-
-//char* xxx[] = {"", "TextFile.y", 0};
-//xmain(2, xxx);
 
 	// scan the grammar into a list of rules.
 	dProductionRule ruleList;
