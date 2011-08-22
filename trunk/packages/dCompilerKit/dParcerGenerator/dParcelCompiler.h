@@ -26,6 +26,12 @@ class dGrammarLexical;
 class dParcelCompiler
 {
 	public:
+	enum TokenType
+	{
+		TERMINAL,
+		NONTERMINAL
+	};
+
 	enum Token
 	{
 		OR = 256,
@@ -55,15 +61,13 @@ class dParcelCompiler
 	~dParcelCompiler();
 
 	protected:
-	void ScanGrammarFile(const char* const inputRules, dProductionRule& rules, dTree<void*, string>& symbolList);
-	Token ScanGrammarRule(dGrammarLexical& lexical, dProductionRule& rules, dTree<void*, string>& symbolList);
+	void ScanGrammarFile(const char* const inputRules, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens);
+	Token ScanGrammarRule(dGrammarLexical& lexical, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens);
 
 	
-	void CanonicalItemSets (dList<dState*>& states, dProductionRule& rules, dTree<void*, string>& symbolList);
+	void CanonicalItemSets (dTree<dState*,int>& states, dProductionRule& rules, dTree<TokenType, string>& symbolList);
 	dState* Goto (dProductionRule& rulesList, dState* const state, const string& symbol);
 	dState* Closure (dProductionRule& rulesList, dList<dItem>& itemSet);
-
-	bool IsStateInList (dList<dState*>& stateList) const;
 };
 
 
