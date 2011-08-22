@@ -50,6 +50,7 @@ class dParcelCompiler
 	class dItem;
 	class dState;
 	class dSymbol;
+	class dTransition;
 	class dSentenceSymbol;
 	class dRuleInfo;
 	class dProductionRule;
@@ -65,9 +66,11 @@ class dParcelCompiler
 	Token ScanGrammarRule(dGrammarLexical& lexical, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens);
 
 	
-	void CanonicalItemSets (dTree<dState*,int>& states, dProductionRule& rules, dTree<TokenType, string>& symbolList);
+	dState* CanonicalItemSets (dTree<dState*,int>& states, dProductionRule& rules, dTree<TokenType, string>& symbolList);
 	dState* Goto (dProductionRule& rulesList, dState* const state, const string& symbol);
 	dState* Closure (dProductionRule& rulesList, dList<dItem>& itemSet);
+
+	void BuildParcingTable (dState* rootState, dTree<dState*,int>& states);
 };
 
 

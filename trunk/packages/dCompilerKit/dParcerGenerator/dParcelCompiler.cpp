@@ -70,6 +70,14 @@ class dParcelCompiler::dProductionRule: public dList<dParcelCompiler::dRuleInfo>
 	}
 };
 
+class dParcelCompiler::dTransition
+{
+	public:
+	string m_name;
+	TokenType m_type;
+	dState* m_targetState;
+};
+
 class dParcelCompiler::dItem
 {
 	public:
@@ -81,7 +89,7 @@ class dParcelCompiler::dState: public dList<dParcelCompiler::dItem>
 {
 	public:
 	dState (dList<dItem>& itemSet)
-		:m_key(0)
+		:m_key(0), m_number(0), m_trantions()
 	{
 		for (dListNode* node = itemSet.GetFirst(); node; node = node->GetNext()) {
 			Append(node->GetInfo());
@@ -119,6 +127,7 @@ class dParcelCompiler::dState: public dList<dParcelCompiler::dItem>
 
 	void Trace() const
 	{
+		DTRACE(("state %d:\n", m_number));
 		for (dState::dListNode* itemNode = GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
 			dItem& item = itemNode->GetInfo();
 			DTRACE(("%s -> ", item.m_ruleNode->GetInfo().m_name.c_str()));
@@ -150,8 +159,9 @@ class dParcelCompiler::dState: public dList<dParcelCompiler::dItem>
 		DTRACE(("\n"));
 	}
 
-	private:
 	int m_key;
+	int m_number;
+	dList<dTransition> m_trantions;
 };
 
 dParcelCompiler::dParcelCompiler(const char* const inputRules, const char* const outputFileName)
@@ -163,9 +173,12 @@ dParcelCompiler::dParcelCompiler(const char* const inputRules, const char* const
 	
 	ScanGrammarFile(inputRules, ruleList, symbolList, terminalTokens);
 
-	// convert the rules into a DFA.
+	// convert the rules into a NFA.
 	dTree<dState*,int> stateList;
-	CanonicalItemSets (stateList, ruleList, symbolList);
+	dState* const rootState = CanonicalItemSets (stateList, ruleList, symbolList);
+
+	// create a LR(1) parsing table from the NFA graphs
+	BuildParcingTable (rootState, stateList);
 
 	dTree<dState*,int>::Iterator iter(stateList);
 	for (iter.Begin(); iter; iter ++) {
@@ -188,15 +201,16 @@ void dParcelCompiler::ScanGrammarFile(const char* const inputRules, dProductionR
 	int teminalTokenEnumeration = 256;
 
 	// scan the definition segment
-	for (Token token = Token(lexical.NextToken()); token != GRAMMAR_SEGEMENT; token = Token(lexical.NextToken())) {
+	for (Token token = Token(lexical.NextToken()); token != GRAMMAR_SEGEMENT; ) {
 //		DTRACE (("%s\n", lexical.GetTokenString()));
-		switch (int (token)) {
-
+		switch (int (token)) 
+		{
 			case TOKEN:
 			{
-				token = Token(lexical.NextToken());
-				terminalTokens.Insert(teminalTokenEnumeration, lexical.GetTokenString());
-				teminalTokenEnumeration ++;
+				for (token = Token(lexical.NextToken()); token == LITERAL; token = Token(lexical.NextToken())) {
+					terminalTokens.Insert(teminalTokenEnumeration, lexical.GetTokenString());
+					teminalTokenEnumeration ++;
+				}
 				break;
 			}
 
@@ -204,9 +218,13 @@ void dParcelCompiler::ScanGrammarFile(const char* const inputRules, dProductionR
 			{
 				token = Token(lexical.NextToken());
 				startSymbol = lexical.GetTokenString();
+				token = Token(lexical.NextToken());
 				break;
 			}
 			default:;
+			{
+				token = Token(lexical.NextToken());
+			}
 
 		}
 	}
@@ -344,44 +362,7 @@ dParcelCompiler::dState* dParcelCompiler::Closure (dProductionRule& rulesList, d
 	return state;
 }
 
-// generates the canonical Items set for a LR(1) grammar
-void dParcelCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, dProductionRule& ruleList, dTree<TokenType, string>& symbolList)
-{
-	dList<dItem> itemSet;
-	dItem& item = itemSet.Append()->GetInfo();
-	item.m_indexMarker = 0;
-	item.m_ruleNode = ruleList.GetFirst();
-
-	dList<dState*> stateList;
-	dState* const state = Closure (ruleList, itemSet);
-	stateMap.Insert(state, state->GetKey());
-	stateList.Append(state);
-
-	state->Trace();
-
-	for (dList<dState*>::dListNode* node = stateList.GetFirst(); node; node = node->GetNext()) {
-		dState* const state = node->GetInfo();
-
-		dTree<TokenType, string>::Iterator iter (symbolList);
-		for (iter.Begin(); iter; iter ++) {
-			
-			string symbol (iter.GetKey());
-			itemSet.RemoveAll();
-
-			dState* const newState = Goto (ruleList, state, symbol);
-
-			if (newState->GetCount() && !stateMap.Find(newState->GetKey())) {
-				stateMap.Insert(newState, newState->GetKey());
-				newState->Trace();
-
-				stateList.Append(newState);
-			} else {
-				delete newState;
-			}
-		}
-	}
-}
-
+// generates the got state for thsi simbol
 dParcelCompiler::dState* dParcelCompiler::Goto (dProductionRule& rulesList, dState* const state, const string& symbol)
 {
 	dList<dItem> itemSet;
@@ -404,7 +385,63 @@ dParcelCompiler::dState* dParcelCompiler::Goto (dProductionRule& rulesList, dSta
 			index ++;
 		}
 	}
-
 	return Closure (rulesList, itemSet);
 }
 
+// generates the canonical Items set for a LR(1) grammar
+dParcelCompiler::dState* dParcelCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, dProductionRule& ruleList, dTree<TokenType, string>& symbolList)
+{
+	dList<dItem> itemSet;
+	dItem& item = itemSet.Append()->GetInfo();
+	item.m_indexMarker = 0;
+	item.m_ruleNode = ruleList.GetFirst();
+
+	dList<dState*> stateList;
+	dState* const state = Closure (ruleList, itemSet);
+	stateMap.Insert(state, state->GetKey());
+	stateList.Append(state);
+
+	state->Trace();
+
+	int stateNumber = 1;
+	for (dList<dState*>::dListNode* node = stateList.GetFirst(); node; node = node->GetNext()) {
+		dState* const state = node->GetInfo();
+
+		dTree<TokenType, string>::Iterator iter (symbolList);
+		for (iter.Begin(); iter; iter ++) {
+
+			string symbol (iter.GetKey());
+			dState* const newState = Goto (ruleList, state, symbol);
+
+			if (newState->GetCount()) {
+				dTransition& transition = state->m_trantions.Append()->GetInfo();
+				transition.m_name = symbol;
+				transition.m_type = iter.GetNode()->GetInfo();
+				transition.m_targetState = newState;
+
+				dTree<dState*,int>::dTreeNode* const targetStateNode = stateMap.Find(newState->GetKey());
+				if (!targetStateNode) {
+					newState->m_number = stateNumber;
+					stateNumber ++;
+					stateMap.Insert(newState, newState->GetKey());
+					newState->Trace();
+
+					stateList.Append(newState);
+				} else {
+					transition.m_targetState = targetStateNode->GetInfo();
+					delete newState;
+				}
+			} else {
+				delete newState;
+			}
+		}
+	}
+	return state;
+}
+
+
+
+void dParcelCompiler::BuildParcingTable (dState* rootState, dTree<dState*,int>& states)
+{
+
+}
