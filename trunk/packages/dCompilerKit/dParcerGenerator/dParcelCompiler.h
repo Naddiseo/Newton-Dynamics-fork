@@ -66,11 +66,11 @@ class dParcelCompiler
 	Token ScanGrammarRule(dGrammarLexical& lexical, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens);
 
 	
-	dState* CanonicalItemSets (dTree<dState*,int>& states, dProductionRule& rules, dTree<TokenType, string>& symbolList);
+	void CanonicalItemSets (dTree<dState*,int>& states, dProductionRule& rules, dTree<TokenType, string>& symbolList);
 	dState* Goto (dProductionRule& rulesList, dState* const state, const string& symbol);
 	dState* Closure (dProductionRule& rulesList, dList<dItem>& itemSet);
 
-	void BuildParcingTable (dState* rootState, dTree<dState*,int>& states);
+	void BuildParcingTable (dTree<dState*,int>& stateList, dTree<TokenType, string>& symbolList);
 };
 
 
