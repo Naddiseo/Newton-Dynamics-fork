@@ -15,6 +15,8 @@
 #include "dParcelCompiler.h"
 #include "dGrammarLexical.h"
 
+#define DACCEPT_SYMBOL "$$$"
+
 //The Parcel input file consists of three sections, separated by a line containing only `%%'. 
 //
 //	definitions
@@ -36,11 +38,12 @@ class dParcelCompiler::dRuleInfo: public dParcelCompiler::dSymbol, public dList<
 {
 	public:
 	int m_ruleId;
+	int m_ruleNumber;
 	string m_userActionCode;
 
 	dRuleInfo()
 		:dSymbol(), dList<dSymbol>()
-		,m_ruleId(0), m_userActionCode("")
+		,m_ruleId(0), m_ruleNumber(0), m_userActionCode("")
 	{
 	}
 
@@ -89,11 +92,18 @@ class dParcelCompiler::dItem
 	dProductionRule::dListNode* m_ruleNode;
 };
 
+class dParcelCompiler::dAction 
+{
+	public:
+	ActionType m_type;
+	dProductionRule::dListNode* m_ruleNode;
+};
+
 class dParcelCompiler::dState: public dList<dParcelCompiler::dItem>
 {
 	public:
 	dState (dList<dItem>& itemSet)
-		:m_key(0), m_number(0), m_trantions()
+		:m_key(0), m_number(0), m_actions(), m_transitions()
 	{
 		for (dListNode* node = itemSet.GetFirst(); node; node = node->GetNext()) {
 			Append(node->GetInfo());
@@ -165,7 +175,9 @@ class dParcelCompiler::dState: public dList<dParcelCompiler::dItem>
 
 	int m_key;
 	int m_number;
-	dList<dTransition> m_trantions;
+	dTree<dAction, string> m_actions; 
+	dList<dTransition> m_transitions;
+	
 };
 
 dParcelCompiler::dParcelCompiler(const char* const inputRules, const char* const outputFileName)
@@ -175,6 +187,7 @@ dParcelCompiler::dParcelCompiler(const char* const inputRules, const char* const
 	dTree<int, string> terminalTokens;
 	dTree<TokenType, string> symbolList;
 	
+	symbolList.Insert(TERMINAL, DACCEPT_SYMBOL);
 	ScanGrammarFile(inputRules, ruleList, symbolList, terminalTokens);
 
 	// convert the rules into a NFA.
@@ -233,6 +246,7 @@ void dParcelCompiler::ScanGrammarFile(const char* const inputRules, dProductionR
 		}
 	}
 
+	int ruleNumber = 1;
 	dTree<int, string> nonTerminalRuleEnumFilter;
 	// scan the production rules segment
 	for (Token token = Token(lexical.NextToken()); token != GRAMMAR_SEGEMENT; token = Token(lexical.NextToken())) {
@@ -254,10 +268,12 @@ void dParcelCompiler::ScanGrammarFile(const char* const inputRules, dProductionR
 					teminalTokenEnumeration ++;
 				}
 				rule.m_ruleId = nonTerminalIdNode->GetInfo();
+				rule.m_ruleNumber = ruleNumber;
+				ruleNumber ++;
 
 				token = Token(lexical.NextToken());
 				_ASSERTE (token == COLOM);
-				for (Token token = ScanGrammarRule(lexical, ruleList, symbolList, terminalTokens); token != SIMICOLOM; token = ScanGrammarRule(lexical, ruleList, symbolList, terminalTokens)); 
+				for (Token token = ScanGrammarRule(lexical, ruleList, symbolList, terminalTokens, ruleNumber); token != SIMICOLOM; token = ScanGrammarRule(lexical, ruleList, symbolList, terminalTokens, ruleNumber)); 
 				break;
 			}
 			default:
@@ -273,6 +289,7 @@ void dParcelCompiler::ScanGrammarFile(const char* const inputRules, dProductionR
 	const dRuleInfo& firstRule = firtRuleNode->GetInfo();
 
 	dRuleInfo& rule = ruleList.Addtop()->GetInfo();
+	rule.m_ruleNumber = 0;
 	rule.m_ruleId = teminalTokenEnumeration;
 	rule.m_token = firstRule.m_token;
 	rule.m_type = NONTERMINAL;
@@ -292,7 +309,8 @@ dParcelCompiler::Token dParcelCompiler::ScanGrammarRule(
 	dGrammarLexical& lexical, 
 	dProductionRule& rules, 
 	dTree<TokenType, string>& symbolList, 
-	dTree<int, string>& terminalTokens)
+	dTree<int, string>& terminalTokens,
+	int& ruleNumber)
 {
 	dRuleInfo* currentRule = &rules.GetLast()->GetInfo();
 
@@ -321,6 +339,8 @@ dParcelCompiler::Token dParcelCompiler::ScanGrammarRule(
 			{
 				// this is a rule with multiples sentences, add new rule with the same name
 				dRuleInfo& rule = rules.Append()->GetInfo();
+				rule.m_ruleNumber = ruleNumber;
+				ruleNumber ++;
 				rule.m_ruleId = currentRule->m_ruleId;
 				rule.m_token = currentRule->m_token;
 				rule.m_type = NONTERMINAL;
@@ -429,7 +449,7 @@ void dParcelCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, dProducti
 			dState* const newState = Goto (ruleList, state, symbol);
 
 			if (newState->GetCount()) {
-				dTransition& transition = state->m_trantions.Append()->GetInfo();
+				dTransition& transition = state->m_transitions.Append()->GetInfo();
 				transition.m_name = symbol;
 				transition.m_type = iter.GetNode()->GetInfo();
 				transition.m_targetState = newState;
@@ -462,9 +482,58 @@ void dParcelCompiler::BuildParcingTable (dTree<dState*,int>& stateList, dTree<To
 	for (iter0.Begin(); iter0; iter0 ++) {
 		dState* const state = iter0.GetNode()->GetInfo();
 
-		for (iter1.Begin(); iter1; iter1 ++) {
-			TokenType type = iter1.GetNode()->GetInfo();
-			string symbol = iter1.GetKey();
+		if (state->m_number != 0) {
+
+			if (state->GetCount() == 1) {
+				// emit simple reduce rule on all inputs
+				dState::dListNode* const itemNode = state->GetFirst();
+				dItem& item = itemNode->GetInfo();
+				
+				const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
+				if (ruleInfo.GetCount() == item.m_indexMarker) {
+					for (iter1.Begin(); iter1; iter1 ++) {
+						TokenType type = iter1.GetNode()->GetInfo();
+						if (type == TERMINAL) {
+							string symbol = iter1.GetKey();
+
+							dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (symbol); 
+							// this could be a reduce-reduce conflict;
+							_ASSERTE (actionNode);
+							if (actionNode) {
+								dAction& action = actionNode->GetInfo();
+								action.m_type = REDUCE;
+								action.m_ruleNode = item.m_ruleNode;
+							}
+						}
+					}
+				}
+			} else {
+				// check if accepting rule in in th estate
+				for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
+					dItem& item = itemNode->GetInfo();
+					const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
+					// check if this item is the accepting Rule
+					if (ruleInfo.m_ruleNumber == 0) {
+						if (item.m_indexMarker == 1) {
+							dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (DACCEPT_SYMBOL); 
+							_ASSERTE (actionNode);
+							dAction& action = actionNode->GetInfo();
+							action.m_type = ACCEPT;
+							action.m_ruleNode = item.m_ruleNode;
+						}
+					} else {
+						// if it does not contain the accepting rule them is see if is is a shift action
+						_ASSERTE (0);
+					}
+				}
+			}
+		} else {
+			_ASSERTE (0);
+		}
+		
+
+			
+/*
 			if (type == TERMINAL) {
 				if (state->GetCount() == 1) {
 					dState::dListNode* const itemNode = state->GetFirst();
@@ -477,13 +546,12 @@ void dParcelCompiler::BuildParcingTable (dTree<dState*,int>& stateList, dTree<To
 						_ASSERTE (0);
 					}
 				}
-				
-
 			}
-		}
+*/
+
 		
 /*
-		for (dList<dTransition>::dListNode* node = state->m_trantions.GetFirst(); node; node = node->GetNext()) {
+		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
 			dTransition& transition = node->GetInfo();
 
 			if (transition.m_type == TERMINAL) {

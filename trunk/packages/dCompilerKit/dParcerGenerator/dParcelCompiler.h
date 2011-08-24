@@ -32,6 +32,13 @@ class dParcelCompiler
 		NONTERMINAL
 	};
 
+	enum ActionType
+	{
+		ACCEPT,
+		SHIFT,
+		REDUCE
+	};
+
 	enum Token
 	{
 		OR = 256,
@@ -49,6 +56,7 @@ class dParcelCompiler
 
 	class dItem;
 	class dState;
+	class dAction;
 	class dSymbol;
 	class dTransition;
 	class dSentenceSymbol;
@@ -63,7 +71,7 @@ class dParcelCompiler
 
 	protected:
 	void ScanGrammarFile(const char* const inputRules, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens);
-	Token ScanGrammarRule(dGrammarLexical& lexical, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens);
+	Token ScanGrammarRule(dGrammarLexical& lexical, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens, int& ruleNumber);
 
 	
 	void CanonicalItemSets (dTree<dState*,int>& states, dProductionRule& rules, dTree<TokenType, string>& symbolList);
