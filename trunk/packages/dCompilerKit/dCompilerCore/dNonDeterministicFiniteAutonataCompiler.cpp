@@ -640,9 +640,7 @@ dAutomataState* dNonDeterministicFiniteAutonataCompiler::CreateDeterministicFini
 	int stateID = 0;
 	NFAmap.Insert(m_startState, m_startState);
 
-
 	dAutomataState* stackPool[2048];
-
 
 	EmptyTransitionClosure (NFAmap, subSet);
 	dAutomataState* const startState = new dAutomataState(subSet, stateID ++);
@@ -695,11 +693,36 @@ dAutomataState* dNonDeterministicFiniteAutonataCompiler::CreateDeterministicFini
 		}
 	}
 
-//	DeleteNFA (m_startState);
+
+//	int index = 0;
+//	dAutomataState** const stateSort = new dAutomataState*[stateArray.GetCount()];
+//	for (dList<dAutomataState*>::dListNode* node = stateArray.GetFirst(); node; node = node->GetNext()) {
+//		stateSort[index] = node->GetInfo();
+//		index ++;
+//	}
+//	qsort (stateSort, index, sizeof (dAutomataState*), SortStates);
+//	for (int i = 0; i < index; i ++) {
+//		dAutomataState* const state = stateSort[i];
+//		state->m_id = i;
+//	}
+//	delete stateSort;
+
 	return startState;
 }
 
+int dNonDeterministicFiniteAutonataCompiler::SortStates (const void *ptr0, const void *ptr1)
+{
+	dAutomataState* const state0 = *(dAutomataState**) ptr0;
+	dAutomataState* const state1 = *(dAutomataState**) ptr1;
 
+	if (state0->m_exitState == state1->m_exitState) {
+		return 0;
+	}
+	if (state0->m_exitState) {
+		return -1;
+	}
+	return 1;
+}
 
 bool dNonDeterministicFiniteAutonataCompiler::CompareSets (dList<dAutomataState*>& setA, dTree<dAutomataState*,dAutomataState*>& setB) const
 {

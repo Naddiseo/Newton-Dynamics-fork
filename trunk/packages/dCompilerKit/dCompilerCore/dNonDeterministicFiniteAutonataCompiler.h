@@ -134,6 +134,8 @@ class dNonDeterministicFiniteAutonataCompiler
 	void MoveSymbol (int symbol, const dAutomataState* const state, dTree<dAutomataState*,dAutomataState*>& ouput) const;
 	void EmptyTransitionClosure (const dTree<dAutomataState*,dAutomataState*>& set, dTree<dAutomataState*,dAutomataState*>& closureStates) const;
 
+	static int SortStates (const void *ptr0, const void *ptr1);
+
 	bool m_error;
 	int m_token;
 	int m_stateID;

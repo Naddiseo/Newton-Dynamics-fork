@@ -56,6 +56,7 @@ class dParcelCompiler
 
 	class dItem;
 	class dState;
+	class dGoto;
 	class dAction;
 	class dSymbol;
 	class dTransition;
@@ -71,7 +72,7 @@ class dParcelCompiler
 
 	protected:
 	void ScanGrammarFile(const char* const inputRules, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens);
-	Token ScanGrammarRule(dGrammarLexical& lexical, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens, int& ruleNumber);
+	Token ScanGrammarRule(dGrammarLexical& lexical, dProductionRule& rules, dTree<TokenType, string>& symbolList, int& ruleNumber, dTree<int, string>& tokenEnumarationMap, int& tokenEnumeration);
 
 	
 	void CanonicalItemSets (dTree<dState*,int>& states, dProductionRule& rules, dTree<TokenType, string>& symbolList);
@@ -79,6 +80,10 @@ class dParcelCompiler
 	dState* Closure (dProductionRule& rulesList, dList<dItem>& itemSet);
 
 	void BuildParcingTable (dTree<dState*,int>& stateList, dTree<TokenType, string>& symbolList);
+
+	void GenerateHeaderFile (const char* const className, const char* const outputFileName, dProductionRule& rules, dTree<int, string>& tokenEnumerationMap);
+	void GenerateParcerCode (const char* const className, const char* const outputFileName);
+
 };
 
 

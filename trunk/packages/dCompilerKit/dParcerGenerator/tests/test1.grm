@@ -10,7 +10,7 @@
 * freely
 */
 
-// very simple sample grammar 
+// very simple sample ADD and MULT grammar 
 
 %token id
 %start E

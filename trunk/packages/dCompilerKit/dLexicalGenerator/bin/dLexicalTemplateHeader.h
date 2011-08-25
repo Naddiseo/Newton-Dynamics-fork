@@ -10,8 +10,9 @@
 */
 
 //
-//Auto generated Lexical Analyzer class: dParcelLexical.h
+//Auto generated Lexical Analyzer class: $(className).h
 //
+
 #ifndef __$(className)_h__
 #define __$(className)_h__
 
