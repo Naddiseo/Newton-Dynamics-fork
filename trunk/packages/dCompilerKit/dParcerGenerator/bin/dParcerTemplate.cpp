@@ -10,22 +10,23 @@
 */
 
 //
-//Auto generated Parcel Generator class: $(className).h
+//Auto generated Parcer Generator class: $(className).cpp
 //
 
-#ifndef __$(className)_h__
-#define __$(className)_h__
+#include "$(className).h"
 
-class $(className)
+$(className)::$(className)()
 {
-	enum Token
-	{
-		$(Tokens)
-	};
+}
 
-	public:
-	int Parce(dParcelLexical& lexical);
+$(className)::~$(className)()
+{
+}
 
-};
+int $(className)::Parce(dParcelLexical& lexical)
+{
 
-#endif
+
+	return 0;
+}
+

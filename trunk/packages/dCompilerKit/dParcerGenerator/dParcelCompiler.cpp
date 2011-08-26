@@ -206,8 +206,7 @@ dParcelCompiler::dParcelCompiler(const char* const inputRules, const char* const
 	// create a LR(1) parsing table from the NFA graphs
 	BuildParcingTable (stateList, symbolList);
 
-	//Write ParcelCode
-
+	//Write Parcer Code
 	char className[256];
 	const char* ptr = strrchr (outputFileName, '/');
 	if (ptr) {
@@ -220,7 +219,8 @@ dParcelCompiler::dParcelCompiler(const char* const inputRules, const char* const
 			ptr = outputFileName;
 		}
 	}
-
+	strcpy (className, ptr);
+	strtok (className, ".");
 	GenerateHeaderFile (className, outputFileName, ruleList, tokenEnumeration);
 	GenerateParcerCode (className, outputFileName);
 
@@ -632,9 +632,6 @@ void dParcelCompiler::BuildParcingTable (dTree<dState*,int>& stateList, dTree<To
 }
 
 
-void dParcelCompiler::GenerateParcerCode (const char* const className, const char* const outputFileName)
-{
-}
 
 
 void dParcelCompiler::GenerateHeaderFile (
@@ -657,7 +654,7 @@ void dParcelCompiler::GenerateHeaderFile (
 
 
 	char* const ptr = strrchr (path, '\\');
-	sprintf (ptr, "/dParcerTemplateHeader.h");
+	sprintf (ptr, "/dParcerTemplate.h");
 
 	FILE* const templateFile = fopen (path, "r");
 	_ASSERTE (templateFile);
@@ -676,6 +673,8 @@ void dParcelCompiler::GenerateHeaderFile (
 		templateHeader.replace(position, 12, name);
 	}
 
+	string enumTokens ("");
+	bool firstToken = true;
 	for (dProductionRule::dListNode* ruleNode = ruleList.GetFirst(); ruleNode; ruleNode = ruleNode->GetNext()) {
 		dRuleInfo& ruleInfo = ruleNode->GetInfo();
 		for (dRuleInfo::dListNode* symbolNode = ruleInfo.GetFirst(); symbolNode; symbolNode = symbolNode->GetNext()) {
@@ -685,17 +684,79 @@ void dParcelCompiler::GenerateHeaderFile (
 				_ASSERTE (node);
 				int value = node->GetInfo();
 				if (value >= 256) {
-					_ASSERTE (0);
+					enumTokens += "\t\t";
+					enumTokens += symbol.m_name;
+					if (firstToken) {
+						firstToken = false;
+						enumTokens += " = 256,\n";
+					} else {
+						enumTokens += ",\n";
+					}
 				}
 			}
 		}
 	}
+	int position ;
+	enumTokens.replace(enumTokens.size()-2, 2, "");
+	position = templateHeader.find ("$(Tokens)");
+	templateHeader.replace(position, 9, enumTokens);
 
-/*
-	FILE* const headerFile = fopen (fileName, "w");
+
+	strcpy (path, outputFileName);
+	char* const ptr1 = strrchr (path, '.');
+	if (ptr1) {
+		*ptr1 = 0;
+	}
+	strcat (path, ".h");
+
+	FILE* const headerFile = fopen (path, "w");
 	_ASSERTE (headerFile);
 	fprintf (headerFile, "%s", templateHeader.c_str());
-
 	fclose (headerFile);
-*/
+}
+
+
+void dParcelCompiler::GenerateParcerCode (const char* const className, const char* const outputFileName)
+{
+
+	char path[2048];
+
+	// in windows
+	GetModuleFileName(NULL, path, sizeof(path)); 
+
+	//	for Linux:
+	//	char szTmp[32]; 
+	//	sprintf(szTmp, "/proc/%d/exe", getpid()); 
+	//	int bytes = MIN(readlink(szTmp, pBuf, len), len - 1); 
+	//	if(bytes >= 0)
+	//		pBuf[bytes] = '\0'; 
+
+
+	char* const ptr = strrchr (path, '\\');
+	sprintf (ptr, "/dParcerTemplate.cpp");
+
+	FILE* const templateFile = fopen (path, "r");
+	_ASSERTE (templateFile);
+
+	fseek (templateFile, 0, SEEK_END);
+	int size = ftell (templateFile) + 1;
+	fseek (templateFile, 0, SEEK_SET);
+
+	string templateHeader ("") ;
+	templateHeader.resize(size);
+	fread ((void*)templateHeader.c_str(), 1, size, templateFile);
+	fclose (templateFile);	
+
+	string name (className);
+	for (size_t position = templateHeader.find ("$(className)"); position != -1; position = templateHeader.find ("$(className)")) {
+		templateHeader.replace(position, 12, name);
+	}
+
+
+
+
+	FILE* const headerFile = fopen (outputFileName, "w");
+	_ASSERTE (headerFile);
+	fprintf (headerFile, "%s", templateHeader.c_str());
+	fclose (headerFile);
 }

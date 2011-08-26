@@ -106,7 +106,7 @@ void dLexCompiler::CreateCodeFile (
 
 
 	char* const ptr = strrchr (path, '\\');
-	sprintf (ptr, "/dLexicalTemplateCode.cpp");
+	sprintf (ptr, "/dLexicalTemplate.cpp");
 
 	FILE* const templateFile = fopen (path, "r");
 	_ASSERTE (templateFile);
@@ -321,7 +321,7 @@ void dLexCompiler::CreateHeaderFile (const char* const fileName, const char* con
 
 
 	char* const ptr = strrchr (path, '\\');
-	sprintf (ptr, "/dLexicalTemplateHeader.h");
+	sprintf (ptr, "/dLexicalTemplate.h");
 
 	FILE* const templateFile = fopen (path, "r");
 	_ASSERTE (templateFile);

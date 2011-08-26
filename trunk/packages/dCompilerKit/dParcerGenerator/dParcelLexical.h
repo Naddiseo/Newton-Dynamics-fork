@@ -25,16 +25,15 @@ class dParcelLexical
 	dParcelLexical(const char* const data);
 	virtual ~dParcelLexical();
 
-	int NextToken ();
-	const char* GetTokenString () const;
+	virtual int NextToken ();
+	virtual const char* GetTokenString () const;
 	
 
 	protected:
-	char NextChar ();
-	void GetLexString ();
-
-	int NextPattern ();
-	bool IsCharInSet (int ch, const char* const set) const;
+	virtual char NextChar ();
+	virtual void GetLexString ();
+	virtual int NextPattern ();
+	virtual bool IsCharInSet (int ch, const char* const set) const;
 
 	// local lexical variables
 	int m_token;
