@@ -79,7 +79,9 @@ $(characterSets)
 	static int transitionsCount[] = {$(transitionsCount)};
 	static int nextState[][$(statesCount)] = {$(nextState)};
 	static int charaterTests[][$(statesCount)] = {$(charactesTest)};
-	static int testSetArrayIndex[][$(statesCount)] = {$(testSetArrayIndex)};
+	static int testSetArrayIndex[][$(statesCount)] = {$(testSetArrayIndex__)};
+	//static int testSetArrayIndexOffset[] = {$(testSetArrayOffsets)};
+	//static int testSetArrayIndex[] = {$(testSetArrayIndex)};
 
 	m_state = 0;
 	m_startState = 0;

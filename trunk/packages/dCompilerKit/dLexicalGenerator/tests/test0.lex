@@ -39,10 +39,10 @@ ANY			[0-9a-zA-Z_.]
 
 
 "\;"			{ return(';'); }
-"\{"		{ return('{'); }
-"\}"		{ return('}'); }
-"\("		{ return('('); }
-"\)"		{ return(')'); }
+"\{"			{ return('{'); }
+"\}"			{ return('}'); }
+"\("			{ return('('); }
+"\)"			{ return(')'); }
 "\,"			{ return(','); }
 "\:"			{ return(':'); }
 "\="			{ return('='); }

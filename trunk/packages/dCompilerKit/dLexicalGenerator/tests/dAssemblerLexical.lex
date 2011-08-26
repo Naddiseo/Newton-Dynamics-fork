@@ -11,7 +11,7 @@
 */
 
 
-// lexical analizero fo and assembly compiler
+// lexical analizer for an virtual machine byte code assembly compiler
 
 AnyButAstr		[^\*]
 AnyButSlash		[^\/]
@@ -21,7 +21,6 @@ Comment			({Comment1}|{Comment2})
 
 
 %%
-{Comment}			{}
 [aA](d|D)[dD]		{ return ADD;}
-
+{Comment}			{}
 

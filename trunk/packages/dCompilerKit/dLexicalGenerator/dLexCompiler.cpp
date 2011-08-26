@@ -241,6 +241,35 @@ void dLexCompiler::CreateCodeFile (
 	templateHeader.replace(position, 16, characterTestTable);
 
 
+
+	int nextStateOffset = 0;
+	string characterSetIndexTableOffsets ("0, ");
+	string characterSetIndexTableStates ("");
+	for (int i = 0; i < stateCount; i ++) {
+		char text[256];
+		dTree<dTree<int, int>, int>::Iterator iter (testSetArrayIndexMap); 
+		for (iter.Begin(); iter; iter ++) {
+			dTree<int, int>& nextState = iter.GetNode()->GetInfo();
+			dTree<int, int>::dTreeNode* const node = nextState.Find(i);
+			if (node) {
+				int state = node->GetInfo();
+				sprintf (text, "%d, ", state);
+				characterSetIndexTableStates += text;
+				nextStateOffset ++;
+			}
+		}
+		sprintf (text, "%d, ", nextStateOffset);
+		characterSetIndexTableOffsets += text;
+	}
+	characterSetIndexTableOffsets.replace(characterSetIndexTableOffsets.size()-2, 2, "");
+	position = templateHeader.find ("$(testSetArrayOffsets)");
+	templateHeader.replace(position, 22, characterSetIndexTableOffsets);
+
+	characterSetIndexTableStates.replace(characterSetIndexTableStates.size()-2, 2, "");
+	position = templateHeader.find ("$(testSetArrayIndex)");
+	templateHeader.replace(position, 20, characterSetIndexTableStates);
+
+{
 	string characterSetIndexTable ("\n");
 	dTree<dTree<int, int>, int>::Iterator iter4 (testSetArrayIndexMap); 
 	for (iter4.Begin(); iter4; iter4 ++) {
@@ -262,8 +291,10 @@ void dLexCompiler::CreateCodeFile (
 		characterSetIndexTable += "0},\n";
 	}
 	characterSetIndexTable.replace(characterSetIndexTable.size()-2, 2, "\n\t");
-	position = templateHeader.find ("$(testSetArrayIndex)");
-	templateHeader.replace(position, 20, characterSetIndexTable);
+	position = templateHeader.find ("$(testSetArrayIndex__)");
+	templateHeader.replace(position, 22, characterSetIndexTable);
+}
+
 
 
 

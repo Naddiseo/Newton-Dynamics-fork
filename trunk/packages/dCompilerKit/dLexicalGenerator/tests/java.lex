@@ -93,92 +93,92 @@ Numeric  		({IntegerLiteral}|{FloatingPoint})
 Literal			({Numeric}|{Character}|{String})
 
 %%
-"true"		{return BOOLLIT;}
-"false"		{return BOOLLIT;}
+"true"			{return BOOLLIT;}
+"false"			{return BOOLLIT;}
 
-{Separator}	{return yytext[0];}
+{Separator}	{	return yytext[0];}
 {Delimiter1}	{return yytext[0];}
-{Dimension}	{return OP_DIM;}
+{Dimension}		{return OP_DIM;}
 
-"=="		{return OP_EQ;}
-"<="		{return OP_LE;}
-">="		{return OP_GE;}
-"!="		{return OP_NE;}
-"\|\|"		{return OP_LOR;}
-"&&"		{return OP_LAND;}
-"\+\+"		{return OP_INC;}
-"--"		{return OP_DEC;}
-">>"		{return OP_SHR;}
-"<<"		{return OP_SHL;}
-">>>"		{return OP_SHRR;}
-"\+="		{return ASS_ADD;}
-"-="		{return ASS_SUB;}
-"\*="		{return ASS_MUL;}
-"/="		{return ASS_DIV;}
-"&="		{return ASS_AND;}
-"\|="		{return ASS_OR;}
-"^="		{return ASS_XOR;}
-"%="		{return ASS_MOD;}
-"<<="		{return ASS_SHL;}
-">>="		{return ASS_SHR;}
-">>>="		{return ASS_SHRR;}
+"=="			{return OP_EQ;}
+"<="			{return OP_LE;}
+">="			{return OP_GE;}
+"!="			{return OP_NE;}
+"\|\|"			{return OP_LOR;}
+"&&"			{return OP_LAND;}
+"\+\+"			{return OP_INC;}
+"--"			{return OP_DEC;}
+">>"			{return OP_SHR;}
+"<<"			{return OP_SHL;}
+">>>"			{return OP_SHRR;}
+"\+="			{return ASS_ADD;}
+"-="			{return ASS_SUB;}
+"\*="			{return ASS_MUL;}
+"/="			{return ASS_DIV;}
+"&="			{return ASS_AND;}
+"\|="			{return ASS_OR;}
+"^="			{return ASS_XOR;}
+"%="			{return ASS_MOD;}
+"<<="			{return ASS_SHL;}
+">>="			{return ASS_SHR;}
+">>>="			{return ASS_SHRR;}
 
-"abstract"	{return ABSTRACT;}
+"abstract"		{return ABSTRACT;}
 "do"            {return DO;}
 "implements"    {return IMPLEMENTS;}
-"package"	{return PACKAGE;}
-"throw"		{return THROW;}
-"boolean"	{return BOOLEAN;}
-"double"	{return DOUBLE;}
-"import"	{return IMPORT;}
-"private"	{return PRIVATE;}
-"throws"	{return THROWS;}
-"break"		{return BREAK;}
-"else"		{return ELSE;}
-"inner"		{return INNER;}
-"protected"	{return PROTECTED;}
-"transient"	{return TRANSIENT;}
-"byte"		{return BYTE;}
-"extends"	{return EXTENDS;}
+"package"		{return PACKAGE;}
+"throw"			{return THROW;}
+"boolean"		{return BOOLEAN;}
+"double"		{return DOUBLE;}
+"import"		{return IMPORT;}
+"private"		{return PRIVATE;}
+"throws"		{return THROWS;}
+"break"			{return BREAK;}
+"else"			{return ELSE;}
+"inner"			{return INNER;}
+"protected"		{return PROTECTED;}
+"transient"		{return TRANSIENT;}
+"byte"			{return BYTE;}
+"extends"		{return EXTENDS;}
 "instanceof"	{return INSTANCEOF;}
-"public"	{return PUBLIC;}
-"try"		{return TRY;}
-"case"		{return CASE;}
-"final"		{return FINAL;}
-"int"		{return INT;}
-"rest"		{return REST;}
-"var"		{return VAR;}
-"cast"		{return CAST;}
-"finally"	{return FINALLY;}
-"interface"	{return INTERFACE;}
-"return"	{return RETURN;}
-"void"		{return VOID;}
-"catch"		{return CATCH;}
-"float"		{return FLOAT;}
-"long"		{return LONG;}
-"short"		{return SHORT;}
-"volatile"	{return VOLATILE;}
-"char"		{return CHAR;}
-"for"		{return FOR;}
-"native"	{return NATIVE;}
-"static"	{return STATIC;}
-"while"		{return WHILE;}
-"class"		{return CLASS;}
-"future"	{return FUTURE;}
-"new"		{return NEW;}
-"super"		{return SUPER;}
-"const"		{return CONST;}
-"generic"	{return GENERIC;}
-"null"		{return JNULL;}
-"switch"	{return SWITCH;}
-"continue"	{return CONTINUE;}
-"goto"		{return GOTO;}
-"operator"	{return OPERATOR;}
+"public"		{return PUBLIC;}
+"try"			{return TRY;}
+"case"			{return CASE;}
+"final"			{return FINAL;}
+"int"			{return INT;}
+"rest"			{return REST;}
+"var"			{return VAR;}
+"cast"			{return CAST;}
+"finally"		{return FINALLY;}
+"interface"		{return INTERFACE;}
+"return"		{return RETURN;}
+"void"			{return VOID;}
+"catch"			{return CATCH;}
+"float"			{return FLOAT;}
+"long"			{return LONG;}
+"short"			{return SHORT;}
+"volatile"		{return VOLATILE;}
+"char"			{return CHAR;}
+"for"			{return FOR;}
+"native"		{return NATIVE;}
+"static"		{return STATIC;}
+"while"			{return WHILE;}
+"class"			{return CLASS;}
+"future"		{return FUTURE;}
+"new"			{return NEW;}
+"super"			{return SUPER;}
+"const"			{return CONST;}
+"generic"		{return GENERIC;}
+"null"			{return JNULL;}
+"switch"		{return SWITCH;}
+"continue"		{return CONTINUE;}
+"goto"			{return GOTO;}
+"operator"		{return OPERATOR;}
 "synchronized"	{return SYNCHRONIZED;}
-"default"	{return DEFAULT;}
-"if"		{return IF;}
-"outer"		{return OUTER;}
-"this"		{return THIS;}
+"default"		{return DEFAULT;}
+"if"			{return IF;}
+"outer"			{return OUTER;}
+"this"			{return THIS;}
 
 {Identifier}	{return IDENTIFIER;}
 
@@ -192,14 +192,13 @@ Literal			({Numeric}|{Character}|{String})
 {Float4}        {return LITERAL;}
 
 {Character}     {return LITERAL;}
-{String}	{return LITERAL;}
+{String}		{return LITERAL;}
 
-{CR}   		{}
-{LF}		{}
-{FF}		{}
-{TAB}		{}
+{CR}   			{}
+{LF}			{}
+{FF}			{}
+{TAB}			{}
 {BLK}           {}
-{BLANK}		{}
-
-{Comment}	{}
+{BLANK}			{}
+{Comment}		{}
 
