@@ -21,6 +21,7 @@ Comment			({Comment1}|{Comment2})
 
 
 %%
+{Comment}			{}
 [aA](d|D)[dD]		{ return ADD;}
 
 

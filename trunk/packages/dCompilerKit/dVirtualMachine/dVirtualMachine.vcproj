@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="dVistualMachine"
+	Name="dVirtualMachine"
 	ProjectGUID="{61D6A343-3A8F-440E-8FA6-2C342ABB6896}"
 	RootNamespace="dCompilerKit"
 	Keyword="Win32Proj"
@@ -172,7 +172,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="dLexCompiler.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="dLexCompiler.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
+					CommandLine="dLexCompiler.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp&#x0D;&#x0A;"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>
@@ -182,7 +182,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="dLexCompiler.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="dLexCompiler.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
+					CommandLine="dLexCompiler.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp&#x0D;&#x0A;"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>
