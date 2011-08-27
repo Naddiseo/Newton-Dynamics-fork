@@ -12,7 +12,7 @@
 
 
 %{
-#include <dParcelCompiler.h>
+#include <dParcerCompiler.h>
 #include "dGrammarLexical.h"
 %}
 
@@ -38,9 +38,9 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 
 %%
 [ \t\n\r]+			{}
-[|]					{ return(dParcelCompiler::OR); }
-[:]					{ return(dParcelCompiler::COLOM); }
-[;]					{ return(dParcelCompiler::SIMICOLOM); }
+[|]					{ return(dParcerCompiler::OR); }
+[:]					{ return(dParcerCompiler::COLOM); }
+[;]					{ return(dParcerCompiler::SIMICOLOM); }
 "';'"				{ return(';'); }
 "'{'"				{ return('{'); }
 "'}'"				{ return('}'); }
@@ -68,12 +68,12 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 "'\]'"				{ return(']'); }
 
 
-"%%"				{ return dParcelCompiler::GRAMMAR_SEGEMENT;}
-"%token"			{ return dParcelCompiler::TOKEN;}
-"%left"				{ return dParcelCompiler::LEFT;}
-"%right"			{ return dParcelCompiler::RIGHT;}
-"%start"			{ return dParcelCompiler::START;}
-{Literal}			{ return dParcelCompiler::LITERAL;}
-{CodeBlock}			{ return dParcelCompiler::CODE_BLOCK;}
-[{]					{ ((dGrammarLexical*)this)->ReadUserAction(); return dParcelCompiler::USER_ACTION;}
+"%%"				{ return dParcerCompiler::GRAMMAR_SEGEMENT;}
+"%token"			{ return dParcerCompiler::TOKEN;}
+"%left"				{ return dParcerCompiler::LEFT;}
+"%right"			{ return dParcerCompiler::RIGHT;}
+"%start"			{ return dParcerCompiler::START;}
+{Literal}			{ return dParcerCompiler::LITERAL;}
+{CodeBlock}			{ m_tokenString.replace(0, 2, ""); m_tokenString.replace(m_tokenString.size() - 2, 2, ""); return dParcerCompiler::CODE_BLOCK;}
+[{]					{ ((dGrammarLexical*)this)->ReadUserAction(); return dParcerCompiler::USER_ACTION;}
 {Comment}			{}

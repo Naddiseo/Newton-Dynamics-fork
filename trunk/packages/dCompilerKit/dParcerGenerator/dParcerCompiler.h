@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __dParcelCompiler_h__
-#define __dParcelCompiler_h__
+#ifndef __dParcerCompiler_h__
+#define __dParcerCompiler_h__
 
 
 #include <dTree.h>
@@ -23,7 +23,7 @@ using namespace std;
 
 class dGrammarLexical;
 
-class dParcelCompiler
+class dParcerCompiler
 {
 	public:
 	enum TokenType
@@ -65,13 +65,11 @@ class dParcelCompiler
 	class dProductionRule;
 
 	
-	
-
-	dParcelCompiler(const char* const inputRules, const char* const outputFileName);
-	~dParcelCompiler();
+	dParcerCompiler(const char* const inputRules, const char* const outputFileName, const char* const scannerClassName);
+	~dParcerCompiler();
 
 	protected:
-	void ScanGrammarFile(const char* const inputRules, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens);
+	void ScanGrammarFile(const char* const inputRules, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens, string& userCodeBlock);
 	Token ScanGrammarRule(dGrammarLexical& lexical, dProductionRule& rules, dTree<TokenType, string>& symbolList, int& ruleNumber, dTree<int, string>& tokenEnumarationMap, int& tokenEnumeration);
 
 	
@@ -81,8 +79,8 @@ class dParcelCompiler
 
 	void BuildParcingTable (dTree<dState*,int>& stateList, dTree<TokenType, string>& symbolList);
 
-	void GenerateHeaderFile (const char* const className, const char* const outputFileName, dProductionRule& rules, dTree<int, string>& tokenEnumerationMap);
-	void GenerateParcerCode (const char* const className, const char* const outputFileName);
+	void GenerateHeaderFile (const char* const className, const char* const scannerClassName, const char* const outputFileName, dProductionRule& rules, dTree<int, string>& tokenEnumerationMap);
+	void GenerateParcerCode (const char* const className, const char* const scannerClassName, const char* const outputFileName, const string& userCode);
 
 };
 

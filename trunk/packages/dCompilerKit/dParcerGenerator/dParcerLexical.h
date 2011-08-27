@@ -10,20 +10,20 @@
 */
 
 //
-//Auto generated Lexical Analyzer class: dParcelLexical.h
+//Auto generated Lexical Analyzer class: dParcerLexical.h
 //
 
-#ifndef __dParcelLexical_h__
-#define __dParcelLexical_h__
+#ifndef __dParcerLexical_h__
+#define __dParcerLexical_h__
 
 #include <string>
 using namespace std;
 
-class dParcelLexical
+class dParcerLexical
 {
 	public:
-	dParcelLexical(const char* const data);
-	virtual ~dParcelLexical();
+	dParcerLexical(const char* const data);
+	virtual ~dParcerLexical();
 
 	virtual int NextToken ();
 	virtual const char* GetTokenString () const;

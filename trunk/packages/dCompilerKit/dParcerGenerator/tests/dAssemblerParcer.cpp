@@ -10,23 +10,25 @@
 */
 
 //
-//Auto generated Parcer Generator class: $(className).cpp
+//Auto generated Parcer Generator class: dAssemblerParcer.cpp
 //
 
-$(userCode)
-#include "$(className).h"
+
+#include <dVirtualMachine.h>
+
+#include "dAssemblerParcer.h"
 
 #define dStackSize 1024
 
-$(className)::$(className)()
+dAssemblerParcer::dAssemblerParcer()
 {
 }
 
-$(className)::~$(className)()
+dAssemblerParcer::~dAssemblerParcer()
 {
 }
 
-int $(className)::Parce($(scannerClass)& scanner)
+int dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 {
 	for (Token token = Token (scanner.NextToken()); token != -1; token = Token (scanner.NextToken())) {
 

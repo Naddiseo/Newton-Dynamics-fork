@@ -1,9 +1,9 @@
 #ifndef __dGrammarLexical_d__
 #define __dGrammarLexical_d__
 
-#include "dParcelLexical.h"
+#include "dParcerLexical.h"
 
-class dGrammarLexical: public dParcelLexical
+class dGrammarLexical: public dParcerLexical
 {
 public:
 	dGrammarLexical(const char* const data);

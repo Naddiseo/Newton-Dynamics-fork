@@ -16,7 +16,8 @@
 #ifndef __$(className)_h__
 #define __$(className)_h__
 
-class dParcelLexical;
+
+class $(scannerClass);
 
 class $(className)
 {
@@ -28,7 +29,7 @@ $(Tokens)
 
 	$(className)();
 	virtual ~$(className)();
-	virtual int Parce(dParcelLexical& lexical);
+	virtual int Parce($(scannerClass)& scanner);
 
 };
 

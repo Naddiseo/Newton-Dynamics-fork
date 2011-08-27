@@ -10,28 +10,26 @@
 */
 
 //
-//Auto generated Parcer Generator class: $(className).cpp
+//Auto generated Parcer Generator class: test0.h
 //
 
-$(userCode)
-#include "$(className).h"
+#ifndef __test0_h__
+#define __test0_h__
 
-#define dStackSize 1024
+class dParcelLexical;
 
-$(className)::$(className)()
+class test0
 {
-}
+	public:
+	enum Token
+	{
+		id = 256
+	};
 
-$(className)::~$(className)()
-{
-}
+	test0();
+	virtual ~test0();
+	virtual int Parce(dParcelLexical& lexical);
 
-int $(className)::Parce($(scannerClass)& scanner)
-{
-	for (Token token = Token (scanner.NextToken()); token != -1; token = Token (scanner.NextToken())) {
+};
 
-	}
-
-	return 0;
-}
-
+#endif

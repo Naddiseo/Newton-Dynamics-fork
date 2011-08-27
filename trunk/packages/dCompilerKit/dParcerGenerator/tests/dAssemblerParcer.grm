@@ -12,6 +12,12 @@
 
 // dVirtual Machine dAssembler compiler grammar
 
+%{
+#include <dVirtualMachine.h>
+#include "dAssemblerLexical.h"
+%}
+
+
 %start SegementList
 
 %token END

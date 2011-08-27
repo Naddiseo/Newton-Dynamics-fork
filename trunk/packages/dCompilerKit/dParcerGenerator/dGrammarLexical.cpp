@@ -1,8 +1,8 @@
-#include "dParcelCompiler.h"
+#include "dParcerCompiler.h"
 #include "dGrammarLexical.h"
 
 dGrammarLexical::dGrammarLexical(const char* const data)
-	:dParcelLexical(data)
+	:dParcerLexical(data)
 {
 }
 

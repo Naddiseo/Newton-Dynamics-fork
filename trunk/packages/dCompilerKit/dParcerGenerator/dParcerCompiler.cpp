@@ -9,10 +9,10 @@
 * freely
 */
 
-// dParcelCompiler.cpp : Defines the entry point for the console application.
+// dParcerCompiler.cpp : Defines the entry point for the console application.
 //
 
-#include "dParcelCompiler.h"
+#include "dParcerCompiler.h"
 #include "dGrammarLexical.h"
 
 #define DACCEPT_SYMBOL "$$$"
@@ -27,7 +27,7 @@
 //	%%
 //	user code
 
-class dParcelCompiler::dSymbol
+class dParcerCompiler::dSymbol
 {
 	public:
 	TokenType m_type;
@@ -36,7 +36,7 @@ class dParcelCompiler::dSymbol
 };
 
 
-class dParcelCompiler::dRuleInfo: public dParcelCompiler::dSymbol, public dList<dParcelCompiler::dSymbol>
+class dParcerCompiler::dRuleInfo: public dParcerCompiler::dSymbol, public dList<dParcerCompiler::dSymbol>
 {
 	public:
 	int m_ruleId;
@@ -63,7 +63,7 @@ class dParcelCompiler::dRuleInfo: public dParcelCompiler::dSymbol, public dList<
 };
 
 
-class dParcelCompiler::dProductionRule: public dList<dParcelCompiler::dRuleInfo>
+class dParcerCompiler::dProductionRule: public dList<dParcerCompiler::dRuleInfo>
 {
 	public:
 
@@ -79,7 +79,7 @@ class dParcelCompiler::dProductionRule: public dList<dParcelCompiler::dRuleInfo>
 	}
 };
 
-class dParcelCompiler::dTransition
+class dParcerCompiler::dTransition
 {
 	public:
 	string m_name;
@@ -87,7 +87,7 @@ class dParcelCompiler::dTransition
 	dState* m_targetState;
 };
 
-class dParcelCompiler::dItem
+class dParcerCompiler::dItem
 {
 	public:
 	dItem ()
@@ -100,14 +100,14 @@ class dParcelCompiler::dItem
 	dProductionRule::dListNode* m_ruleNode;
 };
 
-class dParcelCompiler::dAction 
+class dParcerCompiler::dAction 
 {
 	public:
 	ActionType m_type;
 	dProductionRule::dListNode* m_ruleNode;
 };
 
-class dParcelCompiler::dState: public dList<dParcelCompiler::dItem>
+class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 {
 	public:
 	dState (dList<dItem>& itemSet)
@@ -189,15 +189,16 @@ class dParcelCompiler::dState: public dList<dParcelCompiler::dItem>
 	
 };
 
-dParcelCompiler::dParcelCompiler(const char* const inputRules, const char* const outputFileName)
+dParcerCompiler::dParcerCompiler(const char* const inputRules, const char* const outputFileName, const char* const scannerClassName)
 {
 	// scan the grammar into a list of rules.
 	dProductionRule ruleList;
 	dTree<int, string> tokenEnumeration;
 	dTree<TokenType, string> symbolList;
+	string userCodeBlock;
 	
 	symbolList.Insert(TERMINAL, DACCEPT_SYMBOL);
-	ScanGrammarFile(inputRules, ruleList, symbolList, tokenEnumeration);
+	ScanGrammarFile(inputRules, ruleList, symbolList, tokenEnumeration, userCodeBlock);
 
 	// convert the rules into a NFA.
 	dTree<dState*,int> stateList;
@@ -221,8 +222,8 @@ dParcelCompiler::dParcelCompiler(const char* const inputRules, const char* const
 	}
 	strcpy (className, ptr);
 	strtok (className, ".");
-	GenerateHeaderFile (className, outputFileName, ruleList, tokenEnumeration);
-	GenerateParcerCode (className, outputFileName);
+	GenerateHeaderFile (className, scannerClassName, outputFileName, ruleList, tokenEnumeration);
+	GenerateParcerCode (className, scannerClassName, outputFileName, userCodeBlock);
 
 	dTree<dState*,int>::Iterator iter(stateList);
 	for (iter.Begin(); iter; iter ++) {
@@ -232,15 +233,16 @@ dParcelCompiler::dParcelCompiler(const char* const inputRules, const char* const
 }
 
 
-dParcelCompiler::~dParcelCompiler()
+dParcerCompiler::~dParcerCompiler()
 {
 }
 
-void dParcelCompiler::ScanGrammarFile(
+void dParcerCompiler::ScanGrammarFile(
 	const char* const inputRules, 
 	dProductionRule& ruleList, 
 	dTree<TokenType, string>& symbolList, 
-	dTree<int, string>& tokenEnumerationMap)
+	dTree<int, string>& tokenEnumerationMap,
+	string& userCodeBlock)
 {
 	dGrammarLexical lexical (inputRules);
 
@@ -271,6 +273,14 @@ void dParcelCompiler::ScanGrammarFile(
 				token = Token(lexical.NextToken());
 				break;
 			}
+
+			case CODE_BLOCK:
+			{
+				userCodeBlock += lexical.GetTokenString();
+				token = Token(lexical.NextToken());
+				break;
+			}
+
 			default:;
 			{
 				token = Token(lexical.NextToken());
@@ -338,7 +348,7 @@ void dParcelCompiler::ScanGrammarFile(
 	// scan literal use code
 }
 
-dParcelCompiler::Token dParcelCompiler::ScanGrammarRule(
+dParcerCompiler::Token dParcerCompiler::ScanGrammarRule(
 	dGrammarLexical& lexical, 
 	dProductionRule& rules, 
 	dTree<TokenType, string>& symbolList, 
@@ -420,7 +430,7 @@ dParcelCompiler::Token dParcelCompiler::ScanGrammarRule(
 }
 
 // Generate the closure for a Set of Item  
-dParcelCompiler::dState* dParcelCompiler::Closure (dProductionRule& rulesList, dList<dItem>& itemSet)
+dParcerCompiler::dState* dParcerCompiler::Closure (dProductionRule& rulesList, dList<dItem>& itemSet)
 {
 	dState* const state = new dState (itemSet);
 	for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
@@ -449,7 +459,7 @@ dParcelCompiler::dState* dParcelCompiler::Closure (dProductionRule& rulesList, d
 }
 
 // generates the got state for this symbol
-dParcelCompiler::dState* dParcelCompiler::Goto (dProductionRule& rulesList, dState* const state, const string& symbol)
+dParcerCompiler::dState* dParcerCompiler::Goto (dProductionRule& rulesList, dState* const state, const string& symbol)
 {
 	dList<dItem> itemSet;
 
@@ -475,7 +485,7 @@ dParcelCompiler::dState* dParcelCompiler::Goto (dProductionRule& rulesList, dSta
 }
 
 // generates the canonical Items set for a LR(1) grammar
-void dParcelCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, dProductionRule& ruleList, dTree<TokenType, string>& symbolList)
+void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, dProductionRule& ruleList, dTree<TokenType, string>& symbolList)
 {
 	dList<dItem> itemSet;
 	dItem& item = itemSet.Append()->GetInfo();
@@ -526,7 +536,7 @@ void dParcelCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, dProducti
 
 
 
-void dParcelCompiler::BuildParcingTable (dTree<dState*,int>& stateList, dTree<TokenType, string>& symbolList)
+void dParcerCompiler::BuildParcingTable (dTree<dState*,int>& stateList, dTree<TokenType, string>& symbolList)
 {
 	dTree<dState*,int>::Iterator stateIter (stateList);
 	dTree<TokenType, string>::Iterator symbolIter (symbolList);
@@ -634,8 +644,9 @@ void dParcelCompiler::BuildParcingTable (dTree<dState*,int>& stateList, dTree<To
 
 
 
-void dParcelCompiler::GenerateHeaderFile (
+void dParcerCompiler::GenerateHeaderFile (
 	const char* const className, 
+	const char* const scannerClassName,
 	const char* const outputFileName,
 	dProductionRule& ruleList, 
 	dTree<int, string>& tokenEnumerationMap)
@@ -673,24 +684,34 @@ void dParcelCompiler::GenerateHeaderFile (
 		templateHeader.replace(position, 12, name);
 	}
 
+	string scanner(scannerClassName);
+	for (size_t position = templateHeader.find ("$(scannerClass)"); position != -1; position = templateHeader.find ("$(scannerClass)")) {
+		templateHeader.replace(position, 15, scanner);
+	}
+
+
 	string enumTokens ("");
 	bool firstToken = true;
+	dTree<int, string> symbolFilter;
 	for (dProductionRule::dListNode* ruleNode = ruleList.GetFirst(); ruleNode; ruleNode = ruleNode->GetNext()) {
 		dRuleInfo& ruleInfo = ruleNode->GetInfo();
 		for (dRuleInfo::dListNode* symbolNode = ruleInfo.GetFirst(); symbolNode; symbolNode = symbolNode->GetNext()) {
 			dSymbol& symbol = symbolNode->GetInfo();
 			if (symbol.m_type == TERMINAL) {
-				dTree<int, string>::dTreeNode* const node = tokenEnumerationMap.Find(symbol.m_name);
-				_ASSERTE (node);
-				int value = node->GetInfo();
-				if (value >= 256) {
-					enumTokens += "\t\t";
-					enumTokens += symbol.m_name;
-					if (firstToken) {
-						firstToken = false;
-						enumTokens += " = 256,\n";
-					} else {
-						enumTokens += ",\n";
+				if (!symbolFilter.Find(symbol.m_name)) {
+					symbolFilter.Insert(0, symbol.m_name);
+					dTree<int, string>::dTreeNode* const node = tokenEnumerationMap.Find(symbol.m_name);
+					_ASSERTE (node);
+					int value = node->GetInfo();
+					if (value >= 256) {
+						enumTokens += "\t\t";
+						enumTokens += symbol.m_name;
+						if (firstToken) {
+							firstToken = false;
+							enumTokens += " = 256,\n";
+						} else {
+							enumTokens += ",\n";
+						}
 					}
 				}
 			}
@@ -715,7 +736,11 @@ void dParcelCompiler::GenerateHeaderFile (
 }
 
 
-void dParcelCompiler::GenerateParcerCode (const char* const className, const char* const outputFileName)
+void dParcerCompiler::GenerateParcerCode (
+	const char* const className, 
+	const char* const scannerClassName,
+	const char* const outputFileName,
+	const string& userCode)
 {
 	char path[2048];
 
@@ -745,11 +770,19 @@ void dParcelCompiler::GenerateParcerCode (const char* const className, const cha
 	fread ((void*)templateHeader.c_str(), 1, size, templateFile);
 	fclose (templateFile);	
 
+	size_t position = templateHeader.find ("$(userCode)");
+	templateHeader.replace(position, 11, userCode);
+
+
 	string name (className);
 	for (size_t position = templateHeader.find ("$(className)"); position != -1; position = templateHeader.find ("$(className)")) {
 		templateHeader.replace(position, 12, name);
 	}
 
+	string scanner(scannerClassName);
+	for (size_t position = templateHeader.find ("$(scannerClass)"); position != -1; position = templateHeader.find ("$(scannerClass)")) {
+		templateHeader.replace(position, 15, scanner);
+	}
 
 	strcpy (path, outputFileName);
 	char* const ptr1 = strrchr (path, '.');

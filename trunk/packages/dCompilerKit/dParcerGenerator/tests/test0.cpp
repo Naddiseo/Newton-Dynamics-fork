@@ -10,27 +10,22 @@
 */
 
 //
-//Auto generated Parcer Generator class: $(className).cpp
+//Auto generated Parcer Generator class: test0.cpp
 //
 
-$(userCode)
-#include "$(className).h"
+#include "test0.h"
 
-#define dStackSize 1024
-
-$(className)::$(className)()
+test0::test0()
 {
 }
 
-$(className)::~$(className)()
+test0::~test0()
 {
 }
 
-int $(className)::Parce($(scannerClass)& scanner)
+int test0::Parce(dParcelLexical& lexical)
 {
-	for (Token token = Token (scanner.NextToken()); token != -1; token = Token (scanner.NextToken())) {
 
-	}
 
 	return 0;
 }
