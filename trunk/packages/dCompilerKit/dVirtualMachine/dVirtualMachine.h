@@ -46,6 +46,8 @@ class dVirtualMachine
 	dVirtualMachine(void);
 	virtual ~dVirtualMachine(void);
 
+	bool CompileAssembly (const char* const code);
+
 	protected:
 	unsigned m_registes[32];
 	int m_codeSegementSize;

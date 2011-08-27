@@ -1,4 +1,3 @@
-
 /* Copyright (c) <2009> <Newton Game Dynamics>
 * 
 * This software is provided 'as-is', without any express or implied
@@ -11,16 +10,47 @@
 */
 
 
-// lexical analizer for an virtual machine byte code assembly compiler
+%{
+//
+// Newton Scrip Lex parcel
+// based on a subset of Java language specification 1.0 
+//
+%}
+
+%{
+#include <dVirtualMachine.h>
+#include "dAssemblerParcer.h"
+%}
+
 
 AnyButAstr		[^\*]
 AnyButSlash		[^\/]
-Comment1        [\/][\*]({AnyButAstr}|[\*]{AnyButSlash})*[\*][\/]
-Comment2        [\/][\/].*
+Comment1        [\/][\/].*
+Comment2        [\/][\*]({AnyButAstr}|[\*]{AnyButSlash})*[\*][\/]
 Comment			({Comment1}|{Comment2})
 
+UnsignedInt		[0-9]+
+SignedInt		[\-\+]?{UnsignedInt}
+
+Register		[rR]{UnsignedInt}
+loadI			[lL][oO][aA][dD][iI]
+add				[aA][dD][dD]
+ret				[rR][eE][tT]
+
+Literal			[a-zA-Z_][0-9a-zA-Z_]*
 
 %%
-[aA](d|D)[dD]		{ return ADD;}
-{Comment}			{}
+loadI			{return dAssemblerParcer::LOADI;}
+add				{return dAssemblerParcer::ADD;}
+ret				{return dAssemblerParcer::RET;}
+"begin"			{return dAssemblerParcer::BEGIN;}
+"end"			{return dAssemblerParcer::END;}
+"data:"			{return dAssemblerParcer::DATA;}
+"code:"			{return dAssemblerParcer::CODE;}
+SignedInt		{return dAssemblerParcer::INTERGER;}
+Register		{return dAssemblerParcer::REGISTER;}
 
+Literal			{return dAssemblerParcer::LITERAL;}
+{Comment}		{}
+
+%%

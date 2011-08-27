@@ -20,10 +20,8 @@
 
 %start SegementList
 
-%token END
+%token BEGIN END
 %token PUBLIC
-%token BEGINFUNCTION
-%token ENDFUNCTION
 %token INCLUDE
 
 %token DATASEGMENT
@@ -33,7 +31,11 @@
 %token LITERAL
 %token REGISTER
 
-%token MOV ADD
+%token INTERGER
+
+%token LOADI ADD RET
+
+
 
 %%
 
@@ -83,16 +85,9 @@ FuntionList     : FuntionList Function
 				| Function
 				|
 				;
-		
-		
-Function		: funtionExport FunctionBody
-				| FunctionBody
-				;
-
-funtionExport	: PUBLIC LITERAL
-				;
 				
-FunctionBody	: BEGINFUNCTION LITERAL instructionList	ENDFUNCTION	LITERAL
+FunctionBody	: BEGIN LITERAL ':' instructionList	END	LITERAL
+				| BEGIN LITERAL ':' PUBLIC instructionList END LITERAL
 				;	
 				
 				
@@ -101,8 +96,9 @@ instructionList	: instructionList instruction
 				;
 				
 				
-instruction		: MOV REGISTER ',' REGISTER			
+instruction		: LOADI REGISTER ',' INTERGER			
 				| ADD REGISTER ',' REGISTER	',' REGISTER		
+				| RET
 				;
 				
 				

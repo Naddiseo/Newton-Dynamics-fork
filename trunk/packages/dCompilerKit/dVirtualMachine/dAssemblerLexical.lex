@@ -20,6 +20,7 @@
 
 %{
 #include <dVirtualMachine.h>
+#include "dAssemblerParcer.h"
 %}
 
 
@@ -29,7 +30,33 @@ Comment1        [\/][\/].*
 Comment2        [\/][\*]({AnyButAstr}|[\*]{AnyButSlash})*[\*][\/]
 Comment			({Comment1}|{Comment2})
 
+UnsignedInt		[0-9]+
+SignedInt		[\-\+]?{UnsignedInt}
+
+Register		[rR]{UnsignedInt}
+loadI			[lL][oO][aA][dD][iI]
+add				[aA][dD][dD]
+ret				[rR][eE][tT]
+
+Literal			[a-zA-Z_][0-9a-zA-Z_]*
 
 %%
+loadI			{return dAssemblerParcer::LOADI;}
+add				{return dAssemblerParcer::ADD;}
+ret				{return dAssemblerParcer::RET;}
+
+
+"begin"			{return dAssemblerParcer::BEGIN;}
+"end"			{return dAssemblerParcer::END;}
+"include"		{return dAssemblerParcer::INCLUDE;}
+"public"		{return dAssemblerParcer::PUBLIC;}
+"data:"			{return dAssemblerParcer::DATASEGMENT;}
+"code:"			{return dAssemblerParcer::CODESEGMENT;}
+
+SignedInt		{return dAssemblerParcer::INTERGER;}
+Register		{return dAssemblerParcer::REGISTER;}
+
+Literal			{return dAssemblerParcer::LITERAL;}
 {Comment}		{}
 
+%%

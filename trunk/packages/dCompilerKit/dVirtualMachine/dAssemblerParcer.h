@@ -30,12 +30,13 @@ class dAssemblerParcer
 		DATASEGMENT,
 		WORD,
 		CODESEGMENT,
+		BEGIN,
 		PUBLIC,
-		BEGINFUNCTION,
-		ENDFUNCTION,
-		MOV,
+		LOADI,
 		REGISTER,
-		ADD
+		INTERGER,
+		ADD,
+		RET
 	};
 
 	dAssemblerParcer();

@@ -10,23 +10,21 @@
 * freely
 */
 
-// very simple sample ADDER grammar 
-
-%token id
-%token xxx
-%start E
-
-%%
-E	: E '+'	T
-	| T
-	;
-	
-T	: '(' E ')'
-	| id
-	;
-		
-
-%%
+// Assembler program test0.asm
 
 
+data:
+
+
+code:
+
+// add two integer values
+begin testFuntion: public
+	loadi	r2, 10			// load 10 to register1
+	loadi	r1, 20			// load 2 to register2
+	add		r1, r2, r0		// add r0 = r1 + r2
+	ret						// return the value in register0	
+end testFuntion	
+
+end
 
