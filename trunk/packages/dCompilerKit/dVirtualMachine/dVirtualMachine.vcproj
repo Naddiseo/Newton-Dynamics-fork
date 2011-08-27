@@ -172,7 +172,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="dLexicalGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="..\dLexicalGenerator\bin\dLexicalGenerator.exe $(InputFileName) $(InputPath)"
+					CommandLine="..\dLexicalGenerator\bin\dLexicalGenerator.exe $(InputFileName) $(InputDir)$(InputName).cpp"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>
@@ -181,11 +181,15 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					Description="dLexCompiler.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="dLexCompiler.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp&#x0D;&#x0A;"
+					Description="dLexicalGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
+					CommandLine="..\dLexicalGenerator\bin\dLexicalGenerator.exe $(InputFileName) $(InputDir)$(InputName).cpp"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>
+		</File>
+		<File
+			RelativePath=".\dAssemblerParcer.cpp"
+			>
 		</File>
 		<File
 			RelativePath=".\dAssemblerParcer.grm"
@@ -196,7 +200,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="dParcerGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="..\dParcerGenerator\bin\dParcerGenerator.exe $(InputFileName) $(InputPath)"
+					CommandLine="..\dParcerGenerator\bin\dParcerGenerator.exe $(InputFileName) $(InputDir)$(InputName).cpp"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>
@@ -206,10 +210,14 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="dParcerGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="dParcerGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp"
+					CommandLine="..\dParcerGenerator\bin\dParcerGenerator.exe $(InputFileName) $(InputDir)$(InputName).cpp"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>
+		</File>
+		<File
+			RelativePath=".\dAssemblerParcer.h"
+			>
 		</File>
 		<File
 			RelativePath=".\dVirtualMachine.cpp"

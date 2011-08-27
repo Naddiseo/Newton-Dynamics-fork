@@ -10,8 +10,7 @@
 * freely
 */
 
-// dVirtual Machine dAssembler compiuel grammar
-
+// dVirtual Machine dAssembler compiler grammar
 
 %start SegementList
 

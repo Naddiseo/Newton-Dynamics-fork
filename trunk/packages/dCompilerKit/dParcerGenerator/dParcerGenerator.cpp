@@ -11,13 +11,14 @@
 
 int main(int argc, char* argv[])
 {
+
 	#ifdef _MSC_VER
 		_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 	#endif
 
 	if (argc < 3) {
 		fprintf (stdout, "usage: dParcelGenerator [GrammarFile] [OutputFileName]\n");
-		fprintf (stdout, "[GrammarFile] name of the file containing a TYacc like Grammar file\n");
+		fprintf (stdout, "[GrammarFile] name of the file containing a Yacc like Grammar file\n");
 		fprintf (stdout, "[OutputFileName] name of the file cpp output file\n");
 		exit (0);
 	}

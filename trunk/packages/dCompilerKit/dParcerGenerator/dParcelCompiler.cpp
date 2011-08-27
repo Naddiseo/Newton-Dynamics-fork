@@ -708,7 +708,6 @@ void dParcelCompiler::GenerateHeaderFile (
 		*ptr1 = 0;
 	}
 	strcat (path, ".h");
-
 	FILE* const headerFile = fopen (path, "w");
 	_ASSERTE (headerFile);
 	fprintf (headerFile, "%s", templateHeader.c_str());
@@ -718,7 +717,6 @@ void dParcelCompiler::GenerateHeaderFile (
 
 void dParcelCompiler::GenerateParcerCode (const char* const className, const char* const outputFileName)
 {
-
 	char path[2048];
 
 	// in windows
@@ -753,9 +751,14 @@ void dParcelCompiler::GenerateParcerCode (const char* const className, const cha
 	}
 
 
-
-	FILE* const headerFile = fopen (outputFileName, "w");
-	_ASSERTE (headerFile);
-	fprintf (headerFile, "%s", templateHeader.c_str());
-	fclose (headerFile);
+	strcpy (path, outputFileName);
+	char* const ptr1 = strrchr (path, '.');
+	if (ptr1) {
+		*ptr1 = 0;
+	}
+	strcat (path, ".cpp");
+	FILE* const ouputFile = fopen (path, "w");
+	_ASSERTE (ouputFile);
+	fprintf (ouputFile, "%s", templateHeader.c_str());
+	fclose (ouputFile);
 }
