@@ -17,7 +17,56 @@
 
 
 
+static void RenderBodyContactsAndTangentDiretions (NewtonBody* const body, float length)
+{
+	for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(body); joint; joint = NewtonBodyGetNextContactJoint(body, joint)) {
+		for (void* contact = NewtonContactJointGetFirstContact (joint); contact; contact = NewtonContactJointGetNextContact (joint, contact)) {
+			dVector point;
+			dVector normal;	
+			NewtonMaterial* const material = NewtonContactGetMaterial (contact);
+			NewtonMaterialGetContactPositionAndNormal (material, body, &point.m_x, &normal.m_x);
 
+			dVector tangnetDir0;
+			dVector tangnetDir1;
+			NewtonMaterialGetContactTangentDirections(material, body, &tangnetDir0[0], &tangnetDir1[0]);
+
+			// if we are display debug info we need to block other threads from writing the data at the same time
+			dVector p0 (point + normal.Scale (length));
+			dVector p1 (point - normal.Scale (length));
+			glVertex3f (p0.m_x, p0.m_y, p0.m_z);
+			glVertex3f (p1.m_x, p1.m_y, p1.m_z);
+		}
+	}
+}
+
+static void RenderBodyContactsForces (NewtonBody* const body, float scale)
+{
+
+	for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(body); joint; joint = NewtonBodyGetNextContactJoint(body, joint)) {
+		for (void* contact = NewtonContactJointGetFirstContact (joint); contact; contact = NewtonContactJointGetNextContact (joint, contact)) {
+			dVector point;
+			dVector normal;	
+			dVector tangnetDir0;
+			dVector tangnetDir1;
+			dVector contactForce;	
+			NewtonMaterial* const material = NewtonContactGetMaterial (contact);
+
+			NewtonMaterialGetContactForce(material, body, &contactForce.m_x);
+			NewtonMaterialGetContactPositionAndNormal (material, body, &point.m_x, &normal.m_x);
+			NewtonMaterialGetContactTangentDirections(material, body, &tangnetDir0[0], &tangnetDir1[0]);
+
+			// these are the components of the tangents forces at the contact point, the can be display at the contact position point.
+			dVector tangentForce1 (tangnetDir0.Scale ((contactForce % tangnetDir0) * scale));
+			dVector tangentForce2 (tangnetDir1.Scale ((contactForce % tangnetDir1) * scale));
+
+				
+//			glVertex3f (p0.m_x, p0.m_y, p0.m_z);
+//			glVertex3f (p1.m_x, p1.m_y, p1.m_z);
+		}
+	}
+}
+
+//void NewtonMaterialGetContactForce(const NewtonMaterial* const materialHandle, NewtonBody* const body, dFloat* const forcePtr)
 
 void RenderContactPoints (NewtonWorld* const world)
 {
@@ -29,12 +78,18 @@ void RenderContactPoints (NewtonWorld* const world)
 	glBegin(GL_LINES);
 	float length = 0.5f;
 	for (NewtonBody* body = NewtonWorldGetFirstBody(world); body; body = NewtonWorldGetNextBody(world, body)) {
+		RenderBodyContactsAndTangentDiretions (body, length);
+/*
 		for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(body); joint; joint = NewtonBodyGetNextContactJoint(body, joint)) {
 			for (void* contact = NewtonContactJointGetFirstContact (joint); contact; contact = NewtonContactJointGetNextContact (joint, contact)) {
 				dVector point;
 				dVector normal;	
 				NewtonMaterial* const material = NewtonContactGetMaterial (contact);
 				NewtonMaterialGetContactPositionAndNormal (material, body, &point.m_x, &normal.m_x);
+
+				dVector tangnetDir0;
+				dVector tangnetDir1;
+				NewtonMaterialGetContactTangentDirections(material, body, &tangnetDir0[0], &tangnetDir1[0]);
 
 				// if we are display debug info we need to block other threads from writing the data at the same time
 				dVector p0 (point + normal.Scale (length));
@@ -43,6 +98,7 @@ void RenderContactPoints (NewtonWorld* const world)
 				glVertex3f (p1.m_x, p1.m_y, p1.m_z);
 			}
 		}
+*/
 	}
 	glEnd();
 

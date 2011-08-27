@@ -754,7 +754,6 @@ void dParcelCompiler::GenerateParcerCode (const char* const className, const cha
 
 
 
-
 	FILE* const headerFile = fopen (outputFileName, "w");
 	_ASSERTE (headerFile);
 	fprintf (headerFile, "%s", templateHeader.c_str());

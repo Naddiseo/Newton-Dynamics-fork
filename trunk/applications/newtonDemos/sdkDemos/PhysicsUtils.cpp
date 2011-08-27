@@ -777,7 +777,34 @@ void GenericContactProcess (const NewtonJoint* contactJoint, dFloat timestep, in
 		// save the position of the contact (for 3d sound of particles effects)
 		currectEffect->m_contactMaxTangentSpeed = speed0;
 	}
+
+
 #endif
+	
+	// read the table direction
+//	dVector dir (tableDir);
+//	// table verical dir
+//	dVector updir (TableDir);
+//	NewtonBody* const body = NewtonJointGetBody0(contactJoint);
+//	for (void* contact = NewtonContactJointGetFirstContact (contactJoint); contact; contact = NewtonContactJointGetNextContact (contactJoint, contact)) {
+//		dFloat speed;
+//		dVector point;
+//		dVector normal;	
+//		dVector dir0;	
+//		dVector dir1;	
+//		dVector force;
+//		NewtonMaterial* material;
+//
+//		material = NewtonContactGetMaterial (contact);
+//		NewtonMaterialGetContactPositionAndNormal (material, body, &point.m_x, &normal.m_x);
+//
+//		// if the normal is vertical is large the say 40 degrees
+//		if (fabsf (normal % upDir) > 0.7f) {
+//			// rotate the normal to be aligned with the table direction
+//			NewtonMaterialContactRotateTangentDirections (material, dir);
+//		}
+//	}
+
 
 	NewtonBody* const body = NewtonJointGetBody0(contactJoint);
 	for (void* contact = NewtonContactJointGetFirstContact (contactJoint); contact; contact = NewtonContactJointGetNextContact (contactJoint, contact)) {

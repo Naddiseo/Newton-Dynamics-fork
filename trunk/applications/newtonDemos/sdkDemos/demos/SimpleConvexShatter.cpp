@@ -450,56 +450,23 @@ static void AddShatterPrimitive (DemoEntityManager* const scene, dFloat mass, co
 }
 
 
-/*
+
 void xxxxx (NewtonWorld* const world)
 {
-	float points[] = {
-		0.65, -0.10, 0.15,
-		0.58, -0.10, 0.40,
-		0.40, -0.10, 0.58,
-		0.15, -0.10, 0.65,
-		-0.10, -0.10, 0.58,
-		-0.29, -0.10, 0.40,
-		-0.35, -0.10, 0.15,
-		-0.29, -0.10, -0.10,
-		-0.10, -0.10, -0.29,
-		0.15, -0.10, -0.35,
-		0.40, -0.10, -0.29,
-		0.58, -0.10, -0.10,
-		0.15, 0.10, 0.15,
-		0.15, 0.10, 0.15,
-		0.15, 0.10, 0.15,
-		0.15, 0.10, 0.15,
-		0.15, 0.10, 0.15,
-		0.15, 0.10, 0.15,
-		0.15, 0.10, 0.15,
-		0.15, 0.10, 0.15,
-		0.15, 0.10, 0.15,
-		0.15, 0.10, 0.15,
-		0.15, 0.10, 0.15,
-		0.15, 0.10, 0.15};
+	NewtonCollision* const collision = NewtonCreateTreeCollision(world, 0);
+	NewtonTreeCollisionBeginBuild(collision);
 
+	float faces[] = {
+		32.000000, 26.000000, -1.000000, // Quad 0
+		32.000000, 26.000000, 0.000000,
+		32.000000, 25.000000, 0.000000,
+		32.000000, 25.000000, -1.000000};
+	NewtonTreeCollisionAddFace(collision, 4, &faces[0], 3 * sizeof (float), 0);
 
-		NewtonCollision* const collision = NewtonCreateTreeCollision(scene->GetNewton(), 0);
-		NewtonTreeCollisionBeginBuild(collision);
-		float xx[] = {-50.000, 0.000, 50.000,
-			50.000, 0.000, 50.000,
-			-50.000, 0.000, -50.000,
-
-			-50.000,  0.000,  -50.000,
-			50.000,  0.000,  50.000,
-			50.000,  0.000,  -50.000};
-		NewtonTreeCollisionAddFace(collision, 3, &xx[0], 3 * sizeof (float), 0);
-		//NewtonTreeCollisionAddFace(collision, 3, &xx[3], 3 * sizeof (float), 0);
-		NewtonTreeCollisionEndBuild(collision, 1);
-
-
-		NewtonCollision* coll = NewtonCreateConvexHull(world, sizeof (points) / (3 * sizeof (points[0])), points, 3 * sizeof (float), 0.0f, 0, NULL );
-		_ASSERTE (coll);
-		NewtonReleaseCollision(world, coll);
-
+	NewtonTreeCollisionEndBuild(collision, 0);
+	NewtonReleaseCollision(world, collision);
 }
-*/
+
 
 
 void SimpleConvexShatter (DemoEntityManager* const scene)
@@ -510,7 +477,7 @@ void SimpleConvexShatter (DemoEntityManager* const scene)
 	// load the skybox
 	scene->Append(new SkyBox());
 
-//xxxxx(scene->GetNewton());
+xxxxx(scene->GetNewton());
 
 
 	// load the scene from and alchemedia file format

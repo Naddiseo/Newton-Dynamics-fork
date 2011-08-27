@@ -171,8 +171,8 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					Description="dLexCompiler.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="dLexCompiler.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp&#x0D;&#x0A;"
+					Description="dLexicalGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
+					CommandLine="..\dLexicalGenerator\bin\dLexicalGenerator.exe $(InputFileName) $(InputPath)"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>
@@ -183,6 +183,30 @@
 					Name="VCCustomBuildTool"
 					Description="dLexCompiler.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
 					CommandLine="dLexCompiler.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp&#x0D;&#x0A;"
+					Outputs="$(InputName).cpp"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath=".\dAssemblerParcer.grm"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="dParcerGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
+					CommandLine="..\dParcerGenerator\bin\dParcerGenerator.exe $(InputFileName) $(InputPath)"
+					Outputs="$(InputName).cpp"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="dParcerGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
+					CommandLine="dParcerGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>
