@@ -14,17 +14,20 @@
 
 
 data:
-
+	offset mem0		10, 10	
+	dword  value0	1000	
+	double value2	1000.25e-2	
 
 code:
 
 // add two integer values
-begin testFuntion: public
-	loadi	r2, 10			// load 10 to register1
-	loadi	r1, 20			// load 2 to register2
+begin testFunction: public
+	loadi	r3, 0			// clear registe
+	loadd	r2, [r3].value0	// load 10 to register1
+	loadi	r1, mem1		// load 2 to register2
 	add		r1, r2, r0		// add r0 = r1 + r2
 	ret						// return the value in register0	
-end testFuntion	
+end testFunction	
 
 end
 

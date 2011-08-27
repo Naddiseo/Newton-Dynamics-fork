@@ -148,6 +148,14 @@
 	</References>
 	<Files>
 		<File
+			RelativePath=".\dAssemblerCompiler.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dAssemblerCompiler.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dAssemblerLexical.cpp"
 			>
 		</File>

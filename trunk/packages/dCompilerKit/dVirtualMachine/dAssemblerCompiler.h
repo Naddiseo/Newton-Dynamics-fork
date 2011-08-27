@@ -10,44 +10,25 @@
 */
 
 //
-//Auto generated Parcer Generator class: dAssemblerParcer.h
+//Auto generated Parcer Generator class: dAssemblerCompiler.h
 //
 
-#ifndef __dAssemblerParcer_h__
-#define __dAssemblerParcer_h__
+#ifndef __dAssemblerCompiler_h__
+#define __dAssemblerCompiler_h__
 
+#include "dAssemblerParcer.h"
 
-class dAssemblerLexical;
+class dVirtualMachine;
 
-class dAssemblerParcer
+class dAssemblerCompiler: public dAssemblerParcer
 {
 	public:
-	enum Token
-	{
-		END = 256,
-		INCLUDE,
-		LITERAL,
-		DATASEGMENT,
-		BYTE,
-		WORD,
-		DWORD,
-		DOUBLE,
-		OFFSET,
-		INTERGER,
-		FLOAT,
-		CODESEGMENT,
-		BEGIN,
-		PUBLIC,
-		LOADI,
-		REGISTER,
-		ADD,
-		RET
-	};
-
-	dAssemblerParcer();
-	virtual ~dAssemblerParcer();
+	dAssemblerCompiler(dVirtualMachine* const m_virtualMachine);
+	virtual ~dAssemblerCompiler();
 	virtual int Parce(dAssemblerLexical& scanner);
 
+
+	dVirtualMachine* m_virtualMachine;
 };
 
 #endif

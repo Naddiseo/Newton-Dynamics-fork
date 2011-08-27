@@ -1,4 +1,4 @@
-/* Copych1 (c) <2009> <Newton Game Dynamics>
+ /* Copych1 (c) <2009> <Newton Game Dynamics>
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -18,7 +18,7 @@ $(userIncludeCode)
 $(className)::$(className)(const char* const data)
 	:m_token(0)
 	,m_state(0)
-	,m_lastState(161)
+	,m_lastState($(statesCount))
 	,m_startState(0)
 	,m_index(0)
 	,m_startIndex(0)
@@ -87,7 +87,7 @@ $(characterSets)
 	m_startState = 0;
 	m_startIndex = m_index;
 
-	while (m_state != m_lastState)
+	while ((m_state != m_lastState) && (m_data[m_index] != 0))
 	{
 		switch (m_state)
 		{

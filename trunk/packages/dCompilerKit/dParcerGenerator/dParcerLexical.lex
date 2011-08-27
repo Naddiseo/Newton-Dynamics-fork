@@ -16,8 +16,8 @@
 #include "dGrammarLexical.h"
 %}
 
-
-WhiteSpace			[ \t\n\r]*
+				
+WhiteSpace			[ \t\n\r]+
 
 AnyButAstr			[^\*]
 AnyButSlash			[^\/]
@@ -37,7 +37,9 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 
 
 %%
-[ \t\n\r]+			{}
+{WhiteSpace}		{}
+
+
 [|]					{ return(dParcerCompiler::OR); }
 [:]					{ return(dParcerCompiler::COLOM); }
 [;]					{ return(dParcerCompiler::SIMICOLOM); }
@@ -76,4 +78,5 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 {Literal}			{ return dParcerCompiler::LITERAL;}
 {CodeBlock}			{ m_tokenString.replace(0, 2, ""); m_tokenString.replace(m_tokenString.size() - 2, 2, ""); return dParcerCompiler::CODE_BLOCK;}
 [{]					{ ((dGrammarLexical*)this)->ReadUserAction(); return dParcerCompiler::USER_ACTION;}
+
 {Comment}			{}

@@ -65,7 +65,7 @@ ANY			[0-9a-zA-Z_.]
 "\?"			{ return('?'); }
 
 
-[ \t\v\n\f]		{}
+[ \t\v\n\f]*	{}
 .				{ /* ignore bad characters */ }
 "//".*			{ /* ignore bad characters */ }	
 

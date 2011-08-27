@@ -1,3 +1,4 @@
+
 /* Copyright (c) <2009> <Newton Game Dynamics>
 * 
 * This software is provided 'as-is', without any express or implied
@@ -22,6 +23,7 @@
 #include "dAssemblerParcer.h"
 %}
 
+WhiteSpace		[ \t\n\r]+
 
 AnyButAstr		[^\*]
 AnyButSlash		[^\/]
@@ -40,17 +42,26 @@ ret				[rR][eE][tT]
 Literal			[a-zA-Z_][0-9a-zA-Z_]*
 
 %%
-loadI			{return dAssemblerParcer::LOADI;}
-add				{return dAssemblerParcer::ADD;}
-ret				{return dAssemblerParcer::RET;}
+{WhiteSpace}		{}
+{loadI}			{return dAssemblerParcer::LOADI;}
+{add}				{return dAssemblerParcer::ADD;}
+{ret}				{return dAssemblerParcer::RET;}
+
 "begin"			{return dAssemblerParcer::BEGIN;}
 "end"			{return dAssemblerParcer::END;}
-"data:"			{return dAssemblerParcer::DATA;}
-"code:"			{return dAssemblerParcer::CODE;}
-SignedInt		{return dAssemblerParcer::INTERGER;}
-Register		{return dAssemblerParcer::REGISTER;}
+"include"		{return dAssemblerParcer::INCLUDE;}
+"public"		{return dAssemblerParcer::PUBLIC;}
+"data:"			{return dAssemblerParcer::DATASEGMENT;}
+"code:"			{return dAssemblerParcer::CODESEGMENT;}
 
-Literal			{return dAssemblerParcer::LITERAL;}
+{SignedInt}		{return dAssemblerParcer::INTERGER;}
+{Register}		{return dAssemblerParcer::REGISTER;}
+
+{Literal}			{return dAssemblerParcer::LITERAL;}
 {Comment}		{}
 
 %%
+
+
+
+

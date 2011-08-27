@@ -1,4 +1,4 @@
-/* Copych1 (c) <2009> <Newton Game Dynamics>
+ /* Copych1 (c) <2009> <Newton Game Dynamics>
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -26,7 +26,7 @@
 dAssemblerLexical::dAssemblerLexical(const char* const data)
 	:m_token(0)
 	,m_state(0)
-	,m_lastState(161)
+	,m_lastState(22)
 	,m_startState(0)
 	,m_index(0)
 	,m_startIndex(0)
@@ -69,7 +69,7 @@ void dAssemblerLexical::GetLexString ()
 
 int dAssemblerLexical::NextPattern ()
 {
-	static int nextState[] = {6, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 16, 0, 0, 0, 22, 0, 0, 0, 0, 0, 28, 0, 0, 0, 0, 0, 38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 47, 0, 0, 0, 0, 0, 0, 0, 0, 55, 0, 0, 0, 0, 0, 0, 0, 64, 0, 0, 0, 0, 0, 0, 0, 0, };
+	static int nextState[] = {11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, };
 
 	m_index = m_startIndex;
 	_ASSERTE (nextState[m_startState] <= (sizeof (nextState) / sizeof (nextState[0])));
@@ -89,21 +89,21 @@ int dAssemblerLexical::NextToken ()
 	static char text_4[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 0};
 
 	static char* testSetArray[] = {text_0, text_1, text_2, text_3, text_4};
-	static int transitionsCount[] = {1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 2, 0, 2, 2, 2, 0, 2, 0, 0, 0};
-	static int nextState[][66] = {
-		{1, 2, 3, 4, 5, 0, 7, 8, 9, 10, 11, 0, 13, 14, 15, 0, 17, 18, 19, 20, 21, 0, 23, 24, 25, 26, 27, 0, 29, 30, 31, 32, 33, 34, 35, 36, 37, 0, 39, 40, 41, 42, 43, 44, 45, 46, 0, 48, 49, 50, 51, 52, 53, 54, 0, 56, 57, 0, 59, 61, 59, 0, 59, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 58, 0, 60, 62, 60, 0, 60, 0, 0, 0}
+	static int transitionsCount[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 2, 0, 2, 2, 2, 0, 2, 0, 0, 0};
+	static int nextState[][22] = {
+		{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 12, 13, 0, 15, 17, 15, 0, 15, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 16, 18, 16, 0, 16, 0, 0, 0}
 	};
-	static int charaterTests[][66] = {
-		{108, 111, 97, 100, 73, 0, 98, 101, 103, 105, 110, 0, 101, 110, 100, 0, 100, 97, 116, 97, 58, 0, 99, 111, 100, 101, 58, 0, 83, 105, 103, 110, 101, 100, 73, 110, 116, 0, 82, 101, 103, 105, 115, 116, 101, 114, 0, 76, 105, 116, 101, 114, 97, 108, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	static int charaterTests[][22] = {
+		{87, 104, 105, 116, 101, 83, 112, 97, 99, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	};
-	static int testSetArrayIndex[][66] = {
-		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 3, 2, 0, 2, 0, 0, 0}
+	static int testSetArrayIndex[][22] = {
+		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 3, 2, 0, 2, 0, 0, 0}
 	};
-	//static int testSetArrayIndexOffset[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3, 3, 5, 7, 9, 9, 11, 11, 11};
-	//static int testSetArrayIndex[] = {0, 0, 1, 1, 2, 0, 3, 1, 2, 1, 2};
+	//static int testSetArrayIndexOffset[] = {$(testSetArrayOffsets)};
+	//static int testSetArrayIndex[] = {$(testSetArrayIndex)};
 
 	m_state = 0;
 	m_startState = 0;
@@ -113,104 +113,8 @@ int dAssemblerLexical::NextToken ()
 	{
 		switch (m_state)
 		{
-						// loadI
-			case 5:
-			{
-				{
-					GetLexString ();
-					//user specified action
-					m_state = 0;
-					m_startState = 0;
-					{return dAssemblerParcer::LOADI;}
-				}
-				break;
-			}
-			// "begin"
-			case 11:
-			{
-				{
-					GetLexString ();
-					//user specified action
-					m_state = 0;
-					m_startState = 0;
-					{return dAssemblerParcer::BEGIN;}
-				}
-				break;
-			}
-			// "end"
-			case 15:
-			{
-				{
-					GetLexString ();
-					//user specified action
-					m_state = 0;
-					m_startState = 0;
-					{return dAssemblerParcer::END;}
-				}
-				break;
-			}
-			// "data:"
-			case 21:
-			{
-				{
-					GetLexString ();
-					//user specified action
-					m_state = 0;
-					m_startState = 0;
-					{return dAssemblerParcer::DATA;}
-				}
-				break;
-			}
-			// "code:"
-			case 27:
-			{
-				{
-					GetLexString ();
-					//user specified action
-					m_state = 0;
-					m_startState = 0;
-					{return dAssemblerParcer::CODE;}
-				}
-				break;
-			}
-			// SignedInt
-			case 37:
-			{
-				{
-					GetLexString ();
-					//user specified action
-					m_state = 0;
-					m_startState = 0;
-					{return dAssemblerParcer::INTERGER;}
-				}
-				break;
-			}
-			// Register
-			case 46:
-			{
-				{
-					GetLexString ();
-					//user specified action
-					m_state = 0;
-					m_startState = 0;
-					{return dAssemblerParcer::REGISTER;}
-				}
-				break;
-			}
-			// Literal
-			case 54:
-			{
-				{
-					GetLexString ();
-					//user specified action
-					m_state = 0;
-					m_startState = 0;
-					{return dAssemblerParcer::LITERAL;}
-				}
-				break;
-			}
-			// {Comment}
-			case 61:
+						// WhiteSpace
+			case 10:
 			{
 				{
 					GetLexString ();
@@ -221,10 +125,22 @@ int dAssemblerLexical::NextToken ()
 				}
 				break;
 			}
-			case 57:
+			// {Comment}
+			case 17:
+			{
+				{
+					GetLexString ();
+					//user specified action
+					m_state = 0;
+					m_startState = 0;
+					{}
+				}
+				break;
+			}
+			case 13:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_4)) m_state = 63;
+				if (IsCharInSet (ch, text_4)) m_state = 19;
 				else {
 					m_index --;
 					GetLexString ();
@@ -235,10 +151,10 @@ int dAssemblerLexical::NextToken ()
 				}
 				break;
 			}
-			case 63:
+			case 19:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_4)) m_state = 63;
+				if (IsCharInSet (ch, text_4)) m_state = 19;
 				else {
 					m_index --;
 					GetLexString ();

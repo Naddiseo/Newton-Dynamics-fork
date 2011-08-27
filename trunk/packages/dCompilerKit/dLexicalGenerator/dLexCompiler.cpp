@@ -120,57 +120,62 @@ void dLexCompiler::CreateCodeFile (
 	fread ((void*)templateHeader.c_str(), 1, size, templateFile);
 	fclose (templateFile);	
 
-	string name (className);
-	for (size_t position = templateHeader.find ("$(className)"); position != -1; position = templateHeader.find ("$(className)")) {
-		templateHeader.replace(position, 12, name);
-	}
-	
-	size_t position = templateHeader.find ("$(nextTokenStart)");
-	templateHeader.replace(position, 17, nextCodeCases);
-
+	size_t position;
 	position = templateHeader.find ("$(userIncludeCode)");
 	templateHeader.replace(position, 18, userPreheaderCode);
 
-	position = templateHeader.find ("$(finiteAutomataCode)");
-	templateHeader.replace(position, 21, automataCode);
+	string name (className);
+	for (size_t i = templateHeader.find ("$(className)"); i != -1; i = templateHeader.find ("$(className)")) {
+		templateHeader.replace(i, 12, name);
+	}
 
 	char stateCountString[256];
 	sprintf (stateCountString, "%d", stateCount + 1);
 	string statesCountText (stateCountString);
-	for (size_t position = templateHeader.find ("$(statesCount)"); position != -1; position = templateHeader.find ("$(statesCount)")) {
-		templateHeader.replace(position, 14, statesCountText);
+	for (size_t i = templateHeader.find ("$(statesCount)"); i != -1; i = templateHeader.find ("$(statesCount)")) {
+		templateHeader.replace(i, 14, statesCountText);
 	}
+	
+	position = templateHeader.find ("$(nextTokenStart)");
+	templateHeader.replace(position, 17, nextCodeCases);
 
 
-	string characterSets ("");
-	string characterSetList ("");
-	dTree<dList <dChatertSetMap::ChatertSet>::dListNode*, int>::Iterator iter (characterSet.GetSets());
-	for (iter.Begin(); iter; iter ++) {
-		dChatertSetMap::ChatertSet& set = iter.GetNode()->GetInfo()->GetInfo();
-		int count = set.GetLength();
+	if (characterSet.GetSets().GetCount()) {
+		string characterSets ("");
+		string characterSetList ("");
+		dTree<dList <dChatertSetMap::ChatertSet>::dListNode*, int>::Iterator iter (characterSet.GetSets());
+		for (iter.Begin(); iter; iter ++) {
+			dChatertSetMap::ChatertSet& set = iter.GetNode()->GetInfo()->GetInfo();
+			int count = set.GetLength();
 
-		char name[256];
+			char name[256];
 
-		sprintf (name, "text_%d, ", set.GetId() & 0x7fff);		
-		characterSetList += name;
+			sprintf (name, "text_%d, ", set.GetId() & 0x7fff);		
+			characterSetList += name;
 
-		sprintf (name, "\tstatic char text_%d[] = {", set.GetId() & 0x7fff);
-		characterSets += name;
-		const char* const str = set.GetSet();
-		for (int i = 0; i < count; i ++) {
-			char tmp[128];
-			sprintf (tmp, "%d, ", str[i]);
-			characterSets += tmp;
+			sprintf (name, "\tstatic char text_%d[] = {", set.GetId() & 0x7fff);
+			characterSets += name;
+			const char* const str = set.GetSet();
+			for (int i = 0; i < count; i ++) {
+				char tmp[128];
+				sprintf (tmp, "%d, ", str[i]);
+				characterSets += tmp;
+			}
+			characterSets += "0};\n";
 		}
-		characterSets += "0};\n";
+		position = templateHeader.find ("$(characterSets)");
+		templateHeader.replace(position, 16, characterSets);
+
+		characterSetList.replace(characterSetList.size()-2, 2, "");
+		position = templateHeader.find ("$(characterSetArray)");
+		templateHeader.replace(position, 20, characterSetList);
+	} else {
+		position = templateHeader.find ("$(characterSets)");
+		templateHeader.replace(position, 16, "");
+
+		position = templateHeader.find ("$(characterSetArray)");
+		templateHeader.replace(position, 20, "");
 	}
-	position = templateHeader.find ("$(characterSets)");
-	templateHeader.replace(position, 16, characterSets);
-
-	characterSetList.replace(characterSetList.size()-2, 2, "");
-	position = templateHeader.find ("$(characterSetArray)");
-	templateHeader.replace(position, 20, characterSetList);
-
 
 	for (int i = 0; i < stateCount; i ++) {
 		if (!transitionsCount.Find(i)) {
@@ -240,8 +245,7 @@ void dLexCompiler::CreateCodeFile (
 	position = templateHeader.find ("$(charactesTest)");
 	templateHeader.replace(position, 16, characterTestTable);
 
-
-
+/*
 	int nextStateOffset = 0;
 	string characterSetIndexTableOffsets ("0, ");
 	string characterSetIndexTableStates ("");
@@ -268,7 +272,7 @@ void dLexCompiler::CreateCodeFile (
 	characterSetIndexTableStates.replace(characterSetIndexTableStates.size()-2, 2, "");
 	position = templateHeader.find ("$(testSetArrayIndex)");
 	templateHeader.replace(position, 20, characterSetIndexTableStates);
-
+*/
 {
 	string characterSetIndexTable ("\n");
 	dTree<dTree<int, int>, int>::Iterator iter4 (testSetArrayIndexMap); 
@@ -297,6 +301,8 @@ void dLexCompiler::CreateCodeFile (
 
 
 
+	position = templateHeader.find ("$(finiteAutomataCode)");
+	templateHeader.replace(position, 21, automataCode);
 
 	FILE* const headerFile = fopen (fileName, "w");
 	_ASSERTE (headerFile);
@@ -450,6 +456,7 @@ int dLexCompiler::ParseDefinitions (
 		m_tokenList.AddTokenData (m_whiteSpace, "[ \t\v\n\f]+");
 		m_tokenList.AddTokenData (m_quatedString, "\"[^\" \t\v\n\f]*\"");
 		m_tokenList.AddTokenData (m_delimiter, "%%");
+		m_tokenList.AddTokenData (m_comment, "(/\\*([^*]|[\r\n]|(\\*+([^*/]|[\r\n])))*\\*+/)|(//.*)");
 		m_tokenList.AddTokenData (m_extendedRegularExpresion, "((\\[[^\\]]+\\])|[^ \t\v\n\f[]+)+");
 		
 		for (NextToken(); (m_token != m_end) && (m_token != m_delimiter); ) {
