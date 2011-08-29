@@ -16,7 +16,8 @@
 #ifndef __test0_h__
 #define __test0_h__
 
-class dParcelLexical;
+
+class xxxxx;
 
 class test0
 {
@@ -26,10 +27,18 @@ class test0
 		id = 256
 	};
 
+	enum ActionType;
+	class dStackPair;
+	class dActionEntry;
+
 	test0();
 	virtual ~test0();
-	virtual int Parce(dParcelLexical& lexical);
+	virtual int Parce(xxxxx& scanner);
 
+	virtual bool ErrorHandler (string* const line) const;
+
+	private:
+	const dActionEntry* FindAction (const dActionEntry* const list, int count, Token token) const;
 };
 
 #endif

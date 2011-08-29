@@ -16,6 +16,8 @@
 #ifndef __$(className)_h__
 #define __$(className)_h__
 
+#include <string>
+using namespace std;
 
 class $(scannerClass);
 
@@ -27,10 +29,18 @@ class $(className)
 $(Tokens)
 	};
 
+	enum ActionType;
+	class dStackPair;
+	class dActionEntry;
+
 	$(className)();
 	virtual ~$(className)();
 	virtual int Parce($(scannerClass)& scanner);
 
+	virtual bool ErrorHandler (const string& line) const;
+
+	private:
+	const dActionEntry* FindAction (const dActionEntry* const list, int count, Token token) const;
 };
 
 #endif

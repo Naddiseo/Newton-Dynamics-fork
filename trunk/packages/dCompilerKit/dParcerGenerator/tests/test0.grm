@@ -12,8 +12,8 @@
 
 // very simple sample ADDER grammar 
 
+
 %token id
-%token xxx
 %start E
 
 %%

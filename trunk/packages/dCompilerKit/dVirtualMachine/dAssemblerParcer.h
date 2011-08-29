@@ -16,6 +16,8 @@
 #ifndef __dAssemblerParcer_h__
 #define __dAssemblerParcer_h__
 
+#include <string>
+using namespace std;
 
 class dAssemblerLexical;
 
@@ -44,10 +46,18 @@ class dAssemblerParcer
 		RET
 	};
 
+	enum ActionType;
+	class dStackPair;
+	class dActionEntry;
+
 	dAssemblerParcer();
 	virtual ~dAssemblerParcer();
 	virtual int Parce(dAssemblerLexical& scanner);
 
+	virtual bool ErrorHandler (const string& line) const;
+
+	private:
+	const dActionEntry* FindAction (const dActionEntry* const list, int count, Token token) const;
 };
 
 #endif

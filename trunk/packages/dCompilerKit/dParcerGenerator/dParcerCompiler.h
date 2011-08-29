@@ -26,25 +26,13 @@ class dGrammarLexical;
 class dParcerCompiler
 {
 	public:
-	enum TokenType
-	{
-		TERMINAL,
-		NONTERMINAL
-	};
-
-	enum ActionType
-	{
-		ACCEPT,
-		SHIFT,
-		REDUCE
-	};
-
 	enum Token
 	{
 		OR = 256,
 		COLOM,
 		SIMICOLOM,
 		TOKEN,
+		UNION,
 		LEFT,
 		RIGHT,
 		START,
@@ -54,6 +42,9 @@ class dParcerCompiler
 		GRAMMAR_SEGEMENT,
 	};
 
+	enum TokenType;
+	enum ActionType;
+	
 	class dItem;
 	class dState;
 	class dGoto;
@@ -63,6 +54,8 @@ class dParcerCompiler
 	class dSentenceSymbol;
 	class dRuleInfo;
 	class dProductionRule;
+
+	class dActionEntry;
 
 	
 	dParcerCompiler(const char* const inputRules, const char* const outputFileName, const char* const scannerClassName);
@@ -80,7 +73,9 @@ class dParcerCompiler
 	void BuildParcingTable (dTree<dState*,int>& stateList, dTree<TokenType, string>& symbolList);
 
 	void GenerateHeaderFile (const char* const className, const char* const scannerClassName, const char* const outputFileName, dProductionRule& rules, dTree<int, string>& tokenEnumerationMap);
-	void GenerateParcerCode (const char* const className, const char* const scannerClassName, const char* const outputFileName, const string& userCode);
+	void GenerateParcerCode (const char* const className, const char* const scannerClassName, const char* const outputFileName, const string& userCode, 
+							 const string& userVariable, const string& userVariableClass, 
+							 dTree<dState*,int>& stateList, dTree<TokenType, string>& symbolList);
 
 };
 

@@ -71,6 +71,7 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 
 
 "%%"				{ return dParcerCompiler::GRAMMAR_SEGEMENT;}
+"%union"			{ return dParcerCompiler::UNION;}
 "%token"			{ return dParcerCompiler::TOKEN;}
 "%left"				{ return dParcerCompiler::LEFT;}
 "%right"			{ return dParcerCompiler::RIGHT;}

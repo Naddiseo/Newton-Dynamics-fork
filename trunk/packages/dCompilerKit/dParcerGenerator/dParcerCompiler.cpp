@@ -27,6 +27,36 @@
 //	%%
 //	user code
 
+enum dParcerCompiler::TokenType
+{
+	TERMINAL,
+	NONTERMINAL
+};
+
+
+enum dParcerCompiler::ActionType
+{
+	ACCEPT,
+	SHIFT,
+	REDUCE
+};
+
+
+
+/*
+class dParcerCompiler::dActionEntry
+{
+	public: 
+	Token m_token;
+	int m_state;
+	int m_reduceCount;
+	ActionType m_action;
+};
+*/
+
+
+
+
 class dParcerCompiler::dSymbol
 {
 	public:
@@ -189,6 +219,19 @@ class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 	
 };
 
+class dUserVariable: public string
+{
+	dUserVariable ()
+		:string()
+	{
+	}
+
+	dUserVariable (const char* const text)
+		:string(text)
+	{
+	}
+};
+
 dParcerCompiler::dParcerCompiler(const char* const inputRules, const char* const outputFileName, const char* const scannerClassName)
 {
 	// scan the grammar into a list of rules.
@@ -196,6 +239,21 @@ dParcerCompiler::dParcerCompiler(const char* const inputRules, const char* const
 	dTree<int, string> tokenEnumeration;
 	dTree<TokenType, string> symbolList;
 	string userCodeBlock;
+	string userVariable = "dUserVariable";
+	string userVariableClass =  "\tclass $(userVariable): public string\n" 
+								"\t{\n"	
+								"\t	public:\n"	
+								"\t	$(userVariable) ()\n"	
+								"\t		:string()\n"	
+								"\t	{\n"
+								"\t	}\n"
+								"\t\n"
+								"\t	$(userVariable) (const char* const text)\n"
+								"\t		:string(text)\n"
+								"\t	{\n"
+								"\t	}\n"
+								"\t};\n";
+
 	
 	symbolList.Insert(TERMINAL, DACCEPT_SYMBOL);
 	ScanGrammarFile(inputRules, ruleList, symbolList, tokenEnumeration, userCodeBlock);
@@ -222,8 +280,10 @@ dParcerCompiler::dParcerCompiler(const char* const inputRules, const char* const
 	}
 	strcpy (className, ptr);
 	strtok (className, ".");
+
+
 	GenerateHeaderFile (className, scannerClassName, outputFileName, ruleList, tokenEnumeration);
-	GenerateParcerCode (className, scannerClassName, outputFileName, userCodeBlock);
+	GenerateParcerCode (className, scannerClassName, outputFileName, userCodeBlock, userVariable, userVariableClass, stateList, symbolList);
 
 	dTree<dState*,int>::Iterator iter(stateList);
 	for (iter.Begin(); iter; iter ++) {
@@ -255,6 +315,14 @@ void dParcerCompiler::ScanGrammarFile(
 //		DTRACE (("%s\n", lexical.GetTokenString()));
 		switch (int (token)) 
 		{
+			case START:
+			{
+				token = Token(lexical.NextToken());
+				startSymbol = lexical.GetTokenString();
+				token = Token(lexical.NextToken());
+				break;
+			}
+
 			case TOKEN:
 			{
 				for (token = Token(lexical.NextToken()); token == LITERAL; token = Token(lexical.NextToken())) {
@@ -266,13 +334,12 @@ void dParcerCompiler::ScanGrammarFile(
 				break;
 			}
 
-			case START:
+			case UNION:
 			{
-				token = Token(lexical.NextToken());
-				startSymbol = lexical.GetTokenString();
-				token = Token(lexical.NextToken());
+				_ASSERTE (0);
 				break;
 			}
+
 
 			case CODE_BLOCK:
 			{
@@ -740,7 +807,11 @@ void dParcerCompiler::GenerateParcerCode (
 	const char* const className, 
 	const char* const scannerClassName,
 	const char* const outputFileName,
-	const string& userCode)
+	const string& userCode,
+	const string& userVariable,
+	const string& userVariableClass, 
+	dTree<dState*,int>& stateList, 
+	dTree<TokenType, string>& symbolList)
 {
 	char path[2048];
 
@@ -773,15 +844,23 @@ void dParcerCompiler::GenerateParcerCode (
 	size_t position = templateHeader.find ("$(userCode)");
 	templateHeader.replace(position, 11, userCode);
 
-
+	
 	string name (className);
-	for (size_t position = templateHeader.find ("$(className)"); position != -1; position = templateHeader.find ("$(className)")) {
-		templateHeader.replace(position, 12, name);
+	for (size_t i = templateHeader.find ("$(className)"); i != -1; i = templateHeader.find ("$(className)")) {
+		templateHeader.replace(i, 12, name);
 	}
 
 	string scanner(scannerClassName);
-	for (size_t position = templateHeader.find ("$(scannerClass)"); position != -1; position = templateHeader.find ("$(scannerClass)")) {
-		templateHeader.replace(position, 15, scanner);
+	for (size_t i = templateHeader.find ("$(scannerClass)"); i != -1; i = templateHeader.find ("$(scannerClass)")) {
+		templateHeader.replace(i, 15, scanner);
+	}
+
+
+	position = templateHeader.find ("$(userVariableClass)");
+	templateHeader.replace(position, 20, userVariableClass);
+
+	for (size_t i = templateHeader.find ("$(userVariable)"); i != -1; i = templateHeader.find ("$(userVariable)")) {
+		templateHeader.replace(i, 15, userVariable);
 	}
 
 	strcpy (path, outputFileName);
