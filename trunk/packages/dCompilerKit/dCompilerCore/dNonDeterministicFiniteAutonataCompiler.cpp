@@ -13,6 +13,8 @@
 #include "dAutomataState.h"
 #include "dNonDeterministicFiniteAutonataCompiler.h"
 
+#define DTRACE_NFA(x) DTRACE(x)
+
 /*
 char dNonDeterministicFiniteAutonataCompiler::m_asciiSet[] = 
 {
@@ -130,16 +132,12 @@ const dChatertSetMap& dNonDeterministicFiniteAutonataCompiler::GetChatertSetMap(
 
 void dNonDeterministicFiniteAutonataCompiler::CompileExpression(const char* const regularExpression)
 {
-//	m_asciiSet['\n' - 1] = 'a';
-//	m_asciiSet[sizeof (m_asciiSet) - 1] = 0;
-
 	// prepossess the expression for simples parsing 
 	PreProcessExpression (regularExpression);
 
-
 	// build an NFA graph
-//	DTRACE(("\n"));
-//	DTRACE(("Expression: %s\n", regularExpression));
+	DTRACE_NFA(("\n"));
+	DTRACE_NFA(("Expression: %s\n", regularExpression));
 
 	ParseExpresionToNFA ();
 }
@@ -174,7 +172,7 @@ int dNonDeterministicFiniteAutonataCompiler::GetChar()
 
 bool dNonDeterministicFiniteAutonataCompiler::CheckInsertConcatenation (int left, int right) const
 {
-	bool test = (((!IsOperator(left)) || (left == m_closeParentesis) || (left == m_closeSquareBrakect) || (left == m_zeroOrMore) || (left == m_oneOrMore) || (left == m_zeroOrOne)) && 
+	bool test = (((!IsOperator(left)) || (left == m_closeParentesis) || (left == m_closeSquareBrakect) || (left == m_zeroOrMore) || (left == m_oneOrMore) || (left == m_zeroOrOne) || (left == m_balancedCharacterExpresion)) && 
 		         ((!IsOperator(right))|| (right == m_openParentesis)  || (right == m_openSquareBrakect))); 
 	return test;
 }
@@ -198,13 +196,11 @@ void dNonDeterministicFiniteAutonataCompiler::PreProcessExpression (const char* 
 
 		#ifdef _DEBUG
 		bool test0 = CheckInsertConcatenation (ch0, ch1);
-		bool test1 = (((!IsOperator(ch0)) || (ch0 == m_closeParentesis) || (ch0 == m_closeSquareBrakect) || (ch0 == m_zeroOrMore) || (ch0 == m_oneOrMore) || (ch0 == m_zeroOrOne)) && 
+		bool test1 = (((!IsOperator(ch0)) || (ch0 == m_closeParentesis) || (ch0 == m_closeSquareBrakect) || (ch0 == m_zeroOrMore) || (ch0 == m_oneOrMore) || (ch0 == m_zeroOrOne) || (ch0 == m_balancedCharacterExpresion)) && 
 					 ((!IsOperator(ch1)) || (ch1 == m_openParentesis)  || (ch1 == m_openSquareBrakect)));
 		_ASSERTE (test0 == test1);
 		#endif
 
-//		if (((!IsOperator(ch0)) || (ch0 == m_closeParentesis) || (ch0 == m_closeSquareBrakect) || (ch0 == m_zeroOrMore) || (ch0 == m_oneOrMore) || (ch0 == m_zeroOrOne)) && 
-//			((!IsOperator(ch1)) || (ch1 == m_openParentesis)  || (ch1 == m_openSquareBrakect))) {
 		if (CheckInsertConcatenation (ch0, ch1)) {
 			buffer[count ++] = char (m_concatenation);
 			_ASSERTE (count < sizeof (buffer));
@@ -227,7 +223,7 @@ void dNonDeterministicFiniteAutonataCompiler::PreProcessExpression (const char* 
 bool dNonDeterministicFiniteAutonataCompiler::IsOperator (int character) const
 {
 	static char operation[] = {m_union, char (m_concatenation), m_zeroOrMore, m_oneOrMore, m_zeroOrOne, 
-							   m_openParentesis, m_closeParentesis, m_openSquareBrakect, m_closeSquareBrakect };
+							   m_openParentesis, m_closeParentesis, m_openSquareBrakect, m_closeSquareBrakect, m_balancedCharacterExpresion };
 	for (int i = 0; i < sizeof (operation) / sizeof (operation[0]); i ++) {
 		if (character == operation[i]) {
 			return true;
@@ -241,7 +237,7 @@ void dNonDeterministicFiniteAutonataCompiler::Match (int token)
 	if (m_token == token) {
 		m_token = GetChar();
 	} else {
-//		DTRACE(("parse error\n"));
+		DTRACE_NFA(("parse error\n"));
 		m_error = true;
 	}
 }
@@ -258,11 +254,11 @@ void dNonDeterministicFiniteAutonataCompiler::PushId (int charater)
 
 	m_stack.Push(startState, acceptingState);
 
-//	DTRACE(("Push ", charater));
-//	if (charater > 256) {
-//		DTRACE(("\\"));
-//	}
-//	DTRACE(("%c\n", charater));
+	DTRACE_NFA(("Push ", charater));
+	if (charater > 256) {
+		DTRACE_NFA(("\\"));
+	}
+	DTRACE_NFA(("%c\n", charater));
 }
 
 void dNonDeterministicFiniteAutonataCompiler::PushSet (const char* const set, int size)
@@ -277,7 +273,7 @@ void dNonDeterministicFiniteAutonataCompiler::PushSet (const char* const set, in
 
 	m_stack.Push(startState, acceptingState);
 
-//	DTRACE(("Push charSet%d\n", ch & (0x7fff)));
+	DTRACE_NFA(("Push charSet_%d\n", setId));
 }
 
 
@@ -286,14 +282,14 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceUnionDiagram()
 {
 	if (m_stack.IsEmpty()) {
 		m_error = true;
-		DTRACE(("Parce stack underflow error\n"));
+		DTRACE_NFA(("Parce stack underflow error\n"));
 		return;
 	}
 	StateConstructPair rightOperand (m_stack.Pop());
 
 	if (m_stack.IsEmpty()) {
 		m_error = true;
-		DTRACE(("Parce stack underflow error\n"));
+		DTRACE_NFA(("Parce stack underflow error\n"));
 		m_stack.Push(rightOperand.GetStart(), rightOperand.GetAccepting());
 		return;
 	}
@@ -308,21 +304,22 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceUnionDiagram()
 	rightOperand.GetAccepting()->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), acceptingState));
 
 	m_stack.Push(startState, acceptingState);
-//	DTRACE(("operator union\n"));
+	DTRACE_NFA(("operator union\n"));
 }
+
 
 void dNonDeterministicFiniteAutonataCompiler::ReduceConcatenationDiagram()
 {
 	if (m_stack.IsEmpty()) {
 		m_error = true;
-		DTRACE(("Parce stack underflow error\n"));
+		DTRACE_NFA(("Parce stack underflow error\n"));
 		return;
 	}
 	StateConstructPair rightOperand (m_stack.Pop());
 
 	if (m_stack.IsEmpty()) {
 		m_error = true;
-		DTRACE(("Parce stack underflow error\n"));
+		DTRACE_NFA(("Parce stack underflow error\n"));
 		m_stack.Push(rightOperand.GetStart(), rightOperand.GetAccepting());
 		return;
 	}
@@ -331,14 +328,14 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceConcatenationDiagram()
 	leftOperand.GetAccepting()->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), rightOperand.GetStart()));
 
 	m_stack.Push(leftOperand.GetStart(), rightOperand.GetAccepting());
-//	DTRACE(("operator concatenation\n"));
+	DTRACE_NFA(("operator concatenation\n"));
 }
 
 void dNonDeterministicFiniteAutonataCompiler::ReduceZeroOrMoreDiagram()
 {
 	if (m_stack.IsEmpty()) {
 		m_error = true;
-		DTRACE(("Parce stack underflow error\n"));
+		DTRACE_NFA(("Parce stack underflow error\n"));
 		return;
 	}
 	StateConstructPair operand (m_stack.Pop());
@@ -353,14 +350,14 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceZeroOrMoreDiagram()
 
 	m_stack.Push(startState, acceptingState);
 
-//	DTRACE(("operator zeroOrMore\n"));
+	DTRACE_NFA(("operator zeroOrMore\n"));
 }
 
 void dNonDeterministicFiniteAutonataCompiler::ReduceOneOrMoreDiagram()
 {
 	if (m_stack.IsEmpty()) {
 		m_error = true;
-		DTRACE(("Parce stack underflow error\n"));
+		DTRACE_NFA(("Parce stack underflow error\n"));
 		return;
 	}
 	StateConstructPair operand (m_stack.Pop());
@@ -374,14 +371,41 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceOneOrMoreDiagram()
 
 	m_stack.Push(startState, acceptingState);
 
-//	DTRACE(("operator oneOrMore\n"));
+	DTRACE_NFA(("operator oneOrMore\n"));
 }
+
+void dNonDeterministicFiniteAutonataCompiler::ReduceBalancedCharacterExpresion(char openChar, char closingChar)
+{
+	if (m_stack.IsEmpty()) {
+		m_error = true;
+		DTRACE_NFA(("Parce stack underflow error\n"));
+		return;
+	}
+	StateConstructPair operand (m_stack.Pop());
+
+	dAutomataState* const startState = new dAutomataState (m_stateID ++);
+	dAutomataState* const stackState = new dAutomataState (m_stateID ++);
+	dAutomataState* const acceptingState = new dAutomataState (m_stateID ++);
+
+	startState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(openChar, dAutomataState::NESTED_CHARACTER_INIT), stackState));
+	stackState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(openChar, dAutomataState::NESTED_CHARACTER_INC), stackState));
+	stackState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(closingChar, dAutomataState::NESTED_CHARACTER_DEC), stackState));
+	stackState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), acceptingState));
+	stackState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), operand.GetStart()));
+	operand.GetAccepting()->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), stackState));
+
+	m_stack.Push(startState, acceptingState);
+
+	DTRACE_NFA(("balanced operation :%c(expression):%c\n", openChar, closingChar));
+
+}
+
 
 void dNonDeterministicFiniteAutonataCompiler::ReduceZeroOrOneDiagram()
 {
 	if (m_stack.IsEmpty()) {
 		m_error = true;
-//		DTRACE(("Parce stack underflow error\n"));
+		DTRACE_NFA(("Parce stack underflow error\n"));
 		return;
 	}
 	StateConstructPair operand (m_stack.Pop());
@@ -395,7 +419,7 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceZeroOrOneDiagram()
 
 	m_stack.Push(start, accepting);
 
-//	DTRACE(("operator zeroOrOne\n"));
+	DTRACE_NFA(("operator zeroOrOne\n"));
 }
 
 
@@ -535,6 +559,7 @@ int dNonDeterministicFiniteAutonataCompiler::BracketedExpression (char* const se
 
 // id	: m_openSquareBrakect BracketedExpression m_closeSquareBrakect
 // id	: m_openParentesis UnionExpression m_closeParentesis
+// id	: m_balancedCharacterExpresion CHARACTER UnionExpression m_balancedCharacterExpresion CHARACTER
 // id	: .
 // id	: CHARACTER
 void dNonDeterministicFiniteAutonataCompiler::ShiftID()
@@ -543,6 +568,21 @@ void dNonDeterministicFiniteAutonataCompiler::ShiftID()
 		Match (m_openParentesis);
 		UnionExpression ();
 		Match (m_closeParentesis);
+	} else if (m_token == m_balancedCharacterExpresion) {
+		Match (m_balancedCharacterExpresion);
+		Match (m_token);
+		char openChar = char (m_token);
+
+		Match (m_token);
+		Match (m_token);
+		UnionExpression ();
+
+		Match (m_balancedCharacterExpresion);
+		Match (m_token);
+		char closeChar = char (m_token);
+		Match (m_token);
+
+		ReduceBalancedCharacterExpresion(openChar, closeChar);
 
 	} else if (m_token == m_openSquareBrakect) {
 		char asciiSet[D_ASCII_SET_MAX_SIZE];
@@ -566,7 +606,7 @@ void dNonDeterministicFiniteAutonataCompiler::ShiftID()
 		Match (m_token);
 	} else {
 		Match (m_token);
-		DTRACE(("parse error\n"));
+		DTRACE_NFA(("parse error\n"));
 	}
 }
 

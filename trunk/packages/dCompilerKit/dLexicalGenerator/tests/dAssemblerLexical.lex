@@ -13,7 +13,7 @@
 
 %{
 //
-// Newton Scrip Lex parcel
+// Newton Script Lex parcel
 // based on a subset of Java language specification 1.0 
 //
 %}

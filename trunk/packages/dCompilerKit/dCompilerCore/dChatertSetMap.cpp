@@ -35,7 +35,18 @@ dChatertSetMap::ChatertSet::ChatertSet (const char* const set, int count, int id
 
 bool dChatertSetMap::ChatertSet::IsCharAMatch (int id) const
 {
-	for (int i = 0; i < m_count; i ++) {
+	int i0 = 0;
+	int i1 = m_count - 1;
+	while ((i1 - i0) >= 4) {
+		int i = (i1 + i0 + 1)>>1;
+		if (id <= m_characters[i]) {
+			i1 = i;
+		} else {
+			i0 = i;
+		}
+	}
+
+	for (int i = i0; i <= i1; i ++) {
 		if (id == m_characters[i]) {
 			return true;
 		}

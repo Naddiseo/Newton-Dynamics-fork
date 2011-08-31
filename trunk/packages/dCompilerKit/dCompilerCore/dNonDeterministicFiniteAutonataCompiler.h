@@ -51,6 +51,7 @@ class dNonDeterministicFiniteAutonataCompiler
 		m_closeParentesis = ')',			// (a)  
 		m_openSquareBrakect = '[',			// [a] 
 		m_closeSquareBrakect = ']',			// [a] 
+		m_balancedCharacterExpresion = ':',	// my special extension for balanced expressions ex :{(expression):} will match balanced curly bracketed expresion  
 	};
 	
 
@@ -119,11 +120,13 @@ class dNonDeterministicFiniteAutonataCompiler
 	void Match (int token);
 	void PushId (int charater);
 	void PushSet (const char* const set, int size);
+
 	void ReduceUnionDiagram();
 	void ReduceConcatenationDiagram();
 	void ReduceZeroOrMoreDiagram ();
 	void ReduceOneOrMoreDiagram();
 	void ReduceZeroOrOneDiagram();
+	void ReduceBalancedCharacterExpresion(char openChar, char closingChar);
 
 	void UnionExpression ();
 	void ConcatenationExpression ();
