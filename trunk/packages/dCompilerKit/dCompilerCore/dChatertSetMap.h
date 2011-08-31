@@ -32,8 +32,8 @@ class dChatertSetMap
 		private:
 		static int sort (const void* a, const void* b);
 
-		int m_count;
 		int m_id;
+		int m_count;
 		char m_characters[D_ASCII_SET_MAX_SIZE];
 		friend dChatertSetMap;
 	};

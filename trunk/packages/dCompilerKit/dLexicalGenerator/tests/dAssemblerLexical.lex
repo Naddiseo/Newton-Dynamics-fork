@@ -24,7 +24,6 @@
 %}
 
 WhiteSpace		[ \t\n\r]+
-
 AnyButAstr		[^\*]
 AnyButSlash		[^\/]
 Comment1        [\/][\/].*
@@ -42,10 +41,11 @@ ret				[rR][eE][tT]
 Literal			[a-zA-Z_][0-9a-zA-Z_]*
 
 %%
-{WhiteSpace}		{}
+{WhiteSpace}	{}
+
 {loadI}			{return dAssemblerParcer::LOADI;}
-{add}				{return dAssemblerParcer::ADD;}
-{ret}				{return dAssemblerParcer::RET;}
+{add}			{return dAssemblerParcer::ADD;}
+{ret}			{return dAssemblerParcer::RET;}
 
 "begin"			{return dAssemblerParcer::BEGIN;}
 "end"			{return dAssemblerParcer::END;}
@@ -57,7 +57,8 @@ Literal			[a-zA-Z_][0-9a-zA-Z_]*
 {SignedInt}		{return dAssemblerParcer::INTERGER;}
 {Register}		{return dAssemblerParcer::REGISTER;}
 
-{Literal}			{return dAssemblerParcer::LITERAL;}
+{Literal}		{return dAssemblerParcer::LITERAL;}
+
 {Comment}		{}
 
 %%

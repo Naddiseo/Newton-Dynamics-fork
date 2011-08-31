@@ -14,24 +14,40 @@
 #include "dAutomataState.h"
 
 
-dAutomataState::Transition::Transition (int character, dAutomataState* const targetdAutomataState)
+dAutomataState::dCharacter::dCharacter ()
+	:m_symbol (0)
+{
+}
+
+dAutomataState::dCharacter::dCharacter (int symbol)
+	:m_symbol (symbol)
+{
+}
+
+dAutomataState::dCharacter::dCharacter (int info, TransitionType type)
+	:m_info (info), m_type(type)
+{
+}
+
+
+
+dAutomataState::dTransition::dTransition (dCharacter character, dAutomataState* const targetdAutomataState)
 	:m_character(character)
 	,m_targetdAutomataState(targetdAutomataState)
 {
 }
 
 
-int dAutomataState::Transition::GetCharater () const 
-{	return m_character;
+dAutomataState::dCharacter dAutomataState::dTransition::GetCharater () const 
+{	
+	return m_character;
 }
 
-dAutomataState* dAutomataState::Transition::GetState() const 
+
+dAutomataState* dAutomataState::dTransition::GetState() const 
 { 
 	return m_targetdAutomataState;
 }
-
-
-
 
 
 dAutomataState::dAutomataState (int id)
@@ -75,7 +91,7 @@ void dAutomataState::GetStateArray (dList<dAutomataState*>& statesList)
 		dAutomataState* const state = pool[stack];
 		statesList.Append(state);
 
-		for (dList<dAutomataState::Transition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
+		for (dList<dAutomataState::dTransition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
 			dAutomataState* const state = node->GetInfo().GetState();
 			if (!filter.Find (state)) {
 				pool[stack] = state;

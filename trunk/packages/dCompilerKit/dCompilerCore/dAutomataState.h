@@ -13,19 +13,52 @@
 #ifndef __dAutomataState_h_
 #define __dAutomataState_h_
 
+#if (_MSC_VER >= 1400)
+#	pragma warning (disable: 4201) //  warning C4201: nonstandard extension used : nameless struct/union
+#endif
+
+
 
 class dAutomataState 
 {	
 	public:
-	class Transition 
+	enum TransitionType
+	{
+		EMPTY = 0,
+		CHARACTER,
+		CHARACTER_SET,
+		NESTED_CHARACTER_INC,
+		NESTED_CHARACTER_DEC,
+		NESTED_CHARACTER_INIT,
+	};
+
+	class dCharacter 
 	{
 		public:
-		Transition (int character, dAutomataState* const targetdAutomataState);
-		int GetCharater () const;
+		dCharacter ();
+		dCharacter (int symbol);
+		dCharacter (int info, TransitionType type);
+
+		union {
+			int m_symbol;
+			struct 
+			{
+				int m_info			: 16;
+				int m_type			: 16;
+			};
+		};
+	};
+
+	class dTransition 
+	{
+		public:
+		dTransition (dCharacter character, dAutomataState* const targeState);
+
+		dCharacter GetCharater () const;
 		dAutomataState* GetState() const;
 
 		private:
-		int m_character;
+		dCharacter m_character;
 		dAutomataState* m_targetdAutomataState; 
 	};
 
@@ -38,7 +71,7 @@ class dAutomataState
 	int m_id;
 	int m_mark;
 	bool m_exitState;
-	dList<Transition> m_transtions;
+	dList<dTransition> m_transtions;
 	dList<dAutomataState*> m_myNFANullStates;
 };
 

@@ -51,17 +51,17 @@ dDeterministicFiniteAutonataCompiler::~dDeterministicFiniteAutonataCompiler(void
 void dDeterministicFiniteAutonataCompiler::CopySet (const dNonDeterministicFiniteAutonataCompiler& nfa)
 {
 	dList<dAutomataState*> stateList;
-//	nfa.GetStateArray (stateList, m_deterministicFiniteAutomata);
 	m_deterministicFiniteAutomata->GetStateArray (stateList);
 
 	dTree<int, int> setFilter;
 	for (dList<dAutomataState*>::dListNode* node = stateList.GetFirst(); node; node = node->GetNext()) {
 		dAutomataState* const state = node->GetInfo();
-		for (dList<dAutomataState::Transition>::dListNode* transitionNode = state->m_transtions.GetFirst(); transitionNode; transitionNode = transitionNode->GetNext()) {
-			dAutomataState::Transition& transition = transitionNode->GetInfo();
-			int ch = transition.GetCharater();
-			if (ch & (1<<15)) {
-				setFilter.Insert (ch, ch);
+		for (dList<dAutomataState::dTransition>::dListNode* transitionNode = state->m_transtions.GetFirst(); transitionNode; transitionNode = transitionNode->GetNext()) {
+			dAutomataState::dTransition& transition = transitionNode->GetInfo();
+			dAutomataState::dCharacter ch (transition.GetCharater());
+//			if (ch & (1<<15)) {
+			if (ch.m_type == dAutomataState::CHARACTER_SET) {
+				setFilter.Insert (ch.m_symbol, ch.m_symbol);
 			}
 		}
 	}
@@ -69,10 +69,11 @@ void dDeterministicFiniteAutonataCompiler::CopySet (const dNonDeterministicFinit
 	const dChatertSetMap& charaterSet = nfa.GetChatertSetMap();
 	dTree<int, int>::Iterator iter (setFilter);
 	for (iter.Begin(); iter; iter ++) {
-		int ch = iter.GetNode()->GetInfo();
-		const dChatertSetMap::ChatertSet* const set = charaterSet.FindSet (ch);
+		dAutomataState::dCharacter ch (iter.GetNode()->GetInfo());
+		const dChatertSetMap::ChatertSet* const set = charaterSet.FindSet (ch.m_info);
+		_ASSERTE (set);
 		int ch1 = m_charaterSetMap.AddSet(set->GetSet(), set->GetLength());
-		_ASSERTE (ch1 == ch);
+		_ASSERTE (ch1 == ch.m_info);
 	}
 }
 
@@ -95,26 +96,27 @@ int dDeterministicFiniteAutonataCompiler::FindMatch(const char* const text) cons
 			}
 
 
-			dAutomataState::Transition* transition = NULL;
-			for (dList<dAutomataState::Transition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
-				dAutomataState::Transition*const trans = &node->GetInfo();
-				int symbol = trans->GetCharater();
-				if (symbol == ch) {
-					transition = trans;
-					break;
+			dAutomataState::dTransition* transition = NULL;
+			for (dList<dAutomataState::dTransition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
+				dAutomataState::dTransition*const trans = &node->GetInfo();
+				dAutomataState::dCharacter symbol (trans->GetCharater());
 
-				} else if (symbol & (1<<15)) {
-					const dChatertSetMap::ChatertSet* const characterSet = m_charaterSetMap.FindSet(symbol);
+				if (symbol.m_type == dAutomataState::CHARACTER) {
+					if (symbol.m_info == ch) {
+						transition = trans;
+						break;
+					}
+//				} else if (symbol & (1<<15)) {
+				} else if (symbol.m_type == dAutomataState::CHARACTER_SET) {
+					const dChatertSetMap::ChatertSet* const characterSet = m_charaterSetMap.FindSet(symbol.m_info);
 					if (characterSet) {
-	//					if (characterSet->IsCharAMatch (ch)) {
 						if (characterSet->IsCharAMatch (GetScapeChar (ch))) {
 							transition = trans;
 							break;
 						}
 					}
-	//			} else if (GetScapeChar (symbol) == ch) {
-	//				transition = trans;
-	//				break;
+				} else {
+					_ASSERTE (0);
 				}
 			}
 
@@ -182,8 +184,8 @@ int dDeterministicFiniteAutonataCompiler::ConvertSwitchCaseStatements (string& p
 
 		char condition[126];
 		condition[0] = 0;
-		for (dList<dAutomataState::Transition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
-			dAutomataState::Transition& sourceTransition = node->GetInfo();
+		for (dList<dAutomataState::dTransition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
+			dAutomataState::dTransition& sourceTransition = node->GetInfo();
 
 			dAutomataState* const targetState = sourceTransition.GetState();
 			dTree<dAutomataState*,dAutomataState*>::dTreeNode* const mapMode = filter.Find(targetState);
@@ -310,42 +312,34 @@ int dDeterministicFiniteAutonataCompiler::ConvertSwitchCaseStatements (
 				AddText (parseTokenOutput, "\tchar ch = NextChar();\n");
 			}
 
-			for (dList<dAutomataState::Transition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
+			for (dList<dAutomataState::dTransition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
 
 
-				dAutomataState::Transition& sourceTransition = node->GetInfo();
-
+				dAutomataState::dTransition& sourceTransition = node->GetInfo();
 				dAutomataState* const targetState = sourceTransition.GetState();
-				dTree<dAutomataState*,dAutomataState*>::dTreeNode* const mapMode = filter.Find(targetState);
 
-				int ch = sourceTransition.GetCharater();
-				if (mapMode) {
-					if (ch & (1<<15)) {
-						const dChatertSetMap::ChatertSet* const charSet = m_charaterSetMap.FindSet (ch);
-						_ASSERTE (charSet);
-						ch = characterSet.AddSet (charSet->GetSet(), charSet->GetLength());
-						AddText (parseTokenOutput, "\t%sif (IsCharInSet (ch, text_%d)) m_state = %d;\n", condition, ch & 0x7fff, targetState->m_id + stateIdBase);
-						
-					} else {
-						AddText (parseTokenOutput, "\t%sif (ch == %d) m_state = %d;\n", condition, GetScapeChar(ch), targetState->m_id + stateIdBase);
-					}
-
-				} else {
+				if (!filter.Find(targetState)) {
 					pool[stack] = targetState;
 					filter.Insert(targetState, targetState);
 					stack ++;
 					_ASSERTE (stack < sizeof (pool)/sizeof (pool[0]));
-
-					if (ch & (1<<15)) {
-						const dChatertSetMap::ChatertSet* const charSet = m_charaterSetMap.FindSet (ch);
-						_ASSERTE (charSet);
-						ch = characterSet.AddSet (charSet->GetSet(), charSet->GetLength());
-						AddText (parseTokenOutput, "\t%sif (IsCharInSet (ch, text_%d)) m_state = %d;\n", condition, ch & 0x7fff, targetState->m_id + stateIdBase);
-
-					} else {
-						AddText (parseTokenOutput, "\t%sif (ch == %d) m_state = %d;\n", condition, GetScapeChar(ch), targetState->m_id + stateIdBase);
-					}
 				}
+
+				dAutomataState::dCharacter ch (sourceTransition.GetCharater());
+//				if (ch & (1<<15)) {
+				if (ch.m_type == dAutomataState::CHARACTER_SET) {
+					const dChatertSetMap::ChatertSet* const charSet = m_charaterSetMap.FindSet (ch.m_info);
+					_ASSERTE (charSet);
+					int ch = characterSet.AddSet (charSet->GetSet(), charSet->GetLength());
+					AddText (parseTokenOutput, "\t%sif (IsCharInSet (ch, text_%d)) m_state = %d;\n", condition, ch, targetState->m_id + stateIdBase);
+					
+				} else if (ch.m_type == dAutomataState::CHARACTER) {
+					AddText (parseTokenOutput, "\t%sif (ch == %d) m_state = %d;\n", condition, GetScapeChar(ch.m_info), targetState->m_id + stateIdBase);
+				} else {
+					_ASSERTE (0);
+				}
+
+
 				sprintf (condition, "else ");
 			}
 
@@ -383,62 +377,43 @@ int dDeterministicFiniteAutonataCompiler::ConvertSwitchCaseStatements (
 			}
 
 			int transitionIndex = 0;
-			for (dList<dAutomataState::Transition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
+			for (dList<dAutomataState::dTransition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
 
 				dTree<int, int>& nextState = nextStateMap.Find(transitionIndex)->GetInfo();
 				dTree<char, int>& charatestTest = characterTestMap.Find(transitionIndex)->GetInfo();
 				dTree<int, int>& testSetArrayIndex = testSetArrayIndexMap.Find(transitionIndex)->GetInfo();
 
-				dAutomataState::Transition& sourceTransition = node->GetInfo();
+				dAutomataState::dTransition& sourceTransition = node->GetInfo();
 				dAutomataState* const targetState = sourceTransition.GetState();
-				dTree<dAutomataState*,dAutomataState*>::dTreeNode* const mapMode = filter.Find(targetState);
 
 				nextState.Insert(targetState->m_id + stateIdBase, state->m_id + stateIdBase);
-
-				int ch = sourceTransition.GetCharater();
-				if (mapMode) {
-					if (ch & (1<<15)) {
-						const dChatertSetMap::ChatertSet* const charSet = m_charaterSetMap.FindSet (ch);
-						_ASSERTE (charSet);
-						ch = characterSet.AddSet (charSet->GetSet(), charSet->GetLength());
-						//AddText (parseTokenOutput, "\t%sif (IsCharInSet (ch, text_%d)) m_state = %d;\n", condition, ch & 0x7fff, targetState->m_id + stateIdBase);
-
-						testSetArrayIndex.Insert(ch & 0x7fff, state->m_id + stateIdBase);
-					} else {
-						//AddText (parseTokenOutput, "\t%sif (ch == %d) m_state = %d;\n", condition, GetScapeChar(ch), targetState->m_id + stateIdBase);
-						charatestTest.Insert(char(GetScapeChar(ch)), state->m_id + stateIdBase);
-					}
-
-				} else {
+				
+				if (!filter.Find(targetState)) {
 					pool[stack] = targetState;
 					filter.Insert(targetState, targetState);
 					stack ++;
 					_ASSERTE (stack < sizeof (pool)/sizeof (pool[0]));
-
-					if (ch & (1<<15)) {
-						const dChatertSetMap::ChatertSet* const charSet = m_charaterSetMap.FindSet (ch);
-						_ASSERTE (charSet);
-						ch = characterSet.AddSet (charSet->GetSet(), charSet->GetLength());
-						//AddText (parseTokenOutput, "\t%sif (IsCharInSet (ch, text_%d)) m_state = %d;\n", condition, ch & 0x7fff, targetState->m_id + stateIdBase);
-						testSetArrayIndex.Insert(ch & 0x7fff, state->m_id + stateIdBase);
-
-					} else {
-						//AddText (parseTokenOutput, "\t%sif (ch == %d) m_state = %d;\n", condition, GetScapeChar(ch), targetState->m_id + stateIdBase);
-						charatestTest.Insert(char(GetScapeChar(ch)), state->m_id + stateIdBase);
-					}
 				}
-				//sprintf (condition, "else ");
+
+				//int ch = sourceTransition.GetCharater();
+				dAutomataState::dCharacter ch (sourceTransition.GetCharater());
+				//if (ch & (1<<15)) {
+				if (ch.m_type == dAutomataState::CHARACTER_SET) {
+					const dChatertSetMap::ChatertSet* const charSet = m_charaterSetMap.FindSet (ch.m_info);
+					_ASSERTE (charSet);
+					int ch = characterSet.AddSet (charSet->GetSet(), charSet->GetLength());
+					testSetArrayIndex.Insert(ch, state->m_id + stateIdBase);
+				} else if (ch.m_type == dAutomataState::CHARACTER) {
+					charatestTest.Insert(char(GetScapeChar(ch.m_info)), state->m_id + stateIdBase);
+				} else {
+					_ASSERTE (0);
+				}
 
 				transitionIndex ++;
 			}
-
-			//AddText (parseTokenOutput, "\t%sm_state = NextPattern();\n", condition);
-			//AddText (parseTokenOutput, "\tbreak;\n");
-			//AddText (parseTokenOutput, "}\n");
 		}
 	}
 
-	//	AddText (nextTokenOutput, "case %d: m_startState = %d; break;\n", m_deterministicFiniteAutomata->m_id + stateIdBase, lastState + stateIdBase + 1);
 	char nextJump[256];
 	static string filler ("0, ");
 	sprintf (nextJump, "%d, ", lastState + stateIdBase + 1);

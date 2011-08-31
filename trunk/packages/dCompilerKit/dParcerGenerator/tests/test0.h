@@ -16,6 +16,8 @@
 #ifndef __test0_h__
 #define __test0_h__
 
+#include <string>
+using namespace std;
 
 class xxxxx;
 
@@ -35,7 +37,7 @@ class test0
 	virtual ~test0();
 	virtual int Parce(xxxxx& scanner);
 
-	virtual bool ErrorHandler (string* const line) const;
+	virtual bool ErrorHandler (const string& line) const;
 
 	private:
 	const dActionEntry* FindAction (const dActionEntry* const list, int count, Token token) const;

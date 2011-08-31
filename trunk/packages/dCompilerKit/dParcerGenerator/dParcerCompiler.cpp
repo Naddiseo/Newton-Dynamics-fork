@@ -863,6 +863,26 @@ void dParcerCompiler::GenerateParcerCode (
 		templateHeader.replace(i, 15, userVariable);
 	}
 
+	dTree<dState*,int>::Iterator stateIter (stateList);
+	for (stateIter.Begin(); stateIter; stateIter ++) {
+		dState* const state = stateIter.GetNode()->GetInfo();
+
+		dTree<dAction, string>::Iterator actionIter (state->m_actions);
+		for (actionIter.Begin(); actionIter; actionIter++) {
+			dAction& action = actionIter.GetNode()->GetInfo();
+			if (action.m_type == SHIFT) {
+				_ASSERTE (0);
+			} else if (action.m_type == REDUCE) {
+				_ASSERTE (0);
+			} else {
+				_ASSERTE (action.m_type == ACCEPT);
+			}
+
+		}
+	}
+		
+
+
 	strcpy (path, outputFileName);
 	char* const ptr1 = strrchr (path, '.');
 	if (ptr1) {

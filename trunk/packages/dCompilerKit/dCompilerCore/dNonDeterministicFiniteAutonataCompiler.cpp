@@ -249,13 +249,14 @@ void dNonDeterministicFiniteAutonataCompiler::Match (int token)
 
 void dNonDeterministicFiniteAutonataCompiler::PushId (int charater)
 {
-	dAutomataState* const start = new dAutomataState (m_stateID ++);
-	dAutomataState* const accepting = new dAutomataState (m_stateID ++);
+	dAutomataState* const startState = new dAutomataState (m_stateID ++);
+	dAutomataState* const acceptingState = new dAutomataState (m_stateID ++);
 
-	charater = GetScapeChar (charater);
-	start->m_transtions.Append(dAutomataState::Transition(charater, accepting));
+//	charater = GetScapeChar (charater);
+	dAutomataState::dCharacter charInfo (GetScapeChar (charater), dAutomataState::CHARACTER);
+	startState->m_transtions.Append(dAutomataState::dTransition(charInfo, acceptingState));
 
-	m_stack.Push(start, accepting);
+	m_stack.Push(startState, acceptingState);
 
 //	DTRACE(("Push ", charater));
 //	if (charater > 256) {
@@ -266,13 +267,15 @@ void dNonDeterministicFiniteAutonataCompiler::PushId (int charater)
 
 void dNonDeterministicFiniteAutonataCompiler::PushSet (const char* const set, int size)
 {
-	dAutomataState* const start = new dAutomataState (m_stateID ++);
-	dAutomataState* const accepting = new dAutomataState (m_stateID ++);
+	dAutomataState* const startState = new dAutomataState (m_stateID ++);
+	dAutomataState* const acceptingState = new dAutomataState (m_stateID ++);
 	
-	int ch = m_charaterSetMap.AddSet(set, size);
-	start->m_transtions.Append(dAutomataState::Transition(ch, accepting));
+//	int setID = m_charaterSetMap.AddSet(set, size);
+	int setId = m_charaterSetMap.AddSet(set, size);
+	dAutomataState::dCharacter charInfo (setId, dAutomataState::CHARACTER_SET);
+	startState->m_transtions.Append(dAutomataState::dTransition(charInfo, acceptingState));
 
-	m_stack.Push(start, accepting);
+	m_stack.Push(startState, acceptingState);
 
 //	DTRACE(("Push charSet%d\n", ch & (0x7fff)));
 }
@@ -296,15 +299,15 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceUnionDiagram()
 	}
 	StateConstructPair leftOperand (m_stack.Pop());
 
-	dAutomataState* const start = new dAutomataState (m_stateID ++);
-	dAutomataState* const accepting = new dAutomataState (m_stateID ++);
+	dAutomataState* const startState = new dAutomataState (m_stateID ++);
+	dAutomataState* const acceptingState = new dAutomataState (m_stateID ++);
 
-	start->m_transtions.Append(dAutomataState::Transition(0, leftOperand.GetStart()));
-	start->m_transtions.Append(dAutomataState::Transition(0, rightOperand.GetStart()));
-	leftOperand.GetAccepting()->m_transtions.Append(dAutomataState::Transition(0, accepting));
-	rightOperand.GetAccepting()->m_transtions.Append(dAutomataState::Transition(0, accepting));
+	startState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), leftOperand.GetStart()));
+	startState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), rightOperand.GetStart()));
+	leftOperand.GetAccepting()->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), acceptingState));
+	rightOperand.GetAccepting()->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), acceptingState));
 
-	m_stack.Push(start, accepting);
+	m_stack.Push(startState, acceptingState);
 //	DTRACE(("operator union\n"));
 }
 
@@ -325,7 +328,7 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceConcatenationDiagram()
 	}
 	StateConstructPair leftOperand (m_stack.Pop());
 
-	leftOperand.GetAccepting()->m_transtions.Append(dAutomataState::Transition(0, rightOperand.GetStart()));
+	leftOperand.GetAccepting()->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), rightOperand.GetStart()));
 
 	m_stack.Push(leftOperand.GetStart(), rightOperand.GetAccepting());
 //	DTRACE(("operator concatenation\n"));
@@ -340,15 +343,15 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceZeroOrMoreDiagram()
 	}
 	StateConstructPair operand (m_stack.Pop());
 
-	dAutomataState* const start = new dAutomataState (m_stateID ++);
-	dAutomataState* const accepting = new dAutomataState (m_stateID ++);
+	dAutomataState* const startState = new dAutomataState (m_stateID ++);
+	dAutomataState* const acceptingState = new dAutomataState (m_stateID ++);
 
-	start->m_transtions.Append(dAutomataState::Transition(0, accepting));
-	start->m_transtions.Append(dAutomataState::Transition(0, operand.GetStart()));
-	operand.GetAccepting()->m_transtions.Append(dAutomataState::Transition(0, accepting));
-	operand.GetAccepting()->m_transtions.Append(dAutomataState::Transition(0, operand.GetStart()));
+	startState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), acceptingState));
+	startState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), operand.GetStart()));
+	operand.GetAccepting()->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), acceptingState));
+	operand.GetAccepting()->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), operand.GetStart()));
 
-	m_stack.Push(start, accepting);
+	m_stack.Push(startState, acceptingState);
 
 //	DTRACE(("operator zeroOrMore\n"));
 }
@@ -362,14 +365,14 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceOneOrMoreDiagram()
 	}
 	StateConstructPair operand (m_stack.Pop());
 
-	dAutomataState* const start = new dAutomataState (m_stateID ++);
-	dAutomataState* const accepting = new dAutomataState (m_stateID ++);
+	dAutomataState* const startState = new dAutomataState (m_stateID ++);
+	dAutomataState* const acceptingState = new dAutomataState (m_stateID ++);
 
-	start->m_transtions.Append(dAutomataState::Transition(0, operand.GetStart()));
-	operand.GetAccepting()->m_transtions.Append(dAutomataState::Transition(0, accepting));
-	operand.GetAccepting()->m_transtions.Append(dAutomataState::Transition(0, operand.GetStart()));
+	startState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), operand.GetStart()));
+	operand.GetAccepting()->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), acceptingState));
+	operand.GetAccepting()->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), operand.GetStart()));
 
-	m_stack.Push(start, accepting);
+	m_stack.Push(startState, acceptingState);
 
 //	DTRACE(("operator oneOrMore\n"));
 }
@@ -386,9 +389,9 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceZeroOrOneDiagram()
 	dAutomataState* const start = new dAutomataState (m_stateID ++);
 	dAutomataState* const accepting = new dAutomataState (m_stateID ++);
 
-	start->m_transtions.Append(dAutomataState::Transition(0, accepting));
-	start->m_transtions.Append(dAutomataState::Transition(0, operand.GetStart()));
-	operand.GetAccepting()->m_transtions.Append(dAutomataState::Transition(0, accepting));
+	start->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), accepting));
+	start->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), operand.GetStart()));
+	operand.GetAccepting()->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), accepting));
 
 	m_stack.Push(start, accepting);
 
@@ -620,22 +623,22 @@ dAutomataState* dNonDeterministicFiniteAutonataCompiler::CreateDeterministicFini
 {
 	dList<dAutomataState*> stateArray;
 	dTree<int, int> symbolsList;
-	
+
 	m_startState->GetStateArray(stateArray);
 	for (dList<dAutomataState*>::dListNode* node = stateArray.GetFirst(); node; node = node->GetNext()) {
 		dAutomataState* const state = node->GetInfo();
-		for (dList<dAutomataState::Transition>::dListNode* transitionNode = state->m_transtions.GetFirst(); transitionNode; transitionNode = transitionNode->GetNext()) {
-			dAutomataState::Transition& transition = transitionNode->GetInfo();
-			int ch = transition.GetCharater();
-			if (ch) {
-				symbolsList.Insert(ch, ch);
+		for (dList<dAutomataState::dTransition>::dListNode* transitionNode = state->m_transtions.GetFirst(); transitionNode; transitionNode = transitionNode->GetNext()) {
+			dAutomataState::dTransition& transition = transitionNode->GetInfo();
+			dAutomataState::dCharacter ch (transition.GetCharater());
+			if (ch.m_symbol) {
+				symbolsList.Insert(ch.m_symbol, ch.m_symbol);
 			}
 		}
 	}
 
+
 	dTree<dAutomataState*,dAutomataState*> NFAmap;
 	dTree<dAutomataState*,dAutomataState*> subSet;
-
 
 	int stateID = 0;
 	NFAmap.Insert(m_startState, m_startState);
@@ -675,9 +678,9 @@ dAutomataState* dNonDeterministicFiniteAutonataCompiler::CreateDeterministicFini
 						break;
 					}
 				}
-
+				
 				if (foundState) {
-					state->m_transtions.Append(dAutomataState::Transition(ch, foundState));
+					state->m_transtions.Append(dAutomataState::dTransition(ch, foundState));
 
 				} else {
 				
@@ -687,7 +690,7 @@ dAutomataState* dNonDeterministicFiniteAutonataCompiler::CreateDeterministicFini
 					_ASSERTE (stack < sizeof (stackPool)/sizeof (stackPool[0]));
 
 					newStatesList.Append(targetState);
-					state->m_transtions.Append(dAutomataState::Transition(ch, targetState));
+					state->m_transtions.Append(dAutomataState::dTransition(ch, targetState));
 				}
 			}
 		}
@@ -741,10 +744,10 @@ void dNonDeterministicFiniteAutonataCompiler::MoveSymbol (int symbol, const dAut
 {
 	for (dList<dAutomataState*>::dListNode* stateNode = state->m_myNFANullStates.GetFirst(); stateNode; stateNode = stateNode->GetNext()) {
 		const dAutomataState* const state = stateNode->GetInfo();
-		for (dList<dAutomataState::Transition>::dListNode* transitionNode = state->m_transtions.GetFirst(); transitionNode; transitionNode = transitionNode->GetNext()) {
-			dAutomataState::Transition& thans = transitionNode->GetInfo();
-			int ch = thans.GetCharater();
-			if (ch == symbol) {
+		for (dList<dAutomataState::dTransition>::dListNode* transitionNode = state->m_transtions.GetFirst(); transitionNode; transitionNode = transitionNode->GetNext()) {
+			dAutomataState::dTransition& thans = transitionNode->GetInfo();
+			dAutomataState::dCharacter ch (thans.GetCharater());
+			if (ch.m_symbol == symbol) {
 				dAutomataState* const target = thans.GetState();
 				ouput.Insert(target, target);
 			}
@@ -754,6 +757,7 @@ void dNonDeterministicFiniteAutonataCompiler::MoveSymbol (int symbol, const dAut
 
 void dNonDeterministicFiniteAutonataCompiler::EmptyTransitionClosure (const dTree<dAutomataState*,dAutomataState*>& set, dTree<dAutomataState*,dAutomataState*>& closureStates) const
 {
+
 	int stack = 0;
 	dAutomataState* stackPool[2048];
 
@@ -769,9 +773,9 @@ void dNonDeterministicFiniteAutonataCompiler::EmptyTransitionClosure (const dTre
 	while(stack) {
 		stack --;
 		dAutomataState* const state = stackPool[stack];
-		for (dList<dAutomataState::Transition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
-			dAutomataState::Transition& transition = node->GetInfo();
-			if (transition.GetCharater() == 0) {
+		for (dList<dAutomataState::dTransition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
+			dAutomataState::dTransition& transition = node->GetInfo();
+			if (transition.GetCharater().m_symbol == 0) {
 				dAutomataState* const targetState = transition.GetState();
 				if(!closureStates.Find(targetState)) {
 					closureStates.Insert(targetState, targetState);

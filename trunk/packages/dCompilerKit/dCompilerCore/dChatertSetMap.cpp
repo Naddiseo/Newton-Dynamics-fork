@@ -73,7 +73,7 @@ int dChatertSetMap::ChatertSet::sort (const void* a, const void* b)
 
 
 dChatertSetMap::dChatertSetMap ()
-	:m_id (1<<15)
+	:m_id (0)
 {
 }
 

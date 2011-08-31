@@ -12,6 +12,19 @@
 
 // very simple sample ADD and MULT grammar 
 
+%union 
+{
+	class myVariable 
+	{
+		myVariable (
+		myVariable (const char* const text)
+			:m_data (text);
+		{
+		}
+		string m_data;
+	};
+}
+
 %token id
 %start E
 

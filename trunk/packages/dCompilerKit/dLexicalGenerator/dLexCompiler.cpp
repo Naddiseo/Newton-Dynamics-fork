@@ -723,25 +723,27 @@ void dLexCompiler::ExpandedNFA::PushNFA (ExpandedNFA* const nfa, const char* con
 		StateConstructPair statePair = pool[stack];
 		_ASSERTE (filter.Find(statePair.GetStart()));
 
-		for (dList<dAutomataState::Transition>::dListNode* node = statePair.GetStart()->m_transtions.GetFirst(); node; node = node->GetNext()) {
-			dAutomataState::Transition& sourceTransition = node->GetInfo();
+		for (dList<dAutomataState::dTransition>::dListNode* node = statePair.GetStart()->m_transtions.GetFirst(); node; node = node->GetNext()) {
+			dAutomataState::dTransition& sourceTransition = node->GetInfo();
 			dAutomataState* const targetState = sourceTransition.GetState();
 
 			dTree<dAutomataState*,dAutomataState*>::dTreeNode* const mapMode = filter.Find(targetState);
 
-			int ch = sourceTransition.GetCharater();
-			if (ch & (1<<15)) {
-				const dChatertSetMap::ChatertSet* const charSet = nfa->m_charaterSetMap.FindSet (ch);
-				ch = m_charaterSetMap.AddSet(charSet->GetSet(), charSet->GetLength());
+			dAutomataState::dCharacter ch (sourceTransition.GetCharater());
+//			if (ch & (1<<15)) {
+			if (ch.m_type == dAutomataState::CHARACTER_SET) {
+				const dChatertSetMap::ChatertSet* const charSet = nfa->m_charaterSetMap.FindSet (ch.m_info);
+				int newch = m_charaterSetMap.AddSet(charSet->GetSet(), charSet->GetLength());
+				ch = dAutomataState::dCharacter (newch, dAutomataState::CHARACTER_SET);
 			}
 
 			if (mapMode) {
 				dAutomataState* const accepting = mapMode->GetInfo();
-				statePair.GetAccepting()->m_transtions.Append(dAutomataState::Transition(ch, accepting));
+				statePair.GetAccepting()->m_transtions.Append(dAutomataState::dTransition(ch, accepting));
 			} else {
 				pool[stack] = StateConstructPair (targetState, new dAutomataState(m_stateID));
 				filter.Insert(pool[stack].GetAccepting(), targetState);
-				statePair.GetAccepting()->m_transtions.Append(dAutomataState::Transition(ch, pool[stack].GetAccepting()));
+				statePair.GetAccepting()->m_transtions.Append(dAutomataState::dTransition(ch, pool[stack].GetAccepting()));
 				stack ++;
 				m_stateID ++;
 				_ASSERTE (stack < sizeof (pool)/sizeof (pool[0]));
