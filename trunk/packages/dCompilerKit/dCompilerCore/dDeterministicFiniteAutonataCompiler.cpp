@@ -159,6 +159,7 @@ int dDeterministicFiniteAutonataCompiler::FindMatch(const char* const text) cons
 				}
 			}
 
+
 			if(transition) {
 				count ++;
 				count += extendChar;
