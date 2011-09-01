@@ -424,15 +424,15 @@ int dLexCompiler::ParseDefinitions (
 {
 	// parse definitions
 	{
-//m_tokenList.AddTokenData (m_codeBlock, "{(([^{}\"\']*)|(\'(.|[\n])\')|(\"(\\.|[^\"])*\"))*}");
-
-m_tokenList.AddTokenData (m_codeBlock, "%(:{([^{}]*):})%");
-//m_tokenList.AddTokenData (m_codeBlock, "(:{(([^{}\"\']*)|(\'(.|[\n])\')|(\"(\\.|[^\"])*\"))*:}");
+//m_tokenList.AddTokenData (m_codeBlock, "%(:{([^{}]*):})%");
+//m_tokenList.AddTokenData (m_codeBlock, "(:{(([^{}\"\']*)|(\'(.|[\n])\')|(\"(\\.|[^\"])*\"))*:})");
+m_tokenList.AddTokenData (m_codeBlock, "%(:{(([^{}\"])|(\"[^\"]*\"))*:})%");
 
 
 //		m_tokenList.AddTokenData (m_whiteSpace, "[ \t\v\n\f]+");
 //		m_tokenList.AddTokenData (m_comment, "(/\\*([^*]|[\r\n]|(\\*+([^*/]|[\r\n])))*\\*+/)|(//.*)");
-//		m_tokenList.AddTokenData (m_codeBlock, "%\\{([^%]|[\r\n]|(%+([^%}]|[\r\n])))*%+\\}");
+		//m_tokenList.AddTokenData (m_codeBlock, "%\\{([^%]|[\r\n]|(%+([^%}]|[\r\n])))*%+\\}");
+//		m_tokenList.AddTokenData (m_codeBlock, "%(:{(([^{}\"\']*)|(\'(.|[\n])\')|(\"(\\.|[^\"])*\"))*:})%");
 //		m_tokenList.AddTokenData (m_literal, "[a-zA-Z_][0-9a-zA-Z]*");
 //		m_tokenList.AddTokenData (m_number, "[0-9]+");
 //		m_tokenList.AddTokenData (m_intenalSize, "%[pneako]");
