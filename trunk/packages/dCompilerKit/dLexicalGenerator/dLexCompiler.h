@@ -24,6 +24,9 @@
 #include <dList.h>
 #include <dCRC.h>
 
+#include <string>
+using namespace std;
+
 
 #include "dAutomataState.h"
 #include "dChatertSetMap.h"
@@ -33,91 +36,28 @@
 
 class dLexCompiler
 {
-	enum Token
-	{
-		m_whiteSpace,
-		m_action,
-		m_comment,
-		m_delimiter,
-		m_codeBlock,
-		m_intenalSize,
-		m_number,
-		m_quatedString,
-		m_literal,
-		m_extendedRegularExpresion,
-		m_curlyBrace,
-		m_end,
-	};
+	enum dToken;
+	class dTokenData;
+	class dExpandedNFA;
+	class dConvertDFAtoCode;
 
-	class TokenData: public dDeterministicFiniteAutonataCompiler
+	class dTokenDataList: public dList<dTokenData*>
 	{
 		public:
-		TokenData (Token token, const char* const regulatExpresion)
-			:dDeterministicFiniteAutonataCompiler (regulatExpresion)
-			,m_token(token)
-		{
-		}
-
-		~TokenData()
-		{
-
-		}
-		Token m_token;
-	};
-
-	class TokenDataList: public dList<TokenData*>
-	{
-		public:
-		TokenDataList ()
-			:dList<TokenData*>()
-		{
-		}
-
-		~TokenDataList ()
-		{
-			DeleteAll();
-		}
-
-		void AddTokenData (Token token, const char* const regulatExpresion)
-		{
-			TokenData* const data = new TokenData (token, regulatExpresion);
-			Append (data);
-		}
-
-		void DeleteAll()
-		{
-			for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
-				delete node->GetInfo();
-			}
-			dList<TokenData*>::RemoveAll();
-		}
-	};
-
-	class DefinitionsMap;
-	class ExpandedNFA: public dNonDeterministicFiniteAutonataCompiler
-	{
-		public:
-		ExpandedNFA (const char* const regulatExpresion, DefinitionsMap* const map);
-
-		virtual void ShiftID();
-		virtual bool IsOperator (int charater) const;
-		virtual bool CheckInsertConcatenation (int left, int right) const;
-		virtual void PreProcessExpression (const char* const regularExpression);
-
-		void PushNFA (ExpandedNFA* const nfa, const char* const label);
-
-		DefinitionsMap* m_map;
-
+		dTokenDataList ();
+		~dTokenDataList ();
+		void DeleteAll();
+		void AddTokenData (dToken token, const char* const regulatExpresion);
 	};
 
 
-	class DefinitionsMap: public dTree<ExpandedNFA*,int>
+	class dDefinitionsMap: public dTree<string,unsigned>
 	{
 		public:
-		DefinitionsMap ();
-		~DefinitionsMap ();
-		void AddDefinition (const char* const label, const char* const regulatExpresion);
-		ExpandedNFA* FindNDAExpresion (const char* const label) const;
+		dDefinitionsMap ();
+		~dDefinitionsMap ();
+		void PreProcessDefinitions (string& regularExpresionWithDefinitions);
+		void AddDefinition (string& regularExpresionWithMacros, string& key);
 	};
 
 
@@ -127,10 +67,13 @@ class dLexCompiler
 
 	private:
 	void NextToken ();
-	void MatchToken (Token token);
-	void CopyTokenStream (char* const buffer) const;
+	void MatchToken (dToken token);
 	void ParseDefinitionExpression (string& preheaderCode);
 	void ParseDefinitionBlock (string& preheaderCode);
+
+
+	void ParseDefinitions (string& userPreheaderCode, string& automataCode);
+
 	int ParseDefinitions (string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet, 
 						   dTree<int, int>& transitionsCountMap, dTree<dTree<int, int>, int>& nextState,
 						   dTree<dTree<char, int>, int>& characterTestMap, dTree<dTree<int, int>, int>& testSetArrayIndexMap);
@@ -143,13 +86,14 @@ class dLexCompiler
 						 dTree<dTree<char, int>, int>& characterTestMap, dTree<dTree<int, int>, int>& testSetArrayIndexMap) const;
 
 
-	Token m_token;
+	dToken m_token;
 	int m_grammarTokenStart;
 	int m_grammarTokenLength;
 	const char* m_grammar;
-	TokenDataList m_tokenList;
-	DefinitionsMap m_defintions;
-	
+	dTokenDataList m_tokenList;
+	dDefinitionsMap m_defintions;
+
+
 };
 
 

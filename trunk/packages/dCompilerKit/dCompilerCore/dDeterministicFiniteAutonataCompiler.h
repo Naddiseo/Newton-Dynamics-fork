@@ -19,28 +19,28 @@
 class dDeterministicFiniteAutonataCompiler
 {
 	public:
+	dDeterministicFiniteAutonataCompiler();
 	dDeterministicFiniteAutonataCompiler(const char* const regularExpression);
-	dDeterministicFiniteAutonataCompiler(const dNonDeterministicFiniteAutonataCompiler& expression);
+	dDeterministicFiniteAutonataCompiler(const dNonDeterministicFiniteAutonataCompiler& nfa);
 	
 	virtual ~dDeterministicFiniteAutonataCompiler(void);
 
-	int FindMatch(const char* const text) const;
-	int ConvertSwitchCaseStatements (string& parseTokenOutput, string& nextTokenOutput, int initialState, 
-									dChatertSetMap& characterSet, const string& action,
-									dTree<int, int>& transitionsCountMap,
-									dTree<dTree<int, int>, int>& nextState,
-									dTree<dTree<char, int>, int>& characterTestMap,
-									dTree<dTree<int, int>, int>& testSetArrayIndexMap) const;
+	virtual int FindMatch(const char* const text) const;
+
+	protected:
+		
+	virtual dAutomataState* CreateTargetState (dTree<dAutomataState*,dAutomataState*>& subSet, int id);
+	void CreateDeterministicFiniteAutomaton (const dNonDeterministicFiniteAutonataCompiler& nfa);
 
 	private:
 	void CopySet (const dNonDeterministicFiniteAutonataCompiler& nfa);
-	void ParseExpresionToNFA ();
+	bool CompareSets (dList<dAutomataState*>& setA, dTree<dAutomataState*,dAutomataState*>& setB) const;
+	void MoveSymbol (int symbol, const dAutomataState* const state, dTree<dAutomataState*,dAutomataState*>& ouput) const;
+	void EmptyTransitionClosure (const dTree<dAutomataState*,dAutomataState*>& set, dTree<dAutomataState*,dAutomataState*>& closureStates) const;
 
-	void AddText (string& output, const char* const fmt, ...) const;
-
+	protected:
 	dAutomataState* m_deterministicFiniteAutomata; 
 	dChatertSetMap m_charaterSetMap;
-
 };
 
 

@@ -63,7 +63,6 @@ class dAutomataState
 	};
 
 	dAutomataState (int id);
-	dAutomataState (dTree<dAutomataState*,dAutomataState*>& subSet, int id);
 	~dAutomataState ();
 
 	void dAutomataState::GetStateArray (dList<dAutomataState*>& statesList);

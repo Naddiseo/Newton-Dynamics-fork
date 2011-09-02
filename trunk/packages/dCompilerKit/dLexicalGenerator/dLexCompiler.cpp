@@ -15,69 +15,534 @@
 #include "dLexCompiler.h"
 #include "dCompilerCore.h"
 
-
-//The flex input file consists of three sections, separated by a line containing only `%%'. 
-//
-//	definitions
-//	%%
-//	rules
-//	%%
-//	user code
-
-dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outputFileName)
-	:m_token (m_end)
-	,m_grammarTokenStart(0)
-	,m_grammarTokenLength(0)
-	,m_grammar (inputRules)
-	,m_tokenList()
+enum dLexCompiler::dToken
 {
-	string automataCode ("");
-	string nextCodeCases ("");
-	string userPreheaderCode (""); 
-	dChatertSetMap characterSet;
-	dTree<int, int> transitionsCountMap;
-	dTree<dTree<int, int>, int> nextState;
-	dTree<dTree<char, int>, int> characterTestMap;
-	dTree<dTree<int, int>, int> testSetArrayIndexMap;
+	m_whiteSpace,
+	m_action,
+	m_comment,
+	m_delimiter,
+	m_codeBlock,
+	m_intenalSize,
+	m_number,
+	m_quatedString,
+	m_literal,
+	m_extendedRegularExpresion,
+	m_curlyBrace,
+	m_end,
+};
 
 
-	int stateCount = ParseDefinitions (userPreheaderCode, nextCodeCases, automataCode, characterSet, transitionsCountMap, nextState, characterTestMap, testSetArrayIndexMap);
 
-	char cppFileName[256];
-	strcpy (cppFileName, outputFileName);
-	char* const dot = strrchr (cppFileName, '.');
-	if (dot) {
-		*dot = 0;
+class dLexCompiler::dTokenData: public dDeterministicFiniteAutonataCompiler
+{
+	public:
+	dTokenData (dToken token, const char* const regulatExpresion)
+		:dDeterministicFiniteAutonataCompiler (regulatExpresion)
+		,m_token(token)
+	{
 	}
 
-	char className[256];
-	const char* ptr = strrchr (cppFileName, '/');
-	if (ptr) {
-		ptr ++;
-	} else {
-		ptr = strrchr (cppFileName, '\\');
-		if (ptr) {
-			ptr ++;
-		} else {
-			ptr = cppFileName;
+	~dTokenData()
+	{
+
+	}
+	dToken m_token;
+};
+
+
+dLexCompiler::dTokenDataList::dTokenDataList ()
+	:dList<dTokenData*>()
+{
+}
+
+dLexCompiler::dTokenDataList::~dTokenDataList ()
+{
+	DeleteAll();
+}
+
+void dLexCompiler::dTokenDataList::AddTokenData (dToken token, const char* const regulatExpresion)
+{
+	dTokenData* const data = new dTokenData (token, regulatExpresion);
+	Append (data);
+}
+
+void dLexCompiler::dTokenDataList::DeleteAll()
+{
+	for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
+		delete node->GetInfo();
+	}
+	dList<dTokenData*>::RemoveAll();
+}
+
+
+dLexCompiler::dDefinitionsMap::dDefinitionsMap ()
+{
+
+}
+dLexCompiler::dDefinitionsMap::~dDefinitionsMap ()
+{
+}
+
+void dLexCompiler::dDefinitionsMap::PreProcessDefinitions (string& regularExpresionWithMacros)
+{
+	int i0 = 0;
+	for (int i1 = regularExpresionWithMacros.find('{', i0); i1 != -1; i1 = regularExpresionWithMacros.find('{', i0)) {
+		i0 = i1;
+		int size = regularExpresionWithMacros.size();
+		for (i1 ++; (i1 <= size) && isalnum (regularExpresionWithMacros[i1]); i1 ++) {
+		} 
+		if (i1 < size) {
+			string expressionName (&regularExpresionWithMacros[i0 + 1], i1 - i0 - 1);
+			dTreeNode* const node = Find(dCRC (expressionName.c_str()));
+			if (node) {
+				string expression (node->GetInfo());
+				regularExpresionWithMacros.replace(i0, i1 - i0 + 1, expression);
+			} else {
+				i0 ++;
+			}
 		}
 	}
-
-	strcpy (className, ptr);
-
-	strcat (cppFileName, ".cpp");
-	
-	CreateCodeFile (cppFileName, className, stateCount, userPreheaderCode, nextCodeCases, automataCode, characterSet, 
-					transitionsCountMap, nextState, characterTestMap, testSetArrayIndexMap);
-
-	*dot = 0;
-	strcat (cppFileName, ".h");
-	CreateHeaderFile (cppFileName, className);
 }
 
-dLexCompiler::~dLexCompiler()
+void dLexCompiler::dDefinitionsMap::AddDefinition (string& regularExpresion, string& key)
 {
+	PreProcessDefinitions (regularExpresion);
+	Insert (regularExpresion, dCRC (key.c_str()));
 }
+
+
+
+class dLexCompiler::dExpandedNFA: public dNonDeterministicFiniteAutonataCompiler
+{
+public:
+	dExpandedNFA ()
+		:dNonDeterministicFiniteAutonataCompiler()
+		,m_empty (true), m_userActionMap()
+	{
+	}
+//	ExpandedNFA (const char* const regulatExpresion, DefinitionsMap* const map);
+//	virtual void ShiftID();
+//	virtual bool IsOperator (int charater) const;
+//	virtual bool CheckInsertConcatenation (int left, int right) const;
+//	virtual void PreProcessExpression (const char* const regularExpression);
+//	void PushNFA (ExpandedNFA* const nfa, const char* const label);
+//	DefinitionsMap* m_map;
+
+	void PreProcessExpression (const char* const regularExpression)
+	{
+		char buffer[D_ASCII_SET_MAX_SIZE];
+
+		_ASSERTE (sizeof (m_regularExpression) > strlen (regularExpression));
+		sprintf (m_regularExpression, "%s", regularExpression);
+
+		int i = 0;
+		for (int ch = GetChar(); ch; ch = GetChar()) {
+			if ((ch>>8) == '\\') {
+				switch (char (ch))
+				{
+					case '~':
+					case '!':
+					case '@':
+					case '#':
+					case '$':
+					case '%':
+					case '^':
+					case '&':
+					case '*':
+					case '(':
+					case ')':
+					case '-':
+					case '+':
+
+
+					case '{':
+					case '}':
+					case '|':
+					case ':':
+					case '"':
+					case '<':
+					case '>':
+					case '?':
+
+					case '`':
+					case '_':
+					case '=':
+					case '[':
+					case ']':
+					case '\\':
+					case ';':
+					case '\'':
+					case ',':
+					case '.':
+					case '/':
+
+					case 'n':
+					case 'r':
+					case 't':
+					case 'v':
+					case 'f':
+						buffer[i] = '\\';
+						i ++;
+						break;
+
+					case '1':
+						if (m_regularExpression[m_regularExpressionIndex] == 'b') {
+							GetChar();
+							ch = 0x1b;
+						}
+						break;
+					default:;
+						ch = char (ch);
+				}
+			}
+			buffer[i] = char (ch);
+			i ++;
+		}
+		buffer[i] = 0;
+		m_regularExpressionIndex = 0;
+		dNonDeterministicFiniteAutonataCompiler::PreProcessExpression (buffer);
+	}
+
+
+	void AddExpression (string& expression, string& userAction)
+	{
+		if (m_empty) {
+			m_empty = false;
+			CompileExpression(expression.c_str());
+		} else {
+			dAutomataState* const startState0 = m_startState;
+			dAutomataState* const acceptingState0 = m_acceptingState;
+			
+			CompileExpression(expression.c_str());
+
+			dAutomataState* const startState1 = m_startState;
+			dAutomataState* const acceptingState1 = m_acceptingState;
+			
+			m_startState = new dAutomataState (m_stateID ++);
+			m_acceptingState = new dAutomataState (m_stateID ++);
+			m_acceptingState->m_exitState = true;
+
+			m_startState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), startState0));
+			m_startState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), startState1));
+			acceptingState1->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), m_acceptingState));
+			acceptingState1->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), m_acceptingState));
+
+			//DTRACE_NFA(("operator union\n"));
+		}
+		m_userActionMap.Insert(userAction, m_acceptingState);
+	}
+
+	bool m_empty;
+	dTree<string, dAutomataState*> m_userActionMap;
+};
+
+class dLexCompiler::dConvertDFAtoCode: public dDeterministicFiniteAutonataCompiler
+{
+	public: 
+	dConvertDFAtoCode (const dNonDeterministicFiniteAutonataCompiler& nfa)
+		:dDeterministicFiniteAutonataCompiler ()
+	{
+		CreateDeterministicFiniteAutomaton (nfa);
+	}
+
+	private:
+	dAutomataState* CreateTargetState (dTree<dAutomataState*,dAutomataState*>& subSet, int id)
+	{
+		dAutomataState* const state = dDeterministicFiniteAutonataCompiler::CreateTargetState (subSet, id);
+
+
+		return state;
+	}
+
+	void AddText (string& output, const char* const fmt, ...) const
+	{
+		va_list v_args;
+		char text[2048];
+
+		text[0] = '\t';
+		text[1] = '\t';
+		text[2] = '\t';
+		text[3] = 0;
+		va_start (v_args, fmt);     
+		vsprintf(&text[3], fmt, v_args);
+		va_end (v_args);            
+
+		output += text;
+	}
+
+
+	int ConvertSwitchCaseStatements (
+		string& parseTokenOutput, 
+		string& nextTokenOutput, 
+		int stateIdBase, 
+		dChatertSetMap& characterSet, 
+		const string& userAction,
+		dTree<int, int>& transitionsCountMap,
+		dTree<dTree<int, int>, int>& nextStateMap,
+		dTree<dTree<char, int>, int>& characterTestMap,
+		dTree<dTree<int, int>, int>& testSetArrayIndexMap) const 
+	{
+#if 0
+		dTree<dAutomataState*,dAutomataState*> filter;
+
+		int stack = 1;
+		dAutomataState* pool[128];
+
+		pool[0] = m_deterministicFiniteAutomata;
+		filter.Insert(pool[0], pool[0]);
+
+		int lastState = m_deterministicFiniteAutomata->m_id;
+
+		while (stack) {
+			stack --;
+
+			dAutomataState* const state = pool[stack];
+			_ASSERTE (filter.Find(state));
+
+			AddText (parseTokenOutput, "case %d:\n", state->m_id + stateIdBase);
+			AddText (parseTokenOutput, "{\n");
+
+			if (!state->m_exitState || state->m_transtions.GetCount()) {
+				AddText (parseTokenOutput, "\tchar ch = NextChar();\n");
+			}
+
+			if ((state->m_id) > lastState) {
+				lastState = state->m_id;
+			}
+
+			char condition[126];
+			condition[0] = 0;
+			for (dList<dAutomataState::dTransition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
+				dAutomataState::dTransition& sourceTransition = node->GetInfo();
+
+				dAutomataState* const targetState = sourceTransition.GetState();
+				dTree<dAutomataState*,dAutomataState*>::dTreeNode* const mapMode = filter.Find(targetState);
+
+				int ch = sourceTransition.GetCharater();
+
+				if (mapMode) {
+					if (ch & (1<<15)) {
+						const dChatertSetMap::ChatertSet* const charSet = m_charaterSetMap.FindSet (ch);
+						_ASSERTE (charSet);
+						ch = characterSet.AddSet (charSet->GetSet(), charSet->GetLength());
+						AddText (parseTokenOutput, "\t%sif (IsCharInSet (ch, text_%d)) m_state = %d;\n", condition, ch & 0x7fff, targetState->m_id + stateIdBase);
+					} else {
+						AddText (parseTokenOutput, "\t%sif (ch == %d) m_state = %d;\n", condition, GetScapeChar(ch), targetState->m_id + stateIdBase);
+					}
+
+				} else {
+					pool[stack] = targetState;
+					filter.Insert(targetState, targetState);
+					stack ++;
+					_ASSERTE (stack < sizeof (pool)/sizeof (pool[0]));
+
+					if (ch & (1<<15)) {
+						const dChatertSetMap::ChatertSet* const charSet = m_charaterSetMap.FindSet (ch);
+						_ASSERTE (charSet);
+						ch = characterSet.AddSet (charSet->GetSet(), charSet->GetLength());
+
+						AddText (parseTokenOutput, "\t%sif (IsCharInSet (ch, text_%d)) m_state = %d;\n", condition, ch & 0x7fff, targetState->m_id + stateIdBase);
+
+					} else {
+						AddText (parseTokenOutput, "\t%sif (ch == %d) m_state = %d;\n", condition, GetScapeChar(ch), targetState->m_id + stateIdBase);
+					}
+				}
+				sprintf (condition, "else ");
+			}
+
+			if (state->m_exitState) {
+				// this is the exit;
+
+				AddText (parseTokenOutput, "\t%s{\n", condition);
+
+				//AddText (parseTokenOutput, "\t\tm_state = %d;\n", condition, state->m_id + stateIdBase);
+				if (state->m_transtions.GetCount()) {
+					AddText (parseTokenOutput, "\t\tm_index --;\n");
+				}
+				AddText (parseTokenOutput, "\t\tGetLexString ();\n");
+
+				//AddText (parseTokenOutput, "\t\t{\n");
+				AddText (parseTokenOutput, "\t\t//user specified action\n");
+				AddText (parseTokenOutput, "\t\tm_state = 0;\n");
+				AddText (parseTokenOutput, "\t\tm_startState = 0;\n");
+				AddText (parseTokenOutput, "\t\t%s\n", action.c_str());
+
+				//AddText (parseTokenOutput, "\t\t}\n");
+
+
+
+				AddText (parseTokenOutput, "\t}\n");
+
+			} else {
+				AddText (parseTokenOutput, "\t%sm_state = NextPattern();\n", condition);
+			}
+
+			AddText (parseTokenOutput, "\tbreak;\n");
+
+			AddText (parseTokenOutput, "}\n");
+		}
+
+		//	AddText (nextTokenOutput, "case %d: m_startState = %d; break;\n", m_deterministicFiniteAutomata->m_id + stateIdBase, lastState + stateIdBase + 1);
+		char nextJump[256];
+		static string filler ("0, ");
+		sprintf (nextJump, "%d, ", lastState + stateIdBase + 1);
+		nextTokenOutput += nextJump;
+		for (int i = 0; i < lastState; i ++) {
+			nextTokenOutput += filler;
+		}
+
+
+		//	DTRACE ((parseTokenOutput.c_str()));
+		return stateIdBase + lastState + 1;
+
+#endif
+		dTree<dAutomataState*,dAutomataState*> filter;
+
+		int stack = 1;
+		dAutomataState* pool[128];
+
+		pool[0] = m_deterministicFiniteAutomata;
+		filter.Insert(pool[0], pool[0]);
+
+		int lastState = m_deterministicFiniteAutomata->m_id;
+
+		while (stack) {
+			stack --;
+
+			dAutomataState* const state = pool[stack];
+			_ASSERTE (filter.Find(state));
+
+
+			if ((state->m_id) > lastState) {
+				lastState = state->m_id;
+			}
+
+			char condition[126];
+			condition[0] = 0;
+
+			if (state->m_exitState) {
+				AddText (parseTokenOutput, "case %d:\n", state->m_id + stateIdBase);
+				AddText (parseTokenOutput, "{\n");
+				if (!state->m_exitState || state->m_transtions.GetCount()) {
+					AddText (parseTokenOutput, "\tchar ch = NextChar();\n");
+				}
+
+				for (dList<dAutomataState::dTransition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
+
+
+					dAutomataState::dTransition& sourceTransition = node->GetInfo();
+					dAutomataState* const targetState = sourceTransition.GetState();
+
+					if (!filter.Find(targetState)) {
+						pool[stack] = targetState;
+						filter.Insert(targetState, targetState);
+						stack ++;
+						_ASSERTE (stack < sizeof (pool)/sizeof (pool[0]));
+					}
+
+					dAutomataState::dCharacter ch (sourceTransition.GetCharater());
+					//				if (ch & (1<<15)) {
+					if (ch.m_type == dAutomataState::CHARACTER_SET) {
+						const dChatertSetMap::ChatertSet* const charSet = m_charaterSetMap.FindSet (ch.m_info);
+						_ASSERTE (charSet);
+						int ch = characterSet.AddSet (charSet->GetSet(), charSet->GetLength());
+						AddText (parseTokenOutput, "\t%sif (IsCharInSet (ch, text_%d)) m_state = %d;\n", condition, ch, targetState->m_id + stateIdBase);
+
+					} else if (ch.m_type == dAutomataState::CHARACTER) {
+						AddText (parseTokenOutput, "\t%sif (ch == %d) m_state = %d;\n", condition, dNonDeterministicFiniteAutonataCompiler::GetScapeChar(ch.m_info), targetState->m_id + stateIdBase);
+					} else {
+						_ASSERTE (0);
+					}
+
+
+					sprintf (condition, "else ");
+				}
+
+				AddText (parseTokenOutput, "\t%s{\n", condition);
+
+				//AddText (parseTokenOutput, "\t\tm_state = %d;\n", condition, state->m_id + stateIdBase);
+				if (state->m_transtions.GetCount()) {
+					AddText (parseTokenOutput, "\t\tm_index --;\n");
+				}
+				AddText (parseTokenOutput, "\t\tGetLexString ();\n");
+
+				//AddText (parseTokenOutput, "\t\t{\n");
+				AddText (parseTokenOutput, "\t\t//user specified action\n");
+				AddText (parseTokenOutput, "\t\tm_state = 0;\n");
+				AddText (parseTokenOutput, "\t\tm_startState = 0;\n");
+				AddText (parseTokenOutput, "\t\t%s\n", userAction.c_str());
+
+				//AddText (parseTokenOutput, "\t\t}\n");
+
+				AddText (parseTokenOutput, "\t}\n");
+
+				AddText (parseTokenOutput, "\tbreak;\n");
+
+				AddText (parseTokenOutput, "}\n");
+
+			} else {
+
+				transitionsCountMap.Insert(state->m_transtions.GetCount(), state->m_id + stateIdBase);
+				for (int i = 0; i < state->m_transtions.GetCount(); i ++) {
+					if (!nextStateMap.Find(i)) {
+						nextStateMap.Insert(i);
+						characterTestMap.Insert(i);
+						testSetArrayIndexMap.Insert(i);
+					}
+				}
+
+				int transitionIndex = 0;
+				for (dList<dAutomataState::dTransition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
+
+					dTree<int, int>& nextState = nextStateMap.Find(transitionIndex)->GetInfo();
+					dTree<char, int>& charatestTest = characterTestMap.Find(transitionIndex)->GetInfo();
+					dTree<int, int>& testSetArrayIndex = testSetArrayIndexMap.Find(transitionIndex)->GetInfo();
+
+					dAutomataState::dTransition& sourceTransition = node->GetInfo();
+					dAutomataState* const targetState = sourceTransition.GetState();
+
+					nextState.Insert(targetState->m_id + stateIdBase, state->m_id + stateIdBase);
+
+					if (!filter.Find(targetState)) {
+						pool[stack] = targetState;
+						filter.Insert(targetState, targetState);
+						stack ++;
+						_ASSERTE (stack < sizeof (pool)/sizeof (pool[0]));
+					}
+
+					//int ch = sourceTransition.GetCharater();
+					dAutomataState::dCharacter ch (sourceTransition.GetCharater());
+					//if (ch & (1<<15)) {
+					if (ch.m_type == dAutomataState::CHARACTER_SET) {
+						const dChatertSetMap::ChatertSet* const charSet = m_charaterSetMap.FindSet (ch.m_info);
+						_ASSERTE (charSet);
+						int ch = characterSet.AddSet (charSet->GetSet(), charSet->GetLength());
+						testSetArrayIndex.Insert(ch, state->m_id + stateIdBase);
+					} else if (ch.m_type == dAutomataState::CHARACTER) {
+						charatestTest.Insert(char(dNonDeterministicFiniteAutonataCompiler::GetScapeChar(ch.m_info)), state->m_id + stateIdBase);
+					} else {
+						_ASSERTE (0);
+					}
+
+					transitionIndex ++;
+				}
+			}
+		}
+
+		char nextJump[256];
+		static string filler ("0, ");
+		sprintf (nextJump, "%d, ", lastState + stateIdBase + 1);
+		nextTokenOutput += nextJump;
+		for (int i = 0; i < lastState; i ++) {
+			nextTokenOutput += filler;
+		}
+
+
+		//	DTRACE ((parseTokenOutput.c_str()));
+		return stateIdBase + lastState + 1;
+	}
+};
+
 
 void dLexCompiler::CreateCodeFile (
 	const char* const fileName, 
@@ -354,231 +819,14 @@ void dLexCompiler::CreateHeaderFile (const char* const fileName, const char* con
 	fclose (headerFile);
 }
 
-void dLexCompiler::CopyTokenStream (char* const buffer) const
-{
-	strncpy (buffer, &m_grammar[m_grammarTokenStart], m_grammarTokenLength);	
-	buffer[m_grammarTokenLength] = 0;
-}
-
-void dLexCompiler::NextToken ()
-{
-	m_grammarTokenStart += m_grammarTokenLength;
-	if (m_grammar[m_grammarTokenStart]) {
-		
-		for (bool reStart = true; reStart;) {
-			reStart = false;
-			for (TokenDataList::dListNode* node = m_tokenList.GetFirst(); node; node = node->GetNext()) {
-				TokenData* const tokenData = node->GetInfo();
-
-				const char* const text = &m_grammar[m_grammarTokenStart];
-				int count = tokenData->FindMatch (text);
-				if (count >= 0) {
-					m_grammarTokenLength = count;
-					if ((tokenData->m_token == m_whiteSpace) || (tokenData->m_token == m_comment)) {
-						m_grammarTokenStart += m_grammarTokenLength;
-						reStart = true;
-						break;
-					} else {
-						m_token = tokenData->m_token;
-						return;
-					}
-				} 
-			}
-		}
-	}
-	m_token = m_end;
-}
-
-void dLexCompiler::MatchToken (Token token)
-{
-	if (m_token == token) {
-		NextToken ();
-	} else {
-		_ASSERTE (0);
-		DTRACE(("parse error\n"));
-//		m_error = true;
-	}
-}
 
 
 
-// DefinitionExpression	: DefinitionBlock 
-// DefinitionExpression	: DefinitionBlock DefinitionExpression | nothing
-
-// DefinitionBlock		: m_comment
-
-//
-// id							: m_openSquareBrakect BracketedExpression m_closeSquareBrakect
-// id							: m_openParentesis DefinitionExpression m_closeParentesis
-// id							: .
-// id							: CHARACTER 
-int dLexCompiler::ParseDefinitions (
-	string& preheaderCode, 
-	string& nextTokeCode, 
-	string& automataCode, 
-	dChatertSetMap& characterSet,
-	dTree<int, int>& transitionsCountMap,
-	dTree<dTree<int, int>, int>& nextState,
-	dTree<dTree<char, int>, int>& characterTestMap,
-	dTree<dTree<int, int>, int>& testSetArrayIndexMap)
-{
-	// parse definitions
-	{
-//m_tokenList.AddTokenData (m_codeBlock, "%(:{([^{}]*):})%");
-//m_tokenList.AddTokenData (m_codeBlock, "(:{(([^{}\"\']*)|(\'(.|[\n])\')|(\"(\\.|[^\"])*\"))*:})");
-//m_tokenList.AddTokenData (m_codeBlock, "%(:{(([^{}\"])|(\"[^\"]*\"))*:})%");
 
 
-		m_tokenList.AddTokenData (m_whiteSpace, "[ \t\v\n\f]+");
-		m_tokenList.AddTokenData (m_comment, "(/\\*([^*]|[\r\n]|(\\*+([^*/]|[\r\n])))*\\*+/)|(//.*)");
-		m_tokenList.AddTokenData (m_codeBlock, "%\\{([^%]|[\r\n]|(%+([^%}]|[\r\n])))*%+\\}");
-		//m_tokenList.AddTokenData (m_codeBlock, "%(:{(([^{}\"\']*)|(\'(.|[\n])\')|(\"(\\.|[^\"])*\"))*:})%");
-		m_tokenList.AddTokenData (m_literal, "[a-zA-Z_][0-9a-zA-Z]*");
-		m_tokenList.AddTokenData (m_number, "[0-9]+");
-		m_tokenList.AddTokenData (m_intenalSize, "%[pneako]");
-		m_tokenList.AddTokenData (m_delimiter, "%%");
-		m_tokenList.AddTokenData (m_extendedRegularExpresion, "((\\[[^\\]]+\\])|[^ \t\v\n\f[]+)+");
-
-		for (NextToken(); (m_token != m_end) && (m_token != m_delimiter);) {
-			ParseDefinitionExpression (preheaderCode);
-		}
-		m_tokenList.DeleteAll();
-	}
-
-	// parse rules
-	int initialState = 0;
-	{
-		//	0	m_whiteSpace,				
-		//	1   m_action
-		//	2	m_comment,						
-		//	3	m_delimiter,
-		//	4	m_verbatingText,
-		//	5	m_intenalSize,
-		//	6	m_number,
-		//	7	m_quatedString,
-		//	8	m_literal,
-		//	9	m_extendedRegularExpresion,
-
-		m_tokenList.AddTokenData (m_whiteSpace, "[ \t\v\n\f]+");
-		m_tokenList.AddTokenData (m_quatedString, "\"[^\" \t\v\n\f]*\"");
-		m_tokenList.AddTokenData (m_delimiter, "%%");
-		m_tokenList.AddTokenData (m_comment, "(/\\*([^*]|[\r\n]|(\\*+([^*/]|[\r\n])))*\\*+/)|(//.*)");
-		m_tokenList.AddTokenData (m_extendedRegularExpresion, "((\\[[^\\]]+\\])|[^ \t\v\n\f[]+)+");
-		
-		for (NextToken(); (m_token != m_end) && (m_token != m_delimiter); ) {
-
-			string expression (&m_grammar[m_grammarTokenStart], m_grammarTokenLength);
-			Token expresionToken = m_token;
-
-			m_grammarTokenStart += m_grammarTokenLength;
-			const char* const str = &m_grammar[m_grammarTokenStart];
-			int length = 0;
-			for (int ch = str[length]; ch && (ch != '{') ; ch = str[length]) {
-				length ++;
-			}
-			if (str[length] == '{') {
-				m_grammarTokenStart += length;
-				const char* const str = &m_grammar[m_grammarTokenStart];
-				int length = 1;
-				for (int ch = str[length]; ch != '\n'; ch = str[length]) {
-					length ++;
-					if (!ch) {
-						_ASSERTE (0);
-						return 0;
-					}
-				}
-				string userAction (str, length);
-
-				
-				automataCode += "\t\t\t// ";
-				automataCode += expression;
-				automataCode += "\n";
-				switch (expresionToken) 
-				{
-					case m_quatedString:
-					{
-						string keyword (expression.substr(1, expression.length() - 2));
-						dDeterministicFiniteAutonataCompiler keywordAutomata (keyword.c_str());
-						initialState = keywordAutomata.ConvertSwitchCaseStatements (automataCode, nextTokeCode, initialState, characterSet, userAction, 
-																					transitionsCountMap, nextState, characterTestMap, testSetArrayIndexMap);
-//						DTRACE ((automataCode.c_str()));
-						break;
-					}
-
-					case m_extendedRegularExpresion:
-					{
-						//m_defintions
-						ExpandedNFA expresionNFA (expression.c_str(), &m_defintions);
-						dDeterministicFiniteAutonataCompiler expresionAutomata (expresionNFA);
-						initialState = expresionAutomata.ConvertSwitchCaseStatements (automataCode, nextTokeCode, initialState, characterSet, userAction, 
-																					  transitionsCountMap, nextState, characterTestMap, testSetArrayIndexMap);
-//						DTRACE ((automataCode.c_str()));
-						break;
-					}
-					default:;
-						_ASSERTE (0);
-				}
-
-				m_grammarTokenStart += length;
-				m_grammarTokenLength = 0;
-			}
-			NextToken();
-		}
-	}
-
-	if (m_token != m_delimiter) {
-		NextToken();
-	}
-	return initialState + 1;
-}
 
 
-// DefinitionExpression	: DefinitionBlock 
-// DefinitionExpression	: DefinitionBlock DefinitionExpression | nothing
-void dLexCompiler::ParseDefinitionExpression (string& preheaderCode)
-{
-	for (ParseDefinitionBlock (preheaderCode); (m_token != m_end) && (m_token != m_delimiter); ParseDefinitionBlock (preheaderCode));
-}
-
-// DefinitionBlock		: m_comment
-void dLexCompiler::ParseDefinitionBlock (string& preheaderCode)
-{
-	if (m_token == m_comment) {
-		MatchToken (m_token);
-
-	} else if (m_token == m_codeBlock) {
-
-		char* const code = new char[m_grammarTokenLength+1];
-		CopyTokenStream (code);
-		code[m_grammarTokenLength - 2] = 0;
-
-		preheaderCode += code + 2;
-
-		delete[] code;
-		MatchToken (m_token);
-
-	} else if (m_token == m_intenalSize) {
-		MatchToken (m_token);
-		MatchToken (m_token);
-
-	} else if (m_token == m_literal) {
-		char literal [256]; 
-		char extendedRegularExpresion[256];
-
-		CopyTokenStream (literal);
-		MatchToken (m_token);
-		
-		CopyTokenStream (extendedRegularExpresion);
-		MatchToken (m_token);
-
-		m_defintions.AddDefinition (literal, extendedRegularExpresion);
-
-	} else {
-		_ASSERTE (0);
-	}
-}
-
-
+/*
 dLexCompiler::DefinitionsMap::DefinitionsMap ()
 	:dTree<ExpandedNFA*,int>()
 {
@@ -615,93 +863,10 @@ dLexCompiler::ExpandedNFA::ExpandedNFA (const char* const regularExpression, Def
 }
 
 
-void dLexCompiler::ExpandedNFA::PreProcessExpression (const char* const regularExpression)
-{
-	char buffer[1024];
-
-	_ASSERTE (sizeof (m_regularExpression) > strlen (regularExpression));
-	sprintf (m_regularExpression, "%s", regularExpression);
-
-	int i = 0;
-	for (int ch = GetChar(); ch; ch = GetChar()) {
-		if ((ch>>8) == '\\') {
-			switch (char (ch))
-			{
-				case '~':
-				case '!':
-				case '@':
-				case '#':
-				case '$':
-				case '%':
-				case '^':
-				case '&':
-				case '*':
-				case '(':
-				case ')':
-				case '-':
-				case '+':
-
-
-				case '{':
-				case '}':
-				case '|':
-				case ':':
-				case '"':
-				case '<':
-				case '>':
-				case '?':
-
-				case '`':
-				case '_':
-				case '=':
-				case '[':
-				case ']':
-				case '\\':
-				case ';':
-				case '\'':
-				case ',':
-				case '.':
-				case '/':
-
-				case 'n':
-				case 'r':
-				case 't':
-				case 'v':
-				case 'f':
-					buffer[i] = '\\';
-					i ++;
-					break;
-
-				case '1':
-					if (m_regularExpression[m_regularExpressionIndex] == 'b') {
-						GetChar();
-						ch = 0x1b;
-					}
-					break;
-				default:;
-					ch = char (ch);
-			}
-		}
-		buffer[i] = char (ch);
-		i ++;
-	}
-	buffer[i] = 0;
-	m_regularExpressionIndex = 0;
-	dNonDeterministicFiniteAutonataCompiler::PreProcessExpression (buffer);
-}
 
 bool dLexCompiler::ExpandedNFA::IsOperator (int charater) const
 {
 	return dNonDeterministicFiniteAutonataCompiler::IsOperator(charater);
-/*
-	if (dNonDeterministicFiniteAutonataCompiler::IsOperator(charater)) {
-		return true;
-	}
-	if ((charater == '{') || (charater == '}')) {
-		return true;
-	}
-	return false;
-*/
 }
 
 bool dLexCompiler::ExpandedNFA::CheckInsertConcatenation (int left, int right) const
@@ -789,3 +954,298 @@ void dLexCompiler::ExpandedNFA::ShiftID()
 		dNonDeterministicFiniteAutonataCompiler::ShiftID();
 	}
 }
+*/
+
+
+//The flex input file consists of three sections, separated by a line containing only `%%'. 
+//
+//	definitions
+//	%%
+//	rules
+//	%%
+//	user code
+
+dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outputFileName)
+	:m_token (m_end)
+	,m_grammarTokenStart(0)
+	,m_grammarTokenLength(0)
+	,m_grammar (inputRules)
+	,m_tokenList()
+{
+	string automataCode ("");
+//	string nextCodeCases ("");
+	string userPreheaderCode (""); 
+//	dChatertSetMap characterSet;
+//	dTree<int, int> transitionsCountMap;
+//	dTree<dTree<int, int>, int> nextState;
+//	dTree<dTree<char, int>, int> characterTestMap;
+//	dTree<dTree<int, int>, int> testSetArrayIndexMap;
+
+	ParseDefinitions (userPreheaderCode, automataCode);
+//	int stateCount = ParseDefinitions (userPreheaderCode, nextCodeCases, automataCode, characterSet, transitionsCountMap, nextState, characterTestMap, testSetArrayIndexMap);
+/*
+	char cppFileName[256];
+	strcpy (cppFileName, outputFileName);
+	char* const dot = strrchr (cppFileName, '.');
+	if (dot) {
+		*dot = 0;
+	}
+
+	char className[256];
+	const char* ptr = strrchr (cppFileName, '/');
+	if (ptr) {
+		ptr ++;
+	} else {
+		ptr = strrchr (cppFileName, '\\');
+		if (ptr) {
+			ptr ++;
+		} else {
+			ptr = cppFileName;
+		}
+	}
+
+	strcpy (className, ptr);
+
+	strcat (cppFileName, ".cpp");
+
+	CreateCodeFile (cppFileName, className, stateCount, userPreheaderCode, nextCodeCases, automataCode, characterSet, 
+		transitionsCountMap, nextState, characterTestMap, testSetArrayIndexMap);
+
+	*dot = 0;
+	strcat (cppFileName, ".h");
+	CreateHeaderFile (cppFileName, className);
+*/
+}
+
+dLexCompiler::~dLexCompiler()
+{
+}
+
+
+
+void dLexCompiler::NextToken ()
+{
+	m_grammarTokenStart += m_grammarTokenLength;
+	if (m_grammar[m_grammarTokenStart]) {
+
+		for (bool reStart = true; reStart;) {
+			reStart = false;
+			for (dTokenDataList::dListNode* node = m_tokenList.GetFirst(); node; node = node->GetNext()) {
+				dTokenData* const dTokenData = node->GetInfo();
+
+				const char* const text = &m_grammar[m_grammarTokenStart];
+				int count = dTokenData->FindMatch (text);
+				if (count >= 0) {
+					m_grammarTokenLength = count;
+					if ((dTokenData->m_token == m_whiteSpace) || (dTokenData->m_token == m_comment)) {
+						m_grammarTokenStart += m_grammarTokenLength;
+						reStart = true;
+						break;
+					} else {
+						m_token = dTokenData->m_token;
+						return;
+					}
+				} 
+			}
+		}
+	}
+	m_token = m_end;
+}
+
+
+
+// DefinitionExpression	: DefinitionBlock 
+// DefinitionExpression	: DefinitionBlock DefinitionExpression | nothing
+
+// DefinitionBlock		: m_comment
+
+//
+// id							: m_openSquareBrakect BracketedExpression m_closeSquareBrakect
+// id							: m_openParentesis DefinitionExpression m_closeParentesis
+// id							: .
+// id							: CHARACTER 
+void dLexCompiler::ParseDefinitions (string& preheaderCode, string& automataCode) 
+//	string& nextTokeCode, 
+//	string& automataCode, 
+//	dChatertSetMap& characterSet,
+//	dTree<int, int>& transitionsCountMap,
+//	dTree<dTree<int, int>, int>& nextState,
+//	dTree<dTree<char, int>, int>& characterTestMap,
+//	dTree<dTree<int, int>, int>& testSetArrayIndexMap)
+{
+	// parse definitions
+	{
+//m_tokenList.AddTokenData (m_codeBlock, "%(:{([^{}]*):})%");
+//m_tokenList.AddTokenData (m_codeBlock, "(:{(([^{}\"\']*)|(\'(.|[\n])\')|(\"(\\.|[^\"])*\"))*:})");
+//m_tokenList.AddTokenData (m_codeBlock, "%(:{(([^{}\"])|(\"[^\"]*\"))*:})%");
+
+
+		m_tokenList.AddTokenData (m_whiteSpace, "[ \t\v\n\f]+");
+		m_tokenList.AddTokenData (m_comment, "(/\\*([^*]|[\r\n]|(\\*+([^*/]|[\r\n])))*\\*+/)|(//.*)");
+		m_tokenList.AddTokenData (m_codeBlock, "%\\{([^%]|[\r\n]|(%+([^%}]|[\r\n])))*%+\\}");
+		//m_tokenList.AddTokenData (m_codeBlock, "%(:{(([^{}\"\']*)|(\'(.|[\n])\')|(\"(\\.|[^\"])*\"))*:})%");
+		m_tokenList.AddTokenData (m_literal, "[a-zA-Z_][0-9a-zA-Z]*");
+		m_tokenList.AddTokenData (m_number, "[0-9]+");
+		m_tokenList.AddTokenData (m_intenalSize, "%[pneako]");
+		m_tokenList.AddTokenData (m_delimiter, "%%");
+		m_tokenList.AddTokenData (m_extendedRegularExpresion, "((\\[[^\\]]+\\])|[^ \t\v\n\f[]+)+");
+
+		for (NextToken(); (m_token != m_end) && (m_token != m_delimiter);) {
+			ParseDefinitionExpression (preheaderCode);
+		}
+		m_tokenList.DeleteAll();
+	}
+
+	// parse rules
+
+	dExpandedNFA nfa;
+//	int initialState = 0;
+	{
+		//	0	m_whiteSpace,				
+		//	1   m_action
+		//	2	m_comment,						
+		//	3	m_delimiter,
+		//	4	m_verbatingText,
+		//	5	m_intenalSize,
+		//	6	m_number,
+		//	7	m_quatedString,
+		//	8	m_literal,
+		//	9	m_extendedRegularExpresion,
+
+		m_tokenList.AddTokenData (m_whiteSpace, "[ \t\v\n\f]+");
+		m_tokenList.AddTokenData (m_quatedString, "\"[^\" \t\v\n\f]*\"");
+		m_tokenList.AddTokenData (m_delimiter, "%%");
+		m_tokenList.AddTokenData (m_comment, "(/\\*([^*]|[\r\n]|(\\*+([^*/]|[\r\n])))*\\*+/)|(//.*)");
+		m_tokenList.AddTokenData (m_extendedRegularExpresion, "((\\[[^\\]]+\\])|[^ \t\v\n\f[]+)+");
+
+		for (NextToken(); (m_token != m_end) && (m_token != m_delimiter); ) {
+
+			string expression (&m_grammar[m_grammarTokenStart], m_grammarTokenLength);
+			m_defintions.PreProcessDefinitions(expression);
+			dToken expresionToken (m_token);
+
+			// until I get the balance expression feature working
+			m_grammarTokenStart += m_grammarTokenLength;
+			const char* const str = &m_grammar[m_grammarTokenStart];
+			int length = 0;
+			for (int ch = str[length]; ch && (ch != '{') ; ch = str[length]) {
+				length ++;
+			}
+			if (str[length] == '{') {
+				m_grammarTokenStart += length;
+				const char* const str = &m_grammar[m_grammarTokenStart];
+				int length = 1;
+				for (int ch = str[length]; ch != '\n'; ch = str[length]) {
+					length ++;
+					if (!ch) {
+						_ASSERTE (0);
+					}
+				}
+				string userAction (str, length);
+
+//				automataCode += "\t\t\t// ";
+//				automataCode += expression;
+//				automataCode += "\n";
+
+				switch (expresionToken) 
+				{
+					case m_quatedString:
+					{
+						string keyword (expression.substr(1, expression.length() - 2));
+
+						nfa.AddExpression(expression, userAction);
+/*
+						dDeterministicFiniteAutonataCompiler keywordAutomata (keyword.c_str());
+						initialState = keywordAutomata.ConvertSwitchCaseStatements (automataCode, nextTokeCode, initialState, characterSet, userAction, 
+							transitionsCountMap, nextState, characterTestMap, testSetArrayIndexMap);
+							//DTRACE ((automataCode.c_str()));
+*/
+						break;
+					}
+
+					case m_extendedRegularExpresion:
+					{
+						//m_defintions
+						//ExpandedNFA expresionNFA (expression.c_str(), &m_defintions);
+						//dDeterministicFiniteAutonataCompiler expresionAutomata (expresionNFA);
+						//initialState = expresionAutomata.ConvertSwitchCaseStatements (automataCode, nextTokeCode, initialState, characterSet, userAction, 
+						//															  transitionsCountMap, nextState, characterTestMap, testSetArrayIndexMap);
+						nfa.AddExpression(expression, userAction);
+							//DTRACE ((automataCode.c_str()));
+
+						break;
+					}
+				default:;
+					_ASSERTE (0);
+				}
+
+				m_grammarTokenStart += length;
+				m_grammarTokenLength = 0;
+			}
+
+			NextToken();
+		}
+	}
+
+	if (m_token != m_delimiter) {
+		NextToken();
+	}
+
+	dConvertDFAtoCode expresionAutomata (nfa);
+
+//	return initialState + 1;
+
+
+}
+
+
+// DefinitionExpression	: DefinitionBlock 
+// DefinitionExpression	: DefinitionBlock DefinitionExpression | nothing
+void dLexCompiler::ParseDefinitionExpression (string& preheaderCode)
+{
+	for (ParseDefinitionBlock (preheaderCode); (m_token != m_end) && (m_token != m_delimiter); ParseDefinitionBlock (preheaderCode));
+}
+
+// DefinitionBlock		: m_comment
+void dLexCompiler::ParseDefinitionBlock (string& preheaderCode)
+{
+	if (m_token == m_comment) {
+		_ASSERTE (0);
+//		MatchToken (m_token);
+
+	} else if (m_token == m_codeBlock) {
+		preheaderCode.append(&m_grammar[m_grammarTokenStart] + 2, m_grammarTokenLength - 4);
+		MatchToken (m_token);
+
+	} else if (m_token == m_intenalSize) {
+		_ASSERTE (0);
+		MatchToken (m_token);
+		MatchToken (m_token);
+
+	} else if (m_token == m_literal) {
+		string literal (&m_grammar[m_grammarTokenStart], m_grammarTokenLength);
+		MatchToken (m_token);
+		
+		string extendedRegularExpresion (&m_grammar[m_grammarTokenStart], m_grammarTokenLength);
+		MatchToken (m_token);
+
+		m_defintions.AddDefinition(extendedRegularExpresion, literal);
+
+	} else {
+		_ASSERTE (0);
+	}
+}
+
+
+
+void dLexCompiler::MatchToken (dToken token)
+{
+	if (m_token == token) {
+		NextToken ();
+	} else {
+		_ASSERTE (0);
+		DTRACE(("parse error\n"));
+		//		m_error = true;
+	}
+}
+

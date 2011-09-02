@@ -14,8 +14,6 @@
 #define __dChatertSetMap_h_
 
 
-#define D_ASCII_SET_MAX_SIZE	1024
-
 
 class dChatertSetMap 
 {
@@ -34,7 +32,7 @@ class dChatertSetMap
 
 		int m_id;
 		int m_count;
-		char m_characters[D_ASCII_SET_MAX_SIZE];
+		char m_characters[256];
 		friend dChatertSetMap;
 	};
 

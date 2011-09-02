@@ -57,20 +57,6 @@ dAutomataState::dAutomataState (int id)
 {
 }
 
-dAutomataState::dAutomataState (dTree<dAutomataState*,dAutomataState*>& subSet, int id)
-	:m_id (id)
-	,m_mark (0)
-	,m_exitState(false)
-{
-	dTree<dAutomataState*,dAutomataState*>::Iterator iter (subSet);
-	for (iter.Begin(); iter; iter ++) {
-		dAutomataState* const dAutomataState = iter.GetNode()->GetInfo();
-		m_myNFANullStates.Append(dAutomataState);
-		if (dAutomataState->m_exitState) {
-			m_exitState = true;
-		}
-	}
-}
 
 dAutomataState::~dAutomataState ()
 {

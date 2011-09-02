@@ -59,23 +59,67 @@ char dNonDeterministicFiniteAutonataCompiler::m_asciiSetButNewLine[] = {  1,  2,
 																		120, 121, 122, 123, 124, 125, 126, 127, 0};
 
 
-int GetScapeChar (int symbol)
+enum dNonDeterministicFiniteAutonataCompiler::Operations
 {
-	if ((symbol>>8) == '\\') {
-		char low = char (symbol);
+	m_union = '|',						// a|b	
+	m_concatenation = 0x7f,				// ab
+	m_zeroOrMore = '*',					// a* 
+	m_oneOrMore  = '+',					// a+ 
+	m_zeroOrOne  = '?',					// a? 
+	m_openParentesis = '(',				// (a)
+	m_closeParentesis = ')',			// (a)  
+	m_openSquareBrakect = '[',			// [a] 
+	m_closeSquareBrakect = ']',			// [a] 
+	m_balancedCharacterExpresion = ':',	// my special extension for balanced expressions ex :{(expression):} will match balanced curly bracketed expresion  
+};
 
-		static char scapeSquence[] = "nrtvf~!@#$%^&*()-+{}|:\"<>?`_=[]\\;\',./";
-		static char ascciSquence[] = "\n\r\t\v\f~!@#$%^&*()-+{}|:\"<>?`_=[]\\;\',./";
-		for (int i = 0; scapeSquence[i]; i ++) {
-			if (scapeSquence[i] == low) {
-				return ascciSquence[i];
-			}
-		}
-		return low;
-	}
-
-	return symbol;
+dNonDeterministicFiniteAutonataCompiler::dStateConstructPair::dStateConstructPair ()
+{
 }
+
+dNonDeterministicFiniteAutonataCompiler::dStateConstructPair::dStateConstructPair (dAutomataState* start, dAutomataState* accepting)
+	:m_start(start)
+	,m_accepting(accepting)
+{
+}
+
+dAutomataState* dNonDeterministicFiniteAutonataCompiler::dStateConstructPair::GetStart() const 
+{ 
+	return m_start;
+}
+
+dAutomataState* dNonDeterministicFiniteAutonataCompiler::dStateConstructPair::GetAccepting() const 
+{ 
+	return m_accepting;
+}
+
+
+dNonDeterministicFiniteAutonataCompiler::dAutomataStateConstructStack::dAutomataStateConstructStack ()
+	:m_index(0)
+{
+}
+
+bool dNonDeterministicFiniteAutonataCompiler::dAutomataStateConstructStack::IsEmpty() const
+{
+	return m_index == 0;
+}
+
+dNonDeterministicFiniteAutonataCompiler::dStateConstructPair dNonDeterministicFiniteAutonataCompiler::dAutomataStateConstructStack::Pop ()
+{
+	_ASSERTE (m_index);
+	return m_pool[--m_index];
+}
+
+void dNonDeterministicFiniteAutonataCompiler::dAutomataStateConstructStack::Push (dAutomataState* const start, dAutomataState* const accepting)
+{
+	m_pool[m_index++] = dStateConstructPair (start, accepting);
+	_ASSERTE (m_index <= sizeof (m_pool)/sizeof (m_pool[0]));
+}
+
+
+
+
+
 
 
 dNonDeterministicFiniteAutonataCompiler::dNonDeterministicFiniteAutonataCompiler()
@@ -121,6 +165,36 @@ dNonDeterministicFiniteAutonataCompiler::~dNonDeterministicFiniteAutonataCompile
 	}
 }
 
+
+int dNonDeterministicFiniteAutonataCompiler::GetScapeChar (int symbol)
+{
+	if ((symbol>>8) == '\\') {
+		char low = char (symbol);
+
+		static char scapeSquence[] = "nrtvf~!@#$%^&*()-+{}|:\"<>?`_=[]\\;\',./";
+		static char ascciSquence[] = "\n\r\t\v\f~!@#$%^&*()-+{}|:\"<>?`_=[]\\;\',./";
+		for (int i = 0; scapeSquence[i]; i ++) {
+			if (scapeSquence[i] == low) {
+				return ascciSquence[i];
+			}
+		}
+		return low;
+	}
+
+	return symbol;
+}
+
+dAutomataState* dNonDeterministicFiniteAutonataCompiler::GetStartState() const
+{
+	return m_startState;
+}
+
+dAutomataState* dNonDeterministicFiniteAutonataCompiler::GetExitState() const
+{
+	return m_acceptingState;
+}
+
+
 bool dNonDeterministicFiniteAutonataCompiler::IsValid() const
 {
 	return !m_error;
@@ -134,6 +208,7 @@ const dChatertSetMap& dNonDeterministicFiniteAutonataCompiler::GetChatertSetMap(
 void dNonDeterministicFiniteAutonataCompiler::CompileExpression(const char* const regularExpression)
 {
 	// prepossess the expression for simples parsing 
+	m_regularExpressionIndex = 0;
 	PreProcessExpression (regularExpression);
 
 	// build an NFA graph
@@ -183,7 +258,7 @@ void dNonDeterministicFiniteAutonataCompiler::PreProcessExpression (const char* 
 	_ASSERTE (sizeof (m_regularExpression) > strlen (regularExpression));
 	sprintf (m_regularExpression, "%s", regularExpression);
 
-	char buffer[256];
+	char buffer[2048];
 	int ch0 = GetChar();
 	int count = 0;
 	for (int ch1 = GetChar(); ch1; ch1 = GetChar()) {
@@ -286,7 +361,7 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceUnionDiagram()
 		DTRACE_NFA(("Parce stack underflow error\n"));
 		return;
 	}
-	StateConstructPair rightOperand (m_stack.Pop());
+	dStateConstructPair rightOperand (m_stack.Pop());
 
 	if (m_stack.IsEmpty()) {
 		m_error = true;
@@ -294,7 +369,7 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceUnionDiagram()
 		m_stack.Push(rightOperand.GetStart(), rightOperand.GetAccepting());
 		return;
 	}
-	StateConstructPair leftOperand (m_stack.Pop());
+	dStateConstructPair leftOperand (m_stack.Pop());
 
 	dAutomataState* const startState = new dAutomataState (m_stateID ++);
 	dAutomataState* const acceptingState = new dAutomataState (m_stateID ++);
@@ -316,7 +391,7 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceConcatenationDiagram()
 		DTRACE_NFA(("Parce stack underflow error\n"));
 		return;
 	}
-	StateConstructPair rightOperand (m_stack.Pop());
+	dStateConstructPair rightOperand (m_stack.Pop());
 
 	if (m_stack.IsEmpty()) {
 		m_error = true;
@@ -324,7 +399,7 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceConcatenationDiagram()
 		m_stack.Push(rightOperand.GetStart(), rightOperand.GetAccepting());
 		return;
 	}
-	StateConstructPair leftOperand (m_stack.Pop());
+	dStateConstructPair leftOperand (m_stack.Pop());
 
 	leftOperand.GetAccepting()->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), rightOperand.GetStart()));
 
@@ -339,7 +414,7 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceZeroOrMoreDiagram()
 		DTRACE_NFA(("Parce stack underflow error\n"));
 		return;
 	}
-	StateConstructPair operand (m_stack.Pop());
+	dStateConstructPair operand (m_stack.Pop());
 
 	dAutomataState* const startState = new dAutomataState (m_stateID ++);
 	dAutomataState* const acceptingState = new dAutomataState (m_stateID ++);
@@ -361,7 +436,7 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceOneOrMoreDiagram()
 		DTRACE_NFA(("Parce stack underflow error\n"));
 		return;
 	}
-	StateConstructPair operand (m_stack.Pop());
+	dStateConstructPair operand (m_stack.Pop());
 
 	dAutomataState* const startState = new dAutomataState (m_stateID ++);
 	dAutomataState* const acceptingState = new dAutomataState (m_stateID ++);
@@ -382,7 +457,7 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceBalancedCharacterExpresion(c
 		DTRACE_NFA(("Parce stack underflow error\n"));
 		return;
 	}
-	StateConstructPair operand (m_stack.Pop());
+	dStateConstructPair operand (m_stack.Pop());
 
 	dAutomataState* const startState = new dAutomataState (m_stateID ++);
 	dAutomataState* const stackState = new dAutomataState (m_stateID ++);
@@ -409,7 +484,7 @@ void dNonDeterministicFiniteAutonataCompiler::ReduceZeroOrOneDiagram()
 		DTRACE_NFA(("Parce stack underflow error\n"));
 		return;
 	}
-	StateConstructPair operand (m_stack.Pop());
+	dStateConstructPair operand (m_stack.Pop());
 
 	dAutomataState* const start = new dAutomataState (m_stateID ++);
 	dAutomataState* const accepting = new dAutomataState (m_stateID ++);
@@ -645,11 +720,11 @@ void dNonDeterministicFiniteAutonataCompiler::ParseExpresionToNFA ()
 	if (m_error) {
 		_ASSERTE (0);
 		while (!m_stack.IsEmpty()) {
-			StateConstructPair operand (m_stack.Pop());
+			dStateConstructPair operand (m_stack.Pop());
 			DeleteNFA (operand.GetStart());
 		}
 	} else {
-		StateConstructPair operand (m_stack.Pop());
+		dStateConstructPair operand (m_stack.Pop());
 		m_startState = operand.GetStart(); 
 		m_acceptingState = operand.GetAccepting();
 		m_acceptingState->m_exitState = true;
@@ -658,101 +733,6 @@ void dNonDeterministicFiniteAutonataCompiler::ParseExpresionToNFA ()
 
 
 
-// Subset Construction for converting a Nondeterministic Finite Automaton (NFA) to a Deterministic Finite Automaton (DFA)
-// algorithm from book Compilers Principles and Tools: by Alfred V.Aho, Ravi Sethi and Jeffrey D. Ullman 
-dAutomataState* dNonDeterministicFiniteAutonataCompiler::CreateDeterministicFiniteAutomaton () const
-{
-	dList<dAutomataState*> stateArray;
-	dTree<int, int> symbolsList;
-
-	m_startState->GetStateArray(stateArray);
-	for (dList<dAutomataState*>::dListNode* node = stateArray.GetFirst(); node; node = node->GetNext()) {
-		dAutomataState* const state = node->GetInfo();
-		for (dList<dAutomataState::dTransition>::dListNode* transitionNode = state->m_transtions.GetFirst(); transitionNode; transitionNode = transitionNode->GetNext()) {
-			dAutomataState::dTransition& transition = transitionNode->GetInfo();
-			dAutomataState::dCharacter ch (transition.GetCharater());
-			if (ch.m_symbol) {
-				symbolsList.Insert(ch.m_symbol, ch.m_symbol);
-			}
-		}
-	}
-
-
-	dTree<dAutomataState*,dAutomataState*> NFAmap;
-	dTree<dAutomataState*,dAutomataState*> subSet;
-
-	int stateID = 0;
-	NFAmap.Insert(m_startState, m_startState);
-
-	dAutomataState* stackPool[2048];
-
-	EmptyTransitionClosure (NFAmap, subSet);
-	dAutomataState* const startState = new dAutomataState(subSet, stateID ++);
-
-	dList<dAutomataState*> newStatesList;
-	int stack = 1;
-	stackPool[0] = startState;
-
-	newStatesList.Append(startState);
-
-	while (stack) {
-		stack --;
-		dAutomataState* const state = stackPool[stack];
-
-		dTree<int, int>::Iterator iter (symbolsList);
-		for (iter.Begin(); iter; iter ++) {
-			int ch = iter.GetNode()->GetInfo();
-
-			dTree<dAutomataState*,dAutomataState*> moveSet;
-			MoveSymbol (ch, state, moveSet);
-
-			if (moveSet.GetCount()) {
-
-				dTree<dAutomataState*,dAutomataState*> subSet;
-				EmptyTransitionClosure (moveSet, subSet);
-
-				dAutomataState* foundState = NULL;
-				for (dList<dAutomataState*>::dListNode* node = newStatesList.GetFirst(); node; node = node->GetNext()) {
-					dAutomataState* const state = node->GetInfo();
-					if (CompareSets(state->m_myNFANullStates, subSet)) {
-						foundState = state;
-						break;
-					}
-				}
-				
-				if (foundState) {
-					state->m_transtions.Append(dAutomataState::dTransition(ch, foundState));
-
-				} else {
-				
-					dAutomataState* const targetState = new dAutomataState(subSet, stateID ++);
-					stackPool[stack] = targetState;
-					stack ++;
-					_ASSERTE (stack < sizeof (stackPool)/sizeof (stackPool[0]));
-
-					newStatesList.Append(targetState);
-					state->m_transtions.Append(dAutomataState::dTransition(ch, targetState));
-				}
-			}
-		}
-	}
-
-
-//	int index = 0;
-//	dAutomataState** const stateSort = new dAutomataState*[stateArray.GetCount()];
-//	for (dList<dAutomataState*>::dListNode* node = stateArray.GetFirst(); node; node = node->GetNext()) {
-//		stateSort[index] = node->GetInfo();
-//		index ++;
-//	}
-//	qsort (stateSort, index, sizeof (dAutomataState*), SortStates);
-//	for (int i = 0; i < index; i ++) {
-//		dAutomataState* const state = stateSort[i];
-//		state->m_id = i;
-//	}
-//	delete stateSort;
-
-	return startState;
-}
 
 int dNonDeterministicFiniteAutonataCompiler::SortStates (const void *ptr0, const void *ptr1)
 {
@@ -768,63 +748,3 @@ int dNonDeterministicFiniteAutonataCompiler::SortStates (const void *ptr0, const
 	return 1;
 }
 
-bool dNonDeterministicFiniteAutonataCompiler::CompareSets (dList<dAutomataState*>& setA, dTree<dAutomataState*,dAutomataState*>& setB) const
-{
-	if (setA.GetCount() == setB.GetCount()) {
-		for (dList<dAutomataState*>::dListNode* node = setA.GetFirst(); node; node = node->GetNext()) {
-			if (!setB.Find(node->GetInfo())) {
-				return false;
-			}
-		}
-		return true;
-	}
-	return false;
-}
-
-void dNonDeterministicFiniteAutonataCompiler::MoveSymbol (int symbol, const dAutomataState* const state, dTree<dAutomataState*,dAutomataState*>& ouput) const
-{
-	for (dList<dAutomataState*>::dListNode* stateNode = state->m_myNFANullStates.GetFirst(); stateNode; stateNode = stateNode->GetNext()) {
-		const dAutomataState* const state = stateNode->GetInfo();
-		for (dList<dAutomataState::dTransition>::dListNode* transitionNode = state->m_transtions.GetFirst(); transitionNode; transitionNode = transitionNode->GetNext()) {
-			dAutomataState::dTransition& thans = transitionNode->GetInfo();
-			dAutomataState::dCharacter ch (thans.GetCharater());
-			if (ch.m_symbol == symbol) {
-				dAutomataState* const target = thans.GetState();
-				ouput.Insert(target, target);
-			}
-		}
-	}
-}
-
-void dNonDeterministicFiniteAutonataCompiler::EmptyTransitionClosure (const dTree<dAutomataState*,dAutomataState*>& set, dTree<dAutomataState*,dAutomataState*>& closureStates) const
-{
-
-	int stack = 0;
-	dAutomataState* stackPool[2048];
-
-	dTree<dAutomataState*,dAutomataState*>::Iterator iter (set);
-	for (iter.Begin(); iter; iter ++) {
-		dAutomataState* const state = iter.GetNode()->GetInfo();
-		stackPool[stack] = state;
-		stack ++;
-		_ASSERTE (stack  < sizeof (stackPool) / sizeof (stackPool[0]));
-		closureStates.Insert(state, state);
-	}
-
-	while(stack) {
-		stack --;
-		dAutomataState* const state = stackPool[stack];
-		for (dList<dAutomataState::dTransition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
-			dAutomataState::dTransition& transition = node->GetInfo();
-			if (transition.GetCharater().m_symbol == 0) {
-				dAutomataState* const targetState = transition.GetState();
-				if(!closureStates.Find(targetState)) {
-					closureStates.Insert(targetState, targetState);
-					stackPool[stack] = targetState;
-					stack ++;
-					_ASSERTE (stack  < sizeof (stackPool) / sizeof (stackPool[0]));
-				}
-			}
-		}
-	}
-}

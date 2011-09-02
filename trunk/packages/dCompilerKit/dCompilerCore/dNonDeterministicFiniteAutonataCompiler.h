@@ -15,61 +15,40 @@
 
 #include "dChatertSetMap.h"
 
-#include <string>
-using namespace std;
 
-
-#define D_ASCII_SET_MAX_SIZE	1024
-
+#define D_ASCII_SET_MAX_SIZE  2048
 
 
 class dAutomataState;
 
-int GetScapeChar (int symbol);
+
 
 class dNonDeterministicFiniteAutonataCompiler
 {
 	public:
 	dNonDeterministicFiniteAutonataCompiler();
 	dNonDeterministicFiniteAutonataCompiler(const char* const regularExpression);
-//	dNonDeterministicFiniteAutonataCompiler(const dNonDeterministicFiniteAutonataCompiler& nfa);
 	virtual ~dNonDeterministicFiniteAutonataCompiler();
 
 	bool IsValid() const;
 	const dChatertSetMap& GetChatertSetMap() const;
-	dAutomataState* dNonDeterministicFiniteAutonataCompiler::CreateDeterministicFiniteAutomaton () const;
+
+	dAutomataState* GetStartState() const;
+	dAutomataState* GetExitState() const;
+//	dAutomataState* CreateDeterministicFiniteAutomaton () const;
+
+	static int GetScapeChar (int symbol);
 
 	protected:
-	enum Operations
-	{
-		m_union = '|',						// a|b	
-		m_concatenation = 0x7f,				// ab
-		m_zeroOrMore = '*',					// a* 
-		m_oneOrMore  = '+',					// a+ 
-		m_zeroOrOne  = '?',					// a? 
-		m_openParentesis = '(',				// (a)
-		m_closeParentesis = ')',			// (a)  
-		m_openSquareBrakect = '[',			// [a] 
-		m_closeSquareBrakect = ']',			// [a] 
-		m_balancedCharacterExpresion = ':',	// my special extension for balanced expressions ex :{(expression):} will match balanced curly bracketed expresion  
-	};
-	
+	enum Operations;
 
-	class StateConstructPair
+	class dStateConstructPair
 	{
 		public: 
-		StateConstructPair ()
-		{
-		}
-
-		StateConstructPair (dAutomataState* start, dAutomataState* accepting)
-			:m_start(start)
-			,m_accepting(accepting)
-		{
-		}
-
-		dAutomataState* GetStart() const { return m_start;}
-		dAutomataState* GetAccepting() const { return m_accepting;}
+		dStateConstructPair ();
+		dStateConstructPair (dAutomataState* start, dAutomataState* accepting);
+		dAutomataState* GetStart() const;
+		dAutomataState* GetAccepting() const;
 
 		private:
 		dAutomataState* m_start;
@@ -79,31 +58,14 @@ class dNonDeterministicFiniteAutonataCompiler
 	class dAutomataStateConstructStack
 	{
 		public:
-		dAutomataStateConstructStack ()
-			:m_index(0)
-		{
-		}
-
-		bool IsEmpty() const
-		{
-			return m_index == 0;
-		}
-
-		StateConstructPair Pop ()
-		{
-			_ASSERTE (m_index);
-			return m_pool[--m_index];
-		}
-
-		void Push (dAutomataState* const start, dAutomataState* const accepting)
-		{
-			m_pool[m_index++] = StateConstructPair (start, accepting);
-			_ASSERTE (m_index <= sizeof (m_pool)/sizeof (m_pool[0]));
-		}
+		dAutomataStateConstructStack ();
+		bool IsEmpty() const;
+		dStateConstructPair Pop ();
+		void Push (dAutomataState* const start, dAutomataState* const accepting);
 
 		private:
 		int m_index;
-		StateConstructPair m_pool[1024];
+		dStateConstructPair m_pool[1024];
 	};
 
 	virtual void ShiftID();
@@ -133,18 +95,17 @@ class dNonDeterministicFiniteAutonataCompiler
 	void UnuaryExpression ();
 	int BracketedExpression (char* const set, int size);
 
-	bool CompareSets (dList<dAutomataState*>& setA, dTree<dAutomataState*,dAutomataState*>& setB) const;
-	void MoveSymbol (int symbol, const dAutomataState* const state, dTree<dAutomataState*,dAutomataState*>& ouput) const;
-	void EmptyTransitionClosure (const dTree<dAutomataState*,dAutomataState*>& set, dTree<dAutomataState*,dAutomataState*>& closureStates) const;
+	
+
+
 
 	static int SortStates (const void *ptr0, const void *ptr1);
 
 	bool m_error;
 	int m_token;
 	int m_stateID;
-//	int m_stateMark;
 	int m_regularExpressionIndex;	
-	char m_regularExpression[256];	
+	char m_regularExpression[D_ASCII_SET_MAX_SIZE];	
 	dAutomataState* m_startState; 
 	dAutomataState* m_acceptingState; 
 	dAutomataStateConstructStack m_stack;
