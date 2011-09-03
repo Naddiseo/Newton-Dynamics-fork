@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="dCompilerCore"
+	Name="dFiniteAutomata"
 	ProjectGUID="{A84E1056-FD95-416B-BADD-E180E8BE7AEC}"
 	RootNamespace="dCompilerKit"
 	Keyword="Win32Proj"
