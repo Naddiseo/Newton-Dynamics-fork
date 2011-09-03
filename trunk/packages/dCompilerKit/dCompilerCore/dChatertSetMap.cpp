@@ -9,7 +9,7 @@
 * freely
 */
 
-#include "dCompilerCore.h"
+#include "dFiniteAutomata.h"
 #include "dChatertSetMap.h"
 
 

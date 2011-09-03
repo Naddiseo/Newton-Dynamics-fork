@@ -10,7 +10,7 @@
 */
 
 
-#include "dCompilerCore.h"
+#include "dFiniteAutomata.h"
 #include "dAutomataState.h"
 
 

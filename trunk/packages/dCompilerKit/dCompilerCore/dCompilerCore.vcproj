@@ -47,7 +47,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="dCompilerCore.h"
+				PrecompiledHeaderThrough="dFiniteAutomata.h"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -111,7 +111,7 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="dCompilerCore.h"
+				PrecompiledHeaderThrough="dFiniteAutomata.h"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -164,7 +164,15 @@
 			>
 		</File>
 		<File
-			RelativePath="..\dCompilerCore\dCompilerCore.cpp"
+			RelativePath=".\dDeterministicFiniteAutonata.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDeterministicFiniteAutonata.h"
+			>
+		</File>
+		<File
+			RelativePath=".\dFiniteAutomata.cpp"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"
@@ -184,23 +192,15 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\dCompilerCore\dCompilerCore.h"
+			RelativePath=".\dFiniteAutomata.h"
 			>
 		</File>
 		<File
-			RelativePath=".\dDeterministicFiniteAutonataCompiler.cpp"
+			RelativePath=".\dNonDeterministicFiniteAutonata.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\dDeterministicFiniteAutonataCompiler.h"
-			>
-		</File>
-		<File
-			RelativePath=".\dNonDeterministicFiniteAutonataCompiler.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\dNonDeterministicFiniteAutonataCompiler.h"
+			RelativePath=".\dNonDeterministicFiniteAutonata.h"
 			>
 		</File>
 	</Files>

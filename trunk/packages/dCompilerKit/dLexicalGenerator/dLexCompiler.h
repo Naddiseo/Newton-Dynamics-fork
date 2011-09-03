@@ -30,8 +30,8 @@ using namespace std;
 
 #include "dAutomataState.h"
 #include "dChatertSetMap.h"
-#include "dDeterministicFiniteAutonataCompiler.h"
-#include "dNonDeterministicFiniteAutonataCompiler.h"
+#include "dDeterministicFiniteAutonata.h"
+#include "dNonDeterministicFiniteAutonata.h"
 
 
 class dLexCompiler
@@ -39,7 +39,9 @@ class dLexCompiler
 	enum dToken;
 	class dTokenData;
 	class dExpandedNFA;
-	class dConvertDFAtoCode;
+	class dExpandedDFA;
+	class dExpandedState;
+
 
 	class dTokenDataList: public dList<dTokenData*>
 	{
