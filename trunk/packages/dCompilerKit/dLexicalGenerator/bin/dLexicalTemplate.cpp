@@ -15,15 +15,17 @@
 $(userIncludeCode)
 #include "$(className).h"
 
+#ifdef _MSC_VER
+	#pragma warning (disable: 4702) // warning C4702: unreachable code
+#endif
+
+
 $(className)::$(className)(const char* const data)
 	:m_tokenString ("")
 	,m_data(data)
 	,m_index(0)
-//	,m_token(0)
-//	,state(0)
-//	,m_lastState($(statesCount))
-//	,m_startState(0)
-//	,m_startIndex(0)
+	,m_startIndex(0)
+	,m_lineNumber(0)
 {
 }
 
@@ -31,25 +33,8 @@ $(className)::~$(className)()
 {
 }
 
-char $(className)::NextChar()
-{
-	return m_data[m_index++];
-}
-
-const char* $(className)::GetTokenString() const
-{
-	return m_tokenString.c_str();
-}
-
 bool $(className)::IsCharInSet (char ch, const char* const set, int setSize) const
 {
-//	for (int i = 0; i < set[i]; i ++) {
-//		if (ch == set[i]) {
-//			 return true;
-//		}
-//	}
-//	return false;
-
 	int i0 = 0;
 	int i1 = setSize - 1;
 	while ((i1 - i0) >= 4) {
@@ -70,26 +55,13 @@ bool $(className)::IsCharInSet (char ch, const char* const set, int setSize) con
 
 }
 
-/*
+
 void $(className)::GetLexString ()
 {
 	int length = m_index - m_startIndex;
 	m_tokenString = string (&m_data[m_startIndex], length);
 	m_startIndex = m_index;
-	state = NextPattern();
 }
-
-
-int $(className)::NextPattern ()
-{
-	static int nextState[] = {$(nextTokenStart)};
-
-	m_index = m_startIndex;
-	_ASSERTE (nextState[m_startState] <= (sizeof (nextState) / sizeof (nextState[0])));
-	m_startState = nextState[m_startState];
-	return m_startState;
-}
-*/
 
 
 int $(className)::NextToken ()
@@ -103,76 +75,75 @@ $(characterSets)
 	static int transitionsStart[] = {$(transitionsStart)};
 	static dTransitionInfo nextTranstionList[] = {$(nextTranstionList)};
 	
-	
-//	static int nextState[][$(statesCount)] = {$(nextState)};
-//	static int charaterTests[][$(statesCount)] = {$(charactesTest)};
-//	static int testSetArrayIndex[][$(statesCount)] = {$(testSetArrayIndex__)};
-//	//static int testSetArrayIndexOffset[] = {$(testSetArrayOffsets)};
-//	//static int testSetArrayIndex[] = {$(testSetArrayIndex)};
-
-//	state = 0;
-//	m_startState = 0;
-//	m_startIndex = m_index;
-//	while ((state != m_lastState) && (m_data[m_index] != 0))
+	m_startIndex = m_index;
 
 	int state = 0;
 	for (bool matchFound = false; !matchFound; )
 	{
-		char ch = NextChar();
-		int count = transitionsCount[state];
-		dTransitionInfo* const transitionsList = &nextTranstionList[transitionsStart[state]];
-
-		bool stateChanged = false;
-		for (int i = 0; (i < count) && !stateChanged; i ++) {
-			//int test = charaterTests[i][state];
-			dTransitionInfo& transition = transitionsList[i];
-			switch (transition.m_type)
+		switch (state) 
+		{
+$(userActions)
+		
+			default:
 			{
-				case m_infoIsCharacter:
-				{
-					if (ch == transition.m_info) {
-						state = transition.m_nextState;
-						stateChanged = true;
+				char ch = NextChar();
+				int count = transitionsCount[state];
+				int start = transitionsStart[state];
+				dTransitionInfo* const transitionsList = &nextTranstionList[start];
+
+				bool stateChanged = false;
+				for (int i = 0; (i < count) && !stateChanged; i ++) {
+					dTransitionInfo& transition = transitionsList[i];
+					switch (transition.m_type)
+					{
+						case m_infoIsCharacter:
+						{
+							if (ch == transition.m_info) {
+								state = transition.m_nextState;
+								stateChanged = true;
+							}
+							break;
+						}
+
+						case m_infoIsCharacterSet:
+						{
+							int index = transition.m_info;
+							int length = characterSetSize[index];
+							const char* text = characterSetArray[index];
+							if (IsCharInSet (ch, text, length)) {
+								state = transition.m_nextState;
+								stateChanged = true;
+							}
+							break;
+						}
+
+						case m_infoIsInitBalanceCounter:
+						{
+							_ASSERTE (0);
+							break;
+						}
+
+						case m_infoIsIncrementBalanceCounter:
+						{
+							_ASSERTE (0);
+							break;
+						}
+
+						case m_infoIsDecrementBalanceCounter:
+						{
+							_ASSERTE (0);
+							break;
+						}
 					}
-					break;
 				}
-
-				case m_infoIsCharacterSet:
-				{
-					int index = transition.m_info;
-					int length = characterSetSize[index];
-					const char* text = characterSetArray[index];
-					if (IsCharInSet (ch, text, length)) {
-						state = transition.m_nextState;
-						stateChanged = true;
-						break;
-					}
-
-					break;
-				}
-
-				case m_infoIsInitBalanceCounter:
-				{
-					_ASSERTE (0);
-					break;
-				}
-
-				case m_infoIsIncrementBalanceCounter:
-				{
-					_ASSERTE (0);
-					break;
-				}
-
-				case m_infoIsDecrementBalanceCounter:
-				{
-					_ASSERTE (0);
-					break;
+				if (!stateChanged) {
+					// Unknown pattern
+					return -1;
 				}
 			}
 		}
 	}
-//	m_tokenString = "";
-
+	// Unknown pattern
 	return -1;
 }
 

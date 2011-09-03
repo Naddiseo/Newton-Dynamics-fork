@@ -72,7 +72,8 @@ class dParcerCompiler
 		LITERAL,
 		CODE_BLOCK,
 		USER_ACTION,
-		GRAMMAR_SEGEMENT,
+		GRAMMAR_SEGMENT,
+		PARCEL_ERROR,
 	};
 
 	enum TokenType;

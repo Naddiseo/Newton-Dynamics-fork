@@ -37,10 +37,6 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 
 
 %%
-[a][bc]	{}
-
-/*
-{WhiteSpace}		{}
 
 [|]					{ return(dParcerCompiler::OR); }
 [:]					{ return(dParcerCompiler::COLOM); }
@@ -49,7 +45,6 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 "'{'"				{ return('{'); }
 "'}'"				{ return('}'); }
 "','"				{ return(','); }
-"':'"				{ return(':'); }
 "'='"				{ return('='); }
 "'&'"				{ return('&'); }
 "'!'"				{ return('!'); }
@@ -60,6 +55,7 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 "'>'"				{ return('>'); }
 "'/'"				{ return('/'); }
 "'^'"				{ return('^'); }
+"'\:'"				{ return(':'); }
 "'\.'"				{ return('.'); }
 "'\|'"				{ return('|'); }
 "'\?'"				{ return('?'); }
@@ -72,7 +68,7 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 "'\]'"				{ return(']'); }
 
 
-"%%"				{ return dParcerCompiler::GRAMMAR_SEGEMENT;}
+"%%"				{ return dParcerCompiler::GRAMMAR_SEGMENT;}
 "%union"			{ return dParcerCompiler::UNION;}
 "%token"			{ return dParcerCompiler::TOKEN;}
 "%left"				{ return dParcerCompiler::LEFT;}
@@ -82,5 +78,7 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 {CodeBlock}			{ m_tokenString.replace(0, 2, ""); m_tokenString.replace(m_tokenString.size() - 2, 2, ""); return dParcerCompiler::CODE_BLOCK;}
 [{]					{ ((dGrammarLexical*)this)->ReadUserAction(); return dParcerCompiler::USER_ACTION;}
 
+{WhiteSpace}		{}
 {Comment}			{}
-*/
+.					{return dParcerCompiler::PARCEL_ERROR;}
+

@@ -311,7 +311,7 @@ void dParcerCompiler::ScanGrammarFile(
 	int tokenEnumeration = 256;
 
 	// scan the definition segment
-	for (Token token = Token(lexical.NextToken()); token != GRAMMAR_SEGEMENT; ) {
+	for (Token token = Token(lexical.NextToken()); token != GRAMMAR_SEGMENT; ) {
 //		DTRACE (("%s\n", lexical.GetTokenString()));
 		switch (int (token)) 
 		{
@@ -359,7 +359,7 @@ void dParcerCompiler::ScanGrammarFile(
 	int ruleNumber = 1;
 //	dTree<int, string> nonTerminalRuleEnumFilter;
 	// scan the production rules segment
-	for (Token token = Token(lexical.NextToken()); token != GRAMMAR_SEGEMENT; token = Token(lexical.NextToken())) {
+	for (Token token = Token(lexical.NextToken()); token != GRAMMAR_SEGMENT; token = Token(lexical.NextToken())) {
 //		DTRACE (("%s\n", lexical.GetTokenString()));
 		switch (int (token)) 
 		{

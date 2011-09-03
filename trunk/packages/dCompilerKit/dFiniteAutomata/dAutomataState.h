@@ -63,7 +63,7 @@ class dAutomataState
 	};
 
 	dAutomataState (int id);
-	~dAutomataState ();
+	virtual ~dAutomataState ();
 
 	void dAutomataState::GetStateArray (dList<dAutomataState*>& statesList);
 

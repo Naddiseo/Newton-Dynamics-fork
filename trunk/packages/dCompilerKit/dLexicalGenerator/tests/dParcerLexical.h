@@ -48,7 +48,7 @@ class dParcerLexical
 
 	protected:
 	virtual char NextChar ();
-//	virtual void GetLexString ();
+	virtual void GetLexString ();
 //	virtual int NextPattern ();
 
 	bool IsCharInSet (char ch, const char* const set, int setSize) const;
@@ -57,6 +57,7 @@ class dParcerLexical
 	string m_tokenString;
 	const char* m_data;
 	int m_index;
+	int m_startIndex;
 //	int m_token;
 //	int m_state;
 //	int m_lastState;

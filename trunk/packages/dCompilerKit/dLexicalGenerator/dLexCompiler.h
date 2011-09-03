@@ -94,7 +94,8 @@ class dLexCompiler
 	void ParseDefinitions (dExpandedNFA &nfa, string& userPreheaderCode);
 	
 	void CreateHeaderFile (const char* const fileName, const char* const className) const;
-	void CreateCodeFile (const char* const fileName, const char* const className, int stateCount, string& userPreheaderCode,
+	void CreateCodeFile (const char* const fileName, const char* const className, int stateCount, 
+						string& userPreheaderCode, string& automataCode,
 						 const dChatertSetMap& characterSet, dTree<dTransitionCountStart, int>& transitionsCountStartMap, dList<dTransitionType>& nextStateRun) const;
 //	void CreateCodeFile (const char* const fileName, const char* const className, int stateCount,
 //						 string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet,

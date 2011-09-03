@@ -43,26 +43,44 @@ class dParcerLexical
 	virtual ~dParcerLexical();
 
 	virtual int NextToken ();
-	virtual const char* GetTokenString () const;
-	
+
+	const char* GetTokenString() const
+	{
+		return m_tokenString.c_str();
+	}
 
 	protected:
-	virtual char NextChar ();
-//	virtual void GetLexString ();
-//	virtual int NextPattern ();
+	int GetLineNumber () const
+	{
+		return m_lineNumber;
+	}
 
+	char NextChar ()
+	{
+		char ch = m_data[m_index++];
+		if (ch == '\n') {
+			m_lineNumber ++;
+		}
+		return ch;
+	}
+
+	void UnGetChar ()
+	{
+		char ch = m_data[--m_index];
+		if (ch == '\n') {
+			m_lineNumber --;
+		}
+	}
+
+	void GetLexString ();
 	bool IsCharInSet (char ch, const char* const set, int setSize) const;
 
 	// local lexical variables
 	string m_tokenString;
 	const char* m_data;
 	int m_index;
-//	int m_token;
-//	int m_state;
-//	int m_lastState;
-//	int m_startState;
-	
-//	int m_startIndex;
+	int m_startIndex;
+	int m_lineNumber;
 	
 };
 #endif
