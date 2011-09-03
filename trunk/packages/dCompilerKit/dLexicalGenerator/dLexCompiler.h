@@ -62,6 +62,24 @@ class dLexCompiler
 		void AddDefinition (string& regularExpresionWithMacros, string& key);
 	};
 
+	class dTransitionCountStart
+	{
+		public:
+		int m_count;
+		int m_start;
+	};
+
+
+	class dTransitionType
+	{
+		public:
+		int m_targetState;
+		int m_value				: 16;
+		int m_transitionType	:  3;		// 0 m_value is a character, 1 m_value is a charcterSet, 
+											// 2 m_value is init for nested balanced expression, 
+											// 3 m_value is Increment for nested balanced expression, 
+											// 4 m_value is decrement for nested balanced expression
+	};
 
 	public:
 	dLexCompiler(const char* const inputRules, const char* const outputFileName);
@@ -74,18 +92,20 @@ class dLexCompiler
 	void ParseDefinitionBlock (string& preheaderCode);
 
 
-	void ParseDefinitions (string& userPreheaderCode, string& automataCode);
+	int ParseDefinitions (string& userPreheaderCode, string& automataCode, dTree<dTransitionCountStart, int>& transitionsCountMap, dList<dTransitionType>& nextStateRun);
 
-	int ParseDefinitions (string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet, 
-						   dTree<int, int>& transitionsCountMap, dTree<dTree<int, int>, int>& nextState,
-						   dTree<dTree<char, int>, int>& characterTestMap, dTree<dTree<int, int>, int>& testSetArrayIndexMap);
+//	int ParseDefinitions (string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet, 
+//						   , dTree<dTree<int, int>, int>& nextState,
+//						   dTree<dTree<char, int>, int>& characterTestMap, dTree<dTree<int, int>, int>& testSetArrayIndexMap);
 
 	
 	void CreateHeaderFile (const char* const fileName, const char* const className) const;
-	void CreateCodeFile (const char* const fileName, const char* const className, int stateCount,
-						 string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet,
-						 dTree<int, int>& transitionsCountMap, dTree<dTree<int, int>, int>& nextState,
-						 dTree<dTree<char, int>, int>& characterTestMap, dTree<dTree<int, int>, int>& testSetArrayIndexMap) const;
+	void CreateCodeFile (const char* const fileName, const char* const className, int stateCount, string& userPreheaderCode,
+						 dChatertSetMap& characterSet, dTree<dTransitionCountStart, int>& transitionsCountStartMap, dList<dTransitionType>& nextStateRun) const;
+//	void CreateCodeFile (const char* const fileName, const char* const className, int stateCount,
+//						 string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet,
+//						 dTree<int, int>& transitionsCountMap, dTree<dTree<int, int>, int>& nextState,
+//						 dTree<dTree<char, int>, int>& characterTestMap, dTree<dTree<int, int>, int>& testSetArrayIndexMap) const;
 
 
 	dToken m_token;

@@ -37,8 +37,10 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 
 
 %%
-{WhiteSpace}		{}
+a	{}
 
+/*
+{WhiteSpace}		{}
 
 [|]					{ return(dParcerCompiler::OR); }
 [:]					{ return(dParcerCompiler::COLOM); }
@@ -81,3 +83,4 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 [{]					{ ((dGrammarLexical*)this)->ReadUserAction(); return dParcerCompiler::USER_ACTION;}
 
 {Comment}			{}
+*/

@@ -13,6 +13,8 @@ dGrammarLexical::~dGrammarLexical(void)
 
 void dGrammarLexical::ReadUserAction()
 {
+	_ASSERTE (0);
+/*
 	int state = 0;
 	while (state != 14) 
 	{
@@ -81,4 +83,5 @@ void dGrammarLexical::ReadUserAction()
 
 	GetLexString();
 	m_tokenString = "{" + m_tokenString;
+*/
 }

@@ -21,6 +21,16 @@ using namespace std;
 
 class dParcerLexical
 {
+	enum dTranstionType
+	{
+		m_infoIsCharacter = 0,
+		m_infoIsCharacterSet,
+		m_infoIsInitBalanceCounter,
+		m_infoIsIncrementBalanceCounter,
+		m_infoIsDecrementBalanceCounter,
+		
+
+	};
 	public:
 	dParcerLexical(const char* const data);
 	virtual ~dParcerLexical();
@@ -32,8 +42,9 @@ class dParcerLexical
 	protected:
 	virtual char NextChar ();
 	virtual void GetLexString ();
-	virtual int NextPattern ();
-	virtual bool IsCharInSet (int ch, const char* const set) const;
+//	virtual int NextPattern ();
+
+	bool IsCharInSet (char ch, const char* const set, int setSize) const;
 
 	// local lexical variables
 	int m_token;

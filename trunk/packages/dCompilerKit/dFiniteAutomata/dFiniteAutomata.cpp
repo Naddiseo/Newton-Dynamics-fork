@@ -10,7 +10,7 @@ dFiniteAutomata::~dFiniteAutomata()
 {
 }
 
-dAutomataState* dFiniteAutomata::CreateState (int id) const
+dAutomataState* dFiniteAutomata::CreateState (int id)
 {
 	return new dAutomataState (id); 
 }

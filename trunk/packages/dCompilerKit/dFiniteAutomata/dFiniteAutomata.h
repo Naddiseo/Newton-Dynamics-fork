@@ -64,7 +64,7 @@ class dFiniteAutomata
 	dFiniteAutomata();
 	virtual ~dFiniteAutomata();
 
-	virtual dAutomataState* CreateState (int id) const;
+	virtual dAutomataState* CreateState (int id);
 	static int GetScapeChar (int symbol);
 };
 
