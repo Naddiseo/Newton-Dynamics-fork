@@ -257,10 +257,11 @@ public:
 class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 {
 	public: 
-	dExpandedDFA (const dNonDeterministicFiniteAutonata& nfa)
+		dExpandedDFA (const dNonDeterministicFiniteAutonata& nfa, string& automataCode)
 		:dDeterministicFiniteAutonata (), m_nfa(&nfa)
 	{
 		CreateDeterministicFiniteAutomaton (nfa);
+		ConvertSwitchCaseStatements (automataCode);
 	}
 
 	private:
@@ -313,16 +314,14 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 	}
 
 
-	int ConvertSwitchCaseStatements (
-		string& parseTokenOutput, 
-		string& nextTokenOutput, 
-		int stateIdBase, 
-		dChatertSetMap& characterSet, 
-		const string& userAction,
-		dTree<int, int>& transitionsCountMap,
-		dTree<dTree<int, int>, int>& nextStateMap,
-		dTree<dTree<char, int>, int>& characterTestMap,
-		dTree<dTree<int, int>, int>& testSetArrayIndexMap) const 
+	int ConvertSwitchCaseStatements (string& automataCodeOutput) 
+//		int stateIdBase, 
+//		dChatertSetMap& characterSet, 
+//		const string& userAction,
+//		dTree<int, int>& transitionsCountMap,
+//		dTree<dTree<int, int>, int>& nextStateMap,
+//		dTree<dTree<char, int>, int>& characterTestMap,
+//		dTree<dTree<int, int>, int>& testSetArrayIndexMap) const 
 	{
 #if 0
 		dTree<dAutomataState*,dAutomataState*> filter;
@@ -438,15 +437,17 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 		return stateIdBase + lastState + 1;
 
 #endif
+
+
 		dTree<dAutomataState*,dAutomataState*> filter;
 
 		int stack = 1;
 		dAutomataState* pool[128];
 
-		pool[0] = m_deterministicFiniteAutomata;
+		pool[0] = m_startState;
 		filter.Insert(pool[0], pool[0]);
 
-		int lastState = m_deterministicFiniteAutomata->m_id;
+//		int lastState = m_deterministicFiniteAutomata->m_id;
 
 		while (stack) {
 			stack --;
@@ -454,15 +455,16 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 			dAutomataState* const state = pool[stack];
 			_ASSERTE (filter.Find(state));
 
-
-			if ((state->m_id) > lastState) {
-				lastState = state->m_id;
-			}
+//			if ((state->m_id) > lastState) {
+//				lastState = state->m_id;
+//			}
 
 			char condition[126];
 			condition[0] = 0;
 
 			if (state->m_exitState) {
+				_ASSERTE (0);
+/*
 				AddText (parseTokenOutput, "case %d:\n", state->m_id + stateIdBase);
 				AddText (parseTokenOutput, "{\n");
 				if (!state->m_exitState || state->m_transtions.GetCount()) {
@@ -521,9 +523,10 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 				AddText (parseTokenOutput, "\tbreak;\n");
 
 				AddText (parseTokenOutput, "}\n");
-
+*/
 			} else {
-
+				_ASSERTE (0);
+/*
 				transitionsCountMap.Insert(state->m_transtions.GetCount(), state->m_id + stateIdBase);
 				for (int i = 0; i < state->m_transtions.GetCount(); i ++) {
 					if (!nextStateMap.Find(i)) {
@@ -568,9 +571,11 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 
 					transitionIndex ++;
 				}
+*/
 			}
 		}
 
+/*
 		char nextJump[256];
 		static string filler ("0, ");
 		sprintf (nextJump, "%d, ", lastState + stateIdBase + 1);
@@ -582,6 +587,8 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 
 		//	DTRACE ((parseTokenOutput.c_str()));
 		return stateIdBase + lastState + 1;
+*/
+		return 0;
 	}
 
 	const dNonDeterministicFiniteAutonata* m_nfa;
@@ -1094,7 +1101,7 @@ void dLexCompiler::ParseDefinitions (string& preheaderCode, string& automataCode
 		NextToken();
 	}
 
-	dExpandedDFA expresionAutomata (nfa);
+	dExpandedDFA expresionAutomata (nfa, automataCode);
 
 //	return initialState + 1;
 

@@ -39,7 +39,7 @@ class dDeterministicFiniteAutonata: public dFiniteAutomata
 	void EmptyTransitionClosure (const dTree<dAutomataState*,dAutomataState*>& set, dTree<dAutomataState*,dAutomataState*>& closureStates) const;
 
 	protected:
-	dAutomataState* m_deterministicFiniteAutomata; 
+	dAutomataState* m_startState; 
 	dChatertSetMap m_charaterSetMap;
 };
 

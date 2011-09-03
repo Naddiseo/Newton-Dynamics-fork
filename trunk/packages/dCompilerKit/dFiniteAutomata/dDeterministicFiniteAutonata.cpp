@@ -16,13 +16,13 @@
 
 dDeterministicFiniteAutonata::dDeterministicFiniteAutonata()
 	:dFiniteAutomata()
-	,m_deterministicFiniteAutomata(NULL)
+	,m_startState(NULL)
 {
 }
 
 dDeterministicFiniteAutonata::dDeterministicFiniteAutonata(const char* const regularExpression)
 	:dFiniteAutomata()
-	,m_deterministicFiniteAutomata(NULL)
+	,m_startState(NULL)
 {
 	dNonDeterministicFiniteAutonata nfa (regularExpression);
 	CreateDeterministicFiniteAutomaton(nfa);
@@ -30,7 +30,7 @@ dDeterministicFiniteAutonata::dDeterministicFiniteAutonata(const char* const reg
 
 dDeterministicFiniteAutonata::dDeterministicFiniteAutonata(const dNonDeterministicFiniteAutonata& nfa)
 	:dFiniteAutomata()
-	,m_deterministicFiniteAutomata(NULL)
+	,m_startState(NULL)
 {
 	CreateDeterministicFiniteAutomaton(nfa);
 }
@@ -39,9 +39,9 @@ dDeterministicFiniteAutonata::dDeterministicFiniteAutonata(const dNonDeterminist
 
 dDeterministicFiniteAutonata::~dDeterministicFiniteAutonata(void)
 {
-	if (m_deterministicFiniteAutomata) {
+	if (m_startState) {
 		dList<dAutomataState*> statesList;
-		m_deterministicFiniteAutomata->GetStateArray (statesList);
+		m_startState->GetStateArray (statesList);
 		for (dList<dAutomataState*>::dListNode* node = statesList.GetFirst(); node; node = node->GetNext()) {
 			dAutomataState* const state = node->GetInfo();
 			delete state;
@@ -54,7 +54,7 @@ dDeterministicFiniteAutonata::~dDeterministicFiniteAutonata(void)
 void dDeterministicFiniteAutonata::CopySet (const dNonDeterministicFiniteAutonata& nfa)
 {
 	dList<dAutomataState*> stateList;
-	m_deterministicFiniteAutomata->GetStateArray (stateList);
+	m_startState->GetStateArray (stateList);
 
 	dTree<int, int> setFilter;
 	for (dList<dAutomataState*>::dListNode* node = stateList.GetFirst(); node; node = node->GetNext()) {
@@ -240,22 +240,8 @@ void dDeterministicFiniteAutonata::CreateDeterministicFiniteAutomaton (const dNo
 				}
 			}
 		}
-
-
-		//	int index = 0;
-		//	dAutomataState** const stateSort = new dAutomataState*[stateArray.GetCount()];
-		//	for (dList<dAutomataState*>::dListNode* node = stateArray.GetFirst(); node; node = node->GetNext()) {
-		//		stateSort[index] = node->GetInfo();
-		//		index ++;
-		//	}
-		//	qsort (stateSort, index, sizeof (dAutomataState*), SortStates);
-		//	for (int i = 0; i < index; i ++) {
-		//		dAutomataState* const state = stateSort[i];
-		//		state->m_id = i;
-		//	}
-		//	delete stateSort;
 		
-		m_deterministicFiniteAutomata = startState;
+		m_startState = startState;
 		CopySet (nfa);
 	}
 }
@@ -268,7 +254,7 @@ int dDeterministicFiniteAutonata::FindMatch(const char* const text) const
 	if (text[0]) {
 		count = 0;
 		int stack = 0;
-		dAutomataState* state = m_deterministicFiniteAutomata;
+		dAutomataState* state = m_startState;
 		for(int i = 0; text[i]; i ++) {
 			int extendChar = 0;
 			int ch = text[i];
