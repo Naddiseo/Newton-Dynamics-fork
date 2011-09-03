@@ -22,7 +22,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dTestAssembler", "dTestAsse
 		{61D6A343-3A8F-440E-8FA6-2C342ABB6896} = {61D6A343-3A8F-440E-8FA6-2C342ABB6896}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dFiniteAutomata", "dCompilerCore\dFiniteAutomata.vcproj", "{A84E1056-FD95-416B-BADD-E180E8BE7AEC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dFiniteAutomata", "dFiniteAutomata\dFiniteAutomata.vcproj", "{A84E1056-FD95-416B-BADD-E180E8BE7AEC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
