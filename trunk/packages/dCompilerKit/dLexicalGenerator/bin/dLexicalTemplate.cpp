@@ -96,12 +96,14 @@ int $(className)::NextToken ()
 {
 	//static strings patterns
 $(characterSets)
+	static int characterSetSize[] = {$(characterSetSize)};
+	static char* characterSetArray[] = {$(characterSetArray)};
 
 	static int transitionsCount[] = {$(transitionsCount)};
 	static int transitionsStart[] = {$(transitionsStart)};
 	static dTransitionInfo nextTranstionList[] = {$(nextTranstionList)};
 	
-//	static char* testSetArray[] = {$(characterSetArray)};
+	
 //	static int nextState[][$(statesCount)] = {$(nextState)};
 //	static int charaterTests[][$(statesCount)] = {$(charactesTest)};
 //	static int testSetArrayIndex[][$(statesCount)] = {$(testSetArrayIndex__)};
@@ -116,81 +118,56 @@ $(characterSets)
 	int state = 0;
 	for (bool matchFound = false; !matchFound; )
 	{
-		switch (state)
-		{
-//			$(finiteAutomataCode)
-			case 1:
-				matchFound = true;
-				break;
+		char ch = NextChar();
+		int count = transitionsCount[state];
+		dTransitionInfo* const transitionsList = &nextTranstionList[transitionsStart[state]];
 
-			default:;
+		bool stateChanged = false;
+		for (int i = 0; (i < count) && !stateChanged; i ++) {
+			//int test = charaterTests[i][state];
+			dTransitionInfo& transition = transitionsList[i];
+			switch (transition.m_type)
 			{
-				char ch = NextChar();
-				int count = transitionsCount[state];
-				dTransitionInfo* const transitionsList = &nextTranstionList[transitionsStart[state]];
-
-				bool stateChanged = false;
-				for (int i = 0; (i < count) && !stateChanged; i ++) {
-					//int test = charaterTests[i][state];
-					dTransitionInfo& transition = transitionsList[i];
-					switch (transition.m_type)
-					{
-						case m_infoIsCharacter:
-						{
-							if (ch == transition.m_info) {
-								state = transition.m_nextState;
-								stateChanged = true;
-							}
-							break;
-						}
-
-						case m_infoIsCharacterSet:
-						{
-							_ASSERTE (0);
-							break;
-						}
-
-						case m_infoIsInitBalanceCounter:
-						{
-							_ASSERTE (0);
-							break;
-						}
-
-						case m_infoIsIncrementBalanceCounter:
-						{
-							_ASSERTE (0);
-							break;
-						}
-
-						case m_infoIsDecrementBalanceCounter:
-						{
-							_ASSERTE (0);
-							break;
-						}
+				case m_infoIsCharacter:
+				{
+					if (ch == transition.m_info) {
+						state = transition.m_nextState;
+						stateChanged = true;
 					}
-/*
-					if (test) {
-						if (ch == test) {
-							state = nextState[i][state];
-							stateChanged = true;
-							break;
-						}
-					} else {
-						int index = testSetArrayIndex[i][state];
-						const char* text = testSetArray[index];
-						if (IsCharInSet (ch, text)) {
-							state = nextState[i][state];
-							stateChanged = true;
-							break;
-						}
-					}
-*/
+					break;
 				}
 
-//				if (!stateChanged) {
-//					state = NextPattern();
-//				}
-				break;
+				case m_infoIsCharacterSet:
+				{
+					int index = transition.m_info;
+					int length = characterSetSize[index];
+					const char* text = characterSetArray[index];
+					if (IsCharInSet (ch, text, length)) {
+						state = transition.m_nextState;
+						stateChanged = true;
+						break;
+					}
+
+					break;
+				}
+
+				case m_infoIsInitBalanceCounter:
+				{
+					_ASSERTE (0);
+					break;
+				}
+
+				case m_infoIsIncrementBalanceCounter:
+				{
+					_ASSERTE (0);
+					break;
+				}
+
+				case m_infoIsDecrementBalanceCounter:
+				{
+					_ASSERTE (0);
+					break;
+				}
 			}
 		}
 	}
@@ -198,5 +175,4 @@ $(characterSets)
 
 	return -1;
 }
-
 

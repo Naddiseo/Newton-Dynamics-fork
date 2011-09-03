@@ -28,9 +28,16 @@ class dParcerLexical
 		m_infoIsInitBalanceCounter,
 		m_infoIsIncrementBalanceCounter,
 		m_infoIsDecrementBalanceCounter,
-		
-
 	};
+
+	struct dTransitionInfo
+	{
+		short m_info;
+		short m_type;
+		short m_nextState;
+	};
+
+
 	public:
 	dParcerLexical(const char* const data);
 	virtual ~dParcerLexical();
@@ -41,19 +48,21 @@ class dParcerLexical
 
 	protected:
 	virtual char NextChar ();
-	virtual void GetLexString ();
+//	virtual void GetLexString ();
 //	virtual int NextPattern ();
 
 	bool IsCharInSet (char ch, const char* const set, int setSize) const;
 
 	// local lexical variables
-	int m_token;
-	int m_state;
-	int m_lastState;
-	int m_startState;
-	int m_index;
-	int m_startIndex;
-	const char* m_data;
 	string m_tokenString;
+	const char* m_data;
+	int m_index;
+//	int m_token;
+//	int m_state;
+//	int m_lastState;
+//	int m_startState;
+	
+//	int m_startIndex;
+	
 };
 #endif

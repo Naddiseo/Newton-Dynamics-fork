@@ -91,17 +91,11 @@ class dLexCompiler
 	void ParseDefinitionExpression (string& preheaderCode);
 	void ParseDefinitionBlock (string& preheaderCode);
 
-
-	int ParseDefinitions (string& userPreheaderCode, string& automataCode, dTree<dTransitionCountStart, int>& transitionsCountMap, dList<dTransitionType>& nextStateRun);
-
-//	int ParseDefinitions (string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet, 
-//						   , dTree<dTree<int, int>, int>& nextState,
-//						   dTree<dTree<char, int>, int>& characterTestMap, dTree<dTree<int, int>, int>& testSetArrayIndexMap);
-
+	void ParseDefinitions (dExpandedNFA &nfa, string& userPreheaderCode);
 	
 	void CreateHeaderFile (const char* const fileName, const char* const className) const;
 	void CreateCodeFile (const char* const fileName, const char* const className, int stateCount, string& userPreheaderCode,
-						 dChatertSetMap& characterSet, dTree<dTransitionCountStart, int>& transitionsCountStartMap, dList<dTransitionType>& nextStateRun) const;
+						 const dChatertSetMap& characterSet, dTree<dTransitionCountStart, int>& transitionsCountStartMap, dList<dTransitionType>& nextStateRun) const;
 //	void CreateCodeFile (const char* const fileName, const char* const className, int stateCount,
 //						 string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet,
 //						 dTree<int, int>& transitionsCountMap, dTree<dTree<int, int>, int>& nextState,
