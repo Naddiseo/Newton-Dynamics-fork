@@ -27,9 +27,6 @@ class dAutomataState
 		EMPTY = 0,
 		CHARACTER,
 		CHARACTER_SET,
-		NESTED_CHARACTER_INC,
-		NESTED_CHARACTER_DEC,
-		NESTED_CHARACTER_INIT,
 	};
 
 	class dCharacter 

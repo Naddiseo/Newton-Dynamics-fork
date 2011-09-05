@@ -253,7 +253,6 @@ int dDeterministicFiniteAutonata::FindMatch(const char* const text) const
 	int count = -1;
 	if (text[0]) {
 		count = 0;
-		int stack = 0;
 		dAutomataState* state = m_startState;
 		for(int i = 0; text[i]; i ++) {
 			int extendChar = 0;
@@ -268,67 +267,25 @@ int dDeterministicFiniteAutonata::FindMatch(const char* const text) const
 
 
 			dAutomataState::dTransition* transition = NULL;
-			for (dList<dAutomataState::dTransition>::dListNode* node = state->m_transtions.GetFirst(); node && !transition; node = node->GetNext()) {
+			for (dList<dAutomataState::dTransition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
 				dAutomataState::dTransition*const trans = &node->GetInfo();
 				dAutomataState::dCharacter symbol (trans->GetCharater());
 
-				switch (symbol.m_type) 
-				{
-					case dAutomataState::CHARACTER: 
-					{
-						if (symbol.m_info == ch) {
-							transition = trans;
-						}
+				if (symbol.m_type == dAutomataState::CHARACTER) {
+					if (symbol.m_info == ch) {
+						transition = trans;
 						break;
 					}
-
-					case dAutomataState::CHARACTER_SET:
-					{
-						const dChatertSetMap::ChatertSet* const characterSet = m_charaterSetMap.FindSet(symbol.m_info);
-						if (characterSet) {
-							if (characterSet->IsCharAMatch (GetScapeChar (ch))) {
-								transition = trans;
-							}
-						}
-						break;
-					}
-
-
-					case dAutomataState::NESTED_CHARACTER_INIT:
-					{
-						if (symbol.m_info == ch) {
-							stack = 1;
-							transition = trans;
-						}
-						break;
-					}
-
-					case dAutomataState::NESTED_CHARACTER_INC:
-					{
-						if (symbol.m_info == ch) {
-							stack ++;
-							transition = trans;
-						}
-						break;
-					}
-
-					case dAutomataState::NESTED_CHARACTER_DEC:
-					{
-						if (symbol.m_info == ch) {
-							stack --;
-							transition = trans;
-							if (stack == 0) {
-								if (state->m_exitState) {
-									count ++;
-									transition = NULL;
-								}
-							}
-						}
+				} else {
+					_ASSERTE (symbol.m_type == dAutomataState::CHARACTER_SET);
+					const dChatertSetMap::ChatertSet* const characterSet = m_charaterSetMap.FindSet(symbol.m_info);
+					_ASSERTE (characterSet);
+					if (characterSet->IsCharAMatch (GetScapeChar (ch))) {
+						transition = trans;
 						break;
 					}
 				}
 			}
-
 
 			if(transition) {
 				count ++;

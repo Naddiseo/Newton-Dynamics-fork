@@ -89,7 +89,6 @@ class dNonDeterministicFiniteAutonata: public dFiniteAutomata
 	void ReduceZeroOrMoreDiagram ();
 	void ReduceOneOrMoreDiagram();
 	void ReduceZeroOrOneDiagram();
-	void ReduceBalancedCharacterExpresion(char openChar, char closingChar);
 
 	void UnionExpression ();
 	void ConcatenationExpression ();

@@ -13,8 +13,8 @@
 #include "dAutomataState.h"
 #include "dNonDeterministicFiniteAutonata.h"
 
-//#define DTRACE_NFA(x) DTRACE(x)
-#define DTRACE_NFA(x) 
+#define DTRACE_NFA(x) DTRACE(x)
+//#define DTRACE_NFA(x) 
 
 /*
 char dNonDeterministicFiniteAutonata::m_asciiSet[] = 
@@ -70,7 +70,6 @@ enum dNonDeterministicFiniteAutonata::Operations
 	m_closeParentesis = ')',			// (a)  
 	m_openSquareBrakect = '[',			// [a] 
 	m_closeSquareBrakect = ']',			// [a] 
-	m_balancedCharacterExpresion = ':',	// my special extension for balanced expressions ex :{(expression):} will match balanced curly bracketed expresion  
 };
 
 dNonDeterministicFiniteAutonata::dStateConstructPair::dStateConstructPair ()
@@ -146,19 +145,6 @@ dNonDeterministicFiniteAutonata::dNonDeterministicFiniteAutonata(const char* con
 {
 	CompileExpression(regularExpression);
 }
-/*
-dNonDeterministicFiniteAutonata::dNonDeterministicFiniteAutonata(const dNonDeterministicFiniteAutonata& nfa)
-	:m_error(false)
-	,m_token (0)
-	,m_stateID (0)
-	,m_regularExpressionIndex(0)
-	,m_startState(NULL) 
-	,m_acceptingState(NULL) 
-	,m_stack()
-{
-
-}
-*/
 
 dNonDeterministicFiniteAutonata::~dNonDeterministicFiniteAutonata(void)
 {
@@ -233,7 +219,7 @@ int dNonDeterministicFiniteAutonata::GetChar()
 
 bool dNonDeterministicFiniteAutonata::CheckInsertConcatenation (int left, int right) const
 {
-	bool test = (((!IsOperator(left)) || (left == m_closeParentesis) || (left == m_closeSquareBrakect) || (left == m_zeroOrMore) || (left == m_oneOrMore) || (left == m_zeroOrOne) || (left == m_balancedCharacterExpresion)) && 
+	bool test = (((!IsOperator(left)) || (left == m_closeParentesis) || (left == m_closeSquareBrakect) || (left == m_zeroOrMore) || (left == m_oneOrMore) || (left == m_zeroOrOne)) && 
 		         ((!IsOperator(right))|| (right == m_openParentesis)  || (right == m_openSquareBrakect))); 
 	return test;
 }
@@ -255,12 +241,12 @@ void dNonDeterministicFiniteAutonata::PreProcessExpression (const char* const re
 		buffer[count ++] = char (ch0);
 		_ASSERTE (count < sizeof (buffer));
 
-		#ifdef _DEBUG
-		bool test0 = CheckInsertConcatenation (ch0, ch1);
-		bool test1 = (((!IsOperator(ch0)) || (ch0 == m_closeParentesis) || (ch0 == m_closeSquareBrakect) || (ch0 == m_zeroOrMore) || (ch0 == m_oneOrMore) || (ch0 == m_zeroOrOne) || (ch0 == m_balancedCharacterExpresion)) && 
-					 ((!IsOperator(ch1)) || (ch1 == m_openParentesis)  || (ch1 == m_openSquareBrakect)));
-		_ASSERTE (test0 == test1);
-		#endif
+//		#ifdef _DEBUG
+//		bool test0 = CheckInsertConcatenation (ch0, ch1);
+//		bool test1 = (((!IsOperator(ch0)) || (ch0 == m_closeParentesis) || (ch0 == m_closeSquareBrakect) || (ch0 == m_zeroOrMore) || (ch0 == m_oneOrMore) || (ch0 == m_zeroOrOne)) && 
+//					 ((!IsOperator(ch1)) || (ch1 == m_openParentesis)  || (ch1 == m_openSquareBrakect)));
+//		_ASSERTE (test0 == test1);
+//		#endif
 
 		if (CheckInsertConcatenation (ch0, ch1)) {
 			buffer[count ++] = char (m_concatenation);
@@ -284,7 +270,7 @@ void dNonDeterministicFiniteAutonata::PreProcessExpression (const char* const re
 bool dNonDeterministicFiniteAutonata::IsOperator (int character) const
 {
 	static char operation[] = {m_union, char (m_concatenation), m_zeroOrMore, m_oneOrMore, m_zeroOrOne, 
-							   m_openParentesis, m_closeParentesis, m_openSquareBrakect, m_closeSquareBrakect, m_balancedCharacterExpresion };
+							   m_openParentesis, m_closeParentesis, m_openSquareBrakect, m_closeSquareBrakect};
 	for (int i = 0; i < sizeof (operation) / sizeof (operation[0]); i ++) {
 		if (character == operation[i]) {
 			return true;
@@ -326,7 +312,6 @@ void dNonDeterministicFiniteAutonata::PushSet (const char* const set, int size)
 	dAutomataState* const startState = CreateState (m_stateID ++);
 	dAutomataState* const acceptingState = CreateState (m_stateID ++);
 	
-//	int setID = m_charaterSetMap.AddSet(set, size);
 	int setId = m_charaterSetMap.AddSet(set, size);
 	dAutomataState::dCharacter charInfo (setId, dAutomataState::CHARACTER_SET);
 	startState->m_transtions.Append(dAutomataState::dTransition(charInfo, acceptingState));
@@ -434,31 +419,6 @@ void dNonDeterministicFiniteAutonata::ReduceOneOrMoreDiagram()
 	DTRACE_NFA(("operator oneOrMore\n"));
 }
 
-void dNonDeterministicFiniteAutonata::ReduceBalancedCharacterExpresion(char openChar, char closingChar)
-{
-	if (m_stack.IsEmpty()) {
-		m_error = true;
-		DTRACE_NFA(("Parce stack underflow error\n"));
-		return;
-	}
-	dStateConstructPair operand (m_stack.Pop());
-
-	dAutomataState* const startState = CreateState (m_stateID ++);
-	dAutomataState* const stackState = CreateState (m_stateID ++);
-	dAutomataState* const acceptingState = CreateState (m_stateID ++);
-
-	startState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(openChar, dAutomataState::NESTED_CHARACTER_INIT), stackState));
-	stackState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(openChar, dAutomataState::NESTED_CHARACTER_INC), stackState));
-	stackState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(closingChar, dAutomataState::NESTED_CHARACTER_DEC), stackState));
-	stackState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), acceptingState));
-	stackState->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), operand.GetStart()));
-	operand.GetAccepting()->m_transtions.Append(dAutomataState::dTransition(dAutomataState::dCharacter(), stackState));
-
-	m_stack.Push(startState, acceptingState);
-
-	DTRACE_NFA(("balanced operation :%c(expression):%c\n", openChar, closingChar));
-
-}
 
 
 void dNonDeterministicFiniteAutonata::ReduceZeroOrOneDiagram()
@@ -628,21 +588,6 @@ void dNonDeterministicFiniteAutonata::ShiftID()
 		Match (m_openParentesis);
 		UnionExpression ();
 		Match (m_closeParentesis);
-	} else if (m_token == m_balancedCharacterExpresion) {
-		Match (m_balancedCharacterExpresion);
-		Match (m_token);
-		char openChar = char (m_token);
-
-		Match (m_token);
-		Match (m_token);
-		UnionExpression ();
-
-		Match (m_balancedCharacterExpresion);
-		Match (m_token);
-		char closeChar = char (m_token);
-		Match (m_token);
-
-		ReduceBalancedCharacterExpresion(openChar, closeChar);
 
 	} else if (m_token == m_openSquareBrakect) {
 		char asciiSet[D_ASCII_SET_MAX_SIZE];

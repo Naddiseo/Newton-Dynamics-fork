@@ -92,50 +92,28 @@ $(userActions)
 				dTransitionInfo* const transitionsList = &nextTranstionList[start];
 
 				bool stateChanged = false;
-				for (int i = 0; (i < count) && !stateChanged; i ++) {
+				for (int i = 0; i < count; i ++) {
 					dTransitionInfo& transition = transitionsList[i];
-					switch (transition.m_type)
-					{
-						case m_infoIsCharacter:
-						{
-							if (ch == transition.m_info) {
-								state = transition.m_nextState;
-								stateChanged = true;
-							}
+					if (transition.m_type == m_infoIsCharacter) {
+						if (ch == transition.m_info) {
+							state = transition.m_nextState;
+							stateChanged = true;
+							break;
+						}
+					} else {
+						_ASSERTE (transition.m_type == m_infoIsCharacterSet);
+						int index = transition.m_info;
+						int length = characterSetSize[index];
+						const char* text = characterSetArray[index];
+						if (IsCharInSet (ch, text, length)) {
+							state = transition.m_nextState;
+							stateChanged = true;
 							break;
 						}
 
-						case m_infoIsCharacterSet:
-						{
-							int index = transition.m_info;
-							int length = characterSetSize[index];
-							const char* text = characterSetArray[index];
-							if (IsCharInSet (ch, text, length)) {
-								state = transition.m_nextState;
-								stateChanged = true;
-							}
-							break;
-						}
-
-						case m_infoIsInitBalanceCounter:
-						{
-							_ASSERTE (0);
-							break;
-						}
-
-						case m_infoIsIncrementBalanceCounter:
-						{
-							_ASSERTE (0);
-							break;
-						}
-
-						case m_infoIsDecrementBalanceCounter:
-						{
-							_ASSERTE (0);
-							break;
-						}
 					}
 				}
+
 				if (!stateChanged) {
 					// Unknown pattern
 					return -1;

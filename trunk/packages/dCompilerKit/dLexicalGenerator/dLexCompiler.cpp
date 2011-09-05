@@ -18,10 +18,10 @@
 enum dLexCompiler::dToken
 {
 	m_whiteSpace,
-	m_action,
 	m_comment,
 	m_delimiter,
 	m_codeBlock,
+	m_userActionCode,
 	m_intenalSize,
 	m_number,
 	m_quatedString,
@@ -102,6 +102,8 @@ void dLexCompiler::dDefinitionsMap::PreProcessDefinitions (string& regularExpres
 			} else {
 				i0 ++;
 			}
+		} else {
+			i0 ++;
 		}
 	}
 }
@@ -262,11 +264,11 @@ public:
 class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 {
 	public: 
-		dExpandedDFA (
-			const dNonDeterministicFiniteAutonata& nfa, 
-			string& automataCodeOutput, 
-			dTree<dTransitionCountStart, int>& transitionsCountMap,
-			dList<dTransitionType>& nextStateRun)
+	dExpandedDFA (
+		const dNonDeterministicFiniteAutonata& nfa, 
+		string& automataCodeOutput, 
+		dTree<dTransitionCountStart, int>& transitionsCountMap,
+		dList<dTransitionType>& nextStateRun)
 		:dDeterministicFiniteAutonata (), m_stateCount(0), m_nfa(&nfa)
 	{
 		CreateDeterministicFiniteAutomaton (nfa);
@@ -352,8 +354,15 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 			dExpandedState* const state = (dExpandedState*) pool[stack];
 			_ASSERTE (filter.Find(state));
 
-			char condition[126];
+			char condition[128];
 			condition[0] = 0;
+
+			if (!transitionsCountMap.Find(state->m_id)) {
+				dTransitionCountStart countStartEntry;
+				countStartEntry.m_start = 0;
+				countStartEntry.m_count = 0;
+				transitionsCountMap.Insert(countStartEntry, state->m_id);
+			}
 
 			if (state->m_exitState) {
 
@@ -407,7 +416,7 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 
 			} else {
 
-				dTransitionCountStart countStartEntry;
+				dTransitionCountStart& countStartEntry = transitionsCountMap.Find(state->m_id)->GetInfo();
 				countStartEntry.m_start = startIndex;
 				countStartEntry.m_count = state->m_transtions.GetCount();
 				startIndex += state->m_transtions.GetCount();
@@ -508,12 +517,10 @@ void dLexCompiler::NextToken ()
 {
 	m_grammarTokenStart += m_grammarTokenLength;
 	if (m_grammar[m_grammarTokenStart]) {
-
 		for (bool reStart = true; reStart;) {
 			reStart = false;
 			for (dTokenDataList::dListNode* node = m_tokenList.GetFirst(); node; node = node->GetNext()) {
 				dTokenData* const dTokenData = node->GetInfo();
-
 				const char* const text = &m_grammar[m_grammarTokenStart];
 				int count = dTokenData->FindMatch (text);
 				if (count >= 0) {
@@ -535,123 +542,6 @@ void dLexCompiler::NextToken ()
 
 
 
-// DefinitionExpression	: DefinitionBlock 
-// DefinitionExpression	: DefinitionBlock DefinitionExpression | nothing
-
-// DefinitionBlock		: m_comment
-
-//
-// id							: m_openSquareBrakect BracketedExpression m_closeSquareBrakect
-// id							: m_openParentesis DefinitionExpression m_closeParentesis
-// id							: .
-// id							: CHARACTER 
-void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preheaderCode) 
-{
-	// parse definitions
-	{
-//m_tokenList.AddTokenData (m_codeBlock, "%(:{([^{}]*):})%");
-//m_tokenList.AddTokenData (m_codeBlock, "(:{(([^{}\"\']*)|(\'(.|[\n])\')|(\"(\\.|[^\"])*\"))*:})");
-//m_tokenList.AddTokenData (m_codeBlock, "%(:{(([^{}\"])|(\"[^\"]*\"))*:})%");
-
-
-		m_tokenList.AddTokenData (m_whiteSpace, "[ \t\v\n\f]+");
-		m_tokenList.AddTokenData (m_comment, "(/\\*([^*]|[\r\n]|(\\*+([^*/]|[\r\n])))*\\*+/)|(//.*)");
-		m_tokenList.AddTokenData (m_codeBlock, "%\\{([^%]|[\r\n]|(%+([^%}]|[\r\n])))*%+\\}");
-		//m_tokenList.AddTokenData (m_codeBlock, "%(:{(([^{}\"\']*)|(\'(.|[\n])\')|(\"(\\.|[^\"])*\"))*:})%");
-		m_tokenList.AddTokenData (m_literal, "[a-zA-Z_][0-9a-zA-Z]*");
-		m_tokenList.AddTokenData (m_number, "[0-9]+");
-		m_tokenList.AddTokenData (m_intenalSize, "%[pneako]");
-		m_tokenList.AddTokenData (m_delimiter, "%%");
-		m_tokenList.AddTokenData (m_extendedRegularExpresion, "((\\[[^\\]]+\\])|[^ \t\v\n\f[]+)+");
-
-		for (NextToken(); (m_token != m_end) && (m_token != m_delimiter);) {
-			ParseDefinitionExpression (preheaderCode);
-		}
-		m_tokenList.DeleteAll();
-	}
-
-	// parse rules
-
-//	int initialState = 0;
-	{
-		//	0	m_whiteSpace,				
-		//	1   m_action
-		//	2	m_comment,						
-		//	3	m_delimiter,
-		//	4	m_verbatingText,
-		//	5	m_intenalSize,
-		//	6	m_number,
-		//	7	m_quatedString,
-		//	8	m_literal,
-		//	9	m_extendedRegularExpresion,
-
-		m_tokenList.AddTokenData (m_whiteSpace, "[ \t\v\n\f]+");
-		m_tokenList.AddTokenData (m_quatedString, "\"[^\" \t\v\n\f]*\"");
-		m_tokenList.AddTokenData (m_delimiter, "%%");
-		m_tokenList.AddTokenData (m_comment, "(/\\*([^*]|[\r\n]|(\\*+([^*/]|[\r\n])))*\\*+/)|(//.*)");
-		m_tokenList.AddTokenData (m_extendedRegularExpresion, "((\\[[^\\]]+\\])|[^ \t\v\n\f[]+)+");
-
-		for (NextToken(); (m_token != m_end) && (m_token != m_delimiter); ) {
-
-			string expression (&m_grammar[m_grammarTokenStart], m_grammarTokenLength);
-			m_defintions.PreProcessDefinitions(expression);
-			dToken expresionToken (m_token);
-
-			// until I get the balance expression feature working
-			m_grammarTokenStart += m_grammarTokenLength;
-			const char* const str = &m_grammar[m_grammarTokenStart];
-			int length = 0;
-			for (int ch = str[length]; ch && (ch != '{') ; ch = str[length]) {
-				length ++;
-			}
-			if (str[length] == '{') {
-				m_grammarTokenStart += length;
-				const char* const str = &m_grammar[m_grammarTokenStart];
-				int length = 1;
-				for (int ch = str[length]; ch != '\n'; ch = str[length]) {
-					length ++;
-					if (!ch) {
-						_ASSERTE (0);
-					}
-				}
-				string userAction (str, length);
-
-//				automataCode += "\t\t\t// ";
-//				automataCode += expression;
-//				automataCode += "\n";
-
-				switch (expresionToken) 
-				{
-					case m_quatedString:
-					{
-						string keyword (expression.substr(1, expression.length() - 2));
-						nfa.AddExpression(keyword, userAction);
-						break;
-					}
-
-					case m_extendedRegularExpresion:
-					{
-						nfa.AddExpression(expression, userAction);
-							//DTRACE ((automataCode.c_str()));
-
-						break;
-					}
-				default:;
-					_ASSERTE (0);
-				}
-
-				m_grammarTokenStart += length;
-				m_grammarTokenLength = 0;
-			}
-
-			NextToken();
-		}
-	}
-
-	if (m_token != m_delimiter) {
-		NextToken();
-	}
-}
 
 
 // DefinitionExpression	: DefinitionBlock 
@@ -669,7 +559,8 @@ void dLexCompiler::ParseDefinitionBlock (string& preheaderCode)
 //		MatchToken (m_token);
 
 	} else if (m_token == m_codeBlock) {
-		preheaderCode.append(&m_grammar[m_grammarTokenStart] + 2, m_grammarTokenLength - 4);
+		string code (&m_grammar[m_grammarTokenStart] + 2, m_grammarTokenLength - 4) ;
+		preheaderCode.append(code);
 		MatchToken (m_token);
 
 	} else if (m_token == m_intenalSize) {
@@ -902,4 +793,111 @@ void dLexCompiler::CreateCodeFile (
 	fprintf (headerFile, "%s", templateHeader.c_str());
 
 	fclose (headerFile);
+}
+
+
+
+// DefinitionExpression	: DefinitionBlock 
+// DefinitionExpression	: DefinitionBlock DefinitionExpression | nothing
+// DefinitionBlock		: m_comment
+// id					: m_openSquareBrakect BracketedExpression m_closeSquareBrakect
+// id					: m_openParentesis DefinitionExpression m_closeParentesis
+// id					: .
+// id					: CHARACTER 
+void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preheaderCode) 
+{
+	// parse definitions
+	{
+		m_tokenList.AddTokenData (m_whiteSpace, "[ \t\v\n\f]+");
+		m_tokenList.AddTokenData (m_comment, "(/\\*([^*]|[\r\n]|(\\*+([^*/]|[\r\n])))*\\*+/)|(//.*)");
+		m_tokenList.AddTokenData (m_codeBlock, "%\\{([^%]|[\r\n]|(%+([^%}]|[\r\n])))*%+\\}");
+		m_tokenList.AddTokenData (m_literal, "[a-zA-Z_][0-9a-zA-Z]*");
+		m_tokenList.AddTokenData (m_number, "[0-9]+");
+		m_tokenList.AddTokenData (m_intenalSize, "%[pneako]");
+		m_tokenList.AddTokenData (m_delimiter, "%%");
+		m_tokenList.AddTokenData (m_extendedRegularExpresion, "((\\[[^\\]]+\\])|[^ \t\v\n\f[]+)+");
+
+		for (NextToken(); (m_token != m_end) && (m_token != m_delimiter);) {
+			ParseDefinitionExpression (preheaderCode);
+		}
+		m_tokenList.DeleteAll();
+	}
+
+	// parse rules
+
+	//	int initialState = 0;
+	{
+		//	0	m_whiteSpace,				
+		//	1   m_action
+		//	2	m_comment,						
+		//	3	m_delimiter,
+		//	4	m_verbatingText,
+		//	5	m_intenalSize,
+		//	6	m_number,
+		//	7	m_quatedString,
+		//	8	m_literal,
+		//	9	m_extendedRegularExpresion,
+
+		m_tokenList.AddTokenData (m_whiteSpace, "[ \t\v\n\f]+");
+		m_tokenList.AddTokenData (m_quatedString, "\"[^\" \t\v\n\f]*\"");
+		m_tokenList.AddTokenData (m_delimiter, "%%");
+		m_tokenList.AddTokenData (m_comment, "(/\\*([^*]|[\r\n]|(\\*+([^*/]|[\r\n])))*\\*+/)|(//.*)");
+		m_tokenList.AddTokenData (m_extendedRegularExpresion, "((\\[[^\\]]+\\])|[^ \t\v\n\f[]+)+");
+
+		for (NextToken(); (m_token != m_end) && (m_token != m_delimiter); ) {
+
+			string expression (&m_grammar[m_grammarTokenStart], m_grammarTokenLength);
+			m_defintions.PreProcessDefinitions(expression);
+			dToken expresionToken (m_token);
+
+			// until I get the balance expression feature working
+			m_grammarTokenStart += m_grammarTokenLength;
+			const char* const str = &m_grammar[m_grammarTokenStart];
+			int length = 0;
+			for (int ch = str[length]; ch && (ch != '{') ; ch = str[length]) {
+				length ++;
+			}
+			if (str[length] == '{') {
+				m_grammarTokenStart += length;
+				const char* const str = &m_grammar[m_grammarTokenStart];
+				int length = 1;
+				for (int ch = str[length]; ch != '\n'; ch = str[length]) {
+					length ++;
+					if (!ch) {
+						_ASSERTE (0);
+					}
+				}
+
+				string userAction (str, length);
+				switch (expresionToken) 
+				{
+					case m_quatedString:
+					{
+						string keyword (expression.substr(1, expression.length() - 2));
+						nfa.AddExpression(keyword, userAction);
+						break;
+					}
+
+					case m_extendedRegularExpresion:
+					{
+						nfa.AddExpression(expression, userAction);
+						//DTRACE ((automataCode.c_str()));
+
+						break;
+					}
+					default:;
+					_ASSERTE (0);
+				}
+
+				m_grammarTokenStart += length;
+				m_grammarTokenLength = 0;
+			}
+
+			NextToken();
+		}
+	}
+
+	if (m_token != m_delimiter) {
+		NextToken();
+	}
 }

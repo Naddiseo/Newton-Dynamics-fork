@@ -21,13 +21,15 @@ using namespace std;
 
 class $(className)
 {
+	enum dStateType
+	{
+		m_extiState = 'a',
+		m_itermediateState,
+	};
 	enum dTranstionType
 	{
 		m_infoIsCharacter = 0,
 		m_infoIsCharacterSet,
-		m_infoIsInitBalanceCounter,
-		m_infoIsIncrementBalanceCounter,
-		m_infoIsDecrementBalanceCounter,
 	};
 
 	struct dTransitionInfo
