@@ -952,7 +952,7 @@ void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preheaderCode)
 		}
 	}
 
-	if (m_token != m_delimiter) {
-		NextToken();
-	}
+//	if (m_token == m_delimiter) {
+//		NextToken();
+//	}
 }

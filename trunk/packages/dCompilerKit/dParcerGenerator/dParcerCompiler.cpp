@@ -13,7 +13,7 @@
 //
 
 #include "dParcerCompiler.h"
-#include "dGrammarLexical.h"
+#include "dParcerLexical.h"
 
 #define DACCEPT_SYMBOL "$$$"
 
@@ -291,7 +291,7 @@ void dParcerCompiler::ScanGrammarFile(
 	string& userCodeBlock,
 	string& userVariableClass)
 {
-	dGrammarLexical lexical (inputRules);
+	dParcerLexical lexical (inputRules);
 
 
 	char path[2048];
@@ -433,7 +433,7 @@ void dParcerCompiler::ScanGrammarFile(
 }
 
 dParcerCompiler::Token dParcerCompiler::ScanGrammarRule(
-	dGrammarLexical& lexical, 
+	dParcerLexical& lexical, 
 	dProductionRule& rules, 
 	dTree<TokenType, string>& symbolList, 
 	int& ruleNumber,

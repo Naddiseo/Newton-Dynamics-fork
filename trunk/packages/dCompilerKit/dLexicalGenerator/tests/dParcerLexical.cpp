@@ -55,7 +55,41 @@ bool dParcerLexical::IsCharInSet (char ch, const char* const set, int setSize) c
 		}
 	}
 	return false;
+}
 
+void dParcerLexical::ReadBalancedExpresion (char open, char close)
+{
+	int count = 1;
+	while (count) {
+		int ch = NextChar();
+		if (ch == '\n') {
+			m_lineNumber ++;
+		}
+
+		if(ch == open) {
+			count ++;
+		} else if (ch == close) {
+			count --;
+		} else {
+			if (ch == '\'')	{
+				ch = NextChar();
+				if (ch == '\\') {
+					ch = NextChar();
+				}
+				ch = NextChar();
+			} else if (ch == '\"') {
+				for (ch = NextChar(); ch != '\"'; ch = NextChar()) {
+					if (ch == '\\') {
+						ch = NextChar();
+					}
+				}
+			}
+		}
+	}
+
+	string tmp (m_tokenString);
+	GetLexString();
+	m_tokenString = tmp + m_tokenString;
 }
 
 
@@ -103,7 +137,6 @@ int dParcerLexical::NextToken ()
 		switch (state) 
 		{
 			case 15:
-			#line 85 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -114,7 +147,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 11:
-			#line 85 "tests/dParcerLexical.lex"
 			{
 				char ch = NextChar();
 				if (IsCharInSet (ch, text_13, characterSetSize[13])) state = 17;
@@ -128,7 +160,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 17:
-			#line 85 "tests/dParcerLexical.lex"
 			{
 				char ch = NextChar();
 				if (IsCharInSet (ch, text_13, characterSetSize[13])) state = 17;
@@ -142,7 +173,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 9:
-			#line 84 "tests/dParcerLexical.lex"
 			{
 				char ch = NextChar();
 				if (IsCharInSet (ch, text_11, characterSetSize[11])) state = 9;
@@ -156,18 +186,16 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 8:
-			#line 82 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
 					//user specified action
-					{ ((dGrammarLexical*)this)->ReadUserAction(); return dParcerCompiler::USER_ACTION;}
+					{ ReadBalancedExpresion ('{', '}'); return dParcerCompiler::USER_ACTION;}
 					state = 0;
 				}
 				break;
 			}
 			case 24:
-			#line 81 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -178,7 +206,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 6:
-			#line 80 "tests/dParcerLexical.lex"
 			{
 				char ch = NextChar();
 				if (IsCharInSet (ch, text_4, characterSetSize[4])) state = 25;
@@ -192,7 +219,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 25:
-			#line 80 "tests/dParcerLexical.lex"
 			{
 				char ch = NextChar();
 				if (IsCharInSet (ch, text_4, characterSetSize[4])) state = 25;
@@ -206,7 +232,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 5:
-			#line 46 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -217,7 +242,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 4:
-			#line 45 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -228,7 +252,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 3:
-			#line 44 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -239,7 +262,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 51:
-			#line 54 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -250,7 +272,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 52:
-			#line 49 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -261,7 +282,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 53:
-			#line 63 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -272,7 +292,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 54:
-			#line 48 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -283,7 +302,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 55:
-			#line 60 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -294,7 +312,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 56:
-			#line 71 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -305,7 +322,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 57:
-			#line 65 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -316,7 +332,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 58:
-			#line 70 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -327,7 +342,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 59:
-			#line 64 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -338,7 +352,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 60:
-			#line 58 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -349,7 +362,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 61:
-			#line 51 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -360,7 +372,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 62:
-			#line 57 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -371,7 +382,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 63:
-			#line 47 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -382,7 +392,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 64:
-			#line 61 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -393,7 +402,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 65:
-			#line 59 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -404,7 +412,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 66:
-			#line 62 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -415,7 +422,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 67:
-			#line 55 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -426,7 +432,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 68:
-			#line 50 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -437,7 +442,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 69:
-			#line 68 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -448,7 +452,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 70:
-			#line 69 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -459,7 +462,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 71:
-			#line 67 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -470,7 +472,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 72:
-			#line 66 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -481,7 +482,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 73:
-			#line 52 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -492,7 +492,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 74:
-			#line 56 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -503,7 +502,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 75:
-			#line 53 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -514,7 +512,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 85:
-			#line 75 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -525,7 +522,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 89:
-			#line 76 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -536,7 +532,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 93:
-			#line 79 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -547,7 +542,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 97:
-			#line 78 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -558,7 +552,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 100:
-			#line 77 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();
@@ -569,7 +562,6 @@ int dParcerLexical::NextToken ()
 				break;
 			}
 			case 76:
-			#line 74 "tests/dParcerLexical.lex"
 			{
 				{
 					GetLexString ();

@@ -52,7 +52,41 @@ bool $(className)::IsCharInSet (char ch, const char* const set, int setSize) con
 		}
 	}
 	return false;
+}
 
+void $(className)::ReadBalancedExpresion (char open, char close)
+{
+	int count = 1;
+	while (count) {
+		int ch = NextChar();
+		if (ch == '\n') {
+			m_lineNumber ++;
+		}
+
+		if(ch == open) {
+			count ++;
+		} else if (ch == close) {
+			count --;
+		} else {
+			if (ch == '\'')	{
+				ch = NextChar();
+				if (ch == '\\') {
+					ch = NextChar();
+				}
+				ch = NextChar();
+			} else if (ch == '\"') {
+				for (ch = NextChar(); ch != '\"'; ch = NextChar()) {
+					if (ch == '\\') {
+						ch = NextChar();
+					}
+				}
+			}
+		}
+	}
+
+	string tmp (m_tokenString);
+	GetLexString();
+	m_tokenString = tmp + m_tokenString;
 }
 
 

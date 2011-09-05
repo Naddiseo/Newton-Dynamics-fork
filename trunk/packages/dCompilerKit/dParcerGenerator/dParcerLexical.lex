@@ -13,7 +13,6 @@
 
 %{
 #include <dParcerCompiler.h>
-#include "dGrammarLexical.h"
 %}
 
 				
@@ -76,7 +75,7 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 "%start"			{ return dParcerCompiler::START;}
 {Literal}			{ return dParcerCompiler::LITERAL;}
 {CodeBlock}			{ m_tokenString.replace(0, 2, ""); m_tokenString.replace(m_tokenString.size() - 2, 2, ""); return dParcerCompiler::CODE_BLOCK;}
-[{]					{ ((dGrammarLexical*)this)->ReadUserAction(); return dParcerCompiler::USER_ACTION;}
+[{]					{ ReadBalancedExpresion ('{', '}'); return dParcerCompiler::USER_ACTION;}
 
 {WhiteSpace}		{}
 {Comment}			{}

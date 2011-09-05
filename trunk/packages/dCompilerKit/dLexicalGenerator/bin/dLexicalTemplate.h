@@ -74,6 +74,8 @@ class $(className)
 		}
 	}
 
+	void ReadBalancedExpresion (char open, char close);
+
 	void GetLexString ();
 	bool IsCharInSet (char ch, const char* const set, int setSize) const;
 
