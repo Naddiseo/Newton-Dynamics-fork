@@ -39,14 +39,16 @@ int main(int argc, char* argv[])
 	int size = ftell (rules);
 	fseek (rules, 0, SEEK_SET);
 
-	char* const buffer = new char [size + 1];
-	memset (buffer, 0, size + 1);
-	fread (buffer, 1, size, rules);
+	//char* const buffer = new char [size + 1];
+	string buffer;
+	buffer.reserve (size + 1);
+//	memset (buffer, 0, size + 1);
+	fread ((void*) buffer.c_str(), 1, size, rules);
 	fclose (rules);
 
-	dParcerCompiler parcel (buffer, outputFileName, scannerClassName);
+	dParcerCompiler parcel (buffer.c_str(), outputFileName, scannerClassName);
 
-	delete buffer;
+//	delete buffer;
 
 	return 0;
 }

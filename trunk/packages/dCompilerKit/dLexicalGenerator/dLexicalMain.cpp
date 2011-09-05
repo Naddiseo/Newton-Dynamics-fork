@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 	fread (buffer, 1, size, rules);
 	fclose (rules);
 
-	dLexCompiler lexical (buffer, outputFileName);
+	dLexCompiler lexical (buffer, outputFileName, inputRulesFileName);
 
 	delete buffer;
 	return 0;

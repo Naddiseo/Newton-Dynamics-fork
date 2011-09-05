@@ -14,8 +14,10 @@
 //
 
 
-#include "test0.h"
 
+
+#include "test0.h"
+#include <dList.h>
 
 
 enum test0::ActionType
@@ -27,10 +29,11 @@ enum test0::ActionType
 
 class test0::dActionEntry
 {
-public:
+	public:
+	int m_nextState;
+	int statesToPop;
+	int m_actionCount;
 	Token m_token;
-	int m_state;
-	int m_reduceCount;
 	ActionType m_action;
 };
 
@@ -41,6 +44,7 @@ class test0::dStackPair
 	public:
 	class dUserVariable: public string
 	{
+		public:
 		dUserVariable ()
 			:string()
 		{
@@ -78,8 +82,9 @@ test0::~test0()
 }
 
 
-bool test0::ErrorHandler (string* const line) const
+bool test0::ErrorHandler (const string& line) const
 {
+	line;
 	return false;
 }
 
@@ -99,31 +104,67 @@ int test0::Parce(xxxxx& scanner)
 
 	dList<dStackPair> stack;
 
-	static int actionOffsets[][2] = {$(actionEntry}};
-	static dActionEntry actionTable[] = {$(actionTable}};
+//	static int actionOffsets[][2] = {$(actionEntry}};
+//	static dActionEntry actionTable[] = {$(actionTable}};
+static int actionOffsets[][2] = {1};
+static dActionEntry actionTable[] = {{Token(1)}};
 
-	dStackPair.Append ();
+
+	stack.Append ();
 	for (Token token = Token (scanner.NextToken()); token != -1; ) {
-		dStackPair& stackTop = pool[stack];
+		const dStackPair& stackTop = stack.GetLast()->GetInfo();
 		int actionStart = actionOffsets[stackTop.m_state][0];
 		int actionCount = actionOffsets[stackTop.m_state][1];
+		const dActionEntry* const action = FindAction (&actionTable[actionStart], actionCount, token);
 
-		dActionEntry* const action = FindAction (&actionTable[actionStart], actionCount, token);
 		if (action) {
 			if (action->m_action == ACCEPT) {
 				break;
 			} else if (action->m_action == SHIFT) {
 				_ASSERTE (0);
-				dStackPair& entry = dStackPair.Append().GetInfo();
-				entry.m_state = action->m_state;
+				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_token = action->m_token;
+				entry.m_state = action->m_nextState;
 				entry.m_value = dStackPair::dUserVariable (scanner.GetTokenString());
 
 				token = Token (scanner.NextToken());
 
 			} else {
+
 				_ASSERTE (action->m_action == REDUCE);
 				_ASSERTE (0);
+
+				_ASSERTE (action->m_action == REDUCE);
+				dStackPair parameter[256];
+
+				int reduceCount = action->m_actionCount;
+				_ASSERTE (reduceCount < sizeof (parameter) / sizeof (parameter[0]));
+
+				for (int i = 0; i < reduceCount; i ++) {
+					parameter[i] = stack.GetLast()->GetInfo();
+					stack.Remove (stack.GetLast());
+				}
+				
+
+				const dStackPair& newStackTop = stack.GetLast()->GetInfo();
+				int actionStart = actionOffsets[newStackTop.m_state][0];
+				int actionCount = actionOffsets[newStackTop.m_state][1];
+				const dActionEntry* const Goto = FindAction (&actionTable[actionStart], actionCount, action->m_token);
+
+				dStackPair& entry = stack.Append()->GetInfo();
+				entry.m_token = Goto->m_token;
+				entry.m_state = Goto->m_nextState;
+
+				switch (entry.m_token) 
+				{
+					//do userAction
+					//$(userActionsCode);
+					case 256:
+					{
+						break;
+					}
+					default:;
+				}
 			}
 
 		} else {

@@ -239,24 +239,12 @@ dParcerCompiler::dParcerCompiler(const char* const inputRules, const char* const
 	dTree<int, string> tokenEnumeration;
 	dTree<TokenType, string> symbolList;
 	string userCodeBlock;
-	string userVariable = "dUserVariable";
-	string userVariableClass =  "\tclass $(userVariable): public string\n" 
-								"\t{\n"	
-								"\t	public:\n"	
-								"\t	$(userVariable) ()\n"	
-								"\t		:string()\n"	
-								"\t	{\n"
-								"\t	}\n"
-								"\t\n"
-								"\t	$(userVariable) (const char* const text)\n"
-								"\t		:string(text)\n"
-								"\t	{\n"
-								"\t	}\n"
-								"\t};\n";
+	string userVariable ("dUserVariable");
+	string userVariableClass ("");
 
 	
 	symbolList.Insert(TERMINAL, DACCEPT_SYMBOL);
-	ScanGrammarFile(inputRules, ruleList, symbolList, tokenEnumeration, userCodeBlock);
+	ScanGrammarFile(inputRules, ruleList, symbolList, tokenEnumeration, userCodeBlock, userVariableClass);
 
 	// convert the rules into a NFA.
 	dTree<dState*,int> stateList;
@@ -280,8 +268,6 @@ dParcerCompiler::dParcerCompiler(const char* const inputRules, const char* const
 	}
 	strcpy (className, ptr);
 	strtok (className, ".");
-
-
 	GenerateHeaderFile (className, scannerClassName, outputFileName, ruleList, tokenEnumeration);
 	GenerateParcerCode (className, scannerClassName, outputFileName, userCodeBlock, userVariable, userVariableClass, stateList, symbolList);
 
@@ -302,9 +288,36 @@ void dParcerCompiler::ScanGrammarFile(
 	dProductionRule& ruleList, 
 	dTree<TokenType, string>& symbolList, 
 	dTree<int, string>& tokenEnumerationMap,
-	string& userCodeBlock)
+	string& userCodeBlock,
+	string& userVariableClass)
 {
 	dGrammarLexical lexical (inputRules);
+
+
+	char path[2048];
+	GetModuleFileName(NULL, path, sizeof(path)); 
+	//	for Linux:
+	//	char szTmp[32]; 
+	//	sprintf(szTmp, "/proc/%d/exe", getpid()); 
+	//	int bytes = MIN(readlink(szTmp, pBuf, len), len - 1); 
+	//	if(bytes >= 0)
+	//		pBuf[bytes] = '\0'; 
+
+	// read the default template user variable
+	char* const ptr1 = strrchr (path, '\\');
+	sprintf (ptr1, "/dParcerUserVariableTemplate.cpp");
+	FILE* const templateFile = fopen (path, "r");
+	_ASSERTE (templateFile);
+
+	fseek (templateFile, 0, SEEK_END);
+	int size = ftell (templateFile) + 1;
+	fseek (templateFile, 0, SEEK_SET);
+
+	
+	userVariableClass.resize(size);
+	fread ((void*)userVariableClass.c_str(), 1, size, templateFile);
+	fclose (templateFile);	
+
 
 	string startSymbol ("");
 
@@ -336,7 +349,11 @@ void dParcerCompiler::ScanGrammarFile(
 
 			case UNION:
 			{
-				_ASSERTE (0);
+				token = Token(lexical.NextToken());
+				_ASSERTE (token == USER_ACTION);
+				userVariableClass = lexical.GetTokenString() + 1;
+				userVariableClass.replace(userVariableClass.size() - 1, 1, "");
+				token = Token(lexical.NextToken());
 				break;
 			}
 
@@ -357,7 +374,7 @@ void dParcerCompiler::ScanGrammarFile(
 	}
 
 	int ruleNumber = 1;
-//	dTree<int, string> nonTerminalRuleEnumFilter;
+
 	// scan the production rules segment
 	for (Token token = Token(lexical.NextToken()); token != GRAMMAR_SEGMENT; token = Token(lexical.NextToken())) {
 //		DTRACE (("%s\n", lexical.GetTokenString()));
@@ -871,11 +888,11 @@ void dParcerCompiler::GenerateParcerCode (
 		for (actionIter.Begin(); actionIter; actionIter++) {
 			dAction& action = actionIter.GetNode()->GetInfo();
 			if (action.m_type == SHIFT) {
-				_ASSERTE (0);
+//				_ASSERTE (0);
 			} else if (action.m_type == REDUCE) {
-				_ASSERTE (0);
+//				_ASSERTE (0);
 			} else {
-				_ASSERTE (action.m_type == ACCEPT);
+//				_ASSERTE (action.m_type == ACCEPT);
 			}
 
 		}

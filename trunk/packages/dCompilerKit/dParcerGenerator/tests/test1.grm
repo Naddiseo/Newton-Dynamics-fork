@@ -16,11 +16,12 @@
 {
 	class myVariable 
 	{
-		myVariable (
-		myVariable (const char* const text)
-			:m_data (text);
+		myVariable ()
+		myVariable (Token token, const char* const text)
+			:m_token(token), m_data (text) 
 		{
 		}
+		Token m_token;
 		string m_data;
 	};
 }

@@ -119,7 +119,10 @@ class dLexCompiler::dExpandedState: public dAutomataState
 {
 	public:
 	dExpandedState (int id)
-		:dAutomataState (id), m_hasUserAction (false), m_userAction("")
+		:dAutomataState (id)
+		,m_lineNumber(0)
+		,m_hasUserAction (false)
+		,m_userAction("")
 	{
 	}	
 
@@ -127,6 +130,7 @@ class dLexCompiler::dExpandedState: public dAutomataState
 	{
 	}
 
+	int m_lineNumber;
 	bool m_hasUserAction;	
 	string m_userAction;
 };
@@ -137,13 +141,16 @@ class dLexCompiler::dExpandedNFA: public dNonDeterministicFiniteAutonata
 public:
 	dExpandedNFA ()
 		:dNonDeterministicFiniteAutonata()
-		,m_empty (true)
+		,m_empty (true), m_lineNumber(0)
 	{
 	}
 
 	dAutomataState* CreateState (int id)
 	{
-		return new dExpandedState (id); 
+		dExpandedState* const state =  new dExpandedState (id); 
+		state->m_lineNumber = m_lineNumber;
+		return state;
+		
 	}
 
 	void PreProcessExpression (const char* const regularExpression)
@@ -222,8 +229,9 @@ public:
 	}
 
 
-	void AddExpression (string& expression, const string& userAction)
+	void AddExpression (string& expression, const string& userAction, int lineNumber)
 	{
+		m_lineNumber = lineNumber;
 		if (m_empty) {
 			m_empty = false;
 			CompileExpression(expression.c_str());
@@ -259,6 +267,7 @@ public:
 	}
 
 	bool m_empty;
+	int m_lineNumber;
 };
 
 class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
@@ -268,11 +277,12 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 		const dNonDeterministicFiniteAutonata& nfa, 
 		string& automataCodeOutput, 
 		dTree<dTransitionCountStart, int>& transitionsCountMap,
-		dList<dTransitionType>& nextStateRun)
+		dList<dTransitionType>& nextStateRun,
+		const char* const inputFileName)
 		:dDeterministicFiniteAutonata (), m_stateCount(0), m_nfa(&nfa)
 	{
 		CreateDeterministicFiniteAutomaton (nfa);
-		ConvertSwitchCaseStatements (automataCodeOutput, transitionsCountMap, nextStateRun);
+		ConvertSwitchCaseStatements (automataCodeOutput, transitionsCountMap, nextStateRun, inputFileName);
 	}
 
 	int GetStateCount() const
@@ -311,6 +321,7 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 
 		if (userActionState) {
 			state->m_hasUserAction = true;
+			state->m_lineNumber = userActionState->m_lineNumber;
 			state->m_userAction = userActionState->m_userAction;
 		}
 
@@ -337,12 +348,16 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 	void ConvertSwitchCaseStatements (
 		string& automataCodeOutput, 
 		dTree<dTransitionCountStart, int>& transitionsCountMap,
-		dList<dTransitionType>& nextStateRun) const 
+		dList<dTransitionType>& nextStateRun,
+		const char* const inputFileName) const 
 	{
 		dTree<dAutomataState*,dAutomataState*> filter;
 
 		int stack = 1;
 		dAutomataState* pool[128];
+
+		string fileName (string ("\"") + string(inputFileName) + string ("\""));
+//		const char* const text = fileName.c_str();
 
 		pool[0] = m_startState;
 		filter.Insert(pool[0], pool[0]);
@@ -365,8 +380,8 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 			}
 
 			if (state->m_exitState) {
-
 				AddText (automataCodeOutput, "case %d:\n", state->m_id);
+//				AddText (automataCodeOutput, "#line %d %s\n", state->m_lineNumber, fileName.c_str());
 				AddText (automataCodeOutput, "{\n");
 				if (!state->m_exitState || state->m_transtions.GetCount()) {
 					AddText (automataCodeOutput, "\tchar ch = NextChar();\n");
@@ -458,8 +473,9 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 };
 
 
-dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outputFileName)
+dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outputFileName, const char* const inputFileName)
 	:m_token (m_end)
+	,m_lineNumber(1)
 	,m_grammarTokenStart(0)
 	,m_grammarTokenLength(0)
 	,m_grammar (inputRules)
@@ -473,7 +489,7 @@ dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outpu
 	dExpandedNFA nfa;
 	ParseDefinitions (nfa, userPreheaderCode);
 
-	dExpandedDFA dfa (nfa, automataCode, transitionsCountStartMap, nextStateRun);
+	dExpandedDFA dfa (nfa, automataCode, transitionsCountStartMap, nextStateRun, inputFileName);
 
 
 	char cppFileName[256];
@@ -516,7 +532,9 @@ dLexCompiler::~dLexCompiler()
 void dLexCompiler::NextToken ()
 {
 	m_grammarTokenStart += m_grammarTokenLength;
+	
 	if (m_grammar[m_grammarTokenStart]) {
+		int lineNumber = m_lineNumber;
 		for (bool reStart = true; reStart;) {
 			reStart = false;
 			for (dTokenDataList::dListNode* node = m_tokenList.GetFirst(); node; node = node->GetNext()) {
@@ -524,12 +542,20 @@ void dLexCompiler::NextToken ()
 				const char* const text = &m_grammar[m_grammarTokenStart];
 				int count = dTokenData->FindMatch (text);
 				if (count >= 0) {
+					const char* const textstring = &m_grammar[m_grammarTokenStart];
+					for (int i = 0; i < count ; i ++) {
+						if (textstring[i] == '\n') {
+							lineNumber ++;
+						}
+					}
+
 					m_grammarTokenLength = count;
 					if ((dTokenData->m_token == m_whiteSpace) || (dTokenData->m_token == m_comment)) {
 						m_grammarTokenStart += m_grammarTokenLength;
 						reStart = true;
 						break;
 					} else {
+						m_lineNumber = lineNumber;
 						m_token = dTokenData->m_token;
 						return;
 					}
@@ -844,8 +870,10 @@ void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preheaderCode)
 		m_tokenList.AddTokenData (m_comment, "(/\\*([^*]|[\r\n]|(\\*+([^*/]|[\r\n])))*\\*+/)|(//.*)");
 		m_tokenList.AddTokenData (m_extendedRegularExpresion, "((\\[[^\\]]+\\])|[^ \t\v\n\f[]+)+");
 
+		
 		for (NextToken(); (m_token != m_end) && (m_token != m_delimiter); ) {
 
+			int lineNumber = m_lineNumber;
 			string expression (&m_grammar[m_grammarTokenStart], m_grammarTokenLength);
 			m_defintions.PreProcessDefinitions(expression);
 			dToken expresionToken (m_token);
@@ -855,16 +883,43 @@ void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preheaderCode)
 			const char* const str = &m_grammar[m_grammarTokenStart];
 			int length = 0;
 			for (int ch = str[length]; ch && (ch != '{') ; ch = str[length]) {
+				if (ch == '\n') {
+					m_lineNumber ++;
+				}
 				length ++;
 			}
+
 			if (str[length] == '{') {
+
 				m_grammarTokenStart += length;
 				const char* const str = &m_grammar[m_grammarTokenStart];
 				int length = 1;
-				for (int ch = str[length]; ch != '\n'; ch = str[length]) {
-					length ++;
-					if (!ch) {
-						_ASSERTE (0);
+
+				int count = 1;
+				while (count) {
+					char ch = str[length++];
+					if (ch == '\n') {
+						m_lineNumber ++;
+					}
+
+					if(ch == '{') {
+						count ++;
+					} else if (ch == '}') {
+						count --;
+					} else {
+						if (ch == '\'')	{
+							ch = str[length++];;
+							if (ch == '\\') {
+								ch = str[length++];
+							}
+							ch = str[length++];;
+						} else if (ch == '\"') {
+							for (ch = str[length++]; ch != '\"'; ch = str[length++]) {
+								if (ch == '\\') {
+									ch = str[length++];;
+								}
+							}
+						}
 					}
 				}
 
@@ -874,13 +929,13 @@ void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preheaderCode)
 					case m_quatedString:
 					{
 						string keyword (expression.substr(1, expression.length() - 2));
-						nfa.AddExpression(keyword, userAction);
+						nfa.AddExpression(keyword, userAction, lineNumber);
 						break;
 					}
 
 					case m_extendedRegularExpresion:
 					{
-						nfa.AddExpression(expression, userAction);
+						nfa.AddExpression(expression, userAction, lineNumber);
 						//DTRACE ((automataCode.c_str()));
 
 						break;

@@ -43,8 +43,6 @@ class $(className)::dStackPair
 {
 	public:
 $(userVariableClass)
-
-
 	dStackPair()
 		:m_state(0), m_token(Token (0)), m_value()
 	{
@@ -54,10 +52,6 @@ $(userVariableClass)
 	Token m_token;
 	$(userVariable) m_value;
 };
-
-
-
-
 
 
 $(className)::$(className)()

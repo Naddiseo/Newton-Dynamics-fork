@@ -82,7 +82,7 @@ class dLexCompiler
 	};
 
 	public:
-	dLexCompiler(const char* const inputRules, const char* const outputFileName);
+	dLexCompiler(const char* const inputRules, const char* const outputFileName, const char* const inputFileName);
 	~dLexCompiler();
 
 	private:
@@ -97,13 +97,9 @@ class dLexCompiler
 	void CreateCodeFile (const char* const fileName, const char* const className, int stateCount, 
 						string& userPreheaderCode, string& automataCode,
 						 const dChatertSetMap& characterSet, dTree<dTransitionCountStart, int>& transitionsCountStartMap, dList<dTransitionType>& nextStateRun) const;
-//	void CreateCodeFile (const char* const fileName, const char* const className, int stateCount,
-//						 string& userPreheaderCode, string& nextCodeCases, string& automataCode, dChatertSetMap& characterSet,
-//						 dTree<int, int>& transitionsCountMap, dTree<dTree<int, int>, int>& nextState,
-//						 dTree<dTree<char, int>, int>& characterTestMap, dTree<dTree<int, int>, int>& testSetArrayIndexMap) const;
-
 
 	dToken m_token;
+	int m_lineNumber;
 	int m_grammarTokenStart;
 	int m_grammarTokenLength;
 	const char* m_grammar;
