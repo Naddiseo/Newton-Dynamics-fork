@@ -219,18 +219,6 @@ class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 	
 };
 
-class dUserVariable: public string
-{
-	dUserVariable ()
-		:string()
-	{
-	}
-
-	dUserVariable (const char* const text)
-		:string(text)
-	{
-	}
-};
 
 dParcerCompiler::dParcerCompiler(const char* const inputRules, const char* const outputFileName, const char* const scannerClassName)
 {
