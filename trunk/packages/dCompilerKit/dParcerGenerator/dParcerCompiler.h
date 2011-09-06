@@ -92,7 +92,7 @@ class dParcerCompiler
 	class dActionEntry;
 
 	
-	dParcerCompiler(const char* const inputRules, const char* const outputFileName, const char* const scannerClassName);
+	dParcerCompiler(const string& inputRules, const char* const outputFileName, const char* const scannerClassName);
 	~dParcerCompiler();
 
 	protected:
@@ -103,7 +103,7 @@ class dParcerCompiler
 	void ReplaceMacro (string& data, const string& newName, const string& macro) const;
 	void ReplaceAllMacros (string& data, const string& newName, const string& macro) const;
 
-	void ScanGrammarFile(const char* const inputRules, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens, string& userCodeBlock, string& userVariableClass);
+	void ScanGrammarFile(const string& inputRules, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens, string& userCodeBlock, string& userVariableClass);
 	Token ScanGrammarRule(dParcerLexical& lexical, dProductionRule& rules, dTree<TokenType, string>& symbolList, int& ruleNumber, dTree<int, string>& tokenEnumarationMap, int& tokenEnumeration);
 
 	

@@ -220,7 +220,7 @@ class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 };
 
 
-dParcerCompiler::dParcerCompiler(const char* const inputRules, const char* const outputFileName, const char* const scannerClassName)
+dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const outputFileName, const char* const scannerClassName)
 {
 	// scan the grammar into a list of rules.
 	dProductionRule ruleList;
@@ -278,44 +278,18 @@ string dParcerCompiler::GetClassName(const char* const fileName) const
 }
 
 void dParcerCompiler::ScanGrammarFile(
-	const char* const inputRules, 
+	const string& inputRules, 
 	dProductionRule& ruleList, 
 	dTree<TokenType, string>& symbolList, 
 	dTree<int, string>& tokenEnumerationMap,
 	string& userCodeBlock,
 	string& userVariableClass)
 {
-	dParcerLexical lexical (inputRules);
-
-	char path[2048];
-	GetModuleFileName(NULL, path, sizeof(path)); 
-	//	for Linux:
-	//	char szTmp[32]; 
-	//	sprintf(szTmp, "/proc/%d/exe", getpid()); 
-	//	int bytes = MIN(readlink(szTmp, pBuf, len), len - 1); 
-	//	if(bytes >= 0)
-	//		pBuf[bytes] = '\0'; 
-
-	// read the default template user variable
-	char* const ptr1 = strrchr (path, '\\');
-	sprintf (ptr1, "/dParcerUserVariableTemplate.cpp");
-	FILE* const templateFile = fopen (path, "r");
-	_ASSERTE (templateFile);
-
-	fseek (templateFile, 0, SEEK_END);
-	int size = ftell (templateFile) + 1;
-	fseek (templateFile, 0, SEEK_SET);
-
-	
-	userVariableClass.resize(size);
-	fread ((void*)userVariableClass.c_str(), 1, size, templateFile);
-	fclose (templateFile);	
-
-
 	string startSymbol ("");
-
 	int tokenEnumeration = 256;
 
+	dParcerLexical lexical (inputRules.c_str());
+	LoadTemplateFile("/dParcerUserVariableTemplate.cpp", userVariableClass);
 	// scan the definition segment
 	for (Token token = Token(lexical.NextToken()); token != GRAMMAR_SEGMENT; ) {
 //		DTRACE (("%s\n", lexical.GetTokenString()));

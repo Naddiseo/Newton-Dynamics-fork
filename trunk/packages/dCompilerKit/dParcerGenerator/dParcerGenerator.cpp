@@ -41,12 +41,12 @@ int main(int argc, char* argv[])
 
 	//char* const buffer = new char [size + 1];
 	string buffer;
-	buffer.reserve (size + 1);
-//	memset (buffer, 0, size + 1);
+	buffer.resize (size + 1);
 	fread ((void*) buffer.c_str(), 1, size, rules);
 	fclose (rules);
+	buffer.erase(strlen (buffer.c_str()));
 
-	dParcerCompiler parcel (buffer.c_str(), outputFileName, scannerClassName);
+	dParcerCompiler parcel (buffer, outputFileName, scannerClassName);
 
 //	delete buffer;
 
