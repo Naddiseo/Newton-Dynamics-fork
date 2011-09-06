@@ -103,7 +103,7 @@ class dParcerCompiler
 	void ReplaceMacro (string& data, const string& newName, const string& macro) const;
 	void ReplaceAllMacros (string& data, const string& newName, const string& macro) const;
 
-	void ScanGrammarFile(const string& inputRules, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens, string& userCodeBlock, string& userVariableClass);
+	void ScanGrammarFile(const string& inputRules, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens, string& userCodeBlock, string& userVariableClass, string& endUserCode);
 	Token ScanGrammarRule(dParcerLexical& lexical, dProductionRule& rules, dTree<TokenType, string>& symbolList, int& ruleNumber, dTree<int, string>& tokenEnumarationMap, int& tokenEnumeration);
 
 	
@@ -116,7 +116,7 @@ class dParcerCompiler
 	void GenerateHeaderFile (const string& className, const string& scannerClassName, const char* const outputFileName, dProductionRule& rules, dTree<int, string>& tokenEnumerationMap);
 	void GenerateParcerCode (const string& className, const string& scannerClassName, const char* const outputFileName, const string& userCode, 
 							 const string& userVariable, const string& userVariableClass, 
-							 dTree<dState*,int>& stateList, dTree<TokenType, string>& symbolList);
+							 dTree<dState*,int>& stateList, dTree<TokenType, string>& symbolList, string& endUserCode);
 
 };
 

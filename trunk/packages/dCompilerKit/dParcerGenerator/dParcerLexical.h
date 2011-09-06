@@ -51,6 +51,11 @@ class dParcerLexical
 		return m_tokenString.c_str();
 	}
 
+	const char* GetNextBuffer() const
+	{
+		return &m_data[m_index];
+	}
+
 	protected:
 	int GetLineNumber () const
 	{

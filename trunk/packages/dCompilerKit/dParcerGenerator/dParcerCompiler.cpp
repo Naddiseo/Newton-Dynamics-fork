@@ -229,10 +229,11 @@ dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const out
 	string userCodeBlock;
 	string userVariable ("dUserVariable");
 	string userVariableClass ("");
+	string endUserCode ("");
 
 	// scan grammar to a set of LR(1) rules
 	symbolList.Insert(TERMINAL, DACCEPT_SYMBOL);
-	ScanGrammarFile(inputRules, ruleList, symbolList, tokenEnumeration, userCodeBlock, userVariableClass);
+	ScanGrammarFile(inputRules, ruleList, symbolList, tokenEnumeration, userCodeBlock, userVariableClass, endUserCode);
 
 	// convert the rules into a NFA.
 	dTree<dState*,int> stateList;
@@ -244,7 +245,7 @@ dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const out
 	//Write Parcer class and header file
 	string className (GetClassName(outputFileName));
 	GenerateHeaderFile (className, scannerClassName, outputFileName, ruleList, tokenEnumeration);
-	GenerateParcerCode (className, scannerClassName, outputFileName, userCodeBlock, userVariable, userVariableClass, stateList, symbolList);
+	GenerateParcerCode (className, scannerClassName, outputFileName, userCodeBlock, userVariable, userVariableClass, stateList, symbolList, endUserCode);
 
 	dTree<dState*,int>::Iterator iter(stateList);
 	for (iter.Begin(); iter; iter ++) {
@@ -283,7 +284,8 @@ void dParcerCompiler::ScanGrammarFile(
 	dTree<TokenType, string>& symbolList, 
 	dTree<int, string>& tokenEnumerationMap,
 	string& userCodeBlock,
-	string& userVariableClass)
+	string& userVariableClass,
+	string& endUserCode)
 {
 	string startSymbol ("");
 	int tokenEnumeration = 256;
@@ -336,14 +338,14 @@ void dParcerCompiler::ScanGrammarFile(
 			{
 				token = Token(lexical.NextToken());
 			}
-
 		}
 	}
 
 	int ruleNumber = 1;
 
 	// scan the production rules segment
-	for (Token token = Token(lexical.NextToken()); token != GRAMMAR_SEGMENT; token = Token(lexical.NextToken())) {
+	Token token = Token(lexical.NextToken());
+	for (; (token != GRAMMAR_SEGMENT) && (token != -1); token = Token(lexical.NextToken())) {
 //		DTRACE (("%s\n", lexical.GetTokenString()));
 		switch (int (token)) 
 		{
@@ -397,6 +399,9 @@ void dParcerCompiler::ScanGrammarFile(
 	symbolList.Insert(symbol.m_type, symbol.m_name);
 
 	// scan literal use code
+	if (token == GRAMMAR_SEGMENT) {
+		endUserCode = lexical.GetNextBuffer();
+	}
 }
 
 dParcerCompiler::Token dParcerCompiler::ScanGrammarRule(
@@ -811,7 +816,8 @@ void dParcerCompiler::GenerateParcerCode (
 	const string& userVariable,
 	const string& userVariableClass, 
 	dTree<dState*,int>& stateList, 
-	dTree<TokenType, string>& symbolList)
+	dTree<TokenType, string>& symbolList,
+	string& endUserCode)
 {
 	string templateHeader ("");
 	LoadTemplateFile("/dParcerTemplate.cpp", templateHeader);
@@ -839,9 +845,10 @@ void dParcerCompiler::GenerateParcerCode (
 			} else {
 //				_ASSERTE (action.m_type == ACCEPT);
 			}
-
 		}
 	}
+
+	templateHeader += endUserCode;
 
 	SaveFile(outputFileName, ".cpp", templateHeader);
 }

@@ -42,8 +42,11 @@ F	: '(' E ')'
 	| id
 	;
 		
-
 %%
+
+void ThisIsATest ()
+{
+}
 
 
 

@@ -799,7 +799,7 @@ void dLexCompiler::CreateCodeFile (
 //	templateHeader = templateHeader + userPostHeaderCode;
 	templateHeader = templateHeader + userPostHeaderCode;
 
-	SaveFile(fileName, ".h", templateHeader);
+	SaveFile(fileName, ".cpp", templateHeader);
 }
 
 
@@ -934,7 +934,6 @@ void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preHeaderCode, s
 	}
 
 	if (m_token == m_delimiter) {
-		//NextToken();
 		postHeaderCode = &m_grammar[m_grammarTokenStart + m_grammarTokenLength];
 	}
 }
