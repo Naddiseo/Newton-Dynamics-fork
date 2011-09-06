@@ -614,3 +614,8 @@ int dParcerLexical::NextToken ()
 	return -1;
 }
 
+
+
+void textcall ()
+{
+}

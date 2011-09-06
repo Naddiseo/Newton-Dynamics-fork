@@ -482,12 +482,13 @@ dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outpu
 	,m_tokenList()
 {
 	string automataCode ("");
-	string userPreheaderCode (""); 
+	string userPreHeaderCode (""); 
+	string userPostHeaderCode (""); 
 	dList<dTransitionType> nextStateRun;
 	dTree<dTransitionCountStart, int> transitionsCountStartMap;
 
 	dExpandedNFA nfa;
-	ParseDefinitions (nfa, userPreheaderCode);
+	ParseDefinitions (nfa, userPreHeaderCode, userPostHeaderCode);
 
 	dExpandedDFA dfa (nfa, automataCode, transitionsCountStartMap, nextStateRun, inputFileName);
 
@@ -515,7 +516,7 @@ dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outpu
 	strcpy (className, ptr);
 
 	strcat (cppFileName, ".cpp");
-	CreateCodeFile (cppFileName, className, dfa.GetStateCount(), userPreheaderCode, automataCode, dfa.GetCharacterSetMap(), transitionsCountStartMap, nextStateRun); 
+	CreateCodeFile (cppFileName, className, dfa.GetStateCount(), userPreHeaderCode, userPostHeaderCode, automataCode, dfa.GetCharacterSetMap(), transitionsCountStartMap, nextStateRun); 
 
 	*dot = 0;
 	strcat (cppFileName, ".h");
@@ -671,8 +672,9 @@ void dLexCompiler::CreateCodeFile (
 	const char* const fileName, 
 	const char* const className,
 	int stateCount,
-	string& userPreheaderCode, 
-	string& automataCode, 
+	const string& userPreHeaderCode, 
+	const string& userPostHeaderCode, 
+	const string& automataCode,
 	const dChatertSetMap& characterSet,
 	dTree<dTransitionCountStart, int>& transitionsCountStartMap,
 	dList<dTransitionType>& nextStateRun) const
@@ -705,10 +707,12 @@ void dLexCompiler::CreateCodeFile (
 	fread ((void*)templateHeader.c_str(), 1, size, templateFile);
 	fclose (templateFile);	
 
+	templateHeader.erase(strlen (templateHeader.c_str()));
+
 
 	size_t position;
 	position = templateHeader.find ("$(userIncludeCode)");
-	templateHeader.replace(position, 18, userPreheaderCode);
+	templateHeader.replace(position, 18, userPreHeaderCode);
 
 	string name (className);
 	for (size_t i = templateHeader.find ("$(className)"); i != -1; i = templateHeader.find ("$(className)")) {
@@ -763,7 +767,6 @@ void dLexCompiler::CreateCodeFile (
 
 		position = templateHeader.find ("$(characterSetSize)");
 		templateHeader.replace(position, 19, "0");
-
 	}
 
 	for (int i = 0; i < stateCount; i ++) {
@@ -810,9 +813,12 @@ void dLexCompiler::CreateCodeFile (
 	position = templateHeader.find ("$(nextTranstionList)");
 	templateHeader.replace(position, 20, nextStateRunString);
 
-
 	position = templateHeader.find ("$(userActions)");
 	templateHeader.replace(position, 14, automataCode);
+
+//	templateHeader = templateHeader + userPostHeaderCode;
+	templateHeader = templateHeader + userPostHeaderCode;
+
 
 	FILE* const headerFile = fopen (fileName, "w");
 	_ASSERTE (headerFile);
@@ -830,7 +836,7 @@ void dLexCompiler::CreateCodeFile (
 // id					: m_openParentesis DefinitionExpression m_closeParentesis
 // id					: .
 // id					: CHARACTER 
-void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preheaderCode) 
+void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preHeaderCode, string& postHeaderCode) 
 {
 	// parse definitions
 	{
@@ -844,7 +850,7 @@ void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preheaderCode)
 		m_tokenList.AddTokenData (m_extendedRegularExpresion, "((\\[[^\\]]+\\])|[^ \t\v\n\f[]+)+");
 
 		for (NextToken(); (m_token != m_end) && (m_token != m_delimiter);) {
-			ParseDefinitionExpression (preheaderCode);
+			ParseDefinitionExpression (preHeaderCode);
 		}
 		m_tokenList.DeleteAll();
 	}
@@ -952,7 +958,8 @@ void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preheaderCode)
 		}
 	}
 
-//	if (m_token == m_delimiter) {
-//		NextToken();
-//	}
+	if (m_token == m_delimiter) {
+		//NextToken();
+		postHeaderCode = &m_grammar[m_grammarTokenStart + m_grammarTokenLength];
+	}
 }

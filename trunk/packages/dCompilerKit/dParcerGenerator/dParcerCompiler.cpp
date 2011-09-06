@@ -293,7 +293,6 @@ void dParcerCompiler::ScanGrammarFile(
 {
 	dParcerLexical lexical (inputRules);
 
-
 	char path[2048];
 	GetModuleFileName(NULL, path, sizeof(path)); 
 	//	for Linux:
@@ -506,8 +505,6 @@ dParcerCompiler::Token dParcerCompiler::ScanGrammarRule(
 				}
 			}
 		}
-
-
 	}
 
 	return token;
@@ -897,8 +894,6 @@ void dParcerCompiler::GenerateParcerCode (
 
 		}
 	}
-		
-
 
 	strcpy (path, outputFileName);
 	char* const ptr1 = strrchr (path, '.');
