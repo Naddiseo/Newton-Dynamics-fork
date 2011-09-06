@@ -96,6 +96,13 @@ class dParcerCompiler
 	~dParcerCompiler();
 
 	protected:
+	string GetClassName(const char* const fileName) const;
+	void LoadTemplateFile(const char* const fileName, string& output) const;
+	void SaveFile(const char* const fileName, const char* const extention, const string& input) const;
+
+	void ReplaceMacro (string& data, const string& newName, const string& macro) const;
+	void ReplaceAllMacros (string& data, const string& newName, const string& macro) const;
+
 	void ScanGrammarFile(const char* const inputRules, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens, string& userCodeBlock, string& userVariableClass);
 	Token ScanGrammarRule(dParcerLexical& lexical, dProductionRule& rules, dTree<TokenType, string>& symbolList, int& ruleNumber, dTree<int, string>& tokenEnumarationMap, int& tokenEnumeration);
 
@@ -106,8 +113,8 @@ class dParcerCompiler
 
 	void BuildParcingTable (dTree<dState*,int>& stateList, dTree<TokenType, string>& symbolList);
 
-	void GenerateHeaderFile (const char* const className, const char* const scannerClassName, const char* const outputFileName, dProductionRule& rules, dTree<int, string>& tokenEnumerationMap);
-	void GenerateParcerCode (const char* const className, const char* const scannerClassName, const char* const outputFileName, const string& userCode, 
+	void GenerateHeaderFile (const string& className, const string& scannerClassName, const char* const outputFileName, dProductionRule& rules, dTree<int, string>& tokenEnumerationMap);
+	void GenerateParcerCode (const string& className, const string& scannerClassName, const char* const outputFileName, const string& userCode, 
 							 const string& userVariable, const string& userVariableClass, 
 							 dTree<dState*,int>& stateList, dTree<TokenType, string>& symbolList);
 

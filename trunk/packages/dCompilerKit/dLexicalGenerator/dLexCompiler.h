@@ -93,10 +93,16 @@ class dLexCompiler
 
 	void ParseDefinitions (dExpandedNFA &nfa, string& userPreHeaderCode, string& postHeaderCode);
 	
-	void CreateHeaderFile (const char* const fileName, const char* const className) const;
-	void CreateCodeFile (const char* const fileName, const char* const className, int stateCount, 
+	void CreateHeaderFile (const char* const fileName, const string& className) const;
+	void CreateCodeFile (const char* const fileName, const string& className, int stateCount, 
 						 const string& userPreHeaderCode, const string& userPostHeaderCode, const string& automataCode,
 						 const dChatertSetMap& characterSet, dTree<dTransitionCountStart, int>& transitionsCountStartMap, dList<dTransitionType>& nextStateRun) const;
+
+	string GetClassName(const char* const fileName) const;
+	void ReplaceMacro (string& data, const string& newName, const string& macro) const;
+	void ReplaceAllMacros (string& data, const string& newName, const string& macro) const;
+	void LoadTemplateFile(const char* const templateName, string& templateOuput) const;
+	void SaveFile(const char* const fileName, const char* const extention, const string& input) const;
 
 	dToken m_token;
 	int m_lineNumber;

@@ -242,7 +242,7 @@ dParcerCompiler::dParcerCompiler(const char* const inputRules, const char* const
 	string userVariable ("dUserVariable");
 	string userVariableClass ("");
 
-	
+	// scan grammar to a set of LR(1) rules
 	symbolList.Insert(TERMINAL, DACCEPT_SYMBOL);
 	ScanGrammarFile(inputRules, ruleList, symbolList, tokenEnumeration, userCodeBlock, userVariableClass);
 
@@ -253,21 +253,8 @@ dParcerCompiler::dParcerCompiler(const char* const inputRules, const char* const
 	// create a LR(1) parsing table from the NFA graphs
 	BuildParcingTable (stateList, symbolList);
 
-	//Write Parcer Code
-	char className[256];
-	const char* ptr = strrchr (outputFileName, '/');
-	if (ptr) {
-		ptr ++;
-	} else {
-		ptr = strrchr (outputFileName, '\\');
-		if (ptr) {
-			ptr ++;
-		} else {
-			ptr = outputFileName;
-		}
-	}
-	strcpy (className, ptr);
-	strtok (className, ".");
+	//Write Parcer class and header file
+	string className (GetClassName(outputFileName));
 	GenerateHeaderFile (className, scannerClassName, outputFileName, ruleList, tokenEnumeration);
 	GenerateParcerCode (className, scannerClassName, outputFileName, userCodeBlock, userVariable, userVariableClass, stateList, symbolList);
 
@@ -281,6 +268,25 @@ dParcerCompiler::dParcerCompiler(const char* const inputRules, const char* const
 
 dParcerCompiler::~dParcerCompiler()
 {
+}
+
+string dParcerCompiler::GetClassName(const char* const fileName) const
+{
+	char className[256];
+	const char* ptr = strrchr (fileName, '/');
+	if (ptr) {
+		ptr ++;
+	} else {
+		ptr = strrchr (fileName, '\\');
+		if (ptr) {
+			ptr ++;
+		} else {
+			ptr = fileName;
+		}
+	}
+	strcpy (className, ptr);
+	strtok (className, ".");
+	return string (className);
 }
 
 void dParcerCompiler::ScanGrammarFile(
@@ -722,31 +728,22 @@ void dParcerCompiler::BuildParcingTable (dTree<dState*,int>& stateList, dTree<To
 	}
 }
 
-
-
-
-void dParcerCompiler::GenerateHeaderFile (
-	const char* const className, 
-	const char* const scannerClassName,
-	const char* const outputFileName,
-	dProductionRule& ruleList, 
-	dTree<int, string>& tokenEnumerationMap)
+void dParcerCompiler::LoadTemplateFile(const char* const templateName, string& templateOuput) const
 {
 	char path[2048];
 
 	// in windows
 	GetModuleFileName(NULL, path, sizeof(path)); 
 
-	//	for Linux:
-	//	char szTmp[32]; 
-	//	sprintf(szTmp, "/proc/%d/exe", getpid()); 
-	//	int bytes = MIN(readlink(szTmp, pBuf, len), len - 1); 
-	//	if(bytes >= 0)
-	//		pBuf[bytes] = '\0'; 
-
+//	for Linux:
+//	char szTmp[32]; 
+//	sprintf(szTmp, "/proc/%d/exe", getpid()); 
+//	int bytes = MIN(readlink(szTmp, pBuf, len), len - 1); 
+//	if(bytes >= 0)
+//		pBuf[bytes] = '\0'; 
 
 	char* const ptr = strrchr (path, '\\');
-	sprintf (ptr, "/dParcerTemplate.h");
+	sprintf (ptr, templateName);
 
 	FILE* const templateFile = fopen (path, "r");
 	_ASSERTE (templateFile);
@@ -755,21 +752,58 @@ void dParcerCompiler::GenerateHeaderFile (
 	int size = ftell (templateFile) + 1;
 	fseek (templateFile, 0, SEEK_SET);
 
-	string templateHeader ("") ;
-	templateHeader.resize(size);
-	fread ((void*)templateHeader.c_str(), 1, size, templateFile);
+	templateOuput = ("") ;
+	templateOuput.resize(size);
+	fread ((void*)templateOuput.c_str(), 1, size, templateFile);
 	fclose (templateFile);	
 
-	string name (className);
-	for (size_t position = templateHeader.find ("$(className)"); position != -1; position = templateHeader.find ("$(className)")) {
-		templateHeader.replace(position, 12, name);
-	}
+	templateOuput.erase(strlen (templateOuput.c_str()));
+}
 
-	string scanner(scannerClassName);
-	for (size_t position = templateHeader.find ("$(scannerClass)"); position != -1; position = templateHeader.find ("$(scannerClass)")) {
-		templateHeader.replace(position, 15, scanner);
-	}
+void dParcerCompiler::SaveFile(const char* const fileName, const char* const extention, const string& input) const
+{
+	char path[2048];
 
+	strcpy (path, fileName);
+	char* const ptr1 = strrchr (path, '.');
+	if (ptr1) {
+		*ptr1 = 0;
+	}
+	strcat (path, extention);
+	FILE* const headerFile = fopen (path, "w");
+	_ASSERTE (headerFile);
+	fprintf (headerFile, "%s", input.c_str());
+	fclose (headerFile);
+}
+
+void dParcerCompiler::ReplaceMacro (string& data, const string& newName, const string& macro) const
+{
+	int size = macro.size();
+	int position = data.find (macro);
+	data.replace(position, size, newName);
+}
+
+void dParcerCompiler::ReplaceAllMacros (string& data, const string& newName, const string& macro) const
+{
+	int size = macro.size();
+	for (size_t i = data.find (macro); i != -1; i = data.find (macro)) {
+		data.replace(i, size, newName);
+	}
+}
+
+
+void dParcerCompiler::GenerateHeaderFile (
+	const string& className, 
+	const string& scannerClassName,
+	const char* const outputFileName,
+	dProductionRule& ruleList, 
+	dTree<int, string>& tokenEnumerationMap)
+{
+	string templateHeader ("");
+	LoadTemplateFile("/dParcerTemplate.h", templateHeader);
+
+	ReplaceAllMacros (templateHeader, className, "$(className)");
+	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
 
 	string enumTokens ("");
 	bool firstToken = true;
@@ -798,28 +832,18 @@ void dParcerCompiler::GenerateHeaderFile (
 			}
 		}
 	}
-	int position ;
+
 	enumTokens.replace(enumTokens.size()-2, 2, "");
-	position = templateHeader.find ("$(Tokens)");
-	templateHeader.replace(position, 9, enumTokens);
 
+	ReplaceMacro (templateHeader, enumTokens, "$(Tokens)");
 
-	strcpy (path, outputFileName);
-	char* const ptr1 = strrchr (path, '.');
-	if (ptr1) {
-		*ptr1 = 0;
-	}
-	strcat (path, ".h");
-	FILE* const headerFile = fopen (path, "w");
-	_ASSERTE (headerFile);
-	fprintf (headerFile, "%s", templateHeader.c_str());
-	fclose (headerFile);
+	SaveFile(outputFileName, ".h", templateHeader);
 }
 
 
 void dParcerCompiler::GenerateParcerCode (
-	const char* const className, 
-	const char* const scannerClassName,
+	const string& className, 
+	const string& scannerClassName,
 	const char* const outputFileName,
 	const string& userCode,
 	const string& userVariable,
@@ -827,55 +851,17 @@ void dParcerCompiler::GenerateParcerCode (
 	dTree<dState*,int>& stateList, 
 	dTree<TokenType, string>& symbolList)
 {
-	char path[2048];
-
-	// in windows
-	GetModuleFileName(NULL, path, sizeof(path)); 
-
-	//	for Linux:
-	//	char szTmp[32]; 
-	//	sprintf(szTmp, "/proc/%d/exe", getpid()); 
-	//	int bytes = MIN(readlink(szTmp, pBuf, len), len - 1); 
-	//	if(bytes >= 0)
-	//		pBuf[bytes] = '\0'; 
-
-
-	char* const ptr = strrchr (path, '\\');
-	sprintf (ptr, "/dParcerTemplate.cpp");
-
-	FILE* const templateFile = fopen (path, "r");
-	_ASSERTE (templateFile);
-
-	fseek (templateFile, 0, SEEK_END);
-	int size = ftell (templateFile) + 1;
-	fseek (templateFile, 0, SEEK_SET);
-
-	string templateHeader ("") ;
-	templateHeader.resize(size);
-	fread ((void*)templateHeader.c_str(), 1, size, templateFile);
-	fclose (templateFile);	
+	string templateHeader ("");
+	LoadTemplateFile("/dParcerTemplate.cpp", templateHeader);
 
 	size_t position = templateHeader.find ("$(userCode)");
 	templateHeader.replace(position, 11, userCode);
 
-	
-	string name (className);
-	for (size_t i = templateHeader.find ("$(className)"); i != -1; i = templateHeader.find ("$(className)")) {
-		templateHeader.replace(i, 12, name);
-	}
+	ReplaceAllMacros (templateHeader, className, "$(className)");
+	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
 
-	string scanner(scannerClassName);
-	for (size_t i = templateHeader.find ("$(scannerClass)"); i != -1; i = templateHeader.find ("$(scannerClass)")) {
-		templateHeader.replace(i, 15, scanner);
-	}
-
-
-	position = templateHeader.find ("$(userVariableClass)");
-	templateHeader.replace(position, 20, userVariableClass);
-
-	for (size_t i = templateHeader.find ("$(userVariable)"); i != -1; i = templateHeader.find ("$(userVariable)")) {
-		templateHeader.replace(i, 15, userVariable);
-	}
+	ReplaceMacro (templateHeader, userVariableClass, "$(userVariableClass)");
+	ReplaceAllMacros (templateHeader, userVariable, "$(userVariable)");
 
 	dTree<dState*,int>::Iterator stateIter (stateList);
 	for (stateIter.Begin(); stateIter; stateIter ++) {
@@ -895,14 +881,5 @@ void dParcerCompiler::GenerateParcerCode (
 		}
 	}
 
-	strcpy (path, outputFileName);
-	char* const ptr1 = strrchr (path, '.');
-	if (ptr1) {
-		*ptr1 = 0;
-	}
-	strcat (path, ".cpp");
-	FILE* const ouputFile = fopen (path, "w");
-	_ASSERTE (ouputFile);
-	fprintf (ouputFile, "%s", templateHeader.c_str());
-	fclose (ouputFile);
+	SaveFile(outputFileName, ".cpp", templateHeader);
 }

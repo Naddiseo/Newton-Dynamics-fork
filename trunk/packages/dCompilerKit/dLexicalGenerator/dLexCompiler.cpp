@@ -487,46 +487,43 @@ dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outpu
 	dList<dTransitionType> nextStateRun;
 	dTree<dTransitionCountStart, int> transitionsCountStartMap;
 
+	// convert specification file into one single giant non deterministic finite automaton
 	dExpandedNFA nfa;
 	ParseDefinitions (nfa, userPreHeaderCode, userPostHeaderCode);
 
+	// convert nfa to Deterministic Finite Automaton
 	dExpandedDFA dfa (nfa, automataCode, transitionsCountStartMap, nextStateRun, inputFileName);
 
-
-	char cppFileName[256];
-	strcpy (cppFileName, outputFileName);
-	char* const dot = strrchr (cppFileName, '.');
-	if (dot) {
-		*dot = 0;
-	}
-
-	char className[256];
-	const char* ptr = strrchr (cppFileName, '/');
-	if (ptr) {
-		ptr ++;
-	} else {
-		ptr = strrchr (cppFileName, '\\');
-		if (ptr) {
-			ptr ++;
-		} else {
-			ptr = cppFileName;
-		}
-	}
-
-	strcpy (className, ptr);
-
-	strcat (cppFileName, ".cpp");
-	CreateCodeFile (cppFileName, className, dfa.GetStateCount(), userPreHeaderCode, userPostHeaderCode, automataCode, dfa.GetCharacterSetMap(), transitionsCountStartMap, nextStateRun); 
-
-	*dot = 0;
-	strcat (cppFileName, ".h");
-	CreateHeaderFile (cppFileName, className);
-
+	// save header and source files
+	string className (GetClassName(outputFileName));
+	CreateHeaderFile (outputFileName, className);
+	CreateCodeFile (outputFileName, className, dfa.GetStateCount(), userPreHeaderCode, userPostHeaderCode, automataCode, dfa.GetCharacterSetMap(), transitionsCountStartMap, nextStateRun); 
+	
 }
 
 dLexCompiler::~dLexCompiler()
 {
 }
+
+string dLexCompiler::GetClassName(const char* const fileName) const
+{
+	char className[256];
+	const char* ptr = strrchr (fileName, '/');
+	if (ptr) {
+		ptr ++;
+	} else {
+		ptr = strrchr (fileName, '\\');
+		if (ptr) {
+			ptr ++;
+		} else {
+			ptr = fileName;
+		}
+	}
+	strcpy (className, ptr);
+	strtok (className, ".");
+	return string (className);
+}
+
 
 
 
@@ -623,7 +620,7 @@ void dLexCompiler::MatchToken (dToken token)
 
 
 
-void dLexCompiler::CreateHeaderFile (const char* const fileName, const char* const className) const
+void dLexCompiler::LoadTemplateFile(const char* const templateName, string& templateOuput) const
 {
 	char path[2048];
 
@@ -637,9 +634,8 @@ void dLexCompiler::CreateHeaderFile (const char* const fileName, const char* con
 	//	if(bytes >= 0)
 	//		pBuf[bytes] = '\0'; 
 
-
 	char* const ptr = strrchr (path, '\\');
-	sprintf (ptr, "/dLexicalTemplate.h");
+	sprintf (ptr, templateName);
 
 	FILE* const templateFile = fopen (path, "r");
 	_ASSERTE (templateFile);
@@ -648,29 +644,61 @@ void dLexCompiler::CreateHeaderFile (const char* const fileName, const char* con
 	int size = ftell (templateFile) + 1;
 	fseek (templateFile, 0, SEEK_SET);
 
-	string templateHeader ("") ;
-	templateHeader.resize(size);
-	fread ((void*)templateHeader.c_str(), 1, size, templateFile);
+	templateOuput = ("") ;
+	templateOuput.resize(size);
+	fread ((void*)templateOuput.c_str(), 1, size, templateFile);
 	fclose (templateFile);	
 
-	string name (className);
-	for (size_t position = templateHeader.find ("$(className)"); position != -1; position = templateHeader.find ("$(className)")) {
-		templateHeader.replace(position, 12, name);
+	templateOuput.erase(strlen (templateOuput.c_str()));
+}
+
+void dLexCompiler::SaveFile(const char* const fileName, const char* const extention, const string& input) const
+{
+	char path[2048];
+
+	strcpy (path, fileName);
+	char* const ptr1 = strrchr (path, '.');
+	if (ptr1) {
+		*ptr1 = 0;
 	}
-
-
-	FILE* const headerFile = fopen (fileName, "w");
+	strcat (path, extention);
+	FILE* const headerFile = fopen (path, "w");
 	_ASSERTE (headerFile);
-	fprintf (headerFile, "%s", templateHeader.c_str());
-
+	fprintf (headerFile, "%s", input.c_str());
 	fclose (headerFile);
 }
 
+void dLexCompiler::ReplaceMacro (string& data, const string& newName, const string& macro) const
+{
+	int size = macro.size();
+	int position = data.find (macro);
+	data.replace(position, size, newName);
+}
+
+
+void dLexCompiler::ReplaceAllMacros (string& data, const string& newName, const string& macro) const
+{
+	int size = macro.size();
+	for (size_t i = data.find (macro); i != -1; i = data.find (macro)) {
+		data.replace(i, size, newName);
+	}
+}
+
+
+void dLexCompiler::CreateHeaderFile (const char* const fileName, const string& className) const
+{
+	string templateHeader ("");
+	LoadTemplateFile("/dLexicalTemplate.h", templateHeader);
+
+	ReplaceAllMacros (templateHeader, className, "$(className)");
+
+	SaveFile(fileName, ".h", templateHeader);
+}
 
 
 void dLexCompiler::CreateCodeFile (
 	const char* const fileName, 
-	const char* const className,
+	const string& className,
 	int stateCount,
 	const string& userPreHeaderCode, 
 	const string& userPostHeaderCode, 
@@ -679,46 +707,11 @@ void dLexCompiler::CreateCodeFile (
 	dTree<dTransitionCountStart, int>& transitionsCountStartMap,
 	dList<dTransitionType>& nextStateRun) const
 {
-	char path[2048];
+	string templateHeader ("");
+	LoadTemplateFile("/dLexicalTemplate.cpp", templateHeader);
 
-	// in windows
-	GetModuleFileName(NULL, path, sizeof(path)); 
-
-	//	for Linux:
-	//	char szTmp[32]; 
-	//	sprintf(szTmp, "/proc/%d/exe", getpid()); 
-	//	int bytes = MIN(readlink(szTmp, pBuf, len), len - 1); 
-	//	if(bytes >= 0)
-	//		pBuf[bytes] = '\0'; 
-
-
-	char* const ptr = strrchr (path, '\\');
-	sprintf (ptr, "/dLexicalTemplate.cpp");
-
-	FILE* const templateFile = fopen (path, "r");
-	_ASSERTE (templateFile);
-
-	fseek (templateFile, 0, SEEK_END);
-	int size = ftell (templateFile) + 1;
-	fseek (templateFile, 0, SEEK_SET);
-
-	string templateHeader ("") ;
-	templateHeader.resize(size);
-	fread ((void*)templateHeader.c_str(), 1, size, templateFile);
-	fclose (templateFile);	
-
-	templateHeader.erase(strlen (templateHeader.c_str()));
-
-
-	size_t position;
-	position = templateHeader.find ("$(userIncludeCode)");
-	templateHeader.replace(position, 18, userPreHeaderCode);
-
-	string name (className);
-	for (size_t i = templateHeader.find ("$(className)"); i != -1; i = templateHeader.find ("$(className)")) {
-		templateHeader.replace(i, 12, name);
-	}
-
+	ReplaceMacro (templateHeader, userPreHeaderCode, "$(userIncludeCode)");
+	ReplaceAllMacros (templateHeader, className, "$(className)");
 
 	if (characterSet.GetSets().GetCount()) {
 		string characterSets ("");
@@ -747,26 +740,17 @@ void dLexCompiler::CreateCodeFile (
 			}
 			characterSets += "0};\n";
 		}
-		position = templateHeader.find ("$(characterSets)");
-		templateHeader.replace(position, 16, characterSets);
+		ReplaceMacro (templateHeader, characterSets, "$(characterSets)");
 
 		characterSetList.replace(characterSetList.size()-2, 2, "");
-		position = templateHeader.find ("$(characterSetArray)");
-		templateHeader.replace(position, 20, characterSetList);
+		ReplaceMacro (templateHeader, characterSetList, "$(characterSetArray)");
 
 		characterSetSize.replace(characterSetSize.size()-2, 2, "");
-		position = templateHeader.find ("$(characterSetSize)");
-		templateHeader.replace(position, 19, characterSetSize);
-
+		ReplaceMacro (templateHeader, characterSetSize, "$(characterSetSize)");
 	} else {
-		position = templateHeader.find ("$(characterSets)");
-		templateHeader.replace(position, 16, "");
-
-		position = templateHeader.find ("$(characterSetArray)");
-		templateHeader.replace(position, 20, "0");
-
-		position = templateHeader.find ("$(characterSetSize)");
-		templateHeader.replace(position, 19, "0");
+		ReplaceMacro (templateHeader, "", "$(characterSets)");
+		ReplaceMacro (templateHeader, "0", "$(characterSetArray)");
+		ReplaceMacro (templateHeader, "0", "$(characterSetSize)");
 	}
 
 	for (int i = 0; i < stateCount; i ++) {
@@ -791,12 +775,10 @@ void dLexCompiler::CreateCodeFile (
 		transitionsStartString += text;
 	}
 	transitionsCountString += "0";
-	position = templateHeader.find ("$(transitionsCount)");
-	templateHeader.replace(position, 19, transitionsCountString);
+	ReplaceMacro (templateHeader, transitionsCountString, "$(transitionsCount)");
 
 	transitionsStartString += "0";
-	position = templateHeader.find ("$(transitionsStart)");
-	templateHeader.replace(position, 19, transitionsStartString);
+	ReplaceMacro (templateHeader, transitionsStartString, "$(transitionsStart)");
 
 	string nextStateRunString ("");
 	for (dList<dTransitionType>::dListNode* node = nextStateRun.GetFirst(); node; node = node->GetNext()) {
@@ -810,21 +792,14 @@ void dLexCompiler::CreateCodeFile (
 		nextStateRunString += text;
 	}
 	nextStateRunString += "0";
-	position = templateHeader.find ("$(nextTranstionList)");
-	templateHeader.replace(position, 20, nextStateRunString);
+	ReplaceMacro (templateHeader, nextStateRunString, "$(nextTranstionList)");
 
-	position = templateHeader.find ("$(userActions)");
-	templateHeader.replace(position, 14, automataCode);
+	ReplaceMacro (templateHeader, automataCode, "$(userActions)");
 
 //	templateHeader = templateHeader + userPostHeaderCode;
 	templateHeader = templateHeader + userPostHeaderCode;
 
-
-	FILE* const headerFile = fopen (fileName, "w");
-	_ASSERTE (headerFile);
-	fprintf (headerFile, "%s", templateHeader.c_str());
-
-	fclose (headerFile);
+	SaveFile(fileName, ".h", templateHeader);
 }
 
 
