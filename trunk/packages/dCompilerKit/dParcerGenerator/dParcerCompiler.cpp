@@ -27,7 +27,7 @@
 //	%%
 //	user code
 
-enum dParcerCompiler::TokenType
+enum dParcerCompiler::dTokenType
 {
 	TERMINAL,
 	NONTERMINAL
@@ -47,7 +47,7 @@ enum dParcerCompiler::ActionType
 class dParcerCompiler::dActionEntry
 {
 	public: 
-	Token m_token;
+	dToken m_token;
 	int m_state;
 	int m_reduceCount;
 	ActionType m_action;
@@ -60,8 +60,8 @@ class dParcerCompiler::dActionEntry
 class dParcerCompiler::dSymbol
 {
 	public:
-	TokenType m_type;
-	Token m_token;
+	dTokenType m_type;
+	dToken m_token;
 	string m_name;
 };
 
@@ -113,7 +113,7 @@ class dParcerCompiler::dTransition
 {
 	public:
 	string m_name;
-	TokenType m_type;
+	dTokenType m_type;
 	dState* m_targetState;
 };
 
@@ -225,7 +225,7 @@ dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const out
 	// scan the grammar into a list of rules.
 	dProductionRule ruleList;
 	dTree<int, string> tokenEnumeration;
-	dTree<TokenType, string> symbolList;
+	dTree<dTokenType, string> symbolList;
 	string userCodeBlock;
 	string userVariable ("dUserVariable");
 	string userVariableClass ("");
@@ -281,7 +281,7 @@ string dParcerCompiler::GetClassName(const char* const fileName) const
 void dParcerCompiler::ScanGrammarFile(
 	const string& inputRules, 
 	dProductionRule& ruleList, 
-	dTree<TokenType, string>& symbolList, 
+	dTree<dTokenType, string>& symbolList, 
 	dTree<int, string>& tokenEnumerationMap,
 	string& userCodeBlock,
 	string& userVariableClass,
@@ -293,21 +293,21 @@ void dParcerCompiler::ScanGrammarFile(
 	dParcerLexical lexical (inputRules.c_str());
 	LoadTemplateFile("/dParcerUserVariableTemplate.cpp", userVariableClass);
 	// scan the definition segment
-	for (Token token = Token(lexical.NextToken()); token != GRAMMAR_SEGMENT; ) {
+	for (dToken token = dToken(lexical.NextToken()); token != GRAMMAR_SEGMENT; ) {
 //		DTRACE (("%s\n", lexical.GetTokenString()));
 		switch (int (token)) 
 		{
 			case START:
 			{
-				token = Token(lexical.NextToken());
+				token = dToken(lexical.NextToken());
 				startSymbol = lexical.GetTokenString();
-				token = Token(lexical.NextToken());
+				token = dToken(lexical.NextToken());
 				break;
 			}
 
 			case TOKEN:
 			{
-				for (token = Token(lexical.NextToken()); token == LITERAL; token = Token(lexical.NextToken())) {
+				for (token = dToken(lexical.NextToken()); token == LITERAL; token = dToken(lexical.NextToken())) {
 					const char* const name = lexical.GetTokenString();
 					tokenEnumerationMap.Insert(tokenEnumeration, name);
 					tokenEnumeration ++;
@@ -318,11 +318,11 @@ void dParcerCompiler::ScanGrammarFile(
 
 			case UNION:
 			{
-				token = Token(lexical.NextToken());
+				token = dToken(lexical.NextToken());
 				_ASSERTE (token == USER_ACTION);
 				userVariableClass = lexical.GetTokenString() + 1;
 				userVariableClass.replace(userVariableClass.size() - 1, 1, "");
-				token = Token(lexical.NextToken());
+				token = dToken(lexical.NextToken());
 				break;
 			}
 
@@ -330,13 +330,13 @@ void dParcerCompiler::ScanGrammarFile(
 			case CODE_BLOCK:
 			{
 				userCodeBlock += lexical.GetTokenString();
-				token = Token(lexical.NextToken());
+				token = dToken(lexical.NextToken());
 				break;
 			}
 
 			default:;
 			{
-				token = Token(lexical.NextToken());
+				token = dToken(lexical.NextToken());
 			}
 		}
 	}
@@ -344,16 +344,16 @@ void dParcerCompiler::ScanGrammarFile(
 	int ruleNumber = 1;
 
 	// scan the production rules segment
-	Token token = Token(lexical.NextToken());
-	for (; (token != GRAMMAR_SEGMENT) && (token != -1); token = Token(lexical.NextToken())) {
+	dToken token1 = dToken(lexical.NextToken());
+	for (; (token1 != GRAMMAR_SEGMENT) && (token1 != -1); token1 = dToken(lexical.NextToken())) {
 //		DTRACE (("%s\n", lexical.GetTokenString()));
-		switch (int (token)) 
+		switch (int (token1)) 
 		{
 			case LITERAL:
 			{
 				// add the first Rule;
 				dRuleInfo& rule = ruleList.Append()->GetInfo();
-				rule.m_token = token;
+				rule.m_token = token1;
 				rule.m_type = NONTERMINAL;
 				rule.m_name = lexical.GetTokenString();
 				symbolList.Insert(rule.m_type, rule.m_name);
@@ -367,9 +367,7 @@ void dParcerCompiler::ScanGrammarFile(
 				rule.m_ruleNumber = ruleNumber;
 				ruleNumber ++;
 
-				token = Token(lexical.NextToken());
-				_ASSERTE (token == COLOM);
-				for (Token token = ScanGrammarRule(lexical, ruleList, symbolList, ruleNumber, tokenEnumerationMap, tokenEnumeration); token != SIMICOLOM; token = ScanGrammarRule(lexical, ruleList, symbolList, ruleNumber, tokenEnumerationMap, tokenEnumeration)); 
+				token1 = ScanGrammarRule(lexical, ruleList, symbolList, ruleNumber, tokenEnumerationMap, tokenEnumeration); 
 				break;
 			}
 			default:
@@ -381,7 +379,8 @@ void dParcerCompiler::ScanGrammarFile(
 	if (startSymbol != "") {
 		firtRuleNode = ruleList.Find (startSymbol);	
 	}
-	//Expand the Grammar Rule by addin a empty start Rule;
+
+	//Expand the Grammar Rule by adding an empty start Rule;
 	const dRuleInfo& firstRule = firtRuleNode->GetInfo();
 
 	dRuleInfo& rule = ruleList.Addtop()->GetInfo();
@@ -399,86 +398,90 @@ void dParcerCompiler::ScanGrammarFile(
 	symbolList.Insert(symbol.m_type, symbol.m_name);
 
 	// scan literal use code
-	if (token == GRAMMAR_SEGMENT) {
+	if (token1 == GRAMMAR_SEGMENT) {
 		endUserCode = lexical.GetNextBuffer();
 	}
 }
 
-dParcerCompiler::Token dParcerCompiler::ScanGrammarRule(
+dParcerCompiler::dToken dParcerCompiler::ScanGrammarRule(
 	dParcerLexical& lexical, 
 	dProductionRule& rules, 
-	dTree<TokenType, string>& symbolList, 
+	dTree<dTokenType, string>& symbolList, 
 	int& ruleNumber,
 	dTree<int, string>& tokenEnumerationMap,
 	int& tokenEnumeration)
 {
-	dRuleInfo* currentRule = &rules.GetLast()->GetInfo();
+	struct dTokenStringPair 
+	{
+		dToken m_token;
+		string m_info;
+	};
 
-	Token token = Token(lexical.NextToken());
-	for ( ;token != SIMICOLOM; token = Token(lexical.NextToken())) {
-//		DTRACE (("%s\n", lexical.GetTokenString()));
-		switch (int (token)) 
-		{
-			case LITERAL:
-			{
+	dRuleInfo* currentRule = &rules.GetLast()->GetInfo();
+	
+	dToken token = dToken(lexical.NextToken());
+	do {
+		
+		dList<dTokenStringPair> ruleTokens;
+		for (token = dToken(lexical.NextToken()); (token != SIMICOLOM) && (token != OR) ; token = dToken(lexical.NextToken())) {
+			dTokenStringPair& pair = ruleTokens.Append()->GetInfo();
+			pair.m_token = token;
+			pair.m_info = lexical.GetTokenString();
+		}
+		
+		dList<dTokenStringPair>::dListNode* lastNode = ruleTokens.GetLast();
+		if (lastNode->GetInfo().m_token != USER_ACTION) {
+			lastNode = NULL;
+		} else {
+			currentRule->m_userActionCode = lastNode->GetInfo().m_info;
+		}
+		for (dList<dTokenStringPair>::dListNode* node = ruleTokens.GetFirst(); node != lastNode; node = node->GetNext()) {
+			dTokenStringPair& pair = node->GetInfo();
+			if (pair.m_token == LITERAL) {
 				dSymbol& symbol = currentRule->Append()->GetInfo();
-				symbol.m_token = token;
-				symbol.m_name = lexical.GetTokenString();
-				
-				dTree<TokenType, string>::dTreeNode* symbolNode = symbolList.Find(symbol.m_name);
+				symbol.m_token = pair.m_token;
+				symbol.m_name = pair.m_info;
+
+				dTree<dTokenType, string>::dTreeNode* symbolNode = symbolList.Find(symbol.m_name);
 				if (!symbolList.Find(symbol.m_name)) {
 					symbolNode = symbolList.Insert(NONTERMINAL, symbol.m_name);
 				}
-//				symbol.m_type = terminalTokens.Find(symbol.m_name) ? TERMINAL : NONTERMINAL;
-//				symbolList.Insert(symbol.m_type, symbol.m_name);
 				symbol.m_type = symbolNode->GetInfo();
-
 
 				dTree<int, string>::dTreeNode* nonTerminalIdNode = tokenEnumerationMap.Find(symbol.m_name);
 				if (!nonTerminalIdNode) {
 					nonTerminalIdNode = tokenEnumerationMap.Insert(tokenEnumeration, symbol.m_name);
 					tokenEnumeration ++;
 				}
-				break;
-			}
+			} else if (isascii (pair.m_token)) {
+				dSymbol& symbol = currentRule->Append()->GetInfo();
+				symbol.m_name = pair.m_info;
+				symbol.m_type = TERMINAL;
+				symbol.m_token = LITERAL;
+				symbolList.Insert(TERMINAL, symbol.m_name);
+				tokenEnumerationMap.Insert(token, symbol.m_name);
 
-			case USER_ACTION:
-			{
-				currentRule->m_userActionCode = lexical.GetTokenString();
-				break;
-			}
-
-			case OR:
-			{
-				// this is a rule with multiples sentences, add new rule with the same name
-				dRuleInfo& rule = rules.Append()->GetInfo();
-				rule.m_ruleNumber = ruleNumber;
-				ruleNumber ++;
-				rule.m_ruleId = currentRule->m_ruleId;
-				rule.m_token = currentRule->m_token;
-				rule.m_type = NONTERMINAL;
-				rule.m_name += currentRule->m_name;
-				currentRule = &rule;
-				break;
-			}
-
-
-			default:
-			{
-				if (isascii (token)) {
-					dSymbol& symbol = currentRule->Append()->GetInfo();
-					symbol.m_name = lexical.GetTokenString();
-					symbol.m_type = TERMINAL;
-					symbol.m_token = LITERAL;
-					symbolList.Insert(TERMINAL, symbol.m_name);
-
-					tokenEnumerationMap.Insert(token, symbol.m_name);
-				} else {
-					_ASSERTE (0);
-				}
+			} else if (pair.m_token != USER_ACTION) {
+				// no user action allowed in the middle of a sentence
+				_ASSERTE (pair.m_token == USER_ACTION);
+			} else {
+				_ASSERTE (0);
 			}
 		}
-	}
+
+		if (token == OR) {
+			// this is a rule with multiples sentences alternates, add new rule with the same name Non terminal
+			dRuleInfo& rule = rules.Append()->GetInfo();
+			rule.m_ruleNumber = ruleNumber;
+			ruleNumber ++;
+			rule.m_ruleId = currentRule->m_ruleId;
+			rule.m_token = currentRule->m_token;
+			rule.m_type = NONTERMINAL;
+			rule.m_name += currentRule->m_name;
+			currentRule = &rule;
+		}
+
+	} while (token != SIMICOLOM);
 
 	return token;
 }
@@ -539,7 +542,7 @@ dParcerCompiler::dState* dParcerCompiler::Goto (dProductionRule& rulesList, dSta
 }
 
 // generates the canonical Items set for a LR(1) grammar
-void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, dProductionRule& ruleList, dTree<TokenType, string>& symbolList)
+void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, dProductionRule& ruleList, dTree<dTokenType, string>& symbolList)
 {
 	dList<dItem> itemSet;
 	dItem& item = itemSet.Append()->GetInfo();
@@ -557,7 +560,7 @@ void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, dProducti
 	for (dList<dState*>::dListNode* node = stateList.GetFirst(); node; node = node->GetNext()) {
 		dState* const state = node->GetInfo();
 
-		dTree<TokenType, string>::Iterator iter (symbolList);
+		dTree<dTokenType, string>::Iterator iter (symbolList);
 		for (iter.Begin(); iter; iter ++) {
 
 			string symbol (iter.GetKey());
@@ -590,10 +593,10 @@ void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, dProducti
 
 
 
-void dParcerCompiler::BuildParcingTable (dTree<dState*,int>& stateList, dTree<TokenType, string>& symbolList)
+void dParcerCompiler::BuildParcingTable (dTree<dState*,int>& stateList, dTree<dTokenType, string>& symbolList)
 {
 	dTree<dState*,int>::Iterator stateIter (stateList);
-	dTree<TokenType, string>::Iterator symbolIter (symbolList);
+	dTree<dTokenType, string>::Iterator symbolIter (symbolList);
 
 	// create Shift Reduce action table
 	for (stateIter.Begin(); stateIter; stateIter ++) {
@@ -613,7 +616,7 @@ void dParcerCompiler::BuildParcingTable (dTree<dState*,int>& stateList, dTree<To
 			const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
 			if (ruleInfo.GetCount() == item.m_indexMarker) {
 				for (symbolIter.Begin(); symbolIter; symbolIter ++) {
-					TokenType type = symbolIter.GetNode()->GetInfo();
+					dTokenType type = symbolIter.GetNode()->GetInfo();
 					if (type == TERMINAL) {
 						string symbol = symbolIter.GetKey();
 
@@ -649,7 +652,7 @@ void dParcerCompiler::BuildParcingTable (dTree<dState*,int>& stateList, dTree<To
 				} else {
 					// if it does not contain the accepting rule them is see if is is a shift action
 					for (symbolIter.Begin(); symbolIter; symbolIter ++) {
-						TokenType type = symbolIter.GetNode()->GetInfo();
+						dTokenType type = symbolIter.GetNode()->GetInfo();
 						if (type == TERMINAL) {
 							string symbol = symbolIter.GetKey();
 							for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
@@ -772,8 +775,8 @@ void dParcerCompiler::GenerateHeaderFile (
 	ReplaceAllMacros (templateHeader, className, "$(className)");
 	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
 
-	string enumTokens ("");
-	bool firstToken = true;
+	string enumdTokens ("");
+	bool firstdToken = true;
 	dTree<int, string> symbolFilter;
 	for (dProductionRule::dListNode* ruleNode = ruleList.GetFirst(); ruleNode; ruleNode = ruleNode->GetNext()) {
 		dRuleInfo& ruleInfo = ruleNode->GetInfo();
@@ -786,13 +789,13 @@ void dParcerCompiler::GenerateHeaderFile (
 					_ASSERTE (node);
 					int value = node->GetInfo();
 					if (value >= 256) {
-						enumTokens += "\t\t";
-						enumTokens += symbol.m_name;
-						if (firstToken) {
-							firstToken = false;
-							enumTokens += " = 256,\n";
+						enumdTokens += "\t\t";
+						enumdTokens += symbol.m_name;
+						if (firstdToken) {
+							firstdToken = false;
+							enumdTokens += " = 256,\n";
 						} else {
-							enumTokens += ",\n";
+							enumdTokens += ",\n";
 						}
 					}
 				}
@@ -800,9 +803,9 @@ void dParcerCompiler::GenerateHeaderFile (
 		}
 	}
 
-	enumTokens.replace(enumTokens.size()-2, 2, "");
+	enumdTokens.replace(enumdTokens.size()-2, 2, "");
 
-	ReplaceMacro (templateHeader, enumTokens, "$(Tokens)");
+	ReplaceMacro (templateHeader, enumdTokens, "$(dTokens)");
 
 	SaveFile(outputFileName, ".h", templateHeader);
 }
@@ -816,7 +819,7 @@ void dParcerCompiler::GenerateParcerCode (
 	const string& userVariable,
 	const string& userVariableClass, 
 	dTree<dState*,int>& stateList, 
-	dTree<TokenType, string>& symbolList,
+	dTree<dTokenType, string>& symbolList,
 	string& endUserCode)
 {
 	string templateHeader ("");

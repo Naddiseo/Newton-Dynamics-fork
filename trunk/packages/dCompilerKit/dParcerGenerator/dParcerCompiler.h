@@ -59,7 +59,7 @@ class dParcerLexical;
 class dParcerCompiler
 {
 	public:
-	enum Token
+	enum dToken
 	{
 		OR = 256,
 		COLOM,
@@ -76,7 +76,7 @@ class dParcerCompiler
 		PARCEL_ERROR,
 	};
 
-	enum TokenType;
+	enum dTokenType;
 	enum ActionType;
 	
 	class dItem;
@@ -103,20 +103,20 @@ class dParcerCompiler
 	void ReplaceMacro (string& data, const string& newName, const string& macro) const;
 	void ReplaceAllMacros (string& data, const string& newName, const string& macro) const;
 
-	void ScanGrammarFile(const string& inputRules, dProductionRule& rules, dTree<TokenType, string>& symbolList, dTree<int, string>& terminalTokens, string& userCodeBlock, string& userVariableClass, string& endUserCode);
-	Token ScanGrammarRule(dParcerLexical& lexical, dProductionRule& rules, dTree<TokenType, string>& symbolList, int& ruleNumber, dTree<int, string>& tokenEnumarationMap, int& tokenEnumeration);
+	void ScanGrammarFile(const string& inputRules, dProductionRule& rules, dTree<dTokenType, string>& symbolList, dTree<int, string>& terminaldTokens, string& userCodeBlock, string& userVariableClass, string& endUserCode);
+	dToken ScanGrammarRule(dParcerLexical& lexical, dProductionRule& rules, dTree<dTokenType, string>& symbolList, int& ruleNumber, dTree<int, string>& tokenEnumarationMap, int& tokenEnumeration);
 
 	
-	void CanonicalItemSets (dTree<dState*,int>& states, dProductionRule& rules, dTree<TokenType, string>& symbolList);
+	void CanonicalItemSets (dTree<dState*,int>& states, dProductionRule& rules, dTree<dTokenType, string>& symbolList);
 	dState* Goto (dProductionRule& rulesList, dState* const state, const string& symbol);
 	dState* Closure (dProductionRule& rulesList, dList<dItem>& itemSet);
 
-	void BuildParcingTable (dTree<dState*,int>& stateList, dTree<TokenType, string>& symbolList);
+	void BuildParcingTable (dTree<dState*,int>& stateList, dTree<dTokenType, string>& symbolList);
 
 	void GenerateHeaderFile (const string& className, const string& scannerClassName, const char* const outputFileName, dProductionRule& rules, dTree<int, string>& tokenEnumerationMap);
 	void GenerateParcerCode (const string& className, const string& scannerClassName, const char* const outputFileName, const string& userCode, 
 							 const string& userVariable, const string& userVariableClass, 
-							 dTree<dState*,int>& stateList, dTree<TokenType, string>& symbolList, string& endUserCode);
+							 dTree<dState*,int>& stateList, dTree<dTokenType, string>& symbolList, string& endUserCode);
 
 };
 
