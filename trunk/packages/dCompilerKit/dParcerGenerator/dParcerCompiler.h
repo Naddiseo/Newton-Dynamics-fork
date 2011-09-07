@@ -107,11 +107,11 @@ class dParcerCompiler
 	dToken ScanGrammarRule(dParcerLexical& lexical, dProductionRule& rules, dTree<dTokenType, string>& symbolList, int& ruleNumber, dTree<int, string>& tokenEnumarationMap, int& tokenEnumeration);
 
 	
-	void CanonicalItemSets (dTree<dState*,int>& states, dProductionRule& rules, dTree<dTokenType, string>& symbolList);
-	dState* Goto (dProductionRule& rulesList, dState* const state, const string& symbol);
-	dState* Closure (dProductionRule& rulesList, dList<dItem>& itemSet);
+	void CanonicalItemSets (dTree<dState*,int>& states, const dProductionRule& rules, const dTree<dTokenType, string>& symbolList);
+	dState* Goto (const dProductionRule& rulesList, const dState* const state, const string& symbol);
+	dState* Closure (const dProductionRule& rulesList, const dList<dItem>& itemSet);
 
-	void BuildParcingTable (dTree<dState*,int>& stateList, dTree<dTokenType, string>& symbolList);
+	void BuildParcingTable (const dTree<dState*,int>& stateList, const dTree<dTokenType, string>& symbolList);
 
 	void GenerateHeaderFile (const string& className, const string& scannerClassName, const char* const outputFileName, dProductionRule& rules, dTree<int, string>& tokenEnumerationMap);
 	void GenerateParcerCode (const string& className, const string& scannerClassName, const char* const outputFileName, const string& userCode, 
