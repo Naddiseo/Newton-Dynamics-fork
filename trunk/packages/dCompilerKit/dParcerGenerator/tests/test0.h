@@ -19,7 +19,7 @@
 #include <string>
 using namespace std;
 
-class xxxxx;
+class lextest1;
 
 class test0
 {
@@ -35,7 +35,7 @@ class test0
 
 	test0();
 	virtual ~test0();
-	virtual int Parce(xxxxx& scanner);
+	virtual int Parce(lextest1& scanner);
 
 	virtual bool ErrorHandler (const string& line) const;
 

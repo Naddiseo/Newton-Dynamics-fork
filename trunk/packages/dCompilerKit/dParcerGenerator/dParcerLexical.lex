@@ -40,31 +40,31 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 [|]					{ return(dParcerCompiler::OR); }
 [:]					{ return(dParcerCompiler::COLOM); }
 [;]					{ return(dParcerCompiler::SIMICOLOM); }
-"';'"				{ return(';'); }
-"'{'"				{ return('{'); }
-"'}'"				{ return('}'); }
-"','"				{ return(','); }
-"'='"				{ return('='); }
-"'&'"				{ return('&'); }
-"'!'"				{ return('!'); }
-"'~'"				{ return('~'); }
-"'-'"				{ return('-'); }
-"'%'"				{ return('%'); }
-"'<'"				{ return('<'); }
-"'>'"				{ return('>'); }
-"'/'"				{ return('/'); }
-"'^'"				{ return('^'); }
-"'\:'"				{ return(':'); }
-"'\.'"				{ return('.'); }
-"'\|'"				{ return('|'); }
-"'\?'"				{ return('?'); }
-"'\\'"				{ return('\\'); }
-"'\('"				{ return('('); }
-"'\)'"				{ return(')'); }
-"'\+'"				{ return('+'); }
-"'\*'"				{ return('*'); }
-"'\['"				{ return('['); }
-"'\]'"				{ return(']'); }
+"';'"				{ m_tokenString = ";"; return(';'); }
+"'{'"				{ m_tokenString = "{"; return('{'); }
+"'}'"				{ m_tokenString = "}"; return('}'); }
+"','"				{ m_tokenString = ","; return(','); }
+"'='"				{ m_tokenString = "="; return('='); }
+"'&'"				{ m_tokenString = "&"; return('&'); }
+"'!'"				{ m_tokenString = "!"; return('!'); }
+"'~'"				{ m_tokenString = "~"; return('~'); }
+"'-'"				{ m_tokenString = "-"; return('-'); }
+"'%'"				{ m_tokenString = "%"; return('%'); }
+"'<'"				{ m_tokenString = "<"; return('<'); }
+"'>'"				{ m_tokenString = ">"; return('>'); }
+"'/'"				{ m_tokenString = "/"; return('/'); }
+"'^'"				{ m_tokenString = "^"; return('^'); }
+"'\:'"				{ m_tokenString = ":"; return(':'); }
+"'\.'"				{ m_tokenString = "."; return('.'); }
+"'\|'"				{ m_tokenString = "|"; return('|'); }
+"'\?'"				{ m_tokenString = "?"; return('?'); }
+"'\\'"				{ m_tokenString = "\\"; return('\\'); }
+"'\('"				{ m_tokenString = "("; return('('); }
+"'\)'"				{ m_tokenString = ")"; return(')'); }
+"'\+'"				{ m_tokenString = "+"; return('+'); }
+"'\*'"				{ m_tokenString = "*"; return('*'); }
+"'\['"				{ m_tokenString = "["; return('['); }
+"'\]'"				{ m_tokenString = "]"; return(']'); }
 
 
 "%%"				{ return dParcerCompiler::GRAMMAR_SEGMENT;}
