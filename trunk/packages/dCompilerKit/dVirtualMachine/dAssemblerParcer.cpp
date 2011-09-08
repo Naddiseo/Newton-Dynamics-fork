@@ -13,10 +13,20 @@
 //Auto generated Parcer Generator class: dAssemblerParcer.cpp
 //
 
+#ifdef _MSC_VER
+#pragma warning (disable: 4702) // warning C4702: unreachable code
+#pragma warning (disable: 4100) // warning C4100: unreferenced formal parameter
+#endif
 
 
+
+//
+// Newton virtual machine assembler grammar
+// based loosely on the MIPS R3000 Instruction Set 
+//
 
 #include <dVirtualMachine.h>
+
 #include "dAssemblerLexical.h"
 #include "dAssemblerCompiler.h"
 
@@ -46,18 +56,20 @@ class dAssemblerParcer::dActionEntry
 class dAssemblerParcer::dStackPair
 {
 	public:
-	class dUserVariable: public string
-	{
+	class dUserVariable: public string 
+	{	
 		public:
 		dUserVariable ()
 			:string()
 		{
 		}
-	
-		dUserVariable (const char* const text)
-			:string(text)
+
+		dUserVariable (Token token, const char* const text)
+			:string(text), m_token (token)
 		{
 		}
+
+		Token m_token;
 	};
 
 
@@ -71,10 +83,6 @@ class dAssemblerParcer::dStackPair
 	Token m_token;
 	dUserVariable m_value;
 };
-
-
-
-
 
 
 dAssemblerParcer::dAssemblerParcer()
@@ -159,6 +167,15 @@ static dActionEntry actionTable[] = {{Token(1)}};
 				entry.m_token = Goto->m_token;
 				entry.m_state = Goto->m_nextState;
 
+
+				dUserVariable params*[64];
+				_ASSERTE (entry.statesToPop < sizeof (params)/ sizeof (params[0]));
+				_ASSERTE (entry.statesToPop < stack.GetCount());
+				int index entry.statesToPop - 1;
+				for (dList<dStackPair>::dListNode* node = stack.GetLast(); node; node = node->GetPrev()) {
+					params[i] = &node->GetInfo();
+				}
+
 				switch (entry.m_token) 
 				{
 					//do userAction
@@ -183,3 +200,118 @@ static dActionEntry actionTable[] = {{Token(1)}};
 	return 1;
 }
 
+
+
+
+
+/*
+
+%start SegementList
+
+%token BEGIN END
+%token PUBLIC
+%token INCLUDE
+
+%token DATASEGMENT
+%token CODESEGMENT
+
+%token BYTE
+%token WORD
+%token DWORD
+%token DOUBLE
+%token OFFSET
+
+
+%token LITERAL
+%token REGISTER
+
+%token INTERGER
+%token FLOAT
+
+%token LOADI ADD RET
+
+
+
+%%
+
+Module			: IncludeList SegementList END
+				;
+
+
+IncludeList		: IncludeList Include
+				| Include
+				| 
+				;
+				
+Include			: INCLUDE '<' fileName '>'
+				;
+
+
+fileName		: LITERAL '.' LITERAL
+				;			
+
+SegementList	: SegmentList Segment
+				| Segment
+				| 
+				;
+				
+Segment			: DataSegment
+				| CodeSegment
+				;
+
+
+DataSegment		: DATASEGMENT ':' DataList  
+				;
+
+
+DataList		: DataList Data
+				| Data
+				|
+				;
+				
+Data			: BYTE DataList
+				| WORD DataList
+				| DWORD DataList
+				| QWORD DataList
+				| DOUBLE DataList
+				| OFFSET LITERAL INTERGER
+				;
+				
+DataValueList	: DataValueList ',' DataValue
+				| DataValue
+				;
+				
+DataValue		: LITERAL INTERGER
+				| LITERAL FLOAT
+				;
+
+
+CodeSegment		: CODESEGMENT ':' FuntionList   
+				;
+
+
+FuntionList     : FuntionList Function
+				| Function
+				|
+				;
+				
+FunctionBody	: BEGIN LITERAL ':' instructionList	END	LITERAL
+				| BEGIN LITERAL ':' PUBLIC instructionList END LITERAL
+				;	
+				
+				
+instructionList	: instructionList instruction
+				| instruction
+				;
+				
+				
+instruction		: LOADI REGISTER ',' INTERGER			
+				| ADD REGISTER ',' REGISTER	',' REGISTER		
+				| RET
+				;
+				
+				
+
+%%
+
+*/

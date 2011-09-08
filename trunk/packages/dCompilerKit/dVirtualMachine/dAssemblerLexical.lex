@@ -10,18 +10,26 @@
 * freely
 */
 
-
 %{
 //
-// Newton Scrip Lex parcel
-// based on a subset of Java language specification 1.0 
+// Newton virtual machine assemble lexema
+// based looselly on the MIPS R3000 Instruction Set 
 //
-%}
 
-%{
 #include <dVirtualMachine.h>
 #include "dAssemblerParcer.h"
 %}
+
+
+
+%%
+"'+'"	{return '+';}	
+"'\('"	{return '(';}	
+"'\('"	{return ')';}	
+[0-9]+	{return 256;}
+
+
+/*
 
 WhiteSpace		[ \t\n\r]+
 
@@ -89,3 +97,5 @@ Literal			[a-zA-Z_][0-9a-zA-Z_]*
 .+				{}
 
 %%
+
+*/

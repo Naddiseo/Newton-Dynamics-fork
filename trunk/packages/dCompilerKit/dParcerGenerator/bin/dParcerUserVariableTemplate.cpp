@@ -7,7 +7,7 @@
 		}
 
 		$(userVariable) (Token token, const char* const text)
-			:string(text), m_token ()
+			:string(text), m_token (token)
 		{
 		}
 

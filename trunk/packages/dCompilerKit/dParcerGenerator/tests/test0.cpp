@@ -16,6 +16,8 @@
 
 
 
+	// test0 grammar
+
 #include "test0.h"
 #include <dList.h>
 
@@ -42,18 +44,20 @@ class test0::dActionEntry
 class test0::dStackPair
 {
 	public:
-	class dUserVariable: public string
-	{
+	class dUserVariable: public string 
+	{	
 		public:
 		dUserVariable ()
 			:string()
 		{
 		}
-	
-		dUserVariable (const char* const text)
-			:string(text)
+
+		dUserVariable (Token token, const char* const text)
+			:string(text), m_token ()
 		{
 		}
+
+		Token m_token;
 	};
 
 
@@ -67,10 +71,6 @@ class test0::dStackPair
 	Token m_token;
 	dUserVariable m_value;
 };
-
-
-
-
 
 
 test0::test0()
@@ -99,7 +99,7 @@ const test0::dActionEntry* test0::FindAction (const dActionEntry* const actionLi
 }
 
 
-int test0::Parce(xxxxx& scanner)
+int test0::Parce(lextest1& scanner)
 {
 
 	dList<dStackPair> stack;
@@ -155,6 +155,15 @@ static dActionEntry actionTable[] = {{Token(1)}};
 				entry.m_token = Goto->m_token;
 				entry.m_state = Goto->m_nextState;
 
+
+				dUserVariable params*[64];
+				_ASSERTE (entry.statesToPop < sizeof (params)/ sizeof (params[0]));
+				_ASSERTE (entry.statesToPop < stack.GetCount());
+				int index entry.statesToPop - 1;
+				for (dList<dStackPair>::dListNode* node = stack.GetLast(); node; node = node->GetPrev()) {
+					params[i] = &node->GetInfo();
+				}
+
 				switch (entry.m_token) 
 				{
 					//do userAction
@@ -178,4 +187,8 @@ static dActionEntry actionTable[] = {{Token(1)}};
 
 	return 1;
 }
+
+
+
+
 

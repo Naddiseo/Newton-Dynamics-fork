@@ -13,6 +13,10 @@
 //Auto generated Parcer Generator class: $(className).cpp
 //
 
+#ifdef _MSC_VER
+#pragma warning (disable: 4702) // warning C4702: unreachable code
+#pragma warning (disable: 4100) // warning C4100: unreferenced formal parameter
+#endif
 
 
 $(userCode)
@@ -135,6 +139,15 @@ static dActionEntry actionTable[] = {{Token(1)}};
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_token = Goto->m_token;
 				entry.m_state = Goto->m_nextState;
+
+
+				$(userVariable) params*[64];
+				_ASSERTE (entry.statesToPop < sizeof (params)/ sizeof (params[0]));
+				_ASSERTE (entry.statesToPop < stack.GetCount());
+				int index entry.statesToPop - 1;
+				for (dList<dStackPair>::dListNode* node = stack.GetLast(); node; node = node->GetPrev()) {
+					params[i] = &node->GetInfo();
+				}
 
 				switch (entry.m_token) 
 				{

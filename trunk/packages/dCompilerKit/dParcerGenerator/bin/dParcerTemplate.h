@@ -32,6 +32,7 @@ $(Tokens)
 	enum ActionType;
 	class dStackPair;
 	class dActionEntry;
+	class $(userVariable);
 
 	$(className)();
 	virtual ~$(className)();

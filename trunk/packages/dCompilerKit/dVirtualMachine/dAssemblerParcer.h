@@ -26,29 +26,13 @@ class dAssemblerParcer
 	public:
 	enum Token
 	{
-		END = 256,
-		INCLUDE,
-		LITERAL,
-		DATASEGMENT,
-		BYTE,
-		WORD,
-		DWORD,
-		DOUBLE,
-		OFFSET,
-		INTERGER,
-		FLOAT,
-		CODESEGMENT,
-		BEGIN,
-		PUBLIC,
-		LOADI,
-		REGISTER,
-		ADD,
-		RET
+		id = 256
 	};
 
 	enum ActionType;
 	class dStackPair;
 	class dActionEntry;
+	class dUserVariable;
 
 	dAssemblerParcer();
 	virtual ~dAssemblerParcer();

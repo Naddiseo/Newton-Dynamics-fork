@@ -230,7 +230,7 @@ dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const out
 
 	//Write Parcer class and header file
 	string className (GetClassName(outputFileName));
-	GenerateHeaderFile (className, scannerClassName, outputFileName, ruleList, tokenEnumeration);
+	GenerateHeaderFile (className, scannerClassName, outputFileName, ruleList, tokenEnumeration, userVariable);
 	GenerateParcerCode (className, scannerClassName, outputFileName, userCodeBlock, userVariable, userVariableClass, stateList, symbolList, endUserCode);
 
 	dTree<dState*,int>::Iterator iter(stateList);
@@ -663,13 +663,15 @@ void dParcerCompiler::GenerateHeaderFile (
 	const string& scannerClassName,
 	const char* const outputFileName,
 	dProductionRule& ruleList, 
-	dTree<int, string>& tokenEnumerationMap)
+	dTree<int, string>& tokenEnumerationMap,
+	const string& userVarible)
 {
 	string templateHeader ("");
 	LoadTemplateFile("/dParcerTemplate.h", templateHeader);
 
 	ReplaceAllMacros (templateHeader, className, "$(className)");
 	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
+	ReplaceAllMacros (templateHeader, userVarible, "$(userVariable)");
 
 	string enumdTokens ("");
 	bool firstdToken = true;

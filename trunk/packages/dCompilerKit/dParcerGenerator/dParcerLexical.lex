@@ -27,15 +27,21 @@ Comment				({Comment1}|{Comment2})
 
 AnyButPercent		[^\%]
 AnyButCloseCurly	[^\}]
-CarryReturn			[\r\n]
-CodeBlock			[\%][\{]({AnyButPercent}|{CarryReturn}|([\%]+({AnyButCloseCurly}|{CarryReturn})))*[\%]+[\}]
-
-
+CodeBlock			%[\{]({AnyButPercent}|%{AnyButCloseCurly})*%[\}]
 Literal				[a-zA-Z_][0-9a-zA-Z_]*
 
 
-
 %%
+{WhiteSpace}		{}
+{Comment}			{}
+"%%"				{ return dParcerCompiler::GRAMMAR_SEGMENT;}
+"%start"			{ return dParcerCompiler::START;}
+"%token"			{ return dParcerCompiler::TOKEN;}
+"%union"			{ return dParcerCompiler::UNION;}
+"%left"				{ return dParcerCompiler::LEFT;}
+"%right"			{ return dParcerCompiler::RIGHT;}
+{Literal}			{ return dParcerCompiler::LITERAL;}
+{CodeBlock}			{ m_tokenString.replace(0, 2, ""); m_tokenString.replace(m_tokenString.size() - 2, 2, ""); return dParcerCompiler::CODE_BLOCK;}
 
 [|]					{ return(dParcerCompiler::OR); }
 [:]					{ return(dParcerCompiler::COLOM); }
@@ -65,19 +71,5 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 "'\*'"				{ m_tokenString = "*"; return('*'); }
 "'\['"				{ m_tokenString = "["; return('['); }
 "'\]'"				{ m_tokenString = "]"; return(']'); }
-
-
-"%%"				{ return dParcerCompiler::GRAMMAR_SEGMENT;}
-"%union"			{ return dParcerCompiler::UNION;}
-"%token"			{ return dParcerCompiler::TOKEN;}
-"%left"				{ return dParcerCompiler::LEFT;}
-"%right"			{ return dParcerCompiler::RIGHT;}
-"%start"			{ return dParcerCompiler::START;}
-{Literal}			{ return dParcerCompiler::LITERAL;}
-{CodeBlock}			{ m_tokenString.replace(0, 2, ""); m_tokenString.replace(m_tokenString.size() - 2, 2, ""); return dParcerCompiler::CODE_BLOCK;}
 [{]					{ ReadBalancedExpresion ('{', '}'); return dParcerCompiler::USER_ACTION;}
-
-{WhiteSpace}		{}
-{Comment}			{}
-.					{return dParcerCompiler::PARCEL_ERROR;}
 

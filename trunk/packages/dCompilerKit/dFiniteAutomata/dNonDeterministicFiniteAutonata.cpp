@@ -13,8 +13,8 @@
 #include "dAutomataState.h"
 #include "dNonDeterministicFiniteAutonata.h"
 
-//#define DTRACE_NFA(x) DTRACE(x)
-#define DTRACE_NFA(x) 
+#define DTRACE_NFA(x) DTRACE(x)
+//#define DTRACE_NFA(x) 
 
 /*
 char dNonDeterministicFiniteAutonata::m_asciiSet[] = 
