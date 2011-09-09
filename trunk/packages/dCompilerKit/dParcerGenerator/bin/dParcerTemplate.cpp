@@ -23,6 +23,7 @@ $(userCode)
 #include "$(className).h"
 #include <dList.h>
 
+#define MAX_USER_PARAM	64
 
 enum $(className)::ActionType
 {
@@ -35,7 +36,7 @@ class $(className)::dActionEntry
 {
 	public:
 	int m_nextState;
-	int statesToPop;
+	int m_statesToPop;
 	int m_actionCount;
 	Token m_token;
 	ActionType m_action;
@@ -110,7 +111,7 @@ static dActionEntry actionTable[] = {{Token(1)}};
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_token = action->m_token;
 				entry.m_state = action->m_nextState;
-				entry.m_value = dStackPair::$(userVariable) (scanner.GetTokenString());
+				entry.m_value = dStackPair::$(userVariable) (entry.m_token, scanner.GetTokenString());
 
 				token = Token (scanner.NextToken());
 
@@ -134,19 +135,20 @@ static dActionEntry actionTable[] = {{Token(1)}};
 				const dStackPair& newStackTop = stack.GetLast()->GetInfo();
 				int actionStart = actionOffsets[newStackTop.m_state][0];
 				int actionCount = actionOffsets[newStackTop.m_state][1];
-				const dActionEntry* const Goto = FindAction (&actionTable[actionStart], actionCount, action->m_token);
+				const dActionEntry* const GotoAction = FindAction (&actionTable[actionStart], actionCount, action->m_token);
 
 				dStackPair& entry = stack.Append()->GetInfo();
-				entry.m_token = Goto->m_token;
-				entry.m_state = Goto->m_nextState;
+				entry.m_token = GotoAction->m_token;
+				entry.m_state = GotoAction->m_nextState;
 
 
-				$(userVariable) params*[64];
-				_ASSERTE (entry.statesToPop < sizeof (params)/ sizeof (params[0]));
-				_ASSERTE (entry.statesToPop < stack.GetCount());
-				int index entry.statesToPop - 1;
+				dStackPair::$(userVariable)* params[MAX_USER_PARAM];
+				_ASSERTE (GotoAction->m_statesToPop < sizeof (params)/ sizeof (params[0]));
+				_ASSERTE (GotoAction->m_statesToPop < stack.GetCount());
+				int index = GotoAction->m_statesToPop - 1;
 				for (dList<dStackPair>::dListNode* node = stack.GetLast(); node; node = node->GetPrev()) {
-					params[i] = &node->GetInfo();
+					params[index] = &node->GetInfo().m_value;
+					index --;
 				}
 
 				switch (entry.m_token) 

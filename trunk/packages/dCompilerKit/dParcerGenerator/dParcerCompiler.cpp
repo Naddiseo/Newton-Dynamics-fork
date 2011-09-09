@@ -215,7 +215,7 @@ dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const out
 	string userCodeBlock;
 	string userVariable ("dUserVariable");
 	string userVariableClass ("");
-	string endUserCode ("");
+	string endUserCode ("\n");
 
 	// scan grammar to a set of LR(1) rules
 	symbolList.Insert(TERMINAL, DACCEPT_SYMBOL);
@@ -386,6 +386,7 @@ void dParcerCompiler::ScanGrammarFile(
 	// scan literal use code
 	if (token1 == GRAMMAR_SEGMENT) {
 		endUserCode = lexical.GetNextBuffer();
+		endUserCode += "\n";
 	}
 }
 
@@ -610,7 +611,7 @@ void dParcerCompiler::LoadTemplateFile(const char* const templateName, string& t
 	char* const ptr = strrchr (path, '\\');
 	sprintf (ptr, templateName);
 
-	FILE* const templateFile = fopen (path, "r");
+	FILE* const templateFile = fopen (path, "rb");
 	_ASSERTE (templateFile);
 
 	fseek (templateFile, 0, SEEK_END);
@@ -635,7 +636,7 @@ void dParcerCompiler::SaveFile(const char* const fileName, const char* const ext
 		*ptr1 = 0;
 	}
 	strcat (path, extention);
-	FILE* const headerFile = fopen (path, "w");
+	FILE* const headerFile = fopen (path, "wb");
 	_ASSERTE (headerFile);
 	fprintf (headerFile, "%s", input.c_str());
 	fclose (headerFile);

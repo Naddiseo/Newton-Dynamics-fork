@@ -33,6 +33,7 @@
 #include "dAssemblerParcer.h"
 #include <dList.h>
 
+#define MAX_USER_PARAM	64
 
 enum dAssemblerParcer::ActionType
 {
@@ -45,7 +46,7 @@ class dAssemblerParcer::dActionEntry
 {
 	public:
 	int m_nextState;
-	int statesToPop;
+	int m_statesToPop;
 	int m_actionCount;
 	Token m_token;
 	ActionType m_action;
@@ -137,7 +138,7 @@ static dActionEntry actionTable[] = {{Token(1)}};
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_token = action->m_token;
 				entry.m_state = action->m_nextState;
-				entry.m_value = dStackPair::dUserVariable (scanner.GetTokenString());
+				entry.m_value = dStackPair::dUserVariable (entry.m_token, scanner.GetTokenString());
 
 				token = Token (scanner.NextToken());
 
@@ -161,19 +162,20 @@ static dActionEntry actionTable[] = {{Token(1)}};
 				const dStackPair& newStackTop = stack.GetLast()->GetInfo();
 				int actionStart = actionOffsets[newStackTop.m_state][0];
 				int actionCount = actionOffsets[newStackTop.m_state][1];
-				const dActionEntry* const Goto = FindAction (&actionTable[actionStart], actionCount, action->m_token);
+				const dActionEntry* const GotoAction = FindAction (&actionTable[actionStart], actionCount, action->m_token);
 
 				dStackPair& entry = stack.Append()->GetInfo();
-				entry.m_token = Goto->m_token;
-				entry.m_state = Goto->m_nextState;
+				entry.m_token = GotoAction->m_token;
+				entry.m_state = GotoAction->m_nextState;
 
 
-				dUserVariable params*[64];
-				_ASSERTE (entry.statesToPop < sizeof (params)/ sizeof (params[0]));
-				_ASSERTE (entry.statesToPop < stack.GetCount());
-				int index entry.statesToPop - 1;
+				dStackPair::dUserVariable* params[MAX_USER_PARAM];
+				_ASSERTE (GotoAction->m_statesToPop < sizeof (params)/ sizeof (params[0]));
+				_ASSERTE (GotoAction->m_statesToPop < stack.GetCount());
+				int index = GotoAction->m_statesToPop - 1;
 				for (dList<dStackPair>::dListNode* node = stack.GetLast(); node; node = node->GetPrev()) {
-					params[i] = &node->GetInfo();
+					params[index] = &node->GetInfo().m_value;
+					index --;
 				}
 
 				switch (entry.m_token) 
@@ -204,114 +206,4 @@ static dActionEntry actionTable[] = {{Token(1)}};
 
 
 
-/*
 
-%start SegementList
-
-%token BEGIN END
-%token PUBLIC
-%token INCLUDE
-
-%token DATASEGMENT
-%token CODESEGMENT
-
-%token BYTE
-%token WORD
-%token DWORD
-%token DOUBLE
-%token OFFSET
-
-
-%token LITERAL
-%token REGISTER
-
-%token INTERGER
-%token FLOAT
-
-%token LOADI ADD RET
-
-
-
-%%
-
-Module			: IncludeList SegementList END
-				;
-
-
-IncludeList		: IncludeList Include
-				| Include
-				| 
-				;
-				
-Include			: INCLUDE '<' fileName '>'
-				;
-
-
-fileName		: LITERAL '.' LITERAL
-				;			
-
-SegementList	: SegmentList Segment
-				| Segment
-				| 
-				;
-				
-Segment			: DataSegment
-				| CodeSegment
-				;
-
-
-DataSegment		: DATASEGMENT ':' DataList  
-				;
-
-
-DataList		: DataList Data
-				| Data
-				|
-				;
-				
-Data			: BYTE DataList
-				| WORD DataList
-				| DWORD DataList
-				| QWORD DataList
-				| DOUBLE DataList
-				| OFFSET LITERAL INTERGER
-				;
-				
-DataValueList	: DataValueList ',' DataValue
-				| DataValue
-				;
-				
-DataValue		: LITERAL INTERGER
-				| LITERAL FLOAT
-				;
-
-
-CodeSegment		: CODESEGMENT ':' FuntionList   
-				;
-
-
-FuntionList     : FuntionList Function
-				| Function
-				|
-				;
-				
-FunctionBody	: BEGIN LITERAL ':' instructionList	END	LITERAL
-				| BEGIN LITERAL ':' PUBLIC instructionList END LITERAL
-				;	
-				
-				
-instructionList	: instructionList instruction
-				| instruction
-				;
-				
-				
-instruction		: LOADI REGISTER ',' INTERGER			
-				| ADD REGISTER ',' REGISTER	',' REGISTER		
-				| RET
-				;
-				
-				
-
-%%
-
-*/

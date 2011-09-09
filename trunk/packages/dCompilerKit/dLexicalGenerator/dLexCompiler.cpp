@@ -483,7 +483,7 @@ dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outpu
 {
 	string automataCode ("");
 	string userPreHeaderCode (""); 
-	string userPostHeaderCode (""); 
+	string userPostHeaderCode ("\n"); 
 	dList<dTransitionType> nextStateRun;
 	dTree<dTransitionCountStart, int> transitionsCountStartMap;
 
@@ -637,7 +637,7 @@ void dLexCompiler::LoadTemplateFile(const char* const templateName, string& temp
 	char* const ptr = strrchr (path, '\\');
 	sprintf (ptr, templateName);
 
-	FILE* const templateFile = fopen (path, "r");
+	FILE* const templateFile = fopen (path, "rb");
 	_ASSERTE (templateFile);
 
 	fseek (templateFile, 0, SEEK_END);
@@ -662,7 +662,7 @@ void dLexCompiler::SaveFile(const char* const fileName, const char* const extent
 		*ptr1 = 0;
 	}
 	strcat (path, extention);
-	FILE* const headerFile = fopen (path, "w");
+	FILE* const headerFile = fopen (path, "wb");
 	_ASSERTE (headerFile);
 	fprintf (headerFile, "%s", input.c_str());
 	fclose (headerFile);
@@ -935,5 +935,6 @@ void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preHeaderCode, s
 
 	if (m_token == m_delimiter) {
 		postHeaderCode = &m_grammar[m_grammarTokenStart + m_grammarTokenLength];
+		postHeaderCode += "\n";
 	}
 }

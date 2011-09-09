@@ -10,26 +10,28 @@
 */
 
 //
-//Auto generated Parcer Generator class: test0.cpp
+//Auto generated Parcer Generator class: $(className).cpp
 //
 
+#ifdef _MSC_VER
+#pragma warning (disable: 4702) // warning C4702: unreachable code
+#pragma warning (disable: 4100) // warning C4100: unreferenced formal parameter
+#endif
 
 
-
-	// test0 grammar
-
-#include "test0.h"
+$(userCode)
+#include "$(className).h"
 #include <dList.h>
 
 
-enum test0::ActionType
+enum $(className)::ActionType
 {
 	ACCEPT,
 	SHIFT,
 	REDUCE
 };
 
-class test0::dActionEntry
+class $(className)::dActionEntry
 {
 	public:
 	int m_nextState;
@@ -41,27 +43,10 @@ class test0::dActionEntry
 
 
 
-class test0::dStackPair
+class $(className)::dStackPair
 {
 	public:
-	class dUserVariable: public string 
-	{	
-		public:
-		dUserVariable ()
-			:string()
-		{
-		}
-
-		dUserVariable (Token token, const char* const text)
-			:string(text), m_token ()
-		{
-		}
-
-		Token m_token;
-	};
-
-
-
+$(userVariableClass)
 	dStackPair()
 		:m_state(0), m_token(Token (0)), m_value()
 	{
@@ -69,26 +54,26 @@ class test0::dStackPair
 
 	int m_state;
 	Token m_token;
-	dUserVariable m_value;
+	$(userVariable) m_value;
 };
 
 
-test0::test0()
+$(className)::$(className)()
 {
 }
 
-test0::~test0()
+$(className)::~$(className)()
 {
 }
 
 
-bool test0::ErrorHandler (const string& line) const
+bool $(className)::ErrorHandler (const string& line) const
 {
 	line;
 	return false;
 }
 
-const test0::dActionEntry* test0::FindAction (const dActionEntry* const actionList, int count, Token token) const
+const $(className)::dActionEntry* $(className)::FindAction (const dActionEntry* const actionList, int count, Token token) const
 {
 	for (int i = 0; i < count; i ++) {
 		if (actionList[i].m_token == token) {
@@ -99,7 +84,7 @@ const test0::dActionEntry* test0::FindAction (const dActionEntry* const actionLi
 }
 
 
-int test0::Parce(lextest1& scanner)
+int $(className)::Parce($(scannerClass)& scanner)
 {
 
 	dList<dStackPair> stack;
@@ -125,7 +110,7 @@ static dActionEntry actionTable[] = {{Token(1)}};
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_token = action->m_token;
 				entry.m_state = action->m_nextState;
-				entry.m_value = dStackPair::dUserVariable (scanner.GetTokenString());
+				entry.m_value = dStackPair::$(userVariable) (entry.m_token, scanner.GetTokenString());
 
 				token = Token (scanner.NextToken());
 
@@ -156,7 +141,7 @@ static dActionEntry actionTable[] = {{Token(1)}};
 				entry.m_state = Goto->m_nextState;
 
 
-				dUserVariable params*[64];
+				$(userVariable) params*[64];
 				_ASSERTE (entry.statesToPop < sizeof (params)/ sizeof (params[0]));
 				_ASSERTE (entry.statesToPop < stack.GetCount());
 				int index entry.statesToPop - 1;
@@ -188,7 +173,34 @@ static dActionEntry actionTable[] = {{Token(1)}};
 	return 1;
 }
 
+xxxxxxxxxxxxxxx	break;
+
+					}
+
+					default:;
+
+				}
+
+			}
 
 
 
+		} else {
 
+			// error 
+
+			if (!ErrorHandler ("error")) {
+
+				return 0;
+
+			}
+
+		}
+
+
+
+	}
+
+
+
+	return 1;
