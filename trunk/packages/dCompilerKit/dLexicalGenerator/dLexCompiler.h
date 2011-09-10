@@ -69,24 +69,28 @@ class dLexCompiler
 		int m_start;
 	};
 
-
-	class dTransitionType
+	struct dTransitionType
 	{
 		public:
+		dTransitionType ()
+			:m_value(0)
+		{
+		}
+
 		dTransitionType (unsigned val)
 			:m_value(val)
 		{
 		}
-
 		union {
 			unsigned m_value;
 			struct {
-				unsigned  m_char			: 16;
-				unsigned  m_transitionType	:  2;		// 0 m_value is a character, 1 m_value is a charcterSet, 
-				unsigned  m_targetState		: 14;
+				unsigned  m_nextState	:14;
+				unsigned  m_infoType	: 2;		// 0 m_value is a character, 1 m_value is a charcterSet, 
+				unsigned  m_info		:16;
 			};
-		}
+		};
 	};
+
 
 	public:
 	dLexCompiler(const char* const inputRules, const char* const outputFileName, const char* const inputFileName);

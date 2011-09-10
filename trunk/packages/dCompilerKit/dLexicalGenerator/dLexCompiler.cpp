@@ -442,7 +442,7 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 					dAutomataState* const targetState = sourceTransition.GetState();
 
 					dLexCompiler::dTransitionType& transitionType = nextStateRun.Append()->GetInfo();
-					transitionType.m_targetState = targetState->m_id;
+					transitionType.m_nextState = targetState->m_id;
 
 					if (!filter.Find(targetState)) {
 						pool[stack] = targetState;
@@ -455,11 +455,11 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 					if (ch.m_type == dAutomataState::CHARACTER_SET) {
 						const dChatertSetMap::ChatertSet* const charSet = m_charaterSetMap.FindSet (ch.m_info);
 						_ASSERTE (charSet);
-						transitionType.m_value = char(ch.m_info);
-						transitionType.m_transitionType = 1;
+						transitionType.m_info = char(ch.m_info);
+						transitionType.m_infoType = 1;
 					} else if (ch.m_type == dAutomataState::CHARACTER) {
-						transitionType.m_value = char(GetScapeChar(ch.m_info));
-						transitionType.m_transitionType = 0;
+						transitionType.m_info = char(GetScapeChar(ch.m_info));
+						transitionType.m_infoType = 0;
 					} else {
 						_ASSERTE (0);
 					}
@@ -783,21 +783,9 @@ void dLexCompiler::CreateCodeFile (
 	string nextStateRunString ("");
 	for (dList<dTransitionType>::dListNode* node = nextStateRun.GetFirst(); node; node = node->GetNext()) {
 		char text[256];
-		union {
-			unsigned m_value;
-			dTransitionType info;
-		} data;
-		//dTransitionType& info = node->GetInfo();
-		data.info = node->GetInfo();
-
-		sprintf (text, "0x0%x, ", data.m_value);
+		dTransitionType value (node->GetInfo());
+		sprintf (text, "0x0%x, ", value.m_value);
 		nextStateRunString += text;
-		//sprintf (text, "%d, ", info.m_value);
-		//nextStateRunString += text;
-		//sprintf (text, "%d, ", info.m_transitionType);
-		//nextStateRunString += text;
-		//sprintf (text, "%d, ", info.m_targetState);
-		//nextStateRunString += text;
 	}
 	nextStateRunString += "0";
 	ReplaceMacro (templateHeader, nextStateRunString, "$(nextTranstionList)");

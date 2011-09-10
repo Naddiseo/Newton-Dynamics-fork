@@ -49,9 +49,9 @@ class dAssemblerLexical
 		union {
 			unsigned m_value;
 			struct {
-				unsigned  m_character	: 16;
-				unsigned  m_type		:  2;		// 0 m_value is a character, 1 m_value is a charcterSet, 
-				unsigned  m_nextState	: 14;
+				unsigned  m_nextState	:14;
+				unsigned  m_infoType	: 2;		// 0 m_value is a character, 1 m_value is a charcterSet, 
+				unsigned  m_info		:16;
 			};
 		};
 	};

@@ -322,6 +322,7 @@ void dParcerCompiler::ScanGrammarFile(
 
 			default:;
 			{
+				_ASSERTE (0);
 				token = dToken(lexical.NextToken());
 			}
 		}

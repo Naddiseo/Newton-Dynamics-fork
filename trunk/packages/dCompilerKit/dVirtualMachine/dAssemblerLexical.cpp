@@ -112,7 +112,7 @@ int dAssemblerLexical::NextToken ()
 
 	static int transitionsCount[] = {2, 2, 0, 0, 1, 0, 0};
 	static int transitionsStart[] = {0, 2, 0, 0, 4, 0, 0};
-	static unsigned nextTranstionList[] = {0x040027, 0x090000, 0x0c0027, 0x0100028, 0x0140027, 0};
+	static unsigned nextTranstionList[] = {0x0270001, 0x04002, 0x0270003, 0x0280004, 0x0270005, 0};
 	
 	m_startIndex = m_index;
 
@@ -169,15 +169,15 @@ int dAssemblerLexical::NextToken ()
 				bool stateChanged = false;
 				for (int i = 0; i < count; i ++) {
 					dTransitionInfo transition (transitionsList[i]);
-					if (transition.m_type == m_infoIsCharacter) {
-						if (ch == char (transition.m_character)) {
+					if (transition.m_infoType == m_infoIsCharacter) {
+						if (ch == char (transition.m_info)) {
 							state = transition.m_nextState;
 							stateChanged = true;
 							break;
 						}
 					} else {
-						_ASSERTE (transition.m_type == m_infoIsCharacterSet);
-						int index = transition.m_character;
+						_ASSERTE (transition.m_infoType == m_infoIsCharacterSet);
+						int index = transition.m_info;
 						int length = characterSetSize[index];
 						const char* text = characterSetArray[index];
 						if (IsCharInSet (ch, text, length)) {

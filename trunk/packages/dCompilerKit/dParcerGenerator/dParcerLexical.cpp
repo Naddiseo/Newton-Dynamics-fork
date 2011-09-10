@@ -164,7 +164,7 @@ int dParcerLexical::NextToken ()
 				{
 					GetLexString ();
 					//user specified action
-					{ ReadBalancedExpresion ('{', '}'); return dParcerCompiler::USER_ACTION;}
+					{ ReadBalancedExpresion ('{', '}'); return dParcerCompiler::SEMANTIC_ACTION;}
 					state = 0;
 				}
 				break;
@@ -576,15 +576,15 @@ int dParcerLexical::NextToken ()
 				bool stateChanged = false;
 				for (int i = 0; i < count; i ++) {
 					dTransitionInfo transition (transitionsList[i]);
-					if (transition.m_type == m_infoIsCharacter) {
-						if (ch == char (transition.m_character)) {
+					if (transition.m_infoType == m_infoIsCharacter) {
+						if (ch == char (transition.m_info)) {
 							state = transition.m_nextState;
 							stateChanged = true;
 							break;
 						}
 					} else {
-						_ASSERTE (transition.m_type == m_infoIsCharacterSet);
-						int index = transition.m_character;
+						_ASSERTE (transition.m_infoType == m_infoIsCharacterSet);
+						int index = transition.m_info;
 						int length = characterSetSize[index];
 						const char* text = characterSetArray[index];
 						if (IsCharInSet (ch, text, length)) {

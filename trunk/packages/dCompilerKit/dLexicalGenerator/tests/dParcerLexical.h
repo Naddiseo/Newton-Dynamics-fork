@@ -16,6 +16,13 @@
 #ifndef __dParcerLexical_h__
 #define __dParcerLexical_h__
 
+#ifdef _MSC_VER
+#pragma warning (disable: 4702) // warning C4702: unreachable code
+#pragma warning (disable: 4100) // warning C4100: unreferenced formal parameter
+#pragma warning (disable: 4201) // warning C4201: nonstandard extension used : nameless struct/union
+#endif
+
+
 #include <string>
 using namespace std;
 
@@ -34,9 +41,19 @@ class dParcerLexical
 
 	struct dTransitionInfo
 	{
-		int		m_info		:16;
-		int		m_type		: 2;
-		int		m_nextState	:14;
+		public:
+		dTransitionInfo (unsigned val)
+			:m_value(val)
+		{
+		}
+		union {
+			unsigned m_value;
+			struct {
+				unsigned  m_nextState	:14;
+				unsigned  m_infoType	: 2;		// 0 m_value is a character, 1 m_value is a charcterSet, 
+				unsigned  m_info		:16;
+			};
+		};
 	};
 
 

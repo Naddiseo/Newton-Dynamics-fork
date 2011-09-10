@@ -13,13 +13,6 @@
 //Auto generated Parcer Generator class: test0.cpp
 //
 
-#ifdef _MSC_VER
-#pragma warning (disable: 4702) // warning C4702: unreachable code
-#pragma warning (disable: 4100) // warning C4100: unreferenced formal parameter
-#endif
-
-
-
 	// test0 grammar
 
 #include "test0.h"
