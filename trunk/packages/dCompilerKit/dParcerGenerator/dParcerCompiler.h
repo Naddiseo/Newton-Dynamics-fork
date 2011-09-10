@@ -85,11 +85,10 @@ class dParcerCompiler
 	class dAction;
 	class dSymbol;
 	class dTransition;
+	class dActionEntry;
 	class dSentenceSymbol;
 	class dRuleInfo;
 	class dProductionRule;
-
-	class dActionEntry;
 
 	
 	dParcerCompiler(const string& inputRules, const char* const outputFileName, const char* const scannerClassName);
@@ -117,7 +116,8 @@ class dParcerCompiler
 							 const string& userVarible); 
 	void GenerateParcerCode (const string& className, const string& scannerClassName, const char* const outputFileName, const string& userCode, 
 							 const string& userVariable, const string& userVariableClass, 
-							 dTree<dState*,int>& stateList, dTree<dTokenType, string>& symbolList, string& endUserCode);
+							 dTree<dState*,int>& stateList, dTree<dTokenType, string>& symbolList, dTree<int, string>& tokenEnumerationMap,
+							 string& endUserCode);
 
 };
 

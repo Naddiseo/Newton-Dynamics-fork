@@ -15,7 +15,7 @@
 #include "dParcerCompiler.h"
 #include "dParcerLexical.h"
 
-#define DACCEPT_SYMBOL "$$$"
+#define DACCEPT_SYMBOL "\t$$"
 
 
 
@@ -39,6 +39,27 @@ enum dParcerCompiler::ActionType
 	ACCEPT,
 	SHIFT,
 	REDUCE
+};
+
+class dParcerCompiler::dActionEntry
+{
+	public:
+	dActionEntry ()
+		:m_value(0)
+	{
+	}
+	dActionEntry (unsigned val)
+		:m_value(val)
+	{
+	}
+	union {
+		unsigned m_value;
+		struct {
+			unsigned  m_token		:14;
+			unsigned  m_stateType	: 2;
+			unsigned  m_nextState	:16;
+		};
+	};
 };
 
 
@@ -120,6 +141,7 @@ class dParcerCompiler::dAction
 {
 	public:
 	ActionType m_type;
+	int m_nextState;
 	dProductionRule::dListNode* m_reduceRuleNode;
 };
 
@@ -231,7 +253,7 @@ dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const out
 	//Write Parcer class and header file
 	string className (GetClassName(outputFileName));
 	GenerateHeaderFile (className, scannerClassName, outputFileName, ruleList, tokenEnumeration, userVariable);
-	GenerateParcerCode (className, scannerClassName, outputFileName, userCodeBlock, userVariable, userVariableClass, stateList, symbolList, endUserCode);
+	GenerateParcerCode (className, scannerClassName, outputFileName, userCodeBlock, userVariable, userVariableClass, stateList, symbolList, tokenEnumeration, endUserCode);
 
 	dTree<dState*,int>::Iterator iter(stateList);
 	for (iter.Begin(); iter; iter ++) {
@@ -447,7 +469,7 @@ dParcerCompiler::dToken dParcerCompiler::ScanGrammarRule(
 				symbol.m_type = TERMINAL;
 				symbol.m_token = LITERAL;
 				symbolList.Insert(TERMINAL, symbol.m_name);
-				tokenEnumerationMap.Insert(token, symbol.m_name);
+				tokenEnumerationMap.Insert(pair.m_token, symbol.m_name);
 
 			} else if (pair.m_token != SEMANTIC_ACTION) {
 				// no user action allowed in the middle of a sentence
@@ -660,55 +682,6 @@ void dParcerCompiler::ReplaceAllMacros (string& data, const string& newName, con
 }
 
 
-void dParcerCompiler::GenerateHeaderFile (
-	const string& className, 
-	const string& scannerClassName,
-	const char* const outputFileName,
-	dProductionRule& ruleList, 
-	dTree<int, string>& tokenEnumerationMap,
-	const string& userVarible)
-{
-	string templateHeader ("");
-	LoadTemplateFile("/dParcerTemplate.h", templateHeader);
-
-	ReplaceAllMacros (templateHeader, className, "$(className)");
-	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
-	ReplaceAllMacros (templateHeader, userVarible, "$(userVariable)");
-
-	string enumdTokens ("");
-	bool firstdToken = true;
-	dTree<int, string> symbolFilter;
-	for (dProductionRule::dListNode* ruleNode = ruleList.GetFirst(); ruleNode; ruleNode = ruleNode->GetNext()) {
-		dRuleInfo& ruleInfo = ruleNode->GetInfo();
-		for (dRuleInfo::dListNode* symbolNode = ruleInfo.GetFirst(); symbolNode; symbolNode = symbolNode->GetNext()) {
-			dSymbol& symbol = symbolNode->GetInfo();
-			if (symbol.m_type == TERMINAL) {
-				if (((symbol.m_name.size() > 1) || isalnum(symbol.m_name[0])) && !symbolFilter.Find(symbol.m_name)) {
-					symbolFilter.Insert(0, symbol.m_name);
-					dTree<int, string>::dTreeNode* const node = tokenEnumerationMap.Find(symbol.m_name);
-					_ASSERTE (node);
-					int value = node->GetInfo();
-					if (value >= 256) {
-						enumdTokens += "\t\t";
-						enumdTokens += symbol.m_name;
-						if (firstdToken) {
-							firstdToken = false;
-							enumdTokens += " = 256,\n";
-						} else {
-							enumdTokens += ",\n";
-						}
-					}
-				}
-			}
-		}
-	}
-
-	enumdTokens.replace(enumdTokens.size()-2, 2, "");
-
-	ReplaceMacro (templateHeader, enumdTokens, "$(Tokens)");
-
-	SaveFile(outputFileName, ".h", templateHeader);
-}
 
 
 
@@ -796,6 +769,7 @@ void dParcerCompiler::BuildParcingTable (const dTree<dState*,int>& stateList, co
 					dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (transition.m_name); 
 					dAction& action = actionNode->GetInfo();
 					action.m_type = SHIFT;
+					action.m_nextState = transition.m_targetState->m_number;
 					action.m_reduceRuleNode = NULL;
 				}
 			}
@@ -816,6 +790,57 @@ void dParcerCompiler::BuildParcingTable (const dTree<dState*,int>& stateList, co
 }
 
 
+void dParcerCompiler::GenerateHeaderFile (
+	const string& className, 
+	const string& scannerClassName,
+	const char* const outputFileName,
+	dProductionRule& ruleList, 
+	dTree<int, string>& tokenEnumerationMap,
+	const string& userVarible)
+{
+	string templateHeader ("");
+	LoadTemplateFile("/dParcerTemplate.h", templateHeader);
+
+	ReplaceAllMacros (templateHeader, className, "$(className)");
+	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
+	ReplaceAllMacros (templateHeader, userVarible, "$(userVariable)");
+
+	string enumdTokens ("");
+	bool firstdToken = true;
+	dTree<int, string> symbolFilter;
+	for (dProductionRule::dListNode* ruleNode = ruleList.GetFirst(); ruleNode; ruleNode = ruleNode->GetNext()) {
+		dRuleInfo& ruleInfo = ruleNode->GetInfo();
+		for (dRuleInfo::dListNode* symbolNode = ruleInfo.GetFirst(); symbolNode; symbolNode = symbolNode->GetNext()) {
+			dSymbol& symbol = symbolNode->GetInfo();
+			if (symbol.m_type == TERMINAL) {
+				if (((symbol.m_name.size() > 1) || isalnum(symbol.m_name[0])) && !symbolFilter.Find(symbol.m_name)) {
+					symbolFilter.Insert(0, symbol.m_name);
+					dTree<int, string>::dTreeNode* const node = tokenEnumerationMap.Find(symbol.m_name);
+					_ASSERTE (node);
+					int value = node->GetInfo();
+					if (value >= 256) {
+						enumdTokens += "\t\t";
+						enumdTokens += symbol.m_name;
+						if (firstdToken) {
+							_ASSERTE (value == 256);
+							firstdToken = false;
+							enumdTokens += " = 256,\n";
+						} else {
+							enumdTokens += ",\n";
+						}
+					}
+				}
+			}
+		}
+	}
+
+	enumdTokens.replace(enumdTokens.size()-2, 2, "");
+
+	ReplaceMacro (templateHeader, enumdTokens, "$(Tokens)");
+
+	SaveFile(outputFileName, ".h", templateHeader);
+}
+
 
 void dParcerCompiler::GenerateParcerCode (
 	const string& className, 
@@ -826,6 +851,7 @@ void dParcerCompiler::GenerateParcerCode (
 	const string& userVariableClass, 
 	dTree<dState*,int>& stateList, 
 	dTree<dTokenType, string>& symbolList,
+	dTree<int, string>& tokenEnumerationMap,
 	string& endUserCode)
 {
 	string templateHeader ("");
@@ -840,24 +866,66 @@ void dParcerCompiler::GenerateParcerCode (
 	ReplaceMacro (templateHeader, userVariableClass, "$(userVariableClass)");
 	ReplaceAllMacros (templateHeader, userVariable, "$(userVariable)");
 
+	dTree<dState*,int> sortedStates;
 	dTree<dState*,int>::Iterator stateIter (stateList);
 	for (stateIter.Begin(); stateIter; stateIter ++) {
 		dState* const state = stateIter.GetNode()->GetInfo();
-
-		dTree<dAction, string>::Iterator actionIter (state->m_actions);
-		for (actionIter.Begin(); actionIter; actionIter++) {
-			dAction& action = actionIter.GetNode()->GetInfo();
-			if (action.m_type == SHIFT) {
-				//				_ASSERTE (0);
-			} else if (action.m_type == REDUCE) {
-				//				_ASSERTE (0);
-			} else {
-				//				_ASSERTE (action.m_type == ACCEPT);
-			}
-		}
+		sortedStates.Insert(state, state->m_number);
 	}
 
-	templateHeader += endUserCode;
 
+	
+	string nextStateList ("");
+	string stateActionsStart ("");
+	string stateActionsCount ("");
+	int entriesCount = 0;
+	dTree<dState*,int>::Iterator sortStateIter (sortedStates);
+	for (sortStateIter.Begin(); sortStateIter; sortStateIter ++) {
+		dState* const state = sortStateIter.GetNode()->GetInfo();
+
+		int count = 0;
+		dTree<dAction, string>::Iterator actionIter (state->m_actions);
+		for (actionIter.Begin(); actionIter; actionIter++) {
+			count ++;
+			dAction& action = actionIter.GetNode()->GetInfo();
+			if (action.m_type == SHIFT) {
+				const string& symbol = actionIter.GetKey();
+				dTree<int, string>::dTreeNode* const node = tokenEnumerationMap.Find(symbol);
+				_ASSERTE (node);
+				dActionEntry entry;
+				entry.m_nextState = action.m_nextState;
+				entry.m_token = node->GetInfo();
+				entry.m_stateType = 0;
+				char text[256];
+				sprintf (text, "0x%x, ", entry.m_value);
+				nextStateList += text;
+				entriesCount ++;
+			} else if (action.m_type == REDUCE) {
+				_ASSERTE (0);
+			} else {
+				_ASSERTE (action.m_type == ACCEPT);
+				dActionEntry entry;
+				entry.m_stateType = 2;
+				char text[256];
+				sprintf (text, "0x%x, ", entry.m_value);
+				nextStateList += text;
+				entriesCount ++;
+			}
+		}
+
+		char text[256];
+		sprintf (text, "%d, ", entriesCount);
+		stateActionsStart += text;
+
+		sprintf (text, "%d, ", count);
+		stateActionsCount += text;
+	}
+	nextStateList.replace(nextStateList.size()-2, 2, "");
+	stateActionsCount.replace(stateActionsCount.size()-2, 2, "");
+	stateActionsStart.replace(stateActionsStart.size()-2, 2, "");
+
+
+
+	templateHeader += endUserCode;
 	SaveFile(outputFileName, ".cpp", templateHeader);
 }

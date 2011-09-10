@@ -21,7 +21,6 @@ enum dLexCompiler::dToken
 	m_comment,
 	m_delimiter,
 	m_codeBlock,
-//	m_userActionCode,
 	m_intenalSize,
 	m_number,
 	m_quatedString,

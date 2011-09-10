@@ -36,6 +36,25 @@ class test0
 		id = 256
 	};
 
+	class dActionEntry
+	{
+		public:
+		dActionEntry (unsigned val)
+			:m_value(val)
+		{
+		}
+		union {
+			unsigned m_value;
+			struct {
+				unsigned  m_token		:14;
+				unsigned  m_stateType	: 2;  // 0 = shift, 1 = reduce, 2 = accept
+				unsigned  m_nextState	:16;
+			};
+		};
+	};
+
+	 
+
 	enum ActionType;
 	class dStackPair;
 	class dActionEntry;
