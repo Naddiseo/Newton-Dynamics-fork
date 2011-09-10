@@ -811,14 +811,14 @@ void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preHeaderCode, s
 {
 	// parse definitions
 	{
-		m_tokenList.AddTokenData (m_whiteSpace, "[ \t\v\n\f]+");
+		m_tokenList.AddTokenData (m_whiteSpace, "[ \n\r\t\v\f]+");
 		m_tokenList.AddTokenData (m_comment, "(/\\*([^*]|[\r\n]|(\\*+([^*/]|[\r\n])))*\\*+/)|(//.*)");
 		m_tokenList.AddTokenData (m_codeBlock, "%\\{([^%]|[\r\n]|(%+([^%}]|[\r\n])))*%+\\}");
 		m_tokenList.AddTokenData (m_literal, "[a-zA-Z_][0-9a-zA-Z]*");
 		m_tokenList.AddTokenData (m_number, "[0-9]+");
 		m_tokenList.AddTokenData (m_intenalSize, "%[pneako]");
 		m_tokenList.AddTokenData (m_delimiter, "%%");
-		m_tokenList.AddTokenData (m_extendedRegularExpresion, "((\\[[^\\]]+\\])|[^ \t\v\n\f[]+)+");
+		m_tokenList.AddTokenData (m_extendedRegularExpresion, "((\\[[^\\]]+\\])|[^ \n\r\t\v\f[]+)+");
 
 		for (NextToken(); (m_token != m_end) && (m_token != m_delimiter);) {
 			ParseDefinitionExpression (preHeaderCode);
@@ -841,11 +841,11 @@ void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preHeaderCode, s
 		//	8	m_literal,
 		//	9	m_extendedRegularExpresion,
 
-		m_tokenList.AddTokenData (m_whiteSpace, "[ \t\v\n\f]+");
+		m_tokenList.AddTokenData (m_whiteSpace, "[ \n\r\t\v\f]+");
 		m_tokenList.AddTokenData (m_quatedString, "\"[^\" \t\v\n\f]*\"");
 		m_tokenList.AddTokenData (m_delimiter, "%%");
 		m_tokenList.AddTokenData (m_comment, "(/\\*([^*]|[\r\n]|(\\*+([^*/]|[\r\n])))*\\*+/)|(//.*)");
-		m_tokenList.AddTokenData (m_extendedRegularExpresion, "((\\[[^\\]]+\\])|[^ \t\v\n\f[]+)+");
+		m_tokenList.AddTokenData (m_extendedRegularExpresion, "((\\[[^\\]]+\\])|[^ \n\r\t\v\f[]+)+");
 
 		
 		for (NextToken(); (m_token != m_end) && (m_token != m_delimiter); ) {

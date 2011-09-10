@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 	const char* const outputFileName = argv[3];
 	
 
-	FILE* const rules = fopen (inputRulesFileName, "r");
+	FILE* const rules = fopen (inputRulesFileName, "rb");
 	if (!rules) {
 		fprintf (stdout, "Rule file \"%s\" not found\n",  inputRulesFileName);
 		exit (0);
@@ -39,7 +39,6 @@ int main(int argc, char* argv[])
 	int size = ftell (rules);
 	fseek (rules, 0, SEEK_SET);
 
-	//char* const buffer = new char [size + 1];
 	string buffer;
 	buffer.resize (size + 1);
 	fread ((void*) buffer.c_str(), 1, size, rules);
@@ -48,7 +47,6 @@ int main(int argc, char* argv[])
 
 	dParcerCompiler parcel (buffer, outputFileName, scannerClassName);
 
-//	delete buffer;
 
 	return 0;
 }
