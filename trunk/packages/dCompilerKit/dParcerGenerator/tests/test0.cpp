@@ -10,7 +10,7 @@
 */
 
 //
-//Auto generated Parcer Generator class: $(className).cpp
+//Auto generated Parcer Generator class: test0.cpp
 //
 
 #ifdef _MSC_VER
@@ -19,23 +19,26 @@
 #endif
 
 
-$(userCode)
-#include "$(className).h"
+
+	// test0 grammar
+
+#include "test0.h"
 #include <dList.h>
 
+#define MAX_USER_PARAM	64
 
-enum $(className)::ActionType
+enum test0::ActionType
 {
 	ACCEPT,
 	SHIFT,
 	REDUCE
 };
 
-class $(className)::dActionEntry
+class test0::dActionEntry
 {
 	public:
 	int m_nextState;
-	int statesToPop;
+	int m_statesToPop;
 	int m_actionCount;
 	Token m_token;
 	ActionType m_action;
@@ -43,10 +46,27 @@ class $(className)::dActionEntry
 
 
 
-class $(className)::dStackPair
+class test0::dStackPair
 {
 	public:
-$(userVariableClass)
+	class dUserVariable: public string 
+	{	
+		public:
+		dUserVariable ()
+			:string()
+		{
+		}
+
+		dUserVariable (Token token, const char* const text)
+			:string(text), m_token (token)
+		{
+		}
+
+		Token m_token;
+	};
+
+
+
 	dStackPair()
 		:m_state(0), m_token(Token (0)), m_value()
 	{
@@ -54,26 +74,26 @@ $(userVariableClass)
 
 	int m_state;
 	Token m_token;
-	$(userVariable) m_value;
+	dUserVariable m_value;
 };
 
 
-$(className)::$(className)()
+test0::test0()
 {
 }
 
-$(className)::~$(className)()
+test0::~test0()
 {
 }
 
 
-bool $(className)::ErrorHandler (const string& line) const
+bool test0::ErrorHandler (const string& line) const
 {
 	line;
 	return false;
 }
 
-const $(className)::dActionEntry* $(className)::FindAction (const dActionEntry* const actionList, int count, Token token) const
+const test0::dActionEntry* test0::FindAction (const dActionEntry* const actionList, int count, Token token) const
 {
 	for (int i = 0; i < count; i ++) {
 		if (actionList[i].m_token == token) {
@@ -84,7 +104,7 @@ const $(className)::dActionEntry* $(className)::FindAction (const dActionEntry* 
 }
 
 
-int $(className)::Parce($(scannerClass)& scanner)
+int test0::Parce(lextest1& scanner)
 {
 
 	dList<dStackPair> stack;
@@ -110,7 +130,7 @@ static dActionEntry actionTable[] = {{Token(1)}};
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_token = action->m_token;
 				entry.m_state = action->m_nextState;
-				entry.m_value = dStackPair::$(userVariable) (entry.m_token, scanner.GetTokenString());
+				entry.m_value = dStackPair::dUserVariable (entry.m_token, scanner.GetTokenString());
 
 				token = Token (scanner.NextToken());
 
@@ -134,19 +154,20 @@ static dActionEntry actionTable[] = {{Token(1)}};
 				const dStackPair& newStackTop = stack.GetLast()->GetInfo();
 				int actionStart = actionOffsets[newStackTop.m_state][0];
 				int actionCount = actionOffsets[newStackTop.m_state][1];
-				const dActionEntry* const Goto = FindAction (&actionTable[actionStart], actionCount, action->m_token);
+				const dActionEntry* const GotoAction = FindAction (&actionTable[actionStart], actionCount, action->m_token);
 
 				dStackPair& entry = stack.Append()->GetInfo();
-				entry.m_token = Goto->m_token;
-				entry.m_state = Goto->m_nextState;
+				entry.m_token = GotoAction->m_token;
+				entry.m_state = GotoAction->m_nextState;
 
 
-				$(userVariable) params*[64];
-				_ASSERTE (entry.statesToPop < sizeof (params)/ sizeof (params[0]));
-				_ASSERTE (entry.statesToPop < stack.GetCount());
-				int index entry.statesToPop - 1;
+				dStackPair::dUserVariable* params[MAX_USER_PARAM];
+				_ASSERTE (GotoAction->m_statesToPop < sizeof (params)/ sizeof (params[0]));
+				_ASSERTE (GotoAction->m_statesToPop < stack.GetCount());
+				int index = GotoAction->m_statesToPop - 1;
 				for (dList<dStackPair>::dListNode* node = stack.GetLast(); node; node = node->GetPrev()) {
-					params[i] = &node->GetInfo();
+					params[index] = &node->GetInfo().m_value;
+					index --;
 				}
 
 				switch (entry.m_token) 
@@ -173,34 +194,8 @@ static dActionEntry actionTable[] = {{Token(1)}};
 	return 1;
 }
 
-xxxxxxxxxxxxxxx	break;
-
-					}
-
-					default:;
-
-				}
-
-			}
 
 
 
-		} else {
-
-			// error 
-
-			if (!ErrorHandler ("error")) {
-
-				return 0;
-
-			}
-
-		}
 
 
-
-	}
-
-
-
-	return 1;

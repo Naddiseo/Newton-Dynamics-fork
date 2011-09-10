@@ -13,19 +13,15 @@
 //Auto generated Lexical Analyzer class: dAssemblerLexical.cpp
 //
 
-//
-// Newton virtual machine assemble lexema
-// based looselly on the MIPS R3000 Instruction Set 
-//
-
 #include <dVirtualMachine.h>
 #include "dAssemblerParcer.h"
 
-#include "dAssemblerLexical.h"
+//
+// Newton virtual machine assembler grammar
+// based loosely on the MIPS R3000 and the Intel 386 instructions sets 
+//
 
-#ifdef _MSC_VER
-	#pragma warning (disable: 4702) // warning C4702: unreachable code
-#endif
+#include "dAssemblerLexical.h"
 
 
 dAssemblerLexical::dAssemblerLexical(const char* const data)
@@ -116,7 +112,7 @@ int dAssemblerLexical::NextToken ()
 
 	static int transitionsCount[] = {2, 2, 0, 0, 1, 0, 0};
 	static int transitionsStart[] = {0, 2, 0, 0, 4, 0, 0};
-	static dTransitionInfo nextTranstionList[] = {39, 0, 1, 0, 1, 2, 39, 0, 3, 40, 0, 4, 39, 0, 5, 0};
+	static unsigned nextTranstionList[] = {0x040027, 0x090000, 0x0c0027, 0x0100028, 0x0140027, 0};
 	
 	m_startIndex = m_index;
 
@@ -168,20 +164,20 @@ int dAssemblerLexical::NextToken ()
 				char ch = NextChar();
 				int count = transitionsCount[state];
 				int start = transitionsStart[state];
-				dTransitionInfo* const transitionsList = &nextTranstionList[start];
+				unsigned* const transitionsList = &nextTranstionList[start];
 
 				bool stateChanged = false;
 				for (int i = 0; i < count; i ++) {
-					dTransitionInfo& transition = transitionsList[i];
+					dTransitionInfo transition (transitionsList[i]);
 					if (transition.m_type == m_infoIsCharacter) {
-						if (ch == transition.m_info) {
+						if (ch == char (transition.m_character)) {
 							state = transition.m_nextState;
 							stateChanged = true;
 							break;
 						}
 					} else {
 						_ASSERTE (transition.m_type == m_infoIsCharacterSet);
-						int index = transition.m_info;
+						int index = transition.m_character;
 						int length = characterSetSize[index];
 						const char* text = characterSetArray[index];
 						if (IsCharInSet (ch, text, length)) {

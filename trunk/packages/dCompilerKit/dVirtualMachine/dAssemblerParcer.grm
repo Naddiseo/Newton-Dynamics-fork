@@ -11,15 +11,13 @@
 */
 
 %{
-//
-// Newton virtual machine assembler grammar
-// based loosely on the MIPS R3000 Instruction Set 
-//
-
 #include <dVirtualMachine.h>
-
 #include "dAssemblerLexical.h"
 #include "dAssemblerCompiler.h"
+//
+// Newton virtual machine assembler grammar
+// based loosely on the MIPS R3000 and the Intel 386 instructions sets 
+//
 %}
 
 %token id

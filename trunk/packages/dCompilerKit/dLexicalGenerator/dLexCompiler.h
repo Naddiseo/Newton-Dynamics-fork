@@ -73,12 +73,19 @@ class dLexCompiler
 	class dTransitionType
 	{
 		public:
-		int m_targetState;
-		int m_value				: 16;
-		int m_transitionType	:  3;		// 0 m_value is a character, 1 m_value is a charcterSet, 
-											// 2 m_value is init for nested balanced expression, 
-											// 3 m_value is Increment for nested balanced expression, 
-											// 4 m_value is decrement for nested balanced expression
+		dTransitionType (unsigned val)
+			:m_value(val)
+		{
+		}
+
+		union {
+			unsigned m_value;
+			struct {
+				unsigned  m_char			: 16;
+				unsigned  m_transitionType	:  2;		// 0 m_value is a character, 1 m_value is a charcterSet, 
+				unsigned  m_targetState		: 14;
+			};
+		}
 	};
 
 	public:
@@ -95,7 +102,7 @@ class dLexCompiler
 	
 	void CreateHeaderFile (const char* const fileName, const string& className) const;
 	void CreateCodeFile (const char* const fileName, const string& className, int stateCount, 
-						 const string& userPreHeaderCode, const string& userPostHeaderCode, const string& automataCode,
+						 const string& userPreHeaderCode, const string& userPostHeaderCode, const string& semanticActionCode,
 						 const dChatertSetMap& characterSet, dTree<dTransitionCountStart, int>& transitionsCountStartMap, dList<dTransitionType>& nextStateRun) const;
 
 	string GetClassName(const char* const fileName) const;

@@ -21,7 +21,7 @@ enum dLexCompiler::dToken
 	m_comment,
 	m_delimiter,
 	m_codeBlock,
-	m_userActionCode,
+//	m_userActionCode,
 	m_intenalSize,
 	m_number,
 	m_quatedString,
@@ -275,14 +275,14 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 	public: 
 	dExpandedDFA (
 		const dNonDeterministicFiniteAutonata& nfa, 
-		string& automataCodeOutput, 
+		string& semanticActionCodeOutput, 
 		dTree<dTransitionCountStart, int>& transitionsCountMap,
 		dList<dTransitionType>& nextStateRun,
 		const char* const inputFileName)
 		:dDeterministicFiniteAutonata (), m_stateCount(0), m_nfa(&nfa)
 	{
 		CreateDeterministicFiniteAutomaton (nfa);
-		ConvertSwitchCaseStatements (automataCodeOutput, transitionsCountMap, nextStateRun, inputFileName);
+		ConvertSwitchCaseStatements (semanticActionCodeOutput, transitionsCountMap, nextStateRun, inputFileName);
 	}
 
 	int GetStateCount() const
@@ -346,7 +346,7 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 
 
 	void ConvertSwitchCaseStatements (
-		string& automataCodeOutput, 
+		string& semanticActionCodeOutput, 
 		dTree<dTransitionCountStart, int>& transitionsCountMap,
 		dList<dTransitionType>& nextStateRun,
 		const char* const inputFileName) const 
@@ -380,11 +380,11 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 			}
 
 			if (state->m_exitState) {
-				AddText (automataCodeOutput, "case %d:\n", state->m_id);
-//				AddText (automataCodeOutput, "#line %d %s\n", state->m_lineNumber, fileName.c_str());
-				AddText (automataCodeOutput, "{\n");
+				AddText (semanticActionCodeOutput, "case %d:\n", state->m_id);
+//				AddText (semanticActionCodeOutput, "#line %d %s\n", state->m_lineNumber, fileName.c_str());
+				AddText (semanticActionCodeOutput, "{\n");
 				if (!state->m_exitState || state->m_transtions.GetCount()) {
-					AddText (automataCodeOutput, "\tchar ch = NextChar();\n");
+					AddText (semanticActionCodeOutput, "\tchar ch = NextChar();\n");
 				}
 
 				for (dList<dAutomataState::dTransition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
@@ -400,9 +400,9 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 
 					dAutomataState::dCharacter ch (sourceTransition.GetCharater());
 					if (ch.m_type == dAutomataState::CHARACTER_SET) {
-						AddText (automataCodeOutput, "\t%sif (IsCharInSet (ch, text_%d, characterSetSize[%d])) state = %d;\n", condition, ch.m_info, ch.m_info, targetState->m_id);
+						AddText (semanticActionCodeOutput, "\t%sif (IsCharInSet (ch, text_%d, characterSetSize[%d])) state = %d;\n", condition, ch.m_info, ch.m_info, targetState->m_id);
 					} else if (ch.m_type == dAutomataState::CHARACTER) {
-						AddText (automataCodeOutput, "\t%sif (ch == %d) state = %d;\n", condition, GetScapeChar(ch.m_info), targetState->m_id);
+						AddText (semanticActionCodeOutput, "\t%sif (ch == %d) state = %d;\n", condition, GetScapeChar(ch.m_info), targetState->m_id);
 					} else {
 						_ASSERTE (0);
 					}
@@ -410,24 +410,24 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 					sprintf (condition, "else ");
 				}
 
-				AddText (automataCodeOutput, "\t%s{\n", condition);
+				AddText (semanticActionCodeOutput, "\t%s{\n", condition);
 
 				if (state->m_transtions.GetCount()) {
-					AddText (automataCodeOutput, "\t\tUnGetChar();\n");
+					AddText (semanticActionCodeOutput, "\t\tUnGetChar();\n");
 				}
-				AddText (automataCodeOutput, "\t\tGetLexString ();\n");
+				AddText (semanticActionCodeOutput, "\t\tGetLexString ();\n");
 
-				AddText (automataCodeOutput, "\t\t//user specified action\n");
-				//AddText (automataCodeOutput, "\t\tmatchFound = true;\n");
-				AddText (automataCodeOutput, "\t\t%s\n", state->m_userAction.c_str());
-				AddText (automataCodeOutput, "\t\tstate = 0;\n");
-				//AddText (automataCodeOutput, "\t\tmatchFound = false;\n");
+				AddText (semanticActionCodeOutput, "\t\t//user specified action\n");
+				//AddText (semanticActionCodeOutput, "\t\tmatchFound = true;\n");
+				AddText (semanticActionCodeOutput, "\t\t%s\n", state->m_userAction.c_str());
+				AddText (semanticActionCodeOutput, "\t\tstate = 0;\n");
+				//AddText (semanticActionCodeOutput, "\t\tmatchFound = false;\n");
 
-				AddText (automataCodeOutput, "\t}\n");
+				AddText (semanticActionCodeOutput, "\t}\n");
 
-				AddText (automataCodeOutput, "\tbreak;\n");
+				AddText (semanticActionCodeOutput, "\tbreak;\n");
 
-				AddText (automataCodeOutput, "}\n");
+				AddText (semanticActionCodeOutput, "}\n");
 
 			} else {
 
@@ -481,7 +481,7 @@ dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outpu
 	,m_grammar (inputRules)
 	,m_tokenList()
 {
-	string automataCode ("");
+	string semanticActionCode ("");
 	string userPreHeaderCode (""); 
 	string userPostHeaderCode ("\n"); 
 	dList<dTransitionType> nextStateRun;
@@ -492,12 +492,12 @@ dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outpu
 	ParseDefinitions (nfa, userPreHeaderCode, userPostHeaderCode);
 
 	// convert nfa to Deterministic Finite Automaton
-	dExpandedDFA dfa (nfa, automataCode, transitionsCountStartMap, nextStateRun, inputFileName);
+	dExpandedDFA dfa (nfa, semanticActionCode, transitionsCountStartMap, nextStateRun, inputFileName);
 
 	// save header and source files
 	string className (GetClassName(outputFileName));
 	CreateHeaderFile (outputFileName, className);
-	CreateCodeFile (outputFileName, className, dfa.GetStateCount(), userPreHeaderCode, userPostHeaderCode, automataCode, dfa.GetCharacterSetMap(), transitionsCountStartMap, nextStateRun); 
+	CreateCodeFile (outputFileName, className, dfa.GetStateCount(), userPreHeaderCode, userPostHeaderCode, semanticActionCode, dfa.GetCharacterSetMap(), transitionsCountStartMap, nextStateRun); 
 	
 }
 
@@ -702,7 +702,7 @@ void dLexCompiler::CreateCodeFile (
 	int stateCount,
 	const string& userPreHeaderCode, 
 	const string& userPostHeaderCode, 
-	const string& automataCode,
+	const string& semanticActionCode,
 	const dChatertSetMap& characterSet,
 	dTree<dTransitionCountStart, int>& transitionsCountStartMap,
 	dList<dTransitionType>& nextStateRun) const
@@ -783,18 +783,26 @@ void dLexCompiler::CreateCodeFile (
 	string nextStateRunString ("");
 	for (dList<dTransitionType>::dListNode* node = nextStateRun.GetFirst(); node; node = node->GetNext()) {
 		char text[256];
-		dTransitionType& info = node->GetInfo();
-		sprintf (text, "%d, ", info.m_value);
+		union {
+			unsigned m_value;
+			dTransitionType info;
+		} data;
+		//dTransitionType& info = node->GetInfo();
+		data.info = node->GetInfo();
+
+		sprintf (text, "0x0%x, ", data.m_value);
 		nextStateRunString += text;
-		sprintf (text, "%d, ", info.m_transitionType);
-		nextStateRunString += text;
-		sprintf (text, "%d, ", info.m_targetState);
-		nextStateRunString += text;
+		//sprintf (text, "%d, ", info.m_value);
+		//nextStateRunString += text;
+		//sprintf (text, "%d, ", info.m_transitionType);
+		//nextStateRunString += text;
+		//sprintf (text, "%d, ", info.m_targetState);
+		//nextStateRunString += text;
 	}
 	nextStateRunString += "0";
 	ReplaceMacro (templateHeader, nextStateRunString, "$(nextTranstionList)");
 
-	ReplaceMacro (templateHeader, automataCode, "$(userActions)");
+	ReplaceMacro (templateHeader, semanticActionCode, "$(semanticActionCode)");
 
 //	templateHeader = templateHeader + userPostHeaderCode;
 	templateHeader = templateHeader + userPostHeaderCode;
@@ -917,7 +925,7 @@ void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preHeaderCode, s
 					case m_extendedRegularExpresion:
 					{
 						nfa.AddExpression(expression, userAction, lineNumber);
-						//DTRACE ((automataCode.c_str()));
+						//DTRACE ((semanticActionCode.c_str()));
 
 						break;
 					}

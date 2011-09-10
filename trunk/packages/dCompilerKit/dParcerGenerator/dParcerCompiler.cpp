@@ -57,11 +57,11 @@ class dParcerCompiler::dRuleInfo: public dParcerCompiler::dSymbol, public dList<
 	public:
 	int m_ruleId;
 	int m_ruleNumber;
-	string m_userActionCode;
+	string m_semanticActionCode;
 
 	dRuleInfo()
 		:dSymbol(), dList<dSymbol>()
-		,m_ruleId(0), m_ruleNumber(0), m_userActionCode("")
+		,m_ruleId(0), m_ruleNumber(0), m_semanticActionCode("")
 	{
 	}
 
@@ -305,7 +305,7 @@ void dParcerCompiler::ScanGrammarFile(
 			case UNION:
 			{
 				token = dToken(lexical.NextToken());
-				_ASSERTE (token == USER_ACTION);
+				_ASSERTE (token == SEMANTIC_ACTION);
 				userVariableClass = lexical.GetTokenString() + 1;
 				userVariableClass.replace(userVariableClass.size() - 1, 1, "");
 				token = dToken(lexical.NextToken());
@@ -417,10 +417,10 @@ dParcerCompiler::dToken dParcerCompiler::ScanGrammarRule(
 		}
 		
 		dList<dTokenStringPair>::dListNode* lastNode = ruleTokens.GetLast();
-		if (lastNode->GetInfo().m_token != USER_ACTION) {
+		if (lastNode->GetInfo().m_token != SEMANTIC_ACTION) {
 			lastNode = NULL;
 		} else {
-			currentRule->m_userActionCode = lastNode->GetInfo().m_info;
+			currentRule->m_semanticActionCode = lastNode->GetInfo().m_info;
 		}
 		for (dList<dTokenStringPair>::dListNode* node = ruleTokens.GetFirst(); node != lastNode; node = node->GetNext()) {
 			dTokenStringPair& pair = node->GetInfo();
@@ -448,9 +448,9 @@ dParcerCompiler::dToken dParcerCompiler::ScanGrammarRule(
 				symbolList.Insert(TERMINAL, symbol.m_name);
 				tokenEnumerationMap.Insert(token, symbol.m_name);
 
-			} else if (pair.m_token != USER_ACTION) {
+			} else if (pair.m_token != SEMANTIC_ACTION) {
 				// no user action allowed in the middle of a sentence
-				_ASSERTE (pair.m_token == USER_ACTION);
+				_ASSERTE (pair.m_token == SEMANTIC_ACTION);
 			} else {
 				_ASSERTE (0);
 			}

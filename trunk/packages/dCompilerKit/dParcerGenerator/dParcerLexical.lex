@@ -71,5 +71,5 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 "'\*'"				{ m_tokenString = "*"; return('*'); }
 "'\['"				{ m_tokenString = "["; return('['); }
 "'\]'"				{ m_tokenString = "]"; return(']'); }
-[{]					{ ReadBalancedExpresion ('{', '}'); return dParcerCompiler::USER_ACTION;}
+[{]					{ ReadBalancedExpresion ('{', '}'); return dParcerCompiler::SEMANTIC_ACTION;}
 

@@ -11,13 +11,13 @@
 */
 
 %{
-//
-// Newton virtual machine assemble lexema
-// based looselly on the MIPS R3000 Instruction Set 
-//
-
 #include <dVirtualMachine.h>
 #include "dAssemblerParcer.h"
+
+//
+// Newton virtual machine assembler grammar
+// based loosely on the MIPS R3000 and the Intel 386 instructions sets 
+//
 %}
 
 

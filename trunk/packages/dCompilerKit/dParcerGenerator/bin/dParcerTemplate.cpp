@@ -12,13 +12,6 @@
 //
 //Auto generated Parcer Generator class: $(className).cpp
 //
-
-#ifdef _MSC_VER
-#pragma warning (disable: 4702) // warning C4702: unreachable code
-#pragma warning (disable: 4100) // warning C4100: unreferenced formal parameter
-#endif
-
-
 $(userCode)
 #include "$(className).h"
 #include <dList.h>

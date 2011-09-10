@@ -34,9 +34,9 @@ class dParcerLexical
 
 	struct dTransitionInfo
 	{
-		short m_info;
-		short m_type;
-		short m_nextState;
+		int		m_info		:16;
+		int		m_type		: 2;
+		int		m_nextState	:14;
 	};
 
 

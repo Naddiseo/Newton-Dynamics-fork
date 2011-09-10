@@ -15,10 +15,6 @@
 $(userIncludeCode)
 #include "$(className).h"
 
-#ifdef _MSC_VER
-	#pragma warning (disable: 4702) // warning C4702: unreachable code
-#endif
-
 
 $(className)::$(className)(const char* const data)
 	:m_tokenString ("")
@@ -107,7 +103,7 @@ $(characterSets)
 
 	static int transitionsCount[] = {$(transitionsCount)};
 	static int transitionsStart[] = {$(transitionsStart)};
-	static dTransitionInfo nextTranstionList[] = {$(nextTranstionList)};
+	static unsigned nextTranstionList[] = {$(nextTranstionList)};
 	
 	m_startIndex = m_index;
 
@@ -116,27 +112,27 @@ $(characterSets)
 	{
 		switch (state) 
 		{
-$(userActions)
+$(semanticActionCode)
 		
 			default:
 			{
 				char ch = NextChar();
 				int count = transitionsCount[state];
 				int start = transitionsStart[state];
-				dTransitionInfo* const transitionsList = &nextTranstionList[start];
+				unsigned* const transitionsList = &nextTranstionList[start];
 
 				bool stateChanged = false;
 				for (int i = 0; i < count; i ++) {
-					dTransitionInfo& transition = transitionsList[i];
+					dTransitionInfo transition (transitionsList[i]);
 					if (transition.m_type == m_infoIsCharacter) {
-						if (ch == transition.m_info) {
+						if (ch == char (transition.m_character)) {
 							state = transition.m_nextState;
 							stateChanged = true;
 							break;
 						}
 					} else {
 						_ASSERTE (transition.m_type == m_infoIsCharacterSet);
-						int index = transition.m_info;
+						int index = transition.m_character;
 						int length = characterSetSize[index];
 						const char* text = characterSetArray[index];
 						if (IsCharInSet (ch, text, length)) {

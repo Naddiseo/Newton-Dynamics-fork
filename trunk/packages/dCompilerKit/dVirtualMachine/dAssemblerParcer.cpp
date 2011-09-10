@@ -13,22 +13,13 @@
 //Auto generated Parcer Generator class: dAssemblerParcer.cpp
 //
 
-#ifdef _MSC_VER
-#pragma warning (disable: 4702) // warning C4702: unreachable code
-#pragma warning (disable: 4100) // warning C4100: unreferenced formal parameter
-#endif
-
-
-
-//
-// Newton virtual machine assembler grammar
-// based loosely on the MIPS R3000 Instruction Set 
-//
-
 #include <dVirtualMachine.h>
-
 #include "dAssemblerLexical.h"
 #include "dAssemblerCompiler.h"
+//
+// Newton virtual machine assembler grammar
+// based loosely on the MIPS R3000 and the Intel 386 instructions sets 
+//
 
 #include "dAssemblerParcer.h"
 #include <dList.h>
