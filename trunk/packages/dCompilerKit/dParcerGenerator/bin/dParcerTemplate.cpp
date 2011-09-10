@@ -146,8 +146,8 @@ static dActionEntry actionTable[] = {{Token(1)}};
 
 				switch (entry.m_token) 
 				{
-					//do userAction
-					//$(userActionsCode);
+					//do user semantic Action
+					//$(semanticActionsCode);
 					case 256:
 					{
 						break;

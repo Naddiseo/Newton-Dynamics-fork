@@ -37,7 +37,7 @@ class dVirtualMachine
 		enter,		// enter	Rn0, Rn1, bytes		[Rn1] = Rn0, Rn0 = Rn1, Rn1 = Rn1 + bytes	
 		exit,		// exit		Rn0, Rn1, bytes		Rn1 = Rn0, Rn0 = [Rn1]
 		push,		// push		Rn0, registerMask	tmp = rn0; i = 0; mask = registenMask; while (mask & 1) {[tmp] = Rn(i); tmp += 4}; rn0 = tmp; 
-		pop,			// pop		Rn0, registerMask   tmp = rn0; i = 0; mask = registenMask; while (mask & (1<<15)) {tmp -= 4; Rn(i) = [tmp];}
+		pop,		// pop		Rn0, registerMask   tmp = rn0; i = 0; mask = registenMask; while (mask & (1<<15)) {tmp -= 4; Rn(i) = [tmp];}
 	};
 
 	struct dNemonic
@@ -50,24 +50,23 @@ class dVirtualMachine
 	{
 		struct dType0
 		{
-			unsigned	m_opcode : 6;
-			unsigned	m_reg0	 : 4;
-			unsigned	m_reg1	 : 4;
-			unsigned	m_reg2	 : 4;
-			unsigned	m_offsest:14;
+			unsigned	m_opcode	: 6;
+			unsigned	m_reg0		: 4;
+			unsigned	m_reg1		: 4;
+			unsigned	m_reg2		: 4;
 		};
 		struct dType1
 		{
-			unsigned	m_opcode : 6;
-			unsigned	m_reg0	 : 4;
-			unsigned	m_reg1	 : 4;
-			unsigned	m_offsest:18;
+			unsigned	m_opcode	: 6;
+			unsigned	m_reg0		: 4;
+			unsigned	m_reg1		: 4;
+			unsigned	m_immediate :18;
 		};
 		struct dType2
 		{
-			unsigned	m_opcode : 6;
-			unsigned	m_reg0	 : 4;
-			unsigned	m_offsest:22;
+			unsigned	m_opcode	: 6;
+			unsigned	m_reg0		: 4;
+			unsigned	immediate	:22;
 		};
 	};
 
