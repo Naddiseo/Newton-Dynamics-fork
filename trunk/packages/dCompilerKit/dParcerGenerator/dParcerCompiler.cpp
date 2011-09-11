@@ -525,7 +525,7 @@ dParcerCompiler::dToken dParcerCompiler::ScanGrammarRule(
 }
 
 // Generate the closure for a Set of Item  
-dParcerCompiler::dState* dParcerCompiler::Closure (const dProductionRule& rulesList, const dList<dItem>& itemSet)
+dParcerCompiler::dState* dParcerCompiler::Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet)
 {
 	dState* const state = new dState (itemSet);
 	for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
@@ -535,7 +535,7 @@ dParcerCompiler::dState* dParcerCompiler::Closure (const dProductionRule& rulesL
 		if (symbolNode) {
 			dSymbol& sentenceSymbol = symbolNode->GetInfo();
 
-			for (dProductionRule::dListNode* node = rulesList.GetFirst(); node; node = node->GetNext()) {
+			for (dProductionRule::dListNode* node = ruleList.GetFirst(); node; node = node->GetNext()) {
 				const dRuleInfo& info = node->GetInfo();
 				if (info.m_name == sentenceSymbol.m_name) {
 					dState::dListNode* const itemNode = state->FindItem(node, 0);
@@ -554,8 +554,19 @@ dParcerCompiler::dState* dParcerCompiler::Closure (const dProductionRule& rulesL
 	return state;
 }
 
+void dParcerCompiler::First (const string& symbol, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dList<string>& firstSetOut) const
+{
+	_ASSERTE (0);
+}
+
+void dParcerCompiler::Follow (const string& symbol, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dList<string>& followSetOut) const
+{
+	_ASSERTE (0);
+}
+
+
 // generates the got state for this symbol
-dParcerCompiler::dState* dParcerCompiler::Goto (const dProductionRule& rulesList, const dState* const state, const string& symbol)
+dParcerCompiler::dState* dParcerCompiler::Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol)
 {
 	dList<dItem> itemSet;
 
@@ -584,7 +595,7 @@ dParcerCompiler::dState* dParcerCompiler::Goto (const dProductionRule& rulesList
 	}
 
 	//find the closure for this new item set.
-	return Closure (rulesList, itemSet);
+	return Closure (ruleList, itemSet);
 }
 
 // generates the canonical Items set for a LR(1) grammar

@@ -109,8 +109,10 @@ class dParcerCompiler
 
 	
 	void CanonicalItemSets (dTree<dState*,int>& states, const dProductionRule& rules, const dTree<dTokenType, string>& symbolList);
-	dState* Goto (const dProductionRule& rulesList, const dState* const state, const string& symbol);
-	dState* Closure (const dProductionRule& rulesList, const dList<dItem>& itemSet);
+	dState* Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol);
+	dState* Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet);
+	void First (const string& symbol, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dList<string>& firstSetOut) const;
+	void Follow (const string& symbol, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dList<string>& followSetOut) const;
 
 	void BuildParcingTable (const dTree<dState*,int>& stateList, const dTree<dTokenType, string>& symbolList);
 
