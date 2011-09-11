@@ -14,4 +14,4 @@
 // Assembler program test0.asm
 
 
-5 + 10
+2 * 3 + 6

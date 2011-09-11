@@ -23,10 +23,12 @@
 
 
 %%
-"'+'"	{return '+';}	
-"'\('"	{return '(';}	
-"'\('"	{return ')';}	
-[0-9]+	{return 256;}
+[ \t\n\r]+	{}
+[+]			{return '+';}	
+[*]			{return '*';}	
+[(]			{return '(';}	
+[(]			{return ')';}	
+[0-9]+		{return dAssemblerParcer::id;}
 
 
 /*

@@ -105,14 +105,18 @@ void dAssemblerLexical::GetLexString ()
 int dAssemblerLexical::NextToken ()
 {
 	//static strings patterns
-	static char text_0[] = {48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 0};
+	static char text_0[] = {9, 10, 13, 32, 0};
+	static char text_1[] = {43, 0};
+	static char text_2[] = {42, 0};
+	static char text_3[] = {40, 0};
+	static char text_4[] = {48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 0};
 
-	static int characterSetSize[] = {10};
-	static char* characterSetArray[] = {text_0};
+	static int characterSetSize[] = {4, 1, 1, 1, 10};
+	static char* characterSetArray[] = {text_0, text_1, text_2, text_3, text_4};
 
-	static int transitionsCount[] = {2, 2, 0, 0, 1, 0, 0};
-	static int transitionsStart[] = {0, 2, 0, 0, 4, 0, 0};
-	static unsigned nextTranstionList[] = {0x0270001, 0x04002, 0x0270003, 0x0280004, 0x0270005, 0};
+	static int transitionsCount[] = {5, 0, 0, 0, 0, 0, 0};
+	static int transitionsStart[] = {0, 0, 0, 0, 0, 0, 0};
+	static unsigned nextTranstionList[] = {0x04001, 0x014002, 0x024003, 0x034004, 0x044005, 0};
 	
 	m_startIndex = m_index;
 
@@ -121,20 +125,20 @@ int dAssemblerLexical::NextToken ()
 	{
 		switch (state) 
 		{
-			case 2:
+			case 5:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_0, characterSetSize[0])) state = 2;
+				if (IsCharInSet (ch, text_4, characterSetSize[4])) state = 5;
 				else {
 					UnGetChar();
 					GetLexString ();
 					//user specified action
-					{return 256;}
+					{return dAssemblerParcer::id;}
 					state = 0;
 				}
 				break;
 			}
-			case 5:
+			case 4:
 			{
 				{
 					GetLexString ();
@@ -146,13 +150,33 @@ int dAssemblerLexical::NextToken ()
 			}
 			case 3:
 			{
+				{
+					GetLexString ();
+					//user specified action
+					{return '*';}
+					state = 0;
+				}
+				break;
+			}
+			case 2:
+			{
+				{
+					GetLexString ();
+					//user specified action
+					{return '+';}
+					state = 0;
+				}
+				break;
+			}
+			case 1:
+			{
 				char ch = NextChar();
-				if (ch == 39) state = 3;
+				if (IsCharInSet (ch, text_0, characterSetSize[0])) state = 1;
 				else {
 					UnGetChar();
 					GetLexString ();
 					//user specified action
-					{return '+';}
+					{}
 					state = 0;
 				}
 				break;

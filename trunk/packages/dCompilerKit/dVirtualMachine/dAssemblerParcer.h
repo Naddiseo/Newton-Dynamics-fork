@@ -36,6 +36,9 @@ class dAssemblerParcer
 		id = 256
 	};
 
+	
+	 
+
 	enum ActionType;
 	class dStackPair;
 	class dActionEntry;
@@ -48,7 +51,7 @@ class dAssemblerParcer
 	virtual bool ErrorHandler (const string& line) const;
 
 	private:
-	const dActionEntry* FindAction (const dActionEntry* const list, int count, Token token) const;
+	dActionEntry FindAction (const int* const list, int count, Token token) const;
 };
 
 #endif

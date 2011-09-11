@@ -36,23 +36,7 @@ class $(className)
 $(Tokens)
 	};
 
-	class dActionEntry
-	{
-		public:
-		dActionEntry (unsigned val)
-			:m_value(val)
-		{
-		}
-		union {
-			unsigned m_value;
-			struct {
-				unsigned  m_token		:14;
-				unsigned  m_stateType	: 2;  // 0 = shift, 1 = reduce, 2 = accept
-				unsigned  m_nextState	:16;
-			};
-		};
-	};
-
+	
 	 
 
 	enum ActionType;
@@ -67,7 +51,7 @@ $(Tokens)
 	virtual bool ErrorHandler (const string& line) const;
 
 	private:
-	const dActionEntry* FindAction (const dActionEntry* const list, int count, Token token) const;
+	dActionEntry FindAction (const int* const list, int count, Token token) const;
 };
 
 #endif

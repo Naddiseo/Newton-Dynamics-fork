@@ -32,7 +32,7 @@ enum dAssemblerParcer::ActionType
 	SHIFT,
 	REDUCE
 };
-
+/*
 class dAssemblerParcer::dActionEntry
 {
 	public:
@@ -42,7 +42,24 @@ class dAssemblerParcer::dActionEntry
 	Token m_token;
 	ActionType m_action;
 };
+*/
 
+class dAssemblerParcer::dActionEntry
+{
+	public:
+	dActionEntry (unsigned val)
+		:m_value(val)
+	{
+	}
+	union {
+		unsigned m_value;
+		struct {
+			unsigned  m_token		:14;
+			unsigned  m_stateType	: 2;  // 0 = shift, 1 = reduce, 2 = accept
+			unsigned  m_nextState	:16;
+		};
+	};
+};
 
 
 class dAssemblerParcer::dStackPair
@@ -92,14 +109,15 @@ bool dAssemblerParcer::ErrorHandler (const string& line) const
 	return false;
 }
 
-const dAssemblerParcer::dActionEntry* dAssemblerParcer::FindAction (const dActionEntry* const actionList, int count, Token token) const
+dAssemblerParcer::dActionEntry dAssemblerParcer::FindAction (const int* const actionList, int count, Token token) const
 {
 	for (int i = 0; i < count; i ++) {
-		if (actionList[i].m_token == token) {
-			return &actionList[i]; 
+		dActionEntry action (actionList[i]);
+		if (Token(action.m_token) == token) {
+			return action; 
 		}
 	}
-	return NULL;
+	return dActionEntry(unsigned (-1));
 }
 
 
@@ -108,33 +126,35 @@ int dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 
 	dList<dStackPair> stack;
 
-//	static int actionOffsets[][2] = {$(actionEntry}};
-//	static dActionEntry actionTable[] = {$(actionTable}};
-static int actionOffsets[][2] = {1};
-static dActionEntry actionTable[] = {{Token(1)}};
+	static int actionsCount[] = {2, 2, 1, 6, 2, 6, 2, 2, 2, 1, 6, 6};
+	static int actionsStart[] = {0, 2, 4, 5, 5, 7, 7, 9, 11, 13, 14, 14};
+	static int actionTable[] = {0x40028, 0x50100, 0x8000, 0x6002b, 0x7002a, 0x40028, 0x50100, 0x40028, 0x50100, 0x40028, 0x50100, 0xb0029, 0x6002b, 0x7002a};
 
 
 	stack.Append ();
 	for (Token token = Token (scanner.NextToken()); token != -1; ) {
 		const dStackPair& stackTop = stack.GetLast()->GetInfo();
-		int actionStart = actionOffsets[stackTop.m_state][0];
-		int actionCount = actionOffsets[stackTop.m_state][1];
-		const dActionEntry* const action = FindAction (&actionTable[actionStart], actionCount, token);
+		int start = actionsStart[stackTop.m_state];
+		int count = actionsCount[stackTop.m_state];
+		dActionEntry action (FindAction (&actionTable[start], count, token));
 
-		if (action) {
-			if (action->m_action == ACCEPT) {
-				break;
-			} else if (action->m_action == SHIFT) {
-				_ASSERTE (0);
+
+		switch (action.m_stateType) 
+		{
+			case 0: // 0 = shift
+			{
 				dStackPair& entry = stack.Append()->GetInfo();
-				entry.m_token = action->m_token;
-				entry.m_state = action->m_nextState;
+				entry.m_token = Token (action.m_token);
+				entry.m_state = action.m_nextState;
 				entry.m_value = dStackPair::dUserVariable (entry.m_token, scanner.GetTokenString());
-
 				token = Token (scanner.NextToken());
+				break;
+			}
 
-			} else {
-
+			case 1: // 1 = reduce
+			{
+/*
+				_ASSERTE (0);
 				_ASSERTE (action->m_action == REDUCE);
 				_ASSERTE (0);
 
@@ -148,7 +168,7 @@ static dActionEntry actionTable[] = {{Token(1)}};
 					parameter[i] = stack.GetLast()->GetInfo();
 					stack.Remove (stack.GetLast());
 				}
-				
+
 
 				const dStackPair& newStackTop = stack.GetLast()->GetInfo();
 				int actionStart = actionOffsets[newStackTop.m_state][0];
@@ -173,21 +193,29 @@ static dActionEntry actionTable[] = {{Token(1)}};
 				{
 					//do user semantic Action
 					//$(semanticActionsCode);
-					case 256:
+				case 256:
 					{
 						break;
 					}
-					default:;
+				default:;
 				}
+*/
+				break;
 			}
-
-		} else {
-			// error 
-			if (!ErrorHandler ("error")) {
-				return 0;
+	
+			case 2: // 2 = accept
+			{
+				_ASSERTE (0);
+			}
+			
+			default:  // syntax grammar error
+			{
+				_ASSERTE (0);
+				// error
+				//if (!ErrorHandler ("error")) {
+				//}
 			}
 		}
-
 	}
 
 	return 1;

@@ -598,6 +598,10 @@ void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dPr
 				dTree<dState*,int>::dTreeNode* const targetStateNode = stateMap.Find(newState->GetKey());
 				if (!targetStateNode) {
 					newState->m_number = stateNumber;
+
+int xxx [] = {0, 4, 1, 3, 2, 5, 8, 6, 7, 11, 9, 10};
+newState->m_number = xxx[newState->m_number];
+
 					stateNumber ++;
 					stateMap.Insert(newState, newState->GetKey());
 					newState->Trace();
@@ -872,8 +876,6 @@ void dParcerCompiler::GenerateParcerCode (
 		dState* const state = stateIter.GetNode()->GetInfo();
 		sortedStates.Insert(state, state->m_number);
 	}
-
-
 	
 	string nextStateList ("");
 	string stateActionsStart ("");
@@ -881,7 +883,11 @@ void dParcerCompiler::GenerateParcerCode (
 	int entriesCount = 0;
 	dTree<dState*,int>::Iterator sortStateIter (sortedStates);
 	for (sortStateIter.Begin(); sortStateIter; sortStateIter ++) {
+		char text[256];
 		dState* const state = sortStateIter.GetNode()->GetInfo();
+
+		sprintf (text, "%d, ", entriesCount);
+		stateActionsStart += text;
 
 		int count = 0;
 		dTree<dAction, string>::Iterator actionIter (state->m_actions);
@@ -906,16 +912,11 @@ void dParcerCompiler::GenerateParcerCode (
 				_ASSERTE (action.m_type == ACCEPT);
 				dActionEntry entry;
 				entry.m_stateType = 2;
-				char text[256];
 				sprintf (text, "0x%x, ", entry.m_value);
 				nextStateList += text;
 				entriesCount ++;
 			}
 		}
-
-		char text[256];
-		sprintf (text, "%d, ", entriesCount);
-		stateActionsStart += text;
 
 		sprintf (text, "%d, ", count);
 		stateActionsCount += text;
@@ -924,6 +925,10 @@ void dParcerCompiler::GenerateParcerCode (
 	stateActionsCount.replace(stateActionsCount.size()-2, 2, "");
 	stateActionsStart.replace(stateActionsStart.size()-2, 2, "");
 
+	ReplaceMacro (templateHeader, stateActionsCount, "$(actionsCount)");
+	ReplaceMacro (templateHeader, stateActionsStart, "$(actionsStart)");
+	ReplaceMacro (templateHeader, nextStateList, "$(actionTable)");
+	
 
 
 	templateHeader += endUserCode;
