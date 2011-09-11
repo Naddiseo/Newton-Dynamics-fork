@@ -627,8 +627,8 @@ void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dPr
 				if (!targetStateNode) {
 					newState->m_number = stateNumber;
 
-//int xxx [] = {0, 4, 1, 3, 2, 5, 8, 6, 7, 11, 9, 10};
-int xxx [] = {0, 3, 1, 2, 4, 6, 5, 7, 8};
+int xxx [] = {0, 4, 1, 3, 2, 5, 8, 6, 7, 11, 9, 10};
+//int xxx [] = {0, 3, 1, 2, 4, 6, 5, 7, 8};
 newState->m_number = xxx[newState->m_number];
 
 					stateNumber ++;

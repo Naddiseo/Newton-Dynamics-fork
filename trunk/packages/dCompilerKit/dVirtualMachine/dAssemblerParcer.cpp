@@ -176,19 +176,25 @@ dAssemblerParcer::dGotoEntry dAssemblerParcer::FindGoto (const int* const gotoLi
 bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 {
 	dList<dStackPair> stack;
-	static int actionsCount[] = {2, 2, 5, 2, 5, 2, 2, 5, 5};
-	static int actionsStart[] = {0, 2, 4, 9, 11, 16, 18, 20, 25};
-	static int actionTable[] = {0xc0a0, 0x10400, 0x2, 0x140ac, 0x4000001, 0x40000a1, 0x40000a5, 0x40000ad, 0x4000401, 0xc0a0, 0x10400, 0x4004001, 0x40040a1, 0x40040a5, 0x40040ad, 0x4004401, 0xc0a0, 0x10400, 0x1c0a4, 0x140ac, 0xc004001, 0xc0040a1, 0xc0040a5, 0xc0040ad, 0xc004401, 0xc000001, 0xc0000a1, 0xc0000a5, 0xc0000ad, 0xc000401};
+	static int actionsCount[] = {2, 2, 1, 6, 2, 6, 2, 2, 2, 1, 6, 6};
+	static int actionsStart[] = {0, 2, 4, 5, 11, 13, 19, 21, 23, 25, 26, 32};
+	static int actionTable[] = {0x100a0, 0x14400, 0x2, 0x180ac, 0x1c0a8, 0x4004001, 0x40040a1, 0x40040a5, 0x40040a9, 0x40040ad, 0x4004401, 0x100a0, 0x14400, 0x4008001, 0x40080a1, 0x40080a5, 0x40080a9, 0x40080ad, 0x4008401, 0x100a0, 0x14400, 0x100a0, 0x14400, 0x2c0a4, 0x180ac, 0x1c0a8, 0xc004001, 0xc0040a1, 0xc0040a5, 0xc0040a9, 0xc0040ad, 0xc004401, 0xc008001, 0xc0080a1, 0xc0080a5, 0xc0080a9, 0xc0080ad, 0xc008401};
 
-	static int gotoCount[] = {2, 0, 0, 2, 0, 1, 0, 0, 0};
-	static int gotoStart[] = {0, 2, 2, 2, 4, 4, 5, 5, 5};
-	static int gotoTable[] = {0x10101, 0x20102, 0x60101, 0x20102, 0x80102};
+	static int gotoCount[] = {3, 0, 0, 0, 3, 0, 2, 1, 0, 0, 0, 0};
+	static int gotoStart[] = {0, 3, 3, 3, 3, 6, 6, 8, 9, 9, 9, 9};
+	static int gotoTable[] = {0x10101, 0x30103, 0x20102, 0x80101, 0x30103, 0x20102, 0x30103, 0x90102, 0xa0103};
 
 	const int lastToken = 257;
 
+int xxx = -1;
 	stack.Append ();
 	dToken token = dToken (scanner.NextToken());
 	for (;;) {
+
+xxx ++;
+if (xxx == 4)
+xxx *=1;
+
 		const dStackPair& stackTop = stack.GetLast()->GetInfo();
 		int start = actionsStart[stackTop.m_state];
 		int count = actionsCount[stackTop.m_state];
