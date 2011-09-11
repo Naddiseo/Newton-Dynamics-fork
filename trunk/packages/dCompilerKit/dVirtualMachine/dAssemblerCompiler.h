@@ -25,7 +25,7 @@ class dAssemblerCompiler: public dAssemblerParcer
 	public:
 	dAssemblerCompiler(dVirtualMachine* const m_virtualMachine);
 	virtual ~dAssemblerCompiler();
-	virtual int Parce(dAssemblerLexical& scanner);
+	virtual bool Parce(dAssemblerLexical& scanner);
 
 
 	dVirtualMachine* m_virtualMachine;

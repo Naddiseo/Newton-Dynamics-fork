@@ -17,22 +17,12 @@ $(userCode)
 #include <dList.h>
 
 #define MAX_USER_PARAM	64
-
+/*
 enum $(className)::ActionType
 {
 	ACCEPT,
 	SHIFT,
 	REDUCE
-};
-/*
-class $(className)::dActionEntry
-{
-	public:
-	int m_nextState;
-	int m_statesToPop;
-	int m_actionCount;
-	Token m_token;
-	ActionType m_action;
 };
 */
 
@@ -46,12 +36,35 @@ class $(className)::dActionEntry
 	union {
 		unsigned m_value;
 		struct {
-			unsigned  m_token		:14;
-			unsigned  m_stateType	: 2;  // 0 = shift, 1 = reduce, 2 = accept
-			unsigned  m_nextState	:16;
+			unsigned  m_stateType	: 2;// 0 = shift, 1 = reduce, 2 = accept
+			unsigned  m_token		:12;
+			unsigned  m_nextState	:12;
+			unsigned  m_reduceCount	: 6;
+
 		};
 	};
 };
+
+class $(className)::dGotoEntry
+{
+	public:
+	dGotoEntry ()
+		:m_value(0)
+	{
+	}
+	dGotoEntry (unsigned val)
+		:m_value(val)
+	{
+	}
+	union {
+		unsigned m_value;
+		struct {
+			short  m_token;
+			short  m_nextState;
+		};
+	};
+};
+
 
 
 class $(className)::dStackPair
@@ -59,12 +72,12 @@ class $(className)::dStackPair
 	public:
 $(userVariableClass)
 	dStackPair()
-		:m_state(0), m_token(Token (0)), m_value()
+		:m_state(0), m_token(dToken (0)), m_value()
 	{
 	}
 
 	int m_state;
-	Token m_token;
+	dToken m_token;
 	$(userVariable) m_value;
 };
 
@@ -84,60 +97,98 @@ bool $(className)::ErrorHandler (const string& line) const
 	return false;
 }
 
-$(className)::dActionEntry $(className)::FindAction (const int* const actionList, int count, Token token) const
+$(className)::dActionEntry $(className)::FindAction (const int* const actionList, int count, dToken token) const
 {
-	for (int i = 0; i < count; i ++) {
+	int i0 = 0;
+	int i1 = count - 1;
+	while ((i1 - i0) >= 4) {
+		int i = (i1 + i0 + 1)>>1;
+
 		dActionEntry action (actionList[i]);
-		if (Token(action.m_token) == token) {
-			return action; 
+		if (token <= dToken(action.m_token)) {
+			i1 = i;
+		} else {
+			i0 = i;
 		}
 	}
+
+	for (int i = i0; i <= i1; i ++) {
+		dActionEntry action (actionList[i]);
+		if (token == dToken(action.m_token)) {
+			return action;;
+		}
+	}
+
 	return dActionEntry(unsigned (-1));
 }
 
-
-int $(className)::Parce($(scannerClass)& scanner)
+$(className)::dGotoEntry dAssemblerParcer::FindGoto (const int* const gotoList, int count, dToken token) const
 {
+	int i0 = 0;
+	int i1 = count - 1;
+	while ((i1 - i0) >= 4) {
+		int i = (i1 + i0 + 1)>>1;
 
+		dGotoEntry action (gotoList[i]);
+		if (token <= dToken(action.m_token)) {
+			i1 = i;
+		} else {
+			i0 = i;
+		}
+	}
+
+	for (int i = i0; i <= i1; i ++) {
+		dGotoEntry action (gotoList[i]);
+		if (token == dToken(action.m_token)) {
+			return action;
+		}
+	}
+
+	return dGotoEntry(unsigned (-1));
+}
+
+
+bool $(className)::Parce($(scannerClass)& scanner)
+{
 	dList<dStackPair> stack;
-
 	static int actionsCount[] = {$(actionsCount)};
 	static int actionsStart[] = {$(actionsStart)};
 	static int actionTable[] = {$(actionTable)};
 
+	static int gotoCount[] = {$(gotoCount)};
+	static int gotoStart[] = {$(gotoStart)};
+	static int gotoTable[] = {$(gotoTable)};
+
+	const int lastToken = &(lastTerminalToken);
 
 	stack.Append ();
-	for (Token token = Token (scanner.NextToken()); token != -1; ) {
+	dToken token = dToken (scanner.NextToken());
+	for (;;) {
 		const dStackPair& stackTop = stack.GetLast()->GetInfo();
 		int start = actionsStart[stackTop.m_state];
 		int count = actionsCount[stackTop.m_state];
 		dActionEntry action (FindAction (&actionTable[start], count, token));
 
-
 		switch (action.m_stateType) 
 		{
 			case 0: // 0 = shift
 			{
-				_ASSERTE (0);
-//				dStackPair& entry = stack.Append()->GetInfo();
-//				entry.m_token = action->m_token;
-//				entry.m_state = action->m_nextState;
-//				entry.m_value = dStackPair::dUserVariable (entry.m_token, scanner.GetTokenString());
-//				token = Token (scanner.NextToken());
+				dStackPair& entry = stack.Append()->GetInfo();
+				entry.m_token = dToken (action.m_token);
+				entry.m_state = action.m_nextState;
+				entry.m_value = dStackPair::dUserVariable (entry.m_token, scanner.GetTokenString());
+				token = dToken (scanner.NextToken());
+				if (token == -1) {
+					token = dToken (0);
+				}
 				break;
 			}
 
 			case 1: // 1 = reduce
 			{
-/*
-				_ASSERTE (0);
-				_ASSERTE (action->m_action == REDUCE);
-				_ASSERTE (0);
+				dStackPair parameter[MAX_USER_PARAM];
 
-				_ASSERTE (action->m_action == REDUCE);
-				dStackPair parameter[256];
-
-				int reduceCount = action->m_actionCount;
+				int reduceCount = action.m_reduceCount;
 				_ASSERTE (reduceCount < sizeof (parameter) / sizeof (parameter[0]));
 
 				for (int i = 0; i < reduceCount; i ++) {
@@ -145,55 +196,48 @@ int $(className)::Parce($(scannerClass)& scanner)
 					stack.Remove (stack.GetLast());
 				}
 
-
-				const dStackPair& newStackTop = stack.GetLast()->GetInfo();
-				int actionStart = actionOffsets[newStackTop.m_state][0];
-				int actionCount = actionOffsets[newStackTop.m_state][1];
-				const dActionEntry* const GotoAction = FindAction (&actionTable[actionStart], actionCount, action->m_token);
+				const dStackPair& stackTop = stack.GetLast()->GetInfo();
+				int start = gotoStart[stackTop.m_state];
+				int count = gotoCount[stackTop.m_state];
+				dGotoEntry gotoEntry (FindGoto (&gotoTable[start], count, dToken (action.m_nextState + lastToken)));
 
 				dStackPair& entry = stack.Append()->GetInfo();
-				entry.m_token = GotoAction->m_token;
-				entry.m_state = GotoAction->m_nextState;
-
-
-				dStackPair::dUserVariable* params[MAX_USER_PARAM];
-				_ASSERTE (GotoAction->m_statesToPop < sizeof (params)/ sizeof (params[0]));
-				_ASSERTE (GotoAction->m_statesToPop < stack.GetCount());
-				int index = GotoAction->m_statesToPop - 1;
-				for (dList<dStackPair>::dListNode* node = stack.GetLast(); node; node = node->GetPrev()) {
-					params[index] = &node->GetInfo().m_value;
-					index --;
-				}
-
-				switch (entry.m_token) 
+				entry.m_state = gotoEntry.m_nextState;
+				entry.m_token = dToken (gotoEntry.m_token);
+				
+				switch (action.m_nextState) 
 				{
 					//do user semantic Action
 					//$(semanticActionsCode);
-				case 256:
+					case 0:
 					{
 						break;
 					}
-				default:;
+					default:;
 				}
-*/
+
 				break;
+
 			}
 	
 			case 2: // 2 = accept
 			{
-				_ASSERTE (0);
+				// successfully parced grammar, exit with successful code
+				return true;
 			}
 			
 			default:  // syntax grammar error
 			{
 				_ASSERTE (0);
+				// failed parcing gramamr, break with error code
 				// error
 				//if (!ErrorHandler ("error")) {
 				//}
+				break;
 			}
 		}
 	}
 
-	return 1;
+	return false;
 }
 

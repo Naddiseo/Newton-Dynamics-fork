@@ -31,27 +31,27 @@ class dAssemblerLexical;
 class dAssemblerParcer
 {
 	public:
-	enum Token
+	enum dToken
 	{
 		id = 256
 	};
 
-	
-	 
 
-	enum ActionType;
+//	enum ActionType;
 	class dStackPair;
+	class dGotoEntry;
 	class dActionEntry;
 	class dUserVariable;
 
 	dAssemblerParcer();
 	virtual ~dAssemblerParcer();
-	virtual int Parce(dAssemblerLexical& scanner);
+	virtual bool Parce(dAssemblerLexical& scanner);
 
 	virtual bool ErrorHandler (const string& line) const;
 
 	private:
-	dActionEntry FindAction (const int* const list, int count, Token token) const;
+	dGotoEntry FindGoto (const int* const gotoList, int count, dToken token) const;
+	dActionEntry FindAction (const int* const list, int count, dToken token) const;
 };
 
 #endif

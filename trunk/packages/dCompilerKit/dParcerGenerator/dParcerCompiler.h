@@ -85,6 +85,7 @@ class dParcerCompiler
 	class dAction;
 	class dSymbol;
 	class dTransition;
+	class dGotoEntry;
 	class dActionEntry;
 	class dSentenceSymbol;
 	class dRuleInfo;
@@ -102,7 +103,8 @@ class dParcerCompiler
 	void ReplaceMacro (string& data, const string& newName, const string& macro) const;
 	void ReplaceAllMacros (string& data, const string& newName, const string& macro) const;
 
-	void ScanGrammarFile(const string& inputRules, dProductionRule& rules, dTree<dTokenType, string>& symbolList, dTree<int, string>& terminaldTokens, string& userCodeBlock, string& userVariableClass, string& endUserCode);
+	void ScanGrammarFile(const string& inputRules, dProductionRule& rules, dTree<dTokenType, string>& symbolList, 
+						 dTree<int, string>& terminaldTokens, string& userCodeBlock, string& userVariableClass, string& endUserCode, int& lastTokenEnum);
 	dToken ScanGrammarRule(dParcerLexical& lexical, dProductionRule& rules, dTree<dTokenType, string>& symbolList, int& ruleNumber, dTree<int, string>& tokenEnumarationMap, int& tokenEnumeration);
 
 	
@@ -117,7 +119,7 @@ class dParcerCompiler
 	void GenerateParcerCode (const string& className, const string& scannerClassName, const char* const outputFileName, const string& userCode, 
 							 const string& userVariable, const string& userVariableClass, 
 							 dTree<dState*,int>& stateList, dTree<dTokenType, string>& symbolList, dTree<int, string>& tokenEnumerationMap,
-							 string& endUserCode);
+							 string& endUserCode, int lastTokenEnum);
 
 };
 

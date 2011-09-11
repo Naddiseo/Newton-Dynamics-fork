@@ -1,5 +1,3 @@
-5 + 10
-
 /* Copyright (c) <2009> <Newton Game Dynamics>
 * 
 * This software is provided 'as-is', without any express or implied
@@ -13,5 +11,4 @@
 
 // Assembler program test0.asm
 
-
-2 * 3 + 6
+2 + (6)

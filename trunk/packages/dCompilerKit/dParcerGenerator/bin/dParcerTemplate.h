@@ -31,27 +31,27 @@ class $(scannerClass);
 class $(className)
 {
 	public:
-	enum Token
+	enum dToken
 	{
 $(Tokens)
 	};
 
-	
-	 
 
-	enum ActionType;
+//	enum ActionType;
 	class dStackPair;
+	class dGotoEntry;
 	class dActionEntry;
 	class $(userVariable);
 
 	$(className)();
 	virtual ~$(className)();
-	virtual int Parce($(scannerClass)& scanner);
+	virtual bool Parce($(scannerClass)& scanner);
 
 	virtual bool ErrorHandler (const string& line) const;
 
 	private:
-	dActionEntry FindAction (const int* const list, int count, Token token) const;
+	dGotoEntry FindGoto (const int* const gotoList, int count, dToken token) const;
+	dActionEntry FindAction (const int* const list, int count, dToken token) const;
 };
 
 #endif

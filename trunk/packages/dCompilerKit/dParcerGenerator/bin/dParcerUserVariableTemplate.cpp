@@ -2,16 +2,16 @@
 	{	
 		public:
 		$(userVariable) ()
-			:string()
+			:string(), m_token (dToken(0))
 		{
 		}
 
-		$(userVariable) (Token token, const char* const text)
+		$(userVariable) (dToken token, const char* const text)
 			:string(text), m_token (token)
 		{
 		}
 
-		Token m_token;
+		dToken m_token;
 	};
 
 

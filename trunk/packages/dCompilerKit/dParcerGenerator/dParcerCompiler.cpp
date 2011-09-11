@@ -41,6 +41,28 @@ enum dParcerCompiler::ActionType
 	REDUCE
 };
 
+
+class dParcerCompiler::dGotoEntry
+{
+	public:
+	dGotoEntry ()
+		:m_value(0)
+	{
+	}
+	dGotoEntry (unsigned val)
+		:m_value(val)
+	{
+	}
+	union {
+		unsigned m_value;
+		struct {
+			short  m_token;
+			short  m_nextState;
+		};
+	};
+};
+
+
 class dParcerCompiler::dActionEntry
 {
 	public:
@@ -55,9 +77,10 @@ class dParcerCompiler::dActionEntry
 	union {
 		unsigned m_value;
 		struct {
-			unsigned  m_token		:14;
 			unsigned  m_stateType	: 2;
-			unsigned  m_nextState	:16;
+			unsigned  m_token		:12;
+			unsigned  m_nextState	:12;
+			unsigned  m_reduceCount	: 6;
 		};
 	};
 };
@@ -231,6 +254,7 @@ class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const outputFileName, const char* const scannerClassName)
 {
 	// scan the grammar into a list of rules.
+	int lastTokenEnum;
 	dProductionRule ruleList;
 	dTree<int, string> tokenEnumeration;
 	dTree<dTokenType, string> symbolList;
@@ -241,7 +265,7 @@ dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const out
 
 	// scan grammar to a set of LR(1) rules
 	symbolList.Insert(TERMINAL, DACCEPT_SYMBOL);
-	ScanGrammarFile(inputRules, ruleList, symbolList, tokenEnumeration, userCodeBlock, userVariableClass, endUserCode);
+	ScanGrammarFile(inputRules, ruleList, symbolList, tokenEnumeration, userCodeBlock, userVariableClass, endUserCode, lastTokenEnum);
 
 	// convert the rules into a NFA.
 	dTree<dState*,int> stateList;
@@ -253,7 +277,7 @@ dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const out
 	//Write Parcer class and header file
 	string className (GetClassName(outputFileName));
 	GenerateHeaderFile (className, scannerClassName, outputFileName, ruleList, tokenEnumeration, userVariable);
-	GenerateParcerCode (className, scannerClassName, outputFileName, userCodeBlock, userVariable, userVariableClass, stateList, symbolList, tokenEnumeration, endUserCode);
+	GenerateParcerCode (className, scannerClassName, outputFileName, userCodeBlock, userVariable, userVariableClass, stateList, symbolList, tokenEnumeration, endUserCode, lastTokenEnum);
 
 	dTree<dState*,int>::Iterator iter(stateList);
 	for (iter.Begin(); iter; iter ++) {
@@ -293,10 +317,13 @@ void dParcerCompiler::ScanGrammarFile(
 	dTree<int, string>& tokenEnumerationMap,
 	string& userCodeBlock,
 	string& userVariableClass,
-	string& endUserCode)
+	string& endUserCode,
+	int& lastTokenEnum)
 {
 	string startSymbol ("");
 	int tokenEnumeration = 256;
+
+	tokenEnumerationMap.Insert(0, DACCEPT_SYMBOL);
 
 	dParcerLexical lexical (inputRules.c_str());
 	LoadTemplateFile("/dParcerUserVariableTemplate.cpp", userVariableClass);
@@ -351,6 +378,7 @@ void dParcerCompiler::ScanGrammarFile(
 	}
 
 	int ruleNumber = 1;
+	lastTokenEnum = tokenEnumeration;
 
 	// scan the production rules segment
 	dToken token1 = dToken(lexical.NextToken());
@@ -599,7 +627,8 @@ void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dPr
 				if (!targetStateNode) {
 					newState->m_number = stateNumber;
 
-int xxx [] = {0, 4, 1, 3, 2, 5, 8, 6, 7, 11, 9, 10};
+//int xxx [] = {0, 4, 1, 3, 2, 5, 8, 6, 7, 11, 9, 10};
+int xxx [] = {0, 3, 1, 2, 4, 6, 5, 7, 8};
 newState->m_number = xxx[newState->m_number];
 
 					stateNumber ++;
@@ -856,7 +885,8 @@ void dParcerCompiler::GenerateParcerCode (
 	dTree<dState*,int>& stateList, 
 	dTree<dTokenType, string>& symbolList,
 	dTree<int, string>& tokenEnumerationMap,
-	string& endUserCode)
+	string& endUserCode,
+	int lastTokenEnum)
 {
 	string templateHeader ("");
 	LoadTemplateFile("/dParcerTemplate.cpp", templateHeader);
@@ -870,6 +900,10 @@ void dParcerCompiler::GenerateParcerCode (
 	ReplaceMacro (templateHeader, userVariableClass, "$(userVariableClass)");
 	ReplaceAllMacros (templateHeader, userVariable, "$(userVariable)");
 
+	char text[256];
+	sprintf (text, "%d", lastTokenEnum);
+	ReplaceMacro (templateHeader, text, "&(lastTerminalToken)");
+
 	dTree<dState*,int> sortedStates;
 	dTree<dState*,int>::Iterator stateIter (stateList);
 	for (stateIter.Begin(); stateIter; stateIter ++) {
@@ -877,9 +911,10 @@ void dParcerCompiler::GenerateParcerCode (
 		sortedStates.Insert(state, state->m_number);
 	}
 	
-	string nextStateList ("");
+	
 	string stateActionsStart ("");
 	string stateActionsCount ("");
+	string nextActionsStateList ("");
 	int entriesCount = 0;
 	dTree<dState*,int>::Iterator sortStateIter (sortedStates);
 	for (sortStateIter.Begin(); sortStateIter; sortStateIter ++) {
@@ -893,27 +928,44 @@ void dParcerCompiler::GenerateParcerCode (
 		dTree<dAction, string>::Iterator actionIter (state->m_actions);
 		for (actionIter.Begin(); actionIter; actionIter++) {
 			count ++;
+
 			dAction& action = actionIter.GetNode()->GetInfo();
 			if (action.m_type == SHIFT) {
-				const string& symbol = actionIter.GetKey();
-				dTree<int, string>::dTreeNode* const node = tokenEnumerationMap.Find(symbol);
-				_ASSERTE (node);
+				const string& actionSymbol = actionIter.GetKey();
+				_ASSERTE (tokenEnumerationMap.Find(actionSymbol));
+
 				dActionEntry entry;
-				entry.m_nextState = action.m_nextState;
-				entry.m_token = node->GetInfo();
 				entry.m_stateType = 0;
-				char text[256];
+				entry.m_reduceCount = 0;
+				entry.m_nextState = action.m_nextState;
+				entry.m_token = tokenEnumerationMap.Find(actionSymbol)->GetInfo();
+				
 				sprintf (text, "0x%x, ", entry.m_value);
-				nextStateList += text;
+				nextActionsStateList += text;
 				entriesCount ++;
 			} else if (action.m_type == REDUCE) {
-				_ASSERTE (0);
+				const string& actionSymbol = actionIter.GetKey();
+				_ASSERTE (tokenEnumerationMap.Find(actionSymbol));
+
+				dRuleInfo& reduceRule = action.m_reduceRuleNode->GetInfo();
+				_ASSERTE (tokenEnumerationMap.Find(reduceRule.m_name));
+				_ASSERTE (tokenEnumerationMap.Find(reduceRule.m_name)->GetInfo() >= 256);
+				
+				dActionEntry entry;
+				entry.m_stateType = 1;
+				entry.m_reduceCount = reduceRule.GetCount();
+				entry.m_nextState = tokenEnumerationMap.Find(reduceRule.m_name)->GetInfo() - lastTokenEnum;
+				entry.m_token = tokenEnumerationMap.Find(actionSymbol)->GetInfo();
+
+				sprintf (text, "0x%x, ", entry.m_value);
+				nextActionsStateList += text;
+				entriesCount ++;
 			} else {
 				_ASSERTE (action.m_type == ACCEPT);
 				dActionEntry entry;
 				entry.m_stateType = 2;
 				sprintf (text, "0x%x, ", entry.m_value);
-				nextStateList += text;
+				nextActionsStateList += text;
 				entriesCount ++;
 			}
 		}
@@ -921,14 +973,55 @@ void dParcerCompiler::GenerateParcerCode (
 		sprintf (text, "%d, ", count);
 		stateActionsCount += text;
 	}
-	nextStateList.replace(nextStateList.size()-2, 2, "");
+	nextActionsStateList.replace(nextActionsStateList.size()-2, 2, "");
 	stateActionsCount.replace(stateActionsCount.size()-2, 2, "");
 	stateActionsStart.replace(stateActionsStart.size()-2, 2, "");
 
 	ReplaceMacro (templateHeader, stateActionsCount, "$(actionsCount)");
 	ReplaceMacro (templateHeader, stateActionsStart, "$(actionsStart)");
-	ReplaceMacro (templateHeader, nextStateList, "$(actionTable)");
+	ReplaceMacro (templateHeader, nextActionsStateList, "$(actionTable)");
+
 	
+	string stateGotoStart ("");
+	string stateGotoCount ("");
+	string nextGotoStateList ("");
+	entriesCount = 0;
+	for (sortStateIter.Begin(); sortStateIter; sortStateIter ++) {
+
+		char text[256];
+		dState* const state = sortStateIter.GetNode()->GetInfo();
+
+		sprintf (text, "%d, ", entriesCount);
+		stateGotoStart += text;
+
+		int count = 0;
+		dTree<dState*, string>::Iterator gotoIter (state->m_goto); 
+		for (gotoIter.Begin(); gotoIter; gotoIter++) {
+			count ++;
+
+			dState* const targetState = gotoIter.GetNode()->GetInfo();
+
+			dGotoEntry entry;
+			entry.m_nextState = short (targetState->m_number);
+			entry.m_token = short(tokenEnumerationMap.Find(gotoIter.GetKey())->GetInfo());
+
+			sprintf (text, "0x%x, ", entry.m_value);
+			nextGotoStateList += text;
+			entriesCount ++;
+		}
+
+		sprintf (text, "%d, ", count);
+		stateGotoCount += text;
+	}
+
+	nextGotoStateList.replace(nextGotoStateList.size()-2, 2, "");
+	stateGotoCount.replace(stateGotoCount.size()-2, 2, "");
+	stateGotoStart.replace(stateGotoStart.size()-2, 2, "");
+
+	ReplaceMacro (templateHeader, stateGotoCount, "$(gotoCount)");
+	ReplaceMacro (templateHeader, stateGotoStart, "$(gotoStart)");
+	ReplaceMacro (templateHeader, nextGotoStateList, "$(gotoTable)");
+
 
 
 	templateHeader += endUserCode;

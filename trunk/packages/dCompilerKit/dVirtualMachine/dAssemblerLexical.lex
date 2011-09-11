@@ -21,18 +21,6 @@
 %}
 
 
-
-%%
-[ \t\n\r]+	{}
-[+]			{return '+';}	
-[*]			{return '*';}	
-[(]			{return '(';}	
-[(]			{return ')';}	
-[0-9]+		{return dAssemblerParcer::id;}
-
-
-/*
-
 WhiteSpace		[ \t\n\r]+
 
 AnyButAstr		[^\*]
@@ -40,6 +28,21 @@ AnyButSlash		[^\/]
 Comment1        [\/][\/].*
 Comment2        [\/][\*]({AnyButAstr}|[\*]{AnyButSlash})*[\*][\/]
 Comment			({Comment1}|{Comment2})
+
+
+
+%%
+{WhiteSpace}	{}
+{Comment}		{}
+[+]				{return '+';}	
+[*]				{return '*';}	
+[(]				{return '(';}	
+[)]				{return ')';}	
+[0-9]+			{return dAssemblerParcer::id;}
+
+
+/*
+
 
 Integer			[\-\+]?[0-9]+
 Float			{Integer}[\.][0-9]+(e{Integer})?

@@ -31,32 +31,15 @@ class lextest1;
 class test0
 {
 	public:
-	enum Token
+	enum dToken
 	{
 		id = 256
 	};
 
-	class dActionEntry
-	{
-		public:
-		dActionEntry (unsigned val)
-			:m_value(val)
-		{
-		}
-		union {
-			unsigned m_value;
-			struct {
-				unsigned  m_token		:14;
-				unsigned  m_stateType	: 2;  // 0 = shift, 1 = reduce, 2 = accept
-				unsigned  m_nextState	:16;
-			};
-		};
-	};
 
-	 
-
-	enum ActionType;
+//	enum ActionType;
 	class dStackPair;
+	class dGotoEntry;
 	class dActionEntry;
 	class dUserVariable;
 
@@ -67,7 +50,8 @@ class test0
 	virtual bool ErrorHandler (const string& line) const;
 
 	private:
-	const dActionEntry* FindAction (const dActionEntry* const list, int count, Token token) const;
+	dGotoEntry FindGoto (const int* const gotoList, int count, dToken token) const;
+	dActionEntry FindAction (const int* const list, int count, dToken token) const;
 };
 
 #endif
