@@ -15,7 +15,7 @@
 #include "dParcerCompiler.h"
 #include "dParcerLexical.h"
 
-#define DACCEPT_SYMBOL "\t$$"
+#define DACCEPT_SYMBOL "$$$"
 
 
 
@@ -151,12 +151,13 @@ class dParcerCompiler::dItem
 {
 	public:
 	dItem ()
-		:m_error(true), m_indexMarker(0), m_ruleNode(NULL)
+		:m_error(true), m_indexMarker(0), m_lookAheadSymnol(""), m_ruleNode(NULL)
 	{
 	}
 
 	bool m_error;
 	int m_indexMarker;
+	string m_lookAheadSymnol;
 	dProductionRule::dListNode* m_ruleNode;
 };
 
@@ -208,12 +209,26 @@ class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 		return NULL;
 	}
 
+	dListNode* FindItem (dProductionRule::dListNode* const rule, int marker, const string& lookAheadSymbol) const
+	{
+		for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
+			dItem& item = node->GetInfo();
+			if ((item.m_ruleNode == rule) && (item.m_indexMarker == marker)) {
+				if (item.m_lookAheadSymnol == lookAheadSymbol) {
+					return node;
+				}
+			}
+		}
+		return NULL;
+	}
+
+
 	void Trace() const
 	{
 		DTRACE(("state %d:\n", m_number));
 		for (dState::dListNode* itemNode = GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
 			dItem& item = itemNode->GetInfo();
-			DTRACE(("%s -> ", item.m_ruleNode->GetInfo().m_name.c_str()));
+			DTRACE(("%s -> [", item.m_ruleNode->GetInfo().m_name.c_str()));
 
 			int index = 0;
 			bool hasIndex = false;
@@ -237,7 +252,7 @@ class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 			if (!hasIndex) {
 				DTRACE(("."));
 			}
-			DTRACE(("\n"));
+			DTRACE((", %s]\n", item.m_lookAheadSymnol.c_str()));
 		}
 		DTRACE(("\n"));
 	}
@@ -247,8 +262,8 @@ class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 	dTree<dState*, string> m_goto; 
 	dTree<dAction, string> m_actions; 
 	dList<dTransition> m_transitions;
-	
 };
+
 
 
 dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const outputFileName, const char* const scannerClassName)
@@ -524,49 +539,12 @@ dParcerCompiler::dToken dParcerCompiler::ScanGrammarRule(
 	return token;
 }
 
-// Generate the closure for a Set of Item  
-dParcerCompiler::dState* dParcerCompiler::Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet)
-{
-	dState* const state = new dState (itemSet);
-	for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
-		dItem& item = itemNode->GetInfo();
 
-		dRuleInfo::dListNode* const symbolNode = item.m_ruleNode->GetInfo().GetSymbolNodeByIndex (item.m_indexMarker);
-		if (symbolNode) {
-			dSymbol& sentenceSymbol = symbolNode->GetInfo();
 
-			for (dProductionRule::dListNode* node = ruleList.GetFirst(); node; node = node->GetNext()) {
-				const dRuleInfo& info = node->GetInfo();
-				if (info.m_name == sentenceSymbol.m_name) {
-					dState::dListNode* const itemNode = state->FindItem(node, 0);
-					if (!itemNode) {
-						dItem& newItem = state->Append()->GetInfo();
-						newItem.m_indexMarker = 0;
-						newItem.m_ruleNode = node;
-						//newItem.m_symbolOriginationTransition = sentenceSymbol.m_name;
-					}
-				}
-			}
-		}
-	}
-	
-	state->CalculateKey ();
-	return state;
-}
-
-void dParcerCompiler::First (const string& symbol, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dList<string>& firstSetOut) const
-{
-	_ASSERTE (0);
-}
-
-void dParcerCompiler::Follow (const string& symbol, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dList<string>& followSetOut) const
-{
-	_ASSERTE (0);
-}
 
 
 // generates the got state for this symbol
-dParcerCompiler::dState* dParcerCompiler::Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol)
+dParcerCompiler::dState* dParcerCompiler::Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol, const dTree<dTokenType, string>& symbolList)
 {
 	dList<dItem> itemSet;
 
@@ -595,68 +573,9 @@ dParcerCompiler::dState* dParcerCompiler::Goto (const dProductionRule& ruleList,
 	}
 
 	//find the closure for this new item set.
-	return Closure (ruleList, itemSet);
+	return Closure (ruleList, itemSet, symbolList);
 }
 
-// generates the canonical Items set for a LR(1) grammar
-void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dProductionRule& ruleList, const dTree<dTokenType, string>& symbolList)
-{
-	dList<dItem> itemSet;
-	dList<dState*> stateList;
-
-	// start by building an item ste with only the first rule
-	dItem& item = itemSet.Append()->GetInfo();
-	item.m_indexMarker = 0;
-	item.m_ruleNode = ruleList.GetFirst();
-
-	// find the closure for the first this item set with only the first rule
-	dState* const state = Closure (ruleList, itemSet);
-
-	stateMap.Insert(state, state->GetKey());
-	stateList.Append(state);
-
-	state->Trace();
-
-	// now for each state found 
-	int stateNumber = 1;
-	for (dList<dState*>::dListNode* node = stateList.GetFirst(); node; node = node->GetNext()) {
-		dState* const state = node->GetInfo();
-
-		dTree<dTokenType, string>::Iterator iter (symbolList);
-		for (iter.Begin(); iter; iter ++) {
-
-			string symbol (iter.GetKey());
-			dState* const newState = Goto (ruleList, state, symbol);
-
-			if (newState->GetCount()) {
-				dTransition& transition = state->m_transitions.Append()->GetInfo();
-				transition.m_name = symbol;
-				transition.m_type = iter.GetNode()->GetInfo();
-				transition.m_targetState = newState;
-
-				dTree<dState*,int>::dTreeNode* const targetStateNode = stateMap.Find(newState->GetKey());
-				if (!targetStateNode) {
-					newState->m_number = stateNumber;
-
-int xxx [] = {0, 4, 1, 3, 2, 5, 8, 6, 7, 11, 9, 10};
-//int xxx [] = {0, 3, 1, 2, 4, 6, 5, 7, 8};
-newState->m_number = xxx[newState->m_number];
-
-					stateNumber ++;
-					stateMap.Insert(newState, newState->GetKey());
-					newState->Trace();
-
-					stateList.Append(newState);
-				} else {
-					transition.m_targetState = targetStateNode->GetInfo();
-					delete newState;
-				}
-			} else {
-				delete newState;
-			}
-		}
-	}
-}
 
 
 
@@ -730,108 +649,6 @@ void dParcerCompiler::ReplaceAllMacros (string& data, const string& newName, con
 
 
 
-void dParcerCompiler::BuildParcingTable (const dTree<dState*,int>& stateList, const dTree<dTokenType, string>& symbolList)
-{
-	dTree<dState*,int>::Iterator stateIter (stateList);
-	dTree<dTokenType, string>::Iterator symbolIter (symbolList);
-
-	// create Shift Reduce action table
-	for (stateIter.Begin(); stateIter; stateIter ++) {
-		dState* const state = stateIter.GetNode()->GetInfo();
-
-		if ((state->GetCount() == 1) && (state->m_number != 0)) {
-			// emit simple reduce rule on all inputs
-			dState::dListNode* const itemNode = state->GetFirst();
-			dItem& item = itemNode->GetInfo();
-
-			if (item.m_error == false) {
-				// rule already used for in another action
-				_ASSERTE (0);
-			}
-
-			item.m_error = false;
-			const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
-			if (ruleInfo.GetCount() == item.m_indexMarker) {
-				for (symbolIter.Begin(); symbolIter; symbolIter ++) {
-					dTokenType type (symbolIter.GetNode()->GetInfo());
-					if (type == TERMINAL) {
-						const string& symbol = symbolIter.GetKey();
-
-						dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (symbol); 
-						// this could be a reduce-reduce conflict;
-						_ASSERTE (actionNode);
-						if (actionNode) {
-							item.m_error = false;
-							dAction& action = actionNode->GetInfo();
-							action.m_type = REDUCE;
-							action.m_reduceRuleNode = item.m_ruleNode;
-						}
-					}
-				}
-			}
-		} else {
-			// check if accepting rule in in the estate
-			for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
-				dItem& item = itemNode->GetInfo();
-				const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
-				// check if this item is the accepting Rule
-				if ((ruleInfo.m_ruleNumber == 0) && (item.m_indexMarker == 1)) {
-					if (item.m_error == false) {
-						// rule already used in another action
-						_ASSERTE (0);
-					}
-					item.m_error = false;
-					dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (DACCEPT_SYMBOL); 
-					_ASSERTE (actionNode);
-					dAction& action = actionNode->GetInfo();
-					action.m_type = ACCEPT;
-					action.m_reduceRuleNode = NULL;
-				}
-			}
-
-			// now add all shift action for every TERMINAL Token
-			for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
-				dTransition& transition = node->GetInfo();
-				if (transition.m_type == TERMINAL) {
-
-					// find item generating this shift action and mark it as used.
-					const dState* const targetState = transition.m_targetState;
-					for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
-						dItem& item = itemNode->GetInfo();
-						dState::dListNode* const targteItemNode = targetState->FindItem(item.m_ruleNode, item.m_indexMarker + 1);
-						if (targteItemNode) {
-							if (item.m_error == false) {
-								// this is is shift-shift conflict, this rule was already used 
-								_ASSERTE (0);
-							}
-							item.m_error = false;
-							break;
-						}
-					}
-					
-					// this is a shift action
-					dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (transition.m_name); 
-					dAction& action = actionNode->GetInfo();
-					action.m_type = SHIFT;
-					action.m_nextState = transition.m_targetState->m_number;
-					action.m_reduceRuleNode = NULL;
-				}
-			}
-		}
-	}
-
-
-	// create Goto Table
-	for (stateIter.Begin(); stateIter; stateIter ++) {
-		dState* const state = stateIter.GetNode()->GetInfo();
-		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
-			dTransition& transition = node->GetInfo();
-			if (transition.m_type == NONTERMINAL) {
-				state->m_goto.Insert (transition.m_targetState, transition.m_name); 
-			}
-		}
-	}
-}
 
 
 void dParcerCompiler::GenerateHeaderFile (
@@ -1037,4 +854,461 @@ void dParcerCompiler::GenerateParcerCode (
 
 	templateHeader += endUserCode;
 	SaveFile(outputFileName, ".cpp", templateHeader);
+}
+
+
+#if 0
+void dParcerCompiler::BuildParcingTable (const dTree<dState*,int>& stateList, const dTree<dTokenType, string>& symbolList)
+{
+	dTree<dState*,int>::Iterator stateIter (stateList);
+	dTree<dTokenType, string>::Iterator symbolIter (symbolList);
+
+	// create Shift Reduce action table
+	for (stateIter.Begin(); stateIter; stateIter ++) {
+		dState* const state = stateIter.GetNode()->GetInfo();
+
+		if ((state->GetCount() == 1) && (state->m_number != 0)) {
+			// emit simple reduce rule on all inputs
+			dState::dListNode* const itemNode = state->GetFirst();
+			dItem& item = itemNode->GetInfo();
+
+			if (item.m_error == false) {
+				// rule already used for in another action
+				_ASSERTE (0);
+			}
+
+			item.m_error = false;
+			const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
+			if (ruleInfo.GetCount() == item.m_indexMarker) {
+				for (symbolIter.Begin(); symbolIter; symbolIter ++) {
+					dTokenType type (symbolIter.GetNode()->GetInfo());
+					if (type == TERMINAL) {
+						const string& symbol = symbolIter.GetKey();
+
+						dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (symbol); 
+						// this could be a reduce-reduce conflict;
+						_ASSERTE (actionNode);
+						if (actionNode) {
+							item.m_error = false;
+							dAction& action = actionNode->GetInfo();
+							action.m_type = REDUCE;
+							action.m_reduceRuleNode = item.m_ruleNode;
+						}
+					}
+				}
+			}
+		} else {
+			// check if accepting rule in in the estate
+			for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
+				dItem& item = itemNode->GetInfo();
+				const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
+				// check if this item is the accepting Rule
+				if ((ruleInfo.m_ruleNumber == 0) && (item.m_indexMarker == 1)) {
+					if (item.m_error == false) {
+						// rule already used in another action
+						_ASSERTE (0);
+					}
+					item.m_error = false;
+					dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (DACCEPT_SYMBOL); 
+					_ASSERTE (actionNode);
+					dAction& action = actionNode->GetInfo();
+					action.m_type = ACCEPT;
+					action.m_reduceRuleNode = NULL;
+				}
+			}
+
+			// now add all shift action for every TERMINAL Token
+			for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
+				dTransition& transition = node->GetInfo();
+				if (transition.m_type == TERMINAL) {
+
+					// find item generating this shift action and mark it as used.
+					const dState* const targetState = transition.m_targetState;
+					for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
+						dItem& item = itemNode->GetInfo();
+						dState::dListNode* const targteItemNode = targetState->FindItem(item.m_ruleNode, item.m_indexMarker + 1);
+						if (targteItemNode) {
+							if (item.m_error == false) {
+								// this is is shift-shift conflict, this rule was already used 
+								_ASSERTE (0);
+							}
+							item.m_error = false;
+							break;
+						}
+					}
+
+					// this is a shift action
+					dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (transition.m_name); 
+					dAction& action = actionNode->GetInfo();
+					action.m_type = SHIFT;
+					action.m_nextState = transition.m_targetState->m_number;
+					action.m_reduceRuleNode = NULL;
+				}
+			}
+		}
+	}
+
+
+	// create Goto Table
+	for (stateIter.Begin(); stateIter; stateIter ++) {
+		dState* const state = stateIter.GetNode()->GetInfo();
+		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
+			dTransition& transition = node->GetInfo();
+			if (transition.m_type == NONTERMINAL) {
+				state->m_goto.Insert (transition.m_targetState, transition.m_name); 
+			}
+		}
+	}
+}
+
+// generates the canonical Items set for a LR(1) grammar
+void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dProductionRule& ruleList, const dTree<dTokenType, string>& symbolList)
+{
+	dList<dItem> itemSet;
+	dList<dState*> stateList;
+
+	// start by building an item ste with only the first rule
+	dItem& item = itemSet.Append()->GetInfo();
+	item.m_indexMarker = 0;
+	item.m_ruleNode = ruleList.GetFirst();
+
+	// find the closure for the first this item set with only the first rule
+	dState* const state = Closure (ruleList, itemSet);
+
+	stateMap.Insert(state, state->GetKey());
+	stateList.Append(state);
+
+	state->Trace();
+
+	// now for each state found 
+	int stateNumber = 1;
+	for (dList<dState*>::dListNode* node = stateList.GetFirst(); node; node = node->GetNext()) {
+		dState* const state = node->GetInfo();
+
+		dTree<dTokenType, string>::Iterator iter (symbolList);
+		for (iter.Begin(); iter; iter ++) {
+
+			string symbol (iter.GetKey());
+			dState* const newState = Goto (ruleList, state, symbol);
+
+			if (newState->GetCount()) {
+				dTransition& transition = state->m_transitions.Append()->GetInfo();
+				transition.m_name = symbol;
+				transition.m_type = iter.GetNode()->GetInfo();
+				transition.m_targetState = newState;
+
+				dTree<dState*,int>::dTreeNode* const targetStateNode = stateMap.Find(newState->GetKey());
+				if (!targetStateNode) {
+					newState->m_number = stateNumber;
+
+					int xxx [] = {0, 4, 1, 3, 2, 5, 8, 6, 7, 11, 9, 10};
+					//int xxx [] = {0, 3, 1, 2, 4, 6, 5, 7, 8};
+					newState->m_number = xxx[newState->m_number];
+
+					stateNumber ++;
+					stateMap.Insert(newState, newState->GetKey());
+					newState->Trace();
+
+					stateList.Append(newState);
+				} else {
+					transition.m_targetState = targetStateNode->GetInfo();
+					delete newState;
+				}
+			} else {
+				delete newState;
+			}
+		}
+	}
+}
+
+// Generate the closure for a Set of Item  
+dParcerCompiler::dState* dParcerCompiler::Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet)
+{
+	dState* const state = new dState (itemSet);
+	for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
+		dItem& item = itemNode->GetInfo();
+
+		dRuleInfo::dListNode* const symbolNode = item.m_ruleNode->GetInfo().GetSymbolNodeByIndex (item.m_indexMarker);
+		if (symbolNode) {
+			dSymbol& sentenceSymbol = symbolNode->GetInfo();
+
+			for (dProductionRule::dListNode* node = ruleList.GetFirst(); node; node = node->GetNext()) {
+				const dRuleInfo& info = node->GetInfo();
+				if (info.m_name == sentenceSymbol.m_name) {
+					dState::dListNode* const itemNode = state->FindItem(node, 0);
+					if (!itemNode) {
+						dItem& newItem = state->Append()->GetInfo();
+						newItem.m_indexMarker = 0;
+						newItem.m_ruleNode = node;
+						//newItem.m_symbolOriginationTransition = sentenceSymbol.m_name;
+					}
+				}
+			}
+		}
+	}
+
+	state->CalculateKey ();
+	return state;
+}
+
+#endif
+
+void dParcerCompiler::BuildParcingTable (const dTree<dState*,int>& stateList, const dTree<dTokenType, string>& symbolList)
+{
+	dTree<dState*,int>::Iterator stateIter (stateList);
+	dTree<dTokenType, string>::Iterator symbolIter (symbolList);
+
+	// create Shift Reduce action table
+	for (stateIter.Begin(); stateIter; stateIter ++) {
+		dState* const state = stateIter.GetNode()->GetInfo();
+
+		// check if accepting rule in in the estate
+		for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
+			dItem& item = itemNode->GetInfo();
+			const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
+			// check if this item is the accepting Rule
+			if ((ruleInfo.m_ruleNumber == 0) && (item.m_indexMarker == 1)) {
+				if (item.m_error == false) {
+					// rule already used in another action
+					_ASSERTE (0);
+				}
+				item.m_error = false;
+				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (DACCEPT_SYMBOL); 
+				_ASSERTE (actionNode);
+				dAction& action = actionNode->GetInfo();
+				action.m_type = ACCEPT;
+				action.m_reduceRuleNode = NULL;
+			}
+		}
+
+		// now add all shift action for every TERMINAL Token
+		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
+			dTransition& transition = node->GetInfo();
+			if (transition.m_type == TERMINAL) {
+
+				// find item generating this shift action and mark it as used.
+				const dState* const targetState = transition.m_targetState;
+				for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
+					dItem& item = itemNode->GetInfo();
+					dState::dListNode* const targteItemNode = targetState->FindItem(item.m_ruleNode, item.m_indexMarker + 1);
+					if (targteItemNode) {
+						if (item.m_error == false) {
+							// this is is shift-shift conflict, this rule was already used 
+							_ASSERTE (0);
+						}
+						item.m_error = false;
+						break;
+					}
+				}
+
+				// this is a shift action
+				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (transition.m_name); 
+				dAction& action = actionNode->GetInfo();
+				action.m_type = SHIFT;
+				action.m_nextState = transition.m_targetState->m_number;
+				action.m_reduceRuleNode = NULL;
+			}
+		}
+	}
+
+
+	// create Goto Table
+	for (stateIter.Begin(); stateIter; stateIter ++) {
+		dState* const state = stateIter.GetNode()->GetInfo();
+		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
+			dTransition& transition = node->GetInfo();
+			if (transition.m_type == NONTERMINAL) {
+				state->m_goto.Insert (transition.m_targetState, transition.m_name); 
+			}
+		}
+	}
+}
+
+
+
+// generates the canonical Items set for a LR(1) grammar
+void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dProductionRule& ruleList, const dTree<dTokenType, string>& symbolList)
+{
+	dList<dItem> itemSet;
+	dList<dState*> stateList;
+
+	// start by building an item ste with only the first rule
+	dItem& item = itemSet.Append()->GetInfo();
+	item.m_indexMarker = 0;
+	item.m_lookAheadSymnol = DACCEPT_SYMBOL;
+	item.m_ruleNode = ruleList.GetFirst();
+
+	// find the closure for the first this item set with only the first rule
+	dState* const state = Closure (ruleList, itemSet, symbolList);
+
+	stateMap.Insert(state, state->GetKey());
+	stateList.Append(state);
+
+	state->Trace();
+
+	// now for each state found 
+	int stateNumber = 1;
+	for (dList<dState*>::dListNode* node = stateList.GetFirst(); node; node = node->GetNext()) {
+		dState* const state = node->GetInfo();
+
+		dTree<dTokenType, string>::Iterator iter (symbolList);
+		for (iter.Begin(); iter; iter ++) {
+
+			string symbol (iter.GetKey());
+			dState* const newState = Goto (ruleList, state, symbol, symbolList);
+
+			if (newState->GetCount()) {
+				dTransition& transition = state->m_transitions.Append()->GetInfo();
+				transition.m_name = symbol;
+				transition.m_type = iter.GetNode()->GetInfo();
+				transition.m_targetState = newState;
+
+				dTree<dState*,int>::dTreeNode* const targetStateNode = stateMap.Find(newState->GetKey());
+				if (!targetStateNode) {
+					newState->m_number = stateNumber;
+
+					int xxx [] = {0, 4, 1, 3, 2, 5, 8, 6, 7, 11, 9, 10};
+					//int xxx [] = {0, 3, 1, 2, 4, 6, 5, 7, 8};
+					newState->m_number = xxx[newState->m_number];
+
+					stateNumber ++;
+					stateMap.Insert(newState, newState->GetKey());
+					newState->Trace();
+
+					stateList.Append(newState);
+				} else {
+					transition.m_targetState = targetStateNode->GetInfo();
+					delete newState;
+				}
+			} else {
+				delete newState;
+			}
+		}
+	}
+}
+
+
+// Generate the closure for a Set of Item  
+dParcerCompiler::dState* dParcerCompiler::Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet, const dTree<dTokenType, string>& symbolList)
+{
+	dState* const state = new dState (itemSet);
+	for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
+		dItem& item = itemNode->GetInfo();
+
+		dRuleInfo::dListNode* const symbolNode = item.m_ruleNode->GetInfo().GetSymbolNodeByIndex (item.m_indexMarker);
+		if (symbolNode) {
+
+			// get Beta token string
+			const dRuleInfo& rule = item.m_ruleNode->GetInfo();
+			dRuleInfo::dListNode* ruleNode = rule.GetFirst();
+			for (int i = 0; i < item.m_indexMarker; i ++) {
+				_ASSERTE (0);
+				ruleNode = ruleNode->GetNext();
+			}
+
+			dList<string> firstSymbolList;
+			for (ruleNode = ruleNode->GetNext(); ruleNode; ruleNode = ruleNode->GetNext()) {
+				const dSymbol& symbol = ruleNode->GetInfo();
+				firstSymbolList.Append(symbol.m_name);
+			}
+			firstSymbolList.Append(item.m_lookAheadSymnol);
+
+			const dSymbol& sentenceSymbol = symbolNode->GetInfo();
+			for (dProductionRule::dListNode* ruleNode = ruleList.GetFirst(); ruleNode; ruleNode = ruleNode->GetNext()) {
+				const dRuleInfo& info = ruleNode->GetInfo();
+				if (info.m_name == sentenceSymbol.m_name) {
+					dTree<int, string> firstList;
+					First (firstSymbolList, symbolList, ruleList, firstList);
+					dTree<int, string>::Iterator firstIter (firstList);
+					for (firstIter.Begin(); firstIter; firstIter ++) {
+						const string& symbol = firstIter.GetKey();
+						dState::dListNode* const itemNode = state->FindItem(ruleNode, 0, symbol);
+						if (!itemNode) {
+							dItem& newItem = state->Append()->GetInfo();
+							newItem.m_indexMarker = 0;
+							newItem.m_ruleNode = ruleNode;
+							newItem.m_lookAheadSymnol = symbol;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	state->CalculateKey ();
+	return state;
+}
+
+
+
+
+void dParcerCompiler::First (const string& symbol, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const
+{
+	dTree<dTokenType, string>::dTreeNode* const node = symbolList.Find(symbol);
+	_ASSERTE (node);
+	if (node->GetInfo() == TERMINAL) {
+		firstSetOut.Insert(0, symbol);
+	} else if (DoesSymbolDeriveEmpty (symbol, ruleList)) {
+		firstSetOut.Insert(0, "");
+	} else {
+		for (dProductionRule::dListNode* ruleInfoNode = ruleList.GetFirst(); ruleInfoNode; ruleInfoNode = ruleInfoNode->GetNext()) {
+			const dRuleInfo& info = ruleInfoNode->GetInfo();
+			if (symbol == info.m_name) {
+				bool sentenceDeriveEmpty = true;
+				for (dRuleInfo::dListNode* sentenceSymbolNode = info.GetFirst(); sentenceSymbolNode; sentenceSymbolNode = sentenceSymbolNode->GetNext()) {
+					const dSymbol& sentenceSymnol = sentenceSymbolNode->GetInfo();
+					if (!DoesSymbolDeriveEmpty (sentenceSymnol.m_name, ruleList)) {
+						firstSetOut.Insert(0, sentenceSymnol.m_name);
+						sentenceDeriveEmpty = false;
+						break;
+					}
+				}
+				if (sentenceDeriveEmpty) {
+					firstSetOut.Insert(0, "");
+				}
+			}
+		}
+	}
+}
+
+
+void dParcerCompiler::First (const dList<string>& symbolSet, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const
+{
+	if (symbolSet.GetCount() > 1) {
+		string empty ("");
+
+		dList<string>::dListNode* node = symbolSet.GetFirst();
+		bool deriveEmpty = true;
+		while ((deriveEmpty) && node) {
+			const string& symbol = node->GetInfo();
+			node = node->GetNext();
+
+			dTree<int, string> tmpFirst;
+			First (symbol, symbolList, ruleList, tmpFirst);
+			dTree<int, string>::Iterator iter (tmpFirst);
+			deriveEmpty = false;  
+			for (iter.Begin(); iter; iter ++) {
+				const string& symbol = iter.GetKey();
+				if (symbol == empty) {
+					deriveEmpty = true;  
+				} else {
+					firstSetOut.Insert(0, symbol);
+				}
+			}
+		}
+		if (deriveEmpty) {
+			firstSetOut.Insert(0, empty);
+		}
+
+	} else  {
+		const string& symbol = symbolSet.GetFirst()->GetInfo();
+		First (symbol, symbolList, ruleList, firstSetOut);
+	}
+}
+
+
+bool dParcerCompiler::DoesSymbolDeriveEmpty (const string& symbol, const dProductionRule& ruleList) const 
+{
+	_ASSERTE (0);
+	return false;
 }

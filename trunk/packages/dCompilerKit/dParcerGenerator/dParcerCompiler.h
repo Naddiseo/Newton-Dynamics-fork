@@ -90,6 +90,7 @@ class dParcerCompiler
 	class dSentenceSymbol;
 	class dRuleInfo;
 	class dProductionRule;
+	
 
 	
 	dParcerCompiler(const string& inputRules, const char* const outputFileName, const char* const scannerClassName);
@@ -109,10 +110,13 @@ class dParcerCompiler
 
 	
 	void CanonicalItemSets (dTree<dState*,int>& states, const dProductionRule& rules, const dTree<dTokenType, string>& symbolList);
-	dState* Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol);
-	dState* Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet);
-	void First (const string& symbol, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dList<string>& firstSetOut) const;
-	void Follow (const string& symbol, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dList<string>& followSetOut) const;
+	dState* Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet, const dTree<dTokenType, string>& symbolList);
+	dState* Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol, const dTree<dTokenType, string>& symbolList);
+
+	bool DoesSymbolDeriveEmpty (const string& symbol, const dProductionRule& ruleList) const ;
+	void First (const string& symbol, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const;
+	void First (const dList<string>& symbolSet, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const;
+
 
 	void BuildParcingTable (const dTree<dState*,int>& stateList, const dTree<dTokenType, string>& symbolList);
 

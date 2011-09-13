@@ -9,7 +9,7 @@
 * freely
 */
 
-// very simple sample ADDER grammar 
+// very simple sample SLR(0) grammar 
 %{
 	// test0 grammar
 %}

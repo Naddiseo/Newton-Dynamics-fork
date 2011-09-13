@@ -10,7 +10,8 @@
 * freely
 */
 
-// very simple sample ADD and MULT grammar 
+
+// very simple sample SLR(1) grammar 
 
 %union 
 {
