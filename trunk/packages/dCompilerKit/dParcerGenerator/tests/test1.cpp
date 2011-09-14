@@ -92,7 +92,7 @@ class test1::dStackPair
 
 	int m_state;
 	dToken m_token;
-	d m_value;
+	dUserVariable m_value;
 };
 
 
@@ -206,7 +206,7 @@ bool test1::Parce(lextest1& scanner)
 				_ASSERTE (reduceCount < sizeof (parameter) / sizeof (parameter[0]));
 
 				for (int i = 0; i < reduceCount; i ++) {
-					parameter[i] = stack.GetLast()->GetInfo();
+					parameter[reduceCount - i - 1] = stack.GetLast()->GetInfo();
 					stack.Remove (stack.GetLast());
 				}
 
@@ -219,56 +219,26 @@ bool test1::Parce(lextest1& scanner)
 				entry.m_state = gotoEntry.m_nextState;
 				entry.m_token = dToken (gotoEntry.m_token);
 				
-				switch (action.m_nextState) 
+				switch (entry.m_state) 
 				{
 					//do user semantic Actions
-					case 1:
+					case 4:// rule T : F 
+						{entry.m_value = parameter[0].m_value;}
+						break;
+					case 2:// rule E : T 
+						{entry.m_value = parameter[0].m_value;}
+						break;
+					case 6:// rule F : id 
+						{entry.m_value = parameter[0].m_value;}
+						break;
+					case 5:// rule F : ( E ) 
 						{entry.m_value = parameter[1].m_value;}
 						break;
-					case 1:
-						{entry.m_value = parameter[1].m_value;}
+					case 1:// rule E : E + T 
+						{entry.m_value = parameter[0].m_value + " + " + parameter[1].m_value; printf ("%s\n", entry.m_value.c_str());}
 						break;
-					case 1:
-						{entry.m_value = parameter[1].m_value;}
-						break;
-					case 0:
-						{entry.m_value = parameter[1].m_value;}
-						break;
-					case 0:
-						{entry.m_value = parameter[1].m_value;}
-						break;
-					case 2:
-						{entry.m_value = parameter[1].m_value;}
-						break;
-					case 2:
-						{entry.m_value = parameter[1].m_value;}
-						break;
-					case 2:
-						{entry.m_value = parameter[1].m_value;}
-						break;
-					case 2:
-						{entry.m_value = parameter[2].m_value;}
-						break;
-					case 2:
-						{entry.m_value = parameter[2].m_value;}
-						break;
-					case 2:
-						{entry.m_value = parameter[2].m_value;}
-						break;
-					case 0:
-						{entry.m_value = parameter[1].m_value + " + " + parameter[2].m_value; printf ("%s\n", entry.m_value.c_str());}
-						break;
-					case 0:
-						{entry.m_value = parameter[1].m_value + " + " + parameter[2].m_value; printf ("%s\n", entry.m_value.c_str());}
-						break;
-					case 1:
-						{entry.m_value = parameter[1].m_value + " * " + parameter[2].m_value;}
-						break;
-					case 1:
-						{entry.m_value = parameter[1].m_value + " * " + parameter[2].m_value;}
-						break;
-					case 1:
-						{entry.m_value = parameter[1].m_value + " * " + parameter[2].m_value;}
+					case 3:// rule T : T * F 
+						{entry.m_value = parameter[0].m_value + " * " + parameter[1].m_value;}
 						break;
 
 					default:;

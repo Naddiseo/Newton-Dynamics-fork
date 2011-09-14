@@ -233,25 +233,25 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 				switch (entry.m_state) 
 				{
 					//do user semantic Actions
-					case 2:
+					case 1:// rule E1 : E 
 						{printf ("%s\n", parameter[0].m_value.m_data.c_str());}
 						break;
-					case 4:
+					case 5:// rule T : F 
 						{entry.m_value = parameter[0].m_value;}
 						break;
-					case 5:
+					case 3:// rule E : T 
 						{entry.m_value = parameter[0].m_value;}
 						break;
-					case 6:
+					case 7:// rule F : id 
 						{entry.m_value = parameter[0].m_value;}
 						break;
-					case 10:
+					case 6:// rule F : ( E ) 
 						{entry.m_value = parameter[1].m_value;}
 						break;
-					case 11:
+					case 2:// rule E : E + T 
 						{entry.m_value.m_data = parameter[0].m_value.m_data + " + " + parameter[2].m_value.m_data;}
 						break;
-					case 12:
+					case 4:// rule T : T * F 
 						{entry.m_value.m_data = parameter[0].m_value.m_data + " * " + parameter[2].m_value.m_data;}
 						break;
 

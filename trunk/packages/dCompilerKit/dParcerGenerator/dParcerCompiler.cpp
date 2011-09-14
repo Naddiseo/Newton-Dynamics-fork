@@ -38,9 +38,14 @@ enum dParcerCompiler::dTokenType
 
 enum dParcerCompiler::ActionType
 {
-	ACCEPT,
-	SHIFT,
-	REDUCE
+//	ACCEPT,
+//	SHIFT,
+//	REDUCE
+
+	dSHIFT = 0,
+	dREDUCE,
+	dACCEPT,
+	dERROR
 };
 
 
@@ -48,20 +53,33 @@ class dParcerCompiler::dGotoEntry
 {
 	public:
 	dGotoEntry ()
-		:m_value(0)
 	{
 	}
+/*
 	dGotoEntry (unsigned val)
 		:m_value(val)
 	{
 	}
+*/
+	short m_token;
+	short m_stateType;// 0 = shift, 1 = reduce, 2 = accept
+	short m_nextState;
+	short m_ruleSymbols;
+	short m_ruleIndex;
+
+/*
 	union {
 		unsigned m_value;
 		struct {
-			short  m_token;
-			short  m_nextState;
+//			short  m_token;
+//			short  m_nextState;
+			unsigned  m_token		: 10;
+			unsigned  m_nextState	: 12;
+			unsigned  m_rule		: 10;	
+
 		};
 	};
+*/
 };
 
 
@@ -101,13 +119,9 @@ class dParcerCompiler::dSymbol
 class dParcerCompiler::dRuleInfo: public dParcerCompiler::dSymbol, public dList<dParcerCompiler::dSymbol>
 {
 	public:
-	int m_ruleId;
-	int m_ruleNumber;
-	string m_semanticActionCode;
-
 	dRuleInfo()
 		:dSymbol(), dList<dSymbol>()
-		,m_ruleId(0), m_ruleNumber(0), m_semanticActionCode("")
+		,m_ruleId(0), m_ruleNumber(0), m_ruleReduced(false), m_semanticActionCode("")
 	{
 	}
 
@@ -122,6 +136,12 @@ class dParcerCompiler::dRuleInfo: public dParcerCompiler::dSymbol, public dList<
 		}
 		return NULL;
 	}
+
+	int m_ruleId;
+	int m_ruleNumber;
+	bool m_ruleReduced;
+	string m_semanticActionCode;
+
 };
 
 
@@ -175,7 +195,7 @@ class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 {
 	public:
 	dState (const dList<dItem>& itemSet)
-		:m_key(0), m_number(0), m_reduceActionMark (false), m_goto(), m_actions(), m_transitions()
+		:m_key(0), m_number(0), m_goto(), m_actions(), m_transitions()
 	{
 		for (dListNode* node = itemSet.GetFirst(); node; node = node->GetNext()) {
 			Append(node->GetInfo());
@@ -263,7 +283,6 @@ class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 
 	int m_key;
 	int m_number;
-	bool m_reduceActionMark;
 	dTree<dState*, string> m_goto; 
 	dTree<dAction, string> m_actions; 
 	dList<dTransition> m_transitions;
@@ -909,12 +928,15 @@ void dParcerCompiler::BuildParcingTable (const dTree<dState*,int>& stateList, co
 					// rule already used in another action
 					_ASSERTE (0);
 				}
+				_ASSERTE (0);
+/*
 				item.m_error = false;
 				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (DACCEPT_SYMBOL); 
 				_ASSERTE (actionNode);
 				dAction& action = actionNode->GetInfo();
 				action.m_type = ACCEPT;
 				action.m_reduceRuleNode = NULL;
+*/
 			} else if ((item.m_indexMarker == ruleInfo.GetCount()) && (ruleInfo.m_name != acceptingSymbol)) {
 
 				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (item.m_lookAheadSymnol); 
@@ -922,11 +944,14 @@ void dParcerCompiler::BuildParcingTable (const dTree<dState*,int>& stateList, co
 					// the action already exist, this could be a reduce-reduce or a shift reduce conflict;
 					_ASSERTE (0);
 				} else {
+				_ASSERTE (0);
+/*
 					item.m_error = false;
 					dAction& action = actionNode->GetInfo();
 					action.m_type = REDUCE;
 					action.m_nextState = 0;
 					action.m_reduceRuleNode = item.m_ruleNode;
+*/
 				}
 			}
 		}
@@ -957,10 +982,13 @@ void dParcerCompiler::BuildParcingTable (const dTree<dState*,int>& stateList, co
 					// the action already exist, this could be a reduce-reduce or a shift reduce conflict;
 					_ASSERTE (0);
 				} else {
+				_ASSERTE (0);
+/*
 					dAction& action = actionNode->GetInfo();
 					action.m_type = SHIFT;
 					action.m_nextState = transition.m_targetState->m_number;
 					action.m_reduceRuleNode = NULL;
+*/
 				}
 			}
 		}
@@ -1048,7 +1076,8 @@ void dParcerCompiler::GenerateParcerCode (
 		dTree<dAction, string>::Iterator actionIter (state->m_actions);
 		for (actionIter.Begin(); actionIter; actionIter++) {
 			count ++;
-
+	_ASSERTE (0);
+/*
 			dAction& action = actionIter.GetNode()->GetInfo();
 			if (action.m_type == SHIFT) {
 				const string& actionSymbol = actionIter.GetKey();
@@ -1081,9 +1110,9 @@ void dParcerCompiler::GenerateParcerCode (
 				nextActionsStateList += text;
 				entriesCount ++;
 
-				if (!state->m_reduceActionMark && (reduceRule.m_semanticActionCode != emptySematicAction)) {
+				if (!reduceRule.m_ruleReduced && (reduceRule.m_semanticActionCode != emptySematicAction)) {
 					// issue a sematic action code;
-					state->m_reduceActionMark = true;
+					reduceRule.m_ruleReduced = true;
 					char text[128];
 					string userSematicAction (reduceRule.m_semanticActionCode);
 					for (int i = 0; i < int (entry.m_reduceCount); i ++) {
@@ -1100,9 +1129,18 @@ void dParcerCompiler::GenerateParcerCode (
 					}
 					ReplaceAllMacros (userSematicAction, "entry.m_value", "$$");
 
-					sprintf (text, "%d:\n", state->m_number);
+					sprintf (text, "%d:", reduceRule.m_ruleNumber);
 					sematicActions += "\t\t\t\t\tcase "; 
 					sematicActions += text; 
+					sematicActions += "// rule ";
+					sematicActions += reduceRule.m_name;
+					sematicActions += " : ";
+					for (dRuleInfo::dListNode* node = reduceRule.GetFirst(); node; node = node->GetNext()) {
+						sematicActions+= node->GetInfo().m_name;
+						sematicActions += " ";
+					}
+					sematicActions += "\n";
+
 					sematicActions += "\t\t\t\t\t\t";
 					sematicActions += userSematicAction;
 					sematicActions += "\n";
@@ -1116,6 +1154,7 @@ void dParcerCompiler::GenerateParcerCode (
 				nextActionsStateList += text;
 				entriesCount ++;
 			}
+*/
 		}
 
 		sprintf (text, "%d, ", count);
@@ -1148,7 +1187,8 @@ void dParcerCompiler::GenerateParcerCode (
 		dTree<dState*, string>::Iterator gotoIter (state->m_goto); 
 		for (gotoIter.Begin(); gotoIter; gotoIter++) {
 			count ++;
-
+			_ASSERTE (0);
+/*
 			dState* const targetState = gotoIter.GetNode()->GetInfo();
 
 			dGotoEntry entry;
@@ -1158,6 +1198,7 @@ void dParcerCompiler::GenerateParcerCode (
 			sprintf (text, "0x%x, ", entry.m_value);
 			nextGotoStateList += text;
 			entriesCount ++;
+*/
 		}
 
 		sprintf (text, "%d, ", count);

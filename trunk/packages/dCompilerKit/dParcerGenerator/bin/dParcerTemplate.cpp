@@ -17,14 +17,15 @@ $(userCode)
 #include <dList.h>
 
 #define MAX_USER_PARAM	64
-/*
+
 enum $(className)::ActionType
 {
-	ACCEPT,
-	SHIFT,
-	REDUCE
+	dSHIFT = 0,
+	dREDUCE,
+	dACCEPT,
+	dERROR
 };
-*/
+
 
 class $(className)::dActionEntry
 {
@@ -33,16 +34,12 @@ class $(className)::dActionEntry
 		:m_value(val)
 	{
 	}
-	union {
-		unsigned m_value;
-		struct {
-			unsigned  m_stateType	: 2;// 0 = shift, 1 = reduce, 2 = accept
-			unsigned  m_token		:12;
-			unsigned  m_nextState	:12;
-			unsigned  m_reduceCount	: 6;
 
-		};
-	};
+	short m_token;
+	short m_stateType;// 0 = shift, 1 = reduce, 2 = accept
+	short m_nextState;
+	short m_ruleSymbols;
+	short m_ruleIndex;
 };
 
 class $(className)::dGotoEntry
