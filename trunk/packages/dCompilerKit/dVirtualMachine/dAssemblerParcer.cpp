@@ -217,7 +217,7 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 				_ASSERTE (reduceCount < sizeof (parameter) / sizeof (parameter[0]));
 
 				for (int i = 0; i < reduceCount; i ++) {
-					parameter[i] = stack.GetLast()->GetInfo();
+					parameter[reduceCount - i - 1] = stack.GetLast()->GetInfo();
 					stack.Remove (stack.GetLast());
 				}
 
@@ -230,29 +230,29 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 				entry.m_state = gotoEntry.m_nextState;
 				entry.m_token = dToken (gotoEntry.m_token);
 				
-				switch (action.m_nextState) 
+				switch (entry.m_state) 
 				{
 					//do user semantic Actions
 					case 2:
-						{printf ("%s\n", parameter[1].m_value.m_data.c_str());}
+						{printf ("%s\n", parameter[0].m_value.m_data.c_str());}
 						break;
 					case 4:
-						{entry.m_value = parameter[1].m_value;}
+						{entry.m_value = parameter[0].m_value;}
 						break;
 					case 5:
-						{entry.m_value = parameter[1].m_value;}
+						{entry.m_value = parameter[0].m_value;}
 						break;
 					case 6:
-						{entry.m_value = parameter[1].m_value;}
+						{entry.m_value = parameter[0].m_value;}
 						break;
 					case 10:
-						{entry.m_value = parameter[2].m_value;}
+						{entry.m_value = parameter[1].m_value;}
 						break;
 					case 11:
-						{entry.m_value.m_data = parameter[1].m_value.m_data + " + " + parameter[3].m_value.m_data;}
+						{entry.m_value.m_data = parameter[0].m_value.m_data + " + " + parameter[2].m_value.m_data;}
 						break;
 					case 12:
-						{entry.m_value.m_data = parameter[1].m_value.m_data + " * " + parameter[3].m_value.m_data;}
+						{entry.m_value.m_data = parameter[0].m_value.m_data + " * " + parameter[2].m_value.m_data;}
 						break;
 
 					default:;

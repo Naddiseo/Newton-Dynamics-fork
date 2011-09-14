@@ -192,7 +192,7 @@ bool $(className)::Parce($(scannerClass)& scanner)
 				_ASSERTE (reduceCount < sizeof (parameter) / sizeof (parameter[0]));
 
 				for (int i = 0; i < reduceCount; i ++) {
-					parameter[i] = stack.GetLast()->GetInfo();
+					parameter[reduceCount - i - 1] = stack.GetLast()->GetInfo();
 					stack.Remove (stack.GetLast());
 				}
 
@@ -205,7 +205,7 @@ bool $(className)::Parce($(scannerClass)& scanner)
 				entry.m_state = gotoEntry.m_nextState;
 				entry.m_token = dToken (gotoEntry.m_token);
 				
-				switch (action.m_nextState) 
+				switch (entry.m_state) 
 				{
 					//do user semantic Actions
 $(semanticActionsCode)

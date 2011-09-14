@@ -1018,7 +1018,6 @@ void dParcerCompiler::GenerateParcerCode (
 	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
 
 	ReplaceMacro (templateHeader, userVariableClass, "$(userVariableClass)");
-//	ReplaceAllMacros (templateHeader, userVariable, "$(userVariable)");
 
 	char text[256];
 	sprintf (text, "%d", lastTokenEnum);
@@ -1091,8 +1090,10 @@ void dParcerCompiler::GenerateParcerCode (
 						
 						sprintf (text, "%d", i + 1);
 						string macro ("$");
-						string macroVariable ("parameter[");
 						macro += text;
+
+						sprintf (text, "%d", i);
+						string macroVariable ("parameter[");
 						macroVariable += text;
 						macroVariable += "].m_value";
 						ReplaceAllMacros (userSematicAction, macroVariable, macro);
