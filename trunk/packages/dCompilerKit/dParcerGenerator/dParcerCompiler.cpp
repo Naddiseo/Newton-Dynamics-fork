@@ -1039,11 +1039,6 @@ void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dPr
 				if (!targetStateNode) {
 					newState->m_number = stateNumber;
 
-//int xxx [] = {0, 4, 1, 3, 2, 5, 8, 6, 7, 11, 9, 10};
-//int xxx [] = {0, 3, 1, 2, 4, 6, 5, 7, 8};
-int xxx [] = {0, 2, 1, 3, 4, 5, 6, 7, 8, 9};
-newState->m_number = xxx[newState->m_number];
-
 					stateNumber ++;
 					stateMap.Insert(newState, newState->GetKey());
 					newState->Trace();
@@ -1172,11 +1167,12 @@ void dParcerCompiler::BuildParcingTable (const dTree<dState*,int>& stateList, co
 	dTree<dState*,int>::Iterator stateIter (stateList);
 	dTree<dTokenType, string>::Iterator symbolIter (symbolList);
 
+	string acceptingSymbol (DACCEPT_SYMBOL);
 	// create Shift Reduce action table
 	for (stateIter.Begin(); stateIter; stateIter ++) {
 		dState* const state = stateIter.GetNode()->GetInfo();
 
-		// check if accepting rule in in the estate
+		// check if accepting rule in in the state
 		for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
 			dItem& item = itemNode->GetInfo();
 			const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
@@ -1192,6 +1188,19 @@ void dParcerCompiler::BuildParcingTable (const dTree<dState*,int>& stateList, co
 				dAction& action = actionNode->GetInfo();
 				action.m_type = ACCEPT;
 				action.m_reduceRuleNode = NULL;
+			} else if ((item.m_indexMarker == ruleInfo.GetCount()) && (ruleInfo.m_name != acceptingSymbol)) {
+
+				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (item.m_lookAheadSymnol); 
+				if (!actionNode) {
+					// the action already exist, this could be a reduce-reduce or a shift reduce conflict;
+					_ASSERTE (0);
+				} else {
+					item.m_error = false;
+					dAction& action = actionNode->GetInfo();
+					action.m_type = REDUCE;
+					action.m_nextState = 0;
+					action.m_reduceRuleNode = item.m_ruleNode;
+				}
 			}
 		}
 
@@ -1217,10 +1226,15 @@ void dParcerCompiler::BuildParcingTable (const dTree<dState*,int>& stateList, co
 
 				// this is a shift action
 				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (transition.m_name); 
-				dAction& action = actionNode->GetInfo();
-				action.m_type = SHIFT;
-				action.m_nextState = transition.m_targetState->m_number;
-				action.m_reduceRuleNode = NULL;
+				if (!actionNode) {
+					// the action already exist, this could be a reduce-reduce or a shift reduce conflict;
+					_ASSERTE (0);
+				} else {
+					dAction& action = actionNode->GetInfo();
+					action.m_type = SHIFT;
+					action.m_nextState = transition.m_targetState->m_number;
+					action.m_reduceRuleNode = NULL;
+				}
 			}
 		}
 	}

@@ -17,22 +17,12 @@
 #include <dList.h>
 
 #define MAX_USER_PARAM	64
-
+/*
 enum test1::ActionType
 {
 	ACCEPT,
 	SHIFT,
 	REDUCE
-};
-/*
-class test1::dActionEntry
-{
-	public:
-	int m_nextState;
-	int m_statesToPop;
-	int m_actionCount;
-	Token m_token;
-	ActionType m_action;
 };
 */
 
@@ -55,6 +45,27 @@ class test1::dActionEntry
 	};
 };
 
+class test1::dGotoEntry
+{
+	public:
+	dGotoEntry ()
+		:m_value(0)
+	{
+	}
+	dGotoEntry (unsigned val)
+		:m_value(val)
+	{
+	}
+	union {
+		unsigned m_value;
+		struct {
+			short  m_token;
+			short  m_nextState;
+		};
+	};
+};
+
+
 
 class test1::dStackPair
 {
@@ -72,12 +83,12 @@ class test1::dStackPair
 	};
 
 	dStackPair()
-		:m_state(0), m_token(Token (0)), m_value()
+		:m_state(0), m_token(dToken (0)), m_value()
 	{
 	}
 
 	int m_state;
-	Token m_token;
+	dToken m_token;
 	dUserVariable m_value;
 };
 
@@ -97,7 +108,7 @@ bool test1::ErrorHandler (const string& line) const
 	return false;
 }
 
-test1::dActionEntry test1::FindAction (const int* const actionList, int count, Token token) const
+test1::dActionEntry test1::FindAction (const int* const actionList, int count, dToken token) const
 {
 	int i0 = 0;
 	int i1 = count - 1;
@@ -105,7 +116,7 @@ test1::dActionEntry test1::FindAction (const int* const actionList, int count, T
 		int i = (i1 + i0 + 1)>>1;
 
 		dActionEntry action (actionList[i]);
-		if (token <=  Token(action.m_token)) {
+		if (token <= dToken(action.m_token)) {
 			i1 = i;
 		} else {
 			i0 = i;
@@ -114,7 +125,7 @@ test1::dActionEntry test1::FindAction (const int* const actionList, int count, T
 
 	for (int i = i0; i <= i1; i ++) {
 		dActionEntry action (actionList[i]);
-		if (token == Token(action.m_token)) {
+		if (token == dToken(action.m_token)) {
 			return action;;
 		}
 	}
@@ -122,16 +133,48 @@ test1::dActionEntry test1::FindAction (const int* const actionList, int count, T
 	return dActionEntry(unsigned (-1));
 }
 
+test1::dGotoEntry dAssemblerParcer::FindGoto (const int* const gotoList, int count, dToken token) const
+{
+	int i0 = 0;
+	int i1 = count - 1;
+	while ((i1 - i0) >= 4) {
+		int i = (i1 + i0 + 1)>>1;
 
-int test1::Parce(lextest1& scanner)
+		dGotoEntry action (gotoList[i]);
+		if (token <= dToken(action.m_token)) {
+			i1 = i;
+		} else {
+			i0 = i;
+		}
+	}
+
+	for (int i = i0; i <= i1; i ++) {
+		dGotoEntry action (gotoList[i]);
+		if (token == dToken(action.m_token)) {
+			return action;
+		}
+	}
+
+	return dGotoEntry(unsigned (-1));
+}
+
+
+bool test1::Parce(lextest1& scanner)
 {
 	dList<dStackPair> stack;
-	static int actionsCount[] = {2, 2, 1, 6, 2, 6, 2, 2, 2, 1, 6, 6};
-	static int actionsStart[] = {0, 2, 4, 5, 11, 13, 19, 21, 23, 25, 26, 32};
-	static int actionTable[] = {0x100a0, 0x14400, 0x2, 0x180ac, 0x1c0a8, 0x4004001, 0x40040a1, 0x40040a5, 0x40040a9, 0x40040ad, 0x4004401, 0x100a0, 0x14400, 0x4008001, 0x40080a1, 0x40080a5, 0x40080a9, 0x40080ad, 0x4008401, 0x100a0, 0x14400, 0x100a0, 0x14400, 0x2c0a4, 0x180ac, 0x1c0a8, 0xc004001, 0xc0040a1, 0xc0040a5, 0xc0040a9, 0xc0040ad, 0xc004401, 0xc008001, 0xc0080a1, 0xc0080a5, 0xc0080a9, 0xc0080ad, 0xc008401};
+	static int actionsCount[] = {2, 2, 2, 3, 3, 3, 2, 2, 2, 3, 3, 3};
+	static int actionsStart[] = {0, 2, 4, 6, 9, 12, 15, 17, 19, 21, 24, 27};
+	static int actionTable[] = {0x40a0, 0x14400, 0x40a0, 0x14400, 0x2, 0x1c0ac, 0x4004001, 0x40040a9, 0x40040ad, 0x4000001, 0x200a8, 0x40000ad, 0x4008001, 0x40080a9, 0x40080ad, 0x240a4, 0x1c0ac, 0x40a0, 0x14400, 0x40a0, 0x14400, 0xc008001, 0xc0080a9, 0xc0080ad, 0xc000001, 0x200a8, 0xc0000ad, 0xc004001, 0xc0040a9, 0xc0040ad};
+
+	static int gotoCount[] = {3, 3, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0};
+	static int gotoStart[] = {0, 3, 6, 6, 6, 6, 6, 6, 8, 9, 9, 9};
+	static int gotoTable[] = {0x20101, 0x30103, 0x40102, 0x60101, 0x30103, 0x40102, 0x30103, 0xa0102, 0xb0103};
+
+	const int lastToken = 257;
 
 	stack.Append ();
-	for (Token token = Token (scanner.NextToken()); token != -1; ) {
+	dToken token = dToken (scanner.NextToken());
+	for (;;) {
 		const dStackPair& stackTop = stack.GetLast()->GetInfo();
 		int start = actionsStart[stackTop.m_state];
 		int count = actionsCount[stackTop.m_state];
@@ -142,10 +185,13 @@ int test1::Parce(lextest1& scanner)
 			case 0: // 0 = shift
 			{
 				dStackPair& entry = stack.Append()->GetInfo();
-				entry.m_token = Token (action.m_token);
+				entry.m_token = dToken (action.m_token);
 				entry.m_state = action.m_nextState;
 				entry.m_value = dStackPair::dUserVariable (entry.m_token, scanner.GetTokenString());
-				token = Token (scanner.NextToken());
+				token = dToken (scanner.NextToken());
+				if (token == -1) {
+					token = dToken (0);
+				}
 				break;
 			}
 
@@ -162,10 +208,14 @@ int test1::Parce(lextest1& scanner)
 				}
 
 				const dStackPair& stackTop = stack.GetLast()->GetInfo();
-				dStackPair& entry = stack.Append()->GetInfo();
-				entry.m_token = Token (action.m_token);
-				entry.m_state = stackTop.m_state;
+				int start = gotoStart[stackTop.m_state];
+				int count = gotoCount[stackTop.m_state];
+				dGotoEntry gotoEntry (FindGoto (&gotoTable[start], count, dToken (action.m_nextState + lastToken)));
 
+				dStackPair& entry = stack.Append()->GetInfo();
+				entry.m_state = gotoEntry.m_nextState;
+				entry.m_token = dToken (gotoEntry.m_token);
+				
 				switch (action.m_nextState) 
 				{
 					//do user semantic Action
@@ -183,20 +233,23 @@ int test1::Parce(lextest1& scanner)
 	
 			case 2: // 2 = accept
 			{
-				_ASSERTE (0);
+				// successfully parced grammar, exit with successful code
+				return true;
 			}
 			
 			default:  // syntax grammar error
 			{
 				_ASSERTE (0);
+				// failed parcing gramamr, break with error code
 				// error
 				//if (!ErrorHandler ("error")) {
 				//}
+				break;
 			}
 		}
 	}
 
-	return 1;
+	return false;
 }
 
 

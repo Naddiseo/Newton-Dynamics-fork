@@ -31,27 +31,27 @@ class lextest1;
 class test1
 {
 	public:
-	enum Token
+	enum dToken
 	{
 		id = 256
 	};
 
-	
-	 
 
-	enum ActionType;
+//	enum ActionType;
 	class dStackPair;
+	class dGotoEntry;
 	class dActionEntry;
 	class dUserVariable;
 
 	test1();
 	virtual ~test1();
-	virtual int Parce(lextest1& scanner);
+	virtual bool Parce(lextest1& scanner);
 
 	virtual bool ErrorHandler (const string& line) const;
 
 	private:
-	dActionEntry FindAction (const int* const list, int count, Token token) const;
+	dGotoEntry FindGoto (const int* const gotoList, int count, dToken token) const;
+	dActionEntry FindAction (const int* const list, int count, dToken token) const;
 };
 
 #endif
