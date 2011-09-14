@@ -1127,65 +1127,6 @@ void dParcerCompiler::BuildParcingTable (const dTree<dState*,int>& stateList, co
 
 
 // generates the canonical Items set for a LR(1) grammar
-void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dProductionRule& ruleList, const dTree<dTokenType, string>& symbolList)
-{
-	dList<dItem> itemSet;
-	dList<dState*> stateList;
-
-	// start by building an item ste with only the first rule
-	dItem& item = itemSet.Append()->GetInfo();
-	item.m_indexMarker = 0;
-	item.m_lookAheadSymnol = DACCEPT_SYMBOL;
-	item.m_ruleNode = ruleList.GetFirst();
-
-	// find the closure for the first this item set with only the first rule
-	dState* const state = Closure (ruleList, itemSet, symbolList);
-
-	stateMap.Insert(state, state->GetKey());
-	stateList.Append(state);
-
-	state->Trace();
-
-	// now for each state found 
-	int stateNumber = 1;
-	for (dList<dState*>::dListNode* node = stateList.GetFirst(); node; node = node->GetNext()) {
-		dState* const state = node->GetInfo();
-
-		dTree<dTokenType, string>::Iterator iter (symbolList);
-		for (iter.Begin(); iter; iter ++) {
-
-			string symbol (iter.GetKey());
-			dState* const newState = Goto (ruleList, state, symbol, symbolList);
-
-			if (newState->GetCount()) {
-				dTransition& transition = state->m_transitions.Append()->GetInfo();
-				transition.m_name = symbol;
-				transition.m_type = iter.GetNode()->GetInfo();
-				transition.m_targetState = newState;
-
-				dTree<dState*,int>::dTreeNode* const targetStateNode = stateMap.Find(newState->GetKey());
-				if (!targetStateNode) {
-					newState->m_number = stateNumber;
-
-					int xxx [] = {0, 4, 1, 3, 2, 5, 8, 6, 7, 11, 9, 10};
-					//int xxx [] = {0, 3, 1, 2, 4, 6, 5, 7, 8};
-					newState->m_number = xxx[newState->m_number];
-
-					stateNumber ++;
-					stateMap.Insert(newState, newState->GetKey());
-					newState->Trace();
-
-					stateList.Append(newState);
-				} else {
-					transition.m_targetState = targetStateNode->GetInfo();
-					delete newState;
-				}
-			} else {
-				delete newState;
-			}
-		}
-	}
-}
 
 
 // Generate the closure for a Set of Item  
@@ -1309,6 +1250,74 @@ void dParcerCompiler::First (const dList<string>& symbolSet, const dTree<dTokenT
 
 bool dParcerCompiler::DoesSymbolDeriveEmpty (const string& symbol, const dProductionRule& ruleList) const 
 {
-	_ASSERTE (0);
+	for (dProductionRule::dListNode* ruleInfoNode = ruleList.GetFirst(); ruleInfoNode; ruleInfoNode = ruleInfoNode->GetNext()) {
+		const dRuleInfo& info = ruleInfoNode->GetInfo();
+		if (symbol == info.m_name) {
+			if (!info.GetCount()) {
+				return true;
+			}
+		}
+	}
 	return false;
+}
+
+
+void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dProductionRule& ruleList, const dTree<dTokenType, string>& symbolList)
+{
+	dList<dItem> itemSet;
+	dList<dState*> stateList;
+
+	// start by building an item ste with only the first rule
+	dItem& item = itemSet.Append()->GetInfo();
+	item.m_indexMarker = 0;
+	item.m_lookAheadSymnol = DACCEPT_SYMBOL;
+	item.m_ruleNode = ruleList.GetFirst();
+
+	// find the closure for the first this item set with only the first rule
+	dState* const state = Closure (ruleList, itemSet, symbolList);
+
+	stateMap.Insert(state, state->GetKey());
+	stateList.Append(state);
+
+	state->Trace();
+
+	// now for each state found 
+	int stateNumber = 1;
+	for (dList<dState*>::dListNode* node = stateList.GetFirst(); node; node = node->GetNext()) {
+		dState* const state = node->GetInfo();
+
+		dTree<dTokenType, string>::Iterator iter (symbolList);
+		for (iter.Begin(); iter; iter ++) {
+
+			string symbol (iter.GetKey());
+			dState* const newState = Goto (ruleList, state, symbol, symbolList);
+
+			if (newState->GetCount()) {
+				dTransition& transition = state->m_transitions.Append()->GetInfo();
+				transition.m_name = symbol;
+				transition.m_type = iter.GetNode()->GetInfo();
+				transition.m_targetState = newState;
+
+				dTree<dState*,int>::dTreeNode* const targetStateNode = stateMap.Find(newState->GetKey());
+				if (!targetStateNode) {
+					newState->m_number = stateNumber;
+
+					int xxx [] = {0, 4, 1, 3, 2, 5, 8, 6, 7, 11, 9, 10};
+					//int xxx [] = {0, 3, 1, 2, 4, 6, 5, 7, 8};
+					newState->m_number = xxx[newState->m_number];
+
+					stateNumber ++;
+					stateMap.Insert(newState, newState->GetKey());
+					newState->Trace();
+
+					stateList.Append(newState);
+				} else {
+					transition.m_targetState = targetStateNode->GetInfo();
+					delete newState;
+				}
+			} else {
+				delete newState;
+			}
+		}
+	}
 }
