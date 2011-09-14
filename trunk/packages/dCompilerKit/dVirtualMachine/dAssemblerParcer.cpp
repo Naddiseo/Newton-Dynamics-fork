@@ -18,7 +18,7 @@
 #include "dAssemblerCompiler.h"
 //
 // Newton virtual machine assembler grammar
-// based loosely on the MIPS R3000 and the Intel 386 instructions sets 
+// based loosely on a subset of the MIPS R3000 and the Intel 386 instructions set 
 //
 
 #include "dAssemblerParcer.h"
@@ -78,23 +78,21 @@ class dAssemblerParcer::dGotoEntry
 class dAssemblerParcer::dStackPair
 {
 	public:
-	class dUserVariable: public string 
-	{	
+
+	class dUserVariable: public string
+	{
 		public:
-		dUserVariable ()
-			:string(), m_token (dToken(0))
+		dUserVariable () 
+			:string("")
 		{
 		}
-
+		
 		dUserVariable (dToken token, const char* const text)
-			:string(text), m_token (token)
+			:string (text), m_token(token)
 		{
 		}
-
 		dToken m_token;
 	};
-
-
 
 	dStackPair()
 		:m_state(0), m_token(dToken (0)), m_value()
@@ -232,12 +230,56 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 				
 				switch (action.m_nextState) 
 				{
-					//do user semantic Action
-					//$(semanticActionsCode);
-					case 0:
-					{
+					//do user semantic Actions
+					case 1:
+						{entry.m_value = parameter[1].m_value;}
 						break;
-					}
+					case 1:
+						{entry.m_value = parameter[1].m_value;}
+						break;
+					case 1:
+						{entry.m_value = parameter[1].m_value;}
+						break;
+					case 0:
+						{entry.m_value = parameter[1].m_value;}
+						break;
+					case 0:
+						{entry.m_value = parameter[1].m_value;}
+						break;
+					case 2:
+						{entry.m_value = parameter[1].m_value;}
+						break;
+					case 2:
+						{entry.m_value = parameter[1].m_value;}
+						break;
+					case 2:
+						{entry.m_value = parameter[1].m_value;}
+						break;
+					case 2:
+						{entry.m_value = parameter[2].m_value;}
+						break;
+					case 2:
+						{entry.m_value = parameter[2].m_value;}
+						break;
+					case 2:
+						{entry.m_value = parameter[2].m_value;}
+						break;
+					case 0:
+						{entry.m_value = parameter[1].m_value + " + " + parameter[2].m_value; printf ("%s\n", entry.m_value.c_str());}
+						break;
+					case 0:
+						{entry.m_value = parameter[1].m_value + " + " + parameter[2].m_value; printf ("%s\n", entry.m_value.c_str());}
+						break;
+					case 1:
+						{entry.m_value = parameter[1].m_value + " * " + parameter[2].m_value;}
+						break;
+					case 1:
+						{entry.m_value = parameter[1].m_value + " * " + parameter[2].m_value;}
+						break;
+					case 1:
+						{entry.m_value = parameter[1].m_value + " * " + parameter[2].m_value;}
+						break;
+
 					default:;
 				}
 
@@ -247,15 +289,14 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 	
 			case 2: // 2 = accept
 			{
-				// successfully parced grammar, exit with successful code
+				// program parce successfully, exit with successful code
 				return true;
 			}
 			
 			default:  // syntax grammar error
 			{
 				_ASSERTE (0);
-				// failed parcing gramamr, break with error code
-				// error
+				// syntact error parciing program
 				//if (!ErrorHandler ("error")) {
 				//}
 				break;
@@ -265,8 +306,6 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 
 	return false;
 }
-
-
 
 
 

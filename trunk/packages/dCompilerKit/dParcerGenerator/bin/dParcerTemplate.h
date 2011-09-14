@@ -41,7 +41,7 @@ $(Tokens)
 	class dStackPair;
 	class dGotoEntry;
 	class dActionEntry;
-	class $(userVariable);
+	class dUserVariable;
 
 	$(className)();
 	virtual ~$(className)();

@@ -1,16 +1,15 @@
-	class $(userVariable): public string 
+	class dUserVariable: public string 
 	{	
 		public:
-		$(userVariable) ()
+		dUserVariable ()
 			:string(), m_token (dToken(0))
 		{
 		}
 
-		$(userVariable) (dToken token, const char* const text)
+		dUserVariable (dToken token, const char* const text)
 			:string(text), m_token (token)
 		{
 		}
-
 		dToken m_token;
 	};
 

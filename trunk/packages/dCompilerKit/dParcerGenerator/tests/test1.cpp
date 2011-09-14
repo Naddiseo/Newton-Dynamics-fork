@@ -71,15 +71,18 @@ class test1::dStackPair
 {
 	public:
 
-	class myVariable 
+	class dUserVariable: public string
 	{
-		myVariable ()
-		myVariable (Token token, const char* const text)
+		dUserVariable () 
+			:string("")
+		{
+		}
+		
+		dUserVariable (Token token, const char* const text)
 			:m_token(token), m_data (text) 
 		{
 		}
 		Token m_token;
-		string m_data;
 	};
 
 	dStackPair()
@@ -89,7 +92,7 @@ class test1::dStackPair
 
 	int m_state;
 	dToken m_token;
-	dUserVariable m_value;
+	d m_value;
 };
 
 
@@ -218,12 +221,56 @@ bool test1::Parce(lextest1& scanner)
 				
 				switch (action.m_nextState) 
 				{
-					//do user semantic Action
-					//$(semanticActionsCode);
-					case 0:
-					{
+					//do user semantic Actions
+					case 1:
+						{entry.m_value = parameter[1].m_value;}
 						break;
-					}
+					case 1:
+						{entry.m_value = parameter[1].m_value;}
+						break;
+					case 1:
+						{entry.m_value = parameter[1].m_value;}
+						break;
+					case 0:
+						{entry.m_value = parameter[1].m_value;}
+						break;
+					case 0:
+						{entry.m_value = parameter[1].m_value;}
+						break;
+					case 2:
+						{entry.m_value = parameter[1].m_value;}
+						break;
+					case 2:
+						{entry.m_value = parameter[1].m_value;}
+						break;
+					case 2:
+						{entry.m_value = parameter[1].m_value;}
+						break;
+					case 2:
+						{entry.m_value = parameter[2].m_value;}
+						break;
+					case 2:
+						{entry.m_value = parameter[2].m_value;}
+						break;
+					case 2:
+						{entry.m_value = parameter[2].m_value;}
+						break;
+					case 0:
+						{entry.m_value = parameter[1].m_value + " + " + parameter[2].m_value; printf ("%s\n", entry.m_value.c_str());}
+						break;
+					case 0:
+						{entry.m_value = parameter[1].m_value + " + " + parameter[2].m_value; printf ("%s\n", entry.m_value.c_str());}
+						break;
+					case 1:
+						{entry.m_value = parameter[1].m_value + " * " + parameter[2].m_value;}
+						break;
+					case 1:
+						{entry.m_value = parameter[1].m_value + " * " + parameter[2].m_value;}
+						break;
+					case 1:
+						{entry.m_value = parameter[1].m_value + " * " + parameter[2].m_value;}
+						break;
+
 					default:;
 				}
 
@@ -233,15 +280,14 @@ bool test1::Parce(lextest1& scanner)
 	
 			case 2: // 2 = accept
 			{
-				// successfully parced grammar, exit with successful code
+				// program parce successfully, exit with successful code
 				return true;
 			}
 			
 			default:  // syntax grammar error
 			{
 				_ASSERTE (0);
-				// failed parcing gramamr, break with error code
-				// error
+				// syntact error parciing program
 				//if (!ErrorHandler ("error")) {
 				//}
 				break;

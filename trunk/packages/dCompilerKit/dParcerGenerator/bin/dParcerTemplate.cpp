@@ -78,7 +78,7 @@ $(userVariableClass)
 
 	int m_state;
 	dToken m_token;
-	$(userVariable) m_value;
+	dUserVariable m_value;
 };
 
 
@@ -207,12 +207,8 @@ bool $(className)::Parce($(scannerClass)& scanner)
 				
 				switch (action.m_nextState) 
 				{
-					//do user semantic Action
-					//$(semanticActionsCode);
-					case 0:
-					{
-						break;
-					}
+					//do user semantic Actions
+$(semanticActionsCode)
 					default:;
 				}
 
@@ -222,15 +218,14 @@ bool $(className)::Parce($(scannerClass)& scanner)
 	
 			case 2: // 2 = accept
 			{
-				// successfully parced grammar, exit with successful code
+				// program parce successfully, exit with successful code
 				return true;
 			}
 			
 			default:  // syntax grammar error
 			{
 				_ASSERTE (0);
-				// failed parcing gramamr, break with error code
-				// error
+				// syntact error parciing program
 				//if (!ErrorHandler ("error")) {
 				//}
 				break;

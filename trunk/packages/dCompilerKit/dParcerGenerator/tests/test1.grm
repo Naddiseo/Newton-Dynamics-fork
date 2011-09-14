@@ -15,15 +15,18 @@
 
 %union 
 {
-	class myVariable 
+	class dUserVariable: public string
 	{
-		myVariable ()
-		myVariable (Token token, const char* const text)
+		dUserVariable () 
+			:string("")
+		{
+		}
+		
+		dUserVariable (Token token, const char* const text)
 			:m_token(token), m_data (text) 
 		{
 		}
 		Token m_token;
-		string m_data;
 	};
 }
 
@@ -31,16 +34,16 @@
 %start E
 
 %%
-E	: E '+' T
-	| T
+E	: E '+' T		{$$ = $1 + " + " + $2; printf ("%s\n", $$.c_str());}
+	| T				{$$ = $1;}
 	;
 	
-T	: T '*'	F
-	| F
+T	: T '*'	F		{$$ = $1 + " * " + $2;}
+	| F				{$$ = $1;}
 	;
 	
-F	: '(' E ')'
-	| id
+F	: '(' E ')'		{$$ = $2;}
+	| id			{$$ = $1;}
 	;
 		
 %%
