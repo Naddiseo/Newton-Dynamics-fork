@@ -17,6 +17,8 @@
 
 #define DACCEPT_SYMBOL "$$$"
 
+#define DDEBUG_STATES
+
 
 
 //The Parcel input file consists of three sections, separated by a line containing only `%%'. 
@@ -225,6 +227,7 @@ class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 
 	void Trace() const
 	{
+#ifdef DDEBUG_STATES
 		DTRACE(("state %d:\n", m_number));
 		for (dState::dListNode* itemNode = GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
 			dItem& item = itemNode->GetInfo();
@@ -255,6 +258,7 @@ class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 			DTRACE((", %s]\n", item.m_lookAheadSymnol.c_str()));
 		}
 		DTRACE(("\n"));
+#endif
 	}
 
 	int m_key;
