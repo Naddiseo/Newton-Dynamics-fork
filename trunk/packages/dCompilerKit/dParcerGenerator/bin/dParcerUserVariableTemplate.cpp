@@ -1,16 +1,17 @@
-	class dUserVariable: public string 
-	{	
+	class dUserVariable
+	{
 		public:
-		dUserVariable ()
-			:string(), m_token (dToken(0))
+		dUserVariable () 
+			:m_token (dToken (0)), m_data("")
 		{
 		}
 
-		dUserVariable (dToken token, const char* const text)
-			:string(text), m_token (token)
+
+		dUserVariable (dToken token, const char* const data)
+			:m_token(token), m_data (data) 
 		{
 		}
 		dToken m_token;
+		string m_data;
 	};
-
 

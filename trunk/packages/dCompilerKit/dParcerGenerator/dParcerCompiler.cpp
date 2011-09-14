@@ -175,7 +175,7 @@ class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 {
 	public:
 	dState (const dList<dItem>& itemSet)
-		:m_key(0), m_number(0), m_goto(), m_actions(), m_transitions()
+		:m_key(0), m_number(0), m_reduceActionMark (false), m_goto(), m_actions(), m_transitions()
 	{
 		for (dListNode* node = itemSet.GetFirst(); node; node = node->GetNext()) {
 			Append(node->GetInfo());
@@ -263,6 +263,7 @@ class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 
 	int m_key;
 	int m_number;
+	bool m_reduceActionMark;
 	dTree<dState*, string> m_goto; 
 	dTree<dAction, string> m_actions; 
 	dList<dTransition> m_transitions;
@@ -1081,9 +1082,9 @@ void dParcerCompiler::GenerateParcerCode (
 				nextActionsStateList += text;
 				entriesCount ++;
 
-				
-				if (reduceRule.m_semanticActionCode != emptySematicAction) {
+				if (!state->m_reduceActionMark && (reduceRule.m_semanticActionCode != emptySematicAction)) {
 					// issue a sematic action code;
+					state->m_reduceActionMark = true;
 					char text[128];
 					string userSematicAction (reduceRule.m_semanticActionCode);
 					for (int i = 0; i < int (entry.m_reduceCount); i ++) {
@@ -1098,7 +1099,7 @@ void dParcerCompiler::GenerateParcerCode (
 					}
 					ReplaceAllMacros (userSematicAction, "entry.m_value", "$$");
 
-					sprintf (text, "%d:\n", entry.m_nextState);
+					sprintf (text, "%d:\n", state->m_number);
 					sematicActions += "\t\t\t\t\tcase "; 
 					sematicActions += text; 
 					sematicActions += "\t\t\t\t\t\t";

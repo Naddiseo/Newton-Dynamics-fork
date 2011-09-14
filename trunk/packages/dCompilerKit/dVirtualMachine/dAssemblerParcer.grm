@@ -28,31 +28,36 @@
 // very simple sample SLR(1) grammar 
 %union 
 {
-	class dUserVariable: public string
+	class dUserVariable
 	{
 		public:
 		dUserVariable () 
-			:string("")
+			:m_token (dToken (0)), m_data("")
 		{
 		}
 		
+		
 		dUserVariable (dToken token, const char* const text)
-			:string (text), m_token(token)
+			:m_token(token), m_data (text) 
 		{
 		}
 		dToken m_token;
+		string m_data;
 	};
 }
 
 %token id
-%start E
+%start E1
 
 %%
-E	: E '+' T		{$$ = $1 + " + " + $2; printf ("%s\n", $$.c_str());}
+E1	: E				{printf ("%s\n", $1.m_data.c_str());}
+	;
+
+E	: E '+' T		{$$.m_data = $1.m_data + " + " + $3.m_data;}
 	| T				{$$ = $1;}
 	;
 	
-T	: T '*'	F		{$$ = $1 + " * " + $2;}
+T	: T '*'	F		{$$.m_data = $1.m_data + " * " + $3.m_data;}
 	| F				{$$ = $1;}
 	;
 	

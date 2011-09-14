@@ -79,19 +79,21 @@ class dAssemblerParcer::dStackPair
 {
 	public:
 
-	class dUserVariable: public string
+	class dUserVariable
 	{
 		public:
 		dUserVariable () 
-			:string("")
+			:m_token (dToken (0)), m_data("")
 		{
 		}
 		
+		
 		dUserVariable (dToken token, const char* const text)
-			:string (text), m_token(token)
+			:m_token(token), m_data (text) 
 		{
 		}
 		dToken m_token;
+		string m_data;
 	};
 
 	dStackPair()
@@ -174,13 +176,13 @@ dAssemblerParcer::dGotoEntry dAssemblerParcer::FindGoto (const int* const gotoLi
 bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 {
 	dList<dStackPair> stack;
-	static int actionsCount[] = {2, 2, 2, 3, 3, 3, 2, 2, 2, 3, 3, 3};
-	static int actionsStart[] = {0, 2, 4, 6, 9, 12, 15, 17, 19, 21, 24, 27};
-	static int actionTable[] = {0x40a0, 0x14400, 0x40a0, 0x14400, 0x2, 0x1c0ac, 0x4004001, 0x40040a9, 0x40040ad, 0x4000001, 0x200a8, 0x40000ad, 0x4008001, 0x40080a9, 0x40080ad, 0x240a4, 0x1c0ac, 0x40a0, 0x14400, 0x40a0, 0x14400, 0xc008001, 0xc0080a9, 0xc0080ad, 0xc000001, 0x200a8, 0xc0000ad, 0xc004001, 0xc0040a9, 0xc0040ad};
+	static int actionsCount[] = {2, 2, 2, 1, 3, 3, 3, 2, 2, 2, 3, 3, 3};
+	static int actionsStart[] = {0, 2, 4, 6, 7, 10, 13, 16, 18, 20, 22, 25, 28};
+	static int actionTable[] = {0x40a0, 0x18400, 0x40a0, 0x18400, 0x4000001, 0x200ac, 0x2, 0x4008001, 0x40080a9, 0x40080ad, 0x4004001, 0x240a8, 0x40040ad, 0x400c001, 0x400c0a9, 0x400c0ad, 0x280a4, 0x200ac, 0x40a0, 0x18400, 0x40a0, 0x18400, 0xc00c001, 0xc00c0a9, 0xc00c0ad, 0xc004001, 0x240a8, 0xc0040ad, 0xc008001, 0xc0080a9, 0xc0080ad};
 
-	static int gotoCount[] = {3, 3, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0};
-	static int gotoStart[] = {0, 3, 6, 6, 6, 6, 6, 6, 8, 9, 9, 9};
-	static int gotoTable[] = {0x20101, 0x30103, 0x40102, 0x60101, 0x30103, 0x40102, 0x30103, 0xa0102, 0xb0103};
+	static int gotoCount[] = {4, 3, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0};
+	static int gotoStart[] = {0, 4, 7, 7, 7, 7, 7, 7, 7, 9, 10, 10, 10};
+	static int gotoTable[] = {0x20102, 0x30101, 0x40104, 0x50103, 0x70102, 0x40104, 0x50103, 0x40104, 0xb0103, 0xc0104};
 
 	const int lastToken = 257;
 
@@ -231,53 +233,26 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 				switch (action.m_nextState) 
 				{
 					//do user semantic Actions
-					case 1:
-						{entry.m_value = parameter[1].m_value;}
-						break;
-					case 1:
-						{entry.m_value = parameter[1].m_value;}
-						break;
-					case 1:
-						{entry.m_value = parameter[1].m_value;}
-						break;
-					case 0:
-						{entry.m_value = parameter[1].m_value;}
-						break;
-					case 0:
-						{entry.m_value = parameter[1].m_value;}
-						break;
 					case 2:
+						{printf ("%s\n", parameter[1].m_value.m_data.c_str());}
+						break;
+					case 4:
 						{entry.m_value = parameter[1].m_value;}
 						break;
-					case 2:
+					case 5:
 						{entry.m_value = parameter[1].m_value;}
 						break;
-					case 2:
+					case 6:
 						{entry.m_value = parameter[1].m_value;}
 						break;
-					case 2:
+					case 10:
 						{entry.m_value = parameter[2].m_value;}
 						break;
-					case 2:
-						{entry.m_value = parameter[2].m_value;}
+					case 11:
+						{entry.m_value.m_data = parameter[1].m_value.m_data + " + " + parameter[3].m_value.m_data;}
 						break;
-					case 2:
-						{entry.m_value = parameter[2].m_value;}
-						break;
-					case 0:
-						{entry.m_value = parameter[1].m_value + " + " + parameter[2].m_value; printf ("%s\n", entry.m_value.c_str());}
-						break;
-					case 0:
-						{entry.m_value = parameter[1].m_value + " + " + parameter[2].m_value; printf ("%s\n", entry.m_value.c_str());}
-						break;
-					case 1:
-						{entry.m_value = parameter[1].m_value + " * " + parameter[2].m_value;}
-						break;
-					case 1:
-						{entry.m_value = parameter[1].m_value + " * " + parameter[2].m_value;}
-						break;
-					case 1:
-						{entry.m_value = parameter[1].m_value + " * " + parameter[2].m_value;}
+					case 12:
+						{entry.m_value.m_data = parameter[1].m_value.m_data + " * " + parameter[3].m_value.m_data;}
 						break;
 
 					default:;
