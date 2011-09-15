@@ -1021,6 +1021,7 @@ void dParcerCompiler::GenerateParcerCode (
 	string nextActionsStateList ("");
 	string sematicActions ("");
 	int entriesCount = 0;
+	int newLine = 0;
 	dTree<dState*,int>::Iterator sortStateIter (sortedStates);
 	for (sortStateIter.Begin(); sortStateIter; sortStateIter ++) {
 		char text[256];
@@ -1033,6 +1034,12 @@ void dParcerCompiler::GenerateParcerCode (
 		dTree<dAction, string>::Iterator actionIter (state->m_actions);
 		for (actionIter.Begin(); actionIter; actionIter++) {
 			count ++;
+
+			if (entriesCount >= newLine) {
+				nextActionsStateList += "\n\t\t\t\t\t";
+				newLine = entriesCount + 4;
+			}
+
 			dAction& action = actionIter.GetNode()->GetInfo();
 			if (action.m_type == dSHIFT) {
 				const string& actionSymbol = actionIter.GetKey();
@@ -1140,6 +1147,7 @@ void dParcerCompiler::GenerateParcerCode (
 	string stateGotoCount ("");
 	string nextGotoStateList ("");
 	entriesCount = 0;
+	newLine = 0;
 	for (sortStateIter.Begin(); sortStateIter; sortStateIter ++) {
 
 		char text[256];
@@ -1147,6 +1155,12 @@ void dParcerCompiler::GenerateParcerCode (
 
 		sprintf (text, "%d, ", entriesCount);
 		stateGotoStart += text;
+
+		if (entriesCount >= newLine) {
+			nextGotoStateList += "\n\t\t\t\t\t";
+			newLine = entriesCount + 4;
+		}
+
 
 		int count = 0;
 		dTree<dState*, string>::Iterator gotoIter (state->m_goto); 

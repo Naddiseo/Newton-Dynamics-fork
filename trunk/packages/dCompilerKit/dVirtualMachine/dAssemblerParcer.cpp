@@ -170,11 +170,22 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 	dList<dStackPair> stack;
 	static int actionsCount[] = {2, 2, 2, 1, 3, 3, 3, 2, 2, 2, 3, 3, 3};
 	static int actionsStart[] = {0, 2, 4, 6, 7, 10, 13, 16, 18, 20, 22, 25, 28};
-	static dActionEntry actionTable[] = {dActionEntry (40, 0, 1, 0, 0), dActionEntry (256, 0, 6, 0, 0), dActionEntry (40, 0, 1, 0, 0), dActionEntry (256, 0, 6, 0, 0), dActionEntry (0, 1, 0, 1, 1), dActionEntry (43, 0, 8, 0, 0), dActionEntry (0, 2, 0, 0, 0), dActionEntry (0, 1, 2, 1, 5), dActionEntry (42, 1, 2, 1, 5), dActionEntry (43, 1, 2, 1, 5), dActionEntry (0, 1, 1, 1, 3), dActionEntry (42, 0, 9, 0, 0), dActionEntry (43, 1, 1, 1, 3), dActionEntry (0, 1, 3, 1, 7), dActionEntry (42, 1, 3, 1, 7), dActionEntry (43, 1, 3, 1, 7), dActionEntry (41, 0, 10, 0, 0), dActionEntry (43, 0, 8, 0, 0), dActionEntry (40, 0, 1, 0, 0), dActionEntry (256, 0, 6, 0, 0), dActionEntry (40, 0, 1, 0, 0), dActionEntry (256, 0, 6, 0, 0), dActionEntry (0, 1, 3, 3, 6), dActionEntry (42, 1, 3, 3, 6), dActionEntry (43, 1, 3, 3, 6), dActionEntry (0, 1, 1, 3, 2), dActionEntry (42, 0, 9, 0, 0), dActionEntry (43, 1, 1, 3, 2), dActionEntry (0, 1, 2, 3, 4), dActionEntry (42, 1, 2, 3, 4), dActionEntry (43, 1, 2, 3, 4)};
+	static dActionEntry actionTable[] = {
+					dActionEntry (40, 0, 1, 0, 0), dActionEntry (256, 0, 6, 0, 0), dActionEntry (40, 0, 1, 0, 0), dActionEntry (256, 0, 6, 0, 0), 
+					dActionEntry (0, 1, 0, 1, 1), dActionEntry (43, 0, 8, 0, 0), dActionEntry (0, 2, 0, 0, 0), dActionEntry (0, 1, 2, 1, 5), 
+					dActionEntry (42, 1, 2, 1, 5), dActionEntry (43, 1, 2, 1, 5), dActionEntry (0, 1, 1, 1, 3), dActionEntry (42, 0, 9, 0, 0), 
+					dActionEntry (43, 1, 1, 1, 3), dActionEntry (0, 1, 3, 1, 7), dActionEntry (42, 1, 3, 1, 7), dActionEntry (43, 1, 3, 1, 7), 
+					dActionEntry (41, 0, 10, 0, 0), dActionEntry (43, 0, 8, 0, 0), dActionEntry (40, 0, 1, 0, 0), dActionEntry (256, 0, 6, 0, 0), 
+					dActionEntry (40, 0, 1, 0, 0), dActionEntry (256, 0, 6, 0, 0), dActionEntry (0, 1, 3, 3, 6), dActionEntry (42, 1, 3, 3, 6), 
+					dActionEntry (43, 1, 3, 3, 6), dActionEntry (0, 1, 1, 3, 2), dActionEntry (42, 0, 9, 0, 0), dActionEntry (43, 1, 1, 3, 2), 
+					dActionEntry (0, 1, 2, 3, 4), dActionEntry (42, 1, 2, 3, 4), dActionEntry (43, 1, 2, 3, 4)};
 
 	static int gotoCount[] = {4, 3, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0};
 	static int gotoStart[] = {0, 4, 7, 7, 7, 7, 7, 7, 7, 9, 10, 10, 10};
-	static dGotoEntry gotoTable[] = {dGotoEntry (258, 2), dGotoEntry (257, 3), dGotoEntry (260, 4), dGotoEntry (259, 5), dGotoEntry (258, 7), dGotoEntry (260, 4), dGotoEntry (259, 5), dGotoEntry (260, 4), dGotoEntry (259, 11), dGotoEntry (260, 12)};
+	static dGotoEntry gotoTable[] = {
+					dGotoEntry (258, 2), dGotoEntry (257, 3), dGotoEntry (260, 4), dGotoEntry (259, 5), 
+					dGotoEntry (258, 7), dGotoEntry (260, 4), dGotoEntry (259, 5), dGotoEntry (260, 4), dGotoEntry (259, 11), 
+					dGotoEntry (260, 12)};
 
 	const int lastToken = 257;
 
