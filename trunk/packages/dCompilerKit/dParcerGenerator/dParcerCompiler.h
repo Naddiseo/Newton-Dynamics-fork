@@ -84,16 +84,16 @@ class dParcerCompiler
 	class dGoto;
 	class dAction;
 	class dSymbol;
+	class dRuleInfo;
 	class dGotoEntry;
 	class ActionEntry;
 	class dTransition;
 	class dActionEntry;
 	class dSentenceSymbol;
-	class dRuleInfo;
 	class dProductionRule;
-	class dOperatorsAssociation;
+	class dTokenStringPair;
 	class dOperatorsPrecedence;
-	
+	class dOperatorsAssociation;
 
 	
 	dParcerCompiler(const string& inputRules, const char* const outputFileName, const char* const scannerClassName);

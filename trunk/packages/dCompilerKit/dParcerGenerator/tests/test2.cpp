@@ -157,17 +157,19 @@ const test2::dGotoEntry* dAssemblerParcer::FindGoto (const dGotoEntry* const got
 bool test2::Parce(lextest1& scanner)
 {
 	dList<dStackPair> stack;
-	static int actionsCount[] = {1, 2, 1, 2, 1, 2};
-	static int actionsStart[] = {0, 1, 3, 4, 6, 7};
+	static int actionsCount[] = {1, 3, 1, 3, 1, 1, 3, 3};
+	static int actionsStart[] = {0, 1, 4, 5, 8, 9, 10, 13};
 	static dActionEntry actionTable[] = {
-					dActionEntry (256, 0, 3, 0, 0), dActionEntry (0, 1, 0, 1, 1), dActionEntry (43, 0, 4, 0, 0), dActionEntry (0, 2, 0, 0, 0), 
-					dActionEntry (0, 1, 1, 1, 3), dActionEntry (43, 1, 1, 1, 3), dActionEntry (256, 0, 3, 0, 0), dActionEntry (0, 1, 1, 3, 2), 
-					dActionEntry (43, 1, 1, 3, 2)};
+					dActionEntry (256, 0, 3, 0, 0), dActionEntry (0, 1, 0, 1, 1), dActionEntry (42, 0, 4, 0, 0), dActionEntry (43, 0, 5, 0, 0), 
+					dActionEntry (0, 2, 0, 0, 0), dActionEntry (0, 1, 1, 1, 4), dActionEntry (42, 1, 1, 1, 4), dActionEntry (43, 1, 1, 1, 4), 
+					dActionEntry (256, 0, 3, 0, 0), dActionEntry (256, 0, 3, 0, 0), dActionEntry (0, 1, 1, 3, 3), dActionEntry (42, 1, 1, 3, 3), 
+					dActionEntry (43, 1, 1, 3, 3), dActionEntry (0, 1, 1, 3, 2), dActionEntry (42, 1, 1, 3, 2), dActionEntry (43, 1, 1, 3, 2)};
 
-	static int gotoCount[] = {2, 0, 0, 0, 1, 0};
-	static int gotoStart[] = {0, 2, 2, 2, 2, 3};
+	static int gotoCount[] = {2, 0, 0, 0, 1, 1, 0, 0};
+	static int gotoStart[] = {0, 2, 2, 2, 2, 3, 4, 4};
 	static dGotoEntry gotoTable[] = {
-					dGotoEntry (258, 1), dGotoEntry (257, 2), dGotoEntry (258, 5)};
+					dGotoEntry (258, 1), dGotoEntry (257, 2), dGotoEntry (258, 6), dGotoEntry (258, 7), 
+			};
 
 	const int lastToken = 257;
 
@@ -223,8 +225,11 @@ bool test2::Parce(lextest1& scanner)
 					case 1:// rule E1 : E 
 						{printf ("%s\n", parameter[0].m_value.m_data.c_str());}
 						break;
-					case 3:// rule E : id 
+					case 4:// rule E : id 
 						{entry.m_value = parameter[0].m_value;}
+						break;
+					case 3:// rule E : E * E 
+						{entry.m_value.m_data = parameter[0].m_value.m_data + " * " + parameter[2].m_value.m_data;}
 						break;
 					case 2:// rule E : E + E 
 						{entry.m_value.m_data = parameter[0].m_value.m_data + " + " + parameter[2].m_value.m_data;}

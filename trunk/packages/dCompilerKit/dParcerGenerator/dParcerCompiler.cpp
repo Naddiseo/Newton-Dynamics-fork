@@ -156,6 +156,14 @@ class dParcerCompiler::dAction
 	dProductionRule::dListNode* m_reduceRuleNode;
 };
 
+class dParcerCompiler::dTokenStringPair 
+{
+	public:
+	dToken m_token;
+	string m_info;
+};
+
+
 class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 {
 	public:
@@ -514,11 +522,6 @@ dParcerCompiler::dToken dParcerCompiler::ScanGrammarRule(
 	dTree<int, string>& tokenEnumerationMap,
 	int& tokenEnumeration)
 {
-	struct dTokenStringPair 
-	{
-		dToken m_token;
-		string m_info;
-	};
 
 	dRuleInfo* currentRule = &rules.GetLast()->GetInfo();
 	
@@ -1003,9 +1006,9 @@ void dParcerCompiler::BuildParcingTable (
 
 				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Find (item.m_lookAheadSymnol); 
 				if (actionNode) {
-
+					const string& shiftSymbol = actionNode->GetKey();
 					const dOperatorsAssociation* const association0 = operatorPrecence.FindAssociation (item.m_lookAheadSymnol);
-					const dOperatorsAssociation* const association1 = operatorPrecence.FindAssociation (actionNode->GetKey());
+					const dOperatorsAssociation* const association1 = operatorPrecence.FindAssociation (shiftSymbol);
 					if (association0 == association1) {
 						// two operator with the same association, see if the association was specified
 						if (association0) {
@@ -1021,7 +1024,7 @@ void dParcerCompiler::BuildParcingTable (
 							}
 						} else {
 							// the action already exist, this is a shift-reduce conflict
-							DTRACE (("shift reduce conflict, resulving by shift\n"));
+							DTRACE (("shift reduce conflict, resolving by shift\n"));
 							state->Trace();
 						}
 					} else {
