@@ -51,6 +51,8 @@
 %token id
 %start E1
 
+%left	'+' '-'
+
 %%
 E1	: E				{printf ("%s\n", $1.m_data.c_str());}
 	;

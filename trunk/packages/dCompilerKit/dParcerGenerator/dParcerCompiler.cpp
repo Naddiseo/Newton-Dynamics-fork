@@ -261,11 +261,35 @@ class dParcerCompiler::dOperatorsAssociation: public dList <string>
 		m_left,
 		m_right
 	};
+
+	bool FindOperator(const string& symbol) const
+	{
+		for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
+			if (symbol == node->GetInfo()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	dAssoctivity m_associativity;
 };
 
 class dParcerCompiler::dOperatorsPrecedence: public dList <dOperatorsAssociation>
 {
+	public:
+
+	const dOperatorsAssociation* FindAssociation (const string& symbol)	const
+	{
+		for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
+			const dOperatorsAssociation& association = node->GetInfo();
+			if (association.FindOperator(symbol)) {
+				return &association;
+			}
+		}
+
+		return NULL;
+	}
 };
 
 dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const outputFileName, const char* const scannerClassName)
@@ -977,12 +1001,34 @@ void dParcerCompiler::BuildParcingTable (
 				action.m_reduceRuleNode = NULL;
 			} else if ((item.m_indexMarker == ruleInfo.GetCount()) && (ruleInfo.m_name != startSymbol)) {
 
-				dTree<dAction, string>::dTreeNode* actionNode = state->m_actions.Find (item.m_lookAheadSymnol); 
+				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Find (item.m_lookAheadSymnol); 
 				if (actionNode) {
-					// the action already exist, this is a reduce-reduce conflict
-					_ASSERTE (0);
+
+					const dOperatorsAssociation* const association0 = operatorPrecence.FindAssociation (item.m_lookAheadSymnol);
+					const dOperatorsAssociation* const association1 = operatorPrecence.FindAssociation (actionNode->GetKey());
+					if (association0 == association1) {
+						// two operator with the same association, see if the association was specified
+						if (association0) {
+							// the association was specified
+							if (association0->m_associativity == dOperatorsAssociation::m_left) {
+								// overwriting a shift action with a reduce action
+								item.m_error = false;
+								dAction& action = actionNode->GetInfo();
+								action.m_type = dREDUCE;
+								action.m_nextState = 0;
+								action.m_reduceRuleNode = item.m_ruleNode;
+
+							}
+						} else {
+							// the action already exist, this is a shift-reduce conflict
+							DTRACE (("shift reduce conflict, resulving by shift\n"));
+							state->Trace();
+						}
+					} else {
+						_ASSERTE (0);
+					}
 				} else {
-					actionNode = state->m_actions.Insert (item.m_lookAheadSymnol); 
+					dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (item.m_lookAheadSymnol); 
 					item.m_error = false;
 					dAction& action = actionNode->GetInfo();
 					action.m_type = dREDUCE;
