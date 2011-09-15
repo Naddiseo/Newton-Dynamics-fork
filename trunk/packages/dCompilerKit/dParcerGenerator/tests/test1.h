@@ -36,8 +36,7 @@ class test1
 		id = 256
 	};
 
-
-//	enum ActionType;
+	enum ActionType;
 	class dStackPair;
 	class dGotoEntry;
 	class dActionEntry;
@@ -51,7 +50,7 @@ class test1
 
 	private:
 	dGotoEntry FindGoto (const int* const gotoList, int count, dToken token) const;
-	dActionEntry FindAction (const int* const list, int count, dToken token) const;
+	const dActionEntry* FindAction (const dActionEntry* const list, int count, dToken token) const;
 };
 
 #endif

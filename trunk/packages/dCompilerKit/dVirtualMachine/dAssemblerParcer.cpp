@@ -25,52 +25,40 @@
 #include <dList.h>
 
 #define MAX_USER_PARAM	64
-/*
+
 enum dAssemblerParcer::ActionType
 {
-	ACCEPT,
-	SHIFT,
-	REDUCE
+	dSHIFT = 0,
+	dREDUCE,
+	dACCEPT,
+	dERROR
 };
-*/
+
 
 class dAssemblerParcer::dActionEntry
 {
 	public:
-	dActionEntry (unsigned val)
-		:m_value(val)
+	dActionEntry (short token, short stateType,	short nextState, short ruleSymbols, short ruleIndex)
+		:m_token(token), m_stateType(stateType), m_nextState(nextState), m_ruleSymbols(ruleSymbols), m_ruleIndex(ruleIndex)
 	{
 	}
-	union {
-		unsigned m_value;
-		struct {
-			unsigned  m_stateType	: 2;// 0 = shift, 1 = reduce, 2 = accept
-			unsigned  m_token		:12;
-			unsigned  m_nextState	:12;
-			unsigned  m_reduceCount	: 6;
 
-		};
-	};
+	short m_token;
+	short m_stateType;// 0 = shift, 1 = reduce, 2 = accept
+	short m_nextState;
+	short m_ruleSymbols;
+	short m_ruleIndex;
 };
 
 class dAssemblerParcer::dGotoEntry
 {
 	public:
 	dGotoEntry ()
-		:m_value(0)
 	{
 	}
-	dGotoEntry (unsigned val)
-		:m_value(val)
-	{
-	}
-	union {
-		unsigned m_value;
-		struct {
-			short  m_token;
-			short  m_nextState;
-		};
-	};
+
+	short  m_token;
+	short  m_nextState;
 };
 
 
@@ -122,14 +110,15 @@ bool dAssemblerParcer::ErrorHandler (const string& line) const
 	return false;
 }
 
-dAssemblerParcer::dActionEntry dAssemblerParcer::FindAction (const int* const actionList, int count, dToken token) const
+const dAssemblerParcer::dActionEntry* dAssemblerParcer::FindAction (const dActionEntry* const actionList, int count, dToken token) const
 {
+
 	int i0 = 0;
 	int i1 = count - 1;
 	while ((i1 - i0) >= 4) {
 		int i = (i1 + i0 + 1)>>1;
 
-		dActionEntry action (actionList[i]);
+		const dActionEntry& action = actionList[i];
 		if (token <= dToken(action.m_token)) {
 			i1 = i;
 		} else {
@@ -138,17 +127,19 @@ dAssemblerParcer::dActionEntry dAssemblerParcer::FindAction (const int* const ac
 	}
 
 	for (int i = i0; i <= i1; i ++) {
-		dActionEntry action (actionList[i]);
+		const dActionEntry& action = actionList[i];
 		if (token == dToken(action.m_token)) {
-			return action;;
+			return& action;;
 		}
 	}
 
-	return dActionEntry(unsigned (-1));
+	return NULL;
 }
 
 dAssemblerParcer::dGotoEntry dAssemblerParcer::FindGoto (const int* const gotoList, int count, dToken token) const
 {
+	_ASSERTE (0);
+/*
 	int i0 = 0;
 	int i1 = count - 1;
 	while ((i1 - i0) >= 4) {
@@ -168,8 +159,8 @@ dAssemblerParcer::dGotoEntry dAssemblerParcer::FindGoto (const int* const gotoLi
 			return action;
 		}
 	}
-
-	return dGotoEntry(unsigned (-1));
+*/
+	return dGotoEntry();
 }
 
 
@@ -178,11 +169,11 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 	dList<dStackPair> stack;
 	static int actionsCount[] = {2, 2, 2, 1, 3, 3, 3, 2, 2, 2, 3, 3, 3};
 	static int actionsStart[] = {0, 2, 4, 6, 7, 10, 13, 16, 18, 20, 22, 25, 28};
-	static int actionTable[] = {0x40a0, 0x18400, 0x40a0, 0x18400, 0x4000001, 0x200ac, 0x2, 0x4008001, 0x40080a9, 0x40080ad, 0x4004001, 0x240a8, 0x40040ad, 0x400c001, 0x400c0a9, 0x400c0ad, 0x280a4, 0x200ac, 0x40a0, 0x18400, 0x40a0, 0x18400, 0xc00c001, 0xc00c0a9, 0xc00c0ad, 0xc004001, 0x240a8, 0xc0040ad, 0xc008001, 0xc0080a9, 0xc0080ad};
+	static dActionEntry actionTable[] = {dActionEntry (40, 0, 1, 0, 0), dActionEntry (256, 0, 6, 0, 0), dActionEntry (40, 0, 1, 0, 0), dActionEntry (256, 0, 6, 0, 0), dActionEntry (0, 1, 0, 1, 1), dActionEntry (43, 0, 8, 0, 0), dActionEntry (0, 2, 0, 0, 0), dActionEntry (0, 1, 2, 1, 5), dActionEntry (42, 1, 2, 1, 5), dActionEntry (43, 1, 2, 1, 5), dActionEntry (0, 1, 1, 1, 3), dActionEntry (42, 0, 9, 0, 0), dActionEntry (43, 1, 1, 1, 3), dActionEntry (0, 1, 3, 1, 7), dActionEntry (42, 1, 3, 1, 7), dActionEntry (43, 1, 3, 1, 7), dActionEntry (41, 0, 10, 0, 0), dActionEntry (43, 0, 8, 0, 0), dActionEntry (40, 0, 1, 0, 0), dActionEntry (256, 0, 6, 0, 0), dActionEntry (40, 0, 1, 0, 0), dActionEntry (256, 0, 6, 0, 0), dActionEntry (0, 1, 3, 3, 6), dActionEntry (42, 1, 3, 3, 6), dActionEntry (43, 1, 3, 3, 6), dActionEntry (0, 1, 1, 3, 2), dActionEntry (42, 0, 9, 0, 0), dActionEntry (43, 1, 1, 3, 2), dActionEntry (0, 1, 2, 3, 4), dActionEntry (42, 1, 2, 3, 4), dActionEntry (43, 1, 2, 3, 4)};
 
 	static int gotoCount[] = {4, 3, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0};
 	static int gotoStart[] = {0, 4, 7, 7, 7, 7, 7, 7, 7, 9, 10, 10, 10};
-	static int gotoTable[] = {0x20102, 0x30101, 0x40104, 0x50103, 0x70102, 0x40104, 0x50103, 0x40104, 0xb0103, 0xc0104};
+	static int gotoTable[] = {258, 2, 257, 3, 260, 4, 259, 5, 258, 7, 260, 4, 259, 5, 260, 4, 259, 11, 260, 12};
 
 	const int lastToken = 257;
 
@@ -192,28 +183,30 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 		const dStackPair& stackTop = stack.GetLast()->GetInfo();
 		int start = actionsStart[stackTop.m_state];
 		int count = actionsCount[stackTop.m_state];
-		dActionEntry action (FindAction (&actionTable[start], count, token));
+		const dActionEntry* const action (FindAction (&actionTable[start], count, token));
+		_ASSERTE (action);
 
-		switch (action.m_stateType) 
+		switch (action->m_stateType) 
 		{
-			case 0: // 0 = shift
+			case dSHIFT: 
 			{
 				dStackPair& entry = stack.Append()->GetInfo();
-				entry.m_token = dToken (action.m_token);
-				entry.m_state = action.m_nextState;
+				entry.m_token = dToken (action->m_token);
+				entry.m_state = action->m_nextState;
 				entry.m_value = dStackPair::dUserVariable (entry.m_token, scanner.GetTokenString());
 				token = dToken (scanner.NextToken());
 				if (token == -1) {
 					token = dToken (0);
 				}
+
 				break;
 			}
 
-			case 1: // 1 = reduce
+			case dREDUCE: 
 			{
 				dStackPair parameter[MAX_USER_PARAM];
 
-				int reduceCount = action.m_reduceCount;
+				int reduceCount = action->m_ruleSymbols;
 				_ASSERTE (reduceCount < sizeof (parameter) / sizeof (parameter[0]));
 
 				for (int i = 0; i < reduceCount; i ++) {
@@ -224,13 +217,13 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 				const dStackPair& stackTop = stack.GetLast()->GetInfo();
 				int start = gotoStart[stackTop.m_state];
 				int count = gotoCount[stackTop.m_state];
-				dGotoEntry gotoEntry (FindGoto (&gotoTable[start], count, dToken (action.m_nextState + lastToken)));
+				dGotoEntry gotoEntry (FindGoto (&gotoTable[start], count, dToken (action->m_nextState + lastToken)));
 
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_state = gotoEntry.m_nextState;
 				entry.m_token = dToken (gotoEntry.m_token);
 				
-				switch (entry.m_state) 
+				switch (action->m_token) 
 				{
 					//do user semantic Actions
 					case 1:// rule E1 : E 
@@ -262,13 +255,13 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 
 			}
 	
-			case 2: // 2 = accept
+			case dACCEPT: // 2 = accept
 			{
-				// program parce successfully, exit with successful code
+				// program parced successfully, exit with successful code
 				return true;
 			}
 			
-			default:  // syntax grammar error
+			default:  
 			{
 				_ASSERTE (0);
 				// syntact error parciing program
@@ -278,7 +271,6 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 			}
 		}
 	}
-
 	return false;
 }
 

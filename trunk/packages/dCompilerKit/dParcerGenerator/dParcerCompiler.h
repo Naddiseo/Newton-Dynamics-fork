@@ -84,8 +84,9 @@ class dParcerCompiler
 	class dGoto;
 	class dAction;
 	class dSymbol;
-	class dTransition;
 	class dGotoEntry;
+	class ActionEntry;
+	class dTransition;
 	class dActionEntry;
 	class dSentenceSymbol;
 	class dRuleInfo;

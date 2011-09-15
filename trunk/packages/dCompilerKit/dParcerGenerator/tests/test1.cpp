@@ -17,14 +17,15 @@
 #include <dList.h>
 
 #define MAX_USER_PARAM	64
-/*
+
 enum test1::ActionType
 {
-	ACCEPT,
-	SHIFT,
-	REDUCE
+	dSHIFT = 0,
+	dREDUCE,
+	dACCEPT,
+	dERROR
 };
-*/
+
 
 class test1::dActionEntry
 {
@@ -33,36 +34,23 @@ class test1::dActionEntry
 		:m_value(val)
 	{
 	}
-	union {
-		unsigned m_value;
-		struct {
-			unsigned  m_stateType	: 2;// 0 = shift, 1 = reduce, 2 = accept
-			unsigned  m_token		:12;
-			unsigned  m_nextState	:12;
-			unsigned  m_reduceCount	: 6;
 
-		};
-	};
+	short m_token;
+	short m_stateType;// 0 = shift, 1 = reduce, 2 = accept
+	short m_nextState;
+	short m_ruleSymbols;
+	short m_ruleIndex;
 };
 
 class test1::dGotoEntry
 {
 	public:
 	dGotoEntry ()
-		:m_value(0)
 	{
 	}
-	dGotoEntry (unsigned val)
-		:m_value(val)
-	{
-	}
-	union {
-		unsigned m_value;
-		struct {
-			short  m_token;
-			short  m_nextState;
-		};
-	};
+
+	short  m_token;
+	short  m_nextState;
 };
 
 
@@ -167,11 +155,11 @@ bool test1::Parce(lextest1& scanner)
 	dList<dStackPair> stack;
 	static int actionsCount[] = {2, 2, 2, 3, 3, 3, 2, 2, 2, 3, 3, 3};
 	static int actionsStart[] = {0, 2, 4, 6, 9, 12, 15, 17, 19, 21, 24, 27};
-	static int actionTable[] = {0x40a0, 0x14400, 0x40a0, 0x14400, 0x2, 0x1c0ac, 0x4004001, 0x40040a9, 0x40040ad, 0x4000001, 0x200a8, 0x40000ad, 0x4008001, 0x40080a9, 0x40080ad, 0x240a4, 0x1c0ac, 0x40a0, 0x14400, 0x40a0, 0x14400, 0xc008001, 0xc0080a9, 0xc0080ad, 0xc000001, 0x200a8, 0xc0000ad, 0xc004001, 0xc0040a9, 0xc0040ad};
+	static dActionEntry actionTable[] = {{0, 0, 0, 1, 40}, {0, 0, 0, 5, 256}, {0, 0, 0, 1, 40}, {0, 0, 0, 5, 256}, {2, 0, 0, 0, 0}, {0, 0, 0, 7, 43}, {1, 4, 1, 1, 0}, {1, 4, 1, 1, 42}, {1, 4, 1, 1, 43}, {1, 2, 1, 0, 0}, {0, 0, 0, 8, 42}, {1, 2, 1, 0, 43}, {1, 6, 1, 2, 0}, {1, 6, 1, 2, 42}, {1, 6, 1, 2, 43}, {0, 0, 0, 9, 41}, {0, 0, 0, 7, 43}, {0, 0, 0, 1, 40}, {0, 0, 0, 5, 256}, {0, 0, 0, 1, 40}, {0, 0, 0, 5, 256}, {1, 5, 3, 2, 0}, {1, 5, 3, 2, 42}, {1, 5, 3, 2, 43}, {1, 1, 3, 0, 0}, {0, 0, 0, 8, 42}, {1, 1, 3, 0, 43}, {1, 3, 3, 1, 0}, {1, 3, 3, 1, 42}, {1, 3, 3, 1, 43}};
 
 	static int gotoCount[] = {3, 3, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0};
 	static int gotoStart[] = {0, 3, 6, 6, 6, 6, 6, 6, 8, 9, 9, 9};
-	static int gotoTable[] = {0x20101, 0x30103, 0x40102, 0x60101, 0x30103, 0x40102, 0x30103, 0xa0102, 0xb0103};
+	static int gotoTable[] = {257, 2, 259, 3, 258, 4, 257, 6, 259, 3, 258, 4, 259, 3, 258, 10, 259, 11};
 
 	const int lastToken = 257;
 
@@ -185,8 +173,10 @@ bool test1::Parce(lextest1& scanner)
 
 		switch (action.m_stateType) 
 		{
-			case 0: // 0 = shift
+			case dSHIFT: 
 			{
+				_ASSERTE (0);
+/*
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_token = dToken (action.m_token);
 				entry.m_state = action.m_nextState;
@@ -195,11 +185,14 @@ bool test1::Parce(lextest1& scanner)
 				if (token == -1) {
 					token = dToken (0);
 				}
+*/
 				break;
 			}
 
-			case 1: // 1 = reduce
+			case dREDUCE: 
 			{
+				_ASSERTE (0);
+/*
 				dStackPair parameter[MAX_USER_PARAM];
 
 				int reduceCount = action.m_reduceCount;
@@ -219,7 +212,7 @@ bool test1::Parce(lextest1& scanner)
 				entry.m_state = gotoEntry.m_nextState;
 				entry.m_token = dToken (gotoEntry.m_token);
 				
-				switch (entry.m_state) 
+				switch (action.m_ruleIndex) 
 				{
 					//do user semantic Actions
 					case 4:// rule T : F 
@@ -243,18 +236,19 @@ bool test1::Parce(lextest1& scanner)
 
 					default:;
 				}
-
+*/
 				break;
 
 			}
 	
-			case 2: // 2 = accept
+			case dACCEPT: // 2 = accept
 			{
-				// program parce successfully, exit with successful code
+				// program parced successfully, exit with successful code
+				_ASSERTE (0);
 				return true;
 			}
 			
-			default:  // syntax grammar error
+			default:  
 			{
 				_ASSERTE (0);
 				// syntact error parciing program
@@ -264,7 +258,6 @@ bool test1::Parce(lextest1& scanner)
 			}
 		}
 	}
-
 	return false;
 }
 
