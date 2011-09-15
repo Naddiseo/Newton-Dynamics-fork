@@ -143,12 +143,12 @@ const $(className)::dGotoEntry* dAssemblerParcer::FindGoto (const dGotoEntry* co
 bool $(className)::Parce($(scannerClass)& scanner)
 {
 	dList<dStackPair> stack;
-	static int actionsCount[] = {$(actionsCount)};
-	static int actionsStart[] = {$(actionsStart)};
+	static short actionsCount[] = {$(actionsCount)};
+	static short actionsStart[] = {$(actionsStart)};
 	static dActionEntry actionTable[] = {$(actionTable)};
 
-	static int gotoCount[] = {$(gotoCount)};
-	static int gotoStart[] = {$(gotoStart)};
+	static short gotoCount[] = {$(gotoCount)};
+	static short gotoStart[] = {$(gotoStart)};
 	static dGotoEntry gotoTable[] = {$(gotoTable)};
 
 	const int lastToken = &(lastTerminalToken);
