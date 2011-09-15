@@ -49,7 +49,7 @@ class dAssemblerParcer
 	virtual bool ErrorHandler (const string& line) const;
 
 	private:
-	dGotoEntry FindGoto (const int* const gotoList, int count, dToken token) const;
+	const dGotoEntry* FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const;
 	const dActionEntry* FindAction (const dActionEntry* const list, int count, dToken token) const;
 };
 

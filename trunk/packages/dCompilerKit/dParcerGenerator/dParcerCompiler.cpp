@@ -1158,7 +1158,7 @@ void dParcerCompiler::GenerateParcerCode (
 			entry.m_nextState = short (targetState->m_number);
 			entry.m_token = short(tokenEnumerationMap.Find(gotoIter.GetKey())->GetInfo());
 
-			sprintf (text, "%d, %d, ", entry.m_token, entry.m_nextState);
+			sprintf (text, "dGotoEntry (%d, %d), ", entry.m_token, entry.m_nextState);
 			nextGotoStateList += text;
 			entriesCount ++;
 		}

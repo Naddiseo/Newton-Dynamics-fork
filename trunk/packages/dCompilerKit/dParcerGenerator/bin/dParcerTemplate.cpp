@@ -45,7 +45,8 @@ class $(className)::dActionEntry
 class $(className)::dGotoEntry
 {
 	public:
-	dGotoEntry ()
+	dGotoEntry (short token, short nextState)
+		:m_token(token), m_nextState(nextState)
 	{
 	}
 
@@ -104,23 +105,22 @@ const $(className)::dActionEntry* $(className)::FindAction (const dActionEntry* 
 	for (int i = i0; i <= i1; i ++) {
 		const dActionEntry& action = actionList[i];
 		if (token == dToken(action.m_token)) {
-			return& action;;
+			return& action;
 		}
 	}
 
+	_ASSERT (0);
 	return NULL;
 }
 
-$(className)::dGotoEntry dAssemblerParcer::FindGoto (const int* const gotoList, int count, dToken token) const
+const $(className)::dGotoEntry* dAssemblerParcer::FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const
 {
-	_ASSERTE (0);
-/*
 	int i0 = 0;
 	int i1 = count - 1;
 	while ((i1 - i0) >= 4) {
 		int i = (i1 + i0 + 1)>>1;
 
-		dGotoEntry action (gotoList[i]);
+		const dGotoEntry& action = gotoList[i];
 		if (token <= dToken(action.m_token)) {
 			i1 = i;
 		} else {
@@ -129,13 +129,14 @@ $(className)::dGotoEntry dAssemblerParcer::FindGoto (const int* const gotoList, 
 	}
 
 	for (int i = i0; i <= i1; i ++) {
-		dGotoEntry action (gotoList[i]);
+		const dGotoEntry& action = gotoList[i];
 		if (token == dToken(action.m_token)) {
-			return action;
+			return &action;
 		}
 	}
-*/
-	return dGotoEntry();
+
+	_ASSERT (0);
+	return NULL;
 }
 
 
@@ -148,7 +149,7 @@ bool $(className)::Parce($(scannerClass)& scanner)
 
 	static int gotoCount[] = {$(gotoCount)};
 	static int gotoStart[] = {$(gotoStart)};
-	static int gotoTable[] = {$(gotoTable)};
+	static dGotoEntry gotoTable[] = {$(gotoTable)};
 
 	const int lastToken = &(lastTerminalToken);
 
@@ -192,13 +193,13 @@ bool $(className)::Parce($(scannerClass)& scanner)
 				const dStackPair& stackTop = stack.GetLast()->GetInfo();
 				int start = gotoStart[stackTop.m_state];
 				int count = gotoCount[stackTop.m_state];
-				dGotoEntry gotoEntry (FindGoto (&gotoTable[start], count, dToken (action->m_nextState + lastToken)));
+				const dGotoEntry* const gotoEntry = FindGoto (&gotoTable[start], count, dToken (action->m_nextState + lastToken));
 
 				dStackPair& entry = stack.Append()->GetInfo();
-				entry.m_state = gotoEntry.m_nextState;
-				entry.m_token = dToken (gotoEntry.m_token);
+				entry.m_state = gotoEntry->m_nextState;
+				entry.m_token = dToken (gotoEntry->m_token);
 				
-				switch (action->m_token) 
+				switch (action->m_ruleIndex) 
 				{
 					//do user semantic Actions
 $(semanticActionsCode)
