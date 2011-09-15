@@ -91,6 +91,8 @@ class dParcerCompiler
 	class dSentenceSymbol;
 	class dRuleInfo;
 	class dProductionRule;
+	class dOperatorsAssociation;
+	class dOperatorsPrecedence;
 	
 
 	
@@ -105,21 +107,18 @@ class dParcerCompiler
 	void ReplaceMacro (string& data, const string& newName, const string& macro) const;
 	void ReplaceAllMacros (string& data, const string& newName, const string& macro) const;
 
-	void ScanGrammarFile(const string& inputRules, dProductionRule& rules, dTree<dTokenType, string>& symbolList, 
+	void ScanGrammarFile(const string& inputRules, dProductionRule& rules, dTree<dTokenType, string>& symbolList, dOperatorsPrecedence& operatorPrecence,
 						 dTree<int, string>& terminaldTokens, string& userCodeBlock, string& userVariableClass, string& endUserCode, int& lastTokenEnum);
 	dToken ScanGrammarRule(dParcerLexical& lexical, dProductionRule& rules, dTree<dTokenType, string>& symbolList, int& ruleNumber, dTree<int, string>& tokenEnumarationMap, int& tokenEnumeration);
 
 	
-	void CanonicalItemSets (dTree<dState*,int>& states, const dProductionRule& rules, const dTree<dTokenType, string>& symbolList);
-	dState* Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet, const dTree<dTokenType, string>& symbolList);
-	dState* Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol, const dTree<dTokenType, string>& symbolList);
-
 	bool DoesSymbolDeriveEmpty (const string& symbol, const dProductionRule& ruleList) const ;
 	void First (const string& symbol, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const;
 	void First (const dList<string>& symbolSet, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const;
-
-
-	void BuildParcingTable (const dTree<dState*,int>& stateList, const dTree<dTokenType, string>& symbolList);
+	dState* Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol, const dTree<dTokenType, string>& symbolList) const;
+	dState* Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet, const dTree<dTokenType, string>& symbolList) const;
+	void BuildParcingTable (const dTree<dState*,int>& stateList, const dTree<dTokenType, string>& symbolList, const string& startSymbol, const dOperatorsPrecedence& operatorPrecence) const;
+	void CanonicalItemSets (dTree<dState*,int>& states, const dProductionRule& rules, const dTree<dTokenType, string>& symbolList);
 
 	void GenerateHeaderFile (const string& className, const string& scannerClassName, const char* const outputFileName, dProductionRule& rules, dTree<int, string>& tokenEnumerationMap); 
 	void GenerateParcerCode (const string& className, const string& scannerClassName, const char* const outputFileName, const string& userCode, 
