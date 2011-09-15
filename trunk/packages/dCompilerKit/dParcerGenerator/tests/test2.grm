@@ -40,7 +40,7 @@ E1	: E				{printf ("%s\n", $1.m_data.c_str());}
 	;
 
 E	: E '+' E		{$$.m_data = $1.m_data + " + " + $3.m_data;}
-	: E '-' E		{$$.m_data = $1.m_data + " + " + $3.m_data;}
+	| E '-' E		{$$.m_data = $1.m_data + " + " + $3.m_data;}
 	| E '*' E		{$$.m_data = $1.m_data + " * " + $3.m_data;}
 	| E '/' E		{$$.m_data = $1.m_data + " * " + $3.m_data;}
 	| '(' E ')'		{$$ = $2;}

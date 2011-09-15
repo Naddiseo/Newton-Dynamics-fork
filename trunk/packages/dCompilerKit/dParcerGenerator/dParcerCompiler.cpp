@@ -559,7 +559,7 @@ dParcerCompiler::dToken dParcerCompiler::ScanGrammarRule(
 					nonTerminalIdNode = tokenEnumerationMap.Insert(tokenEnumeration, symbol.m_name);
 					tokenEnumeration ++;
 				}
-			} else if (!isalnum (pair.m_token)) {
+			} else if (!(pair.m_token < 256 && isalnum (pair.m_token))) {
 				dSymbol& symbol = currentRule->Append()->GetInfo();
 				symbol.m_name = pair.m_info;
 				symbol.m_type = TERMINAL;
