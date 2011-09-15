@@ -31,21 +31,25 @@
 }
 
 %token id
-%start E
+%start E1
 
 %%
-E	: E '+' T		{$$ = $1 + " + " + $2; printf ("%s\n", $$.c_str());}
+
+
+E1	: E				{printf ("%s\n", $1.m_data.c_str());}
+	;
+
+E	: E '+' T		{$$.m_data = $1.m_data + " + " + $3.m_data;}
 	| T				{$$ = $1;}
 	;
 	
-T	: T '*'	F		{$$ = $1 + " * " + $2;}
+T	: T '*'	F		{$$.m_data = $1.m_data + " * " + $3.m_data;}
 	| F				{$$ = $1;}
 	;
 	
 F	: '(' E ')'		{$$ = $2;}
 	| id			{$$ = $1;}
 	;
-		
 %%
 
 

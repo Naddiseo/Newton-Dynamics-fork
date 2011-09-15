@@ -9,6 +9,22 @@
 * freely
 */
 
-// Assembler program test0.asm
 
-2 + 6 + 5
+// very simple sample LR(1) grammar 
+
+%start S
+%token c d
+
+%%
+S	: C C
+	;
+	
+C	: c C
+	| d
+	;
+		
+
+%%
+
+
+
