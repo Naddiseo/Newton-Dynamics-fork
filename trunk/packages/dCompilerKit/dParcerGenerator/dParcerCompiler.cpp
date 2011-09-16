@@ -966,18 +966,12 @@ void dParcerCompiler::BuildParcingTable (
 				}
 
 				// this is a shift action
-//				dTree<dAction, string>::dTreeNode* actionNode = state->m_actions.Find (transition.m_name); 
-//				if (actionNode) {
-//					// the action already exist, this is a shift-reduce conflict;
-//					_ASSERTE (0);
-//				} else {
-					_ASSERTE (!state->m_actions.Find (transition.m_name));
-					dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (transition.m_name); 
-					dAction& action = actionNode->GetInfo();
-					action.m_type = dSHIFT;
-					action.m_nextState = transition.m_targetState->m_number;
-					action.m_reduceRuleNode = NULL;
-//				}
+				_ASSERTE (!state->m_actions.Find (transition.m_name));
+				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (transition.m_name); 
+				dAction& action = actionNode->GetInfo();
+				action.m_type = dSHIFT;
+				action.m_nextState = transition.m_targetState->m_number;
+				action.m_reduceRuleNode = NULL;
 			}
 		}
 
@@ -1129,7 +1123,6 @@ void dParcerCompiler::GenerateParcerCode (
 				sprintf (text, "dActionEntry (%d, %d, %d, %d, %d), ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
 
 				stateActions += text; 
-				//nextActionsStateList += text;
 				entriesCount ++;
 
 			} else if (action.m_type == dREDUCE) {
@@ -1148,7 +1141,6 @@ void dParcerCompiler::GenerateParcerCode (
 				entry.m_token = short (tokenEnumerationMap.Find(actionSymbol)->GetInfo());
 				sprintf (text, "dActionEntry (%d, %d, %d, %d, %d), ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
 
-				//nextActionsStateList += text;
 				stateActions += text; 
 				entriesCount ++;
 
@@ -1201,7 +1193,6 @@ void dParcerCompiler::GenerateParcerCode (
 				entry.m_token = 0;
 				sprintf (text, "dActionEntry (%d, %d, %d, %d, %d), ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
 
-				//nextActionsStateList += text;
 				stateActions += text; 
 				entriesCount ++;
 			}
