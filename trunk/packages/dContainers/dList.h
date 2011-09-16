@@ -111,6 +111,12 @@ class dList
 			return m_info;
 		}
 
+		const T& GetInfo() const
+		{
+			return m_info;
+		}
+
+
 		dListNode *GetNext() const
 		{
 			return m_next;
