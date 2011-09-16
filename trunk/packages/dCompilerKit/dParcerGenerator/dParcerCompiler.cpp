@@ -68,31 +68,6 @@ class dParcerCompiler::dActionEntry
 	short m_nextState;
 	short m_ruleSymbols;
 	short m_ruleIndex;
-
-	bool const operator > (const dActionEntry& other) const
-	{
-		const short* const ptr0 = &m_token;
-		const short* const ptr1 = &other.m_token;
-		for (int i = 0; i < 5; i ++ ) {
-			if (ptr0[i] > ptr1[i]) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	bool const operator < (const dActionEntry& other) const
-	{
-		const short* const ptr0 = &m_token;
-		const short* const ptr1 = &other.m_token;
-		for (int i = 0; i < 5; i ++ ) {
-			if (ptr0[i] < ptr1[i]) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 };
 
 
@@ -163,11 +138,10 @@ class dParcerCompiler::dItem
 {
 	public:
 	dItem ()
-		:m_error(true), m_indexMarker(0), m_lookAheadSymnol(""), m_ruleNode(NULL)
+		:m_indexMarker(0), m_lookAheadSymnol(""), m_ruleNode(NULL)
 	{
 	}
 
-	bool m_error;
 	int m_indexMarker;
 	string m_lookAheadSymnol;
 	dProductionRule::dListNode* m_ruleNode;
@@ -987,27 +961,23 @@ void dParcerCompiler::BuildParcingTable (
 					dItem& item = itemNode->GetInfo();
 					dState::dListNode* const targteItemNode = targetState->FindItem(item.m_ruleNode, item.m_indexMarker + 1);
 					if (targteItemNode) {
-						if (item.m_error == false) {
-							// this is is shift-shift conflict, this rule was already used 
-							_ASSERTE (0);
-						}
-						item.m_error = false;
 						break;
 					}
 				}
 
 				// this is a shift action
-				dTree<dAction, string>::dTreeNode* actionNode = state->m_actions.Find (transition.m_name); 
-				if (actionNode) {
-					// the action already exist, this is a shift-reduce conflict;
-					_ASSERTE (0);
-				} else {
-					actionNode = state->m_actions.Insert (transition.m_name); 
+//				dTree<dAction, string>::dTreeNode* actionNode = state->m_actions.Find (transition.m_name); 
+//				if (actionNode) {
+//					// the action already exist, this is a shift-reduce conflict;
+//					_ASSERTE (0);
+//				} else {
+					_ASSERTE (!state->m_actions.Find (transition.m_name));
+					dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (transition.m_name); 
 					dAction& action = actionNode->GetInfo();
 					action.m_type = dSHIFT;
 					action.m_nextState = transition.m_targetState->m_number;
 					action.m_reduceRuleNode = NULL;
-				}
+//				}
 			}
 		}
 
@@ -1017,11 +987,6 @@ void dParcerCompiler::BuildParcingTable (
 			const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
 			// check if this item is the accepting Rule
 			if ((ruleInfo.m_ruleNumber == 0) && (item.m_indexMarker == 1)) {
-				if (item.m_error == false) {
-					// rule already used in another action
-					_ASSERTE (0);
-				}
-				item.m_error = false;
 				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (DACCEPT_SYMBOL); 
 				_ASSERTE (actionNode);
 				dAction& action = actionNode->GetInfo();
@@ -1040,7 +1005,6 @@ void dParcerCompiler::BuildParcingTable (
 							// the association was specified
 							if (association0->m_associativity == dOperatorsAssociation::m_left) {
 								// overwriting a shift action with a reduce action
-								item.m_error = false;
 								dAction& action = actionNode->GetInfo();
 								action.m_type = dREDUCE;
 								action.m_nextState = 0;
@@ -1057,7 +1021,6 @@ void dParcerCompiler::BuildParcingTable (
 					}
 				} else {
 					dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (item.m_lookAheadSymnol); 
-					item.m_error = false;
 					dAction& action = actionNode->GetInfo();
 					action.m_type = dREDUCE;
 					action.m_nextState = 0;
@@ -1131,31 +1094,26 @@ void dParcerCompiler::GenerateParcerCode (
 		sortedStates.Insert(state, state->m_number);
 	}
 
-	dTree<int, dActionEntry> actionFilter;
+	dTree<int, string> actionFilter;
 
 	string emptySematicAction ("");
 	string stateActionsStart ("");
 	string stateActionsCount ("");
-	string nextActionsStateList ("");
+	string nextActionsStateList ("\n\t\t\t\t\t");
 	string sematicActions ("");
 	int entriesCount = 0;
-	int newLine = 0;
+
 	dTree<dState*,int>::Iterator sortStateIter (sortedStates);
 	for (sortStateIter.Begin(); sortStateIter; sortStateIter ++) {
 		char text[256];
 		dState* const state = sortStateIter.GetNode()->GetInfo();
 
-		
 		int count = 0;
 		int actionIndex = entriesCount;
+		string stateActions ("");
 		dTree<dAction, string>::Iterator actionIter (state->m_actions);
 		for (actionIter.Begin(); actionIter; actionIter++) {
 			count ++;
-
-			if (entriesCount >= newLine) {
-				nextActionsStateList += "\n\t\t\t\t\t";
-				newLine = entriesCount + 4;
-			}
 
 			dAction& action = actionIter.GetNode()->GetInfo();
 			if (action.m_type == dSHIFT) {
@@ -1168,17 +1126,11 @@ void dParcerCompiler::GenerateParcerCode (
 				entry.m_ruleSymbols = 0;
 				entry.m_nextState = short (action.m_nextState);
 				entry.m_token = short (tokenEnumerationMap.Find(actionSymbol)->GetInfo());
+				sprintf (text, "dActionEntry (%d, %d, %d, %d, %d), ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
 
-//				dTree<int, dActionEntry>::dTreeNode* const actionNode = actionFilter.Find(entry);
-//				if (!actionNode) {
-					actionFilter.Insert (0, entry);
-					sprintf (text, "dActionEntry (%d, %d, %d, %d, %d), ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
-					nextActionsStateList += text;
-					entriesCount ++;
-//				} else {
-//					int cacheInfo = actionNode->GetInfo();
-//					actionIndex = cacheInfo;
-//				}
+				stateActions += text; 
+				//nextActionsStateList += text;
+				entriesCount ++;
 
 			} else if (action.m_type == dREDUCE) {
 				const string& actionSymbol = actionIter.GetKey();
@@ -1196,7 +1148,8 @@ void dParcerCompiler::GenerateParcerCode (
 				entry.m_token = short (tokenEnumerationMap.Find(actionSymbol)->GetInfo());
 				sprintf (text, "dActionEntry (%d, %d, %d, %d, %d), ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
 
-				nextActionsStateList += text;
+				//nextActionsStateList += text;
+				stateActions += text; 
 				entriesCount ++;
 
 				if (!reduceRule.m_ruleReduced && (reduceRule.m_semanticActionCode != emptySematicAction)) {
@@ -1248,9 +1201,20 @@ void dParcerCompiler::GenerateParcerCode (
 				entry.m_token = 0;
 				sprintf (text, "dActionEntry (%d, %d, %d, %d, %d), ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
 
-				nextActionsStateList += text;
+				//nextActionsStateList += text;
+				stateActions += text; 
 				entriesCount ++;
 			}
+		}
+
+		dTree<int, string>::dTreeNode* const stateActionNode = actionFilter.Find(stateActions);
+		if (stateActionNode) {
+			entriesCount = actionIndex;
+			actionIndex =  stateActionNode->GetInfo();
+		} else {
+			actionFilter.Insert(actionIndex, stateActions);
+			nextActionsStateList += stateActions;
+			nextActionsStateList += "\n\t\t\t\t\t";
 		}
 
 		sprintf (text, "%d, ", actionIndex);
@@ -1274,7 +1238,7 @@ void dParcerCompiler::GenerateParcerCode (
 	string stateGotoCount ("");
 	string nextGotoStateList ("");
 	entriesCount = 0;
-	newLine = 0;
+	int newLine = 0;
 	for (sortStateIter.Begin(); sortStateIter; sortStateIter ++) {
 
 		char text[256];
