@@ -150,29 +150,40 @@ const dAssemblerParcer::dGotoEntry* dAssemblerParcer::FindGoto (const dGotoEntry
 bool dAssemblerParcer::Parce(lextest1& scanner)
 {
 	dList<dStackPair> stack;
-	static short actionsCount[] = {3, 1, 2, 1, 2, 2, 1, 2, 2, 2, 1};
-	static short actionsStart[] = {0, 3, 4, 6, 7, 9, 11, 12, 14, 16, 18};
+	static short actionsCount[] = {5, 1, 1, 3, 1, 3, 1, 3, 3, 1, 4, 4, 3, 2, 2, 2, 1, 1, 3, 3, 2};
+	static short actionsStart[] = {0, 5, 6, 7, 10, 11, 14, 15, 18, 21, 22, 26, 30, 33, 35, 37, 39, 21, 40, 43, 46};
 	static dActionEntry actionTable[] = {
-					dActionEntry (0, 1, 1, 0, 4), dActionEntry (256, 0, 1, 0, 0), dActionEntry (261, 1, 1, 0, 4), 
-					dActionEntry (60, 0, 6, 0, 0), 
-					dActionEntry (0, 1, 2, 1, 5), dActionEntry (256, 1, 2, 1, 5), 
-					dActionEntry (0, 2, 0, 0, 0), 
-					dActionEntry (0, 1, 1, 1, 2), dActionEntry (261, 1, 1, 1, 2), 
-					dActionEntry (0, 1, 0, 1, 1), dActionEntry (256, 0, 1, 0, 0), 
-					dActionEntry (257, 0, 8, 0, 0), 
-					dActionEntry (0, 1, 1, 2, 3), dActionEntry (261, 1, 1, 2, 3), 
-					dActionEntry (46, 1, 4, 1, 7), dActionEntry (62, 1, 4, 1, 7), 
-					dActionEntry (46, 0, 10, 0, 0), dActionEntry (62, 0, 1, 0, 0), 
+					dActionEntry (0, 1, 1, 0, 4), dActionEntry (256, 0, 1, 0, 0), dActionEntry (258, 0, 2, 0, 0), dActionEntry (264, 1, 1, 0, 4), dActionEntry (263, 1, 1, 0, 4), 
+					dActionEntry (60, 0, 9, 0, 0), 
+					dActionEntry (257, 1, 7, 1, 13), 
+					dActionEntry (0, 1, 2, 1, 6), dActionEntry (256, 1, 2, 1, 6), dActionEntry (267, 1, 2, 1, 6), 
 					dActionEntry (257, 0, 10, 0, 0), 
+					dActionEntry (0, 1, 2, 1, 5), dActionEntry (256, 1, 2, 1, 5), dActionEntry (267, 1, 2, 1, 5), 
+					dActionEntry (0, 2, 0, 0, 0), 
+					dActionEntry (0, 1, 1, 1, 2), dActionEntry (264, 1, 1, 1, 2), dActionEntry (263, 1, 1, 1, 2), 
+					dActionEntry (0, 1, 0, 1, 1), dActionEntry (256, 0, 1, 0, 0), dActionEntry (258, 0, 2, 0, 0), 
+					dActionEntry (257, 0, 13, 0, 0), 
+					dActionEntry (0, 1, 6, 1, 14), dActionEntry (61, 1, 6, 1, 14), dActionEntry (256, 1, 6, 1, 14), dActionEntry (258, 1, 6, 1, 14), 
+					dActionEntry (0, 1, 4, 2, 10), dActionEntry (61, 0, 16, 0, 0), dActionEntry (256, 1, 4, 2, 10), dActionEntry (258, 1, 4, 2, 10), 
+					dActionEntry (0, 1, 1, 2, 3), dActionEntry (264, 1, 1, 2, 3), dActionEntry (263, 1, 1, 2, 3), 
+					dActionEntry (46, 1, 6, 1, 14), dActionEntry (62, 1, 6, 1, 14), 
+					dActionEntry (46, 0, 17, 0, 0), dActionEntry (62, 0, 1, 0, 0), 
+					dActionEntry (46, 1, 5, 1, 8), dActionEntry (62, 1, 5, 1, 8), 
+					dActionEntry (259, 0, 18, 0, 0), 
+					dActionEntry (0, 1, 8, 1, 12), dActionEntry (256, 1, 8, 1, 12), dActionEntry (258, 1, 8, 1, 12), 
+					dActionEntry (0, 1, 4, 4, 11), dActionEntry (256, 1, 4, 4, 11), dActionEntry (258, 1, 4, 4, 11), 
+					dActionEntry (46, 1, 5, 3, 9), dActionEntry (62, 1, 5, 3, 9), 
 			};
 
-	static short gotoCount[] = {4, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0};
-	static short gotoStart[] = {0, 4, 4, 4, 4, 4, 6, 7, 7, 7, 7};
+	static short gotoCount[] = {6, 0, 0, 0, 1, 0, 0, 0, 4, 2, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0};
+	static short gotoStart[] = {0, 6, 6, 6, 6, 7, 7, 7, 7, 11, 13, 13, 13, 13, 13, 13, 13, 14, 15, 15, 15};
 	static dGotoEntry gotoTable[] = {
-					dGotoEntry (261, 2), dGotoEntry (258, 3), dGotoEntry (260, 4), dGotoEntry (259, 5), 
-					dGotoEntry (261, 2), dGotoEntry (260, 7), dGotoEntry (262, 9)};
+					dGotoEntry (264, 3), dGotoEntry (267, 4), dGotoEntry (263, 5), dGotoEntry (260, 6), dGotoEntry (262, 7), dGotoEntry (261, 8), 
+					dGotoEntry (266, 11), dGotoEntry (264, 3), dGotoEntry (267, 4), dGotoEntry (263, 5), dGotoEntry (262, 12), 
+					dGotoEntry (265, 14), dGotoEntry (266, 15), dGotoEntry (268, 19), dGotoEntry (266, 20), 
+			};
 
-	const int lastToken = 258;
+	const int lastToken = 260;
 
 	stack.Append ();
 	dToken token = dToken (scanner.NextToken());
@@ -190,7 +201,7 @@ bool dAssemblerParcer::Parce(lextest1& scanner)
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_token = dToken (action->m_token);
 				entry.m_state = action->m_nextState;
-				entry.m_value = dStackPair::dUserVariable (entry.m_token, scanner.GetTokenString());
+				entry.m_value = dUserVariable (entry.m_token, scanner.GetTokenString());
 				token = dToken (scanner.NextToken());
 				if (token == -1) {
 					token = dToken (0);
@@ -223,6 +234,15 @@ bool dAssemblerParcer::Parce(lextest1& scanner)
 				switch (action->m_ruleIndex) 
 				{
 					//do user semantic Actions
+					case 13:// rule dataType : INT 
+						{entry.m_value = ((dAssemblerCompiler*)this)->EmitDataType (parameter[0].m_value);}
+						break;
+					case 14:// rule literal : LITERAL 
+						{entry.m_value = ((dAssemblerCompiler*)this)->EmitSymbol (parameter[0].m_value);}
+						break;
+					case 12:// rule constantExpression : INTEGER 
+						{entry.m_value = ((dAssemblerCompiler*)this)->EmitIntegerConst (parameter[0].m_value);}
+						break;
 
 					default:;
 				}
@@ -249,12 +269,6 @@ bool dAssemblerParcer::Parce(lextest1& scanner)
 	}
 	return false;
 }
-
-
-
-
-
-
 
 
 

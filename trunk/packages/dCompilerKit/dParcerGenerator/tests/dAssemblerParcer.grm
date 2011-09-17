@@ -9,7 +9,6 @@
 * freely
 */
 
-
 %{
 #include <dVirtualMachine.h>
 #include "dAssemblerLexical.h"
@@ -44,6 +43,11 @@
 
 	
 %token IMPORT LITERAL 
+
+%token INT
+%token INTEGER 
+
+
 %start module
 
 
@@ -59,7 +63,7 @@ segmentList	: segment
 			
 			
 segment		: import
-//			| dataDecalaration	
+			| dataDeclaration	
 //			| funtionDeclaration
 			;
 			
@@ -67,15 +71,24 @@ segment		: import
 import		: IMPORT '<' fileName '>'
 			; 			
 			
-			
-fileName	: LITERAL			
-			| fileName '.' LITERAL
+fileName	: literal
+			| fileName '.' literal
 			;
+			
+dataDeclaration	: dataType literal		
+				| dataType literal '=' constantExpression 
+				;
+				
+constantExpression : INTEGER {$$ = ((dAssemblerCompiler*)this)->EmitIntegerConst ($1);}
+				   ;	
+				   
+dataType		: INT {$$ = ((dAssemblerCompiler*)this)->EmitDataType ($1);}
+				;				
+
+literal			: LITERAL {$$ = ((dAssemblerCompiler*)this)->EmitSymbol ($1);}
+				;	
+
+				   
+
 %%
-
-
-
-
-
-
 

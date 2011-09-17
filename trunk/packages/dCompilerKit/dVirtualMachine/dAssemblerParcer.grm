@@ -71,19 +71,24 @@ segment		: import
 import		: IMPORT '<' fileName '>'
 			; 			
 			
-fileName	: LITERAL			
-			| fileName '.' LITERAL
+fileName	: literal
+			| fileName '.' literal
 			;
 			
-dataDeclaration	: dataType LITERAL		
-				| dataType LITERAL '=' constantExpression 
+dataDeclaration	: dataType literal		
+				| dataType literal '=' constantExpression 
 				;
 				
-dataType		: INT {$$ = ((dAssemblerCompiler*)this)->DataType ($1);}
+constantExpression : INTEGER {$$ = ((dAssemblerCompiler*)this)->EmitIntegerConst ($1);}
+				   ;	
+				   
+dataType		: INT {$$ = ((dAssemblerCompiler*)this)->EmitDataType ($1);}
 				;				
 
-constantExpression : INTEGER
-				   ;	
+literal			: LITERAL {$$ = ((dAssemblerCompiler*)this)->EmitSymbol ($1);}
+				;	
+
+				   
 
 %%
 

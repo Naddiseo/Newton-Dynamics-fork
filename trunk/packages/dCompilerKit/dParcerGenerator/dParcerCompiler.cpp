@@ -904,123 +904,6 @@ void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dPr
 }
 
 
-void dParcerCompiler::BuildParcingTable (
-	const dTree<dState*,int>& stateList, 
-	const dTree<dTokenType, string>& symbolList, 
-	const string& startSymbol,
-	const dOperatorsPrecedence& operatorPrecedence) const
-{
-	dTree<dState*,int>::Iterator stateIter (stateList);
-	dTree<dTokenType, string>::Iterator symbolIter (symbolList);
-
-	string emptySymbol ("");
-	string acceptingSymbol (DACCEPT_SYMBOL);
-	// create Shift Reduce action table
-	for (stateIter.Begin(); stateIter; stateIter ++) {
-		dState* const state = stateIter.GetNode()->GetInfo();
-
-		// add all shift actions first
-		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
-			dTransition& transition = node->GetInfo();
-			if (transition.m_type == TERMINAL) {
-
-				// find item generating this shift action and mark it as used.
-				const dState* const targetState = transition.m_targetState;
-				_ASSERTE (!state->m_actions.Find (transition.m_name));
-				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (transition.m_name); 
-				dAction& action = actionNode->GetInfo();
-				action.m_type = dSHIFT;
-				action.m_myItem = NULL;
-				action.m_nextState = targetState->m_number;
-				action.m_reduceRuleNode = NULL;
-			}
-		}
-
-		// add all reduce actions
-		dList<dAction*> potencialConflictinActions;
-		for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
-			dItem& item = itemNode->GetInfo();
-			const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
-			if ((ruleInfo.m_ruleNumber == 0) && (item.m_indexMarker == 1)) {
-				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (DACCEPT_SYMBOL); 
-				_ASSERTE (actionNode);
-				dAction& action = actionNode->GetInfo();
-				action.m_type = dACCEPT;
-				action.m_myItem = &item;
-				action.m_reduceRuleNode = NULL;
-			} else if ((item.m_indexMarker == ruleInfo.GetCount()) && (ruleInfo.m_name != startSymbol)) {
-				dTree<dAction, string>::dTreeNode* actionNode = state->m_actions.Find (item.m_lookAheadSymnol); 
-				if (!actionNode) {
-					actionNode = state->m_actions.Insert (item.m_lookAheadSymnol); 
-					dAction& action = actionNode->GetInfo();
-					action.m_type = dREDUCE;
-					action.m_myItem = &item;
-					action.m_nextState = 0;
-					action.m_reduceRuleNode = item.m_ruleNode;
-				} else {
-					dAction& action = actionNode->GetInfo();
-					action.m_myItem = &item;
-					action.m_reduceRuleNode = item.m_ruleNode;
-					potencialConflictinActions.Append (&actionNode->GetInfo());
-				}
-			}
-		}
-
-		// now resolve all conflicting actions
-		if (potencialConflictinActions.GetCount()) {
-
-			// resolve conflicting actions
-			dList<dAction*>::dListNode* nextActionNode = NULL;
-			for (dList<dAction*>::dListNode* actionNode = potencialConflictinActions.GetFirst(); actionNode; actionNode = nextActionNode) {
-				dAction* const action = actionNode->GetInfo();
-
-				if (action->m_type == dREDUCE) {
-					// this is a reduce reduce conflict
-					_ASSERTE (0);
-					DTRACE (("This is a reduce Reduce conflict, resolve in favor of of first production rule\n")); 
-				}
-				nextActionNode = actionNode->GetNext();
-
-				const dItem& item = *action->m_myItem;
-				if (item.m_lastOperatorSymbol != emptySymbol) {
-					const dOperatorsAssociation* const operatorAssosiation = operatorPrecedence.FindAssociation (item.m_lastOperatorSymbol);
-					_ASSERTE (operatorAssosiation);
-					if (operatorAssosiation->m_associativity == dOperatorsAssociation::m_left) {
-						
-						const dOperatorsAssociation* const lookAheadOperatorAssosiation = operatorPrecedence.FindAssociation (item.m_lookAheadSymnol);
-						if (!(lookAheadOperatorAssosiation && (lookAheadOperatorAssosiation->m_prioprity > operatorAssosiation->m_prioprity))) {
-							action->m_type = dREDUCE;
-						}
-					}
-					potencialConflictinActions.Remove(actionNode);
-				}
-			}
-
-			// for any conflicting actions left, display warning
-			for (dList<dAction*>::dListNode* actionNode = potencialConflictinActions.GetFirst(); actionNode; actionNode = actionNode->GetNext()) {
-				_ASSERTE (0);
-				dAction* const action = actionNode->GetInfo();
-				if (action->m_type == dSHIFT) {
-					DTRACE (("This is a shift Reduce conflict, resolve in favor of shift\n")); 
-				} else {
-					DTRACE (("This is a reduce Reduce conflict, resolving by the first reduce rule\n"));
-				}
-			}
-		}
-	}
-
-
-	// create Goto Table
-	for (stateIter.Begin(); stateIter; stateIter ++) {
-		dState* const state = stateIter.GetNode()->GetInfo();
-		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
-			dTransition& transition = node->GetInfo();
-			if (transition.m_type == NONTERMINAL) {
-				state->m_goto.Insert (transition.m_targetState, transition.m_name); 
-			}
-		}
-	}
-}
 
 void dParcerCompiler::ReplaceMacro (string& data, const string& newName, const string& macro) const
 {
@@ -1309,4 +1192,124 @@ void dParcerCompiler::GenerateParcerCode (
 
 	templateHeader += endUserCode;
 	SaveFile(outputFileName, ".cpp", templateHeader);
+}
+
+
+
+void dParcerCompiler::BuildParcingTable (
+	const dTree<dState*,int>& stateList, 
+	const dTree<dTokenType, string>& symbolList, 
+	const string& startSymbol,
+	const dOperatorsPrecedence& operatorPrecedence) const
+{
+	dTree<dState*,int>::Iterator stateIter (stateList);
+	dTree<dTokenType, string>::Iterator symbolIter (symbolList);
+
+	string emptySymbol ("");
+	string acceptingSymbol (DACCEPT_SYMBOL);
+	// create Shift Reduce action table
+	for (stateIter.Begin(); stateIter; stateIter ++) {
+		dState* const state = stateIter.GetNode()->GetInfo();
+
+		// add all shift actions first
+		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
+			dTransition& transition = node->GetInfo();
+			if (transition.m_type == TERMINAL) {
+
+				// find item generating this shift action and mark it as used.
+				const dState* const targetState = transition.m_targetState;
+				_ASSERTE (!state->m_actions.Find (transition.m_name));
+				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (transition.m_name); 
+				dAction& action = actionNode->GetInfo();
+				action.m_type = dSHIFT;
+				action.m_myItem = NULL;
+				action.m_nextState = targetState->m_number;
+				action.m_reduceRuleNode = NULL;
+			}
+		}
+
+		// add all reduce actions
+		dList<dAction*> potencialConflictinActions;
+		for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
+			dItem& item = itemNode->GetInfo();
+			const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
+			if ((ruleInfo.m_ruleNumber == 0) && (item.m_indexMarker == 1)) {
+				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (DACCEPT_SYMBOL); 
+				_ASSERTE (actionNode);
+				dAction& action = actionNode->GetInfo();
+				action.m_type = dACCEPT;
+				action.m_myItem = &item;
+				action.m_reduceRuleNode = NULL;
+			} else if ((item.m_indexMarker == ruleInfo.GetCount()) && (ruleInfo.m_name != startSymbol)) {
+				dTree<dAction, string>::dTreeNode* actionNode = state->m_actions.Find (item.m_lookAheadSymnol); 
+				if (!actionNode) {
+					actionNode = state->m_actions.Insert (item.m_lookAheadSymnol); 
+					dAction& action = actionNode->GetInfo();
+					action.m_type = dREDUCE;
+					action.m_myItem = &item;
+					action.m_nextState = 0;
+					action.m_reduceRuleNode = item.m_ruleNode;
+				} else {
+					dAction& action = actionNode->GetInfo();
+					action.m_myItem = &item;
+					action.m_reduceRuleNode = item.m_ruleNode;
+					potencialConflictinActions.Append (&actionNode->GetInfo());
+				}
+			}
+		}
+
+		// now resolve all conflicting actions
+		if (potencialConflictinActions.GetCount()) {
+
+			// resolve conflicting actions
+			dList<dAction*>::dListNode* nextActionNode = NULL;
+			for (dList<dAction*>::dListNode* actionNode = potencialConflictinActions.GetFirst(); actionNode; actionNode = nextActionNode) {
+				dAction* const action = actionNode->GetInfo();
+
+				if (action->m_type == dREDUCE) {
+					// this is a reduce reduce conflict
+					_ASSERTE (0);
+					DTRACE (("This is a reduce Reduce conflict, resolve in favor of of first production rule\n")); 
+				}
+				nextActionNode = actionNode->GetNext();
+
+				const dItem& item = *action->m_myItem;
+				if (item.m_lastOperatorSymbol != emptySymbol) {
+					const dOperatorsAssociation* const operatorAssosiation = operatorPrecedence.FindAssociation (item.m_lastOperatorSymbol);
+					_ASSERTE (operatorAssosiation);
+					if (operatorAssosiation->m_associativity == dOperatorsAssociation::m_left) {
+
+						const dOperatorsAssociation* const lookAheadOperatorAssosiation = operatorPrecedence.FindAssociation (item.m_lookAheadSymnol);
+						if (!(lookAheadOperatorAssosiation && (lookAheadOperatorAssosiation->m_prioprity > operatorAssosiation->m_prioprity))) {
+							action->m_type = dREDUCE;
+						}
+					}
+					potencialConflictinActions.Remove(actionNode);
+				}
+			}
+
+			// for any conflicting actions left, display warning
+			for (dList<dAction*>::dListNode* actionNode = potencialConflictinActions.GetFirst(); actionNode; actionNode = actionNode->GetNext()) {
+				_ASSERTE (0);
+				dAction* const action = actionNode->GetInfo();
+				if (action->m_type == dSHIFT) {
+					DTRACE (("This is a shift Reduce conflict, resolve in favor of shift\n")); 
+				} else {
+					DTRACE (("This is a reduce Reduce conflict, resolving by the first reduce rule\n"));
+				}
+			}
+		}
+	}
+
+
+	// create Goto Table
+	for (stateIter.Begin(); stateIter; stateIter ++) {
+		dState* const state = stateIter.GetNode()->GetInfo();
+		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
+			dTransition& transition = node->GetInfo();
+			if (transition.m_type == NONTERMINAL) {
+				state->m_goto.Insert (transition.m_targetState, transition.m_name); 
+			}
+		}
+	}
 }

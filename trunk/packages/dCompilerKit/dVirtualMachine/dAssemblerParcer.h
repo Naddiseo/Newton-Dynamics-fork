@@ -34,9 +34,9 @@ class dAssemblerParcer
 	enum dToken
 	{
 		IMPORT = 256,
-		LITERAL,
+		INTEGER,
 		INT,
-		INTEGER
+		LITERAL
 	};
 
 	enum ActionType;

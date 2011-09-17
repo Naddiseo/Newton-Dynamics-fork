@@ -114,17 +114,18 @@ int dAssemblerLexical::NextToken ()
 	static char text_6[] = {46, 0};
 	static char text_7[] = {60, 0};
 	static char text_8[] = {62, 0};
-	static char text_9[] = {43, 45, 0};
-	static char text_10[] = {48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 0};
-	static char text_11[] = {65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 95, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 0};
-	static char text_12[] = {48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 95, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 0};
+	static char text_9[] = {61, 0};
+	static char text_10[] = {43, 45, 0};
+	static char text_11[] = {48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 0};
+	static char text_12[] = {65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 95, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 0};
+	static char text_13[] = {48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 95, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 0};
 
-	static int characterSetSize[] = {4, 1, 126, 1, 126, 126, 1, 1, 1, 2, 10, 53, 63};
-	static char* characterSetArray[] = {text_0, text_1, text_2, text_3, text_4, text_5, text_6, text_7, text_8, text_9, text_10, text_11, text_12};
+	static int characterSetSize[] = {4, 1, 126, 1, 126, 126, 1, 1, 1, 1, 2, 10, 53, 63};
+	static char* characterSetArray[] = {text_0, text_1, text_2, text_3, text_4, text_5, text_6, text_7, text_8, text_9, text_10, text_11, text_12, text_13};
 
-	static int transitionsCount[] = {9, 2, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 2, 2, 2, 0, 2, 0, 1, 1, 0, 1, 1, 1, 0, 0};
-	static int transitionsStart[] = {0, 20, 0, 10, 0, 0, 0, 9, 0, 0, 0, 0, 12, 16, 14, 0, 18, 0, 23, 22, 0, 24, 25, 26, 0, 0};
-	static unsigned nextTranstionList[] = {0x0690001, 0x04002, 0x014003, 0x064004, 0x074005, 0x084006, 0x094007, 0x0a4008, 0x0b4009, 0x0a4008, 0x01400b, 0x03400c, 0x03400d, 0x04400e, 0x03400d, 0x04400e, 0x01400f, 0x054010, 0x03400d, 0x04400e, 0x06d0012, 0x06e0013, 0x0740014, 0x0700015, 0x06f0016, 0x0720017, 0x0740018, 0};
+	static int transitionsCount[] = {10, 2, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2, 2, 2, 0, 2, 0, 1, 1, 0, 1, 1, 1, 0, 0};
+	static int transitionsStart[] = {0, 21, 0, 11, 0, 0, 0, 0, 10, 0, 0, 0, 0, 13, 17, 15, 0, 19, 0, 24, 23, 0, 25, 26, 27, 0, 0};
+	static unsigned nextTranstionList[] = {0x0690001, 0x04002, 0x014003, 0x064004, 0x074005, 0x084006, 0x094007, 0x0a4008, 0x0b4009, 0x0c400a, 0x0b4009, 0x01400c, 0x03400d, 0x03400e, 0x04400f, 0x03400e, 0x04400f, 0x014010, 0x054011, 0x03400e, 0x04400f, 0x06d0013, 0x06e0014, 0x0740015, 0x0700016, 0x06f0017, 0x0720018, 0x0740019, 0};
 	
 	m_startIndex = m_index;
 
@@ -133,23 +134,10 @@ int dAssemblerLexical::NextToken ()
 	{
 		switch (state) 
 		{
-			case 9:
-			{
-				char ch = NextChar();
-				if (IsCharInSet (ch, text_12, characterSetSize[12])) state = 10;
-				else {
-					UnGetChar();
-					GetLexString ();
-					//user specified action
-					{return dAssemblerParcer::LITERAL;}
-					state = 0;
-				}
-				break;
-			}
 			case 10:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_12, characterSetSize[12])) state = 10;
+				if (IsCharInSet (ch, text_13, characterSetSize[13])) state = 11;
 				else {
 					UnGetChar();
 					GetLexString ();
@@ -159,15 +147,38 @@ int dAssemblerLexical::NextToken ()
 				}
 				break;
 			}
-			case 8:
+			case 11:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_10, characterSetSize[10])) state = 8;
+				if (IsCharInSet (ch, text_13, characterSetSize[13])) state = 11;
+				else {
+					UnGetChar();
+					GetLexString ();
+					//user specified action
+					{return dAssemblerParcer::LITERAL;}
+					state = 0;
+				}
+				break;
+			}
+			case 9:
+			{
+				char ch = NextChar();
+				if (IsCharInSet (ch, text_11, characterSetSize[11])) state = 9;
 				else {
 					UnGetChar();
 					GetLexString ();
 					//user specified action
 					{return dAssemblerParcer::INTEGER;}
+					state = 0;
+				}
+				break;
+			}
+			case 7:
+			{
+				{
+					GetLexString ();
+					//user specified action
+					{return '=';}
 					state = 0;
 				}
 				break;
@@ -202,7 +213,7 @@ int dAssemblerLexical::NextToken ()
 				}
 				break;
 			}
-			case 15:
+			case 16:
 			{
 				{
 					GetLexString ();
@@ -212,10 +223,10 @@ int dAssemblerLexical::NextToken ()
 				}
 				break;
 			}
-			case 11:
+			case 12:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_2, characterSetSize[2])) state = 17;
+				if (IsCharInSet (ch, text_2, characterSetSize[2])) state = 18;
 				else {
 					UnGetChar();
 					GetLexString ();
@@ -225,10 +236,10 @@ int dAssemblerLexical::NextToken ()
 				}
 				break;
 			}
-			case 17:
+			case 18:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_2, characterSetSize[2])) state = 17;
+				if (IsCharInSet (ch, text_2, characterSetSize[2])) state = 18;
 				else {
 					UnGetChar();
 					GetLexString ();
@@ -251,7 +262,7 @@ int dAssemblerLexical::NextToken ()
 				}
 				break;
 			}
-			case 20:
+			case 21:
 			{
 				{
 					GetLexString ();
@@ -261,7 +272,7 @@ int dAssemblerLexical::NextToken ()
 				}
 				break;
 			}
-			case 24:
+			case 25:
 			{
 				{
 					GetLexString ();

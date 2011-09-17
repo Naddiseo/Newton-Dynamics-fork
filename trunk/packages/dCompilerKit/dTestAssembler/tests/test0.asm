@@ -11,4 +11,4 @@
 
 // Assembler program test0.asm
 
-2 + 6 * 5
+int a = 10

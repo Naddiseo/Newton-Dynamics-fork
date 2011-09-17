@@ -33,7 +33,17 @@ bool dAssemblerCompiler::Parce(dAssemblerLexical& scanner)
 }
 
 
-dAssemblerCompiler::dUserVariable dAssemblerCompiler::DataType (const dUserVariable& dataType) const
+dAssemblerCompiler::dUserVariable dAssemblerCompiler::EmitDataType (const dUserVariable& dataType) const
 {
 	return dataType;
+}
+
+dAssemblerCompiler::dUserVariable dAssemblerCompiler::EmitSymbol (const dUserVariable& symbol) const
+{
+	return symbol;
+}
+
+dAssemblerCompiler::dUserVariable dAssemblerCompiler::EmitIntegerConst (const dUserVariable& integerConst) const
+{
+	return integerConst;
 }

@@ -27,7 +27,10 @@ class dAssemblerCompiler: public dAssemblerParcer
 	virtual ~dAssemblerCompiler();
 	virtual bool Parce(dAssemblerLexical& scanner);
 
-	dUserVariable DataType (const dUserVariable& dataType) const;
+	
+	dUserVariable EmitSymbol (const dUserVariable& symbol) const;
+	dUserVariable EmitDataType (const dUserVariable& dataType) const;
+	dUserVariable EmitIntegerConst (const dUserVariable& symbol) const;
 	
 	dVirtualMachine* m_virtualMachine;
 };
