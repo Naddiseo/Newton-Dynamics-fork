@@ -95,14 +95,14 @@ bool dAssemblerParcer::ErrorHandler (const string& line) const
 
 const dAssemblerParcer::dActionEntry* dAssemblerParcer::FindAction (const dActionEntry* const actionList, int count, dToken token) const
 {
-
 	int i0 = 0;
 	int i1 = count - 1;
 	while ((i1 - i0) >= 4) {
 		int i = (i1 + i0 + 1)>>1;
 
 		const dActionEntry& action = actionList[i];
-		if (token <= dToken(action.m_token)) {
+		dToken actionToken (dToken(action.m_token));
+		if (token <= actionToken) {
 			i1 = i;
 		} else {
 			i0 = i;
@@ -111,7 +111,8 @@ const dAssemblerParcer::dActionEntry* dAssemblerParcer::FindAction (const dActio
 
 	for (int i = i0; i <= i1; i ++) {
 		const dActionEntry& action = actionList[i];
-		if (token == dToken(action.m_token)) {
+		dToken actionToken (dToken(action.m_token));
+		if (token == actionToken) {
 			return& action;
 		}
 	}
@@ -128,7 +129,8 @@ const dAssemblerParcer::dGotoEntry* dAssemblerParcer::FindGoto (const dGotoEntry
 		int i = (i1 + i0 + 1)>>1;
 
 		const dGotoEntry& action = gotoList[i];
-		if (token <= dToken(action.m_token)) {
+		dToken actionToken (dToken(action.m_token));
+		if (token <= actionToken) {
 			i1 = i;
 		} else {
 			i0 = i;
@@ -137,7 +139,8 @@ const dAssemblerParcer::dGotoEntry* dAssemblerParcer::FindGoto (const dGotoEntry
 
 	for (int i = i0; i <= i1; i ++) {
 		const dGotoEntry& action = gotoList[i];
-		if (token == dToken(action.m_token)) {
+		dToken actionToken (dToken(action.m_token));
+		if (token == actionToken) {
 			return &action;
 		}
 	}
@@ -199,10 +202,10 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 			case dSHIFT: 
 			{
 				dStackPair& entry = stack.Append()->GetInfo();
-				entry.m_token = dToken (action->m_token);
 				entry.m_state = action->m_nextState;
 				entry.m_value = dUserVariable (entry.m_token, scanner.GetTokenString());
 				token = dToken (scanner.NextToken());
+				entry.m_token = token;
 				if (token == -1) {
 					token = dToken (0);
 				}

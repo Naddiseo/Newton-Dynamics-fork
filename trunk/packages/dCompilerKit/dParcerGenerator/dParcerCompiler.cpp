@@ -938,31 +938,42 @@ void dParcerCompiler::GenerateHeaderFile (
 	ReplaceMacro (templateHeader, userVariableClass, "$(userVariableClass)");
 
 	string enumdTokens ("");
-	bool firstdToken = true;
+//	bool firstdToken = true;
 	dTree<int, string> symbolFilter;
 	for (dProductionRule::dListNode* ruleNode = ruleList.GetFirst(); ruleNode; ruleNode = ruleNode->GetNext()) {
 		dRuleInfo& ruleInfo = ruleNode->GetInfo();
 		for (dRuleInfo::dListNode* symbolNode = ruleInfo.GetFirst(); symbolNode; symbolNode = symbolNode->GetNext()) {
 			dSymbol& symbol = symbolNode->GetInfo();
 			if (symbol.m_type == TERMINAL) {
-				if (((symbol.m_name.size() > 1) || isalnum(symbol.m_name[0])) && !symbolFilter.Find(symbol.m_name)) {
-					symbolFilter.Insert(0, symbol.m_name);
-					dTree<int, string>::dTreeNode* const node = tokenEnumerationMap.Find(symbol.m_name);
-					_ASSERTE (node);
-					int value = node->GetInfo();
-					if (value >= 256) {
-						enumdTokens += "\t\t";
-						enumdTokens += symbol.m_name;
-						if (firstdToken) {
-							_ASSERTE (value == 256);
-							firstdToken = false;
-							enumdTokens += " = 256,\n";
-						} else {
-							enumdTokens += ",\n";
-						}
-					}
-				}
+				symbolFilter.Insert(0, symbol.m_name);
 			}
+		}
+	}
+
+	dTree<string, int> sortToken;
+	dTree<int, string>::Iterator iter (tokenEnumerationMap);
+	for (iter.Begin(); iter; iter ++) {
+		const string& name = iter.GetKey();
+		if (symbolFilter.Find(name)) {
+			int tokeValue = iter.GetNode()->GetInfo();
+			if (tokeValue >= 256) {
+				sortToken.Insert(name, tokeValue);
+			}
+		}
+	} 
+
+	dTree<string, int>::Iterator iter1 (sortToken);
+	bool first = true;
+	for (iter1.Begin(); iter1; iter1 ++) {
+		const string& name = iter1.GetNode()->GetInfo();
+		enumdTokens += "\t\t";
+		enumdTokens += name;
+		if (first) {
+			_ASSERTE (iter1.GetKey() == 256);
+			first = false;
+			enumdTokens += " = 256,\n";
+		} else {
+			enumdTokens += ",\n";
 		}
 	}
 
