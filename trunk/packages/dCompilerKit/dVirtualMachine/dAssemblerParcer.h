@@ -33,7 +33,7 @@ class dAssemblerParcer
 	public:
 	enum dToken
 	{
-		IMPORT = 256,
+		IMPORT = 256, 
 		LITERAL,
 		INT,
 		INTEGER

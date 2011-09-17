@@ -153,36 +153,21 @@ const dAssemblerParcer::dGotoEntry* dAssemblerParcer::FindGoto (const dGotoEntry
 bool dAssemblerParcer::Parce(lextest1& scanner)
 {
 	dList<dStackPair> stack;
-	static short actionsCount[] = {5, 1, 1, 3, 1, 3, 3, 3, 1, 4, 4, 3, 2, 2, 2, 1, 1, 3, 3, 2};
-	static short actionsStart[] = {0, 5, 6, 7, 10, 11, 14, 17, 20, 21, 25, 29, 32, 34, 36, 38, 20, 39, 42, 45};
+	static short actionsCount[] = {2, 2, 1, 2, 2, 2};
+	static short actionsStart[] = {0, 2, 4, 5, 7, 9};
 	static dActionEntry actionTable[] = {
-					dActionEntry (0, 1, 0, 0, 3), dActionEntry (256, 0, 1, 0, 0), dActionEntry (258, 0, 2, 0, 0), dActionEntry (263, 1, 0, 0, 3), dActionEntry (262, 1, 0, 0, 3), 
-					dActionEntry (60, 0, 8, 0, 0), 
-					dActionEntry (257, 1, 6, 1, 12), 
-					dActionEntry (0, 1, 1, 1, 5), dActionEntry (256, 1, 1, 1, 5), dActionEntry (266, 1, 1, 1, 5), 
-					dActionEntry (257, 0, 9, 0, 0), 
-					dActionEntry (0, 1, 1, 1, 4), dActionEntry (256, 1, 1, 1, 4), dActionEntry (266, 1, 1, 1, 4), 
-					dActionEntry (0, 1, 0, 1, 1), dActionEntry (263, 1, 0, 1, 1), dActionEntry (262, 1, 0, 1, 1), 
-					dActionEntry (0, 2, 0, 0, 0), dActionEntry (256, 0, 1, 0, 0), dActionEntry (258, 0, 2, 0, 0), 
-					dActionEntry (257, 0, 12, 0, 0), 
-					dActionEntry (0, 1, 5, 1, 13), dActionEntry (61, 1, 5, 1, 13), dActionEntry (256, 1, 5, 1, 13), dActionEntry (258, 1, 5, 1, 13), 
-					dActionEntry (0, 1, 3, 2, 9), dActionEntry (61, 0, 15, 0, 0), dActionEntry (256, 1, 3, 2, 9), dActionEntry (258, 1, 3, 2, 9), 
-					dActionEntry (0, 1, 0, 2, 2), dActionEntry (263, 1, 0, 2, 2), dActionEntry (262, 1, 0, 2, 2), 
-					dActionEntry (46, 1, 5, 1, 13), dActionEntry (62, 1, 5, 1, 13), 
-					dActionEntry (46, 0, 16, 0, 0), dActionEntry (62, 0, 1, 0, 0), 
-					dActionEntry (46, 1, 4, 1, 7), dActionEntry (62, 1, 4, 1, 7), 
-					dActionEntry (259, 0, 17, 0, 0), 
-					dActionEntry (0, 1, 7, 1, 11), dActionEntry (256, 1, 7, 1, 11), dActionEntry (258, 1, 7, 1, 11), 
-					dActionEntry (0, 1, 3, 4, 10), dActionEntry (256, 1, 3, 4, 10), dActionEntry (258, 1, 3, 4, 10), 
-					dActionEntry (46, 1, 4, 3, 8), dActionEntry (62, 1, 4, 3, 8), 
+					dActionEntry (0, 1, 0, 0, 2), dActionEntry (258, 0, 1, 0, 0), 
+					dActionEntry (0, 1, 2, 1, 5), dActionEntry (258, 1, 2, 1, 5), 
+					dActionEntry (0, 2, 0, 0, 0), 
+					dActionEntry (0, 1, 1, 1, 3), dActionEntry (258, 1, 1, 1, 3), 
+					dActionEntry (0, 1, 0, 1, 1), dActionEntry (258, 0, 1, 0, 0), 
+					dActionEntry (0, 1, 1, 2, 4), dActionEntry (258, 1, 1, 2, 4), 
 			};
 
-	static short gotoCount[] = {5, 0, 0, 0, 1, 0, 0, 4, 2, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0};
-	static short gotoStart[] = {0, 5, 5, 5, 5, 6, 6, 6, 10, 12, 12, 12, 12, 12, 12, 12, 13, 14, 14, 14};
+	static short gotoCount[] = {3, 0, 0, 0, 1, 0};
+	static short gotoStart[] = {0, 3, 3, 3, 3, 4};
 	static dGotoEntry gotoTable[] = {
-					dGotoEntry (260, 7), dGotoEntry (261, 6), dGotoEntry (262, 5), dGotoEntry (263, 3), dGotoEntry (266, 4), 
-					dGotoEntry (265, 10), dGotoEntry (261, 11), dGotoEntry (262, 5), dGotoEntry (263, 3), dGotoEntry (266, 4), 
-					dGotoEntry (264, 13), dGotoEntry (265, 14), dGotoEntry (267, 18), dGotoEntry (265, 19), 
+					dGotoEntry (260, 2), dGotoEntry (261, 4), dGotoEntry (262, 3), dGotoEntry (262, 5), 
 			};
 
 	const int lastToken = 260;
@@ -236,21 +221,6 @@ bool dAssemblerParcer::Parce(lextest1& scanner)
 				switch (action->m_ruleIndex) 
 				{
 					//do user semantic Actions
-					case 12:// rule dataType : INT 
-						{entry.m_value = ((dAssemblerCompiler*)this)->EmitDataType (parameter[0].m_value);}
-						break;
-					case 13:// rule literal : LITERAL 
-						{entry.m_value = ((dAssemblerCompiler*)this)->EmitSymbol (parameter[0].m_value);}
-						break;
-					case 9:// rule dataDeclaration : dataType literal 
-						{((dAssemblerCompiler*)this)->EmitUnInitilizedDataDeclaration (parameter[0].m_value, parameter[1].m_value);}
-						break;
-					case 11:// rule constantExpression : INTEGER 
-						{entry.m_value = ((dAssemblerCompiler*)this)->EmitIntegerConst (parameter[0].m_value);}
-						break;
-					case 10:// rule dataDeclaration : dataType literal = constantExpression 
-						{((dAssemblerCompiler*)this)->EmitInitilizedDataDeclaration (parameter[0].m_value, parameter[1].m_value, parameter[3].m_value);}
-						break;
 
 					default:;
 				}
