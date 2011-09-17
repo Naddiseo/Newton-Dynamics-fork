@@ -3,42 +3,65 @@
 #include "dAssemblerLexical.h"
 #include "dAssemblerCompiler.h"
 
+
+
+
+
+
+
+
+
+
 dVirtualMachine::dNemonic dVirtualMachine::m_nemonics[] = 
 {
+	{mov,		"mov"},
+
+	{addi,		"addi"},		
 	{add,		"add"},
 	{sub,		"sub"},		
-	{addi,		"addi"},		
-	{addu,		"addu"},		
-	{subu,		"subu"},		
+	{mul,		"mul"},
+	{div,		"div"}, 
+	{abs,		"abs"},
+	{neg,		"neg"},
+
 	{and,		"and"},		
 	{or,		"or"},		
-	{xor,		"xor"},		
+	{xor,		"xor"},
+	{not,		"xor"},
+
 	{sll,		"sll"},		
 	{srl,		"srl"},		
+
 	{loadb,		"loadb"},		
 	{loadw,		"loadw"},		
 	{loadd,		"loadd"},		
 	{storeb,	"storeb"},	
 	{storew,	"storew"},	
 	{stored,	"stored"},	
+
 	{beq,		"beq"},		
 	{bne,		"bne"},		
 	{blt,		"blt"},		
 	{ble,		"ble"},		
 	{bgt,		"bgt"},		
 	{bget,		"bget"},		
+
 	{call,		"call"},		
 	{callr,		"callr"},		
 	{syscall,	"syscall"},		
 	{jump,		"jump"},		
+
 	{enter,		"enter"},		
 	{exit,		"exit"},		
 	{push,		"push"},		 
 	{pop,		"pop"},		
+
+	{nop,		"nop"},
 };
 
 dVirtualMachine::dVirtualMachine(void)
-{
+{	
+	_ASSERTE (nop <= 1 << 6);
 }
 
 dVirtualMachine::~dVirtualMachine(void)
