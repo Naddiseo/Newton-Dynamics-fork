@@ -29,40 +29,42 @@ Comment1        [\/][\/].*
 Comment2        [\/][\*]({AnyButAstr}|[\*]{AnyButSlash})*[\*][\/]
 Comment			({Comment1}|{Comment2})
 
-
+Integer			[\-\+]?[0-9]+
+Literal			[a-zA-Z_][0-9a-zA-Z_]*
 
 %%
 {WhiteSpace}	{}
 {Comment}		{}
-[+]				{return '+';}	
-[*]				{return '*';}	
-[(]				{return '(';}	
-[)]				{return ')';}	
-[0-9]+			{return dAssemblerParcer::id;}
 
+[.]				{return '.';}
+[<]				{return '<';}
+[>]				{return '>';}
+//[+]				{return '+';}	
+//[*]				{return '*';}	
+//[(]				{return '(';}	
+//[)]				{return ')';}	
+
+
+{Integer}		{return dAssemblerParcer::INTEGER;}
+{Literal}		{return dAssemblerParcer::LITERAL;}
+
+
+"int"			{return dAssemblerParcer::INT;}
+"import"		{return dAssemblerParcer::IMPORT;}
 
 /*
-
-
-Integer			[\-\+]?[0-9]+
 Float			{Integer}[\.][0-9]+(e{Integer})?
-
-
-
 Register		[rR][0-9]+
 loadI			[lL][oO][aA][dD][iI]
 add				[aA][dD][dD]
 ret				[rR][eE][tT]
-
-
-
 Byte			[bB][yY][tT][eE]	
 Word			[wW][oO][rR][dD]	
 DWord			[dD]{Word}	
 Double			[dD][oO][uU][bB][lL][eE]	
 Offset			[oO][fF][fF][sS][eE][tT]
 
-Literal			[a-zA-Z_][0-9a-zA-Z_]*
+
 
 %%
 {WhiteSpace}	{}
@@ -95,7 +97,7 @@ Literal			[a-zA-Z_][0-9a-zA-Z_]*
 
 {Register}		{return dAssemblerParcer::REGISTER;}
 
-{Literal}		{return dAssemblerParcer::LITERAL;}
+
 
 {Comment}		{}
 

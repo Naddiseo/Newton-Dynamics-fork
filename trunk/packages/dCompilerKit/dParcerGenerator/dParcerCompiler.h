@@ -120,9 +120,10 @@ class dParcerCompiler
 	void BuildParcingTable (const dTree<dState*,int>& stateList, const dTree<dTokenType, string>& symbolList, const string& startSymbol, const dOperatorsPrecedence& operatorPrecence) const;
 	void CanonicalItemSets (dTree<dState*,int>& states, const dProductionRule& rules, const dTree<dTokenType, string>& symbolList, const dOperatorsPrecedence& operatorPrecence);
 
-	void GenerateHeaderFile (const string& className, const string& scannerClassName, const char* const outputFileName, dProductionRule& rules, dTree<int, string>& tokenEnumerationMap); 
+	void GenerateHeaderFile (const string& className, const string& scannerClassName, const char* const outputFileName, dProductionRule& rules, 
+							 dTree<int, string>& tokenEnumerationMap, const string& userVariableClass); 
 	void GenerateParcerCode (const string& className, const string& scannerClassName, const char* const outputFileName, const string& userCode, 
-							 const string& userVariableClass, dTree<dState*,int>& stateList, dTree<dTokenType, string>& symbolList, dTree<int, string>& tokenEnumerationMap,
+							 dTree<dState*,int>& stateList, dTree<dTokenType, string>& symbolList, dTree<int, string>& tokenEnumerationMap,
 							 string& endUserCode, int lastTokenEnum);
 
 };

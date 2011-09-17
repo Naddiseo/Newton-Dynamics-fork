@@ -1,4 +1,3 @@
-
 /* Copyright (c) <2009> <Newton Game Dynamics>
 * 
 * This software is provided 'as-is', without any express or implied
@@ -10,104 +9,73 @@
 * freely
 */
 
-// dVirtual Machine dAssembler compiler grammar
 
 %{
 #include <dVirtualMachine.h>
 #include "dAssemblerLexical.h"
+#include "dAssemblerCompiler.h"
+//
+// Newton virtual machine assembler grammar
+// based loosely on a subset and a hybrid between the MIPS R3000 and the Intel 386 instructions set 
+//
 %}
 
 
-%start SegementList
-
-%token END
-%token PUBLIC
-%token BEGINFUNCTION
-%token ENDFUNCTION
-%token INCLUDE
-
-%token DATASEGMENT
-%token CODESEGMENT
-
-%token WORD
-%token LITERAL
-%token REGISTER
-
-%token MOV ADD
-
-%%
-
-Module			: IncludeList SegementList END
-				;
-
-
-IncludeList		: IncludeList Include
-				| Include
-				| 
-				;
-				
-Include			: INCLUDE '<' fileName '>'
-				;
-
-
-fileName		: LITERAL '.' LITERAL
-				;			
-
-SegementList	: SegmentList Segment
-				| Segment
-				| 
-				;
-				
-Segment			: DataSegment
-				| CodeSegment
-				;
-
-
-DataSegment		: DATASEGMENT ':' DataList  
-				;
-
-
-DataList		: DataList Data
-				| Data
-				|
-				;
-				
-Data			: WORD
-				;
-
-CodeSegment		: CODESEGMENT ':' FuntionList   
-				;
-
-
-FuntionList     : FuntionList Function
-				| Function
-				|
-				;
+%union 
+{
+	class dUserVariable
+	{
+		public:
+		dUserVariable () 
+			:m_token (dToken (0)), m_data("")
+		{
+		}
 		
 		
-Function		: funtionExport FunctionBody
-				| FunctionBody
-				;
+		dUserVariable (dToken token, const char* const text)
+			:m_token(token), m_data (text) 
+		{
+		}
+		dToken m_token;
+		string m_data;
+	};
+}
 
-funtionExport	: PUBLIC LITERAL
-				;
-				
-FunctionBody	: BEGINFUNCTION LITERAL instructionList	ENDFUNCTION	LITERAL
-				;	
-				
-				
-instructionList	: instructionList instruction
-				| instruction
-				;
-				
-				
-instruction		: MOV REGISTER ',' REGISTER			
-				| ADD REGISTER ',' REGISTER	',' REGISTER		
-				;
-				
-				
+
+	
+%token IMPORT LITERAL 
+%start module
+
 
 %%
+module		: segmentList
+			;
+				
+				
+segmentList	: segment
+			| segmentList segment
+			|
+			;
+			
+			
+segment		: import
+//			| dataDecalaration	
+//			| funtionDeclaration
+			;
+			
+			
+import		: IMPORT '<' fileName '>'
+			; 			
+			
+			
+fileName	: LITERAL			
+			| fileName '.' LITERAL
+			;
+%%
+
+
+
+
 
 
 

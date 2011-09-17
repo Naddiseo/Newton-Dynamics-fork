@@ -27,7 +27,8 @@ class dAssemblerCompiler: public dAssemblerParcer
 	virtual ~dAssemblerCompiler();
 	virtual bool Parce(dAssemblerLexical& scanner);
 
-
+	dUserVariable DataType (const dUserVariable& dataType) const;
+	
 	dVirtualMachine* m_virtualMachine;
 };
 

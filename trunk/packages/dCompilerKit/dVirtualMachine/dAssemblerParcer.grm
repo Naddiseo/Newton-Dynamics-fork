@@ -1,4 +1,3 @@
-
 /* Copyright (c) <2009> <Newton Game Dynamics>
 * 
 * This software is provided 'as-is', without any express or implied
@@ -16,16 +15,11 @@
 #include "dAssemblerCompiler.h"
 //
 // Newton virtual machine assembler grammar
-// based loosely on a subset of the MIPS R3000 and the Intel 386 instructions set 
+// based loosely on a subset and a hybrid between the MIPS R3000 and the Intel 386 instructions set 
 //
 %}
 
 
-
-
-
-
-// very simple sample SLR(1) grammar 
 %union 
 {
 	class dUserVariable
@@ -48,19 +42,48 @@
 
 
 	
-%token i a
-%start S1
+%token IMPORT LITERAL 
+
+%token INT
+%token INTEGER 
+
+
+%start module
 
 
 %%
-S1	: S				{printf ("%s\n", $1.m_data.c_str());}
-	;
-	
-S	: i S e S		{$$.m_data = $1.m_data + $2.m_data + $3.m_data + $4.m_data;}
-	| i S			{$$.m_data = $1.m_data + $2.m_data;}
-	| a				{$$ = $1;}
-	;
-	
-		
+module		: segmentList
+			;
+				
+				
+segmentList	: segment
+			| segmentList segment
+			|
+			;
+			
+			
+segment		: import
+			| dataDeclaration	
+//			| funtionDeclaration
+			;
+			
+			
+import		: IMPORT '<' fileName '>'
+			; 			
+			
+fileName	: LITERAL			
+			| fileName '.' LITERAL
+			;
+			
+dataDeclaration	: dataType LITERAL		
+				| dataType LITERAL '=' constantExpression 
+				;
+				
+dataType		: INT {$$ = ((dAssemblerCompiler*)this)->DataType ($1);}
+				;				
+
+constantExpression : INTEGER
+				   ;	
+
 %%
 

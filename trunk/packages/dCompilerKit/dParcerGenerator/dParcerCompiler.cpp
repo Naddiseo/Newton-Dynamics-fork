@@ -342,8 +342,8 @@ dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const out
 
 	//Write Parcer class and header file
 	string className (GetClassName(outputFileName));
-	GenerateHeaderFile (className, scannerClassName, outputFileName, ruleList, tokenEnumeration);
-	GenerateParcerCode (className, scannerClassName, outputFileName, userCodeBlock, userVariableClass, stateList, symbolList, tokenEnumeration, endUserCode, lastTokenEnum);
+	GenerateHeaderFile (className, scannerClassName, outputFileName, ruleList, tokenEnumeration, userVariableClass);
+	GenerateParcerCode (className, scannerClassName, outputFileName, userCodeBlock, stateList, symbolList, tokenEnumeration, endUserCode, lastTokenEnum);
 
 	dTree<dState*,int>::Iterator iter(stateList);
 	for (iter.Begin(); iter; iter ++) {
@@ -547,17 +547,19 @@ dParcerCompiler::dToken dParcerCompiler::ScanGrammarRule(
 	do {
 		
 		dList<dTokenStringPair> ruleTokens;
-		for (token = dToken(lexical.NextToken()); (token != SIMICOLOM) && (token != OR) ; token = dToken(lexical.NextToken())) {
+		for (token = dToken(lexical.NextToken()); !((token == SIMICOLOM) || (token == OR)); token = dToken(lexical.NextToken())) {
 			dTokenStringPair& pair = ruleTokens.Append()->GetInfo();
 			pair.m_token = token;
 			pair.m_info = lexical.GetTokenString();
 		}
 		
 		dList<dTokenStringPair>::dListNode* lastNode = ruleTokens.GetLast();
-		if (lastNode->GetInfo().m_token != SEMANTIC_ACTION) {
-			lastNode = NULL;
-		} else {
-			currentRule->m_semanticActionCode = lastNode->GetInfo().m_info;
+		if (lastNode) {
+			if (lastNode->GetInfo().m_token != SEMANTIC_ACTION) {
+				lastNode = NULL;
+			} else {
+				currentRule->m_semanticActionCode = lastNode->GetInfo().m_info;
+			}
 		}
 		for (dList<dTokenStringPair>::dListNode* node = ruleTokens.GetFirst(); node != lastNode; node = node->GetNext()) {
 			dTokenStringPair& pair = node->GetInfo();
@@ -667,62 +669,6 @@ void dParcerCompiler::SaveFile(const char* const fileName, const char* const ext
 }
 
 
-
-
-
-
-
-
-
-void dParcerCompiler::GenerateHeaderFile (
-	const string& className, 
-	const string& scannerClassName,
-	const char* const outputFileName,
-	dProductionRule& ruleList, 
-	dTree<int, string>& tokenEnumerationMap)
-{
-	string templateHeader ("");
-	LoadTemplateFile("/dParcerTemplate.h", templateHeader);
-
-	ReplaceAllMacros (templateHeader, className, "$(className)");
-	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
-//	ReplaceAllMacros (templateHeader, userVarible, "$(userVariable)");
-
-	string enumdTokens ("");
-	bool firstdToken = true;
-	dTree<int, string> symbolFilter;
-	for (dProductionRule::dListNode* ruleNode = ruleList.GetFirst(); ruleNode; ruleNode = ruleNode->GetNext()) {
-		dRuleInfo& ruleInfo = ruleNode->GetInfo();
-		for (dRuleInfo::dListNode* symbolNode = ruleInfo.GetFirst(); symbolNode; symbolNode = symbolNode->GetNext()) {
-			dSymbol& symbol = symbolNode->GetInfo();
-			if (symbol.m_type == TERMINAL) {
-				if (((symbol.m_name.size() > 1) || isalnum(symbol.m_name[0])) && !symbolFilter.Find(symbol.m_name)) {
-					symbolFilter.Insert(0, symbol.m_name);
-					dTree<int, string>::dTreeNode* const node = tokenEnumerationMap.Find(symbol.m_name);
-					_ASSERTE (node);
-					int value = node->GetInfo();
-					if (value >= 256) {
-						enumdTokens += "\t\t";
-						enumdTokens += symbol.m_name;
-						if (firstdToken) {
-							_ASSERTE (value == 256);
-							firstdToken = false;
-							enumdTokens += " = 256,\n";
-						} else {
-							enumdTokens += ",\n";
-						}
-					}
-				}
-			}
-		}
-	}
-
-	enumdTokens.replace(enumdTokens.size()-2, 2, "");
-
-	ReplaceMacro (templateHeader, enumdTokens, "$(Tokens)");
-
-	SaveFile(outputFileName, ".h", templateHeader);
-}
 
 
 bool dParcerCompiler::DoesSymbolDeriveEmpty (const string& symbol, const dProductionRule& ruleList) const 
@@ -1093,12 +1039,63 @@ void dParcerCompiler::ReplaceAllMacros (string& data, const string& newName, con
 }
 
 
+void dParcerCompiler::GenerateHeaderFile (
+	const string& className, 
+	const string& scannerClassName,
+	const char* const outputFileName,
+	dProductionRule& ruleList, 
+	dTree<int, string>& tokenEnumerationMap,
+	const string& userVariableClass)
+{
+	string templateHeader ("");
+	LoadTemplateFile("/dParcerTemplate.h", templateHeader);
+
+	ReplaceAllMacros (templateHeader, className, "$(className)");
+	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
+	ReplaceMacro (templateHeader, userVariableClass, "$(userVariableClass)");
+
+	string enumdTokens ("");
+	bool firstdToken = true;
+	dTree<int, string> symbolFilter;
+	for (dProductionRule::dListNode* ruleNode = ruleList.GetFirst(); ruleNode; ruleNode = ruleNode->GetNext()) {
+		dRuleInfo& ruleInfo = ruleNode->GetInfo();
+		for (dRuleInfo::dListNode* symbolNode = ruleInfo.GetFirst(); symbolNode; symbolNode = symbolNode->GetNext()) {
+			dSymbol& symbol = symbolNode->GetInfo();
+			if (symbol.m_type == TERMINAL) {
+				if (((symbol.m_name.size() > 1) || isalnum(symbol.m_name[0])) && !symbolFilter.Find(symbol.m_name)) {
+					symbolFilter.Insert(0, symbol.m_name);
+					dTree<int, string>::dTreeNode* const node = tokenEnumerationMap.Find(symbol.m_name);
+					_ASSERTE (node);
+					int value = node->GetInfo();
+					if (value >= 256) {
+						enumdTokens += "\t\t";
+						enumdTokens += symbol.m_name;
+						if (firstdToken) {
+							_ASSERTE (value == 256);
+							firstdToken = false;
+							enumdTokens += " = 256,\n";
+						} else {
+							enumdTokens += ",\n";
+						}
+					}
+				}
+			}
+		}
+	}
+
+	enumdTokens.replace(enumdTokens.size()-2, 2, "");
+
+	ReplaceMacro (templateHeader, enumdTokens, "$(Tokens)");
+
+	SaveFile(outputFileName, ".h", templateHeader);
+}
+
+
 void dParcerCompiler::GenerateParcerCode (
 	const string& className, 
 	const string& scannerClassName,
 	const char* const outputFileName,
 	const string& userCode,
-	const string& userVariableClass, 
 	dTree<dState*,int>& stateList, 
 	dTree<dTokenType, string>& symbolList,
 	dTree<int, string>& tokenEnumerationMap,
@@ -1114,7 +1111,6 @@ void dParcerCompiler::GenerateParcerCode (
 	ReplaceAllMacros (templateHeader, className, "$(className)");
 	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
 
-	ReplaceMacro (templateHeader, userVariableClass, "$(userVariableClass)");
 
 	char text[256];
 	sprintf (text, "%d", lastTokenEnum);

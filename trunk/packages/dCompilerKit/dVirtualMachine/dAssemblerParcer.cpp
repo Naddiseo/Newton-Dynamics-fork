@@ -18,7 +18,7 @@
 #include "dAssemblerCompiler.h"
 //
 // Newton virtual machine assembler grammar
-// based loosely on a subset of the MIPS R3000 and the Intel 386 instructions set 
+// based loosely on a subset and a hybrid between the MIPS R3000 and the Intel 386 instructions set 
 //
 
 #include "dAssemblerParcer.h"
@@ -67,24 +67,6 @@ class dAssemblerParcer::dGotoEntry
 class dAssemblerParcer::dStackPair
 {
 	public:
-
-	class dUserVariable
-	{
-		public:
-		dUserVariable () 
-			:m_token (dToken (0)), m_data("")
-		{
-		}
-		
-		
-		dUserVariable (dToken token, const char* const text)
-			:m_token(token), m_data (text) 
-		{
-		}
-		dToken m_token;
-		string m_data;
-	};
-
 	dStackPair()
 		:m_state(0), m_token(dToken (0)), m_value()
 	{
@@ -168,24 +150,33 @@ const dAssemblerParcer::dGotoEntry* dAssemblerParcer::FindGoto (const dGotoEntry
 bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 {
 	dList<dStackPair> stack;
-	static short actionsCount[] = {2, 1, 1, 1, 2, 1, 2, 1};
-	static short actionsStart[] = {0, 2, 3, 4, 0, 5, 0, 6};
+	static short actionsCount[] = {5, 1, 1, 3, 1, 3, 1, 3, 3, 1, 3, 2, 2, 1};
+	static short actionsStart[] = {0, 5, 6, 7, 10, 11, 14, 15, 18, 21, 22, 25, 27, 29};
 	static dActionEntry actionTable[] = {
-					dActionEntry (257, 0, 3, 0, 0), dActionEntry (256, 0, 4, 0, 0), 
-					dActionEntry (0, 1, 0, 1, 1), 
+					dActionEntry (0, 1, 1, 0, 4), dActionEntry (256, 0, 1, 0, 0), dActionEntry (258, 0, 2, 0, 0), dActionEntry (264, 1, 1, 0, 4), dActionEntry (263, 1, 1, 0, 4), 
+					dActionEntry (60, 0, 9, 0, 0), 
+					dActionEntry (257, 1, 6, 1, 12), 
+					dActionEntry (0, 1, 2, 1, 6), dActionEntry (256, 1, 2, 1, 6), dActionEntry (266, 1, 2, 1, 6), 
+					dActionEntry (257, 0, 4, 0, 0), 
+					dActionEntry (0, 1, 2, 1, 5), dActionEntry (256, 1, 2, 1, 5), dActionEntry (266, 1, 2, 1, 5), 
 					dActionEntry (0, 2, 0, 0, 0), 
-					dActionEntry (0, 1, 1, 1, 4), 
-					dActionEntry (0, 1, 1, 2, 3), 
-					dActionEntry (0, 1, 1, 4, 2), 
+					dActionEntry (0, 1, 1, 1, 2), dActionEntry (264, 1, 1, 1, 2), dActionEntry (263, 1, 1, 1, 2), 
+					dActionEntry (0, 1, 0, 1, 1), dActionEntry (256, 0, 1, 0, 0), dActionEntry (258, 0, 2, 0, 0), 
+					dActionEntry (257, 0, 11, 0, 0), 
+					dActionEntry (0, 1, 1, 2, 3), dActionEntry (264, 1, 1, 2, 3), dActionEntry (263, 1, 1, 2, 3), 
+					dActionEntry (46, 1, 5, 1, 8), dActionEntry (62, 1, 5, 1, 8), 
+					dActionEntry (46, 0, 13, 0, 0), dActionEntry (62, 0, 1, 0, 0), 
+					dActionEntry (257, 0, 13, 0, 0), 
 			};
 
-	static short gotoCount[] = {2, 0, 0, 0, 1, 1, 1, 0};
-	static short gotoStart[] = {0, 2, 2, 2, 2, 3, 4, 5};
+	static short gotoCount[] = {6, 0, 0, 0, 0, 0, 0, 0, 4, 1, 0, 0, 0, 0};
+	static short gotoStart[] = {0, 6, 6, 6, 6, 6, 6, 6, 6, 10, 11, 11, 11, 11};
 	static dGotoEntry gotoTable[] = {
-					dGotoEntry (259, 1), dGotoEntry (258, 2), dGotoEntry (259, 5), dGotoEntry (260, 6), 
-					dGotoEntry (259, 7)};
+					dGotoEntry (264, 3), dGotoEntry (266, 4), dGotoEntry (263, 5), dGotoEntry (260, 6), dGotoEntry (262, 7), dGotoEntry (261, 8), 
+					dGotoEntry (264, 3), dGotoEntry (266, 4), dGotoEntry (263, 5), dGotoEntry (262, 10), 
+					dGotoEntry (265, 12)};
 
-	const int lastToken = 258;
+	const int lastToken = 260;
 
 	stack.Append ();
 	dToken token = dToken (scanner.NextToken());
@@ -203,7 +194,7 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_token = dToken (action->m_token);
 				entry.m_state = action->m_nextState;
-				entry.m_value = dStackPair::dUserVariable (entry.m_token, scanner.GetTokenString());
+				entry.m_value = dUserVariable (entry.m_token, scanner.GetTokenString());
 				token = dToken (scanner.NextToken());
 				if (token == -1) {
 					token = dToken (0);
@@ -236,17 +227,8 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 				switch (action->m_ruleIndex) 
 				{
 					//do user semantic Actions
-					case 1:// rule S1 : S 
-						{printf ("%s\n", parameter[0].m_value.m_data.c_str());}
-						break;
-					case 4:// rule S : a 
-						{entry.m_value = parameter[0].m_value;}
-						break;
-					case 3:// rule S : i S 
-						{entry.m_value.m_data = parameter[0].m_value.m_data + parameter[1].m_value.m_data;}
-						break;
-					case 2:// rule S : i S e S 
-						{entry.m_value.m_data = parameter[0].m_value.m_data + parameter[1].m_value.m_data + parameter[2].m_value.m_data + parameter[3].m_value.m_data;}
+					case 12:// rule dataType : INT 
+						{entry.m_value = ((dAssemblerCompiler*)this)->DataType (parameter[0].m_value);}
 						break;
 
 					default:;

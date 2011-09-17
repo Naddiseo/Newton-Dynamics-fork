@@ -10,11 +10,11 @@
 */
 
 //
-//Auto generated Parcer Generator class: $(className).h
+//Auto generated Parcer Generator class: test5.h
 //
 
-#ifndef __$(className)_h__
-#define __$(className)_h__
+#ifndef __test5_h__
+#define __test5_h__
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4702) // warning C4702: unreachable code
@@ -26,25 +26,28 @@
 #include <string>
 using namespace std;
 
-class $(scannerClass);
+class lextest1;
 
-class $(className)
+class test5
 {
 	public:
 	enum dToken
 	{
-$(Tokens)
+		sub = 256,
+		sup,
+		{ E },
+		c
 	};
 
 	enum ActionType;
 	class dStackPair;
 	class dGotoEntry;
 	class dActionEntry;
-	$(userVariableClass)
+	class dUserVariable;
 
-	$(className)();
-	virtual ~$(className)();
-	virtual bool Parce($(scannerClass)& scanner);
+	test5();
+	virtual ~test5();
+	virtual bool Parce(lextest1& scanner);
 
 	virtual bool ErrorHandler (const string& line) const;
 

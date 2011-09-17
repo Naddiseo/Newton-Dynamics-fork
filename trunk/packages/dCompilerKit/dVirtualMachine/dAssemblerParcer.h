@@ -33,15 +33,34 @@ class dAssemblerParcer
 	public:
 	enum dToken
 	{
-		i = 256,
-		a
+		IMPORT = 256,
+		LITERAL,
+		INT,
+		INTEGER
 	};
 
 	enum ActionType;
 	class dStackPair;
 	class dGotoEntry;
 	class dActionEntry;
-	class dUserVariable;
+	
+	class dUserVariable
+	{
+		public:
+		dUserVariable () 
+			:m_token (dToken (0)), m_data("")
+		{
+		}
+		
+		
+		dUserVariable (dToken token, const char* const text)
+			:m_token(token), m_data (text) 
+		{
+		}
+		dToken m_token;
+		string m_data;
+	};
+
 
 	dAssemblerParcer();
 	virtual ~dAssemblerParcer();

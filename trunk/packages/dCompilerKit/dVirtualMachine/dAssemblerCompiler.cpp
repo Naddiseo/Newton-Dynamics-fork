@@ -32,3 +32,8 @@ bool dAssemblerCompiler::Parce(dAssemblerLexical& scanner)
 	return dAssemblerParcer::Parce(scanner);
 }
 
+
+dAssemblerCompiler::dUserVariable dAssemblerCompiler::DataType (const dUserVariable& dataType) const
+{
+	return dataType;
+}

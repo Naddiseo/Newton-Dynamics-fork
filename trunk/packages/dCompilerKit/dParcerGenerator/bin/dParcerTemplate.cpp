@@ -59,7 +59,6 @@ class $(className)::dGotoEntry
 class $(className)::dStackPair
 {
 	public:
-$(userVariableClass)
 	dStackPair()
 		:m_state(0), m_token(dToken (0)), m_value()
 	{
@@ -169,7 +168,7 @@ bool $(className)::Parce($(scannerClass)& scanner)
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_token = dToken (action->m_token);
 				entry.m_state = action->m_nextState;
-				entry.m_value = dStackPair::dUserVariable (entry.m_token, scanner.GetTokenString());
+				entry.m_value = dUserVariable (entry.m_token, scanner.GetTokenString());
 				token = dToken (scanner.NextToken());
 				if (token == -1) {
 					token = dToken (0);
