@@ -1028,7 +1028,11 @@ void dParcerCompiler::BuildParcingTable (
 			for (dList<dAction*>::dListNode* actionNode = potencialConflictinActions.GetFirst(); actionNode; actionNode = nextActionNode) {
 				dAction* const action = actionNode->GetInfo();
 
-				_ASSERTE (action->m_type == dSHIFT);
+				if (action->m_type == dREDUCE) {
+					// this is a reduce reduce conflict
+					_ASSERTE (0);
+					DTRACE (("This is a reduce Reduce conflict, resolve in favor of of first production rule\n")); 
+				}
 				nextActionNode = actionNode->GetNext();
 
 				const dItem& item = *action->m_myItem;
@@ -1048,6 +1052,7 @@ void dParcerCompiler::BuildParcingTable (
 
 			// for any conflicting actions left, display warning
 			for (dList<dAction*>::dListNode* actionNode = potencialConflictinActions.GetFirst(); actionNode; actionNode = actionNode->GetNext()) {
+				_ASSERTE (0);
 				dAction* const action = actionNode->GetInfo();
 				if (action->m_type == dSHIFT) {
 					DTRACE (("This is a shift Reduce conflict, resolve in favor of shift\n")); 

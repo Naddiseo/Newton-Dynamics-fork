@@ -168,24 +168,24 @@ const dAssemblerParcer::dGotoEntry* dAssemblerParcer::FindGoto (const dGotoEntry
 bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 {
 	dList<dStackPair> stack;
-	static short actionsCount[] = {1, 3, 1, 3, 1, 1, 3, 3};
-	static short actionsStart[] = {0, 1, 4, 5, 0, 0, 8, 11};
+	static short actionsCount[] = {2, 1, 1, 1, 2, 1, 2, 1};
+	static short actionsStart[] = {0, 2, 3, 4, 0, 5, 0, 6};
 	static dActionEntry actionTable[] = {
-					dActionEntry (256, 0, 3, 0, 0), 
-					dActionEntry (0, 1, 0, 1, 1), dActionEntry (42, 0, 4, 0, 0), dActionEntry (43, 0, 5, 0, 0), 
+					dActionEntry (257, 0, 3, 0, 0), dActionEntry (256, 0, 4, 0, 0), 
+					dActionEntry (0, 1, 0, 1, 1), 
 					dActionEntry (0, 2, 0, 0, 0), 
-					dActionEntry (0, 1, 1, 1, 4), dActionEntry (42, 1, 1, 1, 4), dActionEntry (43, 1, 1, 1, 4), 
-					dActionEntry (0, 1, 1, 3, 3), dActionEntry (42, 1, 1, 3, 3), dActionEntry (43, 1, 1, 3, 3), 
-					dActionEntry (0, 1, 1, 3, 2), dActionEntry (42, 1, 1, 3, 2), dActionEntry (43, 1, 1, 3, 2), 
+					dActionEntry (0, 1, 1, 1, 4), 
+					dActionEntry (0, 1, 1, 2, 3), 
+					dActionEntry (0, 1, 1, 4, 2), 
 			};
 
-	static short gotoCount[] = {2, 0, 0, 0, 1, 1, 0, 0};
-	static short gotoStart[] = {0, 2, 2, 2, 2, 3, 4, 4};
+	static short gotoCount[] = {2, 0, 0, 0, 1, 1, 1, 0};
+	static short gotoStart[] = {0, 2, 2, 2, 2, 3, 4, 5};
 	static dGotoEntry gotoTable[] = {
-					dGotoEntry (258, 1), dGotoEntry (257, 2), dGotoEntry (258, 6), dGotoEntry (258, 7), 
-			};
+					dGotoEntry (259, 1), dGotoEntry (258, 2), dGotoEntry (259, 5), dGotoEntry (260, 6), 
+					dGotoEntry (259, 7)};
 
-	const int lastToken = 257;
+	const int lastToken = 258;
 
 	stack.Append ();
 	dToken token = dToken (scanner.NextToken());
@@ -236,17 +236,17 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 				switch (action->m_ruleIndex) 
 				{
 					//do user semantic Actions
-					case 1:// rule E1 : E 
+					case 1:// rule S1 : S 
 						{printf ("%s\n", parameter[0].m_value.m_data.c_str());}
 						break;
-					case 4:// rule E : id 
+					case 4:// rule S : a 
 						{entry.m_value = parameter[0].m_value;}
 						break;
-					case 3:// rule E : E * E 
-						{entry.m_value.m_data = parameter[0].m_value.m_data + " * " + parameter[2].m_value.m_data;}
+					case 3:// rule S : i S 
+						{entry.m_value.m_data = parameter[0].m_value.m_data + parameter[1].m_value.m_data;}
 						break;
-					case 2:// rule E : E + E 
-						{entry.m_value.m_data = parameter[0].m_value.m_data + " + " + parameter[2].m_value.m_data;}
+					case 2:// rule S : i S e S 
+						{entry.m_value.m_data = parameter[0].m_value.m_data + parameter[1].m_value.m_data + parameter[2].m_value.m_data + parameter[3].m_value.m_data;}
 						break;
 
 					default:;

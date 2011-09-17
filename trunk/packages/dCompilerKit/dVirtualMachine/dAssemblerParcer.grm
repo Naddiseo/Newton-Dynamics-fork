@@ -48,22 +48,17 @@
 
 
 	
-%token id
-%start E1
+%token i a
+%start S1
 
-%left	'+' '-'
-%left	'*' '/'
 
 %%
-E1	: E				{printf ("%s\n", $1.m_data.c_str());}
+S1	: S				{printf ("%s\n", $1.m_data.c_str());}
 	;
 	
-E	: E '+' E		{$$.m_data = $1.m_data + " + " + $3.m_data;}
-//	| E '-' E		{$$.m_data = $1.m_data + " + " + $3.m_data;}
-	| E '*' E		{$$.m_data = $1.m_data + " * " + $3.m_data;}
-//	| E '/' E		{$$.m_data = $1.m_data + " * " + $3.m_data;}
-//	| '(' E ')'		{$$ = $2;}
-	| id			{$$ = $1;}
+S	: i S e S		{$$.m_data = $1.m_data + $2.m_data + $3.m_data + $4.m_data;}
+	| i S			{$$.m_data = $1.m_data + $2.m_data;}
+	| a				{$$ = $1;}
 	;
 	
 		
