@@ -43,7 +43,7 @@ E	: E '+' E		{$$.m_data = $1.m_data + " + " + $3.m_data;}
 //	| E '-' E		{$$.m_data = $1.m_data + " + " + $3.m_data;}
 	| E '*' E		{$$.m_data = $1.m_data + " * " + $3.m_data;}
 //	| E '/' E		{$$.m_data = $1.m_data + " * " + $3.m_data;}
-//	| '(' E ')'		{$$ = $2;}
+	| '(' E ')'		{$$ = $2;}
 	| id			{$$ = $1;}
 	;
 

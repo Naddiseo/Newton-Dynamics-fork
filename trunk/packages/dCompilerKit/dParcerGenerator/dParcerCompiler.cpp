@@ -144,6 +144,7 @@ class dParcerCompiler::dItem
 
 	int m_indexMarker;
 	string m_lookAheadSymnol;
+	string m_lastOperatorSymbol;
 	dProductionRule::dListNode* m_ruleNode;
 };
 
@@ -152,6 +153,7 @@ class dParcerCompiler::dAction
 	public:
 	ActionType m_type;
 	int m_nextState;
+	dItem* m_myItem;
 	dProductionRule::dListNode* m_reduceRuleNode;
 };
 
@@ -245,9 +247,9 @@ class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 				DTRACE(("%s ", info.m_name.c_str()));
 			}
 			if (!hasIndex) {
-				DTRACE(("."));
+				DTRACE((". "));
 			}
-			DTRACE((", %s]\n", item.m_lookAheadSymnol.c_str()));
+			DTRACE((":: %s]\n", item.m_lookAheadSymnol.c_str()));
 		}
 		DTRACE(("\n"));
 #endif
@@ -279,24 +281,39 @@ class dParcerCompiler::dOperatorsAssociation: public dList <string>
 		return false;
 	}
 
+	int m_prioprity;
 	dAssoctivity m_associativity;
 };
 
 class dParcerCompiler::dOperatorsPrecedence: public dList <dOperatorsAssociation>
 {
 	public:
-
 	const dOperatorsAssociation* FindAssociation (const string& symbol)	const
 	{
 		for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
 			const dOperatorsAssociation& association = node->GetInfo();
 			if (association.FindOperator(symbol)) {
-				return &association;
+				return &node->GetInfo();
 			}
 		}
 
 		return NULL;
 	}
+
+	void SaveLastOperationSymbol (const dState* const state) const
+	{
+		for (dState::dListNode* node = state->GetFirst(); node; node = node->GetNext()) {
+			dItem& item = node->GetInfo();
+			const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
+			for (dRuleInfo::dListNode* infoSymbolNode = ruleInfo.GetFirst(); infoSymbolNode; infoSymbolNode = infoSymbolNode->GetNext()) {
+				const dSymbol& infoSymbol = infoSymbolNode->GetInfo();
+				if (FindAssociation(infoSymbol.m_name)) {
+					item.m_lastOperatorSymbol = infoSymbol.m_name;
+				}
+			}
+		}
+	}
+
 };
 
 dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const outputFileName, const char* const scannerClassName)
@@ -304,25 +321,24 @@ dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const out
 	// scan the grammar into a list of rules.
 	int lastTokenEnum;
 	dProductionRule ruleList;
-	dOperatorsPrecedence operatorPrecence;
+	dOperatorsPrecedence operatorPrecedence;
 	dTree<int, string> tokenEnumeration;
 	dTree<dTokenType, string> symbolList;
 	string userCodeBlock;
 	string userVariableClass ("");
 	string endUserCode ("\n");
-//	string startSymbol ("\n");
 
 	// scan grammar to a set of LR(1) rules
 	symbolList.Insert(TERMINAL, DACCEPT_SYMBOL);
-	ScanGrammarFile(inputRules, ruleList, symbolList, operatorPrecence, tokenEnumeration, userCodeBlock, userVariableClass, endUserCode, lastTokenEnum);
+	ScanGrammarFile(inputRules, ruleList, symbolList, operatorPrecedence, tokenEnumeration, userCodeBlock, userVariableClass, endUserCode, lastTokenEnum);
 
 	// convert the rules into a NFA.
 	dTree<dState*,int> stateList;
-	CanonicalItemSets (stateList, ruleList, symbolList);
+	CanonicalItemSets (stateList, ruleList, symbolList, operatorPrecedence);
 
 	// create a LR(1) parsing table from the NFA graphs
 	const string& startSymbol = ruleList.GetFirst()->GetInfo().m_name;
-	BuildParcingTable (stateList, symbolList, startSymbol, operatorPrecence);
+	BuildParcingTable (stateList, symbolList, startSymbol, operatorPrecedence);
 
 	//Write Parcer class and header file
 	string className (GetClassName(outputFileName));
@@ -364,7 +380,7 @@ void dParcerCompiler::ScanGrammarFile(
 	const string& inputRules, 
 	dProductionRule& ruleList, 
 	dTree<dTokenType, string>& symbolList, 
-	dOperatorsPrecedence& operatorPrecence,
+	dOperatorsPrecedence& operatorPrecedence,
 	dTree<int, string>& tokenEnumerationMap,
 	string& userCodeBlock,
 	string& userVariableClass,
@@ -373,6 +389,7 @@ void dParcerCompiler::ScanGrammarFile(
 {
 	string startSymbol ("");
 	int tokenEnumeration = 256;
+	int operatorPrecedencePriority = 0;
 
 	tokenEnumerationMap.Insert(0, DACCEPT_SYMBOL);
 
@@ -405,7 +422,9 @@ void dParcerCompiler::ScanGrammarFile(
 			case LEFT:
 			case RIGHT:
 			{
-				dOperatorsAssociation& association = operatorPrecence.Append()->GetInfo();
+				dOperatorsAssociation& association = operatorPrecedence.Append()->GetInfo();
+				association.m_prioprity = operatorPrecedencePriority;
+				operatorPrecedencePriority ++;
 				switch (int (token))
 				{
 					case LEFT:
@@ -879,12 +898,12 @@ dParcerCompiler::dState* dParcerCompiler::Goto (const dProductionRule& ruleList,
 
 
 // generates the canonical Items set for a LR(1) grammar
-void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dProductionRule& ruleList, const dTree<dTokenType, string>& symbolList)
+void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dProductionRule& ruleList, const dTree<dTokenType, string>& symbolList, const dOperatorsPrecedence& operatorPrecence)
 {
 	dList<dItem> itemSet;
 	dList<dState*> stateList;
 
-	// start by building an item ste with only the first rule
+	// start by building an item set with only the first rule
 	dItem& item = itemSet.Append()->GetInfo();
 	item.m_indexMarker = 0;
 	item.m_lookAheadSymnol = DACCEPT_SYMBOL;
@@ -892,6 +911,7 @@ void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dPr
 
 	// find the closure for the first this item set with only the first rule
 	dState* const state = Closure (ruleList, itemSet, symbolList);
+	operatorPrecence.SaveLastOperationSymbol (state);
 
 	stateMap.Insert(state, state->GetKey());
 	stateList.Append(state);
@@ -922,8 +942,10 @@ void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dPr
 					stateNumber ++;
 					stateMap.Insert(newState, newState->GetKey());
 					newState->Trace();
-
 					stateList.Append(newState);
+
+					operatorPrecence.SaveLastOperationSymbol (newState);
+
 				} else {
 					transition.m_targetState = targetStateNode->GetInfo();
 					delete newState;
@@ -940,85 +962,97 @@ void dParcerCompiler::BuildParcingTable (
 	const dTree<dState*,int>& stateList, 
 	const dTree<dTokenType, string>& symbolList, 
 	const string& startSymbol,
-	const dOperatorsPrecedence& operatorPrecence) const
+	const dOperatorsPrecedence& operatorPrecedence) const
 {
 	dTree<dState*,int>::Iterator stateIter (stateList);
 	dTree<dTokenType, string>::Iterator symbolIter (symbolList);
 
+	string emptySymbol ("");
 	string acceptingSymbol (DACCEPT_SYMBOL);
 	// create Shift Reduce action table
 	for (stateIter.Begin(); stateIter; stateIter ++) {
 		dState* const state = stateIter.GetNode()->GetInfo();
 
-		// resolve all shift actions first
+		// add all shift actions first
 		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
 			dTransition& transition = node->GetInfo();
 			if (transition.m_type == TERMINAL) {
 
 				// find item generating this shift action and mark it as used.
 				const dState* const targetState = transition.m_targetState;
-				for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
-					dItem& item = itemNode->GetInfo();
-					dState::dListNode* const targteItemNode = targetState->FindItem(item.m_ruleNode, item.m_indexMarker + 1);
-					if (targteItemNode) {
-						break;
-					}
-				}
-
-				// this is a shift action
 				_ASSERTE (!state->m_actions.Find (transition.m_name));
 				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (transition.m_name); 
 				dAction& action = actionNode->GetInfo();
 				action.m_type = dSHIFT;
-				action.m_nextState = transition.m_targetState->m_number;
+				action.m_myItem = NULL;
+				action.m_nextState = targetState->m_number;
 				action.m_reduceRuleNode = NULL;
 			}
 		}
 
-		// resolve all reduce and accepting actions 
+		// add all reduce actions
+		dList<dAction*> potencialConflictinActions;
 		for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
 			dItem& item = itemNode->GetInfo();
 			const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
-			// check if this item is the accepting Rule
 			if ((ruleInfo.m_ruleNumber == 0) && (item.m_indexMarker == 1)) {
 				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (DACCEPT_SYMBOL); 
 				_ASSERTE (actionNode);
 				dAction& action = actionNode->GetInfo();
 				action.m_type = dACCEPT;
+				action.m_myItem = &item;
 				action.m_reduceRuleNode = NULL;
 			} else if ((item.m_indexMarker == ruleInfo.GetCount()) && (ruleInfo.m_name != startSymbol)) {
-
-				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Find (item.m_lookAheadSymnol); 
-				if (actionNode) {
-					const string& shiftSymbol = actionNode->GetKey();
-					const dOperatorsAssociation* const association0 = operatorPrecence.FindAssociation (item.m_lookAheadSymnol);
-					const dOperatorsAssociation* const association1 = operatorPrecence.FindAssociation (shiftSymbol);
-					if (association0 == association1) {
-						// two operator with the same association, see if the association was specified
-						if (association0) {
-							// the association was specified
-							if (association0->m_associativity == dOperatorsAssociation::m_left) {
-								// overwriting a shift action with a reduce action
-								dAction& action = actionNode->GetInfo();
-								action.m_type = dREDUCE;
-								action.m_nextState = 0;
-								action.m_reduceRuleNode = item.m_ruleNode;
-
-							}
-						} else {
-							// the action already exist, this is a shift-reduce conflict
-							DTRACE (("shift reduce conflict, resolving by shift\n"));
-							state->Trace();
-						}
-					} else {
-						_ASSERTE (0);
-					}
-				} else {
-					dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (item.m_lookAheadSymnol); 
+				dTree<dAction, string>::dTreeNode* actionNode = state->m_actions.Find (item.m_lookAheadSymnol); 
+				if (!actionNode) {
+					actionNode = state->m_actions.Insert (item.m_lookAheadSymnol); 
 					dAction& action = actionNode->GetInfo();
 					action.m_type = dREDUCE;
+					action.m_myItem = &item;
 					action.m_nextState = 0;
 					action.m_reduceRuleNode = item.m_ruleNode;
+				} else {
+					dAction& action = actionNode->GetInfo();
+					action.m_myItem = &item;
+					action.m_reduceRuleNode = item.m_ruleNode;
+					potencialConflictinActions.Append (&actionNode->GetInfo());
+				}
+			}
+		}
+
+		// now resolve all conflicting actions
+		if (potencialConflictinActions.GetCount()) {
+
+			// resolve conflicting actions
+			dList<dAction*>::dListNode* nextActionNode = NULL;
+			for (dList<dAction*>::dListNode* actionNode = potencialConflictinActions.GetFirst(); actionNode; actionNode = nextActionNode) {
+				dAction* const action = actionNode->GetInfo();
+
+				_ASSERTE (action->m_type == dSHIFT);
+				nextActionNode = actionNode->GetNext();
+
+				const dItem& item = *action->m_myItem;
+				if (item.m_lastOperatorSymbol != emptySymbol) {
+					const dOperatorsAssociation* const operatorAssosiation = operatorPrecedence.FindAssociation (item.m_lastOperatorSymbol);
+					_ASSERTE (operatorAssosiation);
+					if (operatorAssosiation->m_associativity == dOperatorsAssociation::m_left) {
+						
+						const dOperatorsAssociation* const lookAheadOperatorAssosiation = operatorPrecedence.FindAssociation (item.m_lookAheadSymnol);
+						if (!(lookAheadOperatorAssosiation && (lookAheadOperatorAssosiation->m_prioprity > operatorAssosiation->m_prioprity))) {
+							action->m_type = dREDUCE;
+						}
+					}
+					potencialConflictinActions.Remove(actionNode);
+				}
+			}
+
+			// for any conflicting actions left, display warning
+			for (dList<dAction*>::dListNode* actionNode = potencialConflictinActions.GetFirst(); actionNode; actionNode = actionNode->GetNext()) {
+				dAction* const action = actionNode->GetInfo();
+				if (action->m_type == dSHIFT) {
+					DTRACE (("This is a shift Reduce conflict, resolve in favor of shift\n")); 
+				} else {
+					DTRACE (("This is a reduce Reduce conflict, resolving by the first reduce rule\n"));
 				}
 			}
 		}

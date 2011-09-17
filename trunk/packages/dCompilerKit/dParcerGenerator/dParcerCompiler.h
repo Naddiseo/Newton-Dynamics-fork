@@ -118,7 +118,7 @@ class dParcerCompiler
 	dState* Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol, const dTree<dTokenType, string>& symbolList) const;
 	dState* Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet, const dTree<dTokenType, string>& symbolList) const;
 	void BuildParcingTable (const dTree<dState*,int>& stateList, const dTree<dTokenType, string>& symbolList, const string& startSymbol, const dOperatorsPrecedence& operatorPrecence) const;
-	void CanonicalItemSets (dTree<dState*,int>& states, const dProductionRule& rules, const dTree<dTokenType, string>& symbolList);
+	void CanonicalItemSets (dTree<dState*,int>& states, const dProductionRule& rules, const dTree<dTokenType, string>& symbolList, const dOperatorsPrecedence& operatorPrecence);
 
 	void GenerateHeaderFile (const string& className, const string& scannerClassName, const char* const outputFileName, dProductionRule& rules, dTree<int, string>& tokenEnumerationMap); 
 	void GenerateParcerCode (const string& className, const string& scannerClassName, const char* const outputFileName, const string& userCode, 
