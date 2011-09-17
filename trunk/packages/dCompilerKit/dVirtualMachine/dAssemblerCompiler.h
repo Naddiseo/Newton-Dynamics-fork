@@ -31,6 +31,9 @@ class dAssemblerCompiler: public dAssemblerParcer
 	dUserVariable EmitSymbol (const dUserVariable& symbol) const;
 	dUserVariable EmitDataType (const dUserVariable& dataType) const;
 	dUserVariable EmitIntegerConst (const dUserVariable& symbol) const;
+
+	void EmitUnInitilizedDataDeclaration (const dUserVariable& type, const dUserVariable& id) const;
+	void EmitInitilizedDataDeclaration (const dUserVariable& type, const dUserVariable& id, const dUserVariable& initialValue) const;
 	
 	dVirtualMachine* m_virtualMachine;
 };

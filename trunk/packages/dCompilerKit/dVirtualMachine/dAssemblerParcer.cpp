@@ -181,8 +181,8 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 	static short gotoCount[] = {6, 0, 0, 0, 1, 0, 0, 0, 4, 2, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0};
 	static short gotoStart[] = {0, 6, 6, 6, 6, 7, 7, 7, 7, 11, 13, 13, 13, 13, 13, 13, 13, 14, 15, 15, 15};
 	static dGotoEntry gotoTable[] = {
-					dGotoEntry (264, 3), dGotoEntry (267, 4), dGotoEntry (263, 5), dGotoEntry (260, 6), dGotoEntry (262, 7), dGotoEntry (261, 8), 
-					dGotoEntry (266, 11), dGotoEntry (264, 3), dGotoEntry (267, 4), dGotoEntry (263, 5), dGotoEntry (262, 12), 
+					dGotoEntry (260, 6), dGotoEntry (261, 8), dGotoEntry (262, 7), dGotoEntry (263, 5), dGotoEntry (264, 3), dGotoEntry (267, 4), 
+					dGotoEntry (266, 11), dGotoEntry (262, 12), dGotoEntry (263, 5), dGotoEntry (264, 3), dGotoEntry (267, 4), 
 					dGotoEntry (265, 14), dGotoEntry (266, 15), dGotoEntry (268, 19), dGotoEntry (266, 20), 
 			};
 
@@ -243,8 +243,14 @@ bool dAssemblerParcer::Parce(dAssemblerLexical& scanner)
 					case 14:// rule literal : LITERAL 
 						{entry.m_value = ((dAssemblerCompiler*)this)->EmitSymbol (parameter[0].m_value);}
 						break;
+					case 10:// rule dataDeclaration : dataType literal 
+						{((dAssemblerCompiler*)this)->EmitUnInitilizedDataDeclaration (parameter[0].m_value, parameter[1].m_value);}
+						break;
 					case 12:// rule constantExpression : INTEGER 
 						{entry.m_value = ((dAssemblerCompiler*)this)->EmitIntegerConst (parameter[0].m_value);}
+						break;
+					case 11:// rule dataDeclaration : dataType literal = constantExpression 
+						{((dAssemblerCompiler*)this)->EmitInitilizedDataDeclaration (parameter[0].m_value, parameter[1].m_value, parameter[3].m_value);}
 						break;
 
 					default:;

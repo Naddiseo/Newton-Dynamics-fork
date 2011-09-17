@@ -1166,22 +1166,29 @@ void dParcerCompiler::GenerateParcerCode (
 
 		sprintf (text, "%d, ", entriesCount);
 		stateGotoStart += text;
-
 		if (entriesCount >= newLine) {
 			nextGotoStateList += "\n\t\t\t\t\t";
 			newLine = entriesCount + 4;
 		}
 
-
 		int count = 0;
 		dTree<dState*, string>::Iterator gotoIter (state->m_goto); 
+		dTree<dTree<dState*, string>::dTreeNode*, int> sortGotoActions;
 		for (gotoIter.Begin(); gotoIter; gotoIter++) {
+			sortGotoActions.Insert(gotoIter.GetNode(), tokenEnumerationMap.Find(gotoIter.GetKey())->GetInfo());
+		}
+
+		dTree<dTree<dState*, string>::dTreeNode*, int>::Iterator iter1 (sortGotoActions);
+//		for (gotoIter.Begin(); gotoIter; gotoIter++) {
+		for (iter1.Begin(); iter1; iter1++) {
 			count ++;
-			dState* const targetState = gotoIter.GetNode()->GetInfo();
+			dTree<dState*, string>::dTreeNode* const node = iter1.GetNode()->GetInfo();
+			dState* const targetState = node->GetInfo();
 
 			dGotoEntry entry;
 			entry.m_nextState = short (targetState->m_number);
-			entry.m_token = short(tokenEnumerationMap.Find(gotoIter.GetKey())->GetInfo());
+			//entry.m_token = short(tokenEnumerationMap.Find(gotoIter.GetKey())->GetInfo());
+			entry.m_token = short(iter1.GetKey());
 
 			sprintf (text, "dGotoEntry (%d, %d), ", entry.m_token, entry.m_nextState);
 			nextGotoStateList += text;

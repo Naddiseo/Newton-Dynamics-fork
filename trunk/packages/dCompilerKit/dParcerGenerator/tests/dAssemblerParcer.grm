@@ -75,8 +75,8 @@ fileName	: literal
 			| fileName '.' literal
 			;
 			
-dataDeclaration	: dataType literal		
-				| dataType literal '=' constantExpression 
+dataDeclaration	: dataType literal						  {((dAssemblerCompiler*)this)->EmitUnInitilizedDataDeclaration ($1, $2);}		
+				| dataType literal '=' constantExpression {((dAssemblerCompiler*)this)->EmitInitilizedDataDeclaration ($1, $2, $3);}
 				;
 				
 constantExpression : INTEGER {$$ = ((dAssemblerCompiler*)this)->EmitIntegerConst ($1);}

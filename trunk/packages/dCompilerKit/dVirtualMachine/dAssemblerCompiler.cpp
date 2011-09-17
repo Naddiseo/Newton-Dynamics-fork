@@ -47,3 +47,14 @@ dAssemblerCompiler::dUserVariable dAssemblerCompiler::EmitIntegerConst (const dU
 {
 	return integerConst;
 }
+
+
+void dAssemblerCompiler::EmitUnInitilizedDataDeclaration (const dUserVariable& type, const dUserVariable& id) const
+{
+
+}
+
+void dAssemblerCompiler::EmitInitilizedDataDeclaration (const dUserVariable& type, const dUserVariable& id, const dUserVariable& initialValue) const
+{
+
+}
