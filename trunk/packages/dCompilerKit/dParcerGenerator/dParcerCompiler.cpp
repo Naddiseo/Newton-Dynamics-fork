@@ -685,14 +685,16 @@ bool dParcerCompiler::DoesSymbolDeriveEmpty (const string& symbol, const dProduc
 }
 
 
-void dParcerCompiler::First (const string& symbol, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const
+bool dParcerCompiler::First (const string& symbol, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const
 {
 	dTree<dTokenType, string>::dTreeNode* const node = symbolList.Find(symbol);
 	_ASSERTE (node);
 	if (node->GetInfo() == TERMINAL) {
 		firstSetOut.Insert(0, symbol);
+		return false;
 	} else if (DoesSymbolDeriveEmpty (symbol, ruleList)) {
 		firstSetOut.Insert(0, "");
+		return true;
 	} else {
 		for (dProductionRule::dListNode* ruleInfoNode = ruleList.GetFirst(); ruleInfoNode; ruleInfoNode = ruleInfoNode->GetNext()) {
 			const dRuleInfo& info = ruleInfoNode->GetInfo();
@@ -701,8 +703,12 @@ void dParcerCompiler::First (const string& symbol, const dTree<dTokenType, strin
 				for (dRuleInfo::dListNode* sentenceSymbolNode = info.GetFirst(); sentenceSymbolNode; sentenceSymbolNode = sentenceSymbolNode->GetNext()) {
 					const dSymbol& sentenceSymnol = sentenceSymbolNode->GetInfo();
 					if (!DoesSymbolDeriveEmpty (sentenceSymnol.m_name, ruleList)) {
-						firstSetOut.Insert(0, sentenceSymnol.m_name);
-						sentenceDeriveEmpty = false;
+						if (sentenceSymnol.m_type == TERMINAL) {
+							firstSetOut.Insert(0, sentenceSymnol.m_name);
+							sentenceDeriveEmpty = false;
+						} else {
+							sentenceDeriveEmpty = First (sentenceSymnol.m_name, symbolList, ruleList, firstSetOut);
+						}
 						break;
 					}
 				}
@@ -712,6 +718,8 @@ void dParcerCompiler::First (const string& symbol, const dTree<dTokenType, strin
 			}
 		}
 	}
+
+	return false;
 }
 
 
@@ -759,6 +767,7 @@ void dParcerCompiler::First (const dList<string>& symbolSet, const dTree<dTokenT
 // Generate the closure for a Set of Item  
 dParcerCompiler::dState* dParcerCompiler::Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet, const dTree<dTokenType, string>& symbolList) const
 {
+static int xxx;
 	dState* const state = new dState (itemSet);
 	for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
 		dItem& item = itemNode->GetInfo();
@@ -785,6 +794,9 @@ dParcerCompiler::dState* dParcerCompiler::Closure (const dProductionRule& ruleLi
 				const dRuleInfo& info = ruleNode->GetInfo();
 				if (info.m_name == sentenceSymbol.m_name) {
 					dTree<int, string> firstList;
+xxx ++;
+if (xxx == 6)
+xxx *=1;
 					First (firstSymbolList, symbolList, ruleList, firstList);
 					dTree<int, string>::Iterator firstIter (firstList);
 					for (firstIter.Begin(); firstIter; firstIter ++) {

@@ -56,8 +56,8 @@ module		: segmentList
 			;
 				
 				
-segmentList	: segment
-			| segmentList segment
+segmentList	: segment ';'
+			| segmentList segment ';'
 			|
 			;
 			

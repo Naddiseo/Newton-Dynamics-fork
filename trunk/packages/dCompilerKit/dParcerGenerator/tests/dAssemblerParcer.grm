@@ -48,20 +48,22 @@
 %token INTEGER 
 
 
-%start module
+//%start module
 
 
 %%
-module		: segmentList
-			;
+//module		: segmentList
+//			;
 				
 				
-segmentList	: segment
-			| segmentList segment
+segmentList	: segment 
+			| segmentList segment 
 			|
 			;
 			
-			
+segment		: INT			
+			;
+/*			
 segment		: import
 			| dataDeclaration	
 //			| funtionDeclaration
@@ -75,8 +77,8 @@ fileName	: literal
 			| fileName '.' literal
 			;
 			
-dataDeclaration	: dataType literal						  {((dAssemblerCompiler*)this)->EmitUnInitilizedDataDeclaration ($1, $2);}		
-				| dataType literal '=' constantExpression {((dAssemblerCompiler*)this)->EmitInitilizedDataDeclaration ($1, $2, $3);}
+dataDeclaration	: dataType literal							{((dAssemblerCompiler*)this)->EmitUnInitilizedDataDeclaration ($1, $2);}		
+				| dataType literal '=' constantExpression	{((dAssemblerCompiler*)this)->EmitInitilizedDataDeclaration ($1, $2, $4);}
 				;
 				
 constantExpression : INTEGER {$$ = ((dAssemblerCompiler*)this)->EmitIntegerConst ($1);}
@@ -88,7 +90,7 @@ dataType		: INT {$$ = ((dAssemblerCompiler*)this)->EmitDataType ($1);}
 literal			: LITERAL {$$ = ((dAssemblerCompiler*)this)->EmitSymbol ($1);}
 				;	
 
-				   
+*/				   
 
 %%
 

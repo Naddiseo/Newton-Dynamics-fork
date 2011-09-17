@@ -12,3 +12,4 @@
 // Assembler program test0.asm
 
 int a = 10
+int b = 20
