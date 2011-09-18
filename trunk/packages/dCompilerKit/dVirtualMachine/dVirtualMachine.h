@@ -49,17 +49,17 @@ class dVirtualMachine
 		bget,		// bget		Rn0, Rn1, imm32  	if (Rn0 >= Rn1) PC = PC + imm32  (signed comparison)
 
 		// call / return 
-		call,		// call		Rn0, imm32			Rn0 = Rn0 - 1, [Rn0] = pc + 3, pc = imm32
-		callr,		// call		Rn0, Rn1			Rn0 = Rn0 - 1, [Rn0] = pc + 3, pc = Rn1
-		ret,		// ret		rn0					pc = [Rn0], Rn0 = Rn0 + 1  
+		call,		// call		Rn0, imm32			Rn0 = Rn0 - 4, [Rn0] = pc + 6, pc = imm32
+		callr,		// call		Rn0, Rn1			Rn0 = Rn0 - 4, [Rn0] = pc + 6, pc = Rn1
+		ret,		// ret		rn0					pc = [Rn0], Rn0 = Rn0 + 4  
 		syscall,	// syscall	Rn0, Rn1, imm32		execute a system call
 		jump,		// jump		Rn0					pc = Rn0
 
 		// frame pointer 
 		enter,		// enter	Rn0, Rn1, imm32		[Rn1] = Rn0, Rn0 = Rn1, Rn1 = Rn1 + imm32	
 		exit,		// exit		Rn0, Rn1			Rn1 = Rn0, Rn0 = [Rn1]
-		push,		// push		Rn0, imm32mask		tmp = rn0; i = 0; mask = registenMask; while (mask & 1) {[tmp] = Rn(i); tmp -= 1}; rn0 = tmp; 
-		pop,		// pop		Rn0, imm32mask		tmp = rn0; i = 0; mask = registenMask; while (mask & (1<<15)) {tmp += 1; Rn(i) = [tmp];}
+		push,		// push		Rn0, imm32mask		tmp = rn0; i = 0;  mask = registenMask; while (mask) { while (!(mask & 1)) mask >>= 1; i ++;} {tmp -= 4; [tmp] = Rn[i]}; rn0 = tmp; 
+		pop,		// pop		Rn0, imm32mask		tmp = rn0; i = 31; mask = registenMask; while (mask) { while (!(mask & (1<<31))) mask <<= 1; i --;} {[tmp] = Rn[i]; tmp -= 4;}
 
 
 		nop,		// do nothing 
