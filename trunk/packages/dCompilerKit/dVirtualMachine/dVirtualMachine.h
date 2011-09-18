@@ -58,8 +58,8 @@ class dVirtualMachine
 		// frame pointer 
 		enter,		// enter	Ri, Rj, imm32		[R(j)] = R(i), R(i) = R(j), R(j) = R(j) + imm32	
 		exit,		// exit		Ri, Rj				R(j) = R(i), R(i) = [R(j)]
-		push,		// push		Ri, imm32mask		tmp = R(i); i = 0;  mask = registenMask; while (mask) { while (!(mask & 1)) mask >>= 1; i ++;} {tmp -= 4; [tmp] = Rn[i]}; R(i) = tmp; 
-		pop,		// pop		Ri, imm32mask		tmp = R(i); i = 31; mask = registenMask; while (mask) { while (!(mask & (1<<31))) mask <<= 1; i --;} {[tmp] = Rn[i]; tmp -= 4;}
+		push,		// push		Ri, imm32mask		tmp = R(i); k = 0;  mask = registenMask; while (mask) { while (!(mask & 1)) mask >>= 1; k ++;} {tmp -= 4; [tmp] = Rn[k]}; R(i) = tmp; 
+		pop,		// pop		Ri, imm32mask		tmp = R(i); k = 31; mask = registenMask; while (mask) { while (!(mask & (1<<31))) mask <<= 1; k --;} {[tmp] = Rn[k]; tmp -= 4;}
 
 
 		nop,		// do nothing 
