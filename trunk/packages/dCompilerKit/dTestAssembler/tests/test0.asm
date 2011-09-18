@@ -1,3 +1,5 @@
+b
+
 /* Copyright (c) <2009> <Newton Game Dynamics>
 * 
 * This software is provided 'as-is', without any express or implied
@@ -11,5 +13,18 @@
 
 // Assembler program test0.asm
 
-int a = 10
+
+
 int b = 20
+int a = 10
+
+
+begin: function_One
+	
+	addi	r0, 0
+	loadd	r1, a	
+	loadd	r2, b	
+	add		r1, r2
+	jmp		r31
+	
+end:

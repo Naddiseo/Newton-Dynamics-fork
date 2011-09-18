@@ -153,24 +153,53 @@ const dAssemblerParcer::dGotoEntry* dAssemblerParcer::FindGoto (const dGotoEntry
 bool dAssemblerParcer::Parce(lextest1& scanner)
 {
 	dList<dStackPair> stack;
-	static short actionsCount[] = {2, 2, 1, 2, 2, 2};
-	static short actionsStart[] = {0, 2, 4, 5, 7, 9};
+	static short actionsCount[] = {4, 1, 1, 1, 4, 1, 4, 4, 1, 4, 4, 3, 4, 1, 5, 5, 4, 3, 0, 2, 2, 2, 1, 4, 0, 4, 1, 4, 0, 1, 4, 4, 4, 4, 2};
+	static short actionsStart[] = {0, 4, 5, 6, 7, 11, 12, 16, 20, 21, 25, 29, 32, 36, 37, 42, 47, 51, 54, 54, 56, 58, 60, 61, 54, 65, 69, 70, 54, 36, 74, 78, 82, 86, 90};
 	static dActionEntry actionTable[] = {
-					dActionEntry (0, 1, 0, 0, 2), dActionEntry (258, 0, 1, 0, 0), 
-					dActionEntry (0, 1, 2, 1, 5), dActionEntry (258, 1, 2, 1, 5), 
+					dActionEntry (0, 1, 0, 0, 2), dActionEntry (259, 0, 1, 0, 0), dActionEntry (256, 0, 2, 0, 0), dActionEntry (261, 0, 3, 0, 0), 
+					dActionEntry (257, 0, 11, 0, 0), 
+					dActionEntry (60, 0, 13, 0, 0), 
+					dActionEntry (257, 1, 8, 1, 14), 
+					dActionEntry (0, 1, 2, 1, 6), dActionEntry (259, 1, 2, 1, 6), dActionEntry (256, 1, 2, 1, 6), dActionEntry (261, 1, 2, 1, 6), 
+					dActionEntry (257, 0, 14, 0, 0), 
+					dActionEntry (0, 1, 2, 1, 7), dActionEntry (259, 1, 2, 1, 7), dActionEntry (256, 1, 2, 1, 7), dActionEntry (261, 1, 2, 1, 7), 
+					dActionEntry (0, 1, 2, 1, 5), dActionEntry (259, 1, 2, 1, 5), dActionEntry (256, 1, 2, 1, 5), dActionEntry (261, 1, 2, 1, 5), 
 					dActionEntry (0, 2, 0, 0, 0), 
-					dActionEntry (0, 1, 1, 1, 3), dActionEntry (258, 1, 1, 1, 3), 
-					dActionEntry (0, 1, 0, 1, 1), dActionEntry (258, 0, 1, 0, 0), 
-					dActionEntry (0, 1, 1, 2, 4), dActionEntry (258, 1, 1, 2, 4), 
+					dActionEntry (0, 1, 1, 1, 3), dActionEntry (259, 1, 1, 1, 3), dActionEntry (256, 1, 1, 1, 3), dActionEntry (261, 1, 1, 1, 3), 
+					dActionEntry (0, 1, 0, 1, 1), dActionEntry (259, 0, 1, 0, 0), dActionEntry (256, 0, 2, 0, 0), dActionEntry (261, 0, 3, 0, 0), 
+					dActionEntry (266, 1, 7, 1, 15), dActionEntry (265, 1, 7, 1, 15), dActionEntry (264, 1, 7, 1, 15), 
+					dActionEntry (266, 1, 10, 0, 18), dActionEntry (265, 1, 10, 0, 18), dActionEntry (264, 1, 10, 0, 18), dActionEntry (258, 0, 17, 0, 0), 
+					dActionEntry (257, 0, 19, 0, 0), 
+					dActionEntry (0, 1, 7, 1, 15), dActionEntry (61, 1, 7, 1, 15), dActionEntry (259, 1, 7, 1, 15), dActionEntry (256, 1, 7, 1, 15), dActionEntry (261, 1, 7, 1, 15), 
+					dActionEntry (0, 1, 4, 2, 11), dActionEntry (61, 0, 22, 0, 0), dActionEntry (259, 1, 4, 2, 11), dActionEntry (256, 1, 4, 2, 11), dActionEntry (261, 1, 4, 2, 11), 
+					dActionEntry (0, 1, 1, 2, 4), dActionEntry (259, 1, 1, 2, 4), dActionEntry (256, 1, 1, 2, 4), dActionEntry (261, 1, 1, 2, 4), 
+					dActionEntry (266, 1, 10, 1, 17), dActionEntry (265, 1, 10, 1, 17), dActionEntry (264, 1, 10, 1, 17), 
+					
+					dActionEntry (46, 1, 7, 1, 15), dActionEntry (62, 1, 7, 1, 15), 
+					dActionEntry (46, 0, 29, 0, 0), dActionEntry (62, 0, 2, 0, 0), 
+					dActionEntry (46, 1, 6, 1, 9), dActionEntry (62, 1, 6, 1, 9), 
+					dActionEntry (262, 0, 30, 0, 0), 
+					dActionEntry (266, 1, 13, 1, 22), dActionEntry (265, 1, 13, 1, 22), dActionEntry (260, 1, 13, 1, 22), dActionEntry (264, 1, 13, 1, 22), 
+					dActionEntry (266, 1, 11, 1, 20), dActionEntry (265, 1, 11, 1, 20), dActionEntry (260, 1, 11, 1, 20), dActionEntry (264, 1, 11, 1, 20), 
+					dActionEntry (260, 0, 32, 0, 0), 
+					dActionEntry (266, 1, 13, 1, 23), dActionEntry (265, 1, 13, 1, 23), dActionEntry (260, 1, 13, 1, 23), dActionEntry (264, 1, 13, 1, 23), 
+					dActionEntry (0, 1, 9, 1, 13), dActionEntry (259, 1, 9, 1, 13), dActionEntry (256, 1, 9, 1, 13), dActionEntry (261, 1, 9, 1, 13), 
+					dActionEntry (0, 1, 4, 4, 12), dActionEntry (259, 1, 4, 4, 12), dActionEntry (256, 1, 4, 4, 12), dActionEntry (261, 1, 4, 4, 12), 
+					dActionEntry (0, 1, 5, 5, 16), dActionEntry (259, 1, 5, 5, 16), dActionEntry (256, 1, 5, 5, 16), dActionEntry (261, 1, 5, 5, 16), 
+					dActionEntry (266, 1, 11, 2, 21), dActionEntry (265, 1, 11, 2, 21), dActionEntry (260, 1, 11, 2, 21), dActionEntry (264, 1, 11, 2, 21), 
+					dActionEntry (46, 1, 6, 3, 10), dActionEntry (62, 1, 6, 3, 10), 
 			};
 
-	static short gotoCount[] = {3, 0, 0, 0, 1, 0};
-	static short gotoStart[] = {0, 3, 3, 3, 3, 4};
+	static short gotoCount[] = {7, 1, 0, 0, 0, 1, 0, 0, 0, 0, 5, 0, 1, 2, 0, 0, 0, 0, 6, 0, 0, 0, 1, 0, 1, 0, 5, 0, 1, 1, 0, 0, 0, 0, 0};
+	static short gotoStart[] = {0, 7, 8, 8, 8, 8, 9, 9, 9, 9, 9, 14, 14, 15, 17, 17, 17, 17, 17, 23, 23, 23, 23, 24, 24, 25, 25, 30, 30, 31, 32, 32, 32, 32, 32};
 	static dGotoEntry gotoTable[] = {
-					dGotoEntry (260, 2), dGotoEntry (261, 4), dGotoEntry (262, 3), dGotoEntry (262, 5), 
-			};
+					dGotoEntry (267, 8), dGotoEntry (268, 10), dGotoEntry (269, 9), dGotoEntry (270, 7), dGotoEntry (271, 4), dGotoEntry (272, 6), dGotoEntry (275, 5), 
+					dGotoEntry (274, 12), dGotoEntry (274, 15), dGotoEntry (269, 16), dGotoEntry (270, 7), dGotoEntry (271, 4), dGotoEntry (272, 6), dGotoEntry (275, 5), 
+					dGotoEntry (277, 18), dGotoEntry (273, 20), dGotoEntry (274, 21), dGotoEntry (278, 26), dGotoEntry (280, 25), dGotoEntry (281, 23), dGotoEntry (282, 27), dGotoEntry (283, 24), dGotoEntry (285, 28), 
+					dGotoEntry (276, 31), dGotoEntry (284, 24), dGotoEntry (280, 33), dGotoEntry (281, 23), dGotoEntry (282, 27), dGotoEntry (283, 24), dGotoEntry (285, 28), 
+					dGotoEntry (284, 28), dGotoEntry (274, 34)};
 
-	const int lastToken = 260;
+	const int lastToken = 267;
 
 	stack.Append ();
 	dToken token = dToken (scanner.NextToken());
@@ -221,6 +250,21 @@ bool dAssemblerParcer::Parce(lextest1& scanner)
 				switch (action->m_ruleIndex) 
 				{
 					//do user semantic Actions
+					case 14:// rule dataType : INT 
+						{entry.m_value = ((dAssemblerCompiler*)this)->EmitDataType (parameter[0].m_value);}
+						break;
+					case 15:// rule literal : LITERAL 
+						{entry.m_value = ((dAssemblerCompiler*)this)->EmitSymbol (parameter[0].m_value);}
+						break;
+					case 11:// rule dataDeclaration : dataType literal 
+						{((dAssemblerCompiler*)this)->EmitUnInitilizedDataDeclaration (parameter[0].m_value, parameter[1].m_value);}
+						break;
+					case 13:// rule constantExpression : INTEGER 
+						{entry.m_value = ((dAssemblerCompiler*)this)->EmitIntegerConst (parameter[0].m_value);}
+						break;
+					case 12:// rule dataDeclaration : dataType literal = constantExpression 
+						{((dAssemblerCompiler*)this)->EmitInitilizedDataDeclaration (parameter[0].m_value, parameter[1].m_value, parameter[3].m_value);}
+						break;
 
 					default:;
 				}

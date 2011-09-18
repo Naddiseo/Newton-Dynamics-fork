@@ -42,11 +42,18 @@
 
 
 	
-%token IMPORT LITERAL 
+%token IMPORT LITERAL PRIVATE
+
+%token BEGIN END
 
 %token INT
+
 %token INTEGER 
 
+%token REGISTER
+
+%token LOADD 
+%token ADDI ADD 
 
 %start module
 
@@ -64,7 +71,7 @@ segmentList	: segment
 			
 segment		: import
 			| dataDeclaration	
-//			| funtionDeclaration
+			| funtionDeclaration
 			;
 			
 			
@@ -88,7 +95,41 @@ dataType		: INT {$$ = ((dAssemblerCompiler*)this)->EmitDataType ($1);}
 literal			: LITERAL {$$ = ((dAssemblerCompiler*)this)->EmitSymbol ($1);}
 				;	
 
+
 				   
+funtionDeclaration	: BEGIN literal visibility instructionList END
+					;
+					
+visibility	: PRIVATE
+			|
+			;
+
+			
+regiter	: REGISTER
+		;
+
+instructionList	: instruction
+				| instructionList instruction
+				;
+
+instruction	: arithemetic
+			| load
+			;
+			
+arithemetic : arithmeticOpcode register ',' register
+			;			
+			
+load		: loadOpcode register ',' literal
+			;			
+			
+			
+arithmeticOpcode : ADD
+				 | ADDI	
+				 ;
+			
+loadOpcode	: LOADD
+			;
+
 
 %%
 

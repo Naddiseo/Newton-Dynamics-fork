@@ -685,8 +685,18 @@ bool dParcerCompiler::DoesSymbolDeriveEmpty (const string& symbol, const dProduc
 }
 
 
-void dParcerCompiler::First (const string& symbol, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const
+void dParcerCompiler::First (
+	const string& symbol, 
+	dTree<int, string>& symbolListMark, 
+	const dTree<dTokenType, string>& symbolList, 
+	const dProductionRule& ruleList, 
+	dTree<int, string>& firstSetOut) const
 {
+	if (symbolListMark.Find(symbol)) {
+		return;
+	}
+	symbolListMark.Insert(0, symbol);
+
 	dTree<dTokenType, string>::dTreeNode* const node = symbolList.Find(symbol);
 	_ASSERTE (node);
 	if (node->GetInfo() == TERMINAL) {
@@ -704,8 +714,7 @@ void dParcerCompiler::First (const string& symbol, const dTree<dTokenType, strin
 					if (!DoesSymbolDeriveEmpty (sentenceSymnol.m_name, ruleList)) {
 						allDeriveEmpty = false;
 						dTree<int, string> newFirstSetOut;
-						First (sentenceSymnol.m_name, symbolList,ruleList, newFirstSetOut);
-						_ASSERTE (newFirstSetOut.GetCount());
+						First (sentenceSymnol.m_name, symbolListMark, symbolList,ruleList, newFirstSetOut);
 						dTree<int, string>::Iterator iter (newFirstSetOut);
 						for (iter.Begin(); iter; iter ++) {
 							const string& symbol = iter.GetKey();
@@ -737,7 +746,8 @@ void dParcerCompiler::First (const dList<string>& symbolSet, const dTree<dTokenT
 			node = node->GetNext();
 
 			dTree<int, string> tmpFirst;
-			First (symbol, symbolList, ruleList, tmpFirst);
+			dTree<int, string> symbolListMark; 
+			First (symbol, symbolListMark, symbolList, ruleList, tmpFirst);
 			dTree<int, string>::Iterator iter (tmpFirst);
 			deriveEmpty = false;  
 			for (iter.Begin(); iter; iter ++) {
@@ -755,15 +765,10 @@ void dParcerCompiler::First (const dList<string>& symbolSet, const dTree<dTokenT
 
 	} else  {
 		const string& symbol = symbolSet.GetFirst()->GetInfo();
-		First (symbol, symbolList, ruleList, firstSetOut);
+		dTree<int, string> symbolListMark; 
+		First (symbol, symbolListMark, symbolList, ruleList, firstSetOut);
 	}
 }
-
-
-
-
-
-
 
 
 // Generate the closure for a Set of Item  
@@ -948,7 +953,6 @@ void dParcerCompiler::GenerateHeaderFile (
 	ReplaceMacro (templateHeader, userVariableClass, "$(userVariableClass)");
 
 	string enumdTokens ("");
-//	bool firstdToken = true;
 	dTree<int, string> symbolFilter;
 	for (dProductionRule::dListNode* ruleNode = ruleList.GetFirst(); ruleNode; ruleNode = ruleNode->GetNext()) {
 		dRuleInfo& ruleInfo = ruleNode->GetInfo();

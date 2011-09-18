@@ -33,7 +33,17 @@ class dAssemblerParcer
 	public:
 	enum dToken
 	{
-		INT = 258,
+		IMPORT = 256, 
+		LITERAL,
+		PRIVATE,
+		BEGIN,
+		END,
+		INT,
+		INTEGER,
+		REGISTER,
+		LOADD,
+		ADDI,
+		ADD
 	};
 
 	enum ActionType;

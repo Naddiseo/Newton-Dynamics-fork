@@ -35,8 +35,15 @@ class dAssemblerParcer
 	{
 		IMPORT = 256, 
 		LITERAL,
+		PRIVATE,
+		BEGIN,
+		END,
 		INT,
-		INTEGER
+		INTEGER,
+		REGISTER,
+		LOADD,
+		ADDI,
+		ADD
 	};
 
 	enum ActionType;
