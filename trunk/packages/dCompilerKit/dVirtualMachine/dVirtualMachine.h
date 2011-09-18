@@ -9,57 +9,57 @@ class dVirtualMachine
 	enum dMachineInstrution
 	{
 		// move
-		mov,		// move		Rn0, Rn1			Rn0 = Rn1
+		mov,		// move		Ri, Rj				R(i) = R(j)
 
 		// arithmetic
-		addi,		// addi 	Rn0, Rn1, imm32		Rn0 = Rn1 + signed (imm32)
-		add,		// add  	Rn0, Rn1			Rn0 = Rn0 + Rn1
-		sub,		// sub  	Rn0, Rn1			Rn0 = Rn0 - Rn1
-		mul,		// mul  	Rn0, Rn1			Rn0 = lowpart (Rn0 * Rn1) ; Rn1 = upperpart (Rn0 * Rn1)
-		div,		// div  	Rn0, Rn1			Rn0 = nume (Rn0 / Rn1) ; Rn1 = recidual (Rn0 / Rn1)
-		abs,		// abs		Rn0, Rn1,			Rn0 = abs (Rn1) 
-		neg,		// neg		Rn0, Rn1,			Rn0 = - Rn1 
+		addi,		// addi 	Ri, Rj, imm32		R(i) = R(j) + signed (imm32)
+		add,		// add  	Ri, Rj				R(i) = R(i) + R(j)
+		sub,		// sub  	Ri, Rj				R(i) = R(i) - R(j)
+		mul,		// mul  	Ri, Rj				R(i) = lowpart (R(i) * R(j)) ; R(j) = upperpart (R(i) * R(j))
+		div,		// div  	Ri, Rj				R(i) = nume (R(i) / R(j)) ; R(j) = recidual (R(i) / R(j))
+		abs,		// abs		Ri, Rj,				R(i) = abs (R(j)) 
+		neg,		// neg		Ri, Rj,				R(i) = - R(j) 
 		
 		// logical
-		and,		// and  	Rn0, Rn1			Rn0 = Rn0 & Rn1
-		or,			// or		Rn0, Rn1			Rn0 = Rn1 | Rn1
-		xor,		// xor		Rn0, Rn1			Rn0 = Rn1 ^ Rn1	
-		not,		// xor		Rn0, Rn1			Rn0 = ~Rn1
+		and,		// and  	Ri, Rj				R(i) = R(i) & R(j)
+		or,			// or		Ri, Rj				R(i) = R(j) | R(j)
+		xor,		// xor		Ri, Rj				R(i) = R(j) ^ R(j)	
+		not,		// xor		Ri, Rj				R(i) = ~R(j)
 
 		// shift 
-		sll,		// sll		Rn0, Rn1			Rn0 = Rn0 << Rn1	
-		srl,		// srl		Rn0, Rn1			Rn0 = Rn0 >> Rn1	
+		sll,		// sll		Ri, Rj				R(i) = R(i) << R(j)	
+		srl,		// srl		Ri, Rj				R(i) = R(i) >> R(j)	
 
 		// load 
-		loadb,		// loadb	Rn0, imm32[Rn1]		Rn0 = byte at memory [Rn1 + imm32]	
-		loadw,		// loadq	Rn0, imm32[Rn1]		Rn0 = word at memory [Rn1 + imm32]	
-		loadd,		// loadd	Rn0, imm32[Rn1]		Rn0 = dword at memory [Rn1 + imm32]
+		loadb,		// loadb	Ri, imm32[Rj]		R(i) = byte at memory [R(j) + imm32]	
+		loadw,		// loadq	Ri, imm32[Rj]		R(i) = word at memory [R(j) + imm32]	
+		loadd,		// loadd	Ri, imm32[Rj]		R(i) = dword at memory [R(j) + imm32]
 
 		// store 
-		storeb,		// storeb	Rn0, Rn1, imm32		byte at memory [Rn1 + imm32] = Rn0
-		storew,		// storeq	Rn0, Rn1, imm32		word at memory [Rn1 + imm32] = Rn0
-		stored,		// stored	Rn0, Rn1, imm32		dword at memory [Rn1 + imm32] = Rn0
+		storeb,		// storeb	Ri, imm32[Rj]		byte at memory [R(j) + imm32] = R(i)
+		storew,		// storeq	Ri, imm32[Rj]		word at memory [R(j) + imm32] = R(i)
+		stored,		// stored	Ri, imm32[Rj]		dword at memory [R(j) + imm32] = R(i)
 
 		// conditional jumps
-		beq,		// beq		Rn0, Rn1, imm32  	if (Rn0 == Rn1) PC = PC + imm32  
-		bne,		// bneq		Rn0, Rn1, imm32  	if (Rn0 != Rn1) PC = PC + imm32  
-		blt,		// blt		Rn0, Rn1, imm32  	if (Rn0 < Rn1) PC = PC + imm32  (signed comparison)
-		ble,		// ble		Rn0, Rn1, imm32  	if (Rn0 <= Rn1) PC = PC + imm32  (signed comparison)
-		bgt,		// bgt		Rn0, Rn1, imm32  	if (Rn0 > Rn1) PC = PC + imm32  (signed comparison)
-		bget,		// bget		Rn0, Rn1, imm32  	if (Rn0 >= Rn1) PC = PC + imm32  (signed comparison)
+		beq,		// beq		Ri, Rj, imm32  		if (R(i) == R(j)) PC = PC + imm32  
+		bne,		// bneq		Ri, Rj, imm32  		if (R(i) != R(j)) PC = PC + imm32  
+		blt,		// blt		Ri, Rj, imm32  		if (R(i) < R(j)) PC = PC + imm32  (signed comparison)
+		ble,		// ble		Ri, Rj, imm32  		if (R(i) <= R(j)) PC = PC + imm32  (signed comparison)
+		bgt,		// bgt		Ri, Rj, imm32  		if (R(i) > R(j)) PC = PC + imm32  (signed comparison)
+		bget,		// bget		Ri, Rj, imm32  		if (R(i) >= R(j)) PC = PC + imm32  (signed comparison)
 
 		// call / return 
-		call,		// call		Rn0, imm32			Rn0 = Rn0 - 4, [Rn0] = pc + 6, pc = imm32
-		callr,		// call		Rn0, Rn1			Rn0 = Rn0 - 4, [Rn0] = pc + 6, pc = Rn1
-		ret,		// ret		rn0					pc = [Rn0], Rn0 = Rn0 + 4  
-		syscall,	// syscall	Rn0, Rn1, imm32		execute a system call
-		jump,		// jump		Rn0					pc = Rn0
+		call,		// call		Ri, imm32			R(i) = R(i) - 4, [R(i)] = pc + 6, pc = imm32
+		callr,		// call		Ri, Rj				R(i) = R(i) - 4, [R(i)] = pc + 6, pc = R(j)
+		ret,		// ret		Ri					pc = [R(i)], R(i) = R(i) + 4  
+		syscall,	// syscall	Ri, Rj, imm32		execute a system call
+		jump,		// jump		Ri					pc = R(i)
 
 		// frame pointer 
-		enter,		// enter	Rn0, Rn1, imm32		[Rn1] = Rn0, Rn0 = Rn1, Rn1 = Rn1 + imm32	
-		exit,		// exit		Rn0, Rn1			Rn1 = Rn0, Rn0 = [Rn1]
-		push,		// push		Rn0, imm32mask		tmp = rn0; i = 0;  mask = registenMask; while (mask) { while (!(mask & 1)) mask >>= 1; i ++;} {tmp -= 4; [tmp] = Rn[i]}; rn0 = tmp; 
-		pop,		// pop		Rn0, imm32mask		tmp = rn0; i = 31; mask = registenMask; while (mask) { while (!(mask & (1<<31))) mask <<= 1; i --;} {[tmp] = Rn[i]; tmp -= 4;}
+		enter,		// enter	Ri, Rj, imm32		[R(j)] = R(i), R(i) = R(j), R(j) = R(j) + imm32	
+		exit,		// exit		Ri, Rj				R(j) = R(i), R(i) = [R(j)]
+		push,		// push		Ri, imm32mask		tmp = R(i); i = 0;  mask = registenMask; while (mask) { while (!(mask & 1)) mask >>= 1; i ++;} {tmp -= 4; [tmp] = Rn[i]}; R(i) = tmp; 
+		pop,		// pop		Ri, imm32mask		tmp = R(i); i = 31; mask = registenMask; while (mask) { while (!(mask & (1<<31))) mask <<= 1; i --;} {[tmp] = Rn[i]; tmp -= 4;}
 
 
 		nop,		// do nothing 
@@ -79,11 +79,6 @@ class dVirtualMachine
 			unsigned	m_opcode	:  6;
 			unsigned	m_reg0		:  5;
 			unsigned	m_reg1		:  5;
-		};
-		struct dType1
-		{
-			unsigned	m_opcode	:  6;
-			unsigned	m_reg0		:  5;
 		};
 	};
 
