@@ -149,7 +149,26 @@ public:
 		dExpandedState* const state =  new dExpandedState (id); 
 		state->m_lineNumber = m_lineNumber;
 		return state;
-		
+	}
+
+	void PushSet (const char* const set, int size)
+	{
+		dAutomataState* const startState = CreateState (m_stateID ++);
+		dAutomataState* const acceptingState = CreateState (m_stateID ++);
+
+//		int setId = m_charaterSetMap.AddSet(set, size);
+//		dAutomataState::dCharacter charInfo (setId, dAutomataState::CHARACTER_SET);
+//		startState->m_transtions.Append(dAutomataState::dTransition(charInfo, acceptingState));
+
+		for (int i = 0; i < size; i ++) {
+			dAutomataState::dCharacter charInfo (GetScapeChar (set[i]), dAutomataState::CHARACTER);
+			startState->m_transtions.Append(dAutomataState::dTransition(charInfo, acceptingState));
+		}
+
+		m_stack.Push(startState, acceptingState);
+
+
+//		dNonDeterministicFiniteAutonata::PushSet (set, size);
 	}
 
 	void PreProcessExpression (const char* const regularExpression)
@@ -356,7 +375,6 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 		dAutomataState* pool[128];
 
 		string fileName (string ("\"") + string(inputFileName) + string ("\""));
-//		const char* const text = fileName.c_str();
 
 		pool[0] = m_startState;
 		filter.Insert(pool[0], pool[0]);
@@ -380,7 +398,6 @@ class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
 
 			if (state->m_exitState) {
 				AddText (semanticActionCodeOutput, "case %d:\n", state->m_id);
-//				AddText (semanticActionCodeOutput, "#line %d %s\n", state->m_lineNumber, fileName.c_str());
 				AddText (semanticActionCodeOutput, "{\n");
 				if (!state->m_exitState || state->m_transtions.GetCount()) {
 					AddText (semanticActionCodeOutput, "\tchar ch = NextChar();\n");
@@ -492,11 +509,12 @@ dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outpu
 
 	// convert nfa to Deterministic Finite Automaton
 	dExpandedDFA dfa (nfa, semanticActionCode, transitionsCountStartMap, nextStateRun, inputFileName);
+	_ASSERTE (dfa.GetCharacterSetMap().GetSets().GetCount() == 0);
 
 	// save header and source files
 	string className (GetClassName(outputFileName));
 	CreateHeaderFile (outputFileName, className);
-	CreateCodeFile (outputFileName, className, dfa.GetStateCount(), userPreHeaderCode, userPostHeaderCode, semanticActionCode, dfa.GetCharacterSetMap(), transitionsCountStartMap, nextStateRun); 
+	CreateCodeFile (outputFileName, className, dfa.GetStateCount(), userPreHeaderCode, userPostHeaderCode, semanticActionCode, transitionsCountStartMap, nextStateRun); 
 	
 }
 
@@ -684,119 +702,6 @@ void dLexCompiler::ReplaceAllMacros (string& data, const string& newName, const 
 }
 
 
-void dLexCompiler::CreateHeaderFile (const char* const fileName, const string& className) const
-{
-	string templateHeader ("");
-	LoadTemplateFile("/dLexicalTemplate.h", templateHeader);
-
-	ReplaceAllMacros (templateHeader, className, "$(className)");
-
-	SaveFile(fileName, ".h", templateHeader);
-}
-
-
-void dLexCompiler::CreateCodeFile (
-	const char* const fileName, 
-	const string& className,
-	int stateCount,
-	const string& userPreHeaderCode, 
-	const string& userPostHeaderCode, 
-	const string& semanticActionCode,
-	const dChatertSetMap& characterSet,
-	dTree<dTransitionCountStart, int>& transitionsCountStartMap,
-	dList<dTransitionType>& nextStateRun) const
-{
-	string templateHeader ("");
-	LoadTemplateFile("/dLexicalTemplate.cpp", templateHeader);
-
-	ReplaceMacro (templateHeader, userPreHeaderCode, "$(userIncludeCode)");
-	ReplaceAllMacros (templateHeader, className, "$(className)");
-
-	if (characterSet.GetSets().GetCount()) {
-		string characterSets ("");
-		string characterSetList ("");
-		string characterSetSize ("");
-		dTree<dList <dChatertSetMap::ChatertSet>::dListNode*, int>::Iterator iter (characterSet.GetSets());
-		for (iter.Begin(); iter; iter ++) {
-			dChatertSetMap::ChatertSet& set = iter.GetNode()->GetInfo()->GetInfo();
-			int count = set.GetLength();
-
-			char name[256];
-
-			sprintf (name, "text_%d, ", set.GetId());		
-			characterSetList += name;
-
-			sprintf (name, "%d, ", count);		
-			characterSetSize += name;
-
-			sprintf (name, "\tstatic char text_%d[] = {", set.GetId());
-			characterSets += name;
-			const char* const str = set.GetSet();
-			for (int i = 0; i < count; i ++) {
-				char tmp[128];
-				sprintf (tmp, "%d, ", str[i]);
-				characterSets += tmp;
-			}
-			characterSets += "0};\n";
-		}
-		ReplaceMacro (templateHeader, characterSets, "$(characterSets)");
-
-		characterSetList.replace(characterSetList.size()-2, 2, "");
-		ReplaceMacro (templateHeader, characterSetList, "$(characterSetArray)");
-
-		characterSetSize.replace(characterSetSize.size()-2, 2, "");
-		ReplaceMacro (templateHeader, characterSetSize, "$(characterSetSize)");
-	} else {
-		ReplaceMacro (templateHeader, "", "$(characterSets)");
-		ReplaceMacro (templateHeader, "0", "$(characterSetArray)");
-		ReplaceMacro (templateHeader, "0", "$(characterSetSize)");
-	}
-
-	for (int i = 0; i < stateCount; i ++) {
-		if (!transitionsCountStartMap.Find(i)) {
-			dTransitionCountStart entry;
-			entry.m_count = 0;
-			entry.m_start = 0;
-			transitionsCountStartMap.Insert(entry, i);
-		}
-	}
-
-	string transitionsCountString ("");
-	string transitionsStartString ("");
-	dTree<dTransitionCountStart, int>::Iterator iter1 (transitionsCountStartMap); 
-	for (iter1.Begin(); iter1; iter1 ++) {
-		char text[256];
-		dTransitionCountStart entry = iter1.GetNode()->GetInfo();
-		sprintf (text, "%d, ", entry.m_count);
-		transitionsCountString += text;
-
-		sprintf (text, "%d, ", entry.m_start);
-		transitionsStartString += text;
-	}
-	transitionsCountString += "0";
-	ReplaceMacro (templateHeader, transitionsCountString, "$(transitionsCount)");
-
-	transitionsStartString += "0";
-	ReplaceMacro (templateHeader, transitionsStartString, "$(transitionsStart)");
-
-	string nextStateRunString ("");
-	for (dList<dTransitionType>::dListNode* node = nextStateRun.GetFirst(); node; node = node->GetNext()) {
-		char text[256];
-		dTransitionType value (node->GetInfo());
-		sprintf (text, "0x0%x, ", value.m_value);
-		nextStateRunString += text;
-	}
-	nextStateRunString += "0";
-	ReplaceMacro (templateHeader, nextStateRunString, "$(nextTranstionList)");
-
-	ReplaceMacro (templateHeader, semanticActionCode, "$(semanticActionCode)");
-
-//	templateHeader = templateHeader + userPostHeaderCode;
-	templateHeader = templateHeader + userPostHeaderCode;
-
-	SaveFile(fileName, ".cpp", templateHeader);
-}
-
 
 
 // DefinitionExpression	: DefinitionBlock 
@@ -933,3 +838,123 @@ void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preHeaderCode, s
 		postHeaderCode += "\n";
 	}
 }
+
+
+
+void dLexCompiler::CreateHeaderFile (const char* const fileName, const string& className) const
+{
+	string templateHeader ("");
+	LoadTemplateFile("/dLexicalTemplate.h", templateHeader);
+
+	ReplaceAllMacros (templateHeader, className, "$(className)");
+
+	SaveFile(fileName, ".h", templateHeader);
+}
+
+
+void dLexCompiler::CreateCodeFile (
+	const char* const fileName, 
+	const string& className,
+	int stateCount,
+	const string& userPreHeaderCode, 
+	const string& userPostHeaderCode, 
+	const string& semanticActionCode,
+//	const dChatertSetMap& characterSet,
+	dTree<dTransitionCountStart, int>& transitionsCountStartMap,
+	dList<dTransitionType>& nextStateRun) const
+{
+	string templateHeader ("");
+	LoadTemplateFile("/dLexicalTemplate.cpp", templateHeader);
+
+	ReplaceMacro (templateHeader, userPreHeaderCode, "$(userIncludeCode)");
+	ReplaceAllMacros (templateHeader, className, "$(className)");
+
+/*
+	if (characterSet.GetSets().GetCount()) {
+		string characterSets ("");
+		string characterSetList ("");
+		string characterSetSize ("");
+		dTree<dList <dChatertSetMap::ChatertSet>::dListNode*, int>::Iterator iter (characterSet.GetSets());
+		for (iter.Begin(); iter; iter ++) {
+			dChatertSetMap::ChatertSet& set = iter.GetNode()->GetInfo()->GetInfo();
+			int count = set.GetLength();
+
+			char name[256];
+
+			sprintf (name, "text_%d, ", set.GetId());		
+			characterSetList += name;
+
+			sprintf (name, "%d, ", count);		
+			characterSetSize += name;
+
+			sprintf (name, "\tstatic char text_%d[] = {", set.GetId());
+			characterSets += name;
+			const char* const str = set.GetSet();
+			for (int i = 0; i < count; i ++) {
+				char tmp[128];
+				sprintf (tmp, "%d, ", str[i]);
+				characterSets += tmp;
+			}
+			characterSets += "0};\n";
+		}
+		ReplaceMacro (templateHeader, characterSets, "$(characterSets)");
+
+		characterSetList.replace(characterSetList.size()-2, 2, "");
+		ReplaceMacro (templateHeader, characterSetList, "$(characterSetArray)");
+
+		characterSetSize.replace(characterSetSize.size()-2, 2, "");
+		ReplaceMacro (templateHeader, characterSetSize, "$(characterSetSize)");
+	} else {
+		ReplaceMacro (templateHeader, "", "$(characterSets)");
+		ReplaceMacro (templateHeader, "0", "$(characterSetArray)");
+		ReplaceMacro (templateHeader, "0", "$(characterSetSize)");
+	}
+*/
+
+	for (int i = 0; i < stateCount; i ++) {
+		if (!transitionsCountStartMap.Find(i)) {
+			dTransitionCountStart entry;
+			entry.m_count = 0;
+			entry.m_start = 0;
+			transitionsCountStartMap.Insert(entry, i);
+		}
+	}
+
+	string transitionsCountString ("");
+	string transitionsStartString ("");
+	dTree<dTransitionCountStart, int>::Iterator iter1 (transitionsCountStartMap); 
+	for (iter1.Begin(); iter1; iter1 ++) {
+		char text[256];
+		dTransitionCountStart entry = iter1.GetNode()->GetInfo();
+		sprintf (text, "%d, ", entry.m_count);
+		transitionsCountString += text;
+
+		sprintf (text, "%d, ", entry.m_start);
+		transitionsStartString += text;
+	}
+
+/*
+	transitionsCountString += "0";
+	ReplaceMacro (templateHeader, transitionsCountString, "$(transitionsCount)");
+
+	transitionsStartString += "0";
+	ReplaceMacro (templateHeader, transitionsStartString, "$(transitionsStart)");
+
+	string nextStateRunString ("");
+	for (dList<dTransitionType>::dListNode* node = nextStateRun.GetFirst(); node; node = node->GetNext()) {
+		char text[256];
+		dTransitionType value (node->GetInfo());
+		sprintf (text, "0x0%x, ", value.m_value);
+		nextStateRunString += text;
+	}
+	nextStateRunString += "0";
+	ReplaceMacro (templateHeader, nextStateRunString, "$(nextTranstionList)");
+
+	ReplaceMacro (templateHeader, semanticActionCode, "$(semanticActionCode)");
+
+	//	templateHeader = templateHeader + userPostHeaderCode;
+	templateHeader = templateHeader + userPostHeaderCode;
+*/
+	SaveFile(fileName, ".cpp", templateHeader);
+}
+

@@ -10,7 +10,7 @@
 */
 
 //
-//Auto generated Parcer Generator class: dAssemblerParcer.cpp
+//Auto generated Parser Generator class: dAssemblerParcer.cpp
 //
 
 #include <dVirtualMachine.h>
@@ -121,7 +121,7 @@ const dAssemblerParcer::dActionEntry* dAssemblerParcer::FindAction (const dActio
 	return NULL;
 }
 
-const dAssemblerParcer::dGotoEntry* dAssemblerParcer::FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const
+const dAssemblerParcer::dGotoEntry* dAssemblerParser::FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const
 {
 	int i0 = 0;
 	int i1 = count - 1;

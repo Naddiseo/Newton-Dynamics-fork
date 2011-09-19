@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="dParcerGenerator"
+	Name="dParserGenerator"
 	ProjectGUID="{B27AF501-3F19-49FF-9DB0-FF60B17508F6}"
 	RootNamespace="dParcerGenerator"
 	Keyword="Win32Proj"
@@ -47,7 +47,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="dParcerCompiler.h"
+				PrecompiledHeaderThrough="dParserCompiler.h"
 				WarningLevel="4"
 				DebugInformationFormat="4"
 			/>
@@ -122,7 +122,7 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="dParcerCompiler.h"
+				PrecompiledHeaderThrough="dParserCompiler.h"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -172,7 +172,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\dParcerCompiler.cpp"
+			RelativePath=".\dParserCompiler.cpp"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"
@@ -180,6 +180,7 @@
 				<Tool
 					Name="VCCLCompilerTool"
 					UsePrecompiledHeader="1"
+					PrecompiledHeaderThrough="dParserCompiler.h"
 				/>
 			</FileConfiguration>
 			<FileConfiguration
@@ -188,19 +189,20 @@
 				<Tool
 					Name="VCCLCompilerTool"
 					UsePrecompiledHeader="1"
+					PrecompiledHeaderThrough="dParserCompiler.h"
 				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath=".\dParcerCompiler.h"
+			RelativePath=".\dParserCompiler.h"
 			>
 		</File>
 		<File
-			RelativePath=".\dParcerGenerator.cpp"
+			RelativePath=".\dParserGenerator.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\dParcerLexical.cpp"
+			RelativePath=".\dParserLexical.cpp"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"
@@ -220,11 +222,11 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath=".\dParcerLexical.h"
+			RelativePath=".\dParserLexical.h"
 			>
 		</File>
 		<File
-			RelativePath=".\dParcerLexical.lex"
+			RelativePath=".\dParserLexical.lex"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"

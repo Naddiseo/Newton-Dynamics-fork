@@ -52,8 +52,18 @@
 
 %token REGISTER
 
-%token LOADD 
-%token ADDI ADD 
+%token MOVE LEA 
+%token LOADB LOADW LOADD 
+%token STOREB STOREW STORED
+%token SLL SRL
+%token AND OR XOR NOT
+%token ADD SUB MUL DIV ABS NEG
+%token BEQ BNE BLT BLE BGT BGET
+%token CALL CALLR RET SYSCALL JUMP JUMPR
+%token ENTER EXIT PUSH POP
+		  
+
+
 
 %start module
 
@@ -112,24 +122,95 @@ instructionList	: instruction
 				| instructionList instruction
 				;
 
-instruction	: arithemetic
+instruction	: move
 			| load
+			| store
+			| shift
+			| logical
+			| arithemetic
+			| conditional
+			| callJumpRet
+			| stack
 			;
 			
-arithemetic : arithmeticOpcode register ',' register
-			;			
+move : moveOpcode register ',' register
+	 | moveOpcode register ',' register ',' immediate
+	 ;			
 			
-load		: loadOpcode register ',' literal
-			;			
+load : loadOpcode register ',' literal
+	 ;			
+	 
+store : storeOpcode register ',' literal
+	  ;			
+	 
+	 
+shift : shiftOpcode register ',' literal
+	  ;			
 			
+logical : logicalOpcode register ',' literal
+	    ;			
+
+arithemetic : arithmeticOpcode register ',' literal
+	        ;			
+
+conditional : conditionalOpcode register ',' register ',' immediate
+			;
+			
+callJumpRet : CALL register ',' immediate
+			| CALLR register ',' register
+			| RET register
+			| SYSCALL register ',' register ',' immediate
+			| JUMP register
+			| JUMPR immediate
+			;
+			
+stack : ENTER register ',' register ',' immediate
+	  | EXIT register ',' register
+	  | PUSH register ',' immediate
+	  | POP register ',' immediate	  
+	  ;
+			
+
+moveOpcode : MOVE
+		   | LEA	
+		   ;
+				 
+loadOpcode : LOADB
+		   | LOADW
+		   | LOADD		   
+		   ;
+		   
+storeOpcode : STOREB
+			| STOREW
+			| STORED			
+		    ;
+		   
+			 
+shiftOpcode : SLL			 
+		    | SRL
+		    ;
+		     
+logicalOpcode : AND
+			  | OR	
+			  | XOR
+			  | NOT
+			  ;
 			
 arithmeticOpcode : ADD
-				 | ADDI	
+				 | SUB	
+				 | MUL
+				 | DIV
+				 | ABS
+				 | NEG
 				 ;
-			
-loadOpcode	: LOADD
-			;
 
+conditionalOpcode : BEQ
+				  | BNE
+				  | BLT
+				  | BLE
+				  | BGT
+				  | BGET
+				  ;
 
 %%
 

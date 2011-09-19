@@ -10,15 +10,15 @@
 */
 
 //
-//Auto generated Lexical Analyzer class: dParcerLexical.cpp
+//Auto generated Lexical Analyzer class: dParserLexical.cpp
 //
 
-#include <dParcerCompiler.h>
+#include <dParserCompiler.h>
 
-#include "dParcerLexical.h"
+#include "dParserLexical.h"
 
 
-dParcerLexical::dParcerLexical(const char* const data)
+dParserLexical::dParserLexical(const char* const data)
 	:m_tokenString ("")
 	,m_data(data)
 	,m_index(0)
@@ -27,11 +27,11 @@ dParcerLexical::dParcerLexical(const char* const data)
 {
 }
 
-dParcerLexical::~dParcerLexical()
+dParserLexical::~dParserLexical()
 {
 }
 
-bool dParcerLexical::IsCharInSet (char ch, const char* const set, int setSize) const
+bool dParserLexical::IsCharInSet (char ch, const char* const set, int setSize) const
 {
 	int i0 = 0;
 	int i1 = setSize - 1;
@@ -52,7 +52,7 @@ bool dParcerLexical::IsCharInSet (char ch, const char* const set, int setSize) c
 	return false;
 }
 
-void dParcerLexical::ReadBalancedExpresion (char open, char close)
+void dParserLexical::ReadBalancedExpresion (char open, char close)
 {
 	int count = 1;
 	while (count) {
@@ -88,7 +88,7 @@ void dParcerLexical::ReadBalancedExpresion (char open, char close)
 }
 
 
-void dParcerLexical::GetLexString ()
+void dParserLexical::GetLexString ()
 {
 	int length = m_index - m_startIndex;
 	m_tokenString = string (&m_data[m_startIndex], length);
@@ -96,7 +96,7 @@ void dParcerLexical::GetLexString ()
 }
 
 
-int dParcerLexical::NextToken ()
+int dParserLexical::NextToken ()
 {
 	//static strings patterns
 	static char text_0[] = {9, 10, 13, 32, 0};
@@ -134,7 +134,7 @@ int dParcerLexical::NextToken ()
 				{
 					GetLexString ();
 					//user specified action
-					{ return(dParcerCompiler::SIMICOLOM); }
+					{ return(dParserCompiler::SIMICOLOM); }
 					state = 0;
 				}
 				break;
@@ -144,7 +144,7 @@ int dParcerLexical::NextToken ()
 				{
 					GetLexString ();
 					//user specified action
-					{ return(dParcerCompiler::COLOM); }
+					{ return(dParserCompiler::COLOM); }
 					state = 0;
 				}
 				break;
@@ -154,7 +154,7 @@ int dParcerLexical::NextToken ()
 				{
 					GetLexString ();
 					//user specified action
-					{ return(dParcerCompiler::OR); }
+					{ return(dParserCompiler::OR); }
 					state = 0;
 				}
 				break;
@@ -164,7 +164,7 @@ int dParcerLexical::NextToken ()
 				{
 					GetLexString ();
 					//user specified action
-					{ ReadBalancedExpresion ('{', '}'); return dParcerCompiler::SEMANTIC_ACTION;}
+					{ ReadBalancedExpresion ('{', '}'); return dParserCompiler::SEMANTIC_ACTION;}
 					state = 0;
 				}
 				break;
@@ -177,7 +177,7 @@ int dParcerLexical::NextToken ()
 					UnGetChar();
 					GetLexString ();
 					//user specified action
-					{ return dParcerCompiler::LITERAL;}
+					{ return dParserCompiler::LITERAL;}
 					state = 0;
 				}
 				break;
@@ -190,7 +190,7 @@ int dParcerLexical::NextToken ()
 					UnGetChar();
 					GetLexString ();
 					//user specified action
-					{ return dParcerCompiler::LITERAL;}
+					{ return dParserCompiler::LITERAL;}
 					state = 0;
 				}
 				break;
@@ -499,7 +499,7 @@ int dParcerLexical::NextToken ()
 				{
 					GetLexString ();
 					//user specified action
-					{ m_tokenString.replace(0, 2, ""); m_tokenString.replace(m_tokenString.size() - 2, 2, ""); return dParcerCompiler::CODE_BLOCK;}
+					{ m_tokenString.replace(0, 2, ""); m_tokenString.replace(m_tokenString.size() - 2, 2, ""); return dParserCompiler::CODE_BLOCK;}
 					state = 0;
 				}
 				break;
@@ -509,7 +509,7 @@ int dParcerLexical::NextToken ()
 				{
 					GetLexString ();
 					//user specified action
-					{ return dParcerCompiler::UNION;}
+					{ return dParserCompiler::UNION;}
 					state = 0;
 				}
 				break;
@@ -519,7 +519,7 @@ int dParcerLexical::NextToken ()
 				{
 					GetLexString ();
 					//user specified action
-					{ return dParcerCompiler::TOKEN;}
+					{ return dParserCompiler::TOKEN;}
 					state = 0;
 				}
 				break;
@@ -529,7 +529,7 @@ int dParcerLexical::NextToken ()
 				{
 					GetLexString ();
 					//user specified action
-					{ return dParcerCompiler::START;}
+					{ return dParserCompiler::START;}
 					state = 0;
 				}
 				break;
@@ -539,7 +539,7 @@ int dParcerLexical::NextToken ()
 				{
 					GetLexString ();
 					//user specified action
-					{ return dParcerCompiler::RIGHT;}
+					{ return dParserCompiler::RIGHT;}
 					state = 0;
 				}
 				break;
@@ -549,7 +549,7 @@ int dParcerLexical::NextToken ()
 				{
 					GetLexString ();
 					//user specified action
-					{ return dParcerCompiler::LEFT;}
+					{ return dParserCompiler::LEFT;}
 					state = 0;
 				}
 				break;
@@ -559,7 +559,7 @@ int dParcerLexical::NextToken ()
 				{
 					GetLexString ();
 					//user specified action
-					{ return dParcerCompiler::GRAMMAR_SEGMENT;}
+					{ return dParserCompiler::GRAMMAR_SEGMENT;}
 					state = 0;
 				}
 				break;

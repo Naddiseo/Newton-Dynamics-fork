@@ -12,7 +12,7 @@
 
 %{
 #include <dVirtualMachine.h>
-#include "dAssemblerParcer.h"
+#include "dAssemblerParser.h"
 
 //
 // Newton virtual machine assembler grammar
@@ -43,6 +43,9 @@ loadd			[lL][oO][aA][dD][dD]
 
 
 %%
+{Literal}		{return dAssemblerParser::LITERAL;}
+"begin:"		{return dAssemblerParser::BEGIN;}
+
 /*
 {WhiteSpace}	{}
 {Comment}		{}
@@ -58,24 +61,24 @@ loadd			[lL][oO][aA][dD][dD]
 //[(]				{return '(';}	
 //[)]				{return ')';}	
 
-{Integer}		{return dAssemblerParcer::INTEGER;}
-*/
-{Literal}		{return dAssemblerParcer::LITERAL;}
+{Integer}		{return dAssemblerParser::INTEGER;}
 
-/*
-{Register}		{return dAssemblerParcer::REGISTER;}
+{Literal}		{return dAssemblerParser::LITERAL;}
 
-"int"			{return dAssemblerParcer::INT;}
-"import"		{return dAssemblerParcer::IMPORT;}
-"private"		{return dAssemblerParcer::PRIVATE;}
-*/
-"begin:"		{return dAssemblerParcer::BEGIN;}
-/*
-"end:"			{return dAssemblerParcer::END;}
-{loadd}			{return dAssemblerParcer::LOADD;}
 
-{addi}			{return dAssemblerParcer::ADDI;}
-{add}			{return dAssemblerParcer::ADD;}
+{Register}		{return dAssemblerParser::REGISTER;}
+
+"int"			{return dAssemblerParser::INT;}
+"import"		{return dAssemblerParser::IMPORT;}
+"private"		{return dAssemblerParser::PRIVATE;}
+
+"begin:"		{return dAssemblerParser::BEGIN;}
+
+"end:"			{return dAssemblerParser::END;}
+{loadd}			{return dAssemblerParser::LOADD;}
+
+{addi}			{return dAssemblerParser::ADDI;}
+{add}			{return dAssemblerParser::ADD;}
 */
 
 

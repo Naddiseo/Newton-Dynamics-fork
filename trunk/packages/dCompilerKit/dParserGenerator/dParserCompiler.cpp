@@ -9,11 +9,11 @@
 * freely
 */
 
-// dParcerCompiler.cpp : Defines the entry point for the console application.
+// dParserCompiler.cpp : Defines the entry point for the console application.
 //
 
-#include "dParcerCompiler.h"
-#include "dParcerLexical.h"
+#include "dParserCompiler.h"
+#include "dParserLexical.h"
 
 #define DACCEPT_SYMBOL "$$$"
 
@@ -29,14 +29,14 @@
 //	%%
 //	user code
 
-enum dParcerCompiler::dTokenType
+enum dParserCompiler::dTokenType
 {
 	TERMINAL,
 	NONTERMINAL
 };
 
 
-enum dParcerCompiler::ActionType
+enum dParserCompiler::ActionType
 {
 	dSHIFT = 0,
 	dREDUCE,
@@ -45,7 +45,7 @@ enum dParcerCompiler::ActionType
 };
 
 
-class dParcerCompiler::dGotoEntry
+class dParserCompiler::dGotoEntry
 {
 	public:
 	dGotoEntry ()
@@ -56,7 +56,7 @@ class dParcerCompiler::dGotoEntry
 };
 
 
-class dParcerCompiler::dActionEntry
+class dParserCompiler::dActionEntry
 {
 	public:
 	dActionEntry ()
@@ -72,7 +72,7 @@ class dParcerCompiler::dActionEntry
 
 
 
-class dParcerCompiler::dSymbol
+class dParserCompiler::dSymbol
 {
 	public:
 	dTokenType m_type;
@@ -81,7 +81,7 @@ class dParcerCompiler::dSymbol
 };
 
 
-class dParcerCompiler::dRuleInfo: public dParcerCompiler::dSymbol, public dList<dParcerCompiler::dSymbol>
+class dParserCompiler::dRuleInfo: public dParserCompiler::dSymbol, public dList<dParserCompiler::dSymbol>
 {
 	public:
 	dRuleInfo()
@@ -110,7 +110,7 @@ class dParcerCompiler::dRuleInfo: public dParcerCompiler::dSymbol, public dList<
 };
 
 
-class dParcerCompiler::dProductionRule: public dList<dParcerCompiler::dRuleInfo>
+class dParserCompiler::dProductionRule: public dList<dParserCompiler::dRuleInfo>
 {
 	public:
 
@@ -126,7 +126,7 @@ class dParcerCompiler::dProductionRule: public dList<dParcerCompiler::dRuleInfo>
 	}
 };
 
-class dParcerCompiler::dTransition
+class dParserCompiler::dTransition
 {
 	public:
 	string m_name;
@@ -134,7 +134,7 @@ class dParcerCompiler::dTransition
 	dState* m_targetState;
 };
 
-class dParcerCompiler::dItem
+class dParserCompiler::dItem
 {
 	public:
 	dItem ()
@@ -148,7 +148,7 @@ class dParcerCompiler::dItem
 	dProductionRule::dListNode* m_ruleNode;
 };
 
-class dParcerCompiler::dAction 
+class dParserCompiler::dAction 
 {
 	public:
 	ActionType m_type;
@@ -157,7 +157,7 @@ class dParcerCompiler::dAction
 	dProductionRule::dListNode* m_reduceRuleNode;
 };
 
-class dParcerCompiler::dTokenStringPair 
+class dParserCompiler::dTokenStringPair 
 {
 	public:
 	dToken m_token;
@@ -165,7 +165,7 @@ class dParcerCompiler::dTokenStringPair
 };
 
 
-class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
+class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 {
 	public:
 	dState (const dList<dItem>& itemSet)
@@ -262,7 +262,7 @@ class dParcerCompiler::dState: public dList<dParcerCompiler::dItem>
 	dList<dTransition> m_transitions;
 };
 
-class dParcerCompiler::dOperatorsAssociation: public dList <string>
+class dParserCompiler::dOperatorsAssociation: public dList <string>
 {
 	public:
 	enum dAssoctivity
@@ -285,7 +285,7 @@ class dParcerCompiler::dOperatorsAssociation: public dList <string>
 	dAssoctivity m_associativity;
 };
 
-class dParcerCompiler::dOperatorsPrecedence: public dList <dOperatorsAssociation>
+class dParserCompiler::dOperatorsPrecedence: public dList <dOperatorsAssociation>
 {
 	public:
 	const dOperatorsAssociation* FindAssociation (const string& symbol)	const
@@ -316,7 +316,7 @@ class dParcerCompiler::dOperatorsPrecedence: public dList <dOperatorsAssociation
 
 };
 
-dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const outputFileName, const char* const scannerClassName)
+dParserCompiler::dParserCompiler(const string& inputRules, const char* const outputFileName, const char* const scannerClassName)
 {
 	// scan the grammar into a list of rules.
 	int lastTokenEnum;
@@ -340,10 +340,10 @@ dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const out
 	const string& startSymbol = ruleList.GetFirst()->GetInfo().m_name;
 	BuildParcingTable (stateList, symbolList, startSymbol, operatorPrecedence);
 
-	//Write Parcer class and header file
+	//Write Parser class and header file
 	string className (GetClassName(outputFileName));
 	GenerateHeaderFile (className, scannerClassName, outputFileName, ruleList, tokenEnumeration, userVariableClass);
-	GenerateParcerCode (className, scannerClassName, outputFileName, userCodeBlock, stateList, symbolList, tokenEnumeration, endUserCode, lastTokenEnum);
+	GenerateParserCode (className, scannerClassName, outputFileName, userCodeBlock, stateList, symbolList, tokenEnumeration, endUserCode, lastTokenEnum);
 
 	dTree<dState*,int>::Iterator iter(stateList);
 	for (iter.Begin(); iter; iter ++) {
@@ -353,11 +353,11 @@ dParcerCompiler::dParcerCompiler(const string& inputRules, const char* const out
 }
 
 
-dParcerCompiler::~dParcerCompiler()
+dParserCompiler::~dParserCompiler()
 {
 }
 
-string dParcerCompiler::GetClassName(const char* const fileName) const
+string dParserCompiler::GetClassName(const char* const fileName) const
 {
 	char className[256];
 	const char* ptr = strrchr (fileName, '/');
@@ -376,7 +376,7 @@ string dParcerCompiler::GetClassName(const char* const fileName) const
 	return string (className);
 }
 
-void dParcerCompiler::ScanGrammarFile(
+void dParserCompiler::ScanGrammarFile(
 	const string& inputRules, 
 	dProductionRule& ruleList, 
 	dTree<dTokenType, string>& symbolList, 
@@ -393,8 +393,8 @@ void dParcerCompiler::ScanGrammarFile(
 
 	tokenEnumerationMap.Insert(0, DACCEPT_SYMBOL);
 
-	dParcerLexical lexical (inputRules.c_str());
-	LoadTemplateFile("/dParcerUserVariableTemplate.cpp", userVariableClass);
+	dParserLexical lexical (inputRules.c_str());
+	LoadTemplateFile("/dParserUserVariableTemplate.cpp", userVariableClass);
 	// scan the definition segment
 	for (dToken token = dToken(lexical.NextToken()); token != GRAMMAR_SEGMENT; ) {
 //		DTRACE (("%s\n", lexical.GetTokenString()));
@@ -532,8 +532,8 @@ void dParcerCompiler::ScanGrammarFile(
 	}
 }
 
-dParcerCompiler::dToken dParcerCompiler::ScanGrammarRule(
-	dParcerLexical& lexical, 
+dParserCompiler::dToken dParserCompiler::ScanGrammarRule(
+	dParserLexical& lexical, 
 	dProductionRule& rules, 
 	dTree<dTokenType, string>& symbolList, 
 	int& ruleNumber,
@@ -620,7 +620,7 @@ dParcerCompiler::dToken dParcerCompiler::ScanGrammarRule(
 
 
 
-void dParcerCompiler::LoadTemplateFile(const char* const templateName, string& templateOuput) const
+void dParserCompiler::LoadTemplateFile(const char* const templateName, string& templateOuput) const
 {
 	char path[2048];
 
@@ -652,7 +652,7 @@ void dParcerCompiler::LoadTemplateFile(const char* const templateName, string& t
 	templateOuput.erase(strlen (templateOuput.c_str()));
 }
 
-void dParcerCompiler::SaveFile(const char* const fileName, const char* const extention, const string& input) const
+void dParserCompiler::SaveFile(const char* const fileName, const char* const extention, const string& input) const
 {
 	char path[2048];
 
@@ -671,7 +671,7 @@ void dParcerCompiler::SaveFile(const char* const fileName, const char* const ext
 
 
 
-bool dParcerCompiler::DoesSymbolDeriveEmpty (const string& symbol, const dProductionRule& ruleList) const 
+bool dParserCompiler::DoesSymbolDeriveEmpty (const string& symbol, const dProductionRule& ruleList) const 
 {
 	for (dProductionRule::dListNode* ruleInfoNode = ruleList.GetFirst(); ruleInfoNode; ruleInfoNode = ruleInfoNode->GetNext()) {
 		const dRuleInfo& info = ruleInfoNode->GetInfo();
@@ -685,7 +685,7 @@ bool dParcerCompiler::DoesSymbolDeriveEmpty (const string& symbol, const dProduc
 }
 
 
-void dParcerCompiler::First (
+void dParserCompiler::First (
 	const string& symbol, 
 	dTree<int, string>& symbolListMark, 
 	const dTree<dTokenType, string>& symbolList, 
@@ -734,7 +734,7 @@ void dParcerCompiler::First (
 }
 
 
-void dParcerCompiler::First (const dList<string>& symbolSet, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const
+void dParserCompiler::First (const dList<string>& symbolSet, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const
 {
 	if (symbolSet.GetCount() > 1) {
 		string empty ("");
@@ -772,7 +772,7 @@ void dParcerCompiler::First (const dList<string>& symbolSet, const dTree<dTokenT
 
 
 // Generate the closure for a Set of Item  
-dParcerCompiler::dState* dParcerCompiler::Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet, const dTree<dTokenType, string>& symbolList) const
+dParserCompiler::dState* dParserCompiler::Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet, const dTree<dTokenType, string>& symbolList) const
 {
 	dState* const state = new dState (itemSet);
 	for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
@@ -823,7 +823,7 @@ dParcerCompiler::dState* dParcerCompiler::Closure (const dProductionRule& ruleLi
 
 
 // generates the got state for this symbol
-dParcerCompiler::dState* dParcerCompiler::Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol, const dTree<dTokenType, string>& symbolList) const
+dParserCompiler::dState* dParserCompiler::Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol, const dTree<dTokenType, string>& symbolList) const
 {
 	dList<dItem> itemSet;
 
@@ -859,7 +859,7 @@ dParcerCompiler::dState* dParcerCompiler::Goto (const dProductionRule& ruleList,
 
 
 // generates the canonical Items set for a LR(1) grammar
-void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dProductionRule& ruleList, const dTree<dTokenType, string>& symbolList, const dOperatorsPrecedence& operatorPrecence)
+void dParserCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dProductionRule& ruleList, const dTree<dTokenType, string>& symbolList, const dOperatorsPrecedence& operatorPrecence)
 {
 	dList<dItem> itemSet;
 	dList<dState*> stateList;
@@ -920,7 +920,7 @@ void dParcerCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dPr
 
 
 
-void dParcerCompiler::ReplaceMacro (string& data, const string& newName, const string& macro) const
+void dParserCompiler::ReplaceMacro (string& data, const string& newName, const string& macro) const
 {
 	int size = macro.size();
 	int position = data.find (macro);
@@ -928,7 +928,7 @@ void dParcerCompiler::ReplaceMacro (string& data, const string& newName, const s
 	data.replace(position, size, newName);
 }
 
-void dParcerCompiler::ReplaceAllMacros (string& data, const string& newName, const string& macro) const
+void dParserCompiler::ReplaceAllMacros (string& data, const string& newName, const string& macro) const
 {
 	int size = macro.size();
 	for (size_t i = data.find (macro); i != -1; i = data.find (macro)) {
@@ -937,7 +937,7 @@ void dParcerCompiler::ReplaceAllMacros (string& data, const string& newName, con
 }
 
 
-void dParcerCompiler::GenerateHeaderFile (
+void dParserCompiler::GenerateHeaderFile (
 	const string& className, 
 	const string& scannerClassName,
 	const char* const outputFileName,
@@ -946,7 +946,7 @@ void dParcerCompiler::GenerateHeaderFile (
 	const string& userVariableClass)
 {
 	string templateHeader ("");
-	LoadTemplateFile("/dParcerTemplate.h", templateHeader);
+	LoadTemplateFile("/dParserTemplate.h", templateHeader);
 
 	ReplaceAllMacros (templateHeader, className, "$(className)");
 	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
@@ -1001,7 +1001,7 @@ void dParcerCompiler::GenerateHeaderFile (
 }
 
 
-void dParcerCompiler::GenerateParcerCode (
+void dParserCompiler::GenerateParserCode (
 	const string& className, 
 	const string& scannerClassName,
 	const char* const outputFileName,
@@ -1013,7 +1013,7 @@ void dParcerCompiler::GenerateParcerCode (
 	int lastTokenEnum)
 {
 	string templateHeader ("");
-	LoadTemplateFile("/dParcerTemplate.cpp", templateHeader);
+	LoadTemplateFile("/dParserTemplate.cpp", templateHeader);
 
 	size_t position = templateHeader.find ("$(userCode)");
 	templateHeader.replace(position, 11, userCode);
@@ -1230,7 +1230,7 @@ void dParcerCompiler::GenerateParcerCode (
 
 
 
-void dParcerCompiler::BuildParcingTable (
+void dParserCompiler::BuildParcingTable (
 	const dTree<dState*,int>& stateList, 
 	const dTree<dTokenType, string>& symbolList, 
 	const string& startSymbol,

@@ -107,7 +107,7 @@ class dLexCompiler
 	void CreateHeaderFile (const char* const fileName, const string& className) const;
 	void CreateCodeFile (const char* const fileName, const string& className, int stateCount, 
 						 const string& userPreHeaderCode, const string& userPostHeaderCode, const string& semanticActionCode,
-						 const dChatertSetMap& characterSet, dTree<dTransitionCountStart, int>& transitionsCountStartMap, dList<dTransitionType>& nextStateRun) const;
+						 dTree<dTransitionCountStart, int>& transitionsCountStartMap, dList<dTransitionType>& nextStateRun) const;
 
 	string GetClassName(const char* const fileName) const;
 	void ReplaceMacro (string& data, const string& newName, const string& macro) const;

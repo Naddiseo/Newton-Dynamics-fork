@@ -10,17 +10,17 @@
 */
 
 //
-//Auto generated Parcer Generator class: dAssemblerCompiler.h
+//Auto generated Parser Generator class: dAssemblerCompiler.h
 //
 
 #ifndef __dAssemblerCompiler_h__
 #define __dAssemblerCompiler_h__
 
-#include "dAssemblerParcer.h"
+#include "dAssemblerParser.h"
 
 class dVirtualMachine;
 
-class dAssemblerCompiler: public dAssemblerParcer
+class dAssemblerCompiler: public dAssemblerParser
 {
 	public:
 	dAssemblerCompiler(dVirtualMachine* const m_virtualMachine);

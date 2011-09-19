@@ -12,7 +12,7 @@
 
 
 %{
-#include <dParcerCompiler.h>
+#include <dParserCompiler.h>
 %}
 
 				
@@ -34,18 +34,18 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 %%
 {WhiteSpace}		{}
 {Comment}			{}
-"%%"				{ return dParcerCompiler::GRAMMAR_SEGMENT;}
-"%start"			{ return dParcerCompiler::START;}
-"%token"			{ return dParcerCompiler::TOKEN;}
-"%union"			{ return dParcerCompiler::UNION;}
-"%left"				{ return dParcerCompiler::LEFT;}
-"%right"			{ return dParcerCompiler::RIGHT;}
-{Literal}			{ return dParcerCompiler::LITERAL;}
-{CodeBlock}			{ m_tokenString.replace(0, 2, ""); m_tokenString.replace(m_tokenString.size() - 2, 2, ""); return dParcerCompiler::CODE_BLOCK;}
+"%%"				{ return dParserCompiler::GRAMMAR_SEGMENT;}
+"%start"			{ return dParserCompiler::START;}
+"%token"			{ return dParserCompiler::TOKEN;}
+"%union"			{ return dParserCompiler::UNION;}
+"%left"				{ return dParserCompiler::LEFT;}
+"%right"			{ return dParserCompiler::RIGHT;}
+{Literal}			{ return dParserCompiler::LITERAL;}
+{CodeBlock}			{ m_tokenString.replace(0, 2, ""); m_tokenString.replace(m_tokenString.size() - 2, 2, ""); return dParserCompiler::CODE_BLOCK;}
 
-[|]					{ return(dParcerCompiler::OR); }
-[:]					{ return(dParcerCompiler::COLOM); }
-[;]					{ return(dParcerCompiler::SIMICOLOM); }
+[|]					{ return(dParserCompiler::OR); }
+[:]					{ return(dParserCompiler::COLOM); }
+[;]					{ return(dParserCompiler::SIMICOLOM); }
 "';'"				{ m_tokenString = ";"; return(';'); }
 "'{'"				{ m_tokenString = "{"; return('{'); }
 "'}'"				{ m_tokenString = "}"; return('}'); }
@@ -71,5 +71,5 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 "'\*'"				{ m_tokenString = "*"; return('*'); }
 "'\['"				{ m_tokenString = "["; return('['); }
 "'\]'"				{ m_tokenString = "]"; return(']'); }
-[{]					{ ReadBalancedExpresion ('{', '}'); return dParcerCompiler::SEMANTIC_ACTION;}
+[{]					{ ReadBalancedExpresion ('{', '}'); return dParserCompiler::SEMANTIC_ACTION;}
 

@@ -1,13 +1,7 @@
 #include "dVirtualMachine.h"
-#include "dAssemblerParcer.h"
+#include "dAssemblerParser.h"
 #include "dAssemblerLexical.h"
 #include "dAssemblerCompiler.h"
-
-
-
-
-
-
 
 
 
@@ -15,8 +9,8 @@
 dVirtualMachine::dNemonic dVirtualMachine::m_nemonics[] = 
 {
 	{mov,		"mov"},
+	{lea,		"addi"},		
 
-	{addi,		"addi"},		
 	{add,		"add"},
 	{sub,		"sub"},		
 	{mul,		"mul"},
@@ -35,6 +29,7 @@ dVirtualMachine::dNemonic dVirtualMachine::m_nemonics[] =
 	{loadb,		"loadb"},		
 	{loadw,		"loadw"},		
 	{loadd,		"loadd"},		
+
 	{storeb,	"storeb"},	
 	{storew,	"storew"},	
 	{stored,	"stored"},	

@@ -28,35 +28,6 @@ using namespace std;
 
 class dParcerLexical
 {
-	enum dStateType
-	{
-		m_extiState = 'a',
-		m_itermediateState,
-	};
-	enum dTranstionType
-	{
-		m_infoIsCharacter = 0,
-		m_infoIsCharacterSet,
-	};
-
-	struct dTransitionInfo
-	{
-		public:
-		dTransitionInfo (unsigned val)
-			:m_value(val)
-		{
-		}
-		union {
-			unsigned m_value;
-			struct {
-				unsigned  m_nextState	:14;
-				unsigned  m_infoType	: 2;		// 0 m_value is a character, 1 m_value is a charcterSet, 
-				unsigned  m_info		:16;
-			};
-		};
-	};
-
-
 	public:
 	dParcerLexical(const char* const data);
 	virtual ~dParcerLexical();

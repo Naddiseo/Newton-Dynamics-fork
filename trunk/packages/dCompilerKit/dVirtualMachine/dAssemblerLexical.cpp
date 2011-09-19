@@ -14,7 +14,7 @@
 //
 
 #include <dVirtualMachine.h>
-#include "dAssemblerParcer.h"
+#include "dAssemblerParser.h"
 
 //
 // Newton virtual machine assembler grammar
@@ -105,15 +105,13 @@ void dAssemblerLexical::GetLexString ()
 int dAssemblerLexical::NextToken ()
 {
 	//static strings patterns
-	static char text_0[] = {65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 95, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 0};
-	static char text_1[] = {48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 95, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 0};
 
-	static int characterSetSize[] = {53, 63};
-	static char* characterSetArray[] = {text_0, text_1};
+	static int characterSetSize[] = {0};
+	static char* characterSetArray[] = {0};
 
-	static int transitionsCount[] = {2, 1, 0, 0, 1, 1, 1, 1, 0, 0};
-	static int transitionsStart[] = {0, 2, 0, 0, 3, 4, 5, 6, 0, 0};
-	static unsigned nextTranstionList[] = {0x0620001, 0x04002, 0x0650004, 0x0670005, 0x0690006, 0x06e0007, 0x03a0008, 0};
+	static int transitionsCount[] = {53, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	static int transitionsStart[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	static unsigned nextTranstionList[] = {0x0410001, 0x0420001, 0x0430001, 0x0440001, 0x0450001, 0x0460001, 0x0470001, 0x0480001, 0x0490001, 0x04a0001, 0x04b0001, 0x04c0001, 0x04d0001, 0x04e0001, 0x04f0001, 0x0500001, 0x0510001, 0x0520001, 0x0530001, 0x0540001, 0x0550001, 0x0560001, 0x0570001, 0x0580001, 0x0590001, 0x05a0001, 0x05f0001, 0x0610001, 0x0620002, 0x0630001, 0x0640001, 0x0650001, 0x0660001, 0x0670001, 0x0680001, 0x0690001, 0x06a0001, 0x06b0001, 0x06c0001, 0x06d0001, 0x06e0001, 0x06f0001, 0x0700001, 0x0710001, 0x0720001, 0x0730001, 0x0740001, 0x0750001, 0x0760001, 0x0770001, 0x0780001, 0x0790001, 0x07a0001, 0};
 	
 	m_startIndex = m_index;
 
@@ -125,25 +123,375 @@ int dAssemblerLexical::NextToken ()
 			case 2:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_1, characterSetSize[1])) state = 3;
+				if (ch == 48) state = 3;
+				else if (ch == 49) state = 3;
+				else if (ch == 50) state = 3;
+				else if (ch == 51) state = 3;
+				else if (ch == 52) state = 3;
+				else if (ch == 53) state = 3;
+				else if (ch == 54) state = 3;
+				else if (ch == 55) state = 3;
+				else if (ch == 56) state = 3;
+				else if (ch == 57) state = 3;
+				else if (ch == 65) state = 3;
+				else if (ch == 66) state = 3;
+				else if (ch == 67) state = 3;
+				else if (ch == 68) state = 3;
+				else if (ch == 69) state = 3;
+				else if (ch == 70) state = 3;
+				else if (ch == 71) state = 3;
+				else if (ch == 72) state = 3;
+				else if (ch == 73) state = 3;
+				else if (ch == 74) state = 3;
+				else if (ch == 75) state = 3;
+				else if (ch == 76) state = 3;
+				else if (ch == 77) state = 3;
+				else if (ch == 78) state = 3;
+				else if (ch == 79) state = 3;
+				else if (ch == 80) state = 3;
+				else if (ch == 81) state = 3;
+				else if (ch == 82) state = 3;
+				else if (ch == 83) state = 3;
+				else if (ch == 84) state = 3;
+				else if (ch == 85) state = 3;
+				else if (ch == 86) state = 3;
+				else if (ch == 87) state = 3;
+				else if (ch == 88) state = 3;
+				else if (ch == 89) state = 3;
+				else if (ch == 90) state = 3;
+				else if (ch == 95) state = 3;
+				else if (ch == 97) state = 3;
+				else if (ch == 98) state = 3;
+				else if (ch == 99) state = 3;
+				else if (ch == 100) state = 3;
+				else if (ch == 101) state = 4;
+				else if (ch == 102) state = 3;
+				else if (ch == 103) state = 3;
+				else if (ch == 104) state = 3;
+				else if (ch == 105) state = 3;
+				else if (ch == 106) state = 3;
+				else if (ch == 107) state = 3;
+				else if (ch == 108) state = 3;
+				else if (ch == 109) state = 3;
+				else if (ch == 110) state = 3;
+				else if (ch == 111) state = 3;
+				else if (ch == 112) state = 3;
+				else if (ch == 113) state = 3;
+				else if (ch == 114) state = 3;
+				else if (ch == 115) state = 3;
+				else if (ch == 116) state = 3;
+				else if (ch == 117) state = 3;
+				else if (ch == 118) state = 3;
+				else if (ch == 119) state = 3;
+				else if (ch == 120) state = 3;
+				else if (ch == 121) state = 3;
+				else if (ch == 122) state = 3;
 				else {
 					UnGetChar();
 					GetLexString ();
 					//user specified action
-					{return dAssemblerParcer::LITERAL;}
+					{return dAssemblerParser::LITERAL;}
 					state = 0;
 				}
 				break;
 			}
-			case 3:
+			case 4:
 			{
 				char ch = NextChar();
-				if (IsCharInSet (ch, text_1, characterSetSize[1])) state = 3;
+				if (ch == 48) state = 3;
+				else if (ch == 49) state = 3;
+				else if (ch == 50) state = 3;
+				else if (ch == 51) state = 3;
+				else if (ch == 52) state = 3;
+				else if (ch == 53) state = 3;
+				else if (ch == 54) state = 3;
+				else if (ch == 55) state = 3;
+				else if (ch == 56) state = 3;
+				else if (ch == 57) state = 3;
+				else if (ch == 65) state = 3;
+				else if (ch == 66) state = 3;
+				else if (ch == 67) state = 3;
+				else if (ch == 68) state = 3;
+				else if (ch == 69) state = 3;
+				else if (ch == 70) state = 3;
+				else if (ch == 71) state = 3;
+				else if (ch == 72) state = 3;
+				else if (ch == 73) state = 3;
+				else if (ch == 74) state = 3;
+				else if (ch == 75) state = 3;
+				else if (ch == 76) state = 3;
+				else if (ch == 77) state = 3;
+				else if (ch == 78) state = 3;
+				else if (ch == 79) state = 3;
+				else if (ch == 80) state = 3;
+				else if (ch == 81) state = 3;
+				else if (ch == 82) state = 3;
+				else if (ch == 83) state = 3;
+				else if (ch == 84) state = 3;
+				else if (ch == 85) state = 3;
+				else if (ch == 86) state = 3;
+				else if (ch == 87) state = 3;
+				else if (ch == 88) state = 3;
+				else if (ch == 89) state = 3;
+				else if (ch == 90) state = 3;
+				else if (ch == 95) state = 3;
+				else if (ch == 97) state = 3;
+				else if (ch == 98) state = 3;
+				else if (ch == 99) state = 3;
+				else if (ch == 100) state = 3;
+				else if (ch == 101) state = 3;
+				else if (ch == 102) state = 3;
+				else if (ch == 103) state = 5;
+				else if (ch == 104) state = 3;
+				else if (ch == 105) state = 3;
+				else if (ch == 106) state = 3;
+				else if (ch == 107) state = 3;
+				else if (ch == 108) state = 3;
+				else if (ch == 109) state = 3;
+				else if (ch == 110) state = 3;
+				else if (ch == 111) state = 3;
+				else if (ch == 112) state = 3;
+				else if (ch == 113) state = 3;
+				else if (ch == 114) state = 3;
+				else if (ch == 115) state = 3;
+				else if (ch == 116) state = 3;
+				else if (ch == 117) state = 3;
+				else if (ch == 118) state = 3;
+				else if (ch == 119) state = 3;
+				else if (ch == 120) state = 3;
+				else if (ch == 121) state = 3;
+				else if (ch == 122) state = 3;
 				else {
 					UnGetChar();
 					GetLexString ();
 					//user specified action
-					{return dAssemblerParcer::LITERAL;}
+					{return dAssemblerParser::LITERAL;}
+					state = 0;
+				}
+				break;
+			}
+			case 5:
+			{
+				char ch = NextChar();
+				if (ch == 48) state = 3;
+				else if (ch == 49) state = 3;
+				else if (ch == 50) state = 3;
+				else if (ch == 51) state = 3;
+				else if (ch == 52) state = 3;
+				else if (ch == 53) state = 3;
+				else if (ch == 54) state = 3;
+				else if (ch == 55) state = 3;
+				else if (ch == 56) state = 3;
+				else if (ch == 57) state = 3;
+				else if (ch == 65) state = 3;
+				else if (ch == 66) state = 3;
+				else if (ch == 67) state = 3;
+				else if (ch == 68) state = 3;
+				else if (ch == 69) state = 3;
+				else if (ch == 70) state = 3;
+				else if (ch == 71) state = 3;
+				else if (ch == 72) state = 3;
+				else if (ch == 73) state = 3;
+				else if (ch == 74) state = 3;
+				else if (ch == 75) state = 3;
+				else if (ch == 76) state = 3;
+				else if (ch == 77) state = 3;
+				else if (ch == 78) state = 3;
+				else if (ch == 79) state = 3;
+				else if (ch == 80) state = 3;
+				else if (ch == 81) state = 3;
+				else if (ch == 82) state = 3;
+				else if (ch == 83) state = 3;
+				else if (ch == 84) state = 3;
+				else if (ch == 85) state = 3;
+				else if (ch == 86) state = 3;
+				else if (ch == 87) state = 3;
+				else if (ch == 88) state = 3;
+				else if (ch == 89) state = 3;
+				else if (ch == 90) state = 3;
+				else if (ch == 95) state = 3;
+				else if (ch == 97) state = 3;
+				else if (ch == 98) state = 3;
+				else if (ch == 99) state = 3;
+				else if (ch == 100) state = 3;
+				else if (ch == 101) state = 3;
+				else if (ch == 102) state = 3;
+				else if (ch == 103) state = 3;
+				else if (ch == 104) state = 3;
+				else if (ch == 105) state = 6;
+				else if (ch == 106) state = 3;
+				else if (ch == 107) state = 3;
+				else if (ch == 108) state = 3;
+				else if (ch == 109) state = 3;
+				else if (ch == 110) state = 3;
+				else if (ch == 111) state = 3;
+				else if (ch == 112) state = 3;
+				else if (ch == 113) state = 3;
+				else if (ch == 114) state = 3;
+				else if (ch == 115) state = 3;
+				else if (ch == 116) state = 3;
+				else if (ch == 117) state = 3;
+				else if (ch == 118) state = 3;
+				else if (ch == 119) state = 3;
+				else if (ch == 120) state = 3;
+				else if (ch == 121) state = 3;
+				else if (ch == 122) state = 3;
+				else {
+					UnGetChar();
+					GetLexString ();
+					//user specified action
+					{return dAssemblerParser::LITERAL;}
+					state = 0;
+				}
+				break;
+			}
+			case 6:
+			{
+				char ch = NextChar();
+				if (ch == 48) state = 3;
+				else if (ch == 49) state = 3;
+				else if (ch == 50) state = 3;
+				else if (ch == 51) state = 3;
+				else if (ch == 52) state = 3;
+				else if (ch == 53) state = 3;
+				else if (ch == 54) state = 3;
+				else if (ch == 55) state = 3;
+				else if (ch == 56) state = 3;
+				else if (ch == 57) state = 3;
+				else if (ch == 65) state = 3;
+				else if (ch == 66) state = 3;
+				else if (ch == 67) state = 3;
+				else if (ch == 68) state = 3;
+				else if (ch == 69) state = 3;
+				else if (ch == 70) state = 3;
+				else if (ch == 71) state = 3;
+				else if (ch == 72) state = 3;
+				else if (ch == 73) state = 3;
+				else if (ch == 74) state = 3;
+				else if (ch == 75) state = 3;
+				else if (ch == 76) state = 3;
+				else if (ch == 77) state = 3;
+				else if (ch == 78) state = 3;
+				else if (ch == 79) state = 3;
+				else if (ch == 80) state = 3;
+				else if (ch == 81) state = 3;
+				else if (ch == 82) state = 3;
+				else if (ch == 83) state = 3;
+				else if (ch == 84) state = 3;
+				else if (ch == 85) state = 3;
+				else if (ch == 86) state = 3;
+				else if (ch == 87) state = 3;
+				else if (ch == 88) state = 3;
+				else if (ch == 89) state = 3;
+				else if (ch == 90) state = 3;
+				else if (ch == 95) state = 3;
+				else if (ch == 97) state = 3;
+				else if (ch == 98) state = 3;
+				else if (ch == 99) state = 3;
+				else if (ch == 100) state = 3;
+				else if (ch == 101) state = 3;
+				else if (ch == 102) state = 3;
+				else if (ch == 103) state = 3;
+				else if (ch == 104) state = 3;
+				else if (ch == 105) state = 3;
+				else if (ch == 106) state = 3;
+				else if (ch == 107) state = 3;
+				else if (ch == 108) state = 3;
+				else if (ch == 109) state = 3;
+				else if (ch == 110) state = 7;
+				else if (ch == 111) state = 3;
+				else if (ch == 112) state = 3;
+				else if (ch == 113) state = 3;
+				else if (ch == 114) state = 3;
+				else if (ch == 115) state = 3;
+				else if (ch == 116) state = 3;
+				else if (ch == 117) state = 3;
+				else if (ch == 118) state = 3;
+				else if (ch == 119) state = 3;
+				else if (ch == 120) state = 3;
+				else if (ch == 121) state = 3;
+				else if (ch == 122) state = 3;
+				else {
+					UnGetChar();
+					GetLexString ();
+					//user specified action
+					{return dAssemblerParser::LITERAL;}
+					state = 0;
+				}
+				break;
+			}
+			case 7:
+			{
+				char ch = NextChar();
+				if (ch == 48) state = 3;
+				else if (ch == 49) state = 3;
+				else if (ch == 50) state = 3;
+				else if (ch == 51) state = 3;
+				else if (ch == 52) state = 3;
+				else if (ch == 53) state = 3;
+				else if (ch == 54) state = 3;
+				else if (ch == 55) state = 3;
+				else if (ch == 56) state = 3;
+				else if (ch == 57) state = 3;
+				else if (ch == 58) state = 8;
+				else if (ch == 65) state = 3;
+				else if (ch == 66) state = 3;
+				else if (ch == 67) state = 3;
+				else if (ch == 68) state = 3;
+				else if (ch == 69) state = 3;
+				else if (ch == 70) state = 3;
+				else if (ch == 71) state = 3;
+				else if (ch == 72) state = 3;
+				else if (ch == 73) state = 3;
+				else if (ch == 74) state = 3;
+				else if (ch == 75) state = 3;
+				else if (ch == 76) state = 3;
+				else if (ch == 77) state = 3;
+				else if (ch == 78) state = 3;
+				else if (ch == 79) state = 3;
+				else if (ch == 80) state = 3;
+				else if (ch == 81) state = 3;
+				else if (ch == 82) state = 3;
+				else if (ch == 83) state = 3;
+				else if (ch == 84) state = 3;
+				else if (ch == 85) state = 3;
+				else if (ch == 86) state = 3;
+				else if (ch == 87) state = 3;
+				else if (ch == 88) state = 3;
+				else if (ch == 89) state = 3;
+				else if (ch == 90) state = 3;
+				else if (ch == 95) state = 3;
+				else if (ch == 97) state = 3;
+				else if (ch == 98) state = 3;
+				else if (ch == 99) state = 3;
+				else if (ch == 100) state = 3;
+				else if (ch == 101) state = 3;
+				else if (ch == 102) state = 3;
+				else if (ch == 103) state = 3;
+				else if (ch == 104) state = 3;
+				else if (ch == 105) state = 3;
+				else if (ch == 106) state = 3;
+				else if (ch == 107) state = 3;
+				else if (ch == 108) state = 3;
+				else if (ch == 109) state = 3;
+				else if (ch == 110) state = 3;
+				else if (ch == 111) state = 3;
+				else if (ch == 112) state = 3;
+				else if (ch == 113) state = 3;
+				else if (ch == 114) state = 3;
+				else if (ch == 115) state = 3;
+				else if (ch == 116) state = 3;
+				else if (ch == 117) state = 3;
+				else if (ch == 118) state = 3;
+				else if (ch == 119) state = 3;
+				else if (ch == 120) state = 3;
+				else if (ch == 121) state = 3;
+				else if (ch == 122) state = 3;
+				else {
+					UnGetChar();
+					GetLexString ();
+					//user specified action
+					{return dAssemblerParser::LITERAL;}
 					state = 0;
 				}
 				break;
@@ -153,7 +501,157 @@ int dAssemblerLexical::NextToken ()
 				{
 					GetLexString ();
 					//user specified action
-					{return dAssemblerParcer::BEGIN;}
+					{return dAssemblerParser::BEGIN;}
+					state = 0;
+				}
+				break;
+			}
+			case 3:
+			{
+				char ch = NextChar();
+				if (ch == 48) state = 3;
+				else if (ch == 49) state = 3;
+				else if (ch == 50) state = 3;
+				else if (ch == 51) state = 3;
+				else if (ch == 52) state = 3;
+				else if (ch == 53) state = 3;
+				else if (ch == 54) state = 3;
+				else if (ch == 55) state = 3;
+				else if (ch == 56) state = 3;
+				else if (ch == 57) state = 3;
+				else if (ch == 65) state = 3;
+				else if (ch == 66) state = 3;
+				else if (ch == 67) state = 3;
+				else if (ch == 68) state = 3;
+				else if (ch == 69) state = 3;
+				else if (ch == 70) state = 3;
+				else if (ch == 71) state = 3;
+				else if (ch == 72) state = 3;
+				else if (ch == 73) state = 3;
+				else if (ch == 74) state = 3;
+				else if (ch == 75) state = 3;
+				else if (ch == 76) state = 3;
+				else if (ch == 77) state = 3;
+				else if (ch == 78) state = 3;
+				else if (ch == 79) state = 3;
+				else if (ch == 80) state = 3;
+				else if (ch == 81) state = 3;
+				else if (ch == 82) state = 3;
+				else if (ch == 83) state = 3;
+				else if (ch == 84) state = 3;
+				else if (ch == 85) state = 3;
+				else if (ch == 86) state = 3;
+				else if (ch == 87) state = 3;
+				else if (ch == 88) state = 3;
+				else if (ch == 89) state = 3;
+				else if (ch == 90) state = 3;
+				else if (ch == 95) state = 3;
+				else if (ch == 97) state = 3;
+				else if (ch == 98) state = 3;
+				else if (ch == 99) state = 3;
+				else if (ch == 100) state = 3;
+				else if (ch == 101) state = 3;
+				else if (ch == 102) state = 3;
+				else if (ch == 103) state = 3;
+				else if (ch == 104) state = 3;
+				else if (ch == 105) state = 3;
+				else if (ch == 106) state = 3;
+				else if (ch == 107) state = 3;
+				else if (ch == 108) state = 3;
+				else if (ch == 109) state = 3;
+				else if (ch == 110) state = 3;
+				else if (ch == 111) state = 3;
+				else if (ch == 112) state = 3;
+				else if (ch == 113) state = 3;
+				else if (ch == 114) state = 3;
+				else if (ch == 115) state = 3;
+				else if (ch == 116) state = 3;
+				else if (ch == 117) state = 3;
+				else if (ch == 118) state = 3;
+				else if (ch == 119) state = 3;
+				else if (ch == 120) state = 3;
+				else if (ch == 121) state = 3;
+				else if (ch == 122) state = 3;
+				else {
+					UnGetChar();
+					GetLexString ();
+					//user specified action
+					{return dAssemblerParser::LITERAL;}
+					state = 0;
+				}
+				break;
+			}
+			case 1:
+			{
+				char ch = NextChar();
+				if (ch == 48) state = 3;
+				else if (ch == 49) state = 3;
+				else if (ch == 50) state = 3;
+				else if (ch == 51) state = 3;
+				else if (ch == 52) state = 3;
+				else if (ch == 53) state = 3;
+				else if (ch == 54) state = 3;
+				else if (ch == 55) state = 3;
+				else if (ch == 56) state = 3;
+				else if (ch == 57) state = 3;
+				else if (ch == 65) state = 3;
+				else if (ch == 66) state = 3;
+				else if (ch == 67) state = 3;
+				else if (ch == 68) state = 3;
+				else if (ch == 69) state = 3;
+				else if (ch == 70) state = 3;
+				else if (ch == 71) state = 3;
+				else if (ch == 72) state = 3;
+				else if (ch == 73) state = 3;
+				else if (ch == 74) state = 3;
+				else if (ch == 75) state = 3;
+				else if (ch == 76) state = 3;
+				else if (ch == 77) state = 3;
+				else if (ch == 78) state = 3;
+				else if (ch == 79) state = 3;
+				else if (ch == 80) state = 3;
+				else if (ch == 81) state = 3;
+				else if (ch == 82) state = 3;
+				else if (ch == 83) state = 3;
+				else if (ch == 84) state = 3;
+				else if (ch == 85) state = 3;
+				else if (ch == 86) state = 3;
+				else if (ch == 87) state = 3;
+				else if (ch == 88) state = 3;
+				else if (ch == 89) state = 3;
+				else if (ch == 90) state = 3;
+				else if (ch == 95) state = 3;
+				else if (ch == 97) state = 3;
+				else if (ch == 98) state = 3;
+				else if (ch == 99) state = 3;
+				else if (ch == 100) state = 3;
+				else if (ch == 101) state = 3;
+				else if (ch == 102) state = 3;
+				else if (ch == 103) state = 3;
+				else if (ch == 104) state = 3;
+				else if (ch == 105) state = 3;
+				else if (ch == 106) state = 3;
+				else if (ch == 107) state = 3;
+				else if (ch == 108) state = 3;
+				else if (ch == 109) state = 3;
+				else if (ch == 110) state = 3;
+				else if (ch == 111) state = 3;
+				else if (ch == 112) state = 3;
+				else if (ch == 113) state = 3;
+				else if (ch == 114) state = 3;
+				else if (ch == 115) state = 3;
+				else if (ch == 116) state = 3;
+				else if (ch == 117) state = 3;
+				else if (ch == 118) state = 3;
+				else if (ch == 119) state = 3;
+				else if (ch == 120) state = 3;
+				else if (ch == 121) state = 3;
+				else if (ch == 122) state = 3;
+				else {
+					UnGetChar();
+					GetLexString ();
+					//user specified action
+					{return dAssemblerParser::LITERAL;}
 					state = 0;
 				}
 				break;

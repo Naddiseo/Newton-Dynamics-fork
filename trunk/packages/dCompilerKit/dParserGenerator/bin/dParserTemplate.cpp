@@ -10,7 +10,7 @@
 */
 
 //
-//Auto generated Parcer Generator class: $(className).cpp
+//Auto generated Parser Generator class: $(className).cpp
 //
 $(userCode)
 #include "$(className).h"
@@ -113,7 +113,7 @@ const $(className)::dActionEntry* $(className)::FindAction (const dActionEntry* 
 	return NULL;
 }
 
-const $(className)::dGotoEntry* dAssemblerParcer::FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const
+const $(className)::dGotoEntry* dAssemblerParser::FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const
 {
 	int i0 = 0;
 	int i1 = count - 1;

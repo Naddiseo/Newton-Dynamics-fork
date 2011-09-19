@@ -1,11 +1,11 @@
-// dParcerGenerator.cpp : Defines the entry point for the console application.
+// dParserGenerator.cpp : Defines the entry point for the console application.
 //
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <tchar.h>
 #include <crtdbg.h>
-#include "dParcerCompiler.h"
+#include "dParserCompiler.h"
 
 
 int main(int argc, char* argv[])
@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
 	fclose (rules);
 	buffer.erase(strlen (buffer.c_str()));
 
-	dParcerCompiler parcel (buffer, outputFileName, scannerClassName);
+	dParserCompiler parcel (buffer, outputFileName, scannerClassName);
 
 
 	return 0;

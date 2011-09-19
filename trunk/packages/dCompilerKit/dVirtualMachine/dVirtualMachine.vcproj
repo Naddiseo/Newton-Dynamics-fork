@@ -188,19 +188,19 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath=".\dAssemblerParcer.cpp"
+			RelativePath=".\dAssemblerParser.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\dAssemblerParcer.grm"
+			RelativePath=".\dAssemblerParser.grm"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					Description="dParcerGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="..\dParcerGenerator\bin\dParcerGenerator.exe $(InputFileName) dAssemblerLexical $(InputDir)$(InputName).cpp&#x0D;&#x0A;"
+					Description="dParserGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
+					CommandLine="..\dParserGenerator\bin\dParserGenerator.exe $(InputFileName) dAssemblerLexical $(InputDir)$(InputName).cpp&#x0D;&#x0A;"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>
@@ -209,14 +209,14 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					Description="dParcerGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="..\dParcerGenerator\bin\dParcerGenerator.exe $(InputFileName) dAssemblerLexical $(InputDir)$(InputName).cpp&#x0D;&#x0A;"
+					Description="dParserGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
+					CommandLine="..\dParserGenerator\bin\dParserGenerator.exe $(InputFileName) dAssemblerLexical $(InputDir)$(InputName).cpp&#x0D;&#x0A;"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath=".\dAssemblerParcer.h"
+			RelativePath=".\dAssemblerParser.h"
 			>
 		</File>
 		<File

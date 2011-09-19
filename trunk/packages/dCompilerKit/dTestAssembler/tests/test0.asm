@@ -25,6 +25,6 @@ begin: function_One
 	loadd	r1, a	
 	loadd	r2, b	
 	add		r1, r2
-	jmp		r31
+	ret		r31
 	
 end:

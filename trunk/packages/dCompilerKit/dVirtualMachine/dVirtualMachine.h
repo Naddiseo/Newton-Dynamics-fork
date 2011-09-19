@@ -10,15 +10,15 @@ class dVirtualMachine
 	{
 		// move
 		mov,		// move		Ri, Rj				R(i) = R(j)
+		lea,		// lea 		Ri, Rj, imm32		R(i) = R(j) + imm32
 
 		// arithmetic
-		addi,		// addi 	Ri, Rj, imm32		R(i) = R(j) + signed (imm32)
 		add,		// add  	Ri, Rj				R(i) = R(i) + R(j)
 		sub,		// sub  	Ri, Rj				R(i) = R(i) - R(j)
 		mul,		// mul  	Ri, Rj				R(i) = lowpart (R(i) * R(j)) ; R(j) = upperpart (R(i) * R(j))
-		div,		// div  	Ri, Rj				R(i) = nume (R(i) / R(j)) ; R(j) = recidual (R(i) / R(j))
-		abs,		// abs		Ri, Rj,				R(i) = abs (R(j)) 
-		neg,		// neg		Ri, Rj,				R(i) = - R(j) 
+		div,		// div  	Ri, Rj				R(i) = num (R(i) / R(j)) ; R(j) = recidual (R(i) / R(j))
+		abs,		// abs		Ri, Rj				R(i) = abs (R(j)) 
+		neg,		// neg		Ri, Rj				R(i) = - R(j) 
 		
 		// logical
 		and,		// and  	Ri, Rj				R(i) = R(i) & R(j)
@@ -54,6 +54,7 @@ class dVirtualMachine
 		ret,		// ret		Ri					pc = [R(i)], R(i) = R(i) + 4  
 		syscall,	// syscall	Ri, Rj, imm32		execute a system call
 		jump,		// jump		Ri					pc = R(i)
+		jumpr,		// jumpr	imm32				pc += imm32
 
 		// frame pointer 
 		enter,		// enter	Ri, Rj, imm32		[R(j)] = R(i), R(i) = R(j), R(j) = R(j) + imm32	

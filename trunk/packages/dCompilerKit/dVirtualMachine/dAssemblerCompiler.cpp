@@ -10,7 +10,7 @@
 */
 
 //
-//Auto generated Parcer Generator class: dAssemblerCompiler.cpp
+//Auto generated Parser Generator class: dAssemblerCompiler.cpp
 //
 
 
@@ -18,7 +18,7 @@
 #include "dAssemblerCompiler.h"
 
 dAssemblerCompiler::dAssemblerCompiler(dVirtualMachine* const virtualMachine)
-	:dAssemblerParcer ()
+	:dAssemblerParser ()
 	,m_virtualMachine (virtualMachine)
 {
 }
@@ -29,7 +29,7 @@ dAssemblerCompiler::~dAssemblerCompiler()
 
 bool dAssemblerCompiler::Parce(dAssemblerLexical& scanner)
 {
-	return dAssemblerParcer::Parce(scanner);
+	return dAssemblerParser::Parce(scanner);
 }
 
 

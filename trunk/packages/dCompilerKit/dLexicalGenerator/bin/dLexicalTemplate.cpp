@@ -96,14 +96,10 @@ void $(className)::GetLexString ()
 
 int $(className)::NextToken ()
 {
-	//static strings patterns
-$(characterSets)
-	static int characterSetSize[] = {$(characterSetSize)};
-	static char* characterSetArray[] = {$(characterSetArray)};
-
-	static int transitionsCount[] = {$(transitionsCount)};
-	static int transitionsStart[] = {$(transitionsStart)};
-	static unsigned nextTranstionList[] = {$(nextTranstionList)};
+	static short transitionsCount[] = {$(transitionsCount)};
+	static short transitionsStart[] = {$(transitionsStart)};
+	static short nextState[] = {$(nextStateList)};
+	static char  nextCharacter[] = {$(nextCharaterList)};
 	
 	m_startIndex = m_index;
 

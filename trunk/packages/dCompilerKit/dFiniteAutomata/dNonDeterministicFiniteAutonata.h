@@ -36,9 +36,6 @@ class dNonDeterministicFiniteAutonata: public dFiniteAutomata
 
 	dAutomataState* GetStartState() const;
 	dAutomataState* GetExitState() const;
-//	dAutomataState* CreateDeterministicFiniteAutomaton () const;
-
-	
 
 	protected:
 	enum Operations;
@@ -80,10 +77,10 @@ class dNonDeterministicFiniteAutonata: public dFiniteAutomata
 	void DeleteNFA (dAutomataState* const startdAutomataState);
 	
 
-	void Match (int token);
-	void PushId (int charater);
-	void PushSet (const char* const set, int size);
-
+	virtual void Match (int token);
+	virtual void PushId (int charater);
+	virtual void PushSet (const char* const set, int size);
+	
 	void ReduceUnionDiagram();
 	void ReduceConcatenationDiagram();
 	void ReduceZeroOrMoreDiagram ();
@@ -94,9 +91,6 @@ class dNonDeterministicFiniteAutonata: public dFiniteAutomata
 	void ConcatenationExpression ();
 	void UnuaryExpression ();
 	int BracketedExpression (char* const set, int size);
-
-	
-
 
 
 	static int SortStates (const void *ptr0, const void *ptr1);

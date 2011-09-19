@@ -32,6 +32,12 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 
 
 %%
+//[a-zA-Z_][0-9a-zA-Z_]*	{return dAssemblerParcer::LITERAL;}
+[A-Z]*					{return dAssemblerParcer::LITERAL;}
+"ABC:"					{return dAssemblerParcer::BEGIN;}
+
+
+/*
 {WhiteSpace}		{}
 {Comment}			{}
 "%%"				{ return dParcerCompiler::GRAMMAR_SEGMENT;}
@@ -72,4 +78,4 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 "'\['"				{ m_tokenString = "["; return('['); }
 "'\]'"				{ m_tokenString = "]"; return(']'); }
 [{]					{ ReadBalancedExpresion ('{', '}'); return dParcerCompiler::USER_ACTION;}
-
+*/

@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __dParcerCompiler_h__
-#define __dParcerCompiler_h__
+#ifndef __dParserCompiler_h__
+#define __dParserCompiler_h__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,9 +54,9 @@
 #include <string>
 using namespace std;
 
-class dParcerLexical;
+class dParserLexical;
 
-class dParcerCompiler
+class dParserCompiler
 {
 	public:
 	enum dToken
@@ -96,8 +96,8 @@ class dParcerCompiler
 	class dOperatorsAssociation;
 
 	
-	dParcerCompiler(const string& inputRules, const char* const outputFileName, const char* const scannerClassName);
-	~dParcerCompiler();
+	dParserCompiler(const string& inputRules, const char* const outputFileName, const char* const scannerClassName);
+	~dParserCompiler();
 
 	protected:
 	string GetClassName(const char* const fileName) const;
@@ -109,7 +109,7 @@ class dParcerCompiler
 
 	void ScanGrammarFile(const string& inputRules, dProductionRule& rules, dTree<dTokenType, string>& symbolList, dOperatorsPrecedence& operatorPrecence,
 						 dTree<int, string>& terminaldTokens, string& userCodeBlock, string& userVariableClass, string& endUserCode, int& lastTokenEnum);
-	dToken ScanGrammarRule(dParcerLexical& lexical, dProductionRule& rules, dTree<dTokenType, string>& symbolList, int& ruleNumber, dTree<int, string>& tokenEnumarationMap, int& tokenEnumeration);
+	dToken ScanGrammarRule(dParserLexical& lexical, dProductionRule& rules, dTree<dTokenType, string>& symbolList, int& ruleNumber, dTree<int, string>& tokenEnumarationMap, int& tokenEnumeration);
 
 	
 	bool DoesSymbolDeriveEmpty (const string& symbol, const dProductionRule& ruleList) const ;
@@ -122,7 +122,7 @@ class dParcerCompiler
 
 	void GenerateHeaderFile (const string& className, const string& scannerClassName, const char* const outputFileName, dProductionRule& rules, 
 							 dTree<int, string>& tokenEnumerationMap, const string& userVariableClass); 
-	void GenerateParcerCode (const string& className, const string& scannerClassName, const char* const outputFileName, const string& userCode, 
+	void GenerateParserCode (const string& className, const string& scannerClassName, const char* const outputFileName, const string& userCode, 
 							 dTree<dState*,int>& stateList, dTree<dTokenType, string>& symbolList, dTree<int, string>& tokenEnumerationMap,
 							 string& endUserCode, int lastTokenEnum);
 

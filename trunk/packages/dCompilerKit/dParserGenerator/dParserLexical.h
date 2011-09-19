@@ -10,11 +10,11 @@
 */
 
 //
-//Auto generated Lexical Analyzer class: dParcerLexical.h
+//Auto generated Lexical Analyzer class: dParserLexical.h
 //
 
-#ifndef __dParcerLexical_h__
-#define __dParcerLexical_h__
+#ifndef __dParserLexical_h__
+#define __dParserLexical_h__
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4702) // warning C4702: unreachable code
@@ -26,7 +26,7 @@
 #include <string>
 using namespace std;
 
-class dParcerLexical
+class dParserLexical
 {
 	enum dStateType
 	{
@@ -58,8 +58,8 @@ class dParcerLexical
 
 
 	public:
-	dParcerLexical(const char* const data);
-	virtual ~dParcerLexical();
+	dParserLexical(const char* const data);
+	virtual ~dParserLexical();
 
 	virtual int NextToken ();
 
