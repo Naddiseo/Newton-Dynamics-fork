@@ -214,14 +214,14 @@ $(semanticActionsCode)
 	
 			case dACCEPT: // 2 = accept
 			{
-				// program parced successfully, exit with successful code
+				// program parsed successfully, exit with successful code
 				return true;
 			}
 			
 			default:  
 			{
 				_ASSERTE (0);
-				// syntact error parciing program
+				// syntax error parsing program
 				//if (!ErrorHandler ("error")) {
 				//}
 				break;
