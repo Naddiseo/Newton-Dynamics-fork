@@ -70,7 +70,8 @@ class dParcerLexical
 	void ReadBalancedExpresion (char open, char close);
 
 	void GetLexString ();
-	bool IsCharInSet (char ch, const char* const set, int setSize) const;
+	int GetNextStateIndex (char symbol, int count, const char* const sharacterSet) const;
+//	bool IsCharInSet (char ch, const char* const set, int setSize) const;
 
 	// local lexical variables
 	string m_tokenString;
@@ -78,6 +79,5 @@ class dParcerLexical
 	int m_index;
 	int m_startIndex;
 	int m_lineNumber;
-	
 };
 #endif

@@ -39,7 +39,7 @@ class dLexCompiler
 	enum dToken;
 	class dTokenData;
 	class dExpandedNFA;
-	class dExpandedDFA;
+//	class dExpandedDFA;
 	class dExpandedState;
 
 
@@ -101,19 +101,8 @@ class dLexCompiler
 	void MatchToken (dToken token);
 	void ParseDefinitionExpression (string& preheaderCode);
 	void ParseDefinitionBlock (string& preheaderCode);
-
 	void ParseDefinitions (dExpandedNFA &nfa, string& userPreHeaderCode, string& postHeaderCode);
-	
-	void CreateHeaderFile (const char* const fileName, const string& className) const;
-	void CreateCodeFile (const char* const fileName, const string& className, int stateCount, 
-						 const string& userPreHeaderCode, const string& userPostHeaderCode, const string& semanticActionCode,
-						 dTree<dTransitionCountStart, int>& transitionsCountStartMap, dList<dTransitionType>& nextStateRun) const;
-
 	string GetClassName(const char* const fileName) const;
-	void ReplaceMacro (string& data, const string& newName, const string& macro) const;
-	void ReplaceAllMacros (string& data, const string& newName, const string& macro) const;
-	void LoadTemplateFile(const char* const templateName, string& templateOuput) const;
-	void SaveFile(const char* const fileName, const char* const extention, const string& input) const;
 
 	dToken m_token;
 	int m_lineNumber;

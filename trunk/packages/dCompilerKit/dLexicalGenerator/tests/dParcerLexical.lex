@@ -22,8 +22,8 @@ AnyButAstr			[^\*]
 AnyButSlash			[^\/]
 Comment1			[\/][\/].*
 Comment2			[\/][\*]({AnyButAstr}|[\*]{AnyButSlash})*[\*][\/]
-Comment				({Comment1}|{Comment2})
-
+//Comment				({Comment1}|{Comment2})
+Comment			([\/][\*])
 
 AnyButPercent		[^\%]
 AnyButCloseCurly	[^\}]
@@ -32,9 +32,8 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 
 
 %%
-//[a-zA-Z_][0-9a-zA-Z_]*	{return dAssemblerParcer::LITERAL;}
-[A-Z]*					{return dAssemblerParcer::LITERAL;}
-"ABC:"					{return dAssemblerParcer::BEGIN;}
+{WhiteSpace}	{/* skip is a white space*/}
+{Comment}		{/* skip commnets */}
 
 
 /*

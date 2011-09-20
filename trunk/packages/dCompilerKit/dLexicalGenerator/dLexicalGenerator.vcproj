@@ -183,6 +183,14 @@
 			RelativePath=".\dLexicalMain.cpp"
 			>
 		</File>
+		<File
+			RelativePath=".\dLexScannerGenerator.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dLexScannerGenerator.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

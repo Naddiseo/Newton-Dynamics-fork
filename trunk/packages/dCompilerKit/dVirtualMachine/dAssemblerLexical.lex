@@ -29,6 +29,7 @@ Comment1        [\/][\/].*
 Comment2        [\/][\*]({AnyButAstr}|[\*]{AnyButSlash})*[\*][\/]
 Comment			({Comment1}|{Comment2})
 
+
 Integer			[\-\+]?[0-9]+
 //Float			{Integer}[\.][0-9]+(e{Integer})?
 
@@ -37,29 +38,26 @@ Literal			[a-zA-Z_][0-9a-zA-Z_]*
 Register		[rR][0-9]+
 
 add				[aA][dD][dD]
-addi			[aA][dD][dD][iI]
+lea				[lL][eE][aA]
 
 loadd			[lL][oO][aA][dD][dD]
 
 
 %%
-{Literal}		{return dAssemblerParser::LITERAL;}
-"begin:"		{return dAssemblerParser::BEGIN;}
+{WhiteSpace}	{/* skip is a white space*/}
+{Comment}		{/* skip commnets */}
 
-/*
-{WhiteSpace}	{}
-{Comment}		{}
 
 [,]				{return ';';}
 [;]				{return ';';}
-[.]			{return '.';}
+[.]				{return '.';}
 [<]				{return '<';}
 [>]				{return '>';}
 [=]				{return '=';}
-//[+]				{return '+';}	
-//[*]				{return '*';}	
-//[(]				{return '(';}	
-//[)]				{return ')';}	
+//[+]			{return '+';}	
+//[*]			{return '*';}	
+//[(]			{return '(';}	
+//[)]			{return ')';}	
 
 {Integer}		{return dAssemblerParser::INTEGER;}
 
@@ -77,9 +75,9 @@ loadd			[lL][oO][aA][dD][dD]
 "end:"			{return dAssemblerParser::END;}
 {loadd}			{return dAssemblerParser::LOADD;}
 
-{addi}			{return dAssemblerParser::ADDI;}
+{lea}			{return dAssemblerParser::LEA;}
 {add}			{return dAssemblerParser::ADD;}
-*/
+
 
 
 

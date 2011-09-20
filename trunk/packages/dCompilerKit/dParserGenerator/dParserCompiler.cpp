@@ -613,13 +613,6 @@ dParserCompiler::dToken dParserCompiler::ScanGrammarRule(
 }
 
 
-
-
-
-
-
-
-
 void dParserCompiler::LoadTemplateFile(const char* const templateName, string& templateOuput) const
 {
 	char path[2048];

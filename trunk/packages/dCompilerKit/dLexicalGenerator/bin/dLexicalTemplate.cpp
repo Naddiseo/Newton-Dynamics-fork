@@ -29,26 +29,6 @@ $(className)::~$(className)()
 {
 }
 
-bool $(className)::IsCharInSet (char ch, const char* const set, int setSize) const
-{
-	int i0 = 0;
-	int i1 = setSize - 1;
-	while ((i1 - i0) >= 4) {
-		int i = (i1 + i0 + 1)>>1;
-		if (ch <= set[i]) {
-			i1 = i;
-		} else {
-			i0 = i;
-		}
-	}
-
-	for (int i = i0; i <= i1; i ++) {
-		if (ch == set[i]) {
-			return true;
-		}
-	}
-	return false;
-}
 
 void $(className)::ReadBalancedExpresion (char open, char close)
 {
@@ -94,54 +74,55 @@ void $(className)::GetLexString ()
 }
 
 
+int $(className)::GetNextStateIndex (char symbol, int count, const char* const characterSet) const
+{
+	int i0 = 0;
+	int i1 = count - 1;
+	while ((i1 - i0) >= 4) {
+		int i = (i1 + i0 + 1)>>1;
+		if (symbol <= characterSet[i]) {
+			i1 = i;
+		} else {
+			i0 = i;
+		}
+	}
+
+	for (int i = i0; i <= i1; i ++) {
+		if (symbol == characterSet[i]) {
+			return i;
+		}
+	}
+	return -1;
+}
+
 int $(className)::NextToken ()
 {
 	static short transitionsCount[] = {$(transitionsCount)};
 	static short transitionsStart[] = {$(transitionsStart)};
-	static short nextState[] = {$(nextStateList)};
-	static char  nextCharacter[] = {$(nextCharaterList)};
+	static short nextStateSet[] = {$(nextStateList)};
+	static char  nextCharacterSet[] = {$(nextCharaterList)};
 	
 	m_startIndex = m_index;
 
 	int state = 0;
-	for (bool matchFound = false; !matchFound; )
+	for (char ch = NextChar(); ch; ) 
 	{
-		switch (state) 
-		{
-$(semanticActionCode)
-		
-			default:
+		int transCount = transitionsCount[state];
+		int tranStart = transitionsStart[state];
+		int nextStateIndex = GetNextStateIndex (ch, transCount, &nextCharacterSet[tranStart]);
+		if (nextStateIndex >= 0) {
+			ch = NextChar();
+			short* const stateArray = &nextStateSet[tranStart];
+			state = stateArray[nextStateIndex];
+		} else {
+			UnGetChar ();
+			switch (state) 
 			{
-				char ch = NextChar();
-				int count = transitionsCount[state];
-				int start = transitionsStart[state];
-				unsigned* const transitionsList = &nextTranstionList[start];
+$(semanticActionCode)
 
-				bool stateChanged = false;
-				for (int i = 0; i < count; i ++) {
-					dTransitionInfo transition (transitionsList[i]);
-					if (transition.m_infoType == m_infoIsCharacter) {
-						if (ch == char (transition.m_info)) {
-							state = transition.m_nextState;
-							stateChanged = true;
-							break;
-						}
-					} else {
-						_ASSERTE (transition.m_infoType == m_infoIsCharacterSet);
-						int index = transition.m_info;
-						int length = characterSetSize[index];
-						const char* text = characterSetArray[index];
-						if (IsCharInSet (ch, text, length)) {
-							state = transition.m_nextState;
-							stateChanged = true;
-							break;
-						}
-
-					}
-				}
-
-				if (!stateChanged) {
-					// Unknown pattern
+				default:
+				{
+					// Lexical error
 					return -1;
 				}
 			}

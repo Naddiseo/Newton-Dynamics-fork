@@ -28,35 +28,6 @@ using namespace std;
 
 class dAssemblerLexical
 {
-	enum dStateType
-	{
-		m_extiState = 'a',
-		m_itermediateState,
-	};
-	enum dTranstionType
-	{
-		m_infoIsCharacter = 0,
-		m_infoIsCharacterSet,
-	};
-
-	struct dTransitionInfo
-	{
-		public:
-		dTransitionInfo (unsigned val)
-			:m_value(val)
-		{
-		}
-		union {
-			unsigned m_value;
-			struct {
-				unsigned  m_nextState	:14;
-				unsigned  m_infoType	: 2;		// 0 m_value is a character, 1 m_value is a charcterSet, 
-				unsigned  m_info		:16;
-			};
-		};
-	};
-
-
 	public:
 	dAssemblerLexical(const char* const data);
 	virtual ~dAssemblerLexical();
@@ -99,7 +70,8 @@ class dAssemblerLexical
 	void ReadBalancedExpresion (char open, char close);
 
 	void GetLexString ();
-	bool IsCharInSet (char ch, const char* const set, int setSize) const;
+	int GetNextStateIndex (char symbol, int count, const char* const sharacterSet) const;
+//	bool IsCharInSet (char ch, const char* const set, int setSize) const;
 
 	// local lexical variables
 	string m_tokenString;
@@ -107,6 +79,5 @@ class dAssemblerLexical
 	int m_index;
 	int m_startIndex;
 	int m_lineNumber;
-	
 };
 #endif

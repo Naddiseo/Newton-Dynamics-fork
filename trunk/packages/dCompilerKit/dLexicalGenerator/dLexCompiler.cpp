@@ -13,7 +13,8 @@
 //
 
 #include "dLexCompiler.h"
-#include "dFiniteAutomata.h"
+//#include "dFiniteAutomata.h"
+#include "dLexScannerGenerator.h"
 
 enum dLexCompiler::dToken
 {
@@ -153,22 +154,15 @@ public:
 
 	void PushSet (const char* const set, int size)
 	{
+//		dNonDeterministicFiniteAutonata::PushSet (set, size);
 		dAutomataState* const startState = CreateState (m_stateID ++);
 		dAutomataState* const acceptingState = CreateState (m_stateID ++);
-
-//		int setId = m_charaterSetMap.AddSet(set, size);
-//		dAutomataState::dCharacter charInfo (setId, dAutomataState::CHARACTER_SET);
-//		startState->m_transtions.Append(dAutomataState::dTransition(charInfo, acceptingState));
 
 		for (int i = 0; i < size; i ++) {
 			dAutomataState::dCharacter charInfo (GetScapeChar (set[i]), dAutomataState::CHARACTER);
 			startState->m_transtions.Append(dAutomataState::dTransition(charInfo, acceptingState));
 		}
-
 		m_stack.Push(startState, acceptingState);
-
-
-//		dNonDeterministicFiniteAutonata::PushSet (set, size);
 	}
 
 	void PreProcessExpression (const char* const regularExpression)
@@ -288,206 +282,6 @@ public:
 	int m_lineNumber;
 };
 
-class dLexCompiler::dExpandedDFA: public dDeterministicFiniteAutonata
-{
-	public: 
-	dExpandedDFA (
-		const dNonDeterministicFiniteAutonata& nfa, 
-		string& semanticActionCodeOutput, 
-		dTree<dTransitionCountStart, int>& transitionsCountMap,
-		dList<dTransitionType>& nextStateRun,
-		const char* const inputFileName)
-		:dDeterministicFiniteAutonata (), m_stateCount(0), m_nfa(&nfa)
-	{
-		CreateDeterministicFiniteAutomaton (nfa);
-		ConvertSwitchCaseStatements (semanticActionCodeOutput, transitionsCountMap, nextStateRun, inputFileName);
-	}
-
-	int GetStateCount() const
-	{
-		return m_stateCount;
-	}
-
-	const dChatertSetMap& GetCharacterSetMap() const
-	{
-		return m_charaterSetMap;
-	}
-
-	private:
-	dAutomataState* CreateState (int id)
-	{
-		m_stateCount ++;
-		return new dExpandedState (id); 
-	}
-
-	dAutomataState* CreateTargetState (dTree<dAutomataState*,dAutomataState*>& subSet, int id)
-	{
-		dExpandedState* const state = (dExpandedState*) dDeterministicFiniteAutonata::CreateTargetState (subSet, id);
-
-		dExpandedState* userActionState = NULL;
-		dTree<dAutomataState*,dAutomataState*>::Iterator iter (subSet);
-		for (iter.Begin(); iter; iter ++) {
-			dExpandedState* const subSetState = (dExpandedState*) iter.GetNode()->GetInfo();
-			if (subSetState->m_hasUserAction) {
-				if (!userActionState) {
-					userActionState = subSetState;
-				} else if (userActionState->m_id < subSetState->m_id) {
-					userActionState = subSetState;
-				}
-			}
-		}
-
-		if (userActionState) {
-			state->m_hasUserAction = true;
-			state->m_lineNumber = userActionState->m_lineNumber;
-			state->m_userAction = userActionState->m_userAction;
-		}
-
-		return state;
-	}
-
-	void AddText (string& output, const char* const fmt, ...) const
-	{
-		va_list v_args;
-		char text[2048];
-
-		text[0] = '\t';
-		text[1] = '\t';
-		text[2] = '\t';
-		text[3] = 0;
-		va_start (v_args, fmt);     
-		vsprintf(&text[3], fmt, v_args);
-		va_end (v_args);            
-
-		output += text;
-	}
-
-
-	void ConvertSwitchCaseStatements (
-		string& semanticActionCodeOutput, 
-		dTree<dTransitionCountStart, int>& transitionsCountMap,
-		dList<dTransitionType>& nextStateRun,
-		const char* const inputFileName) const 
-	{
-		dTree<dAutomataState*,dAutomataState*> filter;
-
-		int stack = 1;
-		dAutomataState* pool[128];
-
-		string fileName (string ("\"") + string(inputFileName) + string ("\""));
-
-		pool[0] = m_startState;
-		filter.Insert(pool[0], pool[0]);
-
-		int startIndex = 0;
-		while (stack) {
-			stack --;
-
-			dExpandedState* const state = (dExpandedState*) pool[stack];
-			_ASSERTE (filter.Find(state));
-
-			char condition[128];
-			condition[0] = 0;
-
-			if (!transitionsCountMap.Find(state->m_id)) {
-				dTransitionCountStart countStartEntry;
-				countStartEntry.m_start = 0;
-				countStartEntry.m_count = 0;
-				transitionsCountMap.Insert(countStartEntry, state->m_id);
-			}
-
-			if (state->m_exitState) {
-				AddText (semanticActionCodeOutput, "case %d:\n", state->m_id);
-				AddText (semanticActionCodeOutput, "{\n");
-				if (!state->m_exitState || state->m_transtions.GetCount()) {
-					AddText (semanticActionCodeOutput, "\tchar ch = NextChar();\n");
-				}
-
-				for (dList<dAutomataState::dTransition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
-					dAutomataState::dTransition& sourceTransition = node->GetInfo();
-					dAutomataState* const targetState = sourceTransition.GetState();
-
-					if (!filter.Find(targetState)) {
-						pool[stack] = targetState;
-						filter.Insert(targetState, targetState);
-						stack ++;
-						_ASSERTE (stack < sizeof (pool)/sizeof (pool[0]));
-					}
-
-					dAutomataState::dCharacter ch (sourceTransition.GetCharater());
-					if (ch.m_type == dAutomataState::CHARACTER_SET) {
-						AddText (semanticActionCodeOutput, "\t%sif (IsCharInSet (ch, text_%d, characterSetSize[%d])) state = %d;\n", condition, ch.m_info, ch.m_info, targetState->m_id);
-					} else if (ch.m_type == dAutomataState::CHARACTER) {
-						AddText (semanticActionCodeOutput, "\t%sif (ch == %d) state = %d;\n", condition, GetScapeChar(ch.m_info), targetState->m_id);
-					} else {
-						_ASSERTE (0);
-					}
-
-					sprintf (condition, "else ");
-				}
-
-				AddText (semanticActionCodeOutput, "\t%s{\n", condition);
-
-				if (state->m_transtions.GetCount()) {
-					AddText (semanticActionCodeOutput, "\t\tUnGetChar();\n");
-				}
-				AddText (semanticActionCodeOutput, "\t\tGetLexString ();\n");
-
-				AddText (semanticActionCodeOutput, "\t\t//user specified action\n");
-				//AddText (semanticActionCodeOutput, "\t\tmatchFound = true;\n");
-				AddText (semanticActionCodeOutput, "\t\t%s\n", state->m_userAction.c_str());
-				AddText (semanticActionCodeOutput, "\t\tstate = 0;\n");
-				//AddText (semanticActionCodeOutput, "\t\tmatchFound = false;\n");
-
-				AddText (semanticActionCodeOutput, "\t}\n");
-
-				AddText (semanticActionCodeOutput, "\tbreak;\n");
-
-				AddText (semanticActionCodeOutput, "}\n");
-
-			} else {
-
-				dTransitionCountStart& countStartEntry = transitionsCountMap.Find(state->m_id)->GetInfo();
-				countStartEntry.m_start = startIndex;
-				countStartEntry.m_count = state->m_transtions.GetCount();
-				startIndex += state->m_transtions.GetCount();
-				transitionsCountMap.Insert(countStartEntry, state->m_id);
-
-				for (dList<dAutomataState::dTransition>::dListNode* node = state->m_transtions.GetFirst(); node; node = node->GetNext()) {
-					dAutomataState::dTransition& sourceTransition = node->GetInfo();
-					dAutomataState* const targetState = sourceTransition.GetState();
-
-					dLexCompiler::dTransitionType& transitionType = nextStateRun.Append()->GetInfo();
-					transitionType.m_nextState = targetState->m_id;
-
-					if (!filter.Find(targetState)) {
-						pool[stack] = targetState;
-						filter.Insert(targetState, targetState);
-						stack ++;
-						_ASSERTE (stack < sizeof (pool)/sizeof (pool[0]));
-					}
-
-					dAutomataState::dCharacter ch (sourceTransition.GetCharater());
-					if (ch.m_type == dAutomataState::CHARACTER_SET) {
-						const dChatertSetMap::ChatertSet* const charSet = m_charaterSetMap.FindSet (ch.m_info);
-						_ASSERTE (charSet);
-						transitionType.m_info = char(ch.m_info);
-						transitionType.m_infoType = 1;
-					} else if (ch.m_type == dAutomataState::CHARACTER) {
-						transitionType.m_info = char(GetScapeChar(ch.m_info));
-						transitionType.m_infoType = 0;
-					} else {
-						_ASSERTE (0);
-					}
-				}
-			}
-		}
-	}
-
-	int m_stateCount;
-	const dNonDeterministicFiniteAutonata* m_nfa;
-};
-
 
 dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outputFileName, const char* const inputFileName)
 	:m_token (m_end)
@@ -497,25 +291,26 @@ dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outpu
 	,m_grammar (inputRules)
 	,m_tokenList()
 {
-	string semanticActionCode ("");
+//	string semanticActionCode ("");
 	string userPreHeaderCode (""); 
 	string userPostHeaderCode ("\n"); 
-	dList<dTransitionType> nextStateRun;
-	dTree<dTransitionCountStart, int> transitionsCountStartMap;
+//	dList<dTransitionType> nextStateRun;
+//	dTree<dTransitionCountStart, int> transitionsCountStartMap;
 
 	// convert specification file into one single giant non deterministic finite automaton
 	dExpandedNFA nfa;
 	ParseDefinitions (nfa, userPreHeaderCode, userPostHeaderCode);
 
 	// convert nfa to Deterministic Finite Automaton
-	dExpandedDFA dfa (nfa, semanticActionCode, transitionsCountStartMap, nextStateRun, inputFileName);
-	_ASSERTE (dfa.GetCharacterSetMap().GetSets().GetCount() == 0);
+//	dExpandedDFA dfa (nfa, semanticActionCode, transitionsCountStartMap, nextStateRun, inputFileName);
+//	dExpandedDFA dfa (nfa, inputFileName);
+	dLexScannerGenerator dfa (nfa);
 
 	// save header and source files
 	string className (GetClassName(outputFileName));
-	CreateHeaderFile (outputFileName, className);
-	CreateCodeFile (outputFileName, className, dfa.GetStateCount(), userPreHeaderCode, userPostHeaderCode, semanticActionCode, transitionsCountStartMap, nextStateRun); 
-	
+	dfa.CreateHeaderFile (outputFileName, className);
+//	CreateCodeFile (outputFileName, className, dfa.GetStateCount(), userPreHeaderCode, userPostHeaderCode, semanticActionCode, transitionsCountStartMap, nextStateRun); 
+	dfa.CreateCodeFile (outputFileName, className, userPreHeaderCode, userPostHeaderCode); 
 }
 
 dLexCompiler::~dLexCompiler()
@@ -636,81 +431,6 @@ void dLexCompiler::MatchToken (dToken token)
 }
 
 
-
-void dLexCompiler::LoadTemplateFile(const char* const templateName, string& templateOuput) const
-{
-	char path[2048];
-
-	// in windows
-	GetModuleFileName(NULL, path, sizeof(path)); 
-
-	//	for Linux:
-	//	char szTmp[32]; 
-	//	sprintf(szTmp, "/proc/%d/exe", getpid()); 
-	//	int bytes = MIN(readlink(szTmp, pBuf, len), len - 1); 
-	//	if(bytes >= 0)
-	//		pBuf[bytes] = '\0'; 
-
-	char* const ptr = strrchr (path, '\\');
-	sprintf (ptr, templateName);
-
-	FILE* const templateFile = fopen (path, "rb");
-	_ASSERTE (templateFile);
-
-	fseek (templateFile, 0, SEEK_END);
-	int size = ftell (templateFile) + 1;
-	fseek (templateFile, 0, SEEK_SET);
-
-	templateOuput = ("") ;
-	templateOuput.resize(size);
-	fread ((void*)templateOuput.c_str(), 1, size, templateFile);
-	fclose (templateFile);	
-
-	templateOuput.erase(strlen (templateOuput.c_str()));
-}
-
-void dLexCompiler::SaveFile(const char* const fileName, const char* const extention, const string& input) const
-{
-	char path[2048];
-
-	strcpy (path, fileName);
-	char* const ptr1 = strrchr (path, '.');
-	if (ptr1) {
-		*ptr1 = 0;
-	}
-	strcat (path, extention);
-	FILE* const headerFile = fopen (path, "wb");
-	_ASSERTE (headerFile);
-	fprintf (headerFile, "%s", input.c_str());
-	fclose (headerFile);
-}
-
-void dLexCompiler::ReplaceMacro (string& data, const string& newName, const string& macro) const
-{
-	int size = macro.size();
-	int position = data.find (macro);
-	data.replace(position, size, newName);
-}
-
-
-void dLexCompiler::ReplaceAllMacros (string& data, const string& newName, const string& macro) const
-{
-	int size = macro.size();
-	for (size_t i = data.find (macro); i != -1; i = data.find (macro)) {
-		data.replace(i, size, newName);
-	}
-}
-
-
-
-
-// DefinitionExpression	: DefinitionBlock 
-// DefinitionExpression	: DefinitionBlock DefinitionExpression | nothing
-// DefinitionBlock		: m_comment
-// id					: m_openSquareBrakect BracketedExpression m_closeSquareBrakect
-// id					: m_openParentesis DefinitionExpression m_closeParentesis
-// id					: .
-// id					: CHARACTER 
 void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preHeaderCode, string& postHeaderCode) 
 {
 	// parse definitions
@@ -840,121 +560,4 @@ void dLexCompiler::ParseDefinitions (dExpandedNFA& nfa, string& preHeaderCode, s
 }
 
 
-
-void dLexCompiler::CreateHeaderFile (const char* const fileName, const string& className) const
-{
-	string templateHeader ("");
-	LoadTemplateFile("/dLexicalTemplate.h", templateHeader);
-
-	ReplaceAllMacros (templateHeader, className, "$(className)");
-
-	SaveFile(fileName, ".h", templateHeader);
-}
-
-
-void dLexCompiler::CreateCodeFile (
-	const char* const fileName, 
-	const string& className,
-	int stateCount,
-	const string& userPreHeaderCode, 
-	const string& userPostHeaderCode, 
-	const string& semanticActionCode,
-//	const dChatertSetMap& characterSet,
-	dTree<dTransitionCountStart, int>& transitionsCountStartMap,
-	dList<dTransitionType>& nextStateRun) const
-{
-	string templateHeader ("");
-	LoadTemplateFile("/dLexicalTemplate.cpp", templateHeader);
-
-	ReplaceMacro (templateHeader, userPreHeaderCode, "$(userIncludeCode)");
-	ReplaceAllMacros (templateHeader, className, "$(className)");
-
-/*
-	if (characterSet.GetSets().GetCount()) {
-		string characterSets ("");
-		string characterSetList ("");
-		string characterSetSize ("");
-		dTree<dList <dChatertSetMap::ChatertSet>::dListNode*, int>::Iterator iter (characterSet.GetSets());
-		for (iter.Begin(); iter; iter ++) {
-			dChatertSetMap::ChatertSet& set = iter.GetNode()->GetInfo()->GetInfo();
-			int count = set.GetLength();
-
-			char name[256];
-
-			sprintf (name, "text_%d, ", set.GetId());		
-			characterSetList += name;
-
-			sprintf (name, "%d, ", count);		
-			characterSetSize += name;
-
-			sprintf (name, "\tstatic char text_%d[] = {", set.GetId());
-			characterSets += name;
-			const char* const str = set.GetSet();
-			for (int i = 0; i < count; i ++) {
-				char tmp[128];
-				sprintf (tmp, "%d, ", str[i]);
-				characterSets += tmp;
-			}
-			characterSets += "0};\n";
-		}
-		ReplaceMacro (templateHeader, characterSets, "$(characterSets)");
-
-		characterSetList.replace(characterSetList.size()-2, 2, "");
-		ReplaceMacro (templateHeader, characterSetList, "$(characterSetArray)");
-
-		characterSetSize.replace(characterSetSize.size()-2, 2, "");
-		ReplaceMacro (templateHeader, characterSetSize, "$(characterSetSize)");
-	} else {
-		ReplaceMacro (templateHeader, "", "$(characterSets)");
-		ReplaceMacro (templateHeader, "0", "$(characterSetArray)");
-		ReplaceMacro (templateHeader, "0", "$(characterSetSize)");
-	}
-*/
-
-	for (int i = 0; i < stateCount; i ++) {
-		if (!transitionsCountStartMap.Find(i)) {
-			dTransitionCountStart entry;
-			entry.m_count = 0;
-			entry.m_start = 0;
-			transitionsCountStartMap.Insert(entry, i);
-		}
-	}
-
-	string transitionsCountString ("");
-	string transitionsStartString ("");
-	dTree<dTransitionCountStart, int>::Iterator iter1 (transitionsCountStartMap); 
-	for (iter1.Begin(); iter1; iter1 ++) {
-		char text[256];
-		dTransitionCountStart entry = iter1.GetNode()->GetInfo();
-		sprintf (text, "%d, ", entry.m_count);
-		transitionsCountString += text;
-
-		sprintf (text, "%d, ", entry.m_start);
-		transitionsStartString += text;
-	}
-
-/*
-	transitionsCountString += "0";
-	ReplaceMacro (templateHeader, transitionsCountString, "$(transitionsCount)");
-
-	transitionsStartString += "0";
-	ReplaceMacro (templateHeader, transitionsStartString, "$(transitionsStart)");
-
-	string nextStateRunString ("");
-	for (dList<dTransitionType>::dListNode* node = nextStateRun.GetFirst(); node; node = node->GetNext()) {
-		char text[256];
-		dTransitionType value (node->GetInfo());
-		sprintf (text, "0x0%x, ", value.m_value);
-		nextStateRunString += text;
-	}
-	nextStateRunString += "0";
-	ReplaceMacro (templateHeader, nextStateRunString, "$(nextTranstionList)");
-
-	ReplaceMacro (templateHeader, semanticActionCode, "$(semanticActionCode)");
-
-	//	templateHeader = templateHeader + userPostHeaderCode;
-	templateHeader = templateHeader + userPostHeaderCode;
-*/
-	SaveFile(fileName, ".cpp", templateHeader);
-}
 
