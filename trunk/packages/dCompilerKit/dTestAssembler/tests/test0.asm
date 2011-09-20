@@ -13,13 +13,12 @@
 
 
 
-int b = 20
-int a = 10
+//int b = 20
+//int a = 10
 
 
 begin: function_One
-	
-	addi	r0, 0
+//	lea		r0, 0
 	loadd	r1, a	
 	loadd	r2, b	
 	add		r1, r2
