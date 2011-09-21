@@ -42,6 +42,8 @@ lea				[lL][eE][aA]
 
 loadd			[lL][oO][aA][dD][dD]
 
+ret				[rR][eE][tT]
+
 
 %%
 {WhiteSpace}	{/* skip is a white space*/}
@@ -77,6 +79,8 @@ loadd			[lL][oO][aA][dD][dD]
 
 {lea}			{return dAssemblerParser::LEA;}
 {add}			{return dAssemblerParser::ADD;}
+
+{ret}			{return dAssemblerParser::RET;}
 
 
 

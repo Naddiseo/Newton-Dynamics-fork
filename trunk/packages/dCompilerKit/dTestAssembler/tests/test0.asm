@@ -13,15 +13,14 @@
 
 
 
-//int b = 20
-//int a = 10
+int b = 20
+int a = 10
 
 begin: function_One
+	lea		r1, a
+	lea		r2, b
+	loadd	r1, a	
+	loadd	r2, b	
 	add		r1, r2
-//	lea		r0, 0
-//	loadd	r1, a	
-//	loadd	r2, b	
-	add		r1, r2
-//	ret		r31
-
+	ret		r31
 end:
