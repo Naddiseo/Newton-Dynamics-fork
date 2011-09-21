@@ -17,7 +17,7 @@
 
 #define DACCEPT_SYMBOL "$$$"
 
-//#define DDEBUG_STATES
+#define DDEBUG_STATES
 
 
 
@@ -851,65 +851,6 @@ dParserCompiler::dState* dParserCompiler::Goto (const dProductionRule& ruleList,
 
 
 
-// generates the canonical Items set for a LR(1) grammar
-void dParserCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dProductionRule& ruleList, const dTree<dTokenType, string>& symbolList, const dOperatorsPrecedence& operatorPrecence)
-{
-	dList<dItem> itemSet;
-	dList<dState*> stateList;
-
-	// start by building an item set with only the first rule
-	dItem& item = itemSet.Append()->GetInfo();
-	item.m_indexMarker = 0;
-	item.m_lookAheadSymnol = DACCEPT_SYMBOL;
-	item.m_ruleNode = ruleList.GetFirst();
-
-	// find the closure for the first this item set with only the first rule
-	dState* const state = Closure (ruleList, itemSet, symbolList);
-	operatorPrecence.SaveLastOperationSymbol (state);
-
-	stateMap.Insert(state, state->GetKey());
-	stateList.Append(state);
-
-	state->Trace();
-
-	// now for each state found 
-	int stateNumber = 1;
-	for (dList<dState*>::dListNode* node = stateList.GetFirst(); node; node = node->GetNext()) {
-		dState* const state = node->GetInfo();
-
-		dTree<dTokenType, string>::Iterator iter (symbolList);
-		for (iter.Begin(); iter; iter ++) {
-
-			string symbol (iter.GetKey());
-			dState* const newState = Goto (ruleList, state, symbol, symbolList);
-
-			if (newState->GetCount()) {
-				dTransition& transition = state->m_transitions.Append()->GetInfo();
-				transition.m_name = symbol;
-				transition.m_type = iter.GetNode()->GetInfo();
-				transition.m_targetState = newState;
-
-				dTree<dState*,int>::dTreeNode* const targetStateNode = stateMap.Find(newState->GetKey());
-				if (!targetStateNode) {
-					newState->m_number = stateNumber;
-
-					stateNumber ++;
-					stateMap.Insert(newState, newState->GetKey());
-					newState->Trace();
-					stateList.Append(newState);
-
-					operatorPrecence.SaveLastOperationSymbol (newState);
-
-				} else {
-					transition.m_targetState = targetStateNode->GetInfo();
-					delete newState;
-				}
-			} else {
-				delete newState;
-			}
-		}
-	}
-}
 
 
 
@@ -1352,4 +1293,65 @@ void dParserCompiler::GenerateParserCode (
 
 	templateHeader += endUserCode;
 	SaveFile(outputFileName, ".cpp", templateHeader);
+}
+
+
+// generates the canonical Items set for a LR(1) grammar
+void dParserCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dProductionRule& ruleList, const dTree<dTokenType, string>& symbolList, const dOperatorsPrecedence& operatorPrecence)
+{
+	dList<dItem> itemSet;
+	dList<dState*> stateList;
+
+	// start by building an item set with only the first rule
+	dItem& item = itemSet.Append()->GetInfo();
+	item.m_indexMarker = 0;
+	item.m_lookAheadSymnol = DACCEPT_SYMBOL;
+	item.m_ruleNode = ruleList.GetFirst();
+
+	// find the closure for the first this item set with only the first rule
+	dState* const state = Closure (ruleList, itemSet, symbolList);
+	operatorPrecence.SaveLastOperationSymbol (state);
+
+	stateMap.Insert(state, state->GetKey());
+	stateList.Append(state);
+
+	state->Trace();
+
+	// now for each state found 
+	int stateNumber = 1;
+	for (dList<dState*>::dListNode* node = stateList.GetFirst(); node; node = node->GetNext()) {
+		dState* const state = node->GetInfo();
+
+		dTree<dTokenType, string>::Iterator iter (symbolList);
+		for (iter.Begin(); iter; iter ++) {
+
+			string symbol (iter.GetKey());
+			dState* const newState = Goto (ruleList, state, symbol, symbolList);
+
+			if (newState->GetCount()) {
+				dTransition& transition = state->m_transitions.Append()->GetInfo();
+				transition.m_name = symbol;
+				transition.m_type = iter.GetNode()->GetInfo();
+				transition.m_targetState = newState;
+
+				dTree<dState*,int>::dTreeNode* const targetStateNode = stateMap.Find(newState->GetKey());
+				if (!targetStateNode) {
+					newState->m_number = stateNumber;
+
+					stateNumber ++;
+					stateMap.Insert(newState, newState->GetKey());
+					newState->Trace();
+					stateList.Append(newState);
+
+					operatorPrecence.SaveLastOperationSymbol (newState);
+
+				} else {
+					transition.m_targetState = targetStateNode->GetInfo();
+					delete newState;
+				}
+			} else {
+				delete newState;
+			}
+		}
+	}
 }
