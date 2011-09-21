@@ -142,7 +142,7 @@ const $(className)::dGotoEntry* dAssemblerParser::FindGoto (const dGotoEntry* co
 }
 
 
-bool $(className)::Parce($(scannerClass)& scanner)
+bool $(className)::Parse($(scannerClass)& scanner)
 {
 	dList<dStackPair> stack;
 	static short actionsCount[] = {$(actionsCount)};
@@ -174,7 +174,7 @@ bool $(className)::Parce($(scannerClass)& scanner)
 				token = dToken (scanner.NextToken());
 				entry.m_token = token;
 				if (token == -1) {
-					token = dToken (0);
+					token = ACCEPTING_TOKEN;
 				}
 
 				break;

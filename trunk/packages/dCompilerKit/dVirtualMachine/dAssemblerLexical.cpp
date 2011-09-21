@@ -113,8 +113,9 @@ int dAssemblerLexical::NextToken ()
 	m_startIndex = m_index;
 
 	int state = 0;
-	for (char ch = NextChar(); ch; ) 
-	{
+	int zeroCount = 2;
+	char ch = NextChar();
+	do {
 		int transCount = transitionsCount[state];
 		int tranStart = transitionsStart[state];
 		int nextStateIndex = GetNextStateIndex (ch, transCount, &nextCharacterSet[tranStart]);
@@ -137,7 +138,7 @@ int dAssemblerLexical::NextToken ()
 				case 2:
 				{
 					GetLexString ();
-					{return ';';}
+					{return ',';}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -535,7 +536,10 @@ int dAssemblerLexical::NextToken ()
 				}
 			}
 		}
-	}
+		if (!ch) {
+			zeroCount--;
+		}
+	} while (zeroCount);
 	// Unknown pattern
 	return -1;
 }

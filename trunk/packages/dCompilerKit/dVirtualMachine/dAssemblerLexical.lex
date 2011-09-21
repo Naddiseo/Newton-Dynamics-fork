@@ -48,7 +48,7 @@ loadd			[lL][oO][aA][dD][dD]
 {Comment}		{/* skip commnets */}
 
 
-[,]				{return ';';}
+[,]				{return ',';}
 [;]				{return ';';}
 [.]				{return '.';}
 [<]				{return '<';}

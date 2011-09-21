@@ -81,7 +81,7 @@ segmentList	: segment
 			
 segment		: import
 			| dataDeclaration	
-			| funtionDeclaration
+			| functionDeclaration
 			;
 			
 			
@@ -107,7 +107,7 @@ literal			: LITERAL {$$ = ((dAssemblerCompiler*)this)->EmitSymbol ($1);}
 
 
 				   
-funtionDeclaration	: BEGIN literal visibility instructionList END
+functionDeclaration	: BEGIN literal visibility instructionList END
 					;
 					
 visibility	: PRIVATE

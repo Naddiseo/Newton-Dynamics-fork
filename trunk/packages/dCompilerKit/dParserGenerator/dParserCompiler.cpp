@@ -16,6 +16,7 @@
 #include "dParserLexical.h"
 
 #define DACCEPT_SYMBOL "$$$"
+#define DACCEPTING_TOKEN 255	
 
 #define DDEBUG_STATES
 
@@ -244,7 +245,7 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 		DTRACE(("state %d:\n", m_number));
 		for (dState::dListNode* itemNode = GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
 			dItem& item = itemNode->GetInfo();
-			DTRACE(("%s -> [", item.m_ruleNode->GetInfo().m_name.c_str()));
+			DTRACE(("%s -> ", item.m_ruleNode->GetInfo().m_name.c_str()));
 
 			int index = 0;
 			bool hasIndex = false;
@@ -268,7 +269,7 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 			if (!hasIndex) {
 				DTRACE((". "));
 			}
-			DTRACE((":: %s]\n", item.m_lookAheadSymnol.c_str()));
+			DTRACE((":: %s\n", item.m_lookAheadSymnol.c_str()));
 		}
 		DTRACE(("\n"));
 #endif
@@ -408,8 +409,6 @@ void dParserCompiler::ScanGrammarFile(
 	string startSymbol ("");
 	int tokenEnumeration = 256;
 	int operatorPrecedencePriority = 0;
-
-//	tokenEnumerationMap.Insert(0, DACCEPT_SYMBOL);
 
 	dParserLexical lexical (inputRules.c_str());
 	LoadTemplateFile("/dParserUserVariableTemplate.cpp", userVariableClass);
@@ -892,7 +891,6 @@ void dParserCompiler::ReplaceAllMacros (string& data, const string& newName, con
 void dParserCompiler::BuildParcingTable (const dTree<dState*,int>& stateList, const string& startSymbol, const dOperatorsPrecedence& operatorPrecedence) const
 {
 	dTree<dState*,int>::Iterator stateIter (stateList);
-//	dTree<dTokenInfo, string>::Iterator symbolIter (symbolList);
 
 	string emptySymbol ("");
 	string acceptingSymbol (DACCEPT_SYMBOL);
@@ -1082,7 +1080,7 @@ void dParserCompiler::GenerateHeaderFile (
 	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
 	ReplaceMacro (templateHeader, userVariableClass, "$(userVariableClass)");
 
-	string enumdTokens ("");
+	
 	dTree<dTree<dTokenInfo, string>::dTreeNode*, int> sortToken;
 	dTree<dTokenInfo, string>::Iterator iter (symbolList);
 	for (iter.Begin(); iter; iter ++) {
@@ -1094,6 +1092,10 @@ void dParserCompiler::GenerateHeaderFile (
 
 	dTree<dTree<dTokenInfo, string>::dTreeNode*, int>::Iterator iter1 (sortToken);
 	bool first = true;
+	char text[256];
+	sprintf (text, " = %d, \n", DACCEPTING_TOKEN);
+	string enumdTokens ("\t\tACCEPTING_TOKEN");
+	enumdTokens += text;
 	for (iter1.Begin(); iter1; iter1 ++) {
 		dTree<dTokenInfo, string>::dTreeNode* const node = iter1.GetNode()->GetInfo();
 		const string& name = node->GetKey();
@@ -1101,7 +1103,6 @@ void dParserCompiler::GenerateHeaderFile (
 		enumdTokens += name;
 		if (first) {
 			first = false;
-			char text[256];
 			sprintf (text, " = %d, \n", iter1.GetKey());
 			enumdTokens += text;
 		} else {
@@ -1181,9 +1182,6 @@ void dParserCompiler::GenerateParserCode (
 				entry.m_ruleSymbols = 0;
 				entry.m_nextState = short (action.m_nextState);
 				entry.m_token = short (symbolList.Find(actionSymbol)->GetInfo().m_tokenId);
-				//sprintf (text, "dActionEntry (%d, %d, %d, %d, %d), ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
-				//stateActions += text; 
-				//entriesCount ++;
 				actionSort.Insert (entry, entry.m_token);
 
 			} else if (action.m_type == dREDUCE) {
@@ -1200,9 +1198,6 @@ void dParserCompiler::GenerateParserCode (
 				entry.m_ruleSymbols = short (reduceRule.GetCount());
 				entry.m_nextState = short (symbolList.Find(reduceRule.m_name)->GetInfo().m_tokenId - lastTerminalTokenEnum);
 				entry.m_token = short (symbolList.Find(actionSymbol)->GetInfo().m_tokenId);
-				//sprintf (text, "dActionEntry (%d, %d, %d, %d, %d), ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
-				//stateActions += text; 
-				//entriesCount ++;
 				actionSort.Insert (entry, entry.m_token);
 
 				if (!reduceRule.m_ruleReduced && (reduceRule.m_semanticActionCode != emptySematicAction)) {
@@ -1251,10 +1246,7 @@ void dParserCompiler::GenerateParserCode (
 				entry.m_ruleIndex = 0;
 				entry.m_ruleSymbols = 0;
 				entry.m_nextState = 0;
-				entry.m_token = 0;
-				//sprintf (text, "dActionEntry (%d, %d, %d, %d, %d), ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
-				//stateActions += text; 
-				//entriesCount ++;
+				entry.m_token = DACCEPTING_TOKEN;
 				actionSort.Insert (entry, entry.m_token);
 			}
 		}
@@ -1317,7 +1309,8 @@ void dParserCompiler::GenerateParserCode (
 		dTree<dState*, string>::Iterator gotoIter (state->m_goto); 
 		dTree<dTree<dState*, string>::dTreeNode*, int> sortGotoActions;
 		for (gotoIter.Begin(); gotoIter; gotoIter++) {
-			sortGotoActions.Insert(gotoIter.GetNode(), symbolList.Find(gotoIter.GetKey())->GetInfo().m_tokenId);
+			int id = symbolList.Find(gotoIter.GetKey())->GetInfo().m_tokenId;
+			sortGotoActions.Insert(gotoIter.GetNode(), id);
 		}
 
 		dTree<dTree<dState*, string>::dTreeNode*, int>::Iterator iter1 (sortGotoActions);

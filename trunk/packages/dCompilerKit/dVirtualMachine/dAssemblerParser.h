@@ -33,6 +33,7 @@ class dAssemblerParser
 	public:
 	enum dToken
 	{
+		ACCEPTING_TOKEN = 255, 
 		IMPORT = 256, 
 		LITERAL,
 		PRIVATE,
@@ -104,7 +105,7 @@ class dAssemblerParser
 
 	dAssemblerParser();
 	virtual ~dAssemblerParser();
-	virtual bool Parce(dAssemblerLexical& scanner);
+	virtual bool Parse(dAssemblerLexical& scanner);
 
 	virtual bool ErrorHandler (const string& line) const;
 

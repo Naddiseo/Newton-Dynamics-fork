@@ -44,7 +44,7 @@ $(Tokens)
 
 	$(className)();
 	virtual ~$(className)();
-	virtual bool Parce($(scannerClass)& scanner);
+	virtual bool Parse($(scannerClass)& scanner);
 
 	virtual bool ErrorHandler (const string& line) const;
 

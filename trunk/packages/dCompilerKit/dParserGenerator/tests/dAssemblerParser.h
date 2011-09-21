@@ -33,6 +33,7 @@ class dAssemblerParser
 	public:
 	enum dToken
 	{
+		ACCEPTING_TOKEN = 255, 
 		IMPORT = 256, 
 		LITERAL,
 		PRIVATE,
