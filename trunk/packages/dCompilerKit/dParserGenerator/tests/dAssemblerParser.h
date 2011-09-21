@@ -10,11 +10,11 @@
 */
 
 //
-//Auto generated Parcer Generator class: dAssemblerParcer.h
+//Auto generated Parcer Generator class: dAssemblerParser.h
 //
 
-#ifndef __dAssemblerParcer_h__
-#define __dAssemblerParcer_h__
+#ifndef __dAssemblerParser_h__
+#define __dAssemblerParser_h__
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4702) // warning C4702: unreachable code
@@ -26,9 +26,9 @@
 #include <string>
 using namespace std;
 
-class lextest1;
+class xxx;
 
-class dAssemblerParcer
+class dAssemblerParser
 {
 	public:
 	enum dToken
@@ -41,9 +41,42 @@ class dAssemblerParcer
 		INT,
 		INTEGER,
 		REGISTER,
+		MOVE,
+		LEA,
+		LOADB,
+		LOADW,
 		LOADD,
-		ADDI,
-		ADD
+		STOREB,
+		STOREW,
+		STORED,
+		SLL,
+		SRL,
+		AND,
+		OR,
+		XOR,
+		NOT,
+		ADD,
+		SUB,
+		MUL,
+		DIV,
+		ABS,
+		NEG,
+		BEQ,
+		BNE,
+		BLT,
+		BLE,
+		BGT,
+		BGET,
+		CALL,
+		CALLR,
+		RET,
+		SYSCALL,
+		JUMP,
+		JUMPR,
+		ENTER,
+		EXIT,
+		PUSH,
+		POP
 	};
 
 	enum ActionType;
@@ -69,9 +102,9 @@ class dAssemblerParcer
 	};
 
 
-	dAssemblerParcer();
-	virtual ~dAssemblerParcer();
-	virtual bool Parce(lextest1& scanner);
+	dAssemblerParser();
+	virtual ~dAssemblerParser();
+	virtual bool Parce(xxx& scanner);
 
 	virtual bool ErrorHandler (const string& line) const;
 

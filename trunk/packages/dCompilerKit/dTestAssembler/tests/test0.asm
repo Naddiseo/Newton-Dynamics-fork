@@ -20,8 +20,8 @@
 begin: function_One
 //	lea		r0, 0
 	loadd	r1, a	
-	loadd	r2, b	
-	add		r1, r2
-	ret		r31
+//	loadd	r2, b	
+//	add		r1, r2
+//	ret		r31
 	
 end:
