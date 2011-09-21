@@ -69,7 +69,7 @@ bool dVirtualMachine::CompileAssembly (const char* const code)
 	dAssemblerCompiler compiler(this);
 	dAssemblerLexical scanner (code);
 
-	compiler.Parce(scanner);
+	compiler.Parse(scanner);
 
 	return true;
 }

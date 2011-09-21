@@ -25,7 +25,7 @@ class dAssemblerCompiler: public dAssemblerParser
 	public:
 	dAssemblerCompiler(dVirtualMachine* const m_virtualMachine);
 	virtual ~dAssemblerCompiler();
-	virtual bool Parce(dAssemblerLexical& scanner);
+	virtual bool Parse(dAssemblerLexical& scanner);
 
 	
 	dUserVariable EmitSymbol (const dUserVariable& symbol) const;

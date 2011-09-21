@@ -27,9 +27,9 @@ dAssemblerCompiler::~dAssemblerCompiler()
 {
 }
 
-bool dAssemblerCompiler::Parce(dAssemblerLexical& scanner)
+bool dAssemblerCompiler::Parse(dAssemblerLexical& scanner)
 {
-	return dAssemblerParser::Parce(scanner);
+	return dAssemblerParser::Parse(scanner);
 }
 
 
