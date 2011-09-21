@@ -105,8 +105,9 @@ int $(className)::NextToken ()
 	m_startIndex = m_index;
 
 	int state = 0;
-	for (char ch = NextChar(); ch; ) 
-	{
+	int zeroCount = 2;
+	char ch = NextChar();
+	do {
 		int transCount = transitionsCount[state];
 		int tranStart = transitionsStart[state];
 		int nextStateIndex = GetNextStateIndex (ch, transCount, &nextCharacterSet[tranStart]);
@@ -127,7 +128,10 @@ $(semanticActionCode)
 				}
 			}
 		}
-	}
+		if (!ch) {
+			zeroCount--;
+		}
+	} while (zeroCount);
 	// Unknown pattern
 	return -1;
 }
