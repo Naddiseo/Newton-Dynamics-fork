@@ -85,6 +85,7 @@ class dParserCompiler
 	class dAction;
 	class dSymbol;
 	class dRuleInfo;
+	class dTokenInfo;
 	class dGotoEntry;
 	class ActionEntry;
 	class dTransition;
@@ -107,24 +108,23 @@ class dParserCompiler
 	void ReplaceMacro (string& data, const string& newName, const string& macro) const;
 	void ReplaceAllMacros (string& data, const string& newName, const string& macro) const;
 
-	void ScanGrammarFile(const string& inputRules, dProductionRule& rules, dTree<dTokenType, string>& symbolList, dOperatorsPrecedence& operatorPrecence,
-						 dTree<int, string>& terminaldTokens, string& userCodeBlock, string& userVariableClass, string& endUserCode, int& lastTokenEnum);
-	dToken ScanGrammarRule(dParserLexical& lexical, dProductionRule& rules, dTree<dTokenType, string>& symbolList, int& ruleNumber, dTree<int, string>& tokenEnumarationMap, int& tokenEnumeration);
+	void ScanGrammarFile(const string& inputRules, dProductionRule& rules, dTree<dTokenInfo, string>& symbolList, dOperatorsPrecedence& operatorPrecence,
+						 string& userCodeBlock, string& userVariableClass, string& endUserCode, int& lastTokenEnum);
+	dToken ScanGrammarRule(dParserLexical& lexical, dProductionRule& rules, dTree<dTokenInfo, string>& symbolList, int& ruleNumber, int& tokenEnumeration);
 
 	
 	bool DoesSymbolDeriveEmpty (const string& symbol, const dProductionRule& ruleList) const ;
-	void First (const string& symbol, dTree<int, string>& symbolListMark, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const;
-	void First (const dList<string>& symbolSet, const dTree<dTokenType, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const;
-	dState* Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol, const dTree<dTokenType, string>& symbolList) const;
-	dState* Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet, const dTree<dTokenType, string>& symbolList) const;
-	void BuildParcingTable (const dTree<dState*,int>& stateList, const dTree<dTokenType, string>& symbolList, const string& startSymbol, const dOperatorsPrecedence& operatorPrecence) const;
-	void CanonicalItemSets (dTree<dState*,int>& states, const dProductionRule& rules, const dTree<dTokenType, string>& symbolList, const dOperatorsPrecedence& operatorPrecence);
+	void First (const string& symbol, dTree<int, string>& symbolListMark, const dTree<dTokenInfo, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const;
+	void First (const dList<string>& symbolSet, const dTree<dTokenInfo, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const;
+	dState* Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol, const dTree<dTokenInfo, string>& symbolList) const;
+	dState* Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet, const dTree<dTokenInfo, string>& symbolList) const;
+	void BuildParcingTable (const dTree<dState*,int>& stateList, const string& startSymbol, const dOperatorsPrecedence& operatorPrecence) const;
+	void CanonicalItemSets (dTree<dState*,int>& states, const dProductionRule& rules, const dTree<dTokenInfo, string>& symbolList, const dOperatorsPrecedence& operatorPrecence);
 
-	void GenerateHeaderFile (const string& className, const string& scannerClassName, const char* const outputFileName, dProductionRule& rules, 
-							 dTree<int, string>& tokenEnumerationMap, const string& userVariableClass); 
-	void GenerateParserCode (const string& className, const string& scannerClassName, const char* const outputFileName, const string& userCode, 
-							 dTree<dState*,int>& stateList, dTree<dTokenType, string>& symbolList, dTree<int, string>& tokenEnumerationMap,
-							 string& endUserCode, int lastTokenEnum);
+	void GenerateHeaderFile (const string& className, const string& scannerClassName, const char* const outputFileName, 
+							 const dTree<dTokenInfo, string>& symbolList, const string& userVariableClass); 
+	void GenerateParserCode (const string& className, const string& scannerClassName, const char* const outputFileName, 
+							 const dTree<dTokenInfo, string>& symbolList, dTree<dState*,int>& stateList, const string& userCode, string& endUserCode, int lastTerminalTokenEnum);
 
 };
 
