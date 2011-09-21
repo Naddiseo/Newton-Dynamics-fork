@@ -115,8 +115,8 @@ visibility	: PRIVATE
 			;
 
 			
-regiter	: REGISTER
-		;
+register : REGISTER
+		 ;
 
 instructionList	: instruction
 				| instructionList instruction
@@ -133,8 +133,8 @@ instruction	: move
 			| stack
 			;
 			
-move : moveOpcode register ',' register
-	 | moveOpcode register ',' register ',' immediate
+move : MOVE register ',' register
+	 | LEA register ',' literal
 	 ;			
 			
 load : loadOpcode register ',' literal
@@ -144,13 +144,13 @@ store : storeOpcode register ',' literal
 	  ;			
 	 
 	 
-shift : shiftOpcode register ',' literal
+shift : shiftOpcode register ',' register
 	  ;			
 			
-logical : logicalOpcode register ',' literal
+logical : logicalOpcode register ',' register
 	    ;			
 
-arithemetic : arithmeticOpcode register ',' literal
+arithemetic : arithmeticOpcode register ',' register
 	        ;			
 
 conditional : conditionalOpcode register ',' register ',' immediate
@@ -170,10 +170,6 @@ stack : ENTER register ',' register ',' immediate
 	  | POP register ',' immediate	  
 	  ;
 			
-
-moveOpcode : MOVE
-		   | LEA	
-		   ;
 				 
 loadOpcode : LOADB
 		   | LOADW
