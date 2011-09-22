@@ -16,6 +16,13 @@
 #ifndef __dAssemblerLexical_h__
 #define __dAssemblerLexical_h__
 
+#ifdef _MSC_VER
+#pragma warning (disable: 4702) // warning C4702: unreachable code
+#pragma warning (disable: 4100) // warning C4100: unreferenced formal parameter
+#pragma warning (disable: 4201) // warning C4201: nonstandard extension used : nameless struct/union
+#endif
+
+
 #include <string>
 using namespace std;
 
@@ -26,23 +33,51 @@ class dAssemblerLexical
 	virtual ~dAssemblerLexical();
 
 	virtual int NextToken ();
-	virtual const char* GetTokenString () const;
-	
+
+	const char* GetTokenString() const
+	{
+		return m_tokenString.c_str();
+	}
+
+	const char* GetNextBuffer() const
+	{
+		return &m_data[m_index];
+	}
 
 	protected:
-	virtual char NextChar ();
-	virtual void GetLexString ();
-	virtual int NextPattern ();
-	virtual bool IsCharInSet (int ch, const char* const set) const;
+	int GetLineNumber () const
+	{
+		return m_lineNumber;
+	}
+
+	char NextChar ()
+	{
+		char ch = m_data[m_index++];
+		if (ch == '\n') {
+			m_lineNumber ++;
+		}
+		return ch;
+	}
+
+	void UnGetChar ()
+	{
+		char ch = m_data[--m_index];
+		if (ch == '\n') {
+			m_lineNumber --;
+		}
+	}
+
+	void ReadBalancedExpresion (char open, char close);
+
+	void GetLexString ();
+	int GetNextStateIndex (char symbol, int count, const char* const sharacterSet) const;
+//	bool IsCharInSet (char ch, const char* const set, int setSize) const;
 
 	// local lexical variables
-	int m_token;
-	int m_state;
-	int m_lastState;
-	int m_startState;
+	string m_tokenString;
+	const char* m_data;
 	int m_index;
 	int m_startIndex;
-	const char* m_data;
-	string m_tokenString;
+	int m_lineNumber;
 };
 #endif

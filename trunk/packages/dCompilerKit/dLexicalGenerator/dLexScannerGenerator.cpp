@@ -275,15 +275,16 @@ void dLexScannerGenerator::CreateCodeFile (const char* const fileName, const str
 		}
 	}
 
-
+	int nextEntry = 0;
+	int nextStateNewLineCount = 0;
+	int stateTransitionNewLineCount = 0;
+	
 	string transtionsCount = "";
 	string transitionsStart = "";
 	string nextCharaterList = "";
 	string nextStateList = "";
 	string semanticAction = "";
 	dTree <int, string> stateTable;
-
-	int nextEntry = 0;
 
 	dTree<dExpandedState*, int>::Iterator iter (stateSort);
 	for (iter.Begin(); iter; iter ++) {
@@ -331,10 +332,31 @@ void dLexScannerGenerator::CreateCodeFile (const char* const fileName, const str
 		if (!node) {
 			node = stateTable.Insert(nextEntry, key);
 			nextEntry += count;
-			nextCharaterList += charSet;
-			nextStateList += states;
+//			nextCharaterList += charSet;
+//			nextStateList += states;
+
+			for (int i = 0; i < count; i ++) {
+				if ((nextStateNewLineCount % 24) == 0) {
+					nextCharaterList += "\n\t\t\t";
+					nextStateList += "\n\t\t\t";
+				}
+				nextStateNewLineCount ++;
+
+				sprintf (text, "%d, ", symbols[i].m_symbol); 
+				nextCharaterList += text;
+
+				sprintf (text, "%d, ", symbols[i].m_nextState); 
+				nextStateList += text;
+			}
 		}
-		
+	
+
+		if ((stateTransitionNewLineCount % 24) == 0) {
+			transitionsStart += "\n\t\t\t";
+			transtionsCount += "\n\t\t\t";
+		}
+		stateTransitionNewLineCount ++;
+
 		sprintf (text, "%d, ", node->GetInfo()); 
 		transitionsStart += text;
 
