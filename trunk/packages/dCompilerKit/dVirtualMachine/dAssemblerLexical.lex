@@ -38,11 +38,21 @@ Literal			[a-zA-Z_][0-9a-zA-Z_]*
 Register		[rR][0-9]+
 
 add				[aA][dD][dD]
-lea				[lL][eE][aA]
+addi			[aA][dD][dD][iI]
 
 loadd			[lL][oO][aA][dD][dD]
 
 ret				[rR][eE][tT]
+call			[cC][aA][lL][lL]
+callr			[cC][aA][lL][lL][rR]
+
+beq				[bB][eE][qQ]	
+bne				[bB][nN][eE]	
+blt				[bB][lL][tT]	
+ble				[bB][lL][eT]	
+bgt				[bB][gG][tT]	
+bget			[bB][gG][eE][tT]
+
 
 
 %%
@@ -81,7 +91,16 @@ ret				[rR][eE][tT]
 {add}			{return dAssemblerParser::ADD;}
 
 {ret}			{return dAssemblerParser::RET;}
+{call}			{return dAssemblerParser::CALL;}
+{callr}			{return dAssemblerParser::CALLR;}
 
+
+{beq}				{return dAssemblerParser::BEQ;}
+{bne}				{return dAssemblerParser::BNE;}
+{blt}				{return dAssemblerParser::BLT;}
+{ble}				{return dAssemblerParser::BLE;}
+{bgt}				{return dAssemblerParser::BGT;}
+{bget}				{return dAssemblerParser::BGET;}
 
 
 

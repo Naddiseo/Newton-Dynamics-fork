@@ -1,6 +1,40 @@
 #ifndef __dVirtualMachine_h__
 #define __dVirtualMachine_h__
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+
+
+#ifndef DTRACE
+	#ifdef _DEBUG
+		#include <stdarg.h>
+		
+		#include <windows.h>
+		inline void dExpandTraceMessage (const char *fmt, ...)
+		{
+			va_list v_args;
+			char* const text = (char*) malloc (strlen (fmt) + 2048);
+
+			text[0] = 0;
+			va_start (v_args, fmt);     
+			vsprintf(text, fmt, v_args);
+			va_end (v_args);            
+
+			OutputDebugStringA (text);
+
+			free (text);
+		}
+
+		#define DTRACE(x)										\
+		{														\
+			dExpandTraceMessage x;								\
+		}
+	#else
+		#define DTRACE(x)
+	#endif
+#endif
 
 
 class dVirtualMachine

@@ -127,6 +127,7 @@ instruction	: move
 			| store
 			| shift
 			| logical
+			| constAdd
 			| arithemetic
 			| conditional
 			| callJumpRet
@@ -150,24 +151,34 @@ logical : logicalOpcode register ',' register
 	    ;			
 
 arithemetic : arithmeticOpcode register ',' register
-			| ADDI register ',' register ',' LITERAL 
-	        ;			
-
-conditional : conditionalOpcode register ',' register ',' immediate
 			;
 			
-callJumpRet : CALL register ',' immediate
+constAdd : ADDI register ',' constantExpression 
+		 | ADDI register ',' literal 
+		 | ADDI register ',' register ',' constantExpression 
+		 | ADDI register ',' register ',' literal 
+		 ;
+			
+	        		
+conditional : conditionalOpcode register ',' register ',' literal
+			| conditionalOpcode register ',' register ',' constantExpression
+			;
+			
+callJumpRet : CALL literal
+			| CALL register ',' literal
+			| CALLR register
 			| CALLR register ',' register
+			| RET 
 			| RET register
-			| SYSCALL register ',' register ',' immediate
+			| SYSCALL register ',' register ',' literal
 			| JUMP register
-			| JUMPR immediate
+			| JUMPR literal
 			;
 			
-stack : ENTER register ',' register ',' immediate
+stack : ENTER register ',' register ',' constantExpression
 	  | EXIT register ',' register
-	  | PUSH register ',' immediate
-	  | POP register ',' immediate	  
+	  | PUSH register ',' constantExpression
+	  | POP register ',' constantExpression	  
 	  ;
 			
 				 
@@ -192,8 +203,7 @@ logicalOpcode : AND
 			  | NOT
 			  ;
 			
-arithmeticOpcode : 
-				 : ADD
+arithmeticOpcode : ADD
 				 | SUB	
 				 | MUL
 				 | DIV

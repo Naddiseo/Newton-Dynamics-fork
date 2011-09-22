@@ -43,7 +43,6 @@ class dAssemblerParser
 		INTEGER,
 		REGISTER,
 		MOVE,
-		LEA,
 		LOADB,
 		LOADW,
 		LOADD,
@@ -56,6 +55,7 @@ class dAssemblerParser
 		OR,
 		XOR,
 		NOT,
+		ADDI,
 		ADD,
 		SUB,
 		MUL,
@@ -105,7 +105,7 @@ class dAssemblerParser
 
 	dAssemblerParser();
 	virtual ~dAssemblerParser();
-	virtual bool Parce(xxx& scanner);
+	virtual bool Parse(xxx& scanner);
 
 	virtual bool ErrorHandler (const string& line) const;
 
