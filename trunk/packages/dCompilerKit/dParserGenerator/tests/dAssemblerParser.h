@@ -77,7 +77,8 @@ class dAssemblerParser
 		ENTER,
 		EXIT,
 		PUSH,
-		POP
+		POP,
+		JUMPLABEL
 	};
 
 	enum ActionType;
