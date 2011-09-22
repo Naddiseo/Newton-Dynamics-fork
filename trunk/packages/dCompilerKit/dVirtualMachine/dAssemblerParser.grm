@@ -26,16 +26,17 @@
 	{
 		public:
 		dUserVariable () 
-			:m_token (dToken (0)), m_data("")
+			:m_token (dToken (0)), m_semanticValue(0), m_data("")
 		{
 		}
 		
 		
 		dUserVariable (dToken token, const char* const text)
-			:m_token(token), m_data (text) 
+			:m_token(token), m_semanticValue(0), m_data (text) 
 		{
 		}
 		dToken m_token;
+		int m_semanticValue;
 		string m_data;
 	};
 }
@@ -97,8 +98,6 @@ dataDeclaration	: dataType literal							{((dAssemblerCompiler*)this)->EmitUnIni
 				| dataType literal '=' constantExpression	{((dAssemblerCompiler*)this)->EmitInitilizedDataDeclaration ($1, $2, $4);}
 				;
 				
-constantExpression : INTEGER {$$ = ((dAssemblerCompiler*)this)->EmitIntegerConst ($1);}
-				   ;	
 				   
 dataType		: INT {$$ = ((dAssemblerCompiler*)this)->EmitDataType ($1);}
 				;				
@@ -106,18 +105,6 @@ dataType		: INT {$$ = ((dAssemblerCompiler*)this)->EmitDataType ($1);}
 literal			: LITERAL {$$ = ((dAssemblerCompiler*)this)->EmitSymbol ($1);}
 				;	
 
-
-				   
-functionDeclaration	: BEGIN literal visibility instructionList END
-					;
-					
-visibility	: PRIVATE
-			|
-			;
-
-			
-register : REGISTER
-		 ;
 
 instructionList	: instruction
 				| instructionList instruction
@@ -136,8 +123,6 @@ instruction	: move
 			| jumpLabel
 			;
 			
-jumpLabel : JUMPLABEL
-		  ;			
 			
 move : MOVE register ',' register
 	 ;			
@@ -158,11 +143,6 @@ logical : logicalOpcode register ',' register
 arithemetic : arithmeticOpcode register ',' register
 			;
 			
-constAdd : ADDI register ',' constantExpression 
-		 | ADDI register ',' literal 
-		 | ADDI register ',' register ',' constantExpression 
-		 | ADDI register ',' register ',' literal 
-		 ;
 			
 	        		
 conditional : conditionalOpcode register ',' register ',' literal
@@ -227,6 +207,71 @@ conditionalOpcode : BEQ
 				  | BGT
 				  | BGET
 				  ;
+				  
+
+visibility	: PRIVATE
+			|
+			;
+
+beginFunction : BEGIN literal visibility 
+					{ 
+						dAssemblerCompiler* const me = (dAssemblerCompiler*) this;
+						switch (me->m_currentPass) 
+						{
+							case dAssemblerCompiler::firstPass:
+								me->RegisterFunction ($2, $3);
+								break;
+							case dAssemblerCompiler::secundPass:	
+								me->BeginFunctionLinking ($2);
+								break;
+						}
+					}
+			  ;
+					
+					
+functionDeclaration	: beginFunction instructionList END 
+					;
+					
+jumpLabel : JUMPLABEL
+			{ 
+				dAssemblerCompiler* const me = (dAssemblerCompiler*) this;
+				switch (me->m_currentPass) 
+				{
+					case dAssemblerCompiler::firstPass:
+						me->EmitJumpDestLabel ($1);
+						break;
+				}
+			}
+		  ;			
+					
+constAdd : ADDI register ',' constantExpression 
+			{ 
+				dAssemblerCompiler* const me = (dAssemblerCompiler*) this;
+				if (me->m_currentPass == dAssemblerCompiler::firstPass) {
+					dUserVariable register0 (REGISTER, "r0");
+					me->EmitADDIConstantExpresion ($2, register0, $4);
+				}
+			}
+		 | ADDI register ',' register ',' constantExpression 			
+			{ 
+				dAssemblerCompiler* const me = (dAssemblerCompiler*) this;
+				if (me->m_currentPass == dAssemblerCompiler::firstPass) {
+					me->EmitADDIConstantExpresion ($2, $4, $6);
+				}
+			}
+		 | ADDI register ',' literal 
+		 | ADDI register ',' register ',' literal 
+		 ;
+
+register : REGISTER
+			{
+				dAssemblerCompiler* const me = (dAssemblerCompiler*) this;
+				$$ = me->TypeCheckRegister ($1);
+			}
+		 ;
+				  
+constantExpression : INTEGER {$$ = ((dAssemblerCompiler*)this)->EmitIntegerConst ($1);}
+				   ;	
 
 %%
 

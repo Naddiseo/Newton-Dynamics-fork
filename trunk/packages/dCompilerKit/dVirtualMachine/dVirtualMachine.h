@@ -6,6 +6,8 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include <dTree.h>
+#include <dList.h>
 
 #ifndef DTRACE
 	#ifdef _DEBUG
@@ -109,7 +111,7 @@ class dVirtualMachine
 	union dOpCode
 	{
 		short m_bytecode;
-		struct dType0
+		struct 
 		{
 			unsigned	m_opcode	:  6;
 			unsigned	m_reg0		:  5;

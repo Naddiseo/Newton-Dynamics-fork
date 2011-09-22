@@ -10,6 +10,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dLexicalGenerator", "dLexic
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dVirtualMachine", "dVirtualMachine\dVirtualMachine.vcproj", "{61D6A343-3A8F-440E-8FA6-2C342ABB6896}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F67C4593-A914-4DDF-8CB5-C59A3EF3ECE0} = {F67C4593-A914-4DDF-8CB5-C59A3EF3ECE0}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dTestAssembler", "dTestAssembler\dTestAssembler.vcproj", "{C2DF8489-BB02-470E-BD2A-A728784158E5}"
 	ProjectSection(ProjectDependencies) = postProject
