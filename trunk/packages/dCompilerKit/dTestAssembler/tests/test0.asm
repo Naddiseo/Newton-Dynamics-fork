@@ -11,16 +11,34 @@
 
 // Assembler program test0.asm
 
+define one 1
+
+// the code assume the risk convention for that r0 is always 0
+// reg 31 is assume to be teh stack 
+
+// calculate fibonacci value of register r1
+begin: fibonacci
+	addi	r29, r0, one			// save const 1 into registe r1
+	call	fibonacci_kerner
+	ret		r31
+end:
 
 
-int b = 20
-int a = 10
-
-begin: function_One
-	lea		r1, a
-	lea		r2, b
-	loadd	r1, a	
-	loadd	r2, b	
-	add		r1, r2
+begin: fibonacci_kerner
+	ble		r1, r29, exit_test	// see if the value on r1 is less or equal to 1
+	
+	sub		r1, r29				// r1 = r1 - 1 			
+	push	r31, r1				// save r1 
+	call	fibonacci_kerner	// calculate fibonacci(r1 - 1)
+	pop		r31, r2				// restore r1
+	
+	push	r31, r1				// save fibonacci(r1 - 1) 
+	mov		r1, r2				
+	sub		r1, r29				// r1 = r1 - 2
+	call	fibonacci_kerner	// calculate fibonacci (r1 - 2)
+	pop		r31, r2				// restore fibonacci of r1 - 1
+	add		r1, r2				// calculate r1 = fibonacci (r1 - 1) + fibonacci (r1 - 2)
+	
+exit_test:	
 	ret		r31
 end:

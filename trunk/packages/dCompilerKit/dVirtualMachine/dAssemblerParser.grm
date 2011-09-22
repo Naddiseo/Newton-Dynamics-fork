@@ -52,12 +52,12 @@
 
 %token REGISTER
 
-%token MOVE LEA 
+%token MOVE 
 %token LOADB LOADW LOADD 
 %token STOREB STOREW STORED
 %token SLL SRL
 %token AND OR XOR NOT
-%token ADD SUB MUL DIV ABS NEG
+%token ADDI ADD SUB MUL DIV ABS NEG
 %token BEQ BNE BLT BLE BGT BGET
 %token CALL CALLR RET SYSCALL JUMP JUMPR
 %token ENTER EXIT PUSH POP
@@ -134,7 +134,6 @@ instruction	: move
 			;
 			
 move : MOVE register ',' register
-	 | LEA register ',' literal
 	 ;			
 			
 load : loadOpcode register ',' literal
@@ -151,6 +150,7 @@ logical : logicalOpcode register ',' register
 	    ;			
 
 arithemetic : arithmeticOpcode register ',' register
+			| ADDI register ',' register ',' LITERAL 
 	        ;			
 
 conditional : conditionalOpcode register ',' register ',' immediate
@@ -192,7 +192,8 @@ logicalOpcode : AND
 			  | NOT
 			  ;
 			
-arithmeticOpcode : ADD
+arithmeticOpcode : 
+				 : ADD
 				 | SUB	
 				 | MUL
 				 | DIV

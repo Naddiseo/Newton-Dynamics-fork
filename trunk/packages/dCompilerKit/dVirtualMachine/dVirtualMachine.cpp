@@ -9,8 +9,8 @@
 dVirtualMachine::dNemonic dVirtualMachine::m_nemonics[] = 
 {
 	{mov,		"mov"},
-	{lea,		"addi"},		
 
+	{addi,		"addi"},		
 	{add,		"add"},
 	{sub,		"sub"},		
 	{mul,		"mul"},

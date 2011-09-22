@@ -10,9 +10,9 @@ class dVirtualMachine
 	{
 		// move
 		mov,		// move		Ri, Rj				R(i) = R(j)
-		lea,		// lea 		Ri, Rj, imm32		R(i) = R(j) + imm32
 
 		// arithmetic
+		addi,		// lea 		Ri, Rj, imm32		R(i) = R(j) + imm32
 		add,		// add  	Ri, Rj				R(i) = R(i) + R(j)
 		sub,		// sub  	Ri, Rj				R(i) = R(i) - R(j)
 		mul,		// mul  	Ri, Rj				R(i) = lowpart (R(i) * R(j)) ; R(j) = upperpart (R(i) * R(j))

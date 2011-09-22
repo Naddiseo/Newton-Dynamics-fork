@@ -77,7 +77,7 @@ ret				[rR][eE][tT]
 "end:"			{return dAssemblerParser::END;}
 {loadd}			{return dAssemblerParser::LOADD;}
 
-{lea}			{return dAssemblerParser::LEA;}
+{addi}			{return dAssemblerParser::ADDI;}
 {add}			{return dAssemblerParser::ADD;}
 
 {ret}			{return dAssemblerParser::RET;}
