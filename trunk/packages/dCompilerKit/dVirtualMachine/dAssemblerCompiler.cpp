@@ -143,6 +143,7 @@ dAssemblerCompiler::dUserVariable dAssemblerCompiler::TypeCheckRegister (const d
 {
 	dAssemblerCompiler::dUserVariable reg (symbol);
 //	if (reg.m_registerNumber)
+	_ASSERTE (0);
 
 	reg.m_semanticValue = 1;
 	return reg;
