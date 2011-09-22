@@ -1154,18 +1154,17 @@ void dParserCompiler::GenerateParserCode (
 	string emptySematicAction ("");
 	string stateActionsStart ("");
 	string stateActionsCount ("");
-	string nextActionsStateList ("\n\t\t\t\t\t");
+	string nextActionsStateList ("");
 	string sematicActions ("");
 	int entriesCount = 0;
 
+	int newLineCount = 0;
+	int starAndCountIndex = 0;
 	dTree<dState*,int>::Iterator sortStateIter (sortedStates);
 	for (sortStateIter.Begin(); sortStateIter; sortStateIter ++) {
-		//char text[256];
 		dState* const state = sortStateIter.GetNode()->GetInfo();
 
 		int count = 0;
-		//int actionIndex = entriesCount;
-		//string stateActions ("");
 		dTree<dActionEntry, int> actionSort;
 		dTree<dAction, string>::Iterator actionIter (state->m_actions);
 		for (actionIter.Begin(); actionIter; actionIter++) {
@@ -1256,7 +1255,7 @@ void dParserCompiler::GenerateParserCode (
 		dTree<dActionEntry, int>::Iterator iter (actionSort);
 		for (iter.Begin(); iter; iter ++) {
 			const dActionEntry& entry = iter.GetNode()->GetInfo();
-			sprintf (text, "dActionEntry (%d, %d, %d, %d, %d), ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
+			sprintf (text, "%d, %d, %d, %d, %d, ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
 			stateActions += text; 
 			entriesCount ++;
 		}
@@ -1267,9 +1266,23 @@ void dParserCompiler::GenerateParserCode (
 			actionIndex =  stateActionNode->GetInfo();
 		} else {
 			actionFilter.Insert(actionIndex, stateActions);
-			nextActionsStateList += stateActions;
-			nextActionsStateList += "\n\t\t\t\t\t";
+
+			for (iter.Begin(); iter; iter ++) {
+				if (newLineCount % 4 == 0) {
+					nextActionsStateList += "\n\t\t\t";
+				}
+				newLineCount ++;
+				const dActionEntry& entry = iter.GetNode()->GetInfo();
+				sprintf (text, "dActionEntry (%d, %d, %d, %d, %d), ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
+				nextActionsStateList += text; 
+			}
 		}
+
+		if ((starAndCountIndex % 24) == 0) {
+			stateActionsStart += "\n\t\t\t";
+			stateActionsCount += "\n\t\t\t";
+		}
+		starAndCountIndex ++;
 
 		sprintf (text, "%d, ", actionIndex);
 		stateActionsStart += text;
@@ -1293,17 +1306,13 @@ void dParserCompiler::GenerateParserCode (
 	string nextGotoStateList ("");
 	entriesCount = 0;
 	int newLine = 0;
+	int gotoStateCount = 0;
 	for (sortStateIter.Begin(); sortStateIter; sortStateIter ++) {
 
 		char text[256];
 		dState* const state = sortStateIter.GetNode()->GetInfo();
 
-		sprintf (text, "%d, ", entriesCount);
-		stateGotoStart += text;
-		if (entriesCount >= newLine) {
-			nextGotoStateList += "\n\t\t\t\t\t";
-			newLine = entriesCount + 4;
-		}
+		int currentEntryuCount = entriesCount;
 
 		int count = 0;
 		dTree<dState*, string>::Iterator gotoIter (state->m_goto); 
@@ -1316,18 +1325,31 @@ void dParserCompiler::GenerateParserCode (
 		dTree<dTree<dState*, string>::dTreeNode*, int>::Iterator iter1 (sortGotoActions);
 		for (iter1.Begin(); iter1; iter1++) {
 			count ++;
+			if ((newLine % 5) == 0) {
+				nextGotoStateList += "\n\t\t\t";
+			}
+			newLine ++;
+
 			dTree<dState*, string>::dTreeNode* const node = iter1.GetNode()->GetInfo();
 			dState* const targetState = node->GetInfo();
 
 			dGotoEntry entry;
 			entry.m_nextState = short (targetState->m_number);
-			//entry.m_token = short(tokenEnumerationMap.Find(gotoIter.GetKey())->GetInfo());
 			entry.m_token = short(iter1.GetKey());
 
 			sprintf (text, "dGotoEntry (%d, %d), ", entry.m_token, entry.m_nextState);
 			nextGotoStateList += text;
 			entriesCount ++;
 		}
+
+		if ((gotoStateCount % 32) == 0) {
+			stateGotoStart += "\n\t\t\t";
+			stateGotoCount += "\n\t\t\t";
+		}
+		gotoStateCount ++;
+
+		sprintf (text, "%d, ", currentEntryuCount);
+		stateGotoStart += text;
 
 		sprintf (text, "%d, ", count);
 		stateGotoCount += text;

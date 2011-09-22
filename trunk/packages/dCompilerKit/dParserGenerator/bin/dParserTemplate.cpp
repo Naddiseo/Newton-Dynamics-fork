@@ -147,11 +147,11 @@ bool $(className)::Parse($(scannerClass)& scanner)
 	dList<dStackPair> stack;
 	static short actionsCount[] = {$(actionsCount)};
 	static short actionsStart[] = {$(actionsStart)};
-	static dActionEntry actionTable[] = {$(actionTable)};
-
 	static short gotoCount[] = {$(gotoCount)};
 	static short gotoStart[] = {$(gotoStart)};
+
 	static dGotoEntry gotoTable[] = {$(gotoTable)};
+	static dActionEntry actionTable[] = {$(actionTable)};
 
 	const int lastToken = &(lastTerminalToken);
 
