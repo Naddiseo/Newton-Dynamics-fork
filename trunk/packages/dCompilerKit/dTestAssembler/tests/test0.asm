@@ -16,14 +16,14 @@
 // reg 31 is assume to be teh stack 
 
 // calculate fibonacci value of register r1
-begin: fibonacci
+begin fibonacci
 	addi	r29, 1					// preload const one into register r29
 	call	fibonacci_kerner		// calculate fibonacci of r1
 	ret		
-end:
+end
 
 
-begin: fibonacci_kerner
+begin fibonacci_kerner
 	ble		r1, r29, exit_test	// see if the value on r1 is less or equal to 1
 	
 	sub		r1, r29				// r1 = r1 - 1 			
@@ -40,4 +40,4 @@ begin: fibonacci_kerner
 	
 exit_test:	
 	ret		
-end:
+end

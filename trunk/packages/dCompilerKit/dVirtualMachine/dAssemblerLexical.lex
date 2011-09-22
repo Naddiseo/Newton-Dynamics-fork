@@ -34,10 +34,13 @@ Integer			[\-\+]?[0-9]+
 //Float			{Integer}[\.][0-9]+(e{Integer})?
 
 Literal			[a-zA-Z_][0-9a-zA-Z_]*
+JumpLabel		{Literal}[:]
 
 Register		[rR][0-9]+
 
+mov				[mM][oO][vV]
 add				[aA][dD][dD]
+sub				[sS][uU][bB]
 addi			[aA][dD][dD][iI]
 
 loadd			[lL][oO][aA][dD][dD]
@@ -45,6 +48,9 @@ loadd			[lL][oO][aA][dD][dD]
 ret				[rR][eE][tT]
 call			[cC][aA][lL][lL]
 callr			[cC][aA][lL][lL][rR]
+
+pop				[pP][oO][pP]
+push			[pP][uU][sS][hH]
 
 beq				[bB][eE][qQ]	
 bne				[bB][nN][eE]	
@@ -58,6 +64,10 @@ bget			[bB][gG][eE][tT]
 %%
 {WhiteSpace}	{/* skip is a white space*/}
 {Comment}		{/* skip commnets */}
+{Integer}		{return dAssemblerParser::INTEGER;}
+{Literal}		{return dAssemblerParser::LITERAL;}
+{Register}		{return dAssemblerParser::REGISTER;}
+{JumpLabel}		{return dAssemblerParser::JUMPLABEL;}
 
 
 [,]				{return ',';}
@@ -71,37 +81,29 @@ bget			[bB][gG][eE][tT]
 //[(]			{return '(';}	
 //[)]			{return ')';}	
 
-{Integer}		{return dAssemblerParser::INTEGER;}
-
-{Literal}		{return dAssemblerParser::LITERAL;}
-
-
-{Register}		{return dAssemblerParser::REGISTER;}
 
 "int"			{return dAssemblerParser::INT;}
 "import"		{return dAssemblerParser::IMPORT;}
 "private"		{return dAssemblerParser::PRIVATE;}
+"begin"			{return dAssemblerParser::BEGIN;}
+"end"			{return dAssemblerParser::END;}
 
-"begin:"		{return dAssemblerParser::BEGIN;}
-
-"end:"			{return dAssemblerParser::END;}
 {loadd}			{return dAssemblerParser::LOADD;}
-
+{mov}			{return dAssemblerParser::MOVE;}
 {addi}			{return dAssemblerParser::ADDI;}
 {add}			{return dAssemblerParser::ADD;}
-
+{sub}			{return dAssemblerParser::SUB;}
 {ret}			{return dAssemblerParser::RET;}
 {call}			{return dAssemblerParser::CALL;}
 {callr}			{return dAssemblerParser::CALLR;}
-
-
-{beq}				{return dAssemblerParser::BEQ;}
-{bne}				{return dAssemblerParser::BNE;}
-{blt}				{return dAssemblerParser::BLT;}
-{ble}				{return dAssemblerParser::BLE;}
-{bgt}				{return dAssemblerParser::BGT;}
-{bget}				{return dAssemblerParser::BGET;}
-
+{pop}			{return dAssemblerParser::POP;}
+{push}			{return dAssemblerParser::PUSH;}
+{beq}			{return dAssemblerParser::BEQ;}
+{bne}			{return dAssemblerParser::BNE;}
+{blt}			{return dAssemblerParser::BLT;}
+{ble}			{return dAssemblerParser::BLE;}
+{bgt}			{return dAssemblerParser::BGT;}
+{bget}			{return dAssemblerParser::BGET;}
 
 
 
