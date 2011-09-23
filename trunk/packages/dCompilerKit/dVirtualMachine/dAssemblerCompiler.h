@@ -82,9 +82,12 @@ class dAssemblerCompiler: public dAssemblerParser
 
 
 
-	void EmitInstrutionType0 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src);
+	void EmitInstrutionType0 (const dUserVariable& instruction, const dUserVariable& reg);	
 	void EmitInstrutionType1 (const dUserVariable& instruction, const dUserVariable& reg, const dUserVariable& immediate);
 	void EmitInstrutionType2 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src, const dUserVariable& immediate);
+	void EmitInstrutionType3 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src);
+
+	void EmitInstrutionType1_label (const dUserVariable& instruction, const dUserVariable& reg, const dUserVariable& label);
 //	void EmitInstrutionType0 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src) const;
 
 //	void EmitJumpDestLabel (const dUserVariable& symbol) const;

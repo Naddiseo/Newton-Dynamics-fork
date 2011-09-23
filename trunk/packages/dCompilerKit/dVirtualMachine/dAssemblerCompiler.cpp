@@ -240,6 +240,14 @@ dAssemblerCompiler::dUserVariable dAssemblerCompiler::EmitIntegerConst (const dU
 	return constantValue;
 }
 
+void dAssemblerCompiler::EmitInstrutionType0 (const dUserVariable& instruction, const dUserVariable& reg)
+{
+
+}
+
+void dAssemblerCompiler::EmitInstrutionType2 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src, const dUserVariable& immediate)
+{
+}
 
 void dAssemblerCompiler::EmitInstrutionType1 (const dUserVariable& instruction, const dUserVariable& reg, const dUserVariable& immediate)
 {
@@ -252,7 +260,11 @@ void dAssemblerCompiler::EmitInstrutionType1 (const dUserVariable& instruction, 
 	EmitByteCode (sizeof (bytecode) / sizeof (bytecode[0]), bytecode);
 }
 
-void dAssemblerCompiler::EmitInstrutionType2 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src, const dUserVariable& immediate)
-{
 
+void dAssemblerCompiler::EmitInstrutionType1_label (const dUserVariable& instruction, const dUserVariable& reg, const dUserVariable& label)
+{
+	dReference& reference = m_globalReferences.Append()->GetInfo();
+	reference.m_location = m_codeSegmentSize + 1;
+	reference.m_symbol = label.m_data;
+	EmitInstrutionType1 (instruction, reg, label);
 }
