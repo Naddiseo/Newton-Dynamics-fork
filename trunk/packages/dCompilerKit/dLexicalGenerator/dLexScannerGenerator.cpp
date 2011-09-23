@@ -332,8 +332,6 @@ void dLexScannerGenerator::CreateCodeFile (const char* const fileName, const str
 		if (!node) {
 			node = stateTable.Insert(nextEntry, key);
 			nextEntry += count;
-//			nextCharaterList += charSet;
-//			nextStateList += states;
 
 			for (int i = 0; i < count; i ++) {
 				if ((nextStateNewLineCount % 24) == 0) {

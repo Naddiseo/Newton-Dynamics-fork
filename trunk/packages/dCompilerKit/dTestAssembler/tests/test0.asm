@@ -17,6 +17,7 @@
 
 // calculate fibonacci value of register r1
 begin fibonacci
+	push	{r0, r2, r4}
 	addi	r29, 1					// preload const one into register r29
 	call	fibonacci_kerner		// calculate fibonacci of r1
 	ret		

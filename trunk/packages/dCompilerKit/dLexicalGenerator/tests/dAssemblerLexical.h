@@ -44,6 +44,13 @@ class dAssemblerLexical
 		return &m_data[m_index];
 	}
 
+	void ReStartScanner()
+	{
+		m_index = 0;
+		m_startIndex = 0;
+		m_tokenString = "";
+	}
+
 	protected:
 	int GetLineNumber () const
 	{
@@ -71,7 +78,6 @@ class dAssemblerLexical
 
 	void GetLexString ();
 	int GetNextStateIndex (char symbol, int count, const char* const sharacterSet) const;
-//	bool IsCharInSet (char ch, const char* const set, int setSize) const;
 
 	// local lexical variables
 	string m_tokenString;

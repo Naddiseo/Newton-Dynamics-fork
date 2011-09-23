@@ -291,25 +291,20 @@ dLexCompiler::dLexCompiler(const char* const inputRules, const char* const outpu
 	,m_grammar (inputRules)
 	,m_tokenList()
 {
-//	string semanticActionCode ("");
+	inputFileName;
 	string userPreHeaderCode (""); 
 	string userPostHeaderCode ("\n"); 
-//	dList<dTransitionType> nextStateRun;
-//	dTree<dTransitionCountStart, int> transitionsCountStartMap;
 
 	// convert specification file into one single giant non deterministic finite automaton
 	dExpandedNFA nfa;
 	ParseDefinitions (nfa, userPreHeaderCode, userPostHeaderCode);
 
 	// convert nfa to Deterministic Finite Automaton
-//	dExpandedDFA dfa (nfa, semanticActionCode, transitionsCountStartMap, nextStateRun, inputFileName);
-//	dExpandedDFA dfa (nfa, inputFileName);
 	dLexScannerGenerator dfa (nfa);
 
 	// save header and source files
 	string className (GetClassName(outputFileName));
 	dfa.CreateHeaderFile (outputFileName, className);
-//	CreateCodeFile (outputFileName, className, dfa.GetStateCount(), userPreHeaderCode, userPostHeaderCode, semanticActionCode, transitionsCountStartMap, nextStateRun); 
 	dfa.CreateCodeFile (outputFileName, className, userPreHeaderCode, userPostHeaderCode); 
 }
 

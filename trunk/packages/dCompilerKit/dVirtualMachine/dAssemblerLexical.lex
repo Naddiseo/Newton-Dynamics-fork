@@ -26,8 +26,9 @@ WhiteSpace		[ \t\n\r]+
 AnyButAstr		[^\*]
 AnyButSlash		[^\/]
 Comment1        [\/][\/].*
-Comment2        [\/][\*]({AnyButAstr}|[\*]{AnyButSlash})*[\*][\/]
-Comment			({Comment1}|{Comment2})
+Comment2        [;].*
+Comment3        [\/][\*]({AnyButAstr}|[\*]{AnyButSlash})*[\*][\/]
+Comment			({Comment1}|{Comment2}|{Comment3})
 
 
 Integer			[\-\+]?[0-9]+
@@ -64,6 +65,7 @@ bget			[bB][gG][eE][tT]
 %%
 {WhiteSpace}	{/* skip is a white space*/}
 {Comment}		{/* skip commnets */}
+
 {Integer}		{return dAssemblerParser::INTEGER;}
 {Literal}		{return dAssemblerParser::LITERAL;}
 {Register}		{return dAssemblerParser::REGISTER;}
@@ -71,15 +73,12 @@ bget			[bB][gG][eE][tT]
 
 
 [,]				{return ',';}
-[;]				{return ';';}
-[.]				{return '.';}
 [<]				{return '<';}
 [>]				{return '>';}
 [=]				{return '=';}
-//[+]			{return '+';}	
-//[*]			{return '*';}	
-//[(]			{return '(';}	
-//[)]			{return ')';}	
+[{]				{return '{';}	
+[}]				{return '}';}	
+[\.]			{return '.';}
 
 
 "int"			{return dAssemblerParser::INT;}
@@ -104,7 +103,6 @@ bget			[bB][gG][eE][tT]
 {ble}			{return dAssemblerParser::BLE;}
 {bgt}			{return dAssemblerParser::BGT;}
 {bget}			{return dAssemblerParser::BGET;}
-
 
 
 

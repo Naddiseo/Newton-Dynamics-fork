@@ -62,8 +62,15 @@ bget			[bB][gG][eE][tT]
 
 
 %%
-{WhiteSpace}	{/* skip is a white space*/}
-{Comment}		{/* skip commnets */}
+[\]]			{return ']';}	
+[\.]			{return '.';}
+
+
+
+
+//{WhiteSpace}	{/* skip is a white space*/}
+//{Comment}		{/* skip commnets */}
+/*
 {Integer}		{return dAssemblerParser::INTEGER;}
 {Literal}		{return dAssemblerParser::LITERAL;}
 {Register}		{return dAssemblerParser::REGISTER;}
@@ -104,7 +111,7 @@ bget			[bB][gG][eE][tT]
 {ble}			{return dAssemblerParser::BLE;}
 {bgt}			{return dAssemblerParser::BGT;}
 {bget}			{return dAssemblerParser::BGET;}
-
+*/
 
 
 

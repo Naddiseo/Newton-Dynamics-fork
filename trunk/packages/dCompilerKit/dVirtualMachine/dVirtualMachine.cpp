@@ -55,14 +55,24 @@ dVirtualMachine::dNemonic dVirtualMachine::m_nemonics[] =
 };
 
 dVirtualMachine::dVirtualMachine(void)
+	:m_registerCount(32)			
+	,m_codeSegementSize(0)
+	,m_codeSegment(NULL)
 {	
 	_ASSERTE (nop <= 1 << 6);
 }
 
 dVirtualMachine::~dVirtualMachine(void)
 {
+	if (m_codeSegment) {
+		delete m_codeSegment;
+	}
 }
 
+int dVirtualMachine::GetRegisterCount() const
+{
+	return m_registerCount;
+}
 
 bool dVirtualMachine::CompileAssembly (const char* const code)
 {

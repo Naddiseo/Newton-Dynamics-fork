@@ -9,6 +9,11 @@
 #include <dTree.h>
 #include <dList.h>
 
+#ifdef _MSC_VER
+#pragma warning (disable: 4201) // warning C4201: nonstandard extension used : nameless struct/union
+#endif
+
+
 #ifndef DTRACE
 	#ifdef _DEBUG
 		#include <stdarg.h>
@@ -49,6 +54,7 @@ class dVirtualMachine
 
 		// arithmetic
 		addi,		// lea 		Ri, Rj, imm32		R(i) = R(j) + imm32
+
 		add,		// add  	Ri, Rj				R(i) = R(i) + R(j)
 		sub,		// sub  	Ri, Rj				R(i) = R(i) - R(j)
 		mul,		// mul  	Ri, Rj				R(i) = lowpart (R(i) * R(j)) ; R(j) = upperpart (R(i) * R(j))
@@ -123,9 +129,11 @@ class dVirtualMachine
 	dVirtualMachine(void);
 	virtual ~dVirtualMachine(void);
 
+	int GetRegisterCount() const; 
 	bool CompileAssembly (const char* const code);
 
 	protected:
+	int m_registerCount;			
 	unsigned m_registes[16];
 	int m_codeSegementSize;
 	dOpCode* m_codeSegment;
