@@ -88,11 +88,12 @@ void dAssemblerCompiler::EmitUnInitilizedDataDeclaration (const dUserVariable& t
 
 void dAssemblerCompiler::EmitInitilizedDataDeclaration (const dUserVariable& type, const dUserVariable& id, const dUserVariable& initialValue) const
 {
+
 }
 
 
-/*
-void dAssemblerCompiler::EmitJumpDestLabel (const dUserVariable& symbol) const
+
+void dAssemblerCompiler::EmitLocalLabel (const dUserVariable& symbol) const
 {
 	_ASSERTE (m_currentFunction);
 	if (m_currentFunction->m_localSymbols.Find(symbol.m_data)) {
@@ -109,95 +110,6 @@ void dAssemblerCompiler::EmitJumpDestLabel (const dUserVariable& symbol) const
 
 
 
-
-
-
-
-
-void dAssemblerCompiler::EmitADDIConstantExpresion (const dUserVariable& dstRegister, const dUserVariable& srcRegister, const dUserVariable& constValue)
-{
-	dVirtualMachine::dOpCode bytecode[3];
-
-	bytecode[0].m_opcode = dVirtualMachine::addi;
-	bytecode[0].m_reg0 = dstRegister.m_semanticValue;
-	bytecode[0].m_reg1 = srcRegister.m_semanticValue;
-	bytecode[1].m_bytecode = short (constValue.m_semanticValue & 0xffff);
-	bytecode[2].m_bytecode = short (constValue.m_semanticValue >> 16);
-	EmitByteCode (sizeof (bytecode) / sizeof (bytecode[0]), bytecode);
-}
-
-
-void dAssemblerCompiler::EmitCALL (const dUserVariable& regStack, const dUserVariable& symbol)
-{
-	dReference& reference = m_globalReferences.Append()->GetInfo();
-	reference.m_location = m_codeSegmentSize + 1;
-	reference.m_symbol = symbol.m_data;
-
-	dVirtualMachine::dOpCode bytecode[3];
-	bytecode[0].m_opcode = dVirtualMachine::call;
-	bytecode[0].m_reg0 = regStack.m_semanticValue;
-	bytecode[0].m_reg1 = 0;
-	bytecode[1].m_bytecode = 0;
-	bytecode[2].m_bytecode = 0;
-	EmitByteCode (sizeof (bytecode) / sizeof (bytecode[0]), bytecode);
-}
-
-void dAssemblerCompiler::EmitRET (const dUserVariable& regStack)
-{
-	dVirtualMachine::dOpCode bytecode[1];
-	bytecode[0].m_opcode = dVirtualMachine::ret;
-	bytecode[0].m_reg0 = regStack.m_semanticValue;
-	bytecode[0].m_reg1 = 0;
-	EmitByteCode (sizeof (bytecode) / sizeof (bytecode[0]), bytecode);
-}
-
-void dAssemblerCompiler::EmitCompareAndJumpConstOffset (const dUserVariable& instruction, const dUserVariable& reg0, const dUserVariable& reg1, const dUserVariable& constOffset)
-{
-	dVirtualMachine::dOpCode bytecode[3];
-	bytecode[0].m_opcode = instruction.m_semanticValue;
-	bytecode[0].m_reg0 = reg0.m_semanticValue;
-	bytecode[0].m_reg1 = reg1.m_semanticValue;
-	bytecode[1].m_bytecode = constOffset.m_semanticValue & 0xffff;
-	bytecode[2].m_bytecode = constOffset.m_semanticValue >> 16;
-	EmitByteCode (sizeof (bytecode) / sizeof (bytecode[0]), bytecode);
-}
-
-void dAssemblerCompiler::EmitCompareAndJumpLocalLabel (const dUserVariable& instruction, const dUserVariable& reg0, const dUserVariable& reg1, const dUserVariable& label)
-{
-	dReference& reference = m_globalReferences.Append()->GetInfo();
-	reference.m_location = m_codeSegmentSize + 1;
-	reference.m_symbol = label.m_data;
-
-	dVirtualMachine::dOpCode bytecode[3];
-	bytecode[0].m_opcode = instruction.m_semanticValue;
-	bytecode[0].m_reg0 = reg0.m_semanticValue;
-	bytecode[0].m_reg1 = reg1.m_semanticValue;
-	bytecode[1].m_bytecode = 0;
-	bytecode[2].m_bytecode = 0;
-	EmitByteCode (sizeof (bytecode) / sizeof (bytecode[0]), bytecode);
-}
-
-
-void dAssemblerCompiler::EmitArithmeticInstrution (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src)
-{
-	dVirtualMachine::dOpCode bytecode[1];
-	bytecode[0].m_opcode = instruction.m_semanticValue;
-	bytecode[0].m_reg0 = dst.m_semanticValue;
-	bytecode[0].m_reg1 = src.m_semanticValue;
-	EmitByteCode (sizeof (bytecode) / sizeof (bytecode[0]), bytecode);
-}
-
-void dAssemblerCompiler::EmitPushPopRegisterList (const dUserVariable& instruction, const dUserVariable& stackReg, const dUserVariable& registerMask)
-{
-	// check that the register mask is no making reference to non existing registers;
-	dVirtualMachine::dOpCode bytecode[1];
-	bytecode[0].m_opcode = instruction.m_semanticValue;
-	bytecode[0].m_reg0 = stackReg.m_semanticValue;
-	bytecode[0].m_reg1 = 0;
-	EmitByteCode (sizeof (bytecode) / sizeof (bytecode[0]), bytecode);
-}
-*/
-
 dAssemblerCompiler::dUserVariable dAssemblerCompiler::TypeCheckRegister (const dUserVariable& symbol)
 {
 	dAssemblerCompiler::dUserVariable reg (symbol);
@@ -210,6 +122,147 @@ dAssemblerCompiler::dUserVariable dAssemblerCompiler::TypeCheckRegister (const d
 
 	reg.m_semanticValue = registerIndex;
 	return reg;
+}
+
+
+
+dAssemblerCompiler::dUserVariable dAssemblerCompiler::EmitIntegerConst (const dUserVariable& integerConst) const
+{
+	dAssemblerCompiler::dUserVariable constantValue (integerConst);
+	constantValue.m_semanticValue = atoi (integerConst.m_data.c_str());
+	return constantValue;
+}
+
+
+
+void dAssemblerCompiler::EmitPushAndPop (const dUserVariable& instruction, const dUserVariable& registerMask)
+{
+	// check that the register mask is no making reference to non existing registers;
+	int mask = registerMask.m_semanticValue;
+	if (instruction.m_semanticValue == dVirtualMachine::push) {
+		int reg = m_virtualMachine->GetRegisterCount() - 1;
+		do {
+			if (mask & (1<<31)) {
+				dUserVariable register1;
+				register1.m_semanticValue = reg; 
+				EmitInstructionType2 (instruction, register1);
+			}
+			reg --;
+			mask <<= 1;
+		} while (mask);
+	} else {
+		int reg = 0;
+		do {
+			if (mask & 1) {
+				dUserVariable register1;
+				register1.m_semanticValue = reg; 
+				EmitInstructionType2 (instruction, register1);
+			}
+			reg ++;
+			mask >>= 1;
+		} while (mask);
+	}
+}
+
+
+void dAssemblerCompiler::EmitInstructionType1_saveLocalAdress (const dUserVariable& instruction, const dUserVariable& symbol)
+{
+	_ASSERTE (0);
+}
+
+void dAssemblerCompiler::EmitInstructionType4_saveLocalAdress (const dUserVariable& instruction, const dUserVariable& reg0, const dUserVariable& reg1, const dUserVariable& symbol)
+{
+	dReference& reference = m_currentFunction->m_localReferences.Append()->GetInfo();
+
+	reference.m_location = m_codeSegmentSize + 1;
+	reference.m_symbol = symbol.m_data;
+
+	EmitInstructionType4 (instruction, reg0, reg1, symbol);
+}
+
+void dAssemblerCompiler::EmitInstructionType1_saveGlobalAdress (const dUserVariable& instruction, const dUserVariable& symbol)
+{
+	dReference& reference = m_globalReferences.Append()->GetInfo();
+	reference.m_location = m_codeSegmentSize + 1;
+	reference.m_symbol = symbol.m_data;
+
+	EmitInstructionType1 (instruction, symbol);
+}
+
+void dAssemblerCompiler::EmitInstructionType0 (const dUserVariable& instruction)
+{
+	dVirtualMachine::dOpCode bytecode[1];
+
+	bytecode[0].m_opcode = instruction.m_semanticValue;
+	bytecode[0].m_reg0 = 0;
+	bytecode[0].m_reg1 = 0;
+	EmitByteCode (sizeof (bytecode) / sizeof (bytecode[0]), bytecode);
+}
+
+
+void dAssemblerCompiler::EmitInstructionType1 (const dUserVariable& instruction, const dUserVariable& immediate)
+{
+	dVirtualMachine::dOpCode bytecode[3];
+
+	bytecode[0].m_opcode = instruction.m_semanticValue;
+	bytecode[0].m_reg0 = 0;
+	bytecode[0].m_reg1 = 0;
+
+	bytecode[1].m_bytecode = immediate.m_semanticValue & 0xffff;
+	bytecode[2].m_bytecode = immediate.m_semanticValue >> 16;
+
+	EmitByteCode (sizeof (bytecode) / sizeof (bytecode[0]), bytecode);
+}
+
+
+void dAssemblerCompiler::EmitInstructionType2 (const dUserVariable& instruction, const dUserVariable& reg)
+{
+	dVirtualMachine::dOpCode bytecode[1];
+	bytecode[0].m_opcode = instruction.m_semanticValue;
+	bytecode[0].m_reg0 = reg.m_semanticValue;
+	bytecode[0].m_reg1 = 0;
+
+	if (reg.m_semanticValue >= m_virtualMachine->GetRegisterCount()) {
+		// error using illegal register
+	}
+
+	EmitByteCode (sizeof (bytecode) / sizeof (bytecode[0]), bytecode);
+}
+
+void dAssemblerCompiler::EmitInstructionType3 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src)
+{
+	dVirtualMachine::dOpCode bytecode[1];
+	bytecode[0].m_opcode = instruction.m_semanticValue;
+	bytecode[0].m_reg0 = dst.m_semanticValue;
+	bytecode[0].m_reg1 = src.m_semanticValue;
+
+	if (dst.m_semanticValue >= m_virtualMachine->GetRegisterCount()) {
+		// error using illegal register
+	}
+	if (src.m_semanticValue >= m_virtualMachine->GetRegisterCount()) {
+		// error using illegal register
+	}
+
+	EmitByteCode (sizeof (bytecode) / sizeof (bytecode[0]), bytecode);
+}
+
+void dAssemblerCompiler::EmitInstructionType4 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src, const dUserVariable& immediate)
+{
+	dVirtualMachine::dOpCode bytecode[3];
+	bytecode[0].m_opcode = instruction.m_semanticValue;
+	bytecode[0].m_reg0 = dst.m_semanticValue;
+	bytecode[0].m_reg1 = src.m_semanticValue;
+
+	if (dst.m_semanticValue >= m_virtualMachine->GetRegisterCount()) {
+		// error using illegal register
+	}
+	if (src.m_semanticValue >= m_virtualMachine->GetRegisterCount()) {
+		// error using illegal register
+	}
+
+	bytecode[1].m_bytecode = immediate.m_semanticValue & 0xffff;
+	bytecode[2].m_bytecode = immediate.m_semanticValue >> 16;
+	EmitByteCode (sizeof (bytecode) / sizeof (bytecode[0]), bytecode);
 }
 
 
@@ -237,40 +290,4 @@ void dAssemblerCompiler::EmitEndFunction ()
 	for (dList<dReference>::dListNode* node = m_currentFunction->m_localReferences.GetFirst(); node; node = node->GetNext()) {
 		_ASSERTE (0);
 	}
-}
-
-dAssemblerCompiler::dUserVariable dAssemblerCompiler::EmitIntegerConst (const dUserVariable& integerConst) const
-{
-	dAssemblerCompiler::dUserVariable constantValue (integerConst);
-	constantValue.m_semanticValue = atoi (integerConst.m_data.c_str());
-	return constantValue;
-}
-
-void dAssemblerCompiler::EmitInstrutionType0 (const dUserVariable& instruction, const dUserVariable& reg)
-{
-
-}
-
-void dAssemblerCompiler::EmitInstrutionType2 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src, const dUserVariable& immediate)
-{
-}
-
-void dAssemblerCompiler::EmitInstrutionType1 (const dUserVariable& instruction, const dUserVariable& reg, const dUserVariable& immediate)
-{
-	dVirtualMachine::dOpCode bytecode[3];
-	bytecode[0].m_opcode = instruction.m_semanticValue;
-	bytecode[0].m_reg0 = reg.m_semanticValue;
-	bytecode[0].m_reg1 = 0;
-	bytecode[1].m_bytecode = immediate.m_semanticValue & 0xffff;
-	bytecode[2].m_bytecode = immediate.m_semanticValue >> 16;
-	EmitByteCode (sizeof (bytecode) / sizeof (bytecode[0]), bytecode);
-}
-
-
-void dAssemblerCompiler::EmitInstrutionType1_label (const dUserVariable& instruction, const dUserVariable& reg, const dUserVariable& label)
-{
-	dReference& reference = m_globalReferences.Append()->GetInfo();
-	reference.m_location = m_codeSegmentSize + 1;
-	reference.m_symbol = label.m_data;
-	EmitInstrutionType1 (instruction, reg, label);
 }

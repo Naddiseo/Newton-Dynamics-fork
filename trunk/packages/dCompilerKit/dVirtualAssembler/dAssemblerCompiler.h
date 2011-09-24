@@ -92,33 +92,41 @@ class dAssemblerCompiler: public dAssemblerParser
 
 
 
-	void EmitInstrutionType0 (const dUserVariable& instruction, const dUserVariable& reg);	
-	void EmitInstrutionType1 (const dUserVariable& instruction, const dUserVariable& reg, const dUserVariable& immediate);
-	void EmitInstrutionType2 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src, const dUserVariable& immediate);
-	void EmitInstrutionType3 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src);
+	void EmitInstructionType0 (const dUserVariable& instruction);
+	void EmitInstructionType1 (const dUserVariable& instruction, const dUserVariable& immediate);
+	void EmitInstructionType2 (const dUserVariable& instruction, const dUserVariable& reg);
+	void EmitInstructionType3 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src);
+	void EmitInstructionType4 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src, const dUserVariable& immediate);
 
-	void EmitInstrutionType1_label (const dUserVariable& instruction, const dUserVariable& reg, const dUserVariable& label);
-//	void EmitInstrutionType0 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src) const;
+	void EmitInstructionType1_saveGlobalAdress (const dUserVariable& instruction, const dUserVariable& symbol);
 
-//	void EmitJumpDestLabel (const dUserVariable& symbol) const;
+	void EmitInstructionType1_saveLocalAdress (const dUserVariable& instruction, const dUserVariable& symbol);
+	void EmitInstructionType4_saveLocalAdress (const dUserVariable& instruction, const dUserVariable& reg0, const dUserVariable& reg1, const dUserVariable& symbol);
+
+
+	void EmitLocalLabel (const dUserVariable& symbol) const;
+	
 //	void EmitADDIConstantExpresion (const dUserVariable& dstRegister, const dUserVariable& srcRegister, const dUserVariable& constValue);
 //	void EmitArithmeticInstrution (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src);
 //	void EmitCompareAndJumpLocalLabel (const dUserVariable& instruction, const dUserVariable& reg0, const dUserVariable& reg1, const dUserVariable& label);
 //	void EmitCompareAndJumpConstOffset (const dUserVariable& instruction, const dUserVariable& reg0, const dUserVariable& reg1, const dUserVariable& offset);
 //	void EmitCALL (const dUserVariable& regStack, const dUserVariable& symbol);
 //	void EmitRET (const dUserVariable& regStack);
-//	void EmitPushPopRegisterList (const dUserVariable& instruction, const dUserVariable& stackReg, const dUserVariable& registerMask);
 
-
-	dUserVariable TypeCheckRegister (const dUserVariable& symbol);
 	
+	dUserVariable TypeCheckRegister (const dUserVariable& symbol);
 	dUserVariable EmitSymbol (const dUserVariable& symbol) const;
 	dUserVariable EmitDataType (const dUserVariable& dataType) const;
 	dUserVariable EmitIntegerConst (const dUserVariable& symbol) const;
-
-
 	void EmitUnInitilizedDataDeclaration (const dUserVariable& type, const dUserVariable& id) const;
 	void EmitInitilizedDataDeclaration (const dUserVariable& type, const dUserVariable& id, const dUserVariable& initialValue) const;
+
+
+	// pseudo instructions
+	void EmitPushAndPop (const dUserVariable& instruction, const dUserVariable& regMask);
+
+
+
 	
 	dVirtualMachine* m_virtualMachine;
 

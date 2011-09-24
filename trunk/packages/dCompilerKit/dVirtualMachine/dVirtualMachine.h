@@ -49,25 +49,19 @@ class dVirtualMachine
 	enum dMachineInstrution
 	{
 		// type0 opcode
-		jumpr,		// jump		Ri					pc = R(i)
-		ret,		// ret		Ri					pc = [R(i)], R(i) = R(i) + 4  
+		ret,			// ret						pc = [rn]; rn += 4
 
 		// type1 opcode
-		push,		// push		Ri, imm32mask		tmp = R(i); k = 0;  mask = registenMask; while (mask) { while (!(mask & 1)) mask >>= 1; k ++;} {tmp -= 4; [tmp] = Rn[k]}; R(i) = tmp; 
-		pop,		// pop		Ri, imm32mask		tmp = R(i); k = 31; mask = registenMask; while (mask) { while (!(mask & (1<<31))) mask <<= 1; k --;} {[tmp] = Rn[k]; tmp -= 4;}
-		call,		// call		Ri, imm32			R(i) = R(i) - 4, [R(i)] = pc + 6, pc = imm32
+		jump,		// jump		imm32				pc += imm32
+		call,		// call		imm32				rn -= 4; [rn] = pc + 4; pc == imm32 
 
 		// type2 opcode
-		addi,		// addi 	Ri, Rj, imm32		R(i) = R(j) + imm32
-		beq,		// beq		Ri, Rj, imm32  		if (R(i) == R(j)) PC = PC + imm32  
-		bne,		// bneq		Ri, Rj, imm32  		if (R(i) != R(j)) PC = PC + imm32  
-		blt,		// blt		Ri, Rj, imm32  		if (R(i) < R(j)) PC = PC + imm32  (signed comparison)
-		ble,		// ble		Ri, Rj, imm32  		if (R(i) <= R(j)) PC = PC + imm32  (signed comparison)
-		bgt,		// bgt		Ri, Rj, imm32  		if (R(i) > R(j)) PC = PC + imm32  (signed comparison)
-		bget,		// bget		Ri, Rj, imm32  		if (R(i) >= R(j)) PC = PC + imm32  (signed comparison)
+		callr,		// callr	Ri					rn -= 4; [rn] = pc + 4; pc == ri 
+		jumpr,		// jump		Ri					pc = ri
+		push,		// push		Ri					rn -= 4; [rn] = r1;	
+		pop,		// pop		Ri					r1 = [rn]; rn += 4;
 
-
-		// move
+		// type3 opcode
 		mov,		// move		Ri, Rj				R(i) = R(j)
 		add,		// add  	Ri, Rj				R(i) = R(i) + R(j)
 		sub,		// sub  	Ri, Rj				R(i) = R(i) - R(j)
@@ -82,28 +76,24 @@ class dVirtualMachine
 		sll,		// sll		Ri, Rj				R(i) = R(i) << R(j)	
 		srl,		// srl		Ri, Rj				R(i) = R(i) >> R(j)	
 
-		// load 
+		// type4 opcode
+		addi,		// addi 	Ri, Rj, imm32		R(i) = R(j) + imm32
+
+		beq,		// beq		Ri, Rj, imm32  		if (R(i) == R(j)) PC = PC + imm32  
+		bne,		// bneq		Ri, Rj, imm32  		if (R(i) != R(j)) PC = PC + imm32  
+		blt,		// blt		Ri, Rj, imm32  		if (R(i) < R(j)) PC = PC + imm32  (signed comparison)
+		ble,		// ble		Ri, Rj, imm32  		if (R(i) <= R(j)) PC = PC + imm32  (signed comparison)
+		bgt,		// bgt		Ri, Rj, imm32  		if (R(i) > R(j)) PC = PC + imm32  (signed comparison)
+		bget,		// bget		Ri, Rj, imm32  		if (R(i) >= R(j)) PC = PC + imm32  (signed comparison)
+
 		loadb,		// loadb	Ri, imm32[Rj]		R(i) = byte at memory [R(j) + imm32]	
 		loadw,		// loadq	Ri, imm32[Rj]		R(i) = word at memory [R(j) + imm32]	
 		loadd,		// loadd	Ri, imm32[Rj]		R(i) = dword at memory [R(j) + imm32]
-
-		// store 
 		storeb,		// storeb	Ri, imm32[Rj]		byte at memory [R(j) + imm32] = R(i)
 		storew,		// storeq	Ri, imm32[Rj]		word at memory [R(j) + imm32] = R(i)
 		stored,		// stored	Ri, imm32[Rj]		dword at memory [R(j) + imm32] = R(i)
 
-
-		// call / return 
-
-		callr,		// call		Ri, Rj				R(i) = R(i) - 4, [R(i)] = pc + 6, pc = R(j)
-		
 		syscall,	// syscall	Ri, Rj, imm32		execute a system call
-		
-		jump,		// jump		imm32					pc += imm32
-
-		// frame pointer 
-		enter,		// enter	Ri, Rj, imm32		[R(j)] = R(i), R(i) = R(j), R(j) = R(j) + imm32	
-		exit,		// exit		Ri, Rj				R(j) = R(i), R(i) = [R(j)]
 
 		nop,		// do nothing 
 	};

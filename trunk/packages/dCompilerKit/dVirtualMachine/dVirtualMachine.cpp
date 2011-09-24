@@ -3,6 +3,7 @@
 
 dVirtualMachine::dNemonic dVirtualMachine::m_nemonics[] = 
 {
+/*
 	{mov,		"mov"},
 
 	{addi,		"addi"},		
@@ -36,8 +37,6 @@ dVirtualMachine::dNemonic dVirtualMachine::m_nemonics[] =
 	{bgt,		"bgt"},		
 	{bget,		"bget"},		
 
-	{call,		"call"},		
-	{callr,		"callr"},		
 	{syscall,	"syscall"},		
 	{jump,		"jump"},		
 
@@ -45,7 +44,7 @@ dVirtualMachine::dNemonic dVirtualMachine::m_nemonics[] =
 	{exit,		"exit"},		
 	{push,		"push"},		 
 	{pop,		"pop"},		
-
+*/
 	{nop,		"nop"},
 };
 

@@ -17,10 +17,10 @@
 
 // calculate fibonacci value of register r1
 begin fibonacci
-	push	{r3, r2, r4}			; save temp registers
+	push	r3, r2, r4				; save temp registers
 	addi	r3, 1					// preload const one into register r3
 	call	fibonacci_kerner		// calculate fibonacci of r1
-	pop		{r3, r2, r4}			; restore temp registers
+	pop		r3, r2, r4				; restore temp registers
 	ret		
 end
 
@@ -39,7 +39,7 @@ begin fibonacci_kerner
 	call	fibonacci_kerner	// calculate fibonacci (r1 - 2)
 	pop		r2					// restore fibonacci of r1 - 1
 	add		r1, r2				// calculate r1 = fibonacci (r1 - 1) + fibonacci (r1 - 2)
-	
+
 exit_test:	
 	ret		
 end

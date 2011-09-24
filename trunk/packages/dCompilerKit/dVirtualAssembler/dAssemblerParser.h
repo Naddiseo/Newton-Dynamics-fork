@@ -35,6 +35,7 @@ class dAssemblerParser
 	{
 		ACCEPTING_TOKEN = 255, 
 		IMPORT = 256, 
+		IMPORT_FILENAME,
 		LITERAL,
 		PRIVATE,
 		BEGIN,
@@ -78,7 +79,7 @@ class dAssemblerParser
 		EXIT,
 		PUSH,
 		POP,
-		JUMPLABEL
+		LOCALLABEL
 	};
 
 	enum ActionType;

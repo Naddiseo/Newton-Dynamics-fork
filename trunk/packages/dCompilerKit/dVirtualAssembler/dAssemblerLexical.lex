@@ -35,7 +35,9 @@ Integer			[\-\+]?[0-9]+
 //Float			{Integer}[\.][0-9]+(e{Integer})?
 
 Literal			[a-zA-Z_][0-9a-zA-Z_]*
-JumpLabel		{Literal}[:]
+ImportFile		<{Literal}([\.]{Literal})*>
+
+LocalLabel		{Literal}[:]
 
 Register		[rR][0-9]+
 
@@ -69,18 +71,20 @@ bget			[bB][gG][eE][tT]
 {Integer}		{return dAssemblerParser::INTEGER;}
 {Literal}		{return dAssemblerParser::LITERAL;}
 {Register}		{return dAssemblerParser::REGISTER;}
-{JumpLabel}		{return dAssemblerParser::JUMPLABEL;}
+{LocalLabel}		{return dAssemblerParser::LOCALLABEL;}
+{ImportFile}	{return dAssemblerParser::IMPORT_FILENAME;}
 
 
 ","				{return ',';}
-"<"				{return '<';}
-">"				{return '>';}
 "="				{return '=';}
-"{"				{return '{';}
-"}"				{return '}';}
-"\["			{return '[';}
-"\]"			{return ']';}
-"\."			{return '.';}
+
+//"<"				{return '<';}
+//">"				{return '>';}
+//"{"				{return '{';}
+//"}"				{return '}';}
+//"\["			{return '[';}
+//"\]"			{return ']';}
+//"\."			{return '.';}
 
 "int"			{return dAssemblerParser::INT;}
 "import"		{return dAssemblerParser::IMPORT;}
