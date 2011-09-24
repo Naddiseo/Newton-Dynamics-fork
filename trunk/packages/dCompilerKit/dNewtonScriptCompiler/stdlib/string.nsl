@@ -9,20 +9,15 @@
 * freely
 */
 
-import <string.nsl>
-import <console.nsl>
+// standard library core support
 
-class hello1
+class string
 {
+	native string ()
+	native string (byte[] data)
+	
+	private int m_size
+	private int m_capacity
+	private byte[] m_data
 }
 
-class hello2 extends hello1
-{
-}
-
-class helloWorld
-{
-	helloWorld ()
-	{
-	}
-}

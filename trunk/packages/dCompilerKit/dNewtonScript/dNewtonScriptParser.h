@@ -34,7 +34,8 @@ class dNewtonScriptParser
 	enum dToken
 	{
 		ACCEPTING_TOKEN = 255, 
-		INTEGER_VALUE = 256, 
+		NATIVE = 256, 
+		INTEGER_VALUE,
 		IMPORT,
 		IMPORT_FILE_NAME,
 		PRIVATE,

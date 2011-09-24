@@ -53,6 +53,8 @@ Integer			[\-\+]?[0-9]+
 ","				{return ',';}
 "{"				{return '{';}
 "}"				{return '}';}
+"\["			{return '[';}
+"\]"			{return ']';}
 "\("			{return '(';}
 "\)"			{return ')';}
 
@@ -66,6 +68,7 @@ Integer			[\-\+]?[0-9]+
 "double"		{return dNewtonScriptParser::DOUBLE;}
 
 "gui"			{return dNewtonScriptParser::GUI;}
+"native"		{return dNewtonScriptParser::NATIVE;}
 "extends"		{return dNewtonScriptParser::EXTENDS;}
 "private"		{return dNewtonScriptParser::PRIVATE;}
 "class"			{return dNewtonScriptParser::CLASS;}
