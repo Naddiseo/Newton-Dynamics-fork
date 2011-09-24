@@ -84,7 +84,7 @@ class dScriptCompiler: public dNewtonScriptParser
 	int CompileSouce (const char* const source);
 
 	protected:
-	virtual bool Parse(dAssemblerLexical& scanner);
+	
 	void EmitByteCode (int count, const dVirtualMachine::dOpCode* const code);
 
 	void EmitBeginFunction (const dUserVariable& name, const dUserVariable& functionScope);
@@ -136,6 +136,10 @@ class dScriptCompiler: public dNewtonScriptParser
 	dScriptCompiler();
 	virtual ~dScriptCompiler();
 	int CompileSource (dVirtualMachine* const virtualMachine, const char* const source);
+
+
+	protected:
+	virtual bool Parse(dNewtonScriptLexical& scanner);
 
 	dVirtualMachine* m_virtualMachine;
 };

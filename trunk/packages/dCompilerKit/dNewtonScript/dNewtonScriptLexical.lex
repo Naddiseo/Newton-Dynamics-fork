@@ -26,7 +26,7 @@ WhiteSpace		[ \t\n\r]+
 AnyButAstr		[^\*]
 AnyButSlash		[^\/]
 Comment1        [\/][\/].*
-Comment3        [\/][\*]({AnyButAstr}|[\*]{AnyButSlash})*[\*][\/]
+Comment2        [\/][\*]({AnyButAstr}|[\*]{AnyButSlash})*[\*][\/]
 Comment			({Comment1}|{Comment2})
 
 
@@ -45,6 +45,8 @@ Integer			[\-\+]?[0-9]+
 {WhiteSpace}	{/* skip is a white space*/}
 {Comment}		{/* skip commnets */}
 ";"				{/* comma are no mandatory by tehy can be use for historical reasons */}
+
+{Indetifier}	{return dNewtonScriptParser::IDENTIFIER;}
 
 "="				{return '=';}
 ":"				{return ':';}
@@ -71,7 +73,7 @@ Integer			[\-\+]?[0-9]+
 
 
 {Integer}		{return dNewtonScriptParser::INTEGER_VALUE;}
-{Indetifier}	{return dNewtonScriptParser::IDENTIFIER;}
+
 {ImportFile}	{return dNewtonScriptParser::IMPORT_FILE_NAME;}
 
 

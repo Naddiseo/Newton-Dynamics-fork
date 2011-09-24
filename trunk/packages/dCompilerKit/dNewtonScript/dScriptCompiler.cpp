@@ -41,17 +41,16 @@ int dScriptCompiler::CompileSource (dVirtualMachine* const virtualMachine, const
 	dNewtonScriptLexical scanner (source);
 
 	m_virtualMachine = virtualMachine;
-	_ASSERTE (0);
-//	Parse(scanner);
+	Parse(scanner);
 	return 0;
 }
 
-/*
-bool dScriptCompiler::Parse(dAssemblerLexical& scanner)
+
+bool dScriptCompiler::Parse(dNewtonScriptLexical& scanner)
 {
-	m_codeSegmentSize = 0;
-	m_codeSegment = new short[D_CODE_SEGMNET_ALLOC_SHUNK_SIZE];
-	dAssemblerParser::Parse(scanner);
+//	m_codeSegmentSize = 0;
+//	m_codeSegment = new short[D_CODE_SEGMNET_ALLOC_SHUNK_SIZE];
+	dNewtonScriptParser::Parse(scanner);
 
 //	scanner.ReStartScanner();
 //	dAssemblerParser::Parse(scanner);
@@ -59,6 +58,7 @@ bool dScriptCompiler::Parse(dAssemblerLexical& scanner)
 	return true;
 }
 
+/*
 void dScriptCompiler::EmitByteCode (int count, const dVirtualMachine::dOpCode* const code)
 {
 	if ((m_codeSegmentSize + count) > D_CODE_SEGMNET_ALLOC_SHUNK_SIZE) {
