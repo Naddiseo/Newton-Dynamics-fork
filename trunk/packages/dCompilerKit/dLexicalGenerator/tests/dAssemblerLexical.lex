@@ -62,8 +62,8 @@ bget			[bB][gG][eE][tT]
 
 
 %%
-[\]]			{return ']';}	
-[\.]			{return '.';}
+"\]"			{return ']';}	
+"\."			{return '.';}
 
 
 

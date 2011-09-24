@@ -72,14 +72,15 @@ bget			[bB][gG][eE][tT]
 {JumpLabel}		{return dAssemblerParser::JUMPLABEL;}
 
 
-[,]				{return ',';}
-[<]				{return '<';}
-[>]				{return '>';}
-[=]				{return '=';}
-[{]				{return '{';}	
-[}]				{return '}';}	
-[\.]			{return '.';}
-
+","				{return ',';}
+"<"				{return '<';}
+">"				{return '>';}
+"="				{return '=';}
+"{"				{return '{';}
+"}"				{return '}';}
+"\["			{return '[';}
+"\]"			{return ']';}
+"\."			{return '.';}
 
 "int"			{return dAssemblerParser::INT;}
 "import"		{return dAssemblerParser::IMPORT;}

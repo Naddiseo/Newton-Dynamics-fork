@@ -112,7 +112,7 @@ int dAssemblerLexical::NextToken ()
 	static short nextStateSet[] = {
 			1, 2};
 	static char  nextCharacterSet[] = {
-			46, 91};
+			46, 93};
 	
 	m_startIndex = m_index;
 
