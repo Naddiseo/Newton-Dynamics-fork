@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="dTestAssembler"
+	Name="dAssembler"
 	ProjectGUID="{C2DF8489-BB02-470E-BD2A-A728784158E5}"
 	RootNamespace="dTestAssembler"
 	Keyword="Win32Proj"
@@ -168,7 +168,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\dTestAssembler.cpp"
+			RelativePath=".\dAssembler.cpp"
 			>
 		</File>
 	</Files>
