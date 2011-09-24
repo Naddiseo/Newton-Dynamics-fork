@@ -13,7 +13,7 @@
 
 
 // the code assume the risk convention for that r0 is always 0
-// reg 31 is assume to be teh stack 
+// reg 31 is assume to be the stack 
 
 // calculate fibonacci value of register r1
 begin fibonacci

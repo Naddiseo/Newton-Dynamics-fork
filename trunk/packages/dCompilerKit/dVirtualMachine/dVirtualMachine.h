@@ -6,10 +6,10 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include <dTree.h>
-#include <dList.h>
 
 #ifdef _MSC_VER
+#include <windows.h>
+#include <crtdbg.h>
 #pragma warning (disable: 4201) // warning C4201: nonstandard extension used : nameless struct/union
 #endif
 
@@ -17,8 +17,7 @@
 #ifndef DTRACE
 	#ifdef _DEBUG
 		#include <stdarg.h>
-		
-		#include <windows.h>
+
 		inline void dExpandTraceMessage (const char *fmt, ...)
 		{
 			va_list v_args;
@@ -131,7 +130,6 @@ class dVirtualMachine
 	virtual ~dVirtualMachine(void);
 
 	int GetRegisterCount() const; 
-	bool CompileAssembly (const char* const code);
 
 	protected:
 	int m_registerCount;			

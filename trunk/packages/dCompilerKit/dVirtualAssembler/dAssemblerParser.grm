@@ -10,9 +10,9 @@
 */
 
 %{
-#include <dVirtualMachine.h>
+#include <dAssemblerCompiler.h>
 #include "dAssemblerLexical.h"
-#include "dAssemblerCompiler.h"
+
 //
 // Newton virtual machine assembler grammar
 // based loosely on a subset and a hybrid between the MIPS R3000 and the Intel 386 instructions set 

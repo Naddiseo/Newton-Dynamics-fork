@@ -1,9 +1,4 @@
 #include "dVirtualMachine.h"
-#include "dAssemblerParser.h"
-#include "dAssemblerLexical.h"
-#include "dAssemblerCompiler.h"
-
-
 
 
 dVirtualMachine::dNemonic dVirtualMachine::m_nemonics[] = 
@@ -74,12 +69,3 @@ int dVirtualMachine::GetRegisterCount() const
 	return m_registerCount;
 }
 
-bool dVirtualMachine::CompileAssembly (const char* const code)
-{
-	dAssemblerCompiler compiler(this);
-	dAssemblerLexical scanner (code);
-
-	compiler.Parse(scanner);
-
-	return true;
-}

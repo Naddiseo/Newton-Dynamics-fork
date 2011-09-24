@@ -13,10 +13,9 @@
 //Auto generated Parser Generator class: dAssemblerCompiler.cpp
 //
 
-
-#include <dVirtualMachine.h>
-#include "dAssemblerLexical.h"
 #include "dAssemblerCompiler.h"
+#include "dAssemblerLexical.h"
+
 
 #define D_CODE_SEGMNET_ALLOC_SHUNK_SIZE (1024 * 32)
 
@@ -35,6 +34,13 @@ dAssemblerCompiler::~dAssemblerCompiler()
 	if (m_codeSegment) {
 		delete[] m_codeSegment;
 	}
+}
+
+int dAssemblerCompiler::CompileSouce (const char* const source)
+{
+	dAssemblerLexical scanner (source);
+	Parse(scanner);
+	return 0;
 }
 
 bool dAssemblerCompiler::Parse(dAssemblerLexical& scanner)

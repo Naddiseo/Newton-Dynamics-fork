@@ -16,9 +16,16 @@
 #ifndef __dAssemblerCompiler_h__
 #define __dAssemblerCompiler_h__
 
+#include <dTree.h>
+#include <dList.h>
+#include <dVirtualMachine.h>
 #include "dAssemblerParser.h"
 
-class dVirtualMachine;
+#ifdef _MSC_VER
+#include <windows.h>
+#include <crtdbg.h>
+#endif
+
 
 class dAssemblerCompiler: public dAssemblerParser
 {
@@ -73,8 +80,11 @@ class dAssemblerCompiler: public dAssemblerParser
 
 	dAssemblerCompiler(dVirtualMachine* const m_virtualMachine);
 	virtual ~dAssemblerCompiler();
-	virtual bool Parse(dAssemblerLexical& scanner);
 
+	int CompileSouce (const char* const source);
+
+	protected:
+	virtual bool Parse(dAssemblerLexical& scanner);
 	void EmitByteCode (int count, const dVirtualMachine::dOpCode* const code);
 
 	void EmitBeginFunction (const dUserVariable& name, const dUserVariable& functionScope);
@@ -121,6 +131,7 @@ class dAssemblerCompiler: public dAssemblerParser
 
 	dGlobalSymbol* m_currentFunction;
 
+	friend dAssemblerParser;
 };
 
 #endif

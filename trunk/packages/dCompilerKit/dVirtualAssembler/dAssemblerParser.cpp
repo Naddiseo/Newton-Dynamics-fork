@@ -1,9 +1,9 @@
-/* Copych1 (c) <2009> <Newton Game Dynamics>
-*
+/* Copyright (c) <2009> <Newton Game Dynamics>
+* 
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
 * arising from the use of this software.
-*
+* 
 * Permission is granted to anyone to use this software for any purpose,
 * including commercial applications, and to alter it and redistribute it
 * freely
@@ -13,9 +13,10 @@
 //Auto generated Parser Generator class: dAssemblerParser.cpp
 //
 
-#include <dVirtualMachine.h>
+
+#include <dAssemblerCompiler.h>
 #include "dAssemblerLexical.h"
-#include "dAssemblerCompiler.h"
+
 //
 // Newton virtual machine assembler grammar
 // based loosely on a subset and a hybrid between the MIPS R3000 and the Intel 386 instructions set 

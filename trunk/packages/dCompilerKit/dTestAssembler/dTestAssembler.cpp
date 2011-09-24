@@ -5,8 +5,14 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <tchar.h>
+#include <dVirtualMachine.h>
+#include <dAssemblerCompiler.h>
+
+#ifdef _MSC_VER
+#include <windows.h>
 #include <crtdbg.h>
-#include "dVirtualMachine.h"
+#endif
+
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -38,8 +44,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	fclose (rules);
 
 	dVirtualMachine virtualMachine;
-	virtualMachine.CompileAssembly (buffer);
-
+	dAssemblerCompiler compiler (&virtualMachine);
+	compiler.CompileSouce (buffer);
 
 	delete buffer;
 	return 0;

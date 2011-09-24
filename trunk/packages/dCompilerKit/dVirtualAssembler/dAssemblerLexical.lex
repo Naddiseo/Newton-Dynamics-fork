@@ -11,7 +11,7 @@
 */
 
 %{
-#include <dVirtualMachine.h>
+#include <dAssemblerCompiler.h>
 #include "dAssemblerParser.h"
 
 //
