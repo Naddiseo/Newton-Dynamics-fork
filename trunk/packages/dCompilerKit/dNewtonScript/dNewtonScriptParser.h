@@ -35,6 +35,7 @@ class dNewtonScriptParser
 	{
 		ACCEPTING_TOKEN = 255, 
 		NATIVE = 256, 
+		CONSTANT,
 		INTEGER_VALUE,
 		IMPORT,
 		IMPORT_FILE_NAME,

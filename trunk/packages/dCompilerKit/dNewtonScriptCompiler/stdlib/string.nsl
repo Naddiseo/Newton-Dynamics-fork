@@ -13,11 +13,24 @@
 
 class string
 {
+
+	int lenght() 
+	{
+//		return m_size
+	}
+
+
 	native string ()
 	native string (byte[] data)
+	
+	int lenght() const
+	{
+//		return m_size
+	}
 	
 	private int m_size
 	private int m_capacity
 	private byte[] m_data
 }
+
 

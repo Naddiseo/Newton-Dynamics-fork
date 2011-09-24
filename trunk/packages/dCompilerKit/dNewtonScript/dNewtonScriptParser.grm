@@ -41,7 +41,7 @@
 	};
 }
 
-%token NATIVE
+%token NATIVE CONSTANT
 %token INTEGER_VALUE
 %token IMPORT IMPORT_FILE_NAME 
 %token PRIVATE CLASS IDENTIFIER EXTENDS GUI
@@ -91,14 +91,7 @@ extends
 	| EXTENDS IDENTIFIER
 	;		
 	
-				 
-function_modifier
-	: NATIVE
-	| PRIVATE
-	| NATIVE PRIVATE
-	| PRIVATE NATIVE 
-	;
-			   
+		   
 class_implementation 
 	: class_member
 	| class_implementation class_member
@@ -107,6 +100,7 @@ class_implementation
 class_member 
 	: class_contructor
 	| class_variable_declaration
+	| class_function_implementaion
 	;
 			
 native_function
@@ -125,12 +119,24 @@ function_parameters
 	:
 	| parameter_list 
 	;
+	
+const_function
+	: 
+	| CONSTANT
+	;
 			 
 class_contructor 
 	: native_function IDENTIFIER '(' function_parameters ')' 
 	| IDENTIFIER '(' function_parameters ')' base_class_initialization function_block
 	| PRIVATE IDENTIFIER '(' function_parameters ')' base_class_initialization function_block
 	;
+	
+class_function_implementaion 
+	: native_function type_specifier IDENTIFIER const_function '(' function_parameters ')' 
+	| type_specifier IDENTIFIER '(' function_parameters ')' const_function function_block
+	| PRIVATE type_specifier IDENTIFIER '(' function_parameters ')' const_function function_block
+	;
+	
 
 
 uninitialized_data

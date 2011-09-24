@@ -41,6 +41,7 @@
 	};
 }
 
+%token NATIVE CONSTANT
 %token INTEGER_VALUE
 %token IMPORT IMPORT_FILE_NAME 
 %token PRIVATE CLASS IDENTIFIER EXTENDS GUI
@@ -74,9 +75,11 @@ import_module
 			  
 			  
 class_delaration 
-	: class_modifier CLASS IDENTIFIER extends gui_support '{' class_implemetation '}'
+	: CLASS IDENTIFIER extends gui_support '{' '}'
+	| CLASS IDENTIFIER extends gui_support '{' class_implementation '}'
+	| PRIVATE CLASS IDENTIFIER extends gui_support '{' '}'
+	| PRIVATE CLASS IDENTIFIER extends gui_support '{' class_implementation '}'
 	;			  
-				
 				
 gui_support 
 	:
@@ -85,43 +88,78 @@ gui_support
 				
 extends 
 	:
-	| EXTENDS
-	;				 
-				 
-class_modifier 
-	:
-	| PRIVATE
-	;
-			   
-			   
-class_implemetation 
+	| EXTENDS IDENTIFIER
+	;		
+	
+		   
+class_implementation 
 	: class_member
-	| class_implemetation class_member
+	| class_implementation class_member
 	;
 				    
 class_member 
 	: class_contructor
-	| variable_declaration
+	| class_variable_declaration
+	| class_function_implementaion
 	;
-			 
+			
+native_function
+	: NATIVE
+	| NATIVE PRIVATE
+	| PRIVATE NATIVE 
+	;
+
+
+parameter_list 
+	: parameter
+	| parameter_list ',' parameter
+	;	
+	
+function_parameters
+	:
+	| parameter_list 
+	;
+	
+const_function
+	: 
+	| CONSTANT
+	;
 			 
 class_contructor 
-	: IDENTIFIER '(' ')' base_class_initialization function_block
-	| IDENTIFIER '(' parameterList ')' base_class_initialization function_block
+	: native_function IDENTIFIER '(' function_parameters ')' 
+	| IDENTIFIER '(' function_parameters ')' base_class_initialization function_block
+	| PRIVATE IDENTIFIER '(' function_parameters ')' base_class_initialization function_block
 	;
-			 
-			 
-parameterList 
-	: parameter
-	| parameterList ',' parameter
-	;	
+	
+class_function_implementaion 
+	: native_function type_specifier IDENTIFIER const_function '(' function_parameters ')' 
+	| type_specifier IDENTIFIER '(' function_parameters ')' const_function function_block
+	| PRIVATE type_specifier IDENTIFIER '(' function_parameters ')' const_function function_block
+	;
+	
+
+
+uninitialized_data
+	: type_specifier IDENTIFIER	
+	| PRIVATE type_specifier IDENTIFIER	
+	;
+	
+initialized_data	
+	: uninitialized_data '=' expression		
+	;
+
+class_variable_declaration
+	: uninitialized_data
+	;
+	 
 			  
 parameter
-	: type_specifier declarator_name
+	: type_specifier IDENTIFIER
 	;
 
 type_specifier
 	: primitive_types
+	| primitive_types array_type_list
 	;		
 	
 primitive_types
@@ -137,10 +175,17 @@ primitive_types
 	| FLOAT
 	| DOUBLE
 	;
-			 
-declarator_name
-	: IDENTIFIER
+	
+array_type_list
+	: array_type
+	| array_type_list array_type
 	;
+	
+array_type
+	: '[' ']'
+	| '[' expression ']'
+	;	
+		 
 			 
 base_class_initialization 
 	:			 
@@ -185,15 +230,9 @@ function_statement
 	;			 
 	
 local_variables_declaration
-	: type_specifier declarationName
-	| type_specifier declarationName '=' expression
+	: uninitialized_data
+	| initialized_data
 	;
-	
-declarationName
-	: IDENTIFIER
-//  | IDENTIFIER dimension_array
-    ;
-
 	
 expression
 	: INTEGER_VALUE

@@ -68,6 +68,7 @@ Integer			[\-\+]?[0-9]+
 "double"		{return dNewtonScriptParser::DOUBLE;}
 
 "gui"			{return dNewtonScriptParser::GUI;}
+"const"			{return dNewtonScriptParser::CONSTANT;}
 "native"		{return dNewtonScriptParser::NATIVE;}
 "extends"		{return dNewtonScriptParser::EXTENDS;}
 "private"		{return dNewtonScriptParser::PRIVATE;}
