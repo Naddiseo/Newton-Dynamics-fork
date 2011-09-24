@@ -41,52 +41,146 @@
 	};
 }
 
-
+%token INTEGER_VALUE
 %token IMPORT IMPORT_FILE_NAME 
 %token PRIVATE CLASS IDENTIFIER EXTENDS GUI
-
-%token INT
+%token BOOLEAN BYTE SHORT INT LONG UNSIGNED FLOAT DOUBLE
 	
 %start compilation_unit
 
-
 %%
 
-compilation_unit: 
-				| module_list
-			    ; 
+compilation_unit
+	: 
+	| module_list
+	; 
 
 
-module_list : module
-			| module_list module
-			;
+module_list 
+	: module
+	| module_list module
+	;
 			
 			
-module : import_module
-	   | class_delaration
-	   ;			
+module 
+	: import_module
+	| class_delaration
+	;			
 			
 
-import_module : IMPORT IMPORT_FILE_NAME 
-			  ;
+import_module 
+	: IMPORT IMPORT_FILE_NAME 
+	;
 			  
 			  
-class_delaration : class_modifier CLASS IDENTIFIER extends gui_support '{' class_implemetation '}'
-				 ;			  
+class_delaration 
+	: class_modifier CLASS IDENTIFIER extends gui_support '{' class_implemetation '}'
+	;			  
 				
 				
-gui_support :
-		    | GUI
-		    ;				
+gui_support 
+	:
+	| GUI
+	;				
 				
-extends :  				 
-	    | EXTENDS
-		;				 
+extends 
+	:
+	| EXTENDS
+	;				 
 				 
-class_modifier :  				 
-			   | PRIVATE
-			   ;
+class_modifier 
+	:
+	| PRIVATE
+	;
 			   
 			   
-class_implemetation : INT  			   
-				    ;
+class_implemetation 
+	: class_member
+	| class_implemetation class_member
+	;
+				    
+class_member 
+	: class_contructor
+	| variable_declaration
+	;
+			 
+			 
+class_contructor 
+	: IDENTIFIER '(' ')' base_class_initialization function_block
+	| IDENTIFIER '(' parameterList ')' base_class_initialization function_block
+	;
+			 
+			 
+parameterList 
+	: parameter
+	| parameterList ',' parameter
+	;	
+			  
+parameter
+	: type_specifier declarator_name
+	;
+
+primitive_types
+	: primitive_types
+	;		
+	
+primitive_types
+	: BOOLEAN
+	| BYTE
+	| SHORT
+	| INT
+	| LONG
+	| UNSIGNED BYTE
+	| UNSIGNED SHORT
+	| UNSIGNED INT
+	| UNSIGNED LONG
+	| FLOAT
+	| DOUBLE
+	;
+			 
+declarator_name
+	: IDENTIFIER
+	;
+			 
+base_class_initialization 
+	:			 
+	| ':' base_class_initialization_list  	
+	;
+	
+base_class_initialization_list 
+	: init_base_constructor
+	| base_class_initialization_list ',' init_base_constructor
+	;
+	
+init_base_constructor
+	: IDENTIFIER '(' ')'
+	| IDENTIFIER '(' argument_list ')'
+	;
+	
+	
+argument_list
+	: argument
+	| argument_list ',' argument
+	;
+		
+argument
+	: INTEGER_VALUE	
+	;					  
+						  
+function_block 
+	: '{' '}'
+	| '{' function_statements_list '}'
+	;
+			   
+			   
+function_statements_list 
+	: function_statement
+	| function_statements_list function_statement
+	;
+						 
+						 
+function_statement 
+	: INT			
+	;			 
+	
+	

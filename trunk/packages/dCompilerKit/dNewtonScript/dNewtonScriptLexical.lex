@@ -34,7 +34,7 @@ Indetifier		[a-zA-Z_][0-9a-zA-Z_]*
 ImportFile		<{Indetifier}([\.]{Indetifier})*>
 
 
-//Integer		[\-\+]?[0-9]+
+Integer			[\-\+]?[0-9]+
 //Float			{Integer}[\.][0-9]+(e{Integer})?
 
 
@@ -46,7 +46,21 @@ ImportFile		<{Indetifier}([\.]{Indetifier})*>
 {Comment}		{/* skip commnets */}
 ";"				{/* comma are no mandatory by tehy can be use for historical reasons */}
 
+":"				{return ':';}
+","				{return ',';}
+"{"				{return '{';}
+"}"				{return '}';}
+"\("			{return '(';}
+"\)"			{return ')';}
+
+"bool"			{return dNewtonScriptParser::BOOLEAN;}
+"byte"			{return dNewtonScriptParser::BYTE;}
+"short"			{return dNewtonScriptParser::SHORT;}
 "int"			{return dNewtonScriptParser::INT;}
+"long"			{return dNewtonScriptParser::LONG;}
+"unsigned"		{return dNewtonScriptParser::UNSIGNED;}
+"float"			{return dNewtonScriptParser::FLOAT;}
+"double"		{return dNewtonScriptParser::DOUBLE;}
 
 "gui"			{return dNewtonScriptParser::GUI;}
 "extends"		{return dNewtonScriptParser::EXTENDS;}
@@ -55,6 +69,7 @@ ImportFile		<{Indetifier}([\.]{Indetifier})*>
 "import"		{return dNewtonScriptParser::IMPORT;}
 
 
+{Integer}		{return dNewtonScriptParser::INTEGER_VALUE;}
 {Indetifier}	{return dNewtonScriptParser::IDENTIFIER;}
 {ImportFile}	{return dNewtonScriptParser::IMPORT_FILE_NAME;}
 

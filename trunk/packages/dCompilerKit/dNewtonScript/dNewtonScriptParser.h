@@ -34,14 +34,22 @@ class dNewtonScriptParser
 	enum dToken
 	{
 		ACCEPTING_TOKEN = 255, 
-		IMPORT = 256, 
+		INTEGER_VALUE = 256, 
+		IMPORT,
 		IMPORT_FILE_NAME,
 		PRIVATE,
 		CLASS,
 		IDENTIFIER,
 		EXTENDS,
 		GUI,
-		INT
+		BOOLEAN,
+		BYTE,
+		SHORT,
+		INT,
+		LONG,
+		UNSIGNED,
+		FLOAT,
+		DOUBLE
 	};
 
 	enum ActionType;
