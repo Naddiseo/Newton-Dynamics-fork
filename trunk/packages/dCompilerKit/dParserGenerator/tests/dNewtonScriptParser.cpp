@@ -151,7 +151,7 @@ const dNewtonScriptParser::dGotoEntry* dNewtonScriptParser::FindGoto (const dGot
 }
 
 
-bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
+bool dNewtonScriptParser::Parse(xxx& scanner)
 {
 	dList<dStackPair> stack;
 	static short actionsCount[] = {
