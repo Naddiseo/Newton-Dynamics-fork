@@ -10,16 +10,16 @@
 */
 
 //
-//Auto generated Parser Generator class: dAssemblerCompiler.h
+//Auto generated Parser Generator class: dScriptCompiler.h
 //
 
-#ifndef __dAssemblerCompiler_h__
-#define __dAssemblerCompiler_h__
+#ifndef __dScriptCompiler_h__
+#define __dScriptCompiler_h__
 
 #include <dTree.h>
 #include <dList.h>
 #include <dVirtualMachine.h>
-#include "dAssemblerParser.h"
+#include "dNewtonScriptParser.h"
 
 #ifdef _MSC_VER
 #include <windows.h>
@@ -27,10 +27,10 @@
 #endif
 
 
-class dAssemblerCompiler: public dAssemblerParser
+class dScriptCompiler: public dNewtonScriptParser
 {
 	public:
-
+/*
 	enum dSymbolType
 	{
 		funtionName,
@@ -78,8 +78,6 @@ class dAssemblerCompiler: public dAssemblerParser
 	{
 	};
 
-	dAssemblerCompiler(dVirtualMachine* const virtualMachine);
-	virtual ~dAssemblerCompiler();
 
 	int CompileSouce (const char* const source);
 
@@ -105,15 +103,6 @@ class dAssemblerCompiler: public dAssemblerParser
 
 
 	void EmitLocalLabel (const dUserVariable& symbol) const;
-	
-//	void EmitADDIConstantExpresion (const dUserVariable& dstRegister, const dUserVariable& srcRegister, const dUserVariable& constValue);
-//	void EmitArithmeticInstrution (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src);
-//	void EmitCompareAndJumpLocalLabel (const dUserVariable& instruction, const dUserVariable& reg0, const dUserVariable& reg1, const dUserVariable& label);
-//	void EmitCompareAndJumpConstOffset (const dUserVariable& instruction, const dUserVariable& reg0, const dUserVariable& reg1, const dUserVariable& offset);
-//	void EmitCALL (const dUserVariable& regStack, const dUserVariable& symbol);
-//	void EmitRET (const dUserVariable& regStack);
-
-	
 	dUserVariable TypeCheckRegister (const dUserVariable& symbol);
 	dUserVariable EmitSymbol (const dUserVariable& symbol) const;
 	dUserVariable EmitDataType (const dUserVariable& dataType) const;
@@ -140,6 +129,13 @@ class dAssemblerCompiler: public dAssemblerParser
 	dGlobalSymbol* m_currentFunction;
 
 	friend dAssemblerParser;
+*/
+
+	dScriptCompiler();
+	virtual ~dScriptCompiler();
+
+//	dVirtualMachine* const m_virtualMachine
+
 };
 
 #endif

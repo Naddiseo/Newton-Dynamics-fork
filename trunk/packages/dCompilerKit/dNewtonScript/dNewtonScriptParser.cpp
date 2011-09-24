@@ -10,16 +10,24 @@
 */
 
 //
-//Auto generated Parser Generator class: $(className).cpp
+//Auto generated Parser Generator class: dNewtonScriptParser.cpp
 //
 
-$(userCode)
-#include "$(className).h"
+
+#include <dScriptCompiler.h>
+#include "dNewtonScriptLexical.h"
+
+//
+// Newton Script parcer  
+// loosely based on a subset of Java and C sharp
+//
+
+#include "dNewtonScriptParser.h"
 #include <dList.h>
 
 #define MAX_USER_PARAM	64
 
-enum $(className)::ActionType
+enum dNewtonScriptParser::ActionType
 {
 	dSHIFT = 0,
 	dREDUCE,
@@ -28,7 +36,7 @@ enum $(className)::ActionType
 };
 
 
-class $(className)::dActionEntry
+class dNewtonScriptParser::dActionEntry
 {
 	public:
 	dActionEntry (short token, short stateType,	short nextState, short ruleSymbols, short ruleIndex)
@@ -43,7 +51,7 @@ class $(className)::dActionEntry
 	short m_ruleIndex;
 };
 
-class $(className)::dGotoEntry
+class dNewtonScriptParser::dGotoEntry
 {
 	public:
 	dGotoEntry (short token, short nextState)
@@ -57,7 +65,7 @@ class $(className)::dGotoEntry
 
 
 
-class $(className)::dStackPair
+class dNewtonScriptParser::dStackPair
 {
 	public:
 	dStackPair()
@@ -71,22 +79,22 @@ class $(className)::dStackPair
 };
 
 
-$(className)::$(className)()
+dNewtonScriptParser::dNewtonScriptParser()
 {
 }
 
-$(className)::~$(className)()
+dNewtonScriptParser::~dNewtonScriptParser()
 {
 }
 
 
-bool $(className)::ErrorHandler (const string& line) const
+bool dNewtonScriptParser::ErrorHandler (const string& line) const
 {
 	line;
 	return false;
 }
 
-const $(className)::dActionEntry* $(className)::FindAction (const dActionEntry* const actionList, int count, dToken token) const
+const dNewtonScriptParser::dActionEntry* dNewtonScriptParser::FindAction (const dActionEntry* const actionList, int count, dToken token) const
 {
 	int i0 = 0;
 	int i1 = count - 1;
@@ -114,7 +122,7 @@ const $(className)::dActionEntry* $(className)::FindAction (const dActionEntry* 
 	return NULL;
 }
 
-const $(className)::dGotoEntry* $(className)::FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const
+const dNewtonScriptParser::dGotoEntry* dNewtonScriptParser::FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const
 {
 	int i0 = 0;
 	int i1 = count - 1;
@@ -143,18 +151,36 @@ const $(className)::dGotoEntry* $(className)::FindGoto (const dGotoEntry* const 
 }
 
 
-bool $(className)::Parse($(scannerClass)& scanner)
+bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 {
 	dList<dStackPair> stack;
-	static short actionsCount[] = {$(actionsCount)};
-	static short actionsStart[] = {$(actionsStart)};
-	static short gotoCount[] = {$(gotoCount)};
-	static short gotoStart[] = {$(gotoStart)};
+	static short actionsCount[] = {
+			4, 1, 1, 3, 1, 1, 3, 3, 4, 3, 1, 3, 2, 1, 2, 1, 1, 1, 1, 1, 3};
+	static short actionsStart[] = {
+			0, 4, 5, 6, 9, 10, 11, 14, 17, 21, 24, 25, 28, 30, 31, 33, 34, 35, 36, 37, 38};
+	static short gotoCount[] = {
+			6, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0};
+	static short gotoStart[] = {
+			0, 6, 6, 6, 6, 6, 6, 6, 6, 10, 10, 10, 10, 11, 11, 12, 12, 12, 13, 13, 13};
 
-	static dGotoEntry gotoTable[] = {$(gotoTable)};
-	static dActionEntry actionTable[] = {$(actionTable)};
+	static dGotoEntry gotoTable[] = {
+			dGotoEntry (264, 5), dGotoEntry (265, 8), dGotoEntry (266, 7), dGotoEntry (267, 6), dGotoEntry (268, 3), 
+			dGotoEntry (269, 4), dGotoEntry (266, 11), dGotoEntry (267, 6), dGotoEntry (268, 3), dGotoEntry (269, 4), 
+			dGotoEntry (270, 14), dGotoEntry (271, 16), dGotoEntry (272, 19)};
+	static dActionEntry actionTable[] = {
+			dActionEntry (255, 1, 0, 0, 1), dActionEntry (256, 0, 1, 0, 0), dActionEntry (258, 0, 2, 0, 0), dActionEntry (259, 1, 5, 0, 13), 
+			dActionEntry (257, 0, 9, 0, 0), dActionEntry (259, 1, 5, 1, 14), dActionEntry (255, 1, 2, 1, 6), dActionEntry (256, 1, 2, 1, 6), 
+			dActionEntry (259, 1, 2, 1, 6), dActionEntry (259, 0, 10, 0, 0), dActionEntry (255, 2, 0, 0, 0), dActionEntry (255, 1, 2, 1, 5), 
+			dActionEntry (256, 1, 2, 1, 5), dActionEntry (259, 1, 2, 1, 5), dActionEntry (255, 1, 1, 1, 3), dActionEntry (256, 1, 1, 1, 3), 
+			dActionEntry (259, 1, 1, 1, 3), dActionEntry (255, 1, 0, 1, 2), dActionEntry (256, 0, 1, 0, 0), dActionEntry (258, 0, 2, 0, 0), 
+			dActionEntry (259, 1, 5, 0, 13), dActionEntry (255, 1, 3, 2, 7), dActionEntry (256, 1, 3, 2, 7), dActionEntry (259, 1, 3, 2, 7), 
+			dActionEntry (260, 0, 12, 0, 0), dActionEntry (255, 1, 1, 2, 4), dActionEntry (256, 1, 1, 2, 4), dActionEntry (259, 1, 1, 2, 4), 
+			dActionEntry (123, 1, 6, 0, 11), dActionEntry (261, 0, 13, 0, 0), dActionEntry (123, 1, 6, 1, 12), dActionEntry (123, 1, 7, 0, 9), 
+			dActionEntry (262, 0, 15, 0, 0), dActionEntry (123, 1, 7, 1, 10), dActionEntry (123, 0, 17, 0, 0), dActionEntry (263, 0, 18, 0, 0), 
+			dActionEntry (125, 1, 8, 1, 15), dActionEntry (125, 0, 20, 0, 0), dActionEntry (255, 1, 4, 8, 8), dActionEntry (256, 1, 4, 8, 8), 
+			dActionEntry (259, 1, 4, 8, 8)};
 
-	const int lastToken = &(lastTerminalToken);
+	const int lastToken = 264;
 
 	stack.Append ();
 	dToken token = dToken (scanner.NextToken());
@@ -205,7 +231,7 @@ bool $(className)::Parse($(scannerClass)& scanner)
 				switch (action->m_ruleIndex) 
 				{
 					//do user semantic Actions
-$(semanticActionsCode)
+
 					default:;
 				}
 
@@ -231,4 +257,5 @@ $(semanticActionsCode)
 	}
 	return false;
 }
+
 

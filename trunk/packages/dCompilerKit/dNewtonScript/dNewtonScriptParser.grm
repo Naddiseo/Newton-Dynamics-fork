@@ -1,0 +1,92 @@
+/* Copyright (c) <2009> <Newton Game Dynamics>
+* 
+* This software is provided 'as-is', without any express or implied
+* warranty. In no event will the authors be held liable for any damages
+* arising from the use of this software.
+* 
+* Permission is granted to anyone to use this software for any purpose,
+* including commercial applications, and to alter it and redistribute it
+* freely
+*/
+
+%{
+#include <dScriptCompiler.h>
+#include "dNewtonScriptLexical.h"
+
+//
+// Newton Script parcer  
+// loosely based on a subset of Java and C sharp
+//
+%}
+
+
+%union 
+{
+	class dUserVariable
+	{
+		public:
+		dUserVariable () 
+			:m_token (dToken (0)), m_semanticValue(0), m_data("")
+		{
+		}
+		
+		
+		dUserVariable (dToken token, const char* const text)
+			:m_token(token), m_semanticValue(0), m_data (text) 
+		{
+		}
+		dToken m_token;
+		int m_semanticValue;
+		string m_data;
+	};
+}
+
+
+%token IMPORT IMPORT_FILE_NAME 
+%token PRIVATE CLASS IDENTIFIER EXTENDS GUI
+
+%token INT
+	
+%start compilation_unit
+
+
+%%
+
+compilation_unit: 
+				| module_list
+			    ; 
+
+
+module_list : module
+			| module_list module
+			;
+			
+			
+module : import_module
+	   | class_delaration
+	   ;			
+			
+
+import_module : IMPORT IMPORT_FILE_NAME 
+			  ;
+			  
+			  
+class_delaration : class_modifier CLASS IDENTIFIER extends gui_support '{' class_implemetation '}'
+				 ;			  
+				
+				
+gui_support :
+		    | GUI
+		    ;				
+				
+extends :  				 
+	    | EXTENDS
+		;				 
+				 
+class_modifier :  				 
+			   | PRIVATE
+			   ;
+			   
+			   
+class_implemetation : INT  			   
+				    ;
