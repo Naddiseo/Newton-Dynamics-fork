@@ -19,9 +19,9 @@
 
 #define D_CODE_SEGMNET_ALLOC_SHUNK_SIZE (1024 * 32)
 
-dAssemblerCompiler::dAssemblerCompiler(dVirtualMachine* const virtualMachine)
+dAssemblerCompiler::dAssemblerCompiler()
 	:dAssemblerParser ()
-	,m_virtualMachine (virtualMachine)
+	,m_virtualMachine (NULL)
 	,m_globalSymbols ()
 	,m_codeSegmentSize(0)
 	,m_codeSegment (NULL)
@@ -36,9 +36,11 @@ dAssemblerCompiler::~dAssemblerCompiler()
 	}
 }
 
-int dAssemblerCompiler::CompileSouce (const char* const source)
+int dAssemblerCompiler::CompileSource (dVirtualMachine* const virtualMachine, const char* const source)
 {
 	dAssemblerLexical scanner (source);
+
+	m_virtualMachine = virtualMachine;
 	Parse(scanner);
 	return 0;
 }

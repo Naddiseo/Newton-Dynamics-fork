@@ -6,7 +6,8 @@
 #include <ctype.h>
 #include <tchar.h>
 #include <dVirtualMachine.h>
-#include <dAssemblerCompiler.h>
+#include <dScriptCompiler.h>
+
 
 #ifdef _MSC_VER
 #include <windows.h>
@@ -43,8 +44,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	fread (buffer, 1, size, rules);
 	fclose (rules);
 
-	
-	dAssemblerCompiler compiler;
+	dScriptCompiler compiler;
 	dVirtualMachine virtualMachine;
 
 	compiler.CompileSource (&virtualMachine, buffer);

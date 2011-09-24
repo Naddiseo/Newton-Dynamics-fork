@@ -27,6 +27,8 @@
 #endif
 
 
+class dVirtualMachine;
+
 class dScriptCompiler: public dNewtonScriptParser
 {
 	public:
@@ -133,9 +135,9 @@ class dScriptCompiler: public dNewtonScriptParser
 
 	dScriptCompiler();
 	virtual ~dScriptCompiler();
+	int CompileSource (dVirtualMachine* const virtualMachine, const char* const source);
 
-//	dVirtualMachine* const m_virtualMachine
-
+	dVirtualMachine* m_virtualMachine;
 };
 
 #endif

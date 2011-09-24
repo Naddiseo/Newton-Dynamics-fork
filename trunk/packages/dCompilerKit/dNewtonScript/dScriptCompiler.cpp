@@ -21,7 +21,7 @@
 
 dScriptCompiler::dScriptCompiler()
 	:dNewtonScriptParser ()
-//	,m_virtualMachine (virtualMachine)
+	,m_virtualMachine (NULL)
 //	,m_globalSymbols ()
 //	,m_codeSegmentSize(0)
 //	,m_codeSegment (NULL)
@@ -36,14 +36,17 @@ dScriptCompiler::~dScriptCompiler()
 //	}
 }
 
-/*
-int dScriptCompiler::CompileSouce (const char* const source)
+int dScriptCompiler::CompileSource (dVirtualMachine* const virtualMachine, const char* const source)
 {
-	dAssemblerLexical scanner (source);
-	Parse(scanner);
+	dNewtonScriptLexical scanner (source);
+
+	m_virtualMachine = virtualMachine;
+	_ASSERTE (0);
+//	Parse(scanner);
 	return 0;
 }
 
+/*
 bool dScriptCompiler::Parse(dAssemblerLexical& scanner)
 {
 	m_codeSegmentSize = 0;

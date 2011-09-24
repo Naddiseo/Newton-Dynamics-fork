@@ -78,10 +78,9 @@ class dAssemblerCompiler: public dAssemblerParser
 	{
 	};
 
-	dAssemblerCompiler(dVirtualMachine* const virtualMachine);
+	dAssemblerCompiler();
 	virtual ~dAssemblerCompiler();
-
-	int CompileSouce (const char* const source);
+	int CompileSource (dVirtualMachine* const virtualMachine, const char* const source);
 
 	protected:
 	virtual bool Parse(dAssemblerLexical& scanner);
