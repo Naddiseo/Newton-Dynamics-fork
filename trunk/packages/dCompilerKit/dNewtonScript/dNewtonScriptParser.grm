@@ -74,7 +74,7 @@ import_module
 			  
 			  
 class_delaration 
-	: class_modifier CLASS IDENTIFIER extends gui_support '{' class_implemetation '}'
+	: visibility_modifier CLASS IDENTIFIER extends gui_support '{' class_implemetation '}'
 	;			  
 				
 				
@@ -88,7 +88,7 @@ extends
 	| EXTENDS
 	;				 
 				 
-class_modifier 
+visibility_modifier
 	:
 	| PRIVATE
 	;
@@ -106,8 +106,8 @@ class_member
 			 
 			 
 class_contructor 
-	: IDENTIFIER '(' ')' base_class_initialization function_block
-	| IDENTIFIER '(' parameterList ')' base_class_initialization function_block
+	: visibility_modifier IDENTIFIER '(' ')' base_class_initialization function_block
+	| visibility_modifier IDENTIFIER '(' parameterList ')' base_class_initialization function_block
 	;
 			 
 			 

@@ -26,30 +26,30 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 
 
-	const char* const source = argv[1];
 
-	FILE* const rules = fopen (source, "r");
-	if (!rules) {
-		fprintf (stdout, "Rule file \"%s\" not found\n", source);
+	const char* const sourceFileName = argv[1];
+	FILE* const sourceFile = fopen (sourceFileName, "r");
+	if (!sourceFile) {
+		fprintf (stdout, "Rule file \"%s\" not found\n", sourceFile);
 		exit (0);
 	}
 
-	fseek (rules, 0, SEEK_END);
-	int size = ftell (rules);
-	fseek (rules, 0, SEEK_SET);
+	fseek (sourceFile, 0, SEEK_END);
+	int size = ftell (sourceFile);
+	fseek (sourceFile, 0, SEEK_SET);
 
-	char* const buffer = new char [size + 1];
-	memset (buffer, 0, size + 1);
-	fread (buffer, 1, size, rules);
-	fclose (rules);
+	char* const source = new char [size + 1];
+	memset (source, 0, size + 1);
+	fread (source, 1, size, sourceFile);
+	fclose (sourceFile);
 
 	
 	dAssemblerCompiler compiler;
 	dVirtualMachine virtualMachine;
 
-	compiler.CompileSource (&virtualMachine, buffer);
+	compiler.CompileSource (&virtualMachine, source);
 
-	delete buffer;
+	delete source;
 	return 0;
 }
 
