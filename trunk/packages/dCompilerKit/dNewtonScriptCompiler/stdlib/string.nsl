@@ -14,7 +14,12 @@
 class string
 {
 
-	int lenght() 
+	int lenght() const
+	{
+//		return m_size
+	}
+
+	int lenght() const
 	{
 //		return m_size
 	}

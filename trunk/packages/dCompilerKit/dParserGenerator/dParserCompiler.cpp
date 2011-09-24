@@ -18,7 +18,7 @@
 #define DACCEPT_SYMBOL "$$$"
 #define DACCEPTING_TOKEN 255	
 
-#define DDEBUG_STATES
+//#define DDEBUG_STATES
 
 
 
