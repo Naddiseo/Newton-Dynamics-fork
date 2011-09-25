@@ -147,20 +147,21 @@ bool dNewtonScriptParser::Parse(xxx& scanner)
 {
 	dList<dStackPair> stack;
 	static short actionsCount[] = {
-			2, 2, 2, 1, 1, 1, 1, 1, 1};
+			2, 2, 2, 1, 1, 1, 1, 1, 1, 1};
 	static short actionsStart[] = {
-			0, 2, 4, 6, 7, 8, 9, 10, 11};
+			0, 2, 4, 6, 7, 8, 9, 10, 11, 12};
 	static short gotoCount[] = {
-			1, 1, 1, 0, 0, 0, 0, 0, 0};
+			1, 1, 1, 0, 0, 0, 0, 0, 0, 0};
 	static short gotoStart[] = {
-			0, 1, 2, 3, 3, 3, 3, 3, 3};
+			0, 1, 2, 3, 3, 3, 3, 3, 3, 3};
 
 	static dGotoEntry gotoTable[] = {
-			dGotoEntry (256, 3), dGotoEntry (257, 5), dGotoEntry (257, 6)};
+			dGotoEntry (256, 3), dGotoEntry (257, 5), dGotoEntry (257, 7)};
 	static dActionEntry actionTable[] = {
 			dActionEntry (97, 0, 1, 0, 0), dActionEntry (102, 0, 2, 0, 0), dActionEntry (102, 1, 1, 0, 3), dActionEntry (109, 0, 4, 0, 0), 
-			dActionEntry (101, 1, 1, 0, 3), dActionEntry (109, 0, 4, 0, 0), dActionEntry (255, 2, 0, 0, 0), dActionEntry (102, 1, 1, 1, 4), 
-			dActionEntry (102, 0, 7, 0, 0), dActionEntry (101, 0, 8, 0, 0), dActionEntry (255, 1, 0, 3, 1), dActionEntry (255, 1, 0, 3, 2)};
+			dActionEntry (101, 1, 1, 0, 3), dActionEntry (109, 0, 6, 0, 0), dActionEntry (255, 2, 0, 0, 0), dActionEntry (102, 1, 1, 1, 4), 
+			dActionEntry (102, 0, 8, 0, 0), dActionEntry (101, 1, 1, 1, 4), dActionEntry (101, 0, 9, 0, 0), dActionEntry (255, 1, 0, 3, 1), 
+			dActionEntry (255, 1, 0, 3, 2)};
 
 	const int lastToken = 256;
 
