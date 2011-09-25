@@ -9,60 +9,17 @@
 * freely
 */
 
-%{
-#include <dScriptCompiler.h>
-#include "dNewtonScriptLexical.h"
-
-//
-// Newton Script parcer  
-// loosely based on a subset of Java and C sharp
-//
-%}
-
-
-%union 
-{
-	class dUserVariable
-	{
-		public:
-		dUserVariable () 
-			:m_token (dToken (0)), m_semanticValue(0), m_data("")
-		{
-		}
-		
-		
-		dUserVariable (dToken token, const char* const text)
-			:m_token(token), m_semanticValue(0), m_data (text) 
-		{
-		}
-		dToken m_token;
-		int m_semanticValue;
-		string m_data;
-	};
-}
-
-//%token NATIVE CONSTANT INT IDENTIFIER
-//%start function
 
 %%
-/*
-const
-	: 
-	| CONSTANT
-	;
 
 function
-	: NATIVE INT IDENTIFIER const '('  ')' 
-	|        INT IDENTIFIER       '('  ')' const '{' '}'
-	;
-*/
-
-function 
 	: 'a' x 'f' 
 	|       'f' x 'e' 
 	;
  
-x :
-  | 'm'  
-  ;
+x 
+	:
+	| 'm'  
+	;
+
 	

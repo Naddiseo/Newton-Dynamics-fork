@@ -14,14 +14,6 @@
 //
 
 
-#include <dScriptCompiler.h>
-#include "dNewtonScriptLexical.h"
-
-//
-// Newton Script parcer  
-// loosely based on a subset of Java and C sharp
-//
-
 #include "dNewtonScriptParser.h"
 #include <dList.h>
 

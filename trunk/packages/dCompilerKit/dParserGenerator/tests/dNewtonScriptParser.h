@@ -40,24 +40,23 @@ class dNewtonScriptParser
 	class dStackPair;
 	class dGotoEntry;
 	class dActionEntry;
-	
-	class dUserVariable
+		class dUserVariable
 	{
 		public:
 		dUserVariable () 
-			:m_token (dToken (0)), m_semanticValue(0), m_data("")
+			:m_token (dToken (0)), m_data("")
 		{
 		}
-		
-		
-		dUserVariable (dToken token, const char* const text)
-			:m_token(token), m_semanticValue(0), m_data (text) 
+
+
+		dUserVariable (dToken token, const char* const data)
+			:m_token(token), m_data (data) 
 		{
 		}
 		dToken m_token;
-		int m_semanticValue;
 		string m_data;
 	};
+
 
 
 	dNewtonScriptParser();
