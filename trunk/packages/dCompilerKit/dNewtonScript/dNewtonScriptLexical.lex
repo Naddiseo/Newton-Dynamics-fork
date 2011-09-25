@@ -44,7 +44,7 @@ Integer			[\-\+]?[0-9]+
 
 {WhiteSpace}	{/* skip is a white space*/}
 {Comment}		{/* skip commnets */}
-";"				{/* comma are no mandatory by tehy can be use for historical reasons */}
+";"				{/* commas are not mandatory by they can be used for historical reasons */}
 
 {Indetifier}	{return dNewtonScriptParser::IDENTIFIER;}
 

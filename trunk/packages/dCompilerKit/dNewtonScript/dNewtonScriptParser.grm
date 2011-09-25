@@ -256,7 +256,6 @@ statement
 	: assigment_statement
 	| if_statement
 	| for_statement 
-	| switch_statement 
 	| continue_statement 
 	| break_statement 
 	;	
@@ -268,7 +267,7 @@ assigment_statement
 if_statement
 	: IF '(' expression	')' THEN function_block 
 	| IF '(' expression	')' THEN function_block ELSE function_block
-	| SWITCH '(' expression ')' '{' switch_cases_list '}'
+	| SWITCH '(' expression ')' '{' switch_case_list '}'
 	; 
 	
 for_statement 
