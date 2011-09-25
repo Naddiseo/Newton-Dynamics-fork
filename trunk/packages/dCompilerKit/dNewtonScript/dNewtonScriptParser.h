@@ -51,7 +51,18 @@ class dNewtonScriptParser
 		LONG,
 		UNSIGNED,
 		FLOAT,
-		DOUBLE
+		DOUBLE,
+		FOR,
+		WHILE,
+		DO,
+		IF,
+		THEN,
+		ELSE,
+		SWITCH,
+		CASE,
+		DEFAULT,
+		CONTINUE,
+		BREAK
 	};
 
 	enum ActionType;

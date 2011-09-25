@@ -67,6 +67,21 @@ Integer			[\-\+]?[0-9]+
 "float"			{return dNewtonScriptParser::FLOAT;}
 "double"		{return dNewtonScriptParser::DOUBLE;}
 
+"if"			{return dNewtonScriptParser::IF;}
+"then"			{return dNewtonScriptParser::THEN;}
+"else"			{return dNewtonScriptParser::ELSE;}
+"for"			{return dNewtonScriptParser::FOR;}
+"while"			{return dNewtonScriptParser::WHILE;}
+"do"			{return dNewtonScriptParser::DO;}
+"switch"		{return dNewtonScriptParser::SWITCH;}
+"case"			{return dNewtonScriptParser::CASE;}
+"default"		{return dNewtonScriptParser::DEFAULT;}
+"break"			{return dNewtonScriptParser::BREAK;}
+"continue"		{return dNewtonScriptParser::CONTINUE;}
+
+
+
+
 "gui"			{return dNewtonScriptParser::GUI;}
 "const"			{return dNewtonScriptParser::CONSTANT;}
 "native"		{return dNewtonScriptParser::NATIVE;}

@@ -46,6 +46,11 @@
 %token IMPORT IMPORT_FILE_NAME 
 %token PRIVATE CLASS IDENTIFIER EXTENDS GUI
 %token BOOLEAN BYTE SHORT INT LONG UNSIGNED FLOAT DOUBLE
+
+
+%token FOR WHILE DO
+%token IF THEN ELSE SWITCH CASE DEFAULT 
+%token CONTINUE BREAK
 	
 %start compilation_unit
 
@@ -246,10 +251,53 @@ expression
 	: INTEGER_VALUE
 	;	
 	
+	
 statement
 	: assigment_statement
+	| if_statement
+	| for_statement 
+	| switch_statement 
+	| continue_statement 
+	| break_statement 
 	;	
-	
+
 assigment_statement
 	: IDENTIFIER '=' expression
 	;
+	
+if_statement
+	: IF '(' expression	')' THEN function_block 
+	| IF '(' expression	')' THEN function_block ELSE function_block
+	| SWITCH '(' expression ')' '{' switch_cases '}'
+	; 
+	
+for_statement 
+	: WHILE '(' expression ')' function_block 	
+	| DO function_block WHILE '(' expression ')'
+	| FOR '(' type_specifier assigment_statement ';' expression ';' assigment_statement	')' function_block 	
+	;
+	
+continue_statement 
+	: CONTINUE 
+	;
+	
+break_statement 
+	: BREAK
+	;
+	
+	
+switch_cases
+	: 
+	| case_list
+	;
+		
+case_list
+	: case
+	| case_list case
+	;
+	
+case
+	: CASE INTEGER_VALUE ':' function_block
+	| DEFAULT ':' function_block
+	;  	
+	
