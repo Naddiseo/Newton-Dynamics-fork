@@ -72,14 +72,16 @@ module
 import_module 
 	: IMPORT IMPORT_FILE_NAME 
 	;
-			  
-			  
+	
+	  
 class_delaration 
-	: CLASS IDENTIFIER extends gui_support '{' '}'
-	| CLASS IDENTIFIER extends gui_support '{' class_implementation '}'
-	| PRIVATE CLASS IDENTIFIER extends gui_support '{' '}'
-	| PRIVATE CLASS IDENTIFIER extends gui_support '{' class_implementation '}'
+	: class_visibility CLASS IDENTIFIER extends gui_support '{' class_members '}'
 	;			  
+
+class_visibility
+	:	
+	| PRIVATE
+	;
 				
 gui_support 
 	:
@@ -91,10 +93,14 @@ extends
 	| EXTENDS IDENTIFIER
 	;		
 	
+class_members
+	:
+	| class_member_list	
+	;
 		   
-class_implementation 
+class_member_list	 
 	: class_member
-	| class_implementation class_member
+	| class_member_list	class_member
 	;
 				    
 class_member 
@@ -126,30 +132,32 @@ const_function
 	;
 			 
 class_contructor 
-	: native_function IDENTIFIER '(' function_parameters ')' 
-	| IDENTIFIER '(' function_parameters ')' base_class_initialization function_block
-	| PRIVATE IDENTIFIER '(' function_parameters ')' base_class_initialization function_block
+	: native_function  IDENTIFIER '(' function_parameters ')' 
+	| class_visibility IDENTIFIER '(' function_parameters ')' base_class_initialization function_block
 	;
 	
 class_function_implementaion 
-	: native_function type_specifier IDENTIFIER '(' function_parameters ')' const_function
-	| type_specifier IDENTIFIER '(' function_parameters ')' const_function function_block
-	| PRIVATE type_specifier IDENTIFIER '(' function_parameters ')' const_function function_block
+	: native_function function_prototype
+	|				  function_prototype function_block
+	| PRIVATE         function_prototype function_block
 	;
 	
+function_prototype
+	: type_specifier IDENTIFIER '(' function_parameters ')' const_function
+	;
 
 
-uninitialized_data
-	: type_specifier IDENTIFIER	
+uninitialized_variable
+	:         type_specifier IDENTIFIER	
 	| PRIVATE type_specifier IDENTIFIER	
 	;
 	
-initialized_data	
-	: uninitialized_data '=' expression		
+initialized_variable	
+	: uninitialized_variable '=' expression		
 	;
 
 class_variable_declaration
-	: uninitialized_data
+	: uninitialized_variable
 	;
 	 
 			  
@@ -214,24 +222,24 @@ argument
 						  
 function_block 
 	: '{' '}'
-	| '{' function_statements_list '}'
+	| '{' function_statement_list '}'
 	;
 			   
 			   
-function_statements_list 
+function_statement_list 
 	: function_statement
-	| function_statements_list function_statement
+	| function_statement_list function_statement
 	;
 						 
 						 
 function_statement 
-	: local_variables_declaration
+	: local_variable_declaration
 	| statement
 	;			 
 	
-local_variables_declaration
-	: uninitialized_data
-	| initialized_data
+local_variable_declaration
+	: uninitialized_variable
+	| initialized_variable
 	;
 	
 expression
