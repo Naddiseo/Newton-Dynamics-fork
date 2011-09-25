@@ -132,7 +132,7 @@ class_contructor
 	;
 	
 class_function_implementaion 
-	: native_function type_specifier IDENTIFIER const_function '(' function_parameters ')' 
+	: native_function type_specifier IDENTIFIER '(' function_parameters ')' const_function
 	| type_specifier IDENTIFIER '(' function_parameters ')' const_function function_block
 	| PRIVATE type_specifier IDENTIFIER '(' function_parameters ')' const_function function_block
 	;

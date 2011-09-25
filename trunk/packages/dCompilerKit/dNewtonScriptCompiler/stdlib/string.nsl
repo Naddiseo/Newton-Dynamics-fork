@@ -13,18 +13,6 @@
 
 class string
 {
-
-	int lenght() const
-	{
-//		return m_size
-	}
-
-	int lenght() const
-	{
-//		return m_size
-	}
-
-
 	native string ()
 	native string (byte[] data)
 	
