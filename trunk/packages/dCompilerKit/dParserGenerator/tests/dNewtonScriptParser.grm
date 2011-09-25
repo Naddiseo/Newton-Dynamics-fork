@@ -41,207 +41,28 @@
 	};
 }
 
-%token NATIVE CONSTANT
-%token INTEGER_VALUE
-%token IMPORT IMPORT_FILE_NAME 
-%token PRIVATE CLASS IDENTIFIER EXTENDS GUI
-%token BOOLEAN BYTE SHORT INT LONG UNSIGNED FLOAT DOUBLE
-	
-%start compilation_unit
+//%token NATIVE CONSTANT INT IDENTIFIER
+//%start function
 
 %%
-
-compilation_unit
-	: 
-	| module_list
-	; 
-
-
-module_list 
-	: module
-	| module_list module
-	;
-			
-			
-module 
-	: import_module
-	| class_delaration
-	;			
-			
-
-import_module 
-	: IMPORT IMPORT_FILE_NAME 
-	;
-			  
-			  
-class_delaration 
-	: CLASS IDENTIFIER extends gui_support '{' '}'
-	| CLASS IDENTIFIER extends gui_support '{' class_implementation '}'
-	| PRIVATE CLASS IDENTIFIER extends gui_support '{' '}'
-	| PRIVATE CLASS IDENTIFIER extends gui_support '{' class_implementation '}'
-	;			  
-				
-gui_support 
-	:
-	| GUI
-	;				
-				
-extends 
-	:
-	| EXTENDS IDENTIFIER
-	;		
-	
-		   
-class_implementation 
-	: class_member
-	| class_implementation class_member
-	;
-				    
-class_member 
-	: class_contructor
-	| class_variable_declaration
-	| class_function_implementaion
-	;
-			
-native_function
-	: NATIVE
-	| NATIVE PRIVATE
-	| PRIVATE NATIVE 
-	;
-
-
-parameter_list 
-	: parameter
-	| parameter_list ',' parameter
-	;	
-	
-function_parameters
-	:
-	| parameter_list 
-	;
-	
-const_function
+/*
+const
 	: 
 	| CONSTANT
 	;
-			 
-class_contructor 
-	: native_function IDENTIFIER '(' function_parameters ')' 
-	| IDENTIFIER '(' function_parameters ')' base_class_initialization function_block
-	| PRIVATE IDENTIFIER '(' function_parameters ')' base_class_initialization function_block
-	;
-	
-class_function_implementaion 
-	: native_function type_specifier IDENTIFIER const_function '(' function_parameters ')' 
-	| type_specifier IDENTIFIER '(' function_parameters ')' const_function function_block
-	| PRIVATE type_specifier IDENTIFIER '(' function_parameters ')' const_function function_block
-	;
-	
 
+function
+	: NATIVE INT IDENTIFIER const '('  ')' 
+	|        INT IDENTIFIER       '('  ')' const '{' '}'
+	;
+*/
 
-uninitialized_data
-	: type_specifier IDENTIFIER	
-	| PRIVATE type_specifier IDENTIFIER	
+function 
+	: 'a' x 'f' 
+	|       'f' x 'e' 
 	;
+ 
+x :
+  | 'm'  
+  ;
 	
-initialized_data	
-	: uninitialized_data '=' expression		
-	;
-
-class_variable_declaration
-	: uninitialized_data
-	;
-	 
-			  
-parameter
-	: type_specifier IDENTIFIER
-	;
-
-type_specifier
-	: primitive_types
-	| primitive_types array_type_list
-	;		
-	
-primitive_types
-	: BOOLEAN
-	| BYTE
-	| SHORT
-	| INT
-	| LONG
-	| UNSIGNED BYTE
-	| UNSIGNED SHORT
-	| UNSIGNED INT
-	| UNSIGNED LONG
-	| FLOAT
-	| DOUBLE
-	;
-	
-array_type_list
-	: array_type
-	| array_type_list array_type
-	;
-	
-array_type
-	: '[' ']'
-	| '[' expression ']'
-	;	
-		 
-			 
-base_class_initialization 
-	:			 
-	| ':' base_class_initialization_list  	
-	;
-	
-base_class_initialization_list 
-	: init_base_constructor
-	| base_class_initialization_list ',' init_base_constructor
-	;
-	
-init_base_constructor
-	: IDENTIFIER '(' ')'
-	| IDENTIFIER '(' argument_list ')'
-	;
-	
-	
-argument_list
-	: argument
-	| argument_list ',' argument
-	;
-		
-argument
-	: INTEGER_VALUE	
-	;					  
-						  
-function_block 
-	: '{' '}'
-	| '{' function_statements_list '}'
-	;
-			   
-			   
-function_statements_list 
-	: function_statement
-	| function_statements_list function_statement
-	;
-						 
-						 
-function_statement 
-	: local_variables_declaration
-	| statement
-	;			 
-	
-local_variables_declaration
-	: uninitialized_data
-	| initialized_data
-	;
-	
-expression
-	: INTEGER_VALUE
-	;	
-	
-statement
-	: assigment_statement
-	;	
-	
-assigment_statement
-	: IDENTIFIER '=' expression
-	;

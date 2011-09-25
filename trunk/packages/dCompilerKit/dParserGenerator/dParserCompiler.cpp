@@ -18,7 +18,7 @@
 #define DACCEPT_SYMBOL "$$$"
 #define DACCEPTING_TOKEN 255	
 
-//#define DDEBUG_STATES
+#define DDEBUG_STATES
 
 
 
@@ -542,7 +542,6 @@ void dParserCompiler::ScanGrammarFile(
 	symbol.m_token = firstRule.m_token;
 	symbol.m_type = firstRule.m_type;
 	symbol.m_name = firstRule.m_name;
-//	symbolList.Insert(symbol.m_type, symbol.m_name);
 
 	// scan literal use code
 	if (token1 == GRAMMAR_SEGMENT) {
@@ -564,6 +563,7 @@ dParserCompiler::dToken dParserCompiler::ScanGrammarRule(
 		
 		dList<dTokenStringPair> ruleTokens;
 		for (token = dToken(lexical.NextToken()); !((token == SIMICOLOM) || (token == OR)); token = dToken(lexical.NextToken())) {
+			_ASSERTE (token != -1);
 			dTokenStringPair& pair = ruleTokens.Append()->GetInfo();
 			pair.m_token = token;
 			pair.m_info = lexical.GetTokenString();
@@ -591,18 +591,14 @@ dParserCompiler::dToken dParserCompiler::ScanGrammarRule(
 				}
 				symbol.m_type = symbolNode->GetInfo().m_type;
 
-//				dTree<int, string>::dTreeNode* nonTerminalIdNode = tokenEnumerationMap.Find(symbol.m_name);
-//				if (!nonTerminalIdNode) {
-//					nonTerminalIdNode = tokenEnumerationMap.Insert(tokenEnumeration, symbol.m_name);
-//					tokenEnumeration ++;
-//				}
-			} else if (!(pair.m_token < 256 && isalnum (pair.m_token))) {
+//			} else if (!(pair.m_token < 256 && isalnum (pair.m_token))) {
+			} else if (pair.m_token < 256) {
+				_ASSERTE (pair.m_info.length() == 1);
 				dSymbol& symbol = currentRule->Append()->GetInfo();
 				symbol.m_name = pair.m_info;
 				symbol.m_type = TERMINAL;
 				symbol.m_token = LITERAL;
 				symbolList.Insert(dTokenInfo (pair.m_token, TERMINAL), symbol.m_name);
-				//tokenEnumerationMap.Insert(pair.m_token, symbol.m_name);
 
 			} else if (pair.m_token != SEMANTIC_ACTION) {
 				// no user action allowed in the middle of a sentence

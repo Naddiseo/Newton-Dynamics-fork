@@ -71,5 +71,6 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 "'\*'"				{ m_tokenString = "*"; return('*'); }
 "'\['"				{ m_tokenString = "["; return('['); }
 "'\]'"				{ m_tokenString = "]"; return(']'); }
+'[A-Za-z]'			{ m_tokenString = m_tokenString.substr (1, 1); return(m_tokenString[0]); }
 [{]					{ ReadBalancedExpresion ('{', '}'); return dParserCompiler::SEMANTIC_ACTION;}
 
