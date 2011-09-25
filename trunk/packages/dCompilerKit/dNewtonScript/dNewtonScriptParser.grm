@@ -268,7 +268,7 @@ assigment_statement
 if_statement
 	: IF '(' expression	')' THEN function_block 
 	| IF '(' expression	')' THEN function_block ELSE function_block
-	| SWITCH '(' expression ')' '{' switch_cases '}'
+	| SWITCH '(' expression ')' '{' switch_cases_list '}'
 	; 
 	
 for_statement 
@@ -286,17 +286,13 @@ break_statement
 	;
 	
 	
-switch_cases
-	: 
-	| case_list
-	;
 		
-case_list
-	: case
-	| case_list case
+switch_case_list
+	: switch_case
+	| switch_case_list switch_case
 	;
 	
-case
+switch_case
 	: CASE INTEGER_VALUE ':' function_block
 	| DEFAULT ':' function_block
 	;  	
