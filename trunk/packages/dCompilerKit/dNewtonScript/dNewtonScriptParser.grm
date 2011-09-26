@@ -49,7 +49,7 @@
 %token INTEGER_VALUE
 %token IMPORT IMPORT_FILE_NAME 
 %token PRIVATE CLASS IDENTIFIER EXTENDS GUI
-%token BOOLEAN BYTE SHORT INT LONG UNSIGNED FLOAT DOUBLE
+%token BOOLEAN BYTE SHORT INT LONG UNSIGNED FLOAT DOUBLE VOID__
 
 %token NEW
 %token FOR WHILE DO
@@ -141,10 +141,15 @@ const_function
 	: 
 	| CONSTANT
 	;
+	
+init_base_class
+	: 
+	| ':' function_call	
+	;
 			 
 class_contructor 
 	: native_function  IDENTIFIER '(' function_parameters ')' 
-	| class_visibility IDENTIFIER '(' function_parameters ')' base_class_initialization function_block
+	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class function_block
 	;
 	
 class_function_implementaion 
@@ -193,6 +198,7 @@ primitive_types
 	| UNSIGNED LONG
 	| FLOAT
 	| DOUBLE
+	| VOID__
 	;
 	
 	
@@ -207,31 +213,6 @@ array_type
 	| '[' expression ']'
 	;	
 		 
-			 
-base_class_initialization 
-	:			 
-	| ':' base_class_initialization_list  	
-	;
-	
-base_class_initialization_list 
-	: init_base_constructor
-	| base_class_initialization_list ',' init_base_constructor
-	;
-	
-init_base_constructor
-	: IDENTIFIER '(' ')'
-	| IDENTIFIER '(' argument_list ')'
-	;
-	
-	
-argument_list
-	: argument
-	| argument_list ',' argument
-	;
-		
-argument
-	: INTEGER_VALUE	
-	;					  
 						  
 function_block 
 	: '{' '}'
@@ -260,12 +241,12 @@ local_variable_declaration
 	
 	
 statement
-	: expression
-	| assigment_statement
+	: assigment_statement
 	| if_statement
 	| for_statement 
 	| continue_statement 
 	| break_statement 
+	| function_call
 	;
 	
 	
@@ -316,6 +297,16 @@ switch_case
 	;  	
 	
 	
+argument_list
+	: expression
+	| argument_list ',' expression
+	;
+		
+function_call
+	: IDENTIFIER '(' ')'
+	| IDENTIFIER '(' argument_list ')'	
+	;
+	
 expression
 	: expression '+' expression
 	| expression '-' expression
@@ -323,6 +314,7 @@ expression
 	| expression '/' expression
 	| '(' expression ')'
 	| indentifier
+	| function_call
 	| INTEGER_VALUE
 	;	
 	

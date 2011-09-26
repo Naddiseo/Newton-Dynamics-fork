@@ -64,6 +64,7 @@ Integer			[\-\+]?[0-9]+
 "\("			{return '(';}
 "\)"			{return ')';}
 
+"void"			{return dNewtonScriptParser::VOID__;}
 "bool"			{return dNewtonScriptParser::BOOLEAN;}
 "byte"			{return dNewtonScriptParser::BYTE;}
 "short"			{return dNewtonScriptParser::SHORT;}
