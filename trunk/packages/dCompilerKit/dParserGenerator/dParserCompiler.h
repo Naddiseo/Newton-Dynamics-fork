@@ -113,11 +113,11 @@ class dParserCompiler
 	dToken ScanGrammarRule(dParserLexical& lexical, dProductionRule& rules, dTree<dTokenInfo, string>& symbolList, int& ruleNumber, int& tokenEnumeration);
 
 	
-	bool DoesSymbolDeriveEmpty (const string& symbol, const dProductionRule& ruleList) const ;
-	void First (const string& symbol, dTree<int, string>& symbolListMark, const dTree<dTokenInfo, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const;
-	void First (const dList<string>& symbolSet, const dTree<dTokenInfo, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const;
-	dState* Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol, const dTree<dTokenInfo, string>& symbolList) const;
-	dState* Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet, const dTree<dTokenInfo, string>& symbolList) const;
+	bool DoesSymbolDeriveEmpty (const string& symbol, const dTree<dList<void*>, string>& ruleMap) const ;
+	void First (const string& symbol, dTree<int, string>& symbolListMark, const dTree<dTokenInfo, string>& symbolList, const dProductionRule& ruleList, const dTree<dList<void*>, string>& ruleMap, dTree<int, string>& firstSetOut) const;
+	void First (const dList<string>& symbolSet, const dTree<dTokenInfo, string>& symbolList, const dProductionRule& ruleList, const dTree<dList<void*>, string>& ruleMap, dTree<int, string>& firstSetOut) const;
+	dState* Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol, const dTree<dTokenInfo, string>& symbolList, const dTree<dList<void*>, string>& ruleMap) const;
+	dState* Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet, const dTree<dTokenInfo, string>& symbolList, const dTree<dList<void*>, string>& ruleMap) const;
 	void BuildParcingTable (const dTree<dState*,int>& stateList, const string& startSymbol, const dOperatorsPrecedence& operatorPrecence) const;
 	void CanonicalItemSets (dTree<dState*,int>& states, const dProductionRule& rules, const dTree<dTokenInfo, string>& symbolList, const dOperatorsPrecedence& operatorPrecence);
 

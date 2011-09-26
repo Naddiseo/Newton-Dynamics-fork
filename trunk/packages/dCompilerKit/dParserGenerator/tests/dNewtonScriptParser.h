@@ -33,30 +33,69 @@ class dNewtonScriptParser
 	public:
 	enum dToken
 	{
-		ACCEPTING_TOKEN = 255,
+		ACCEPTING_TOKEN = 255, 
+		NATIVE = 256, 
+		CONSTANT,
+		INTEGER_VALUE,
+		IMPORT,
+		IMPORT_FILE_NAME,
+		PRIVATE,
+		CLASS,
+		IDENTIFIER,
+		EXTENDS,
+		GUI,
+		BOOLEAN,
+		BYTE,
+		SHORT,
+		INT,
+		LONG,
+		UNSIGNED,
+		FLOAT,
+		DOUBLE,
+		VOID__,
+		NEW,
+		FOR,
+		WHILE,
+		DO,
+		IF,
+		ELSE,
+		SWITCH,
+		CASE,
+		DEFAULT,
+		CONTINUE,
+		BREAK,
+		LOGIC_AND,
+		LOGIC_OR,
+		SHIFT_RIGHT,
+		SHIFT_LEFT,
+		LESS_EQUAL,
+		GREATHER_EQUAL,
+		IDENTICAL,
+		DIFFERENT
 	};
 
 	enum ActionType;
 	class dStackPair;
 	class dGotoEntry;
 	class dActionEntry;
-		class dUserVariable
+	
+	class dUserVariable
 	{
 		public:
 		dUserVariable () 
-			:m_token (dToken (0)), m_data("")
+			:m_token (dToken (0)), m_semanticValue(0), m_data("")
 		{
 		}
-
-
-		dUserVariable (dToken token, const char* const data)
-			:m_token(token), m_data (data) 
+		
+		
+		dUserVariable (dToken token, const char* const text)
+			:m_token(token), m_semanticValue(0), m_data (text) 
 		{
 		}
 		dToken m_token;
+		int m_semanticValue;
 		string m_data;
 	};
-
 
 
 	dNewtonScriptParser();

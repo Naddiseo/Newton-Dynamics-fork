@@ -678,13 +678,22 @@ void dParserCompiler::SaveFile(const char* const fileName, const char* const ext
 
 
 
-bool dParserCompiler::DoesSymbolDeriveEmpty (const string& symbol, const dProductionRule& ruleList) const 
+bool dParserCompiler::DoesSymbolDeriveEmpty (const string& symbol, const dTree<dList<void*>, string>& ruleMap) const 
 {
-	for (dProductionRule::dListNode* ruleInfoNode = ruleList.GetFirst(); ruleInfoNode; ruleInfoNode = ruleInfoNode->GetNext()) {
-		const dRuleInfo& info = ruleInfoNode->GetInfo();
-		if (symbol == info.m_name) {
-			if (!info.GetCount()) {
-				return true;
+//	for (dProductionRule::dListNode* ruleInfoNode = ruleList.GetFirst(); ruleInfoNode; ruleInfoNode = ruleInfoNode->GetNext()) {
+	
+	dTree<dList<void*>, string>::dTreeNode* const ruleNodes = ruleMap.Find(symbol);
+	if (ruleNodes) {
+		//const dList<void*>& matchingRulesList = ruleMap.Find(symbol)->GetInfo();
+		const dList<void*>& matchingRulesList = ruleNodes->GetInfo();
+		for (dList<void*>::dListNode* node = matchingRulesList.GetFirst(); node; node = node->GetNext()) {
+			dProductionRule::dListNode* const ruleInfoNode = (dProductionRule::dListNode*) node->GetInfo();
+
+			const dRuleInfo& info = ruleInfoNode->GetInfo();
+			if (symbol == info.m_name) {
+				if (!info.GetCount()) {
+					return true;
+				}
 			}
 		}
 	}
@@ -697,6 +706,7 @@ void dParserCompiler::First (
 	dTree<int, string>& symbolListMark, 
 	const dTree<dTokenInfo, string>& symbolList, 
 	const dProductionRule& ruleList, 
+	const dTree<dList<void*>, string>& ruleMap,
 	dTree<int, string>& firstSetOut) const
 {
 	if (symbolListMark.Find(symbol)) {
@@ -708,40 +718,51 @@ void dParserCompiler::First (
 	_ASSERTE (node);
 	if (node->GetInfo().m_type == TERMINAL) {
 		firstSetOut.Insert(0, symbol);
-	} else if (DoesSymbolDeriveEmpty (symbol, ruleList)) {
+	} else if (DoesSymbolDeriveEmpty (symbol, ruleMap)) {
 		firstSetOut.Insert(0, "");
 	} else {
 
-		for (dProductionRule::dListNode* ruleInfoNode = ruleList.GetFirst(); ruleInfoNode; ruleInfoNode = ruleInfoNode->GetNext()) {
-			const dRuleInfo& info = ruleInfoNode->GetInfo();
-			if (symbol == info.m_name) {
-				bool allDeriveEmpty = true;
-				for (dRuleInfo::dListNode* sentenceSymbolNode = info.GetFirst(); sentenceSymbolNode; sentenceSymbolNode = sentenceSymbolNode->GetNext()) {
-					const dSymbol& sentenceSymnol = sentenceSymbolNode->GetInfo();
-					if (!DoesSymbolDeriveEmpty (sentenceSymnol.m_name, ruleList)) {
-						allDeriveEmpty = false;
-						dTree<int, string> newFirstSetOut;
-						First (sentenceSymnol.m_name, symbolListMark, symbolList,ruleList, newFirstSetOut);
-						dTree<int, string>::Iterator iter (newFirstSetOut);
-						for (iter.Begin(); iter; iter ++) {
-							const string& symbol = iter.GetKey();
-							_ASSERTE (symbol != "");
-							_ASSERTE (symbolList.Find(symbol)->GetInfo().m_type == TERMINAL);
-							firstSetOut.Insert(0, symbol);
+//		for (dProductionRule::dListNode* ruleInfoNode = ruleList.GetFirst(); ruleInfoNode; ruleInfoNode = ruleInfoNode->GetNext()) {
+		dTree<dList<void*>, string>::dTreeNode* const ruleNodes = ruleMap.Find(symbol);
+		if (ruleNodes) {
+			const dList<void*>& matchingRulesList = ruleNodes->GetInfo();
+			for (dList<void*>::dListNode* node = matchingRulesList.GetFirst(); node; node = node->GetNext()) {
+				dProductionRule::dListNode* const ruleInfoNode = (dProductionRule::dListNode*) node->GetInfo();
+				const dRuleInfo& info = ruleInfoNode->GetInfo();
+//				if (symbol == info.m_name) {
+					bool allDeriveEmpty = true;
+					for (dRuleInfo::dListNode* sentenceSymbolNode = info.GetFirst(); sentenceSymbolNode; sentenceSymbolNode = sentenceSymbolNode->GetNext()) {
+						const dSymbol& sentenceSymnol = sentenceSymbolNode->GetInfo();
+						if (!DoesSymbolDeriveEmpty (sentenceSymnol.m_name, ruleMap)) {
+							allDeriveEmpty = false;
+							dTree<int, string> newFirstSetOut;
+							First (sentenceSymnol.m_name, symbolListMark, symbolList, ruleList, ruleMap, newFirstSetOut);
+							dTree<int, string>::Iterator iter (newFirstSetOut);
+							for (iter.Begin(); iter; iter ++) {
+								const string& symbol = iter.GetKey();
+								_ASSERTE (symbol != "");
+								_ASSERTE (symbolList.Find(symbol)->GetInfo().m_type == TERMINAL);
+								firstSetOut.Insert(0, symbol);
+							}
+							break;
 						}
-						break;
 					}
-				}
-				if (allDeriveEmpty) {
-					firstSetOut.Insert(0, "");
-				}
+					if (allDeriveEmpty) {
+						firstSetOut.Insert(0, "");
+					}
+//				}
 			}
 		}
 	}
 }
 
 
-void dParserCompiler::First (const dList<string>& symbolSet, const dTree<dTokenInfo, string>& symbolList, const dProductionRule& ruleList, dTree<int, string>& firstSetOut) const
+void dParserCompiler::First (
+	const dList<string>& symbolSet, 
+	const dTree<dTokenInfo, string>& symbolList, 
+	const dProductionRule& ruleList, 
+	const dTree<dList<void*>, string>& ruleMap,
+	dTree<int, string>& firstSetOut) const
 {
 	if (symbolSet.GetCount() > 1) {
 		string empty ("");
@@ -754,7 +775,7 @@ void dParserCompiler::First (const dList<string>& symbolSet, const dTree<dTokenI
 
 			dTree<int, string> tmpFirst;
 			dTree<int, string> symbolListMark; 
-			First (symbol, symbolListMark, symbolList, ruleList, tmpFirst);
+			First (symbol, symbolListMark, symbolList, ruleList, ruleMap, tmpFirst);
 			dTree<int, string>::Iterator iter (tmpFirst);
 			deriveEmpty = false;  
 			for (iter.Begin(); iter; iter ++) {
@@ -773,13 +794,17 @@ void dParserCompiler::First (const dList<string>& symbolSet, const dTree<dTokenI
 	} else  {
 		const string& symbol = symbolSet.GetFirst()->GetInfo();
 		dTree<int, string> symbolListMark; 
-		First (symbol, symbolListMark, symbolList, ruleList, firstSetOut);
+		First (symbol, symbolListMark, symbolList, ruleList, ruleMap, firstSetOut);
 	}
 }
 
 
 // Generate the closure for a Set of Item  
-dParserCompiler::dState* dParserCompiler::Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet, const dTree<dTokenInfo, string>& symbolList) const
+dParserCompiler::dState* dParserCompiler::Closure (
+	const dProductionRule& ruleList, 
+	const dList<dItem>& itemSet, 
+	const dTree<dTokenInfo, string>& symbolList,
+	const dTree<dList<void*>, string>& ruleMap) const
 {
 	dState* const state = new dState (itemSet);
 	for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
@@ -803,22 +828,32 @@ dParserCompiler::dState* dParserCompiler::Closure (const dProductionRule& ruleLi
 			firstSymbolList.Append(item.m_lookAheadSymnol);
 
 			const dSymbol& sentenceSymbol = symbolNode->GetInfo();
-			for (dProductionRule::dListNode* ruleNode = ruleList.GetFirst(); ruleNode; ruleNode = ruleNode->GetNext()) {
-				const dRuleInfo& info = ruleNode->GetInfo();
-				if (info.m_name == sentenceSymbol.m_name) {
-					dTree<int, string> firstList;
-					First (firstSymbolList, symbolList, ruleList, firstList);
-					dTree<int, string>::Iterator firstIter (firstList);
-					for (firstIter.Begin(); firstIter; firstIter ++) {
-						const string& symbol = firstIter.GetKey();
-						dState::dListNode* const itemNode = state->FindItem(ruleNode, 0, symbol);
-						if (!itemNode) {
-							dItem& newItem = state->Append()->GetInfo();
-							newItem.m_indexMarker = 0;
-							newItem.m_ruleNode = ruleNode;
-							newItem.m_lookAheadSymnol = symbol;
+//			for (dProductionRule::dListNode* ruleNode = ruleList.GetFirst(); ruleNode; ruleNode = ruleNode->GetNext()) {
+
+			dTree<dList<void*>, string>::dTreeNode* const ruleNodes = ruleMap.Find(sentenceSymbol.m_name);
+			if (ruleNodes) {
+				//const dList<void*>& matchingRulesList = ruleMap.Find(sentenceSymbol.m_name)->GetInfo();
+				const dList<void*>& matchingRulesList = ruleNodes->GetInfo();
+				_ASSERTE (matchingRulesList);
+				for (dList<void*>::dListNode* node = matchingRulesList.GetFirst(); node; node = node->GetNext()) {
+					dProductionRule::dListNode* const ruleNode = (dProductionRule::dListNode*) node->GetInfo();
+					const dRuleInfo& info = ruleNode->GetInfo();
+					_ASSERTE (info.m_name == sentenceSymbol.m_name);
+	//				if (info.m_name == sentenceSymbol.m_name) {
+						dTree<int, string> firstList;
+						First (firstSymbolList, symbolList, ruleList, ruleMap, firstList);
+						dTree<int, string>::Iterator firstIter (firstList);
+						for (firstIter.Begin(); firstIter; firstIter ++) {
+							const string& symbol = firstIter.GetKey();
+							dState::dListNode* const itemNode = state->FindItem(ruleNode, 0, symbol);
+							if (!itemNode) {
+								dItem& newItem = state->Append()->GetInfo();
+								newItem.m_indexMarker = 0;
+								newItem.m_ruleNode = ruleNode;
+								newItem.m_lookAheadSymnol = symbol;
+							}
 						}
-					}
+	//				}
 				}
 			}
 		}
@@ -830,7 +865,12 @@ dParserCompiler::dState* dParserCompiler::Closure (const dProductionRule& ruleLi
 
 
 // generates the got state for this symbol
-dParserCompiler::dState* dParserCompiler::Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol, const dTree<dTokenInfo, string>& symbolList) const
+dParserCompiler::dState* dParserCompiler::Goto (
+	const dProductionRule& ruleList, 
+	const dState* const state, 
+	const string& symbol, 
+	const dTree<dTokenInfo, string>& symbolList,
+	const dTree<dList<void*>, string>& ruleMap) const
 {
 	dList<dItem> itemSet;
 
@@ -860,7 +900,7 @@ dParserCompiler::dState* dParserCompiler::Goto (const dProductionRule& ruleList,
 	}
 
 	//find the closure for this new item set.
-	return Closure (ruleList, itemSet, symbolList);
+	return Closure (ruleList, itemSet, symbolList, ruleMap);
 }
 
 
@@ -899,8 +939,22 @@ void dParserCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dPr
 	item.m_lookAheadSymnol = DACCEPT_SYMBOL;
 	item.m_ruleNode = ruleList.GetFirst();
 
+	// build a rule info map
+	dTree<dList<void*>, string> ruleMap;
+	for (dProductionRule::dListNode* ruleNode = ruleList.GetFirst(); ruleNode; ruleNode = ruleNode->GetNext()) {
+		dRuleInfo& info = ruleNode->GetInfo();
+		
+		dTree<dList<void*>, string>::dTreeNode* node = ruleMap.Find(info.m_name);
+		if (!node) {
+			node = ruleMap.Insert(info.m_name);
+		}
+		dList<void*>& entry = node->GetInfo();
+		entry.Append(ruleNode);
+	}
+
+
 	// find the closure for the first this item set with only the first rule
-	dState* const state = Closure (ruleList, itemSet, symbolList);
+	dState* const state = Closure (ruleList, itemSet, symbolList, ruleMap);
 	operatorPrecence.SaveLastOperationSymbol (state);
 
 	stateMap.Insert(state, state->GetKey());
@@ -917,7 +971,7 @@ void dParserCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dPr
 		for (iter.Begin(); iter; iter ++) {
 
 			string symbol (iter.GetKey());
-			dState* const newState = Goto (ruleList, state, symbol, symbolList);
+			dState* const newState = Goto (ruleList, state, symbol, symbolList, ruleMap);
 
 			if (newState->GetCount()) {
 				dTransition& transition = state->m_transitions.Append()->GetInfo();

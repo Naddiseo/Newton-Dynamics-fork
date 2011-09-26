@@ -332,16 +332,17 @@ function_call
 expression
 	: expression LOGIC_OR expression
 	| expression LOGIC_AND expression
-//	| expression '|' expression
-//	| expression '^' expression
-//	| expression '&' expression
-//	| expression IDENTICAL expression
-//	| expression DIFFERENT expression
+	| expression '|' expression
+	| expression '^' expression
+	| expression '&' expression
+	| expression IDENTICAL expression
+	| expression DIFFERENT expression
 	| expression '<' expression
 	| expression '>' expression
-//	| expression GREATHER_EQUAL expression
-//	| expression LESS_EQUAL expression
-//	| expression SHIFT_RIGHT expression
+	| expression GREATHER_EQUAL expression
+	| expression LESS_EQUAL expression
+	| expression SHIFT_RIGHT expression
+	| expression '+' expression
 	| expression '-' expression
 	| expression '*' expression
 	| expression '%' expression
