@@ -64,6 +64,8 @@ class dNewtonScriptParser
 		DEFAULT,
 		CONTINUE,
 		BREAK,
+		LOGIC_AND,
+		LOGIC_OR,
 		SHIFT_RIGHT,
 		SHIFT_LEFT,
 		LESS_EQUAL,

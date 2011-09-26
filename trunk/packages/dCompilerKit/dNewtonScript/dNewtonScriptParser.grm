@@ -54,16 +54,26 @@
 %token CONTINUE BREAK
 
 
+%token LOGIC_AND LOGIC_OR 
 %token SHIFT_RIGHT SHIFT_LEFT
 %token LESS_EQUAL GREATHER_EQUAL
 %token IDENTICAL DIFFERENT
 
 %right '='
+%left LOGIC_OR 
+%left LOGIC_AND 
+%left '|'
+%left '^'
+%left '&'
+%left IDENTICAL DIFFERENT
+%left LESS_EQUAL GREATHER_EQUAL '<' '>' 
+%left SHIFT_RIGHT SHIFT_LEFT
 %left '+' '-'
 %left '*' '/' '%'
-%left SHIFT_RIGHT SHIFT_LEFT
-%left LESS_EQUAL GREATHER_EQUAL '<' '>' 
-%left IDENTICAL DIFFERENT
+
+//%right '-' '!' '~'
+
+
 	
 %start compilation_unit
 
@@ -320,7 +330,18 @@ function_call
 	;
 	
 expression
-	: expression '+' expression
+	: expression LOGIC_OR expression
+	| expression LOGIC_AND expression
+//	| expression '|' expression
+//	| expression '^' expression
+//	| expression '&' expression
+//	| expression IDENTICAL expression
+//	| expression DIFFERENT expression
+	| expression '<' expression
+	| expression '>' expression
+//	| expression GREATHER_EQUAL expression
+//	| expression LESS_EQUAL expression
+//	| expression SHIFT_RIGHT expression
 	| expression '-' expression
 	| expression '*' expression
 	| expression '%' expression

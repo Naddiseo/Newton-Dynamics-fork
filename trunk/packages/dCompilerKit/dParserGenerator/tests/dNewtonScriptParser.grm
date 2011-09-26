@@ -9,17 +9,346 @@
 * freely
 */
 
+%{
+#include <dScriptCompiler.h>
+#include "dNewtonScriptLexical.h"
+
+//
+// Newton Script parcer  
+// loosely based on a subset of Java and C sharp
+//
+%}
+
+
+%union 
+{
+	class dUserVariable
+	{
+		public:
+		dUserVariable () 
+			:m_token (dToken (0)), m_semanticValue(0), m_data("")
+		{
+		}
+		
+		
+		dUserVariable (dToken token, const char* const text)
+			:m_token(token), m_semanticValue(0), m_data (text) 
+		{
+		}
+		dToken m_token;
+		int m_semanticValue;
+		string m_data;
+	};
+}
+
+
+%token NATIVE CONSTANT
+%token INTEGER_VALUE
+%token IMPORT IMPORT_FILE_NAME 
+%token PRIVATE CLASS IDENTIFIER EXTENDS GUI
+%token BOOLEAN BYTE SHORT INT LONG UNSIGNED FLOAT DOUBLE VOID__
+
+%token NEW
+%token FOR WHILE DO
+%token IF ELSE SWITCH CASE DEFAULT 
+%token CONTINUE BREAK
+
+
+%token LOGIC_AND LOGIC_OR 
+%token SHIFT_RIGHT SHIFT_LEFT
+%token LESS_EQUAL GREATHER_EQUAL
+%token IDENTICAL DIFFERENT
+
+%right '='
+%left LOGIC_OR 
+%left LOGIC_AND 
+%left '|'
+%left '^'
+%left '&'
+%left IDENTICAL DIFFERENT
+%left LESS_EQUAL GREATHER_EQUAL '<' '>' 
+%left SHIFT_RIGHT SHIFT_LEFT
+%left '+' '-'
+%left '*' '/' '%'
+
+//%right '-' '!' '~'
+
+
+	
+%start compilation_unit
 
 %%
 
-function
-	: 'a' x 'f' 
-	|       'f' x 'e' 
+compilation_unit
+	: 
+	| module_list
+	; 
+
+
+module_list 
+	: module
+	| module_list module
 	;
- 
-x 
+			
+			
+module 
+	: ';'
+	| import_module
+	| class_delaration
+	;			
+			
+
+import_module 
+	: IMPORT IMPORT_FILE_NAME 
+	;
+	
+	  
+class_delaration 
+	: class_visibility CLASS IDENTIFIER extends gui_support '{' class_members '}'
+	;			  
+
+class_visibility
+	:	
+	| PRIVATE
+	;
+				
+gui_support 
 	:
-	| 'm'  
+	| GUI
+	;				
+				
+extends 
+	:
+	| EXTENDS IDENTIFIER
+	;		
+	
+class_members
+	:
+	| class_member_list	
+	;
+		   
+class_member_list	 
+	: class_member
+	| class_member_list	class_member
+	;
+				    
+class_member 
+	: ';'
+	| class_contructor
+	| class_variable_declaration
+	| class_function_implementaion
+	;
+			
+native_function
+	: NATIVE
+	| NATIVE PRIVATE
+	| PRIVATE NATIVE 
 	;
 
+
+parameter_list 
+	: parameter
+	| parameter_list ',' parameter
+	;	
+	
+function_parameters
+	:
+	| parameter_list 
+	;
+	
+const_function
+	: 
+	| CONSTANT
+	;
+	
+init_base_class
+	: 
+	| ':' function_call	
+	;
+			 
+class_contructor 
+	: native_function  IDENTIFIER '(' function_parameters ')' 
+	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class function_block
+	;
+	
+class_function_implementaion 
+	: native_function function_prototype
+	| function_prototype function_block
+	| PRIVATE function_prototype function_block
+	;
+	
+	
+function_prototype
+	: type_specifier IDENTIFIER '(' function_parameters ')' const_function
+	;
+
+
+uninitialized_variable
+	:         type_specifier IDENTIFIER	
+	| PRIVATE type_specifier IDENTIFIER	
+	;
+	
+initialized_variable	
+	: uninitialized_variable '=' expression		
+	;
+
+class_variable_declaration
+	: uninitialized_variable
+	;
+	 
+			  
+parameter
+	: type_specifier IDENTIFIER
+	;
+
+type_specifier
+	: primitive_types
+	| CLASS IDENTIFIER
+	| primitive_types array_type_list
+	| CLASS IDENTIFIER array_type_list
+	;		
+	
+primitive_types
+	: BOOLEAN
+	| BYTE
+	| SHORT
+	| INT
+	| LONG
+	| UNSIGNED BYTE
+	| UNSIGNED SHORT
+	| UNSIGNED INT
+	| UNSIGNED LONG
+	| FLOAT
+	| DOUBLE
+	| VOID__
+	;
+	
+	
+	
+array_type_list
+	: array_type
+	| array_type_list array_type
+	;
+	
+array_type
+	: '[' ']'
+	| '[' expression ']'
+	;	
+		 
+						  
+function_block 
+	: '{' '}'
+	| '{' function_statement_list '}'
+	;
+			   
+			   
+function_statement_list 
+	: function_statement
+	| function_statement_list function_statement
+	;
+						 
+						 
+function_statement 
+	: ';'
+	| statement
+	| local_variable_declaration
+	;			 
+	
+	
+local_variable_declaration
+	: uninitialized_variable
+	| initialized_variable
+	;
+	
+	
+	
+statement
+	: assigment_statement
+	| if_statement
+	| for_statement 
+	| continue_statement 
+	| break_statement 
+	| function_call
+	;
+	
+	
+indentifier
+	: IDENTIFIER
+	| IDENTIFIER multidimention_array
+	;
+	
+multidimention_array
+	: '[' expression ']'
+	| multidimention_array '[' expression ']'
+	;
+	
+
+assigment_statement
+	: indentifier '=' expression
+	| indentifier '=' NEW primitive_types multidimention_array
+	;
+	
+if_statement
+	: IF '(' expression	')' function_block 
+	| IF '(' expression	')' function_block ELSE function_block
+	| SWITCH '(' expression ')' '{' switch_case_list '}'
+	; 
+	
+for_statement 
+	: WHILE '(' expression ')' function_block 	
+	| DO function_block WHILE '(' expression ')'
+	| FOR '(' primitive_types assigment_statement ';' expression ';' assigment_statement ')' function_block 	
+	;
+	
+continue_statement 
+	: CONTINUE 
+	;
+	
+break_statement 
+	: BREAK
+	;
+	
+switch_case_list
+	: switch_case
+	| switch_case_list switch_case
+	;
+	
+switch_case
+	: CASE INTEGER_VALUE ':' function_block
+	| DEFAULT ':' function_block
+	;  	
+	
+	
+argument_list
+	: expression
+	| argument_list ',' expression
+	;
+		
+function_call
+	: IDENTIFIER '(' ')'
+	| IDENTIFIER '(' argument_list ')'	
+	;
+	
+expression
+	: expression LOGIC_OR expression
+	| expression LOGIC_AND expression
+//	| expression '|' expression
+//	| expression '^' expression
+//	| expression '&' expression
+//	| expression IDENTICAL expression
+//	| expression DIFFERENT expression
+	| expression '<' expression
+	| expression '>' expression
+//	| expression GREATHER_EQUAL expression
+//	| expression LESS_EQUAL expression
+//	| expression SHIFT_RIGHT expression
+	| expression '-' expression
+	| expression '*' expression
+	| expression '%' expression
+	| expression '/' expression
+	| '(' expression ')'
+	| indentifier
+	| function_call
+	| INTEGER_VALUE
+	;	
 	

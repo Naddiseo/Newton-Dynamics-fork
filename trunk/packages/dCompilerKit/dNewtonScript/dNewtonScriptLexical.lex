@@ -48,12 +48,16 @@ Integer			[\-\+]?[0-9]+
 
 {Indetifier}	{return dNewtonScriptParser::IDENTIFIER;}
 
+
 ";"				{return ';';}
 ":"				{return ':';}
 ","				{return ',';}
 "{"				{return '{';}
 "}"				{return '}';}
 
+"!"				{return '!';}
+"~"				{return '~';}
+"&"				{return '&';}
 "="				{return '=';}
 "\+"			{return '+';}
 "\-"			{return '-';}
@@ -64,9 +68,14 @@ Integer			[\-\+]?[0-9]+
 "\]"			{return ']';}
 "\("			{return '(';}
 "\)"			{return ')';}
+"\^"			{return '^';}
+"\|"			{return '|';}
 
+
+"&&"			{return dNewtonScriptParser::LOGIC_AND;}
+"\|\|"			{return dNewtonScriptParser::LOGIC_OR;}
 "<<"			{return dNewtonScriptParser::SHIFT_LEFT;}
-">>"			{return dNewtonScriptParser::SHIFT_RIGHT;
+">>"			{return dNewtonScriptParser::SHIFT_RIGHT;}
 "<="			{return dNewtonScriptParser::LESS_EQUAL;}
 ">="			{return dNewtonScriptParser::GREATHER_EQUAL;}
 
