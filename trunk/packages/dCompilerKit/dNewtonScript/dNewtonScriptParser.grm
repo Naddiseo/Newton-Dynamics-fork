@@ -41,6 +41,10 @@
 	};
 }
 
+%right '='
+%left '+' '-'
+%left '*' '/'
+
 %token NATIVE CONSTANT
 %token INTEGER_VALUE
 %token IMPORT IMPORT_FILE_NAME 
@@ -247,9 +251,6 @@ local_variable_declaration
 	| initialized_variable
 	;
 	
-expression
-	: INTEGER_VALUE
-	;	
 	
 	
 statement
@@ -284,8 +285,6 @@ break_statement
 	: BREAK
 	;
 	
-	
-		
 switch_case_list
 	: switch_case
 	| switch_case_list switch_case
@@ -295,4 +294,15 @@ switch_case
 	: CASE INTEGER_VALUE ':' function_block
 	| DEFAULT ':' function_block
 	;  	
+	
+	
+expression
+	: expression '+' expression
+	| expression '-' expression
+	| expression '*' expression
+	| expression '/' expression
+	| '(' expression ')'
+	| LITERAL
+	| INTEGER_VALUE
+	;	
 	
