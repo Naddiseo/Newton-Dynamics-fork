@@ -73,6 +73,7 @@ Integer			[\-\+]?[0-9]+
 "float"			{return dNewtonScriptParser::FLOAT;}
 "double"		{return dNewtonScriptParser::DOUBLE;}
 
+"new"			{return dNewtonScriptParser::NEW;}
 "if"			{return dNewtonScriptParser::IF;}
 "else"			{return dNewtonScriptParser::ELSE;}
 "for"			{return dNewtonScriptParser::FOR;}

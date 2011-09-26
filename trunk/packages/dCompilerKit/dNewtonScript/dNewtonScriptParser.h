@@ -52,6 +52,7 @@ class dNewtonScriptParser
 		UNSIGNED,
 		FLOAT,
 		DOUBLE,
+		NEW,
 		FOR,
 		WHILE,
 		DO,
