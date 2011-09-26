@@ -59,10 +59,20 @@ Integer			[\-\+]?[0-9]+
 "\-"			{return '-';}
 "\*"			{return '*';}
 "/"				{return '/';}
+"%"				{return '%';}
 "\["			{return '[';}
 "\]"			{return ']';}
 "\("			{return '(';}
 "\)"			{return ')';}
+
+"<<"			{return dNewtonScriptParser::SHIFT_LEFT;}
+">>"			{return dNewtonScriptParser::SHIFT_RIGHT;
+"<="			{return dNewtonScriptParser::LESS_EQUAL;}
+">="			{return dNewtonScriptParser::GREATHER_EQUAL;}
+
+"=="			{return dNewtonScriptParser::IDENTICAL;}
+"!="			{return dNewtonScriptParser::DIFFERENT;}
+ 
 
 "void"			{return dNewtonScriptParser::VOID__;}
 "bool"			{return dNewtonScriptParser::BOOLEAN;}

@@ -41,9 +41,6 @@
 	};
 }
 
-%right '='
-%left '+' '-'
-%left '*' '/'
 
 %token NATIVE CONSTANT
 %token INTEGER_VALUE
@@ -55,6 +52,18 @@
 %token FOR WHILE DO
 %token IF ELSE SWITCH CASE DEFAULT 
 %token CONTINUE BREAK
+
+
+%token SHIFT_RIGHT SHIFT_LEFT
+%token LESS_EQUAL GREATHER_EQUAL
+%token IDENTICAL DIFFERENT
+
+%right '='
+%left '+' '-'
+%left '*' '/' '%'
+%left SHIFT_RIGHT SHIFT_LEFT
+%left LESS_EQUAL GREATHER_EQUAL '<' '>' 
+%left IDENTICAL DIFFERENT
 	
 %start compilation_unit
 
@@ -154,9 +163,10 @@ class_contructor
 	
 class_function_implementaion 
 	: native_function function_prototype
-	|				  function_prototype function_block
-	| PRIVATE         function_prototype function_block
+	| function_prototype function_block
+	| PRIVATE function_prototype function_block
 	;
+	
 	
 function_prototype
 	: type_specifier IDENTIFIER '(' function_parameters ')' const_function
@@ -183,7 +193,9 @@ parameter
 
 type_specifier
 	: primitive_types
+	| CLASS IDENTIFIER
 	| primitive_types array_type_list
+	| CLASS IDENTIFIER array_type_list
 	;		
 	
 primitive_types
@@ -311,6 +323,7 @@ expression
 	: expression '+' expression
 	| expression '-' expression
 	| expression '*' expression
+	| expression '%' expression
 	| expression '/' expression
 	| '(' expression ')'
 	| indentifier

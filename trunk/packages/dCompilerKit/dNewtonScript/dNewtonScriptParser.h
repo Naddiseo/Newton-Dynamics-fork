@@ -63,7 +63,13 @@ class dNewtonScriptParser
 		CASE,
 		DEFAULT,
 		CONTINUE,
-		BREAK
+		BREAK,
+		SHIFT_RIGHT,
+		SHIFT_LEFT,
+		LESS_EQUAL,
+		GREATHER_EQUAL,
+		IDENTICAL,
+		DIFFERENT
 	};
 
 	enum ActionType;
