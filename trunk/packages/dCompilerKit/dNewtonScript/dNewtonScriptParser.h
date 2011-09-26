@@ -56,7 +56,6 @@ class dNewtonScriptParser
 		WHILE,
 		DO,
 		IF,
-		THEN,
 		ELSE,
 		SWITCH,
 		CASE,

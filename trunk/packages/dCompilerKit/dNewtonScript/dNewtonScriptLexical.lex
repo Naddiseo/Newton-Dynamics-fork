@@ -44,15 +44,21 @@ Integer			[\-\+]?[0-9]+
 
 {WhiteSpace}	{/* skip is a white space*/}
 {Comment}		{/* skip commnets */}
-";"				{/* commas are not mandatory by they can be used for historical reasons */}
+
 
 {Indetifier}	{return dNewtonScriptParser::IDENTIFIER;}
 
-"="				{return '=';}
+";"				{return ';';}
 ":"				{return ':';}
 ","				{return ',';}
 "{"				{return '{';}
 "}"				{return '}';}
+
+"="				{return '=';}
+"\+"			{return '+';}
+"\-"			{return '-';}
+"\*"			{return '*';}
+"/"				{return '/';}
 "\["			{return '[';}
 "\]"			{return ']';}
 "\("			{return '(';}
@@ -68,7 +74,6 @@ Integer			[\-\+]?[0-9]+
 "double"		{return dNewtonScriptParser::DOUBLE;}
 
 "if"			{return dNewtonScriptParser::IF;}
-"then"			{return dNewtonScriptParser::THEN;}
 "else"			{return dNewtonScriptParser::ELSE;}
 "for"			{return dNewtonScriptParser::FOR;}
 "while"			{return dNewtonScriptParser::WHILE;}

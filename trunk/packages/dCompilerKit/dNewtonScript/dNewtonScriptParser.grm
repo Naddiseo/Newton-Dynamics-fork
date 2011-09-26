@@ -53,7 +53,7 @@
 
 
 %token FOR WHILE DO
-%token IF THEN ELSE SWITCH CASE DEFAULT 
+%token IF ELSE SWITCH CASE DEFAULT 
 %token CONTINUE BREAK
 	
 %start compilation_unit
@@ -113,7 +113,8 @@ class_member_list
 	;
 				    
 class_member 
-	: class_contructor
+	: ';'
+	| class_contructor
 	| class_variable_declaration
 	| class_function_implementaion
 	;
@@ -242,9 +243,11 @@ function_statement_list
 						 
 						 
 function_statement 
-	: local_variable_declaration
+	: ';'
 	| statement
+	| local_variable_declaration
 	;			 
+	
 	
 local_variable_declaration
 	: uninitialized_variable
@@ -259,22 +262,34 @@ statement
 	| for_statement 
 	| continue_statement 
 	| break_statement 
-	;	
+	;
+	
+	
+indentifier
+	: IDENTIFIER
+	| IDENTIFIER multidimention_array
+	;
+	
+multidimention_array
+	: '[' expression ']'
+	| multidimention_array '[' expression ']'
+	;
+	
 
 assigment_statement
-	: IDENTIFIER '=' expression
+	: indentifier '=' expression
 	;
 	
 if_statement
-	: IF '(' expression	')' THEN function_block 
-	| IF '(' expression	')' THEN function_block ELSE function_block
+	: IF '(' expression	')' function_block 
+	| IF '(' expression	')' function_block ELSE function_block
 	| SWITCH '(' expression ')' '{' switch_case_list '}'
 	; 
 	
 for_statement 
 	: WHILE '(' expression ')' function_block 	
 	| DO function_block WHILE '(' expression ')'
-	| FOR '(' type_specifier assigment_statement ';' expression ';' assigment_statement	')' function_block 	
+	| FOR '(' primitive_types assigment_statement ';' expression ';' assigment_statement ')' function_block 	
 	;
 	
 continue_statement 
@@ -302,7 +317,7 @@ expression
 	| expression '*' expression
 	| expression '/' expression
 	| '(' expression ')'
-	| LITERAL
+	| indentifier
 	| INTEGER_VALUE
 	;	
 	
