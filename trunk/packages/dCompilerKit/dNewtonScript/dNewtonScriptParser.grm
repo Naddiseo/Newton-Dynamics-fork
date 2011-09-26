@@ -73,7 +73,8 @@ module_list
 			
 			
 module 
-	: import_module
+	: ';'
+	| import_module
 	| class_delaration
 	;			
 			

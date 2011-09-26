@@ -38,7 +38,7 @@ class sieves
 	}
 	
 	int[] m_data;
-}
+};
 
 /*
 void main()
