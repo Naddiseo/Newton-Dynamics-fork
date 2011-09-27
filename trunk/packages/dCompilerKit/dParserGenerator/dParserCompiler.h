@@ -108,18 +108,18 @@ class dParserCompiler
 	void ReplaceMacro (string& data, const string& newName, const string& macro) const;
 	void ReplaceAllMacros (string& data, const string& newName, const string& macro) const;
 
-	void ScanGrammarFile(const string& inputRules, dProductionRule& rules, dTree<dTokenInfo, string>& symbolList, dOperatorsPrecedence& operatorPrecence,
+	void ScanGrammarFile(const string& inputRules, dProductionRule& rules, dTree<dTokenInfo, unsigned>& symbolList, dOperatorsPrecedence& operatorPrecence,
 						 string& userCodeBlock, string& userVariableClass, string& endUserCode, int& lastTokenEnum);
-	dToken ScanGrammarRule(dParserLexical& lexical, dProductionRule& rules, dTree<dTokenInfo, string>& symbolList, int& ruleNumber, int& tokenEnumeration);
+	dToken ScanGrammarRule(dParserLexical& lexical, dProductionRule& rules, dTree<dTokenInfo, unsigned>& symbolList, int& ruleNumber, int& tokenEnumeration);
 
 	
-	bool DoesSymbolDeriveEmpty (const string& symbol, const dTree<dList<void*>, string>& ruleMap) const ;
-	void First (const string& symbol, dTree<int, string>& symbolListMark, const dTree<dTokenInfo, string>& symbolList, const dProductionRule& ruleList, const dTree<dList<void*>, string>& ruleMap, dTree<int, string>& firstSetOut) const;
-	void First (const dList<string>& symbolSet, const dTree<dTokenInfo, string>& symbolList, const dProductionRule& ruleList, const dTree<dList<void*>, string>& ruleMap, dTree<int, string>& firstSetOut) const;
-	dState* Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol, const dTree<dTokenInfo, string>& symbolList, const dTree<dList<void*>, string>& ruleMap) const;
-	dState* Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet, const dTree<dTokenInfo, string>& symbolList, const dTree<dList<void*>, string>& ruleMap) const;
+	bool DoesSymbolDeriveEmpty (unsigned symbol, const dTree<dList<void*>, unsigned>& ruleMap) const ;
+	void First (unsigned symbol, dTree<int, unsigned>& symbolListMark, const dTree<dTokenInfo, unsigned>& symbolList, const dTree<dList<void*>, unsigned>& ruleMap, dTree<int, unsigned>& firstSetOut) const;
+	void First (const dList<unsigned>& symbolSet, const dTree<dTokenInfo, unsigned>& symbolList, const dTree<dList<void*>, unsigned>& ruleMap, dTree<int, unsigned>& firstSetOut) const;
+	dState* Goto (const dState* const state, unsigned symbol, const dTree<dTokenInfo, unsigned>& symbolList, const dTree<dList<void*>, unsigned>& ruleMap) const;
+	dState* Closure (const dList<dItem>& itemSet, const dTree<dTokenInfo, unsigned>& symbolList, const dTree<dList<void*>, unsigned>& ruleMap) const;
 	void BuildParcingTable (const dTree<dState*,int>& stateList, const string& startSymbol, const dOperatorsPrecedence& operatorPrecence) const;
-	void CanonicalItemSets (dTree<dState*,int>& states, const dProductionRule& rules, const dTree<dTokenInfo, string>& symbolList, const dOperatorsPrecedence& operatorPrecence, FILE* const debugFile);
+	void CanonicalItemSets (dTree<dState*,int>& states, const dProductionRule& rules, const dTree<dTokenInfo, unsigned>& symbolList, const dOperatorsPrecedence& operatorPrecence, FILE* const debugFile);
 
 	void GenerateHeaderFile (const string& className, const string& scannerClassName, const char* const outputFileName, 
 							 const dTree<dTokenInfo, string>& symbolList, const string& userVariableClass); 
