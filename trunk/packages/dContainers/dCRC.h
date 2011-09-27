@@ -13,7 +13,6 @@
 #define __dCRC__
 
 
-unsigned dCRC (unsigned crc, unsigned crcAcc);
 unsigned dCRC (const char* const string, unsigned crcAcc = 0);
 unsigned dCRC (const void* const buffer, int size, unsigned crcAcc);
 
