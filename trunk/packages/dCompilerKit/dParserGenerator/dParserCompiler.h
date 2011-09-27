@@ -119,7 +119,7 @@ class dParserCompiler
 	dState* Goto (const dProductionRule& ruleList, const dState* const state, const string& symbol, const dTree<dTokenInfo, string>& symbolList, const dTree<dList<void*>, string>& ruleMap) const;
 	dState* Closure (const dProductionRule& ruleList, const dList<dItem>& itemSet, const dTree<dTokenInfo, string>& symbolList, const dTree<dList<void*>, string>& ruleMap) const;
 	void BuildParcingTable (const dTree<dState*,int>& stateList, const string& startSymbol, const dOperatorsPrecedence& operatorPrecence) const;
-	void CanonicalItemSets (dTree<dState*,int>& states, const dProductionRule& rules, const dTree<dTokenInfo, string>& symbolList, const dOperatorsPrecedence& operatorPrecence);
+	void CanonicalItemSets (dTree<dState*,int>& states, const dProductionRule& rules, const dTree<dTokenInfo, string>& symbolList, const dOperatorsPrecedence& operatorPrecence, FILE* const debugFile);
 
 	void GenerateHeaderFile (const string& className, const string& scannerClassName, const char* const outputFileName, 
 							 const dTree<dTokenInfo, string>& symbolList, const string& userVariableClass); 

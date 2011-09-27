@@ -18,7 +18,7 @@
 #define DACCEPT_SYMBOL "$$$"
 #define DACCEPTING_TOKEN 255	
 
-//#define DDEBUG_STATES
+#define DDEBUG_STATES
 
 
 
@@ -240,13 +240,12 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 	}
 
 
-	void Trace() const
+	void Trace(FILE* const debugFile) const
 	{
-#ifdef DDEBUG_STATES
-		DTRACE(("state %d:\n", m_number));
+		fprintf (debugFile, "state %d:\n", m_number);
 		for (dState::dListNode* itemNode = GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
 			dItem& item = itemNode->GetInfo();
-			DTRACE(("%s -> ", item.m_ruleNode->GetInfo().m_name.c_str()));
+			fprintf (debugFile, "%s -> ", item.m_ruleNode->GetInfo().m_name.c_str());
 
 			int index = 0;
 			bool hasIndex = false;
@@ -254,26 +253,25 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 			for (; node; node = node->GetNext()) {
 
 				if (index == item.m_indexMarker) {
-					DTRACE((". "));
+					fprintf (debugFile, ". ");
 					hasIndex = true;
 					break;
 				}
 				const dSymbol& info = node->GetInfo();
-				DTRACE(("%s ", info.m_name.c_str()));
+				fprintf (debugFile, "%s ", info.m_name.c_str());
 				index ++;
 			}
 
 			for (; node; node = node->GetNext()) {
 				const dSymbol& info = node->GetInfo();
-				DTRACE(("%s ", info.m_name.c_str()));
+				fprintf (debugFile, "%s ", info.m_name.c_str());
 			}
 			if (!hasIndex) {
-				DTRACE((". "));
+				fprintf (debugFile, ". ");
 			}
-			DTRACE((":: %s\n", item.m_lookAheadSymnol.c_str()));
+			fprintf (debugFile, ":: %s\n", item.m_lookAheadSymnol.c_str());
 		}
-		DTRACE(("\n"));
-#endif
+		fprintf (debugFile, "\n");
 	}
 
 	int m_key;
@@ -350,11 +348,17 @@ dParserCompiler::dParserCompiler(const string& inputRules, const char* const out
 
 	// scan grammar to a set of LR(1) rules
 	symbolList.Insert(dTokenInfo (255, TERMINAL), DACCEPT_SYMBOL);
+
 	ScanGrammarFile(inputRules, ruleList, symbolList, operatorPrecedence, userCodeBlock, userVariableClass, endUserCode, lastTerminalToken);
 
 	// convert the rules into a NFA.
+	string debugFileName (outputFileName);
+	debugFileName += ".txt";
+	FILE* const debugFile = fopen (debugFileName.c_str(), "w");
+
 	dTree<dState*,int> stateList;
-	CanonicalItemSets (stateList, ruleList, symbolList, operatorPrecedence);
+	CanonicalItemSets (stateList, ruleList, symbolList, operatorPrecedence, debugFile);
+	fclose (debugFile);
 
 	// create a LR(1) parsing table from the NFA graphs
 	const string& startSymbol = ruleList.GetFirst()->GetInfo().m_name;
@@ -928,7 +932,7 @@ void dParserCompiler::ReplaceAllMacros (string& data, const string& newName, con
 
 
 // generates the canonical Items set for a LR(1) grammar
-void dParserCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dProductionRule& ruleList, const dTree<dTokenInfo, string>& symbolList, const dOperatorsPrecedence& operatorPrecence)
+void dParserCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dProductionRule& ruleList, const dTree<dTokenInfo, string>& symbolList, const dOperatorsPrecedence& operatorPrecence, FILE* const debugFile)
 {
 	dList<dItem> itemSet;
 	dList<dState*> stateList;
@@ -960,7 +964,8 @@ void dParserCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dPr
 	stateMap.Insert(state, state->GetKey());
 	stateList.Append(state);
 
-	state->Trace();
+	
+	state->Trace(debugFile);
 
 	// now for each state found 
 	int stateNumber = 1;
@@ -985,7 +990,7 @@ void dParserCompiler::CanonicalItemSets (dTree<dState*,int>& stateMap, const dPr
 
 					stateNumber ++;
 					stateMap.Insert(newState, newState->GetKey());
-					newState->Trace();
+					newState->Trace(debugFile);
 					stateList.Append(newState);
 
 					operatorPrecence.SaveLastOperationSymbol (newState);
