@@ -83,19 +83,28 @@ static unsigned randBits[] =
 };
 
 
+// concatenate two crc
+unsigned dCRC (unsigned crc, unsigned crcAcc)
+{
+	crcAcc = (crcAcc << 8) ^ crc;
+	return crcAcc; 
+}
+
+
 // calculate a 32 bit crc of a string
-unsigned dCRC (const char* const name, unsigned crc)
+unsigned dCRC (const char* const name, unsigned crcAcc)
 {
 	if (!name) {
 		return 0;
 	}
 
+	unsigned crc = 0;
 	for (unsigned char *ptr = (unsigned char*)name; *ptr; ptr ++) {
 		unsigned c = *ptr;
 		unsigned val = randBits[((crc >> 24) ^ c) & 0xff];
 		crc = (crc << 8) ^ val;
 	}
-	return crc;
+	return dCRC (crc, crcAcc);
 }
 
 
@@ -103,12 +112,13 @@ unsigned dCRC (const void* const buffer, int size, unsigned crcAcc)
 {
 	unsigned char *ptr = (unsigned char*)buffer;
 
+	unsigned crc = 0;
 	for (int i = 0; i < size; i ++) {
 		unsigned c = ptr[i];
 		unsigned val = randBits[((crcAcc >> 24) ^ c) & 0xff];
-		crcAcc = (crcAcc << 8) ^ val;
+		crc = (crc << 8) ^ val;
 	}
-	return crcAcc;
+	return dCRC (crc, crcAcc);
 }
 
 
