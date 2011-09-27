@@ -342,6 +342,7 @@ expression
 	| expression GREATHER_EQUAL expression
 	| expression LESS_EQUAL expression
 	| expression SHIFT_RIGHT expression
+	| expression '+' expression
 	| expression '-' expression
 	| expression '*' expression
 	| expression '%' expression
