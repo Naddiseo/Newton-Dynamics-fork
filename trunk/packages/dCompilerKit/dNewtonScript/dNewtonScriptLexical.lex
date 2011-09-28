@@ -70,7 +70,8 @@ Integer			[\-\+]?[0-9]+
 "\)"			{return ')';}
 "\^"			{return '^';}
 "\|"			{return '|';}
-
+"<"				{return '<';}
+">"				{return '>';}
 
 "&&"			{return dNewtonScriptParser::LOGIC_AND;}
 "\|\|"			{return dNewtonScriptParser::LOGIC_OR;}
