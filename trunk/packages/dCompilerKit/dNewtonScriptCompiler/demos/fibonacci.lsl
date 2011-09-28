@@ -15,21 +15,15 @@ import <console.lsl>
 // naive method to calculate a fibonacci number
 class fibonacci
 {
-	fibonacci (int n)
-	{
-	}
-	
 	int Calculate (int n)
 	{
-		in (n == 0) {
-			return 0
+		if (n == 0) {
+			return 0;
 		}
-		in (n == 1) {
+		if (n == 1) {
 			return 1;
 		}
-		return Calculate (n - 1) + Calculate (n - 2)
+		return Calculate (n - 1) + Calculate (n - 2);
 	}
-	
-	int m_value	
-};
+}
 

@@ -105,7 +105,7 @@ Integer			[\-\+]?[0-9]+
 "default"		{return dNewtonScriptParser::DEFAULT;}
 "break"			{return dNewtonScriptParser::BREAK;}
 "continue"		{return dNewtonScriptParser::CONTINUE;}
-"reurn"			{return dNewtonScriptParser::RETURN;}
+"return"		{return dNewtonScriptParser::RETURN;}
 
 
 
