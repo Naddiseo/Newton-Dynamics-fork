@@ -9,9 +9,6 @@
 * freely
 */
 
-import <string.lsl>
-import <console.lsl>
-
 // naive method to calculate a fibonacci number
 class fibonacci
 {

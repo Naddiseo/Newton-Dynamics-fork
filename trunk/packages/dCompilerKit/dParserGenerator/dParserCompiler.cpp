@@ -20,6 +20,9 @@
 
 #define DDEBUG_STATES
 
+#define DERROR_SYMBOL	"error"
+#define DERROR_TOKEN	254
+
 
 
 //The Parcel input file consists of three sections, separated by a line containing only `%%'. 
@@ -411,6 +414,7 @@ dParserCompiler::dParserCompiler(const string& inputRules, const char* const out
 
 	// scan grammar to a set of LR(1) rules
 	symbolList.Insert(dTokenInfo (DACCEPTING_TOKEN, TERMINAL, DACCEPT_SYMBOL), dCRC (DACCEPT_SYMBOL));
+	symbolList.Insert(dTokenInfo (DERROR_TOKEN, TERMINAL, DERROR_SYMBOL), dCRC (DERROR_SYMBOL));
 
 	ScanGrammarFile(inputRules, ruleList, symbolList, operatorPrecedence, userCodeBlock, userVariableClass, endUserCode, lastTerminalToken);
 
@@ -693,6 +697,10 @@ dParserCompiler::dToken dParserCompiler::ScanGrammarRule(
 			dTokenStringPair& pair = ruleTokens.Append()->GetInfo();
 			pair.m_token = token;
 			pair.m_info = lexical.GetTokenString();
+//			if (pair.m_info == DERROR_SYMBOL) {
+//				_ASSERTE (0);
+//				pair.m_token = DERROR_TOKEN;
+//			}
 		}
 		
 		dList<dTokenStringPair>::dListNode* lastNode = ruleTokens.GetLast();

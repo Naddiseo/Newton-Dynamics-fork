@@ -9,8 +9,6 @@
 * freely
 */
 
-import <string.lsl>
-import <console.lsl>
 
 // Find the primes numbers in the first n integers using The Sieve Of Eratosthenes
 class sieves

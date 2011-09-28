@@ -91,7 +91,6 @@ module_list
 	| module_list module
 	;
 			
-			
 module 
 	: ';'
 	| import_module
@@ -134,8 +133,7 @@ class_member_list
 	;
 				    
 class_member 
-	: ';'
-	| class_contructor
+	: class_contructor
 	| class_variable_declaration
 	| class_function_implementaion
 	;
@@ -167,19 +165,25 @@ init_base_class
 	| ':' function_call	
 	;
 	
-semicolon_marker_List
+semicolon_marker
+	: semicolon_marker_list	
+	| error ';'
+	;
+	
+semicolon_marker_list
 	: ';'
 	| semicolon_marker_list ';'
 	;	
+
 			 
 class_contructor 
-	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker_list
+	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker
 	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class function_block
 	;
 	
 	
 class_function_implementaion 
-	: native_function function_prototype semicolon_marker_list
+	: native_function function_prototype semicolon_marker
 	| function_prototype function_block
 	| PRIVATE function_prototype function_block
 	;
@@ -257,7 +261,7 @@ function_statement_list
 						 
 function_statement 
 	: statement 
-	| local_variable_declaration semicolon_marker_List
+	| local_variable_declaration semicolon_marker
 	;			 
 	
 	
@@ -269,13 +273,13 @@ local_variable_declaration
 	
 	
 statement
-	: assigment_statement semicolon_marker_List
+	: assigment_statement semicolon_marker
 	| if_statement
 	| for_statement 
-	| continue_statement semicolon_marker_List
-	| break_statement semicolon_marker_List
-	| function_call semicolon_marker_List
-	| return semicolon_marker_List	
+	| continue_statement semicolon_marker
+	| break_statement semicolon_marker
+	| function_call semicolon_marker
+	| return semicolon_marker	
 	;
 	
 	
@@ -360,9 +364,9 @@ expression
 	| expression '*' expression
 	| expression '%' expression
 	| expression '/' expression
+*/	
 	| '(' expression ')'
 	| indentifier
-*/	
 	| function_call
 	| INTEGER_VALUE
 	;	
