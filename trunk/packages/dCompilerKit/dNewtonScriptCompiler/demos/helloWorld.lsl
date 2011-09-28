@@ -9,16 +9,9 @@
 * freely
 */
 
-import <string.nsl>
-import <console.nsl>
+import <string.lsl>
+import <console.lsl>
 
-class hello1
-{
-}
-
-class hello2 extends hello1
-{
-}
 
 class helloWorld
 {

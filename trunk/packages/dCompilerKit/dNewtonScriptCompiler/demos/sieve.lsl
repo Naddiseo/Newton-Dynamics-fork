@@ -9,15 +9,15 @@
 * freely
 */
 
-import <string.nsl>
-import <console.nsl>
+import <string.lsl>
+import <console.lsl>
 
 // Find the primes numbers in the first n integers using The Sieve Of Eratosthenes
 class sieves
 {
 	sieves (int n)
 	{
-		m_data = new int[n]
+		m_data = new int[n];
 		
 		//Initialize the first n integer array
 		for (int i = 0; i < n; i = i + 1) {   
@@ -29,7 +29,7 @@ class sieves
 			if(m_data[i]) {
 				for(int j = i; j * i < n; j = j + 1) {
 					//mark all integers who are multiple of i
-					m_data[j * i] = 0
+					m_data[j * i] = 0 ;
 				}
 			}
 		}

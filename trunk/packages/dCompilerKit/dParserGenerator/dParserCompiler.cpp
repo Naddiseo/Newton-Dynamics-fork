@@ -154,15 +154,16 @@ class dParserCompiler::dItem
 {
 	public:
 	dItem ()
-		:m_indexMarker(0), m_lookAheadSymbol(0),  m_lastOperatorSymbol(unsigned(-1)), m_lookAheadSymbolName(""), m_ruleNode(NULL)
+		:m_indexMarker(0), m_lookAheadSymbol(0), m_lastOperatorSymbol(0), m_lookAheadSymbolName(""), m_lastOperatorSymbolName (""), m_ruleNode(NULL)
 	{
 	}
 
 	int m_indexMarker;
-//	string m_lastOperatorSymbol;
+	
 	unsigned m_lookAheadSymbol;
 	unsigned m_lastOperatorSymbol;
 	string m_lookAheadSymbolName;
+	string m_lastOperatorSymbolName;
 	dProductionRule::dListNode* m_ruleNode;
 };
 
@@ -389,6 +390,7 @@ class dParserCompiler::dOperatorsPrecedence: public dList <dOperatorsAssociation
 				const dSymbol& infoSymbol = infoSymbolNode->GetInfo();
 				if (FindAssociation(infoSymbol.m_nameCRC)) {
 					item.m_lastOperatorSymbol = infoSymbol.m_nameCRC;
+					item.m_lastOperatorSymbolName = infoSymbol.m_name;
 				}
 			}
 		}

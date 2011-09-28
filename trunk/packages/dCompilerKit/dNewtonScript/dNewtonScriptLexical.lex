@@ -84,7 +84,7 @@ Integer			[\-\+]?[0-9]+
 "!="			{return dNewtonScriptParser::DIFFERENT;}
  
 
-"void"			{return dNewtonScriptParser::VOID__;}
+"void"			{return dNewtonScriptParser::VOID_TYPE;}
 "bool"			{return dNewtonScriptParser::BOOLEAN;}
 "byte"			{return dNewtonScriptParser::BYTE;}
 "short"			{return dNewtonScriptParser::SHORT;}
@@ -105,6 +105,7 @@ Integer			[\-\+]?[0-9]+
 "default"		{return dNewtonScriptParser::DEFAULT;}
 "break"			{return dNewtonScriptParser::BREAK;}
 "continue"		{return dNewtonScriptParser::CONTINUE;}
+"reurn"			{return dNewtonScriptParser::RETURN;}
 
 
 

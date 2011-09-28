@@ -46,9 +46,10 @@
 %token INTEGER_VALUE
 %token IMPORT IMPORT_FILE_NAME 
 %token PRIVATE CLASS IDENTIFIER EXTENDS GUI
-%token BOOLEAN BYTE SHORT INT LONG UNSIGNED FLOAT DOUBLE VOID__
+%token BOOLEAN BYTE SHORT INT LONG UNSIGNED FLOAT DOUBLE VOID_TYPE
 
 %token NEW
+%token RETURN
 %token FOR WHILE DO
 %token IF ELSE SWITCH CASE DEFAULT 
 %token CONTINUE BREAK
@@ -165,14 +166,20 @@ init_base_class
 	: 
 	| ':' function_call	
 	;
+	
+semicolon_marker_List
+	: ';'
+	| semicolon_marker_list ';'
+	;	
 			 
 class_contructor 
-	: native_function  IDENTIFIER '(' function_parameters ')' 
+	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker_list
 	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class function_block
 	;
 	
+	
 class_function_implementaion 
-	: native_function function_prototype
+	: native_function function_prototype semicolon_marker_list
 	| function_prototype function_block
 	| PRIVATE function_prototype function_block
 	;
@@ -220,7 +227,7 @@ primitive_types
 	| UNSIGNED LONG
 	| FLOAT
 	| DOUBLE
-	| VOID__
+	| VOID_TYPE
 	;
 	
 	
@@ -249,9 +256,8 @@ function_statement_list
 						 
 						 
 function_statement 
-	: ';'
-	| statement
-	| local_variable_declaration
+	: statement 
+	| local_variable_declaration semicolon_marker_List
 	;			 
 	
 	
@@ -263,12 +269,13 @@ local_variable_declaration
 	
 	
 statement
-	: assigment_statement
+	: assigment_statement semicolon_marker_List
 	| if_statement
 	| for_statement 
-	| continue_statement 
-	| break_statement 
-	| function_call
+	| continue_statement semicolon_marker_List
+	| break_statement semicolon_marker_List
+	| function_call semicolon_marker_List
+	| return semicolon_marker_List	
 	;
 	
 	
@@ -329,8 +336,14 @@ function_call
 	| IDENTIFIER '(' argument_list ')'	
 	;
 	
+return 
+	: RETURN
+	| RETURN expression
+	;	
+	
 expression
 	: expression LOGIC_OR expression
+/*	
 	| expression LOGIC_AND expression
 	| expression '|' expression
 	| expression '^' expression
@@ -349,6 +362,7 @@ expression
 	| expression '/' expression
 	| '(' expression ')'
 	| indentifier
+*/	
 	| function_call
 	| INTEGER_VALUE
 	;	
