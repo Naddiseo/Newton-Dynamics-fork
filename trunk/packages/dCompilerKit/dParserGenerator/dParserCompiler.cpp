@@ -159,7 +159,6 @@ class dParserCompiler::dItem
 	}
 
 	int m_indexMarker;
-//	string m_lookAheadSymnol;
 //	string m_lastOperatorSymbol;
 	unsigned m_lookAheadSymbol;
 	unsigned m_lastOperatorSymbol;
@@ -187,12 +186,71 @@ class dParserCompiler::dTokenStringPair
 class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 {
 	public:
+	class dItemKey
+	{
+		public:
+		dItemKey (const dItem& item)
+			:m_lookAheadSymbol (item.m_lookAheadSymbol), m_rule (item.m_ruleNode)
+		{
+		}
+
+		dItemKey (unsigned symbol, dProductionRule::dListNode* rule)
+			:m_lookAheadSymbol (symbol), m_rule (rule)
+		{
+		}
+
+		bool operator< (const dItemKey& key) const
+		{	
+			if (m_lookAheadSymbol < key.m_lookAheadSymbol) {
+				return true;	
+			} else if (m_lookAheadSymbol == key.m_lookAheadSymbol){
+				if (m_rule < key.m_rule) {
+					return true;	
+				} 
+			}
+			return false;
+		}
+
+		bool operator> (const dItemKey& key) const
+		{
+			if (m_lookAheadSymbol > key.m_lookAheadSymbol) {
+				return true;	
+			} else if (m_lookAheadSymbol == key.m_lookAheadSymbol){
+				if (m_rule > key.m_rule) {
+					return true;	
+				} 
+			}
+			return false;
+		}
+
+		unsigned m_lookAheadSymbol;
+		dProductionRule::dListNode* m_rule;
+		
+		
+	};
+
 	dState (const dList<dItem>& itemSet)
 		:m_key(0), m_number(0), m_goto(), m_actions(), m_transitions()
 	{
 		for (dListNode* node = itemSet.GetFirst(); node; node = node->GetNext()) {
-			Append(node->GetInfo());
+			AddItem (node->GetInfo());
 		}
+	}
+
+	void AddItem (const dItem& item)
+	{
+		dState::dListNode* const node = Append(item);
+		
+		dItemKey key (item);
+		dTree<dList<dState::dListNode*>, dItemKey>::dTreeNode* mapNode = m_itemMap.Find (key);
+		if (!mapNode) {
+			mapNode = m_itemMap.Insert (key);
+		}
+
+		dList<dState::dListNode*>& bucket = mapNode->GetInfo();
+		// check if bucket is not too big
+		_ASSERTE (bucket.GetCount() < 16);
+		bucket.Append(node);
 	}
 
 	int GetKey() const
@@ -224,11 +282,17 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 
 	dListNode* FindItem (dProductionRule::dListNode* const rule, int marker, unsigned lookAheadSymbol) const
 	{
-		for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
-			dItem& item = node->GetInfo();
-			if ((item.m_ruleNode == rule) && (item.m_indexMarker == marker)) {
-				if (item.m_lookAheadSymbol == lookAheadSymbol) {
-					return node;
+		dItemKey key (lookAheadSymbol, rule);
+		dTree<dList<dState::dListNode*>, dItemKey>::dTreeNode* const mapNode = m_itemMap.Find (key);
+		if (mapNode) {
+			dList<dState::dListNode*>& bucket = mapNode->GetInfo();
+			for (dList<dState::dListNode*>::dListNode* node = bucket.GetFirst(); node; node = node->GetNext()) {
+				dState::dListNode* const nodeItem = node->GetInfo();
+				const dItem& item = nodeItem->GetInfo();
+				if (item.m_indexMarker == marker) {
+					_ASSERTE (item.m_ruleNode == rule);
+					_ASSERTE (item.m_lookAheadSymbol == lookAheadSymbol);
+					return nodeItem;
 				}
 			}
 		}
@@ -272,9 +336,10 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 
 	int m_key;
 	int m_number;
-	dTree<dState*, string> m_goto; 
-	dTree<dAction, string> m_actions; 
+	dTree<dState*, unsigned> m_goto; 
+	dTree<dAction, unsigned> m_actions; 
 	dList<dTransition> m_transitions;
+	dTree<dList<dState::dListNode*>, dItemKey> m_itemMap;
 };
 
 class dParserCompiler::dOperatorsAssociation: public dList <unsigned>
@@ -355,22 +420,18 @@ dParserCompiler::dParserCompiler(const string& inputRules, const char* const out
 	dTree<dState*,int> stateList;
 	CanonicalItemSets (stateList, ruleList, symbolList, operatorPrecedence, debugFile);
 	fclose (debugFile);
-	
-//	_ASSERTE (0);
-/*
-=======
-	CanonicalItemSets (stateList, ruleList, symbolList, operatorPrecedence, debugFile);
-	fclose (debugFile);
+
 
 	// create a LR(1) parsing table from the NFA graphs
 	const string& startSymbol = ruleList.GetFirst()->GetInfo().m_name;
-	BuildParcingTable (stateList, startSymbol, operatorPrecedence);
+	BuildParcingTable (stateList, dCRC (startSymbol.c_str()), operatorPrecedence);
+
 
 	//Write Parser class and header file
 	string className (GetClassName(outputFileName));
 	GenerateHeaderFile (className, scannerClassName, outputFileName, symbolList, userVariableClass);
 	GenerateParserCode (className, scannerClassName, outputFileName, symbolList, stateList, userCodeBlock, endUserCode, lastTerminalToken);
-*/
+
 	dTree<dState*,int>::Iterator iter(stateList);
 	for (iter.Begin(); iter; iter ++) {
 		dState* const state = iter.GetNode()->GetInfo();
@@ -453,445 +514,6 @@ void dParserCompiler::SaveFile(const char* const fileName, const char* const ext
 	fclose (headerFile);
 }
 
-
-
-/*
-
-void dParserCompiler::ReplaceMacro (string& data, const string& newName, const string& macro) const
-{
-	int size = macro.size();
-	int position = data.find (macro);
-	_ASSERTE (position != -1);
-	data.replace(position, size, newName);
-}
-
-void dParserCompiler::ReplaceAllMacros (string& data, const string& newName, const string& macro) const
-{
-	int size = macro.size();
-	for (size_t i = data.find (macro); i != -1; i = data.find (macro)) {
-		data.replace(i, size, newName);
-	}
-}
-
-
-void dParserCompiler::GenerateHeaderFile (
-	const string& className, 
-	const string& scannerClassName, 
-	const char* const outputFileName, 
-	const dTree<dTokenInfo, string>& symbolList, 
-	const string& userVariableClass) 
-{
-	string templateHeader ("");
-	LoadTemplateFile("/dParserTemplate.h", templateHeader);
-
-	ReplaceAllMacros (templateHeader, className, "$(className)");
-	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
-	ReplaceMacro (templateHeader, userVariableClass, "$(userVariableClass)");
-
-	
-	dTree<dTree<dTokenInfo, string>::dTreeNode*, int> sortToken;
-	dTree<dTokenInfo, string>::Iterator iter (symbolList);
-	for (iter.Begin(); iter; iter ++) {
-		const dTokenInfo& info = iter.GetNode()->GetInfo();
-		if ((info.m_type == TERMINAL) && (info.m_tokenId >= 256)) {
-			sortToken.Insert(iter.GetNode(), info.m_tokenId);
-		}
-	} 
-
-	dTree<dTree<dTokenInfo, string>::dTreeNode*, int>::Iterator iter1 (sortToken);
-	bool first = true;
-	char text[256];
-	sprintf (text, " = %d, \n", DACCEPTING_TOKEN);
-	string enumdTokens ("\t\tACCEPTING_TOKEN");
-	enumdTokens += text;
-	for (iter1.Begin(); iter1; iter1 ++) {
-		dTree<dTokenInfo, string>::dTreeNode* const node = iter1.GetNode()->GetInfo();
-		const string& name = node->GetKey();
-		enumdTokens += "\t\t";
-		enumdTokens += name;
-		if (first) {
-			first = false;
-			sprintf (text, " = %d, \n", iter1.GetKey());
-			enumdTokens += text;
-		} else {
-			enumdTokens += ",\n";
-		}
-	}
-
-	enumdTokens.replace(enumdTokens.size()-2, 2, "");
-	ReplaceMacro (templateHeader, enumdTokens, "$(Tokens)");
-
-	SaveFile(outputFileName, ".h", templateHeader);
-}
-
-
-
-
-
-void dParserCompiler::BuildParcingTable (const dTree<dState*,int>& stateList, const string& startSymbol, const dOperatorsPrecedence& operatorPrecedence) const
-{
-	dTree<dState*,int>::Iterator stateIter (stateList);
-
-	string emptySymbol ("");
-	string acceptingSymbol (DACCEPT_SYMBOL);
-	// create Shift Reduce action table
-	for (stateIter.Begin(); stateIter; stateIter ++) {
-		dState* const state = stateIter.GetNode()->GetInfo();
-
-		// add all shift actions first
-		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
-			dTransition& transition = node->GetInfo();
-			if (transition.m_type == TERMINAL) {
-
-				// find item generating this shift action and mark it as used.
-				const dState* const targetState = transition.m_targetState;
-				_ASSERTE (!state->m_actions.Find (transition.m_name));
-				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (transition.m_name); 
-				dAction& action = actionNode->GetInfo();
-				action.m_type = dSHIFT;
-				action.m_myItem = NULL;
-				action.m_nextState = targetState->m_number;
-				action.m_reduceRuleNode = NULL;
-			}
-		}
-
-		// add all reduce actions
-		dList<dAction*> potencialConflictinActions;
-		for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
-			dItem& item = itemNode->GetInfo();
-			const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
-			if ((ruleInfo.m_ruleNumber == 0) && (item.m_indexMarker == 1)) {
-				dTree<dAction, string>::dTreeNode* const actionNode = state->m_actions.Insert (DACCEPT_SYMBOL); 
-				_ASSERTE (actionNode);
-				dAction& action = actionNode->GetInfo();
-				action.m_type = dACCEPT;
-				action.m_myItem = &item;
-				action.m_reduceRuleNode = NULL;
-			} else if ((item.m_indexMarker == ruleInfo.GetCount()) && (ruleInfo.m_name != startSymbol)) {
-				dTree<dAction, string>::dTreeNode* actionNode = state->m_actions.Find (item.m_lookAheadSymnol); 
-				if (!actionNode) {
-					actionNode = state->m_actions.Insert (item.m_lookAheadSymnol); 
-					dAction& action = actionNode->GetInfo();
-					action.m_type = dREDUCE;
-					action.m_myItem = &item;
-					action.m_nextState = 0;
-					action.m_reduceRuleNode = item.m_ruleNode;
-				} else {
-					dAction& action = actionNode->GetInfo();
-					action.m_myItem = &item;
-					action.m_reduceRuleNode = item.m_ruleNode;
-					potencialConflictinActions.Append (&actionNode->GetInfo());
-				}
-			}
-		}
-
-		// now resolve all conflicting actions
-		if (potencialConflictinActions.GetCount()) {
-
-			// resolve conflicting actions
-			dList<dAction*>::dListNode* nextActionNode = NULL;
-			for (dList<dAction*>::dListNode* actionNode = potencialConflictinActions.GetFirst(); actionNode; actionNode = nextActionNode) {
-				dAction* const action = actionNode->GetInfo();
-
-				if (action->m_type == dREDUCE) {
-					// this is a reduce reduce conflict
-					_ASSERTE (0);
-					DTRACE (("This is a reduce Reduce conflict, resolve in favor of of first production rule\n")); 
-				}
-				nextActionNode = actionNode->GetNext();
-
-				const dItem& item = *action->m_myItem;
-				if (item.m_lastOperatorSymbol != emptySymbol) {
-					const dOperatorsAssociation* const operatorAssosiation = operatorPrecedence.FindAssociation (item.m_lastOperatorSymbol);
-					_ASSERTE (operatorAssosiation);
-					if (operatorAssosiation->m_associativity == dOperatorsAssociation::m_left) {
-
-						const dOperatorsAssociation* const lookAheadOperatorAssosiation = operatorPrecedence.FindAssociation (item.m_lookAheadSymnol);
-						if (!(lookAheadOperatorAssosiation && (lookAheadOperatorAssosiation->m_prioprity > operatorAssosiation->m_prioprity))) {
-							action->m_type = dREDUCE;
-						}
-					}
-					potencialConflictinActions.Remove(actionNode);
-				}
-			}
-
-			// for any conflicting actions left, display warning
-			for (dList<dAction*>::dListNode* actionNode = potencialConflictinActions.GetFirst(); actionNode; actionNode = actionNode->GetNext()) {
-				_ASSERTE (0);
-				dAction* const action = actionNode->GetInfo();
-				if (action->m_type == dSHIFT) {
-					DTRACE (("This is a shift Reduce conflict, resolve in favor of shift\n")); 
-				} else {
-					DTRACE (("This is a reduce Reduce conflict, resolving by the first reduce rule\n"));
-				}
-			}
-		}
-	}
-
-
-	// create Goto Table
-	for (stateIter.Begin(); stateIter; stateIter ++) {
-		dState* const state = stateIter.GetNode()->GetInfo();
-		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
-			dTransition& transition = node->GetInfo();
-			if (transition.m_type == NONTERMINAL) {
-				state->m_goto.Insert (transition.m_targetState, transition.m_name); 
-			}
-		}
-	}
-}
-
-
-void dParserCompiler::GenerateParserCode (
-	const string& className, 
-	const string& scannerClassName, 
-	const char* const outputFileName, 
-	const dTree<dTokenInfo, string>& symbolList, 
-	dTree<dState*,int>& stateList, 
-	const string& userCode, 
-	string& endUserCode,
-	int lastTerminalTokenEnum)
-{
-	string templateHeader ("");
-	LoadTemplateFile("/dParserTemplate.cpp", templateHeader);
-
-	size_t position = templateHeader.find ("$(userCode)");
-	templateHeader.replace(position, 11, userCode);
-
-	ReplaceAllMacros (templateHeader, className, "$(className)");
-	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
-
-
-	char text[256];
-	sprintf (text, "%d", lastTerminalTokenEnum);
-	ReplaceMacro (templateHeader, text, "&(lastTerminalToken)");
-
-	dTree<dState*,int> sortedStates;
-	dTree<dState*,int>::Iterator stateIter (stateList);
-	for (stateIter.Begin(); stateIter; stateIter ++) {
-		dState* const state = stateIter.GetNode()->GetInfo();
-		sortedStates.Insert(state, state->m_number);
-	}
-
-	dTree<int, string> actionFilter;
-
-	string emptySematicAction ("");
-	string stateActionsStart ("");
-	string stateActionsCount ("");
-	string nextActionsStateList ("");
-	string sematicActions ("");
-	int entriesCount = 0;
-
-	int newLineCount = 0;
-	int starAndCountIndex = 0;
-	dTree<dState*,int>::Iterator sortStateIter (sortedStates);
-	for (sortStateIter.Begin(); sortStateIter; sortStateIter ++) {
-		dState* const state = sortStateIter.GetNode()->GetInfo();
-
-		int count = 0;
-		dTree<dActionEntry, int> actionSort;
-		dTree<dAction, string>::Iterator actionIter (state->m_actions);
-		for (actionIter.Begin(); actionIter; actionIter++) {
-			count ++;
-
-			dAction& action = actionIter.GetNode()->GetInfo();
-			if (action.m_type == dSHIFT) {
-				const string& actionSymbol = actionIter.GetKey();
-				_ASSERTE (symbolList.Find(actionSymbol));
-
-				dActionEntry entry;
-				entry.m_stateType = short (action.m_type);
-				entry.m_ruleIndex = 0;
-				entry.m_ruleSymbols = 0;
-				entry.m_nextState = short (action.m_nextState);
-				entry.m_token = short (symbolList.Find(actionSymbol)->GetInfo().m_tokenId);
-				actionSort.Insert (entry, entry.m_token);
-
-			} else if (action.m_type == dREDUCE) {
-				const string& actionSymbol = actionIter.GetKey();
-				_ASSERTE (symbolList.Find(actionSymbol));
-
-				dRuleInfo& reduceRule = action.m_reduceRuleNode->GetInfo();
-				_ASSERTE (symbolList.Find(reduceRule.m_name));
-				_ASSERTE (symbolList.Find(reduceRule.m_name)->GetInfo().m_tokenId >= 256);
-
-				dActionEntry entry;
-				entry.m_stateType = short (action.m_type);
-				entry.m_ruleIndex = short (reduceRule.m_ruleNumber);
-				entry.m_ruleSymbols = short (reduceRule.GetCount());
-				entry.m_nextState = short (symbolList.Find(reduceRule.m_name)->GetInfo().m_tokenId - lastTerminalTokenEnum);
-				entry.m_token = short (symbolList.Find(actionSymbol)->GetInfo().m_tokenId);
-				actionSort.Insert (entry, entry.m_token);
-
-				if (!reduceRule.m_ruleReduced && (reduceRule.m_semanticActionCode != emptySematicAction)) {
-					// issue a sematic action code;
-
-					reduceRule.m_ruleReduced = true;
-					char text[128];
-					string userSematicAction (reduceRule.m_semanticActionCode);
-					for (int i = 0; i < int (entry.m_ruleSymbols); i ++) {
-
-						sprintf (text, "%d", i + 1);
-						string macro ("$");
-						macro += text;
-
-						sprintf (text, "%d", i);
-						string macroVariable ("parameter[");
-						macroVariable += text;
-						macroVariable += "].m_value";
-						ReplaceAllMacros (userSematicAction, macroVariable, macro);
-					}
-					ReplaceAllMacros (userSematicAction, "entry.m_value", "$$");
-
-					sprintf (text, "%d:", reduceRule.m_ruleNumber);
-					sematicActions += "\t\t\t\t\tcase "; 
-					sematicActions += text; 
-					sematicActions += "// rule ";
-					sematicActions += reduceRule.m_name;
-					sematicActions += " : ";
-					for (dRuleInfo::dListNode* node = reduceRule.GetFirst(); node; node = node->GetNext()) {
-						sematicActions+= node->GetInfo().m_name;
-						sematicActions += " ";
-					}
-					sematicActions += "\n";
-
-					sematicActions += "\t\t\t\t\t\t";
-					sematicActions += userSematicAction;
-					sematicActions += "\n";
-					sematicActions += "\t\t\t\t\t\tbreak;\n";
-				}
-
-			} else {
-				_ASSERTE (action.m_type == dACCEPT);
-
-				dActionEntry entry;
-				entry.m_stateType = short (action.m_type);
-				entry.m_ruleIndex = 0;
-				entry.m_ruleSymbols = 0;
-				entry.m_nextState = 0;
-				entry.m_token = DACCEPTING_TOKEN;
-				actionSort.Insert (entry, entry.m_token);
-			}
-		}
-
-		int actionIndex = entriesCount;
-		string stateActions ("");
-		dTree<dActionEntry, int>::Iterator iter (actionSort);
-		for (iter.Begin(); iter; iter ++) {
-			const dActionEntry& entry = iter.GetNode()->GetInfo();
-			sprintf (text, "%d, %d, %d, %d, %d, ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
-			stateActions += text; 
-			entriesCount ++;
-		}
-
-		dTree<int, string>::dTreeNode* const stateActionNode = actionFilter.Find(stateActions);
-		if (stateActionNode) {
-			entriesCount = actionIndex;
-			actionIndex =  stateActionNode->GetInfo();
-		} else {
-			actionFilter.Insert(actionIndex, stateActions);
-
-			for (iter.Begin(); iter; iter ++) {
-				if (newLineCount % 4 == 0) {
-					nextActionsStateList += "\n\t\t\t";
-				}
-				newLineCount ++;
-				const dActionEntry& entry = iter.GetNode()->GetInfo();
-				sprintf (text, "dActionEntry (%d, %d, %d, %d, %d), ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
-				nextActionsStateList += text; 
-			}
-		}
-
-		if ((starAndCountIndex % 24) == 0) {
-			stateActionsStart += "\n\t\t\t";
-			stateActionsCount += "\n\t\t\t";
-		}
-		starAndCountIndex ++;
-
-		sprintf (text, "%d, ", actionIndex);
-		stateActionsStart += text;
-
-		sprintf (text, "%d, ", count);
-		stateActionsCount += text;
-	}
-	nextActionsStateList.replace(nextActionsStateList.size()-2, 2, "");
-	stateActionsCount.replace(stateActionsCount.size()-2, 2, "");
-	stateActionsStart.replace(stateActionsStart.size()-2, 2, "");
-
-	ReplaceMacro (templateHeader, stateActionsCount, "$(actionsCount)");
-	ReplaceMacro (templateHeader, stateActionsStart, "$(actionsStart)");
-	ReplaceMacro (templateHeader, nextActionsStateList, "$(actionTable)");
-
-	ReplaceMacro (templateHeader, sematicActions, "$(semanticActionsCode)");
-
-
-	string stateGotoStart ("");
-	string stateGotoCount ("");
-	string nextGotoStateList ("");
-	entriesCount = 0;
-	int newLine = 0;
-	int gotoStateCount = 0;
-	for (sortStateIter.Begin(); sortStateIter; sortStateIter ++) {
-
-		char text[256];
-		dState* const state = sortStateIter.GetNode()->GetInfo();
-
-		int currentEntryuCount = entriesCount;
-
-		int count = 0;
-		dTree<dState*, string>::Iterator gotoIter (state->m_goto); 
-		dTree<dTree<dState*, string>::dTreeNode*, int> sortGotoActions;
-		for (gotoIter.Begin(); gotoIter; gotoIter++) {
-			int id = symbolList.Find(gotoIter.GetKey())->GetInfo().m_tokenId;
-			sortGotoActions.Insert(gotoIter.GetNode(), id);
-		}
-
-		dTree<dTree<dState*, string>::dTreeNode*, int>::Iterator iter1 (sortGotoActions);
-		for (iter1.Begin(); iter1; iter1++) {
-			count ++;
-			if ((newLine % 5) == 0) {
-				nextGotoStateList += "\n\t\t\t";
-			}
-			newLine ++;
-
-			dTree<dState*, string>::dTreeNode* const node = iter1.GetNode()->GetInfo();
-			dState* const targetState = node->GetInfo();
-
-			dGotoEntry entry;
-			entry.m_nextState = short (targetState->m_number);
-			entry.m_token = short(iter1.GetKey());
-
-			sprintf (text, "dGotoEntry (%d, %d), ", entry.m_token, entry.m_nextState);
-			nextGotoStateList += text;
-			entriesCount ++;
-		}
-
-		if ((gotoStateCount % 32) == 0) {
-			stateGotoStart += "\n\t\t\t";
-			stateGotoCount += "\n\t\t\t";
-		}
-		gotoStateCount ++;
-
-		sprintf (text, "%d, ", currentEntryuCount);
-		stateGotoStart += text;
-
-		sprintf (text, "%d, ", count);
-		stateGotoCount += text;
-	}
-
-	nextGotoStateList.replace(nextGotoStateList.size()-2, 2, "");
-	stateGotoCount.replace(stateGotoCount.size()-2, 2, "");
-	stateGotoStart.replace(stateGotoStart.size()-2, 2, "");
-
-	ReplaceMacro (templateHeader, stateGotoCount, "$(gotoCount)");
-	ReplaceMacro (templateHeader, stateGotoStart, "$(gotoStart)");
-	ReplaceMacro (templateHeader, nextGotoStateList, "$(gotoTable)");
-
-
-	templateHeader += endUserCode;
-	SaveFile(outputFileName, ".cpp", templateHeader);
-}
-*/
 
 
 void dParserCompiler::ScanGrammarFile(
@@ -1247,7 +869,6 @@ dParserCompiler::dState* dParserCompiler::Closure (
 
 			dTree<dList<void*>, unsigned>::dTreeNode* const ruleNodes = ruleMap.Find(sentenceSymbol.m_nameCRC);
 			if (ruleNodes) {
-				//const dList<void*>& matchingRulesList = ruleMap.Find(sentenceSymbol.m_name)->GetInfo();
 				const dList<void*>& matchingRulesList = ruleNodes->GetInfo();
 				_ASSERTE (matchingRulesList);
 				for (dList<void*>::dListNode* node = matchingRulesList.GetFirst(); node; node = node->GetNext()) {
@@ -1261,11 +882,12 @@ dParserCompiler::dState* dParserCompiler::Closure (
 						unsigned symbol = firstIter.GetKey();
 						dState::dListNode* const itemNode = state->FindItem(ruleNode, 0, symbol);
 						if (!itemNode) {
-							dItem& newItem = state->Append()->GetInfo();
+							dItem newItem;
 							newItem.m_indexMarker = 0;
 							newItem.m_ruleNode = ruleNode;
 							newItem.m_lookAheadSymbol = symbol;
 							newItem.m_lookAheadSymbolName = symbolList.Find (symbol)->GetInfo().m_name;
+							state->AddItem(newItem);
 						}
 					}
 				}
@@ -1432,4 +1054,445 @@ dParserCompiler::dState* dParserCompiler::Goto (
 
 	//find the closure for this new item set.
 	return Closure (itemSet, symbolList, ruleMap);
+}
+
+
+
+void dParserCompiler::BuildParcingTable (
+	const dTree<dState*,int>& stateList, 
+	unsigned startSymbol, 
+	const dOperatorsPrecedence& operatorPrecedence) const
+{
+	dTree<dState*,int>::Iterator stateIter (stateList);
+
+//	string emptySymbol ("");
+	unsigned emptySymbol = 0;
+//	string acceptingSymbol (DACCEPT_SYMBOL);
+	const unsigned acceptingSymbol = dCRC (DACCEPT_SYMBOL);
+	// create Shift Reduce action table
+	for (stateIter.Begin(); stateIter; stateIter ++) {
+		dState* const state = stateIter.GetNode()->GetInfo();
+
+		// add all shift actions first
+		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
+			dTransition& transition = node->GetInfo();
+			if (transition.m_type == TERMINAL) {
+
+				// find item generating this shift action and mark it as used.
+				const dState* const targetState = transition.m_targetState;
+				_ASSERTE (!state->m_actions.Find (transition.m_symbol));
+				dTree<dAction, unsigned>::dTreeNode* const actionNode = state->m_actions.Insert (transition.m_symbol); 
+				dAction& action = actionNode->GetInfo();
+				action.m_type = dSHIFT;
+				action.m_myItem = NULL;
+				action.m_nextState = targetState->m_number;
+				action.m_reduceRuleNode = NULL;
+			}
+		}
+
+		// add all reduce actions
+		dList<dAction*> potencialConflictinActions;
+		for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
+			dItem& item = itemNode->GetInfo();
+			const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
+			if ((ruleInfo.m_ruleNumber == 0) && (item.m_indexMarker == 1)) {
+				dTree<dAction, unsigned>::dTreeNode* const actionNode = state->m_actions.Insert (acceptingSymbol); 
+				_ASSERTE (actionNode);
+				dAction& action = actionNode->GetInfo();
+				action.m_type = dACCEPT;
+				action.m_myItem = &item;
+				action.m_reduceRuleNode = NULL;
+			} else if ((item.m_indexMarker == ruleInfo.GetCount()) && (ruleInfo.m_nameCRC != startSymbol)) {
+				dTree<dAction, unsigned>::dTreeNode* actionNode = state->m_actions.Find (item.m_lookAheadSymbol); 
+				if (!actionNode) {
+					actionNode = state->m_actions.Insert (item.m_lookAheadSymbol); 
+					dAction& action = actionNode->GetInfo();
+					action.m_type = dREDUCE;
+					action.m_myItem = &item;
+					action.m_nextState = 0;
+					action.m_reduceRuleNode = item.m_ruleNode;
+				} else {
+					dAction& action = actionNode->GetInfo();
+					action.m_myItem = &item;
+					action.m_reduceRuleNode = item.m_ruleNode;
+					potencialConflictinActions.Append (&actionNode->GetInfo());
+				}
+			}
+		}
+
+		// now resolve all conflicting actions
+		if (potencialConflictinActions.GetCount()) {
+
+			// resolve conflicting actions
+			dList<dAction*>::dListNode* nextActionNode = NULL;
+			for (dList<dAction*>::dListNode* actionNode = potencialConflictinActions.GetFirst(); actionNode; actionNode = nextActionNode) {
+				dAction* const action = actionNode->GetInfo();
+
+				if (action->m_type == dREDUCE) {
+					// this is a reduce reduce conflict
+					_ASSERTE (0);
+					DTRACE (("This is a reduce Reduce conflict, resolve in favor of of first production rule\n")); 
+				}
+				nextActionNode = actionNode->GetNext();
+
+				const dItem& item = *action->m_myItem;
+				if (item.m_lastOperatorSymbol != emptySymbol) {
+					const dOperatorsAssociation* const operatorAssosiation = operatorPrecedence.FindAssociation (item.m_lastOperatorSymbol);
+					_ASSERTE (operatorAssosiation);
+					if (operatorAssosiation->m_associativity == dOperatorsAssociation::m_left) {
+
+						const dOperatorsAssociation* const lookAheadOperatorAssosiation = operatorPrecedence.FindAssociation (item.m_lookAheadSymbol);
+						if (!(lookAheadOperatorAssosiation && (lookAheadOperatorAssosiation->m_prioprity > operatorAssosiation->m_prioprity))) {
+							action->m_type = dREDUCE;
+						}
+					}
+					potencialConflictinActions.Remove(actionNode);
+				}
+			}
+
+			// for any conflicting actions left, display warning
+			for (dList<dAction*>::dListNode* actionNode = potencialConflictinActions.GetFirst(); actionNode; actionNode = actionNode->GetNext()) {
+				_ASSERTE (0);
+				dAction* const action = actionNode->GetInfo();
+				if (action->m_type == dSHIFT) {
+					DTRACE (("This is a shift Reduce conflict, resolve in favor of shift\n")); 
+				} else {
+					DTRACE (("This is a reduce Reduce conflict, resolving by the first reduce rule\n"));
+				}
+			}
+		}
+	}
+
+
+	// create Goto Table
+	for (stateIter.Begin(); stateIter; stateIter ++) {
+		dState* const state = stateIter.GetNode()->GetInfo();
+		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
+			dTransition& transition = node->GetInfo();
+			if (transition.m_type == NONTERMINAL) {
+				state->m_goto.Insert (transition.m_targetState, transition.m_symbol); 
+			}
+		}
+	}
+}
+
+void dParserCompiler::ReplaceMacro (string& data, const string& newName, const string& macro) const
+{
+	int size = macro.size();
+	int position = data.find (macro);
+	_ASSERTE (position != -1);
+	data.replace(position, size, newName);
+}
+
+void dParserCompiler::ReplaceAllMacros (string& data, const string& newName, const string& macro) const
+{
+	int size = macro.size();
+	for (size_t i = data.find (macro); i != -1; i = data.find (macro)) {
+		data.replace(i, size, newName);
+	}
+}
+
+
+void dParserCompiler::GenerateHeaderFile (
+	const string& className, 
+	const string& scannerClassName, 
+	const char* const outputFileName, 
+	const dTree<dTokenInfo, unsigned>& symbolList, 
+	const string& userVariableClass) 
+{
+	string templateHeader ("");
+	LoadTemplateFile("/dParserTemplate.h", templateHeader);
+
+	ReplaceAllMacros (templateHeader, className, "$(className)");
+	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
+	ReplaceMacro (templateHeader, userVariableClass, "$(userVariableClass)");
+
+
+	dTree<dTree<dTokenInfo, unsigned>::dTreeNode*, int> sortToken;
+	dTree<dTokenInfo, unsigned>::Iterator iter (symbolList);
+	for (iter.Begin(); iter; iter ++) {
+		const dTokenInfo& info = iter.GetNode()->GetInfo();
+		if ((info.m_type == TERMINAL) && (info.m_tokenId >= 256)) {
+			sortToken.Insert(iter.GetNode(), info.m_tokenId);
+		}
+	} 
+
+	dTree<dTree<dTokenInfo, unsigned>::dTreeNode*, int>::Iterator iter1 (sortToken);
+	bool first = true;
+	char text[256];
+	sprintf (text, " = %d, \n", DACCEPTING_TOKEN);
+	string enumdTokens ("\t\tACCEPTING_TOKEN");
+	enumdTokens += text;
+	for (iter1.Begin(); iter1; iter1 ++) {
+		dTree<dTokenInfo, unsigned>::dTreeNode* const node = iter1.GetNode()->GetInfo();
+		//const string& name = node->GetKey();
+		const string& name = node->GetInfo().m_name;
+		enumdTokens += "\t\t";
+		enumdTokens += name;
+		if (first) {
+			first = false;
+			sprintf (text, " = %d, \n", iter1.GetKey());
+			enumdTokens += text;
+		} else {
+			enumdTokens += ",\n";
+		}
+	}
+
+	enumdTokens.replace(enumdTokens.size()-2, 2, "");
+	ReplaceMacro (templateHeader, enumdTokens, "$(Tokens)");
+
+	SaveFile(outputFileName, ".h", templateHeader);
+}
+
+
+void dParserCompiler::GenerateParserCode (
+	const string& className, 
+	const string& scannerClassName, 
+	const char* const outputFileName, 
+	const dTree<dTokenInfo, unsigned>& symbolList, 
+	dTree<dState*,int>& stateList, 
+	const string& userCode, 
+	string& endUserCode,
+	int lastTerminalTokenEnum)
+{
+	string templateHeader ("");
+	LoadTemplateFile("/dParserTemplate.cpp", templateHeader);
+
+	size_t position = templateHeader.find ("$(userCode)");
+	templateHeader.replace(position, 11, userCode);
+
+	ReplaceAllMacros (templateHeader, className, "$(className)");
+	ReplaceAllMacros (templateHeader, scannerClassName, "$(scannerClass)");
+
+
+	char text[256];
+	sprintf (text, "%d", lastTerminalTokenEnum);
+	ReplaceMacro (templateHeader, text, "&(lastTerminalToken)");
+
+	dTree<dState*,int> sortedStates;
+	dTree<dState*,int>::Iterator stateIter (stateList);
+	for (stateIter.Begin(); stateIter; stateIter ++) {
+		dState* const state = stateIter.GetNode()->GetInfo();
+		sortedStates.Insert(state, state->m_number);
+	}
+
+	dTree<int, string> actionFilter;
+
+	string emptySematicAction ("");
+	string stateActionsStart ("");
+	string stateActionsCount ("");
+	string nextActionsStateList ("");
+	string sematicActions ("");
+	int entriesCount = 0;
+
+	int newLineCount = 0;
+	int starAndCountIndex = 0;
+	dTree<dState*,int>::Iterator sortStateIter (sortedStates);
+	for (sortStateIter.Begin(); sortStateIter; sortStateIter ++) {
+		dState* const state = sortStateIter.GetNode()->GetInfo();
+
+		int count = 0;
+		dTree<dActionEntry, int> actionSort;
+		dTree<dAction, unsigned>::Iterator actionIter (state->m_actions);
+		for (actionIter.Begin(); actionIter; actionIter++) {
+			count ++;
+
+			dAction& action = actionIter.GetNode()->GetInfo();
+			if (action.m_type == dSHIFT) {
+				//const string& actionSymbol = actionIter.GetKey();
+				unsigned actionSymbol = actionIter.GetKey();
+				_ASSERTE (symbolList.Find(actionSymbol));
+
+				dActionEntry entry;
+				entry.m_stateType = short (action.m_type);
+				entry.m_ruleIndex = 0;
+				entry.m_ruleSymbols = 0;
+				entry.m_nextState = short (action.m_nextState);
+				entry.m_token = short (symbolList.Find(actionSymbol)->GetInfo().m_tokenId);
+				actionSort.Insert (entry, entry.m_token);
+
+			} else if (action.m_type == dREDUCE) {
+				//const string& actionSymbol = actionIter.GetKey();
+				unsigned actionSymbol = actionIter.GetKey();
+				_ASSERTE (symbolList.Find(actionSymbol));
+
+				dRuleInfo& reduceRule = action.m_reduceRuleNode->GetInfo();
+				_ASSERTE (symbolList.Find(reduceRule.m_nameCRC));
+				_ASSERTE (symbolList.Find(reduceRule.m_nameCRC)->GetInfo().m_tokenId >= 256);
+
+				dActionEntry entry;
+				entry.m_stateType = short (action.m_type);
+				entry.m_ruleIndex = short (reduceRule.m_ruleNumber);
+				entry.m_ruleSymbols = short (reduceRule.GetCount());
+				entry.m_nextState = short (symbolList.Find(reduceRule.m_nameCRC)->GetInfo().m_tokenId - lastTerminalTokenEnum);
+				entry.m_token = short (symbolList.Find(actionSymbol)->GetInfo().m_tokenId);
+				actionSort.Insert (entry, entry.m_token);
+
+				if (!reduceRule.m_ruleReduced && (reduceRule.m_semanticActionCode != emptySematicAction)) {
+					// issue a sematic action code;
+
+					reduceRule.m_ruleReduced = true;
+					char text[128];
+					string userSematicAction (reduceRule.m_semanticActionCode);
+					for (int i = 0; i < int (entry.m_ruleSymbols); i ++) {
+
+						sprintf (text, "%d", i + 1);
+						string macro ("$");
+						macro += text;
+
+						sprintf (text, "%d", i);
+						string macroVariable ("parameter[");
+						macroVariable += text;
+						macroVariable += "].m_value";
+						ReplaceAllMacros (userSematicAction, macroVariable, macro);
+					}
+					ReplaceAllMacros (userSematicAction, "entry.m_value", "$$");
+
+					sprintf (text, "%d:", reduceRule.m_ruleNumber);
+					sematicActions += "\t\t\t\t\tcase "; 
+					sematicActions += text; 
+					sematicActions += "// rule ";
+					sematicActions += reduceRule.m_name;
+					sematicActions += " : ";
+					for (dRuleInfo::dListNode* node = reduceRule.GetFirst(); node; node = node->GetNext()) {
+						sematicActions+= node->GetInfo().m_name;
+						sematicActions += " ";
+					}
+					sematicActions += "\n";
+
+					sematicActions += "\t\t\t\t\t\t";
+					sematicActions += userSematicAction;
+					sematicActions += "\n";
+					sematicActions += "\t\t\t\t\t\tbreak;\n";
+				}
+
+			} else {
+				_ASSERTE (action.m_type == dACCEPT);
+
+				dActionEntry entry;
+				entry.m_stateType = short (action.m_type);
+				entry.m_ruleIndex = 0;
+				entry.m_ruleSymbols = 0;
+				entry.m_nextState = 0;
+				entry.m_token = DACCEPTING_TOKEN;
+				actionSort.Insert (entry, entry.m_token);
+			}
+		}
+
+		int actionIndex = entriesCount;
+		string stateActions ("");
+		dTree<dActionEntry, int>::Iterator iter (actionSort);
+		for (iter.Begin(); iter; iter ++) {
+			const dActionEntry& entry = iter.GetNode()->GetInfo();
+			sprintf (text, "%d, %d, %d, %d, %d, ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
+			stateActions += text; 
+			entriesCount ++;
+		}
+
+		dTree<int, string>::dTreeNode* const stateActionNode = actionFilter.Find(stateActions);
+		if (stateActionNode) {
+			entriesCount = actionIndex;
+			actionIndex =  stateActionNode->GetInfo();
+		} else {
+			actionFilter.Insert(actionIndex, stateActions);
+
+			for (iter.Begin(); iter; iter ++) {
+				if (newLineCount % 4 == 0) {
+					nextActionsStateList += "\n\t\t\t";
+				}
+				newLineCount ++;
+				const dActionEntry& entry = iter.GetNode()->GetInfo();
+				sprintf (text, "dActionEntry (%d, %d, %d, %d, %d), ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
+				nextActionsStateList += text; 
+			}
+		}
+
+		if ((starAndCountIndex % 24) == 0) {
+			stateActionsStart += "\n\t\t\t";
+			stateActionsCount += "\n\t\t\t";
+		}
+		starAndCountIndex ++;
+
+		sprintf (text, "%d, ", actionIndex);
+		stateActionsStart += text;
+
+		sprintf (text, "%d, ", count);
+		stateActionsCount += text;
+	}
+	nextActionsStateList.replace(nextActionsStateList.size()-2, 2, "");
+	stateActionsCount.replace(stateActionsCount.size()-2, 2, "");
+	stateActionsStart.replace(stateActionsStart.size()-2, 2, "");
+
+	ReplaceMacro (templateHeader, stateActionsCount, "$(actionsCount)");
+	ReplaceMacro (templateHeader, stateActionsStart, "$(actionsStart)");
+	ReplaceMacro (templateHeader, nextActionsStateList, "$(actionTable)");
+
+	ReplaceMacro (templateHeader, sematicActions, "$(semanticActionsCode)");
+
+
+	string stateGotoStart ("");
+	string stateGotoCount ("");
+	string nextGotoStateList ("");
+	entriesCount = 0;
+	int newLine = 0;
+	int gotoStateCount = 0;
+	for (sortStateIter.Begin(); sortStateIter; sortStateIter ++) {
+
+		char text[256];
+		dState* const state = sortStateIter.GetNode()->GetInfo();
+
+		int currentEntryuCount = entriesCount;
+
+		int count = 0;
+		dTree<dState*, unsigned>::Iterator gotoIter (state->m_goto); 
+		dTree<dTree<dState*, unsigned>::dTreeNode*, int> sortGotoActions;
+		for (gotoIter.Begin(); gotoIter; gotoIter++) {
+			int id = symbolList.Find(gotoIter.GetKey())->GetInfo().m_tokenId;
+			sortGotoActions.Insert(gotoIter.GetNode(), id);
+		}
+
+		dTree<dTree<dState*, unsigned>::dTreeNode*, int>::Iterator iter1 (sortGotoActions);
+		for (iter1.Begin(); iter1; iter1++) {
+			count ++;
+			if ((newLine % 5) == 0) {
+				nextGotoStateList += "\n\t\t\t";
+			}
+			newLine ++;
+
+			dTree<dState*, unsigned>::dTreeNode* const node = iter1.GetNode()->GetInfo();
+			dState* const targetState = node->GetInfo();
+
+			dGotoEntry entry;
+			entry.m_nextState = short (targetState->m_number);
+			entry.m_token = short(iter1.GetKey());
+
+			sprintf (text, "dGotoEntry (%d, %d), ", entry.m_token, entry.m_nextState);
+			nextGotoStateList += text;
+			entriesCount ++;
+		}
+
+		if ((gotoStateCount % 32) == 0) {
+			stateGotoStart += "\n\t\t\t";
+			stateGotoCount += "\n\t\t\t";
+		}
+		gotoStateCount ++;
+
+		sprintf (text, "%d, ", currentEntryuCount);
+		stateGotoStart += text;
+
+		sprintf (text, "%d, ", count);
+		stateGotoCount += text;
+	}
+
+	nextGotoStateList.replace(nextGotoStateList.size()-2, 2, "");
+	stateGotoCount.replace(stateGotoCount.size()-2, 2, "");
+	stateGotoStart.replace(stateGotoStart.size()-2, 2, "");
+
+	ReplaceMacro (templateHeader, stateGotoCount, "$(gotoCount)");
+	ReplaceMacro (templateHeader, stateGotoStart, "$(gotoStart)");
+	ReplaceMacro (templateHeader, nextGotoStateList, "$(gotoTable)");
+
+
+	templateHeader += endUserCode;
+	SaveFile(outputFileName, ".cpp", templateHeader);
 }
