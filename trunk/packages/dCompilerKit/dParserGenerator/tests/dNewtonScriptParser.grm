@@ -270,7 +270,11 @@ local_variable_declaration
 	| initialized_variable
 	;
 	
-	
+
+statement_error	
+	: error '{'
+	| error ';'
+	;
 	
 statement
 	: assigment_statement semicolon_marker
@@ -278,51 +282,16 @@ statement
 	| break_statement semicolon_marker
 	| function_call semicolon_marker
 	| return semicolon_marker	
-	| iteration_or_desicion_statatements
 	| function_block	
+	| IF '(' expression	')' function_block 
+	| IF '(' expression	')' function_block ELSE function_block
+	| SWITCH '(' expression ')' '{' switch_case_list '}' 
+	| FOR '(' primitive_types assigment_statement ';' expression ';' assigment_statement ')' function_block
+	| WHILE '(' expression ')' function_block 
+	| DO function_block WHILE '(' expression ')' semicolon_marker
+	| statement_error	
 	;
 
-
-iteration_or_desicion_statatements
-	: if_statement
-	| for_statement 	
-	;
-
-//if_statement
-//	: IF '(' expression	')' function_block 
-//	| IF '(' expression	')' function_block ELSE function_block
-//	| SWITCH '(' expression ')' '{' switch_case_list '}'
-//	; 
-	
-desicion_statatements
-	: if function_block 
-	| if function_block else function_block
-	| switch '{' switch_case_list '}'
-	;
-
-switch 
-	: SWITCH '(' expression ')' 
-	| error '{'
-	; 	
-	
-else 
-	: ELSE
-	| error '{'
-	; 	
-	
-if 
-	: IF '(' expression	')'
-	| error '{'
-	;	
-
-	
-for_statement 
-	: WHILE '(' expression ')' function_block 	
-	| DO function_block WHILE '(' expression ')'
-	| FOR '(' primitive_types assigment_statement ';' expression ';' assigment_statement ')' function_block 	
-	;
-
-	
 	
 indentifier
 	: IDENTIFIER

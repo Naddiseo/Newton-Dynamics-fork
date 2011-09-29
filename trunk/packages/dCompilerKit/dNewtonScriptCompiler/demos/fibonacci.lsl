@@ -14,6 +14,11 @@ class fibonacci
 {
 	int Calculate (int n)
 	{
+//		error ;
+		
+		int xxx != 2;
+		int xxx;
+		
 		if (n == 0) {
 			return 0;
 		}

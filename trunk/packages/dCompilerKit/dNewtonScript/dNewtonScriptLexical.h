@@ -45,12 +45,18 @@ class dNewtonScriptLexical
 		return &m_data[m_index];
 	}
 
-	void ReStartScanner()
+	void SetIndex(int index)
 	{
-		m_index = 0;
-		m_startIndex = 0;
+		m_index = index;
+		m_startIndex = index;
 		m_tokenString = "";
 	}
+
+	int GetIndex() const
+	{
+		return m_index;
+	}
+
 
 	protected:
 	int GetLineNumber () const

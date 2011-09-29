@@ -91,7 +91,6 @@ module_list
 	| module_list module
 	;
 			
-			
 module 
 	: ';'
 	| import_module
@@ -166,7 +165,6 @@ init_base_class
 	| ':' function_call	
 	;
 	
-	
 semicolon_marker
 	: semicolon_marker_list	
 	| error ';'
@@ -176,7 +174,7 @@ semicolon_marker_list
 	: ';'
 	| semicolon_marker_list ';'
 	;	
-	
+
 			 
 class_contructor 
 	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker
@@ -272,18 +270,28 @@ local_variable_declaration
 	| initialized_variable
 	;
 	
-	
+
+statement_error	
+	: error '{'
+	| error ';'
+	;
 	
 statement
 	: assigment_statement semicolon_marker
-	| if_statement
-	| for_statement 
 	| continue_statement semicolon_marker
 	| break_statement semicolon_marker
 	| function_call semicolon_marker
 	| return semicolon_marker	
+	| function_block	
+	| IF '(' expression	')' function_block 
+	| IF '(' expression	')' function_block ELSE function_block
+	| SWITCH '(' expression ')' '{' switch_case_list '}' 
+	| FOR '(' primitive_types assigment_statement ';' expression ';' assigment_statement ')' function_block
+	| WHILE '(' expression ')' function_block 
+	| DO function_block WHILE '(' expression ')' semicolon_marker
+	| statement_error	
 	;
-	
+
 	
 indentifier
 	: IDENTIFIER
@@ -301,17 +309,6 @@ assigment_statement
 	| indentifier '=' NEW primitive_types multidimention_array
 	;
 	
-if_statement
-	: IF '(' expression	')' function_block 
-	| IF '(' expression	')' function_block ELSE function_block
-	| SWITCH '(' expression ')' '{' switch_case_list '}'
-	; 
-	
-for_statement 
-	: WHILE '(' expression ')' function_block 	
-	| DO function_block WHILE '(' expression ')'
-	| FOR '(' primitive_types assigment_statement ';' expression ';' assigment_statement ')' function_block 	
-	;
 	
 continue_statement 
 	: CONTINUE 
@@ -349,6 +346,7 @@ return
 	
 expression
 	: expression LOGIC_OR expression
+/*	
 	| expression LOGIC_AND expression
 	| expression '|' expression
 	| expression '^' expression
@@ -365,10 +363,10 @@ expression
 	| expression '*' expression
 	| expression '%' expression
 	| expression '/' expression
+*/	
 	| '(' expression ')'
 	| indentifier
 	| function_call
 	| INTEGER_VALUE
-	| error ')'
 	;	
 	

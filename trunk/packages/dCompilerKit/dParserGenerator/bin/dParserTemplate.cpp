@@ -110,7 +110,7 @@ const $(className)::dActionEntry* $(className)::FindAction (const dActionEntry* 
 		}
 	}
 
-	_ASSERT (0);
+
 	return NULL;
 }
 
@@ -142,36 +142,85 @@ const $(className)::dGotoEntry* $(className)::FindGoto (const dGotoEntry* const 
 	return NULL;
 }
 
+const dNewtonScriptParser::dActionEntry* $(className)::GetNextAction (dList<dStackPair>& stack, dToken token, $(scannerClass)& scanner) const
+{
+	static short actionsCount[] = {$(actionsCount)};
+	static short actionsStart[] = {$(actionsStart)};
+	static dActionEntry actionTable[] = {$(actionTable)};
+
+	bool errorMode = false;
+	const dStackPair& stackTop = stack.GetLast()->GetInfo();
+	int state = stackTop.m_state;
+	int start = actionsStart[state];
+	int count = actionsCount[state];
+
+	const dActionEntry* const table = &actionTable[start];
+	const dActionEntry* action = FindAction (table, count, token);
+	while (!action && stack.GetCount()) {
+		errorMode = true; 
+		// we found a syntax error in go into error recovering mode
+		stack.Remove (stack.GetLast());
+
+		const dStackPair& stackTop = stack.GetLast()->GetInfo();
+		int state = stackTop.m_state;
+		int start = actionsStart[state];
+		int count = actionsCount[state];
+		const dActionEntry* const table = &actionTable[start];
+		action = FindAction (table, count, ERROR_TOKEN);
+	}
+
+	if (errorMode) {
+		if (action) {
+			dStackPair& stackTop = stack.GetLast()->GetInfo();
+			stackTop.m_token = ERROR_TOKEN;
+
+			int state = action->m_nextState;
+			int start = actionsStart[state];
+			int count = actionsCount[state];
+			const dActionEntry* const table = &actionTable[start];
+			//int scannerIndex = scanner.GetIndex();
+			while (!FindAction (table, count, token)) {
+				//scannerIndex = scanner.GetIndex();
+				token = dToken (scanner.NextToken());
+			}
+			action = FindAction (table, count, token);
+			//scanner.SetIndex (scannerIndex);
+			dStackPair& entry = stack.Append()->GetInfo();
+			entry.m_state = state;
+			entry.m_value = dUserVariable (ERROR_TOKEN, "error");
+			entry.m_token = token;
+
+		} else {
+			_ASSERTE (0);
+		}
+
+	}
+
+	return action;
+}
+
 
 bool $(className)::Parse($(scannerClass)& scanner)
 {
-	dList<dStackPair> stack;
-	static short actionsCount[] = {$(actionsCount)};
-	static short actionsStart[] = {$(actionsStart)};
 	static short gotoCount[] = {$(gotoCount)};
 	static short gotoStart[] = {$(gotoStart)};
-
 	static dGotoEntry gotoTable[] = {$(gotoTable)};
-	static dActionEntry actionTable[] = {$(actionTable)};
 
+	dList<dStackPair> stack;
 	const int lastToken = &(lastTerminalToken);
-
+	
 	stack.Append ();
 	dToken token = dToken (scanner.NextToken());
 	for (;;) {
-		const dStackPair& stackTop = stack.GetLast()->GetInfo();
-		int start = actionsStart[stackTop.m_state];
-		int count = actionsCount[stackTop.m_state];
-		const dActionEntry* const action (FindAction (&actionTable[start], count, token));
-		_ASSERTE (action);
 
+		const dActionEntry* const action = GetNextAction (stack, token, scanner);
 		switch (action->m_stateType) 
 		{
 			case dSHIFT: 
 			{
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_state = action->m_nextState;
-				entry.m_value = dUserVariable (entry.m_token, scanner.GetTokenString());
+				entry.m_value = dUserVariable (token, scanner.GetTokenString());
 				token = dToken (scanner.NextToken());
 				entry.m_token = token;
 				if (token == -1) {
@@ -196,7 +245,8 @@ bool $(className)::Parse($(scannerClass)& scanner)
 				const dStackPair& stackTop = stack.GetLast()->GetInfo();
 				int start = gotoStart[stackTop.m_state];
 				int count = gotoCount[stackTop.m_state];
-				const dGotoEntry* const gotoEntry = FindGoto (&gotoTable[start], count, dToken (action->m_nextState + lastToken));
+				const dGotoEntry* const table = &gotoTable[start];
+				const dGotoEntry* const gotoEntry = FindGoto (table, count, dToken (action->m_nextState + lastToken));
 
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_state = gotoEntry->m_nextState;

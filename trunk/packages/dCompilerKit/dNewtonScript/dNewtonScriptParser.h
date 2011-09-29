@@ -34,6 +34,7 @@ class dNewtonScriptParser
 	enum dToken
 	{
 		ACCEPTING_TOKEN = 255, 
+		ERROR_TOKEN = 254, 
 		NATIVE = 256, 
 		CONSTANT,
 		INTEGER_VALUE,
@@ -108,6 +109,7 @@ class dNewtonScriptParser
 	private:
 	const dGotoEntry* FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const;
 	const dActionEntry* FindAction (const dActionEntry* const list, int count, dToken token) const;
+	const dActionEntry* GetNextAction (dList<dStackPair>& stack, dToken token, dNewtonScriptLexical& scanner) const;
 };
 
 #endif

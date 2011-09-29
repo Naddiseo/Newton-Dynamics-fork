@@ -108,8 +108,6 @@ Integer			[\-\+]?[0-9]+
 "return"		{return dNewtonScriptParser::RETURN;}
 
 
-
-
 "gui"			{return dNewtonScriptParser::GUI;}
 "const"			{return dNewtonScriptParser::CONSTANT;}
 "native"		{return dNewtonScriptParser::NATIVE;}

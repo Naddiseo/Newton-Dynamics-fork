@@ -34,6 +34,7 @@ class dNewtonScriptParser
 	enum dToken
 	{
 		ACCEPTING_TOKEN = 255, 
+		ERROR_TOKEN = 254, 
 		NATIVE = 256, 
 		CONSTANT,
 		INTEGER_VALUE,

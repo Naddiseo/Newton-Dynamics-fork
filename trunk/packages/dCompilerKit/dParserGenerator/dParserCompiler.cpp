@@ -1233,6 +1233,11 @@ void dParserCompiler::GenerateHeaderFile (
 	sprintf (text, " = %d, \n", DACCEPTING_TOKEN);
 	string enumdTokens ("\t\tACCEPTING_TOKEN");
 	enumdTokens += text;
+
+	sprintf (text, " = %d, \n", DERROR_TOKEN);
+	enumdTokens += "\t\tERROR_TOKEN";
+	enumdTokens += text;
+
 	for (iter1.Begin(); iter1; iter1 ++) {
 		dTree<dTokenInfo, unsigned>::dTreeNode* const node = iter1.GetNode()->GetInfo();
 		//const string& name = node->GetKey();
@@ -1309,7 +1314,6 @@ void dParserCompiler::GenerateParserCode (
 
 			dAction& action = actionIter.GetNode()->GetInfo();
 			if (action.m_type == dSHIFT) {
-				//const string& actionSymbol = actionIter.GetKey();
 				unsigned actionSymbol = actionIter.GetKey();
 				_ASSERTE (symbolList.Find(actionSymbol));
 
@@ -1319,10 +1323,11 @@ void dParserCompiler::GenerateParserCode (
 				entry.m_ruleSymbols = 0;
 				entry.m_nextState = short (action.m_nextState);
 				entry.m_token = short (symbolList.Find(actionSymbol)->GetInfo().m_tokenId);
+
 				actionSort.Insert (entry, entry.m_token);
 
 			} else if (action.m_type == dREDUCE) {
-				//const string& actionSymbol = actionIter.GetKey();
+
 				unsigned actionSymbol = actionIter.GetKey();
 				_ASSERTE (symbolList.Find(actionSymbol));
 
