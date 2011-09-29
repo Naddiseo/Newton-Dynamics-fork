@@ -40,16 +40,14 @@ class $(className)
 		return m_tokenString.c_str();
 	}
 
+	const char* GetData() const
+	{
+		return m_data;
+	}
+
 	const char* GetNextBuffer() const
 	{
 		return &m_data[m_index];
-	}
-
-	void SetIndex(int index)
-	{
-		m_index = index;
-		m_startIndex = index;
-		m_tokenString = "";
 	}
 
 	int GetIndex() const
@@ -57,11 +55,17 @@ class $(className)
 		return m_index;
 	}
 
-
-	protected:
 	int GetLineNumber () const
 	{
 		return m_lineNumber;
+	}
+
+	protected:
+	void SetIndex(int index)
+	{
+		m_index = index;
+		m_startIndex = index;
+		m_tokenString = "";
 	}
 
 	char NextChar ()

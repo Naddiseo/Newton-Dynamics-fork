@@ -141,6 +141,8 @@ class dScriptCompiler: public dNewtonScriptParser
 	protected:
 	virtual bool Parse(dNewtonScriptLexical& scanner);
 
+	virtual void ErrorHandler (const dNewtonScriptLexical& scanner, int scannerLine, int scannerlength, int scannerLineNumber) const;
+
 	dVirtualMachine* m_virtualMachine;
 };
 

@@ -18,7 +18,7 @@
 #include "dNewtonScriptLexical.h"
 
 //
-// Newton Script parcer  
+// Newton Script parser  
 // loosely based on a subset of Java and C sharp
 //
 
@@ -150,10 +150,8 @@ const dNewtonScriptParser::dGotoEntry* dNewtonScriptParser::FindGoto (const dGot
 	return NULL;
 }
 
-
-bool dNewtonScriptParser::Parse(xxx& scanner)
+const dNewtonScriptParser::dActionEntry* dNewtonScriptParser::GetNextAction (dList<dStackPair>& stack, dToken token, xxx& scanner) const
 {
-	dList<dStackPair> stack;
 	static short actionsCount[] = {
 			5, 1, 1, 5, 1, 4, 4, 4, 1, 4, 1, 4, 4, 2, 1, 2, 1, 1, 1, 14, 2, 2, 2, 1, 
 			2, 14, 14, 12, 1, 2, 14, 4, 14, 2, 11, 2, 14, 2, 2, 1, 1, 14, 1, 12, 4, 2, 2, 1, 
@@ -192,126 +190,6 @@ bool dNewtonScriptParser::Parse(xxx& scanner)
 			1649, 1653, 1654, 1678, 1701, 1704, 1484, 1706, 1490, 1708, 1709, 1732, 1616, 1735, 1737, 1738, 1739, 1741, 620, 1743, 1745, 620, 1747, 1749, 
 			1582, 1752, 1775, 1778, 1305, 1781, 1785, 1788, 1790, 1792, 620, 1794, 1797, 1209, 1820, 1822, 1825, 1827, 1829, 1830, 620, 1832, 1834, 620, 
 			1836, 1838, 1840};
-	static short gotoCount[] = {
-			6, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 12, 0, 0, 2, 0, 0, 0, 10, 3, 1, 0, 0, 0, 
-			0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 3, 0, 1, 0, 0, 16, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 
-			0, 0, 0, 0, 0, 0, 3, 0, 1, 0, 5, 0, 0, 1, 0, 3, 0, 15, 0, 2, 0, 0, 2, 2, 0, 0, 0, 2, 0, 0, 16, 2, 
-			2, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 5, 0, 1, 5, 3, 0, 0, 0, 0, 3, 0, 1, 3, 0, 4, 0, 0, 0, 0, 
-			16, 0, 0, 0, 0, 0, 0, 3, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 3, 15, 0, 0, 0, 0, 3, 3, 3, 0, 
-			4, 0, 0, 0, 0, 5, 0, 0, 3, 0, 0, 3, 0, 4, 0, 3, 0, 0, 0, 3, 0, 0, 1, 0, 3, 1, 0, 15, 0, 0, 3, 0, 
-			3, 0, 4, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 2, 0, 1, 0, 0, 0, 
-			3, 0, 0, 0, 0, 3, 0, 3, 0, 4, 3, 0, 0, 1, 1, 0, 3, 0, 0, 0, 3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 
-			0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 
-			0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 3, 3, 16, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 0, 
-			4, 4, 2, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1, 1, 0, 15, 0, 1, 0, 3, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 1, 
-			0, 0, 0, 3, 2, 0, 3, 0, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 1, 0, 0, 0, 0, 0, 3, 0, 0, 3, 0, 0, 
-			0, 15, 0, 0, 1, 3, 0, 0, 0, 0, 3, 0, 0, 1, 0, 0, 0, 0, 1, 0, 3, 0, 0, 3, 0, 0, 0};
-	static short gotoStart[] = {
-			0, 6, 6, 6, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 12, 12, 12, 12, 24, 24, 24, 26, 26, 26, 26, 36, 39, 40, 40, 40, 
-			40, 40, 40, 43, 43, 43, 43, 43, 43, 43, 43, 43, 43, 46, 47, 47, 47, 50, 50, 51, 51, 51, 67, 67, 67, 67, 67, 67, 69, 69, 69, 71, 
-			71, 71, 71, 71, 71, 71, 71, 74, 74, 75, 75, 80, 80, 80, 81, 81, 84, 84, 99, 99, 101, 101, 101, 103, 105, 105, 105, 105, 107, 107, 107, 123, 
-			125, 127, 129, 129, 129, 129, 129, 129, 130, 130, 130, 130, 130, 130, 135, 135, 136, 141, 144, 144, 144, 144, 144, 147, 147, 148, 151, 151, 155, 155, 155, 155, 
-			155, 171, 171, 171, 171, 171, 171, 171, 174, 174, 175, 175, 175, 175, 175, 175, 175, 175, 175, 178, 181, 182, 182, 185, 200, 200, 200, 200, 200, 203, 206, 209, 
-			209, 213, 213, 213, 213, 213, 218, 218, 218, 221, 221, 221, 224, 224, 228, 228, 231, 231, 231, 231, 234, 234, 234, 235, 235, 238, 239, 239, 254, 254, 254, 257, 
-			257, 260, 260, 264, 264, 264, 264, 264, 264, 264, 266, 266, 266, 266, 266, 266, 266, 266, 266, 266, 267, 267, 267, 267, 270, 270, 270, 272, 272, 273, 273, 273, 
-			273, 276, 276, 276, 276, 276, 279, 279, 282, 282, 286, 289, 289, 289, 290, 291, 291, 294, 294, 294, 294, 297, 297, 297, 297, 297, 297, 298, 298, 298, 298, 298, 
-			299, 299, 299, 300, 300, 300, 300, 300, 300, 300, 300, 301, 301, 301, 301, 301, 302, 302, 302, 302, 302, 302, 302, 302, 302, 302, 305, 305, 305, 305, 305, 305, 
-			308, 308, 309, 309, 309, 309, 309, 309, 309, 309, 311, 314, 317, 333, 333, 336, 336, 336, 336, 336, 336, 336, 336, 336, 336, 336, 336, 336, 336, 339, 339, 342, 
-			342, 346, 350, 352, 352, 352, 352, 352, 353, 353, 353, 353, 356, 356, 357, 358, 358, 373, 373, 374, 374, 377, 377, 377, 377, 377, 380, 380, 380, 380, 380, 380, 
-			381, 381, 381, 381, 384, 386, 386, 389, 389, 393, 394, 394, 394, 394, 394, 394, 394, 394, 394, 410, 410, 411, 411, 411, 411, 411, 411, 414, 414, 414, 417, 417, 
-			417, 417, 432, 432, 432, 433, 436, 436, 436, 436, 436, 439, 439, 439, 440, 440, 440, 440, 440, 441, 441, 444, 444, 444, 447, 447, 447};
-
-	static dGotoEntry gotoTable[] = {
-			dGotoEntry (295, 8), dGotoEntry (296, 3), dGotoEntry (297, 9), dGotoEntry (298, 5), dGotoEntry (299, 6), 
-			dGotoEntry (300, 1), dGotoEntry (297, 12), dGotoEntry (298, 5), dGotoEntry (299, 6), dGotoEntry (300, 1), 
-			dGotoEntry (301, 15), dGotoEntry (302, 18), dGotoEntry (300, 23), dGotoEntry (303, 40), dGotoEntry (304, 26), 
-			dGotoEntry (305, 36), dGotoEntry (306, 25), dGotoEntry (307, 32), dGotoEntry (308, 41), dGotoEntry (309, 34), 
-			dGotoEntry (319, 28), dGotoEntry (320, 42), dGotoEntry (321, 30), dGotoEntry (324, 22), dGotoEntry (325, 45), 
-			dGotoEntry (326, 46), dGotoEntry (300, 23), dGotoEntry (305, 49), dGotoEntry (306, 25), dGotoEntry (307, 32), 
-			dGotoEntry (308, 41), dGotoEntry (309, 34), dGotoEntry (319, 28), dGotoEntry (320, 42), dGotoEntry (321, 30), 
-			dGotoEntry (324, 22), dGotoEntry (319, 50), dGotoEntry (320, 51), dGotoEntry (324, 22), dGotoEntry (318, 54), 
-			dGotoEntry (319, 59), dGotoEntry (320, 61), dGotoEntry (324, 22), dGotoEntry (315, 67), dGotoEntry (323, 68), 
-			dGotoEntry (337, 71), dGotoEntry (326, 73), dGotoEntry (319, 50), dGotoEntry (320, 51), dGotoEntry (324, 22), 
-			dGotoEntry (318, 75), dGotoEntry (315, 83), dGotoEntry (318, 98), dGotoEntry (320, 104), dGotoEntry (321, 88), 
-			dGotoEntry (322, 80), dGotoEntry (324, 22), dGotoEntry (327, 81), dGotoEntry (328, 85), dGotoEntry (329, 82), 
-			dGotoEntry (330, 91), dGotoEntry (331, 99), dGotoEntry (332, 97), dGotoEntry (333, 96), dGotoEntry (334, 95), 
-			dGotoEntry (335, 87), dGotoEntry (337, 100), dGotoEntry (316, 107), dGotoEntry (317, 106), dGotoEntry (325, 111), 
-			dGotoEntry (326, 46), dGotoEntry (315, 116), dGotoEntry (323, 117), dGotoEntry (337, 119), dGotoEntry (338, 122), 
-			dGotoEntry (310, 124), dGotoEntry (311, 125), dGotoEntry (312, 126), dGotoEntry (320, 127), dGotoEntry (324, 22), 
-			dGotoEntry (318, 129), dGotoEntry (315, 133), dGotoEntry (323, 134), dGotoEntry (337, 136), dGotoEntry (315, 83), 
-			dGotoEntry (318, 98), dGotoEntry (320, 104), dGotoEntry (321, 88), dGotoEntry (322, 80), dGotoEntry (324, 22), 
-			dGotoEntry (328, 139), dGotoEntry (329, 82), dGotoEntry (330, 91), dGotoEntry (331, 99), dGotoEntry (332, 97), 
-			dGotoEntry (333, 96), dGotoEntry (334, 95), dGotoEntry (335, 87), dGotoEntry (337, 100), dGotoEntry (316, 142), 
-			dGotoEntry (317, 141), dGotoEntry (320, 144), dGotoEntry (324, 22), dGotoEntry (316, 145), dGotoEntry (317, 141), 
-			dGotoEntry (316, 149), dGotoEntry (317, 141), dGotoEntry (315, 83), dGotoEntry (318, 98), dGotoEntry (320, 104), 
-			dGotoEntry (321, 88), dGotoEntry (322, 80), dGotoEntry (324, 22), dGotoEntry (327, 151), dGotoEntry (328, 85), 
-			dGotoEntry (329, 82), dGotoEntry (330, 91), dGotoEntry (331, 99), dGotoEntry (332, 97), dGotoEntry (333, 96), 
-			dGotoEntry (334, 95), dGotoEntry (335, 87), dGotoEntry (337, 100), dGotoEntry (316, 153), dGotoEntry (317, 141), 
-			dGotoEntry (316, 154), dGotoEntry (317, 141), dGotoEntry (316, 155), dGotoEntry (317, 141), dGotoEntry (338, 159), 
-			dGotoEntry (310, 124), dGotoEntry (311, 125), dGotoEntry (312, 164), dGotoEntry (320, 127), dGotoEntry (324, 22), 
-			dGotoEntry (326, 73), dGotoEntry (310, 124), dGotoEntry (311, 125), dGotoEntry (312, 166), dGotoEntry (320, 127), 
-			dGotoEntry (324, 22), dGotoEntry (315, 67), dGotoEntry (323, 167), dGotoEntry (337, 71), dGotoEntry (315, 116), 
-			dGotoEntry (323, 170), dGotoEntry (337, 119), dGotoEntry (338, 172), dGotoEntry (315, 67), dGotoEntry (323, 174), 
-			dGotoEntry (337, 71), dGotoEntry (315, 177), dGotoEntry (323, 178), dGotoEntry (337, 181), dGotoEntry (340, 183), 
-			dGotoEntry (315, 83), dGotoEntry (318, 98), dGotoEntry (320, 104), dGotoEntry (321, 88), dGotoEntry (322, 80), 
-			dGotoEntry (324, 22), dGotoEntry (327, 187), dGotoEntry (328, 85), dGotoEntry (329, 82), dGotoEntry (330, 91), 
-			dGotoEntry (331, 99), dGotoEntry (332, 97), dGotoEntry (333, 96), dGotoEntry (334, 95), dGotoEntry (335, 87), 
-			dGotoEntry (337, 100), dGotoEntry (315, 116), dGotoEntry (323, 191), dGotoEntry (337, 119), dGotoEntry (338, 193), 
-			dGotoEntry (315, 133), dGotoEntry (323, 197), dGotoEntry (337, 136), dGotoEntry (315, 116), dGotoEntry (323, 198), 
-			dGotoEntry (337, 119), dGotoEntry (324, 201), dGotoEntry (315, 116), dGotoEntry (323, 209), dGotoEntry (337, 119), 
-			dGotoEntry (315, 83), dGotoEntry (318, 98), dGotoEntry (320, 104), dGotoEntry (321, 88), dGotoEntry (322, 80), 
-			dGotoEntry (324, 22), dGotoEntry (328, 139), dGotoEntry (329, 82), dGotoEntry (330, 91), dGotoEntry (331, 99), 
-			dGotoEntry (332, 97), dGotoEntry (333, 96), dGotoEntry (334, 95), dGotoEntry (335, 87), dGotoEntry (337, 100), 
-			dGotoEntry (315, 133), dGotoEntry (323, 212), dGotoEntry (337, 136), dGotoEntry (315, 116), dGotoEntry (323, 213), 
-			dGotoEntry (337, 119), dGotoEntry (315, 67), dGotoEntry (323, 214), dGotoEntry (337, 71), dGotoEntry (315, 177), 
-			dGotoEntry (323, 178), dGotoEntry (337, 181), dGotoEntry (340, 217), dGotoEntry (310, 124), dGotoEntry (311, 125), 
-			dGotoEntry (312, 219), dGotoEntry (320, 127), dGotoEntry (324, 22), dGotoEntry (315, 116), dGotoEntry (323, 221), 
-			dGotoEntry (337, 119), dGotoEntry (315, 67), dGotoEntry (323, 223), dGotoEntry (337, 71), dGotoEntry (315, 177), 
-			dGotoEntry (323, 178), dGotoEntry (337, 181), dGotoEntry (340, 226), dGotoEntry (315, 67), dGotoEntry (323, 228), 
-			dGotoEntry (337, 71), dGotoEntry (315, 116), dGotoEntry (323, 230), dGotoEntry (337, 119), dGotoEntry (338, 232), 
-			dGotoEntry (311, 236), dGotoEntry (320, 127), dGotoEntry (324, 22), dGotoEntry (314, 237), dGotoEntry (315, 83), 
-			dGotoEntry (318, 98), dGotoEntry (320, 104), dGotoEntry (321, 88), dGotoEntry (322, 80), dGotoEntry (324, 22), 
-			dGotoEntry (328, 139), dGotoEntry (329, 82), dGotoEntry (330, 91), dGotoEntry (331, 99), dGotoEntry (332, 97), 
-			dGotoEntry (333, 96), dGotoEntry (334, 95), dGotoEntry (335, 87), dGotoEntry (337, 100), dGotoEntry (315, 133), 
-			dGotoEntry (323, 241), dGotoEntry (337, 136), dGotoEntry (315, 67), dGotoEntry (323, 243), dGotoEntry (337, 71), 
-			dGotoEntry (315, 177), dGotoEntry (323, 178), dGotoEntry (337, 181), dGotoEntry (340, 246), dGotoEntry (332, 248), 
-			dGotoEntry (337, 249), dGotoEntry (324, 258), dGotoEntry (315, 67), dGotoEntry (323, 268), dGotoEntry (337, 71), 
-			dGotoEntry (316, 270), dGotoEntry (317, 106), dGotoEntry (313, 272), dGotoEntry (315, 67), dGotoEntry (323, 275), 
-			dGotoEntry (337, 71), dGotoEntry (315, 177), dGotoEntry (323, 278), dGotoEntry (337, 181), dGotoEntry (315, 67), 
-			dGotoEntry (323, 280), dGotoEntry (337, 71), dGotoEntry (315, 177), dGotoEntry (323, 178), dGotoEntry (337, 181), 
-			dGotoEntry (340, 283), dGotoEntry (315, 285), dGotoEntry (323, 286), dGotoEntry (337, 288), dGotoEntry (318, 290), 
-			dGotoEntry (315, 291), dGotoEntry (315, 116), dGotoEntry (323, 293), dGotoEntry (337, 119), dGotoEntry (315, 67), 
-			dGotoEntry (323, 295), dGotoEntry (337, 71), dGotoEntry (338, 159), dGotoEntry (318, 301), dGotoEntry (338, 303), 
-			dGotoEntry (318, 308), dGotoEntry (313, 310), dGotoEntry (315, 67), dGotoEntry (323, 314), dGotoEntry (337, 71), 
-			dGotoEntry (315, 116), dGotoEntry (323, 317), dGotoEntry (337, 119), dGotoEntry (338, 319), dGotoEntry (336, 327), 
-			dGotoEntry (339, 326), dGotoEntry (315, 329), dGotoEntry (323, 330), dGotoEntry (337, 332), dGotoEntry (315, 329), 
-			dGotoEntry (323, 335), dGotoEntry (337, 332), dGotoEntry (315, 83), dGotoEntry (318, 98), dGotoEntry (320, 104), 
-			dGotoEntry (321, 88), dGotoEntry (322, 80), dGotoEntry (324, 22), dGotoEntry (327, 336), dGotoEntry (328, 85), 
-			dGotoEntry (329, 82), dGotoEntry (330, 91), dGotoEntry (331, 99), dGotoEntry (332, 97), dGotoEntry (333, 96), 
-			dGotoEntry (334, 95), dGotoEntry (335, 87), dGotoEntry (337, 100), dGotoEntry (315, 67), dGotoEntry (323, 339), 
-			dGotoEntry (337, 71), dGotoEntry (315, 285), dGotoEntry (323, 342), dGotoEntry (337, 288), dGotoEntry (315, 67), 
-			dGotoEntry (323, 344), dGotoEntry (337, 71), dGotoEntry (315, 177), dGotoEntry (323, 178), dGotoEntry (337, 181), 
-			dGotoEntry (340, 347), dGotoEntry (315, 177), dGotoEntry (323, 178), dGotoEntry (337, 181), dGotoEntry (340, 349), 
-			dGotoEntry (316, 350), dGotoEntry (317, 141), dGotoEntry (339, 354), dGotoEntry (315, 116), dGotoEntry (323, 357), 
-			dGotoEntry (337, 119), dGotoEntry (338, 359), dGotoEntry (324, 361), dGotoEntry (315, 83), dGotoEntry (318, 98), 
-			dGotoEntry (320, 104), dGotoEntry (321, 88), dGotoEntry (322, 80), dGotoEntry (324, 22), dGotoEntry (328, 139), 
-			dGotoEntry (329, 82), dGotoEntry (330, 91), dGotoEntry (331, 99), dGotoEntry (332, 97), dGotoEntry (333, 96), 
-			dGotoEntry (334, 95), dGotoEntry (335, 87), dGotoEntry (337, 100), dGotoEntry (318, 363), dGotoEntry (315, 67), 
-			dGotoEntry (323, 365), dGotoEntry (337, 71), dGotoEntry (315, 67), dGotoEntry (323, 367), dGotoEntry (337, 71), 
-			dGotoEntry (318, 371), dGotoEntry (315, 329), dGotoEntry (323, 373), dGotoEntry (337, 332), dGotoEntry (332, 374), 
-			dGotoEntry (337, 375), dGotoEntry (315, 67), dGotoEntry (323, 377), dGotoEntry (337, 71), dGotoEntry (315, 177), 
-			dGotoEntry (323, 178), dGotoEntry (337, 181), dGotoEntry (340, 380), dGotoEntry (338, 382), dGotoEntry (315, 83), 
-			dGotoEntry (318, 98), dGotoEntry (320, 104), dGotoEntry (321, 88), dGotoEntry (322, 80), dGotoEntry (324, 22), 
-			dGotoEntry (327, 385), dGotoEntry (328, 85), dGotoEntry (329, 82), dGotoEntry (330, 91), dGotoEntry (331, 99), 
-			dGotoEntry (332, 97), dGotoEntry (333, 96), dGotoEntry (334, 95), dGotoEntry (335, 87), dGotoEntry (337, 100), 
-			dGotoEntry (318, 387), dGotoEntry (315, 67), dGotoEntry (323, 391), dGotoEntry (337, 71), dGotoEntry (315, 67), 
-			dGotoEntry (323, 393), dGotoEntry (337, 71), dGotoEntry (315, 83), dGotoEntry (318, 98), dGotoEntry (320, 104), 
-			dGotoEntry (321, 88), dGotoEntry (322, 80), dGotoEntry (324, 22), dGotoEntry (328, 139), dGotoEntry (329, 82), 
-			dGotoEntry (330, 91), dGotoEntry (331, 99), dGotoEntry (332, 97), dGotoEntry (333, 96), dGotoEntry (334, 95), 
-			dGotoEntry (335, 87), dGotoEntry (337, 100), dGotoEntry (318, 396), dGotoEntry (315, 116), dGotoEntry (323, 398), 
-			dGotoEntry (337, 119), dGotoEntry (315, 67), dGotoEntry (323, 401), dGotoEntry (337, 71), dGotoEntry (324, 402), 
-			dGotoEntry (338, 405), dGotoEntry (315, 67), dGotoEntry (323, 406), dGotoEntry (337, 71), dGotoEntry (315, 67), 
-			dGotoEntry (323, 409), dGotoEntry (337, 71)};
 	static dActionEntry actionTable[] = {
 			dActionEntry (59, 0, 7, 0, 0), dActionEntry (255, 1, 0, 0, 1), dActionEntry (259, 0, 2, 0, 0), dActionEntry (261, 0, 4, 0, 0), 
 			dActionEntry (262, 1, 5, 0, 10), dActionEntry (262, 0, 10, 0, 0), dActionEntry (260, 0, 11, 0, 0), dActionEntry (59, 0, 7, 0, 0), 
@@ -775,40 +653,197 @@ bool dNewtonScriptParser::Parse(xxx& scanner)
 			dActionEntry (41, 1, 43, 3, 94), dActionEntry (91, 1, 43, 3, 94), dActionEntry (93, 0, 410, 0, 0), dActionEntry (288, 0, 113, 0, 0), 
 			dActionEntry (41, 1, 43, 4, 95), dActionEntry (91, 1, 43, 4, 95)};
 
+	bool errorMode = false;
+	const dStackPair& stackTop = stack.GetLast()->GetInfo();
+	int state = stackTop.m_state;
+	int start = actionsStart[state];
+	int count = actionsCount[state];
+
+	const dActionEntry* const table = &actionTable[start];
+	const dActionEntry* action = FindAction (table, count, token);
+	while (!action && stack.GetCount()) {
+		errorMode = true; 
+		// we found a syntax error in go into error recovering mode
+		stack.Remove (stack.GetLast());
+
+		const dStackPair& stackTop = stack.GetLast()->GetInfo();
+		int state = stackTop.m_state;
+		int start = actionsStart[state];
+		int count = actionsCount[state];
+		const dActionEntry* const table = &actionTable[start];
+		action = FindAction (table, count, ERROR_TOKEN);
+	}
+
+	if (errorMode) {
+		if (action) {
+			dStackPair& stackTop = stack.GetLast()->GetInfo();
+			stackTop.m_token = ERROR_TOKEN;
+
+			int state = action->m_nextState;
+			int start = actionsStart[state];
+			int count = actionsCount[state];
+			const dActionEntry* const table = &actionTable[start];
+			//int scannerIndex = scanner.GetIndex();
+			while (!FindAction (table, count, token)) {
+				//scannerIndex = scanner.GetIndex();
+				token = dToken (scanner.NextToken());
+			}
+			action = FindAction (table, count, token);
+			//scanner.SetIndex (scannerIndex);
+			dStackPair& entry = stack.Append()->GetInfo();
+			entry.m_state = state;
+			entry.m_value = dUserVariable (ERROR_TOKEN, "error");
+			entry.m_token = token;
+
+		} else {
+			_ASSERTE (0);
+		}
+
+	}
+
+	return action;
+}
+
+
+bool dNewtonScriptParser::Parse(xxx& scanner)
+{
+	static short gotoCount[] = {
+			6, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 12, 0, 0, 2, 0, 0, 0, 10, 3, 1, 0, 0, 0, 
+			0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 0, 0, 3, 0, 1, 0, 0, 16, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 
+			0, 0, 0, 0, 0, 0, 3, 0, 1, 0, 5, 0, 0, 1, 0, 3, 0, 15, 0, 2, 0, 0, 2, 2, 0, 0, 0, 2, 0, 0, 16, 2, 
+			2, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 5, 0, 1, 5, 3, 0, 0, 0, 0, 3, 0, 1, 3, 0, 4, 0, 0, 0, 0, 
+			16, 0, 0, 0, 0, 0, 0, 3, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 3, 1, 0, 3, 15, 0, 0, 0, 0, 3, 3, 3, 0, 
+			4, 0, 0, 0, 0, 5, 0, 0, 3, 0, 0, 3, 0, 4, 0, 3, 0, 0, 0, 3, 0, 0, 1, 0, 3, 1, 0, 15, 0, 0, 3, 0, 
+			3, 0, 4, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 2, 0, 1, 0, 0, 0, 
+			3, 0, 0, 0, 0, 3, 0, 3, 0, 4, 3, 0, 0, 1, 1, 0, 3, 0, 0, 0, 3, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 
+			0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 3, 
+			0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 3, 3, 16, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 3, 0, 
+			4, 4, 2, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1, 1, 0, 15, 0, 1, 0, 3, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 1, 
+			0, 0, 0, 3, 2, 0, 3, 0, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 1, 0, 0, 0, 0, 0, 3, 0, 0, 3, 0, 0, 
+			0, 15, 0, 0, 1, 3, 0, 0, 0, 0, 3, 0, 0, 1, 0, 0, 0, 0, 1, 0, 3, 0, 0, 3, 0, 0, 0};
+	static short gotoStart[] = {
+			0, 6, 6, 6, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 12, 12, 12, 12, 24, 24, 24, 26, 26, 26, 26, 36, 39, 40, 40, 40, 
+			40, 40, 40, 43, 43, 43, 43, 43, 43, 43, 43, 43, 43, 46, 47, 47, 47, 50, 50, 51, 51, 51, 67, 67, 67, 67, 67, 67, 69, 69, 69, 71, 
+			71, 71, 71, 71, 71, 71, 71, 74, 74, 75, 75, 80, 80, 80, 81, 81, 84, 84, 99, 99, 101, 101, 101, 103, 105, 105, 105, 105, 107, 107, 107, 123, 
+			125, 127, 129, 129, 129, 129, 129, 129, 130, 130, 130, 130, 130, 130, 135, 135, 136, 141, 144, 144, 144, 144, 144, 147, 147, 148, 151, 151, 155, 155, 155, 155, 
+			155, 171, 171, 171, 171, 171, 171, 171, 174, 174, 175, 175, 175, 175, 175, 175, 175, 175, 175, 178, 181, 182, 182, 185, 200, 200, 200, 200, 200, 203, 206, 209, 
+			209, 213, 213, 213, 213, 213, 218, 218, 218, 221, 221, 221, 224, 224, 228, 228, 231, 231, 231, 231, 234, 234, 234, 235, 235, 238, 239, 239, 254, 254, 254, 257, 
+			257, 260, 260, 264, 264, 264, 264, 264, 264, 264, 266, 266, 266, 266, 266, 266, 266, 266, 266, 266, 267, 267, 267, 267, 270, 270, 270, 272, 272, 273, 273, 273, 
+			273, 276, 276, 276, 276, 276, 279, 279, 282, 282, 286, 289, 289, 289, 290, 291, 291, 294, 294, 294, 294, 297, 297, 297, 297, 297, 297, 298, 298, 298, 298, 298, 
+			299, 299, 299, 300, 300, 300, 300, 300, 300, 300, 300, 301, 301, 301, 301, 301, 302, 302, 302, 302, 302, 302, 302, 302, 302, 302, 305, 305, 305, 305, 305, 305, 
+			308, 308, 309, 309, 309, 309, 309, 309, 309, 309, 311, 314, 317, 333, 333, 336, 336, 336, 336, 336, 336, 336, 336, 336, 336, 336, 336, 336, 336, 339, 339, 342, 
+			342, 346, 350, 352, 352, 352, 352, 352, 353, 353, 353, 353, 356, 356, 357, 358, 358, 373, 373, 374, 374, 377, 377, 377, 377, 377, 380, 380, 380, 380, 380, 380, 
+			381, 381, 381, 381, 384, 386, 386, 389, 389, 393, 394, 394, 394, 394, 394, 394, 394, 394, 394, 410, 410, 411, 411, 411, 411, 411, 411, 414, 414, 414, 417, 417, 
+			417, 417, 432, 432, 432, 433, 436, 436, 436, 436, 436, 439, 439, 439, 440, 440, 440, 440, 440, 441, 441, 444, 444, 444, 447, 447, 447};
+	static dGotoEntry gotoTable[] = {
+			dGotoEntry (295, 8), dGotoEntry (296, 3), dGotoEntry (297, 9), dGotoEntry (298, 5), dGotoEntry (299, 6), 
+			dGotoEntry (300, 1), dGotoEntry (297, 12), dGotoEntry (298, 5), dGotoEntry (299, 6), dGotoEntry (300, 1), 
+			dGotoEntry (301, 15), dGotoEntry (302, 18), dGotoEntry (300, 23), dGotoEntry (303, 40), dGotoEntry (304, 26), 
+			dGotoEntry (305, 36), dGotoEntry (306, 25), dGotoEntry (307, 32), dGotoEntry (308, 41), dGotoEntry (309, 34), 
+			dGotoEntry (319, 28), dGotoEntry (320, 42), dGotoEntry (321, 30), dGotoEntry (324, 22), dGotoEntry (325, 45), 
+			dGotoEntry (326, 46), dGotoEntry (300, 23), dGotoEntry (305, 49), dGotoEntry (306, 25), dGotoEntry (307, 32), 
+			dGotoEntry (308, 41), dGotoEntry (309, 34), dGotoEntry (319, 28), dGotoEntry (320, 42), dGotoEntry (321, 30), 
+			dGotoEntry (324, 22), dGotoEntry (319, 50), dGotoEntry (320, 51), dGotoEntry (324, 22), dGotoEntry (318, 54), 
+			dGotoEntry (319, 59), dGotoEntry (320, 61), dGotoEntry (324, 22), dGotoEntry (315, 67), dGotoEntry (323, 68), 
+			dGotoEntry (337, 71), dGotoEntry (326, 73), dGotoEntry (319, 50), dGotoEntry (320, 51), dGotoEntry (324, 22), 
+			dGotoEntry (318, 75), dGotoEntry (315, 83), dGotoEntry (318, 98), dGotoEntry (320, 104), dGotoEntry (321, 88), 
+			dGotoEntry (322, 80), dGotoEntry (324, 22), dGotoEntry (327, 81), dGotoEntry (328, 85), dGotoEntry (329, 82), 
+			dGotoEntry (330, 91), dGotoEntry (331, 99), dGotoEntry (332, 97), dGotoEntry (333, 96), dGotoEntry (334, 95), 
+			dGotoEntry (335, 87), dGotoEntry (337, 100), dGotoEntry (316, 107), dGotoEntry (317, 106), dGotoEntry (325, 111), 
+			dGotoEntry (326, 46), dGotoEntry (315, 116), dGotoEntry (323, 117), dGotoEntry (337, 119), dGotoEntry (338, 122), 
+			dGotoEntry (310, 124), dGotoEntry (311, 125), dGotoEntry (312, 126), dGotoEntry (320, 127), dGotoEntry (324, 22), 
+			dGotoEntry (318, 129), dGotoEntry (315, 133), dGotoEntry (323, 134), dGotoEntry (337, 136), dGotoEntry (315, 83), 
+			dGotoEntry (318, 98), dGotoEntry (320, 104), dGotoEntry (321, 88), dGotoEntry (322, 80), dGotoEntry (324, 22), 
+			dGotoEntry (328, 139), dGotoEntry (329, 82), dGotoEntry (330, 91), dGotoEntry (331, 99), dGotoEntry (332, 97), 
+			dGotoEntry (333, 96), dGotoEntry (334, 95), dGotoEntry (335, 87), dGotoEntry (337, 100), dGotoEntry (316, 142), 
+			dGotoEntry (317, 141), dGotoEntry (320, 144), dGotoEntry (324, 22), dGotoEntry (316, 145), dGotoEntry (317, 141), 
+			dGotoEntry (316, 149), dGotoEntry (317, 141), dGotoEntry (315, 83), dGotoEntry (318, 98), dGotoEntry (320, 104), 
+			dGotoEntry (321, 88), dGotoEntry (322, 80), dGotoEntry (324, 22), dGotoEntry (327, 151), dGotoEntry (328, 85), 
+			dGotoEntry (329, 82), dGotoEntry (330, 91), dGotoEntry (331, 99), dGotoEntry (332, 97), dGotoEntry (333, 96), 
+			dGotoEntry (334, 95), dGotoEntry (335, 87), dGotoEntry (337, 100), dGotoEntry (316, 153), dGotoEntry (317, 141), 
+			dGotoEntry (316, 154), dGotoEntry (317, 141), dGotoEntry (316, 155), dGotoEntry (317, 141), dGotoEntry (338, 159), 
+			dGotoEntry (310, 124), dGotoEntry (311, 125), dGotoEntry (312, 164), dGotoEntry (320, 127), dGotoEntry (324, 22), 
+			dGotoEntry (326, 73), dGotoEntry (310, 124), dGotoEntry (311, 125), dGotoEntry (312, 166), dGotoEntry (320, 127), 
+			dGotoEntry (324, 22), dGotoEntry (315, 67), dGotoEntry (323, 167), dGotoEntry (337, 71), dGotoEntry (315, 116), 
+			dGotoEntry (323, 170), dGotoEntry (337, 119), dGotoEntry (338, 172), dGotoEntry (315, 67), dGotoEntry (323, 174), 
+			dGotoEntry (337, 71), dGotoEntry (315, 177), dGotoEntry (323, 178), dGotoEntry (337, 181), dGotoEntry (340, 183), 
+			dGotoEntry (315, 83), dGotoEntry (318, 98), dGotoEntry (320, 104), dGotoEntry (321, 88), dGotoEntry (322, 80), 
+			dGotoEntry (324, 22), dGotoEntry (327, 187), dGotoEntry (328, 85), dGotoEntry (329, 82), dGotoEntry (330, 91), 
+			dGotoEntry (331, 99), dGotoEntry (332, 97), dGotoEntry (333, 96), dGotoEntry (334, 95), dGotoEntry (335, 87), 
+			dGotoEntry (337, 100), dGotoEntry (315, 116), dGotoEntry (323, 191), dGotoEntry (337, 119), dGotoEntry (338, 193), 
+			dGotoEntry (315, 133), dGotoEntry (323, 197), dGotoEntry (337, 136), dGotoEntry (315, 116), dGotoEntry (323, 198), 
+			dGotoEntry (337, 119), dGotoEntry (324, 201), dGotoEntry (315, 116), dGotoEntry (323, 209), dGotoEntry (337, 119), 
+			dGotoEntry (315, 83), dGotoEntry (318, 98), dGotoEntry (320, 104), dGotoEntry (321, 88), dGotoEntry (322, 80), 
+			dGotoEntry (324, 22), dGotoEntry (328, 139), dGotoEntry (329, 82), dGotoEntry (330, 91), dGotoEntry (331, 99), 
+			dGotoEntry (332, 97), dGotoEntry (333, 96), dGotoEntry (334, 95), dGotoEntry (335, 87), dGotoEntry (337, 100), 
+			dGotoEntry (315, 133), dGotoEntry (323, 212), dGotoEntry (337, 136), dGotoEntry (315, 116), dGotoEntry (323, 213), 
+			dGotoEntry (337, 119), dGotoEntry (315, 67), dGotoEntry (323, 214), dGotoEntry (337, 71), dGotoEntry (315, 177), 
+			dGotoEntry (323, 178), dGotoEntry (337, 181), dGotoEntry (340, 217), dGotoEntry (310, 124), dGotoEntry (311, 125), 
+			dGotoEntry (312, 219), dGotoEntry (320, 127), dGotoEntry (324, 22), dGotoEntry (315, 116), dGotoEntry (323, 221), 
+			dGotoEntry (337, 119), dGotoEntry (315, 67), dGotoEntry (323, 223), dGotoEntry (337, 71), dGotoEntry (315, 177), 
+			dGotoEntry (323, 178), dGotoEntry (337, 181), dGotoEntry (340, 226), dGotoEntry (315, 67), dGotoEntry (323, 228), 
+			dGotoEntry (337, 71), dGotoEntry (315, 116), dGotoEntry (323, 230), dGotoEntry (337, 119), dGotoEntry (338, 232), 
+			dGotoEntry (311, 236), dGotoEntry (320, 127), dGotoEntry (324, 22), dGotoEntry (314, 237), dGotoEntry (315, 83), 
+			dGotoEntry (318, 98), dGotoEntry (320, 104), dGotoEntry (321, 88), dGotoEntry (322, 80), dGotoEntry (324, 22), 
+			dGotoEntry (328, 139), dGotoEntry (329, 82), dGotoEntry (330, 91), dGotoEntry (331, 99), dGotoEntry (332, 97), 
+			dGotoEntry (333, 96), dGotoEntry (334, 95), dGotoEntry (335, 87), dGotoEntry (337, 100), dGotoEntry (315, 133), 
+			dGotoEntry (323, 241), dGotoEntry (337, 136), dGotoEntry (315, 67), dGotoEntry (323, 243), dGotoEntry (337, 71), 
+			dGotoEntry (315, 177), dGotoEntry (323, 178), dGotoEntry (337, 181), dGotoEntry (340, 246), dGotoEntry (332, 248), 
+			dGotoEntry (337, 249), dGotoEntry (324, 258), dGotoEntry (315, 67), dGotoEntry (323, 268), dGotoEntry (337, 71), 
+			dGotoEntry (316, 270), dGotoEntry (317, 106), dGotoEntry (313, 272), dGotoEntry (315, 67), dGotoEntry (323, 275), 
+			dGotoEntry (337, 71), dGotoEntry (315, 177), dGotoEntry (323, 278), dGotoEntry (337, 181), dGotoEntry (315, 67), 
+			dGotoEntry (323, 280), dGotoEntry (337, 71), dGotoEntry (315, 177), dGotoEntry (323, 178), dGotoEntry (337, 181), 
+			dGotoEntry (340, 283), dGotoEntry (315, 285), dGotoEntry (323, 286), dGotoEntry (337, 288), dGotoEntry (318, 290), 
+			dGotoEntry (315, 291), dGotoEntry (315, 116), dGotoEntry (323, 293), dGotoEntry (337, 119), dGotoEntry (315, 67), 
+			dGotoEntry (323, 295), dGotoEntry (337, 71), dGotoEntry (338, 159), dGotoEntry (318, 301), dGotoEntry (338, 303), 
+			dGotoEntry (318, 308), dGotoEntry (313, 310), dGotoEntry (315, 67), dGotoEntry (323, 314), dGotoEntry (337, 71), 
+			dGotoEntry (315, 116), dGotoEntry (323, 317), dGotoEntry (337, 119), dGotoEntry (338, 319), dGotoEntry (336, 327), 
+			dGotoEntry (339, 326), dGotoEntry (315, 329), dGotoEntry (323, 330), dGotoEntry (337, 332), dGotoEntry (315, 329), 
+			dGotoEntry (323, 335), dGotoEntry (337, 332), dGotoEntry (315, 83), dGotoEntry (318, 98), dGotoEntry (320, 104), 
+			dGotoEntry (321, 88), dGotoEntry (322, 80), dGotoEntry (324, 22), dGotoEntry (327, 336), dGotoEntry (328, 85), 
+			dGotoEntry (329, 82), dGotoEntry (330, 91), dGotoEntry (331, 99), dGotoEntry (332, 97), dGotoEntry (333, 96), 
+			dGotoEntry (334, 95), dGotoEntry (335, 87), dGotoEntry (337, 100), dGotoEntry (315, 67), dGotoEntry (323, 339), 
+			dGotoEntry (337, 71), dGotoEntry (315, 285), dGotoEntry (323, 342), dGotoEntry (337, 288), dGotoEntry (315, 67), 
+			dGotoEntry (323, 344), dGotoEntry (337, 71), dGotoEntry (315, 177), dGotoEntry (323, 178), dGotoEntry (337, 181), 
+			dGotoEntry (340, 347), dGotoEntry (315, 177), dGotoEntry (323, 178), dGotoEntry (337, 181), dGotoEntry (340, 349), 
+			dGotoEntry (316, 350), dGotoEntry (317, 141), dGotoEntry (339, 354), dGotoEntry (315, 116), dGotoEntry (323, 357), 
+			dGotoEntry (337, 119), dGotoEntry (338, 359), dGotoEntry (324, 361), dGotoEntry (315, 83), dGotoEntry (318, 98), 
+			dGotoEntry (320, 104), dGotoEntry (321, 88), dGotoEntry (322, 80), dGotoEntry (324, 22), dGotoEntry (328, 139), 
+			dGotoEntry (329, 82), dGotoEntry (330, 91), dGotoEntry (331, 99), dGotoEntry (332, 97), dGotoEntry (333, 96), 
+			dGotoEntry (334, 95), dGotoEntry (335, 87), dGotoEntry (337, 100), dGotoEntry (318, 363), dGotoEntry (315, 67), 
+			dGotoEntry (323, 365), dGotoEntry (337, 71), dGotoEntry (315, 67), dGotoEntry (323, 367), dGotoEntry (337, 71), 
+			dGotoEntry (318, 371), dGotoEntry (315, 329), dGotoEntry (323, 373), dGotoEntry (337, 332), dGotoEntry (332, 374), 
+			dGotoEntry (337, 375), dGotoEntry (315, 67), dGotoEntry (323, 377), dGotoEntry (337, 71), dGotoEntry (315, 177), 
+			dGotoEntry (323, 178), dGotoEntry (337, 181), dGotoEntry (340, 380), dGotoEntry (338, 382), dGotoEntry (315, 83), 
+			dGotoEntry (318, 98), dGotoEntry (320, 104), dGotoEntry (321, 88), dGotoEntry (322, 80), dGotoEntry (324, 22), 
+			dGotoEntry (327, 385), dGotoEntry (328, 85), dGotoEntry (329, 82), dGotoEntry (330, 91), dGotoEntry (331, 99), 
+			dGotoEntry (332, 97), dGotoEntry (333, 96), dGotoEntry (334, 95), dGotoEntry (335, 87), dGotoEntry (337, 100), 
+			dGotoEntry (318, 387), dGotoEntry (315, 67), dGotoEntry (323, 391), dGotoEntry (337, 71), dGotoEntry (315, 67), 
+			dGotoEntry (323, 393), dGotoEntry (337, 71), dGotoEntry (315, 83), dGotoEntry (318, 98), dGotoEntry (320, 104), 
+			dGotoEntry (321, 88), dGotoEntry (322, 80), dGotoEntry (324, 22), dGotoEntry (328, 139), dGotoEntry (329, 82), 
+			dGotoEntry (330, 91), dGotoEntry (331, 99), dGotoEntry (332, 97), dGotoEntry (333, 96), dGotoEntry (334, 95), 
+			dGotoEntry (335, 87), dGotoEntry (337, 100), dGotoEntry (318, 396), dGotoEntry (315, 116), dGotoEntry (323, 398), 
+			dGotoEntry (337, 119), dGotoEntry (315, 67), dGotoEntry (323, 401), dGotoEntry (337, 71), dGotoEntry (324, 402), 
+			dGotoEntry (338, 405), dGotoEntry (315, 67), dGotoEntry (323, 406), dGotoEntry (337, 71), dGotoEntry (315, 67), 
+			dGotoEntry (323, 409), dGotoEntry (337, 71)};
+
+	dList<dStackPair> stack;
 	const int lastToken = 295;
-
-
+	
 	stack.Append ();
 	dToken token = dToken (scanner.NextToken());
 	for (;;) {
-		const dStackPair& stackTop = stack.GetLast()->GetInfo();
-		int start = actionsStart[stackTop.m_state];
-		int count = actionsCount[stackTop.m_state];
-		const dActionEntry* const action = FindAction (&actionTable[start], count, token);
-		if (!action) {
 
-			stack.Remove (stack.GetLast());
-			while (stack.GetCount()) {
-				_ASSERTE (0);
-				const dStackPair& stackTop = stack.GetLast()->GetInfo();
-				int start = gotoStart[stackTop.m_state];
-				int count = gotoCount[stackTop.m_state];
-				const dActionEntry* const action = FindAction (&actionTable[start], count, DERROR_TOKEN);
-				if (action) {
-					_ASSERTE (0);
-				}
-
-				stack.Remove (stack.GetLast());
-			}
-		}
-
+		const dActionEntry* const action = GetNextAction (stack, token, scanner);
 		switch (action->m_stateType) 
 		{
 			case dSHIFT: 
 			{
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_state = action->m_nextState;
-				entry.m_value = dUserVariable (entry.m_token, scanner.GetTokenString());
+				entry.m_value = dUserVariable (token, scanner.GetTokenString());
+				entry.m_value.m_scannerLine = scanner.GetLineNumber();
+				entry.m_value.m_scannerIndex = scanner.GetIndex();
 				token = dToken (scanner.NextToken());
 				entry.m_token = token;
 				if (token == -1) {
@@ -833,7 +868,8 @@ bool dNewtonScriptParser::Parse(xxx& scanner)
 				const dStackPair& stackTop = stack.GetLast()->GetInfo();
 				int start = gotoStart[stackTop.m_state];
 				int count = gotoCount[stackTop.m_state];
-				const dGotoEntry* const gotoEntry = FindGoto (&gotoTable[start], count, dToken (action->m_nextState + lastToken));
+				const dGotoEntry* const table = &gotoTable[start];
+				const dGotoEntry* const gotoEntry = FindGoto (table, count, dToken (action->m_nextState + lastToken));
 
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_state = gotoEntry->m_nextState;

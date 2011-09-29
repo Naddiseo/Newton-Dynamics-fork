@@ -296,3 +296,14 @@ void dScriptCompiler::EmitEndFunction ()
 	}
 }
 */
+
+void dScriptCompiler::ErrorHandler (const dNewtonScriptLexical& scanner, int scannerIndex, int scannerlength, int scannerLineNumber) const
+{
+	dNewtonScriptParser::ErrorHandler (scanner, scannerIndex, scannerlength, scannerLineNumber);
+
+	const char* const data = scanner.GetData();
+	string errorLine (&data[scannerIndex], scannerlength);
+	
+	fprintf (stderr, "line number %d syntax error: ", scannerLineNumber);
+	fprintf (stderr, errorLine.c_str());
+}

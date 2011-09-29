@@ -85,17 +85,19 @@ class dNewtonScriptParser
 	{
 		public:
 		dUserVariable () 
-			:m_token (dToken (0)), m_semanticValue(0), m_data("")
+			:m_scannerLine (0), m_scannerIndex(0), m_semanticValue (0), m_token (dToken (0)), m_data("")
 		{
 		}
 		
 		
-		dUserVariable (dToken token, const char* const text)
-			:m_token(token), m_semanticValue(0), m_data (text) 
+		dUserVariable (dToken token, const char* const text, int scannerLine, int scannerIndex)
+			:m_scannerLine (scannerLine), m_scannerIndex(scannerIndex), m_semanticValue (0), m_token(token), m_data (text) 
 		{
 		}
+		int m_scannerLine;
+		int m_scannerIndex;
+		int m_semanticValue;		
 		dToken m_token;
-		int m_semanticValue;
 		string m_data;
 	};
 
@@ -104,7 +106,7 @@ class dNewtonScriptParser
 	virtual ~dNewtonScriptParser();
 	virtual bool Parse(dNewtonScriptLexical& scanner);
 
-	virtual bool ErrorHandler (const string& line) const;
+	virtual void ErrorHandler (const dNewtonScriptLexical& scanner, int scannerLine, int scannerlength, int scannerLineNumber) const;
 
 	private:
 	const dGotoEntry* FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const;

@@ -61,11 +61,13 @@ class $(className)::dStackPair
 {
 	public:
 	dStackPair()
-		:m_state(0), m_token(dToken (0)), m_value()
+		:m_state(0), m_scannerLine(0), m_scannerIndex(0), m_token(dToken (0)), m_value()
 	{
 	}
 
 	int m_state;
+	int m_scannerLine;
+	int m_scannerIndex;
 	dToken m_token;
 	dUserVariable m_value;
 };
@@ -79,12 +81,6 @@ $(className)::~$(className)()
 {
 }
 
-
-bool $(className)::ErrorHandler (const string& line) const
-{
-	line;
-	return false;
-}
 
 const $(className)::dActionEntry* $(className)::FindAction (const dActionEntry* const actionList, int count, dToken token) const
 {
@@ -142,6 +138,12 @@ const $(className)::dGotoEntry* $(className)::FindGoto (const dGotoEntry* const 
 	return NULL;
 }
 
+void $(className)::ErrorHandler (const $(scannerClass)& scanner, int scannerIndex, int scannerlength, int scannerLineNumber) const
+{
+
+}
+
+
 const dNewtonScriptParser::dActionEntry* $(className)::GetNextAction (dList<dStackPair>& stack, dToken token, $(scannerClass)& scanner) const
 {
 	static short actionsCount[] = {$(actionsCount)};
@@ -187,13 +189,17 @@ const dNewtonScriptParser::dActionEntry* $(className)::GetNextAction (dList<dSta
 			//scanner.SetIndex (scannerIndex);
 			dStackPair& entry = stack.Append()->GetInfo();
 			entry.m_state = state;
-			entry.m_value = dUserVariable (ERROR_TOKEN, "error");
+			entry.m_scannerLine = scanner.GetLineNumber();
+			entry.m_scannerIndex = scanner.GetIndex();
+			entry.m_value = dUserVariable (ERROR_TOKEN, "error", scanner.GetLineNumber(), scanner.GetIndex());
 			entry.m_token = token;
+
+			ErrorHandler (scanner, stackTop.m_scannerIndex, entry.m_scannerIndex - stackTop.m_scannerIndex, stackTop.m_scannerLine);
+
 
 		} else {
 			_ASSERTE (0);
 		}
-
 	}
 
 	return action;
@@ -220,7 +226,9 @@ bool $(className)::Parse($(scannerClass)& scanner)
 			{
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_state = action->m_nextState;
-				entry.m_value = dUserVariable (token, scanner.GetTokenString());
+				entry.m_scannerLine = scanner.GetLineNumber();
+				entry.m_scannerIndex = scanner.GetIndex();
+				entry.m_value = dUserVariable (token, scanner.GetTokenString(), entry.m_scannerLine, entry.m_scannerIndex);
 				token = dToken (scanner.NextToken());
 				entry.m_token = token;
 				if (token == -1) {
@@ -250,6 +258,8 @@ bool $(className)::Parse($(scannerClass)& scanner)
 
 				dStackPair& entry = stack.Append()->GetInfo();
 				entry.m_state = gotoEntry->m_nextState;
+				entry.m_scannerLine = stackTop.m_scannerLine;
+				entry.m_scannerIndex = stackTop.m_scannerIndex;
 				entry.m_token = dToken (gotoEntry->m_token);
 				
 				switch (action->m_ruleIndex) 
