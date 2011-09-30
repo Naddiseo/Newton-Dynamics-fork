@@ -16,17 +16,19 @@ class fibonacci
 	{
 		
 		int xxx != 2;
+		int zzz != 4;		
 		int xxx;
 		int xxx;
 		int xxx;
-		int xxx != 2;
-		
+		int zzz != 2;
 		if (n == 0)  {
 			return 0;
 		}
 		if (n == 1) {
 			return 1;
 		}
+		
+int aaa != 2;		
 		return Calculate (n - 1) + Calculate (n - 2);
 	}
 }

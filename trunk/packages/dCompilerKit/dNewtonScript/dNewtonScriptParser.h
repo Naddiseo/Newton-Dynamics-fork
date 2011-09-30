@@ -106,8 +106,6 @@ class dNewtonScriptParser
 	virtual ~dNewtonScriptParser();
 	virtual bool Parse(dNewtonScriptLexical& scanner);
 
-	virtual void ErrorHandler (const dNewtonScriptLexical& scanner, int scannerLine, int scannerlength, int scannerLineNumber) const;
-
 	private:
 	const dGotoEntry* FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const;
 	const dActionEntry* FindAction (const dActionEntry* const list, int count, dToken token) const;

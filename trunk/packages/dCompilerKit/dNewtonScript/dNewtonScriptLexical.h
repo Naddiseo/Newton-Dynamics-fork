@@ -70,7 +70,8 @@ class dNewtonScriptLexical
 
 	char NextChar ()
 	{
-		char ch = m_data[m_index++];
+		char ch = m_data[m_index];
+		m_index ++;
 		if (ch == '\n') {
 			m_lineNumber ++;
 		}
@@ -79,10 +80,11 @@ class dNewtonScriptLexical
 
 	void UnGetChar ()
 	{
-		char ch = m_data[--m_index];
-		if (ch == '\n') {
+		m_index--;
+		if (m_data[m_index] == '\n') {
 			m_lineNumber --;
 		}
+		
 	}
 
 	void ReadBalancedExpresion (char open, char close);

@@ -32,106 +32,7 @@ class dVirtualMachine;
 class dScriptCompiler: public dNewtonScriptParser
 {
 	public:
-/*
-	enum dSymbolType
-	{
-		funtionName,
-		localJumpLabel,
-	};
 
-	class dReference
-	{
-		public:
-		int m_location;
-		string m_symbol;
-	};
-
-	class dSymbol
-	{
-		public:
-		dSymbol ()
-			:m_type(funtionName), m_symbolLocationInByte(0)
-		{
-		}
-
-		dSymbolType m_type;
-		int m_symbolLocationInByte;
-	};
-
-	class dLocalSymbol: public dSymbol
-	{
-		public:
-	};
-
-	class dGlobalSymbol: public dSymbol
-	{
-		public:
-		dGlobalSymbol ()
-			:dSymbol (), m_isPublic(true)
-		{
-		}
-
-		bool m_isPublic;
-		dList<dReference> m_localReferences;
-		dTree <dLocalSymbol, string> m_localSymbols;
-	};
-
-	class dSymbolTable: public dTree <dGlobalSymbol, string>
-	{
-	};
-
-
-	int CompileSouce (const char* const source);
-
-	protected:
-	
-	void EmitByteCode (int count, const dVirtualMachine::dOpCode* const code);
-
-	void EmitBeginFunction (const dUserVariable& name, const dUserVariable& functionScope);
-	void EmitEndFunction ();
-
-
-
-	void EmitInstructionType0 (const dUserVariable& instruction);
-	void EmitInstructionType1 (const dUserVariable& instruction, const dUserVariable& immediate);
-	void EmitInstructionType2 (const dUserVariable& instruction, const dUserVariable& reg);
-	void EmitInstructionType3 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src);
-	void EmitInstructionType4 (const dUserVariable& instruction, const dUserVariable& dst, const dUserVariable& src, const dUserVariable& immediate);
-
-	void EmitInstructionType1_saveGlobalAdress (const dUserVariable& instruction, const dUserVariable& symbol);
-
-	void EmitInstructionType1_saveLocalAdress (const dUserVariable& instruction, const dUserVariable& symbol);
-	void EmitInstructionType4_saveLocalAdress (const dUserVariable& instruction, const dUserVariable& reg0, const dUserVariable& reg1, const dUserVariable& symbol);
-
-
-	void EmitLocalLabel (const dUserVariable& symbol) const;
-	dUserVariable TypeCheckRegister (const dUserVariable& symbol);
-	dUserVariable EmitSymbol (const dUserVariable& symbol) const;
-	dUserVariable EmitDataType (const dUserVariable& dataType) const;
-	dUserVariable EmitIntegerConst (const dUserVariable& symbol) const;
-	void EmitUnInitilizedDataDeclaration (const dUserVariable& type, const dUserVariable& id) const;
-	void EmitInitilizedDataDeclaration (const dUserVariable& type, const dUserVariable& id, const dUserVariable& initialValue) const;
-
-
-	// pseudo instructions
-	void EmitPushAndPop (const dUserVariable& instruction, const dUserVariable& regMask);
-
-
-
-	
-	dVirtualMachine* m_virtualMachine;
-
-
-	dSymbolTable m_globalSymbols;
-	dList<dReference> m_globalReferences;
-
-	int m_codeSegmentSize;
-	short* m_codeSegment;
-
-	dGlobalSymbol* m_currentFunction;
-
-	friend dAssemblerParser;
-*/
 
 	dScriptCompiler(const char* const sourceFileName);
 	virtual ~dScriptCompiler();
@@ -141,10 +42,12 @@ class dScriptCompiler: public dNewtonScriptParser
 	protected:
 	virtual bool Parse(dNewtonScriptLexical& scanner);
 
-	virtual void ErrorHandler (const dNewtonScriptLexical& scanner, int scannerLine, int scannerlength, int scannerLineNumber) const;
+	void SyntaxError (const dNewtonScriptLexical& scanner, const dUserVariable& errorToken, const dUserVariable& errorTokenMarker);
 
 	const char* m_fileName;
 	dVirtualMachine* m_virtualMachine;
+
+	friend class dNewtonScriptParser;
 };
 
 #endif

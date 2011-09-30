@@ -46,8 +46,6 @@ $(Tokens)
 	virtual ~$(className)();
 	virtual bool Parse($(scannerClass)& scanner);
 
-	virtual void ErrorHandler (const $(scannerClass)& scanner, int scannerLine, int scannerlength, int scannerLineNumber) const;
-
 	private:
 	const dGotoEntry* FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const;
 	const dActionEntry* FindAction (const dActionEntry* const list, int count, dToken token) const;
