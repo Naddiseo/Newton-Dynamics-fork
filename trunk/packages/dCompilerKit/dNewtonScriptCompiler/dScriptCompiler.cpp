@@ -34,6 +34,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		exit (0);
 	}
 
+
+
 	fseek (sourceFile, 0, SEEK_END);
 	int size = ftell (sourceFile);
 	fseek (sourceFile, 0, SEEK_SET);
@@ -43,7 +45,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	fread (source, 1, size, sourceFile);
 	fclose (sourceFile);
 
-	dScriptCompiler compiler;
+	dScriptCompiler compiler(sourceFileName);
 	dVirtualMachine virtualMachine;
 
 	compiler.CompileSource (&virtualMachine, source);

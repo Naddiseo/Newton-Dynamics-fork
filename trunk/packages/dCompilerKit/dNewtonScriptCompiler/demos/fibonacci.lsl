@@ -17,8 +17,11 @@ class fibonacci
 		
 		int xxx != 2;
 		int xxx;
+		int xxx;
+		int xxx;
+		int xxx != 2;
 		
-		if (n == 0) xxxxxx {
+		if (n == 0)  {
 			return 0;
 		}
 		if (n == 1) {

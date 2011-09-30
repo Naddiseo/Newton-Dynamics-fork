@@ -133,7 +133,7 @@ class dScriptCompiler: public dNewtonScriptParser
 	friend dAssemblerParser;
 */
 
-	dScriptCompiler();
+	dScriptCompiler(const char* const sourceFileName);
 	virtual ~dScriptCompiler();
 	int CompileSource (dVirtualMachine* const virtualMachine, const char* const source);
 
@@ -143,6 +143,7 @@ class dScriptCompiler: public dNewtonScriptParser
 
 	virtual void ErrorHandler (const dNewtonScriptLexical& scanner, int scannerLine, int scannerlength, int scannerLineNumber) const;
 
+	const char* m_fileName;
 	dVirtualMachine* m_virtualMachine;
 };
 

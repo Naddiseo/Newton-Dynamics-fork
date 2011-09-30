@@ -19,9 +19,10 @@
 
 //#define D_CODE_SEGMNET_ALLOC_SHUNK_SIZE (1024 * 32)
 
-dScriptCompiler::dScriptCompiler()
+dScriptCompiler::dScriptCompiler(const char* const sourceFileName)
 	:dNewtonScriptParser ()
 	,m_virtualMachine (NULL)
+	,m_fileName(sourceFileName)
 //	,m_globalSymbols ()
 //	,m_codeSegmentSize(0)
 //	,m_codeSegment (NULL)
@@ -302,8 +303,14 @@ void dScriptCompiler::ErrorHandler (const dNewtonScriptLexical& scanner, int sca
 	dNewtonScriptParser::ErrorHandler (scanner, scannerIndex, scannerlength, scannerLineNumber);
 
 	const char* const data = scanner.GetData();
+	while (data[scannerIndex] && isspace (data[scannerIndex])) {
+		scannerIndex ++;
+		scannerlength --;
+	}
 	string errorLine (&data[scannerIndex], scannerlength);
+
 	
-	fprintf (stderr, "line number %d syntax error: ", scannerLineNumber);
-	fprintf (stderr, errorLine.c_str());
+	fprintf (stderr, "%s (%d) : syntax error on line: %s\n", m_fileName, scannerLineNumber, errorLine.c_str());
+//	fprintf (stderr, errorLine.c_str());
+//	fprintf (stderr, "\n");
 }
