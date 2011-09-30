@@ -1086,9 +1086,6 @@ void dParserCompiler::BuildParcingTable (
 	for (stateIter.Begin(); stateIter; stateIter ++) {
 		dState* const state = stateIter.GetNode()->GetInfo();
 
-if (state->m_number == 88)
-_ASSERTE (0);
-
 
 		// add all shift actions first
 		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {
