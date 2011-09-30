@@ -14,8 +14,8 @@ class fibonacci
 {
 	int Calculate (int n)
 	{
-		
-		int xxx != 2;
+		int zzz != 4;		
+		int xxx = 2 + 1;
 		int zzz != 4;		
 		int xxx;
 		int xxx;

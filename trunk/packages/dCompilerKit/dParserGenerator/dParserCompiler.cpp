@@ -147,7 +147,7 @@ class dParserCompiler::dProductionRule: public dList<dParserCompiler::dRuleInfo>
 class dParserCompiler::dTransition
 {
 	public:
-//	string m_name;
+	string m_name;
 	unsigned m_symbol;
 	dTokenType m_type;
 	dState* m_targetState;
@@ -820,9 +820,12 @@ void dParserCompiler::CanonicalItemSets (
 			dState* const newState = Goto (state, symbol, symbolList, ruleMap);
 
 			if (newState->GetCount()) {
+				const dTokenInfo& tokenInfo = iter.GetNode()->GetInfo();
 				dTransition& transition = state->m_transitions.Append()->GetInfo();
 				transition.m_symbol = symbol;
-				transition.m_type = iter.GetNode()->GetInfo().m_type;
+				transition.m_name = tokenInfo.m_name; 
+				transition.m_type = tokenInfo.m_type;
+				_ASSERTE (transition.m_symbol == dCRC(transition.m_name.c_str()));
 				transition.m_targetState = newState;
 
 				dTree<dState*,int>::dTreeNode* const targetStateNode = stateMap.Find(newState->GetKey());
@@ -1082,6 +1085,10 @@ void dParserCompiler::BuildParcingTable (
 	// create Shift Reduce action table
 	for (stateIter.Begin(); stateIter; stateIter ++) {
 		dState* const state = stateIter.GetNode()->GetInfo();
+
+if (state->m_number == 88)
+_ASSERTE (0);
+
 
 		// add all shift actions first
 		for (dList<dTransition>::dListNode* node = state->m_transitions.GetFirst(); node; node = node->GetNext()) {

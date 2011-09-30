@@ -169,7 +169,11 @@ init_base_class
 	
 semicolon_marker
 	: semicolon_marker_list	
-	| error ';'
+	| error ';'	
+		{ 
+			dScriptCompiler* const me = (dScriptCompiler*) this;
+			me->SyntaxError (scanner, $1, $2); 
+		}
 	;
 	
 semicolon_marker_list
@@ -275,13 +279,23 @@ local_variable_declaration
 
 statement_error	
 	: error '{'
+		{ 
+			dScriptCompiler* const me = (dScriptCompiler*) this;
+			me->SyntaxError (scanner, $1, $2); 
+		}
 	| error ';'
+		{ 
+			dScriptCompiler* const me = (dScriptCompiler*) this;
+			me->SyntaxError (scanner, $1, $2); 
+		}
 	;
+	
+
 	
 statement
 	: assigment_statement semicolon_marker
-	| continue_statement semicolon_marker
-	| break_statement semicolon_marker
+	| CONTINUE semicolon_marker
+	| BREAK semicolon_marker
 	| function_call semicolon_marker
 	| return semicolon_marker	
 	| function_block	
@@ -306,19 +320,12 @@ multidimention_array
 	;
 	
 
+
 assigment_statement
 	: indentifier '=' expression
 	| indentifier '=' NEW primitive_types multidimention_array
 	;
 	
-	
-continue_statement 
-	: CONTINUE 
-	;
-	
-break_statement 
-	: BREAK
-	;
 	
 switch_case_list
 	: switch_case
@@ -346,6 +353,7 @@ return
 	| RETURN expression
 	;	
 	
+	
 expression
 	: expression LOGIC_OR expression
 /*	
@@ -353,8 +361,10 @@ expression
 	| expression '|' expression
 	| expression '^' expression
 	| expression '&' expression
+*/	
 	| expression IDENTICAL expression
 	| expression DIFFERENT expression
+/*	
 	| expression '<' expression
 	| expression '>' expression
 	| expression GREATHER_EQUAL expression
@@ -371,4 +381,7 @@ expression
 	| function_call
 	| INTEGER_VALUE
 	;	
-	
+
+
+
+

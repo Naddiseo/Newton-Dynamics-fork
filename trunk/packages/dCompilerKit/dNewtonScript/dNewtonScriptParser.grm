@@ -290,6 +290,8 @@ statement_error
 		}
 	;
 	
+
+	
 statement
 	: assigment_statement semicolon_marker
 	| CONTINUE semicolon_marker
@@ -317,6 +319,7 @@ multidimention_array
 	| multidimention_array '[' expression ']'
 	;
 	
+
 
 assigment_statement
 	: indentifier '=' expression
@@ -349,6 +352,7 @@ return
 	: RETURN
 	| RETURN expression
 	;	
+	
 	
 expression
 	: expression LOGIC_OR expression
