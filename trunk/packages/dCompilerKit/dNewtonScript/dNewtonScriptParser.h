@@ -38,6 +38,7 @@ class dNewtonScriptParser
 		NATIVE = 256, 
 		CONSTANT,
 		INTEGER_VALUE,
+		STRING_VALUE,
 		IMPORT,
 		PRIVATE,
 		CLASS,
