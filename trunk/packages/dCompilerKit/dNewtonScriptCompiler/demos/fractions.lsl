@@ -12,14 +12,34 @@
 // naive method to calculate a fibonacci number
 class fractions
 {
-int m_numerator;
 
 	fractions (int numerator, int denominator)
 	{
 		m_numerator = numerator;
 		m_denominator = denominator;
+		
+		Reduce ();
 	}
-	int[] m_data;
+
+	//  Euclid's algorithm for calculating the greatest common divisor ofd tow integers
+	private int gcd(int a, int b)
+	{
+		while(b) {
+			int temp = a % b; 
+			a = b; 
+			b = temp;
+		}
+
+		return (a);
+	}
+	
+	private void Reduce ()
+	{
+		int divisor = gcd(m_numerator, m_denominator);
+		m_numerator = m_numerator / divisor;
+		m_denominator = m_denominator / divisor;
+	}
+
 	
 	int m_numerator;
 	int m_denominator;
