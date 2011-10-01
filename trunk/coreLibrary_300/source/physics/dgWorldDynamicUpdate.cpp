@@ -174,7 +174,7 @@ if (0) {
 	}
 
 	dgUnsigned32 ticks = world->m_getPerformanceCount();
-	world->m_perfomanceCounters[m_dynamicsSolverSpanningTreeTicks] = ticks - dynamicsTime;
+	world->m_perfomanceCounters[m_dynamicsSolveSpanningTreeTicks] = ticks - dynamicsTime;
 	world->m_perfomanceCounters[m_dynamicsTicks] = ticks - updateTime;
 }
 
