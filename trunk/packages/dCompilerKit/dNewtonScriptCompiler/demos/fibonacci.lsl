@@ -14,22 +14,13 @@ class fibonacci
 {
 	int Calculate (int n)
 	{
-//		int zzz != 4;		
-int xxx;
-		int xxx = 2 + 1;
-		int zzz != 4;		
-		int xxx;
-		int xxx;
-		int xxx;
-		int zzz != 2;
 		if (n == 0)  {
 			return 0;
 		}
 		if (n == 1) {
 			return 1;
+			xxxxxx
 		}
-		
-int aaa != 2;		
 		return Calculate (n - 1) + Calculate (n - 2);
 	}
 }

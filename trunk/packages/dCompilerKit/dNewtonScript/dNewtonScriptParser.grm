@@ -276,20 +276,25 @@ local_variable_declaration
 	| initialized_variable
 	;
 	
+	
+error_token
+	: ';'			{ $$ = $1;}
+	| '{'			{ $$ = $1;}
+	| '}'			{ $$ = $1;}
+	| ')'			{ $$ = $1;}
+	| '('			{ $$ = $1;}
+	| '['			{ $$ = $1;}
+	| ']'			{ $$ = $1;}
+	| IDENTIFIER	{ $$ = $1;}
+	;
 
 statement_error	
-	: error '{'
-		{ 
-			dScriptCompiler* const me = (dScriptCompiler*) this;
-			me->SyntaxError (scanner, $1, $2); 
-		}
-	| error ';'
+	: error error_token
 		{ 
 			dScriptCompiler* const me = (dScriptCompiler*) this;
 			me->SyntaxError (scanner, $1, $2); 
 		}
 	;
-	
 
 	
 statement
@@ -356,15 +361,12 @@ return
 	
 expression
 	: expression LOGIC_OR expression
-/*	
 	| expression LOGIC_AND expression
 	| expression '|' expression
 	| expression '^' expression
 	| expression '&' expression
-*/	
 	| expression IDENTICAL expression
 	| expression DIFFERENT expression
-/*	
 	| expression '<' expression
 	| expression '>' expression
 	| expression GREATHER_EQUAL expression
@@ -375,7 +377,6 @@ expression
 	| expression '*' expression
 	| expression '%' expression
 	| expression '/' expression
-*/	
 	| '(' expression ')'
 	| indentifier
 	| function_call

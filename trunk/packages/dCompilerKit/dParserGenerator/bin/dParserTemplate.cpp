@@ -155,9 +155,10 @@ const dNewtonScriptParser::dActionEntry* $(className)::GetNextAction (dList<dSta
 
 	const dActionEntry* const table = &actionTable[start];
 	const dActionEntry* action = FindAction (table, count, token);
-	while (!action && stack.GetCount()) {
+	while (!action && (stack.GetCount() > 1)) {
 		errorMode = true; 
-		// we found a syntax error in go into error recovering mode
+
+		// we found a syntax error in go into error recovering mode, and find the token mark by a ". error" rule
 		stack.Remove (stack.GetLast());
 
 		const dStackPair& stackTop = stack.GetLast()->GetInfo();
@@ -166,35 +167,32 @@ const dNewtonScriptParser::dActionEntry* $(className)::GetNextAction (dList<dSta
 		int count = actionsCount[state];
 		const dActionEntry* const table = &actionTable[start];
 		action = FindAction (table, count, ERROR_TOKEN);
+		if (action && !action->m_errorRule) {
+			action = NULL;
+		}
 	}
 
-	if (errorMode) {
-		if (action) {
-			dStackPair& stackTop = stack.GetLast()->GetInfo();
-			stackTop.m_token = ERROR_TOKEN;
+	if (errorMode && action) {
+		dStackPair& stackTop = stack.GetLast()->GetInfo();
+		stackTop.m_token = ERROR_TOKEN;
 
-			int state = action->m_nextState;
-			int start = actionsStart[state];
-			int count = actionsCount[state];
-			const dActionEntry* const table = &actionTable[start];
-			//int scannerIndex = scanner.GetIndex();
-			while (!FindAction (table, count, token)) {
-				//scannerIndex = scanner.GetIndex();
-				token = dToken (scanner.NextToken());
-			}
-			action = FindAction (table, count, token);
-			//scanner.SetIndex (scannerIndex);
-			dStackPair& entry = stack.Append()->GetInfo();
-			entry.m_state = state;
-			entry.m_scannerLine = stackTop.m_scannerLine;
-			entry.m_scannerIndex = stackTop.m_scannerIndex;
-			entry.m_value = dUserVariable (ERROR_TOKEN, "error", entry.m_scannerLine, entry.m_scannerIndex);
-			entry.m_token = token;
+		int state = action->m_nextState;
+		int start = actionsStart[state];
+		int count = actionsCount[state];
+		const dActionEntry* const table = &actionTable[start];
 
-
-		} else {
-			_ASSERTE (0);
+		// find the next viable token to continues parsing
+		while (!FindAction (table, count, token)) {
+			token = dToken (scanner.NextToken());
 		}
+		action = FindAction (table, count, token);
+		
+		dStackPair& entry = stack.Append()->GetInfo();
+		entry.m_state = state;
+		entry.m_scannerLine = stackTop.m_scannerLine;
+		entry.m_scannerIndex = stackTop.m_scannerIndex;
+		entry.m_value = dUserVariable (ERROR_TOKEN, "error", entry.m_scannerLine, entry.m_scannerIndex);
+		entry.m_token = token;
 	}
 
 	return action;
@@ -211,79 +209,89 @@ bool $(className)::Parse($(scannerClass)& scanner)
 	const int lastToken = &(lastTerminalToken);
 	
 	stack.Append ();
+	m_grammarError = false;
 	dToken token = dToken (scanner.NextToken());
-	for (;;) {
+	for (bool terminate = false; !terminate;) {
 
 		const dActionEntry* const action = GetNextAction (stack, token, scanner);
-		switch (action->m_stateType) 
-		{
-			case dSHIFT: 
+		if (!action) {
+			terminate = true;
+			fprintf (stderr, "unrecoverable parser error\n");
+			DTRACE (("unrecoverable parser error\n"));
+		} else {
+			switch (action->m_stateType) 
 			{
-				dStackPair& entry = stack.Append()->GetInfo();
-				entry.m_state = action->m_nextState;
-				entry.m_scannerLine = scanner.GetLineNumber();
-				entry.m_scannerIndex = scanner.GetIndex();
-				entry.m_value = dUserVariable (token, scanner.GetTokenString(), entry.m_scannerLine, entry.m_scannerIndex);
-				token = dToken (scanner.NextToken());
-				entry.m_token = token;
-				if (token == -1) {
-					token = ACCEPTING_TOKEN;
-				}
-
-				break;
-			}
-
-			case dREDUCE: 
-			{
-				dStackPair parameter[MAX_USER_PARAM];
-
-				int reduceCount = action->m_ruleSymbols;
-				_ASSERTE (reduceCount < sizeof (parameter) / sizeof (parameter[0]));
-
-				for (int i = 0; i < reduceCount; i ++) {
-					parameter[reduceCount - i - 1] = stack.GetLast()->GetInfo();
-					stack.Remove (stack.GetLast());
-				}
-
-				const dStackPair& stackTop = stack.GetLast()->GetInfo();
-				int start = gotoStart[stackTop.m_state];
-				int count = gotoCount[stackTop.m_state];
-				const dGotoEntry* const table = &gotoTable[start];
-				const dGotoEntry* const gotoEntry = FindGoto (table, count, dToken (action->m_nextState + lastToken));
-
-				dStackPair& entry = stack.Append()->GetInfo();
-				entry.m_state = gotoEntry->m_nextState;
-				entry.m_scannerLine = scanner.GetLineNumber();
-				entry.m_scannerIndex = scanner.GetIndex();
-				entry.m_token = dToken (gotoEntry->m_token);
-				
-				switch (action->m_ruleIndex) 
+				case dSHIFT: 
 				{
-					//do user semantic Actions
-$(semanticActionsCode)
-					default:;
+					dStackPair& entry = stack.Append()->GetInfo();
+					entry.m_state = action->m_nextState;
+					entry.m_scannerLine = scanner.GetLineNumber();
+					entry.m_scannerIndex = scanner.GetIndex();
+					entry.m_value = dUserVariable (token, scanner.GetTokenString(), entry.m_scannerLine, entry.m_scannerIndex);
+					token = dToken (scanner.NextToken());
+					entry.m_token = token;
+					if (token == -1) {
+						token = ACCEPTING_TOKEN;
+					}
+
+					break;
 				}
 
-				break;
+				case dREDUCE: 
+				{
+					dStackPair parameter[MAX_USER_PARAM];
 
-			}
-	
-			case dACCEPT: // 2 = accept
-			{
-				// program parsed successfully, exit with successful code
-				return true;
-			}
-			
-			default:  
-			{
-				_ASSERTE (0);
-				// syntax error parsing program
-				//if (!ErrorHandler ("error")) {
-				//}
-				break;
+					int reduceCount = action->m_ruleSymbols;
+					_ASSERTE (reduceCount < sizeof (parameter) / sizeof (parameter[0]));
+
+					for (int i = 0; i < reduceCount; i ++) {
+						parameter[reduceCount - i - 1] = stack.GetLast()->GetInfo();
+						stack.Remove (stack.GetLast());
+					}
+
+					const dStackPair& stackTop = stack.GetLast()->GetInfo();
+					int start = gotoStart[stackTop.m_state];
+					int count = gotoCount[stackTop.m_state];
+					const dGotoEntry* const table = &gotoTable[start];
+					const dGotoEntry* const gotoEntry = FindGoto (table, count, dToken (action->m_nextState + lastToken));
+
+					dStackPair& entry = stack.Append()->GetInfo();
+					entry.m_state = gotoEntry->m_nextState;
+					entry.m_scannerLine = scanner.GetLineNumber();
+					entry.m_scannerIndex = scanner.GetIndex();
+					entry.m_token = dToken (gotoEntry->m_token);
+					
+					switch (action->m_ruleIndex) 
+					{
+						//do user semantic Actions
+	$(semanticActionsCode)
+						default:;
+					}
+
+					break;
+
+				}
+		
+				case dACCEPT: // 2 = accept
+				{
+					// program parsed successfully, exit with successful code
+					terminate = true;
+					break;
+				}
+				
+				default:  
+				{
+					_ASSERTE (0);
+					// syntax error parsing program
+					//if (!ErrorHandler ("error")) {
+					//}
+					terminate = true;
+					m_grammarError = true;
+					break;
+				}
 			}
 		}
 	}
-	return false;
+	return m_grammarError;
 }
 
