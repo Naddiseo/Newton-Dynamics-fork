@@ -80,7 +80,8 @@ class dParserCompiler::dActionEntry
 	}
 
 	short m_token;
-	short m_stateType;// 0 = shift, 1 = reduce, 2 = accept
+	char m_errorRule;
+	char m_stateType;// 0 = shift, 1 = reduce, 2 = accept
 	short m_nextState;
 	short m_ruleSymbols;
 	short m_ruleIndex;
@@ -234,7 +235,7 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 	};
 
 	dState (const dList<dItem>& itemSet)
-		:m_key(0), m_number(0), m_goto(), m_actions(), m_transitions()
+		:m_key(0), m_number(0), m_hasErroItem(false), m_goto(), m_actions(), m_transitions()
 	{
 		for (dListNode* node = itemSet.GetFirst(); node; node = node->GetNext()) {
 			AddItem (node->GetInfo());
@@ -244,11 +245,25 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 	void AddItem (const dItem& item)
 	{
 		dState::dListNode* const node = Append(item);
-		
+
+		static unsigned errorCRC = dCRC (DERROR_SYMBOL);
+
 		dItemKey key (item);
 		dTree<dList<dState::dListNode*>, dItemKey>::dTreeNode* mapNode = m_itemMap.Find (key);
 		if (!mapNode) {
 			mapNode = m_itemMap.Insert (key);
+		}
+
+		if (item.m_indexMarker == 0) {
+			_ASSERTE (item.m_ruleNode);
+			const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
+			if (ruleInfo.GetCount()) {
+				const dSymbol& symbol = ruleInfo.GetFirst()->GetInfo();
+				if (symbol.m_nameCRC == errorCRC) {
+					m_hasErroItem = true;
+				}
+			}
+
 		}
 
 		dList<dState::dListNode*>& bucket = mapNode->GetInfo();
@@ -290,16 +305,16 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 		dTree<dList<dState::dListNode*>, dItemKey>::dTreeNode* const mapNode = m_itemMap.Find (key);
 		if (mapNode) {
 			dList<dState::dListNode*>& bucket = mapNode->GetInfo();
-			for (dList<dState::dListNode*>::dListNode* node = bucket.GetFirst(); node; node = node->GetNext()) {
-				dState::dListNode* const nodeItem = node->GetInfo();
-				const dItem& item = nodeItem->GetInfo();
+				for (dList<dState::dListNode*>::dListNode* node = bucket.GetFirst(); node; node = node->GetNext()) {
+					dState::dListNode* const nodeItem = node->GetInfo();
+					const dItem& item = nodeItem->GetInfo();
 				if (item.m_indexMarker == marker) {
 					_ASSERTE (item.m_ruleNode == rule);
-					_ASSERTE (item.m_lookAheadSymbol == lookAheadSymbol);
-					return nodeItem;
+						_ASSERTE (item.m_lookAheadSymbol == lookAheadSymbol);
+						return nodeItem;
+					}
 				}
 			}
-		}
 		return NULL;
 	}
 
@@ -340,6 +355,7 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 
 	int m_key;
 	int m_number;
+	bool m_hasErroItem;
 	dTree<dState*, unsigned> m_goto; 
 	dTree<dAction, unsigned> m_actions; 
 	dList<dTransition> m_transitions;
@@ -430,7 +446,7 @@ dParserCompiler::dParserCompiler(const string& inputRules, const char* const out
 
 	// create a LR(1) parsing table from the NFA graphs
 	const string& startSymbol = ruleList.GetFirst()->GetInfo().m_name;
-	BuildParcingTable (stateList, dCRC (startSymbol.c_str()), operatorPrecedence);
+	BuildParsingTable (stateList, dCRC (startSymbol.c_str()), operatorPrecedence);
 
 
 	//Write Parser class and header file
@@ -815,8 +831,6 @@ void dParserCompiler::CanonicalItemSets (
 		for (iter.Begin(); iter; iter ++) {
 
 			unsigned symbol = iter.GetKey();
-			//const string symbolName = iter.GetNode()->GetInfo().m_name;
-
 			dState* const newState = Goto (state, symbol, symbolList, ruleMap);
 
 			if (newState->GetCount()) {
@@ -1071,7 +1085,7 @@ dParserCompiler::dState* dParserCompiler::Goto (
 
 
 
-void dParserCompiler::BuildParcingTable (
+void dParserCompiler::BuildParsingTable (
 	const dTree<dState*,int>& stateList, 
 	unsigned startSymbol, 
 	const dOperatorsPrecedence& operatorPrecedence) const
@@ -1322,7 +1336,8 @@ void dParserCompiler::GenerateParserCode (
 				_ASSERTE (symbolList.Find(actionSymbol));
 
 				dActionEntry entry;
-				entry.m_stateType = short (action.m_type);
+				entry.m_stateType = char (action.m_type);
+				entry.m_errorRule = state->m_hasErroItem ? 1 : 0;
 				entry.m_ruleIndex = 0;
 				entry.m_ruleSymbols = 0;
 				entry.m_nextState = short (action.m_nextState);
@@ -1340,7 +1355,8 @@ void dParserCompiler::GenerateParserCode (
 				_ASSERTE (symbolList.Find(reduceRule.m_nameCRC)->GetInfo().m_tokenId >= 256);
 
 				dActionEntry entry;
-				entry.m_stateType = short (action.m_type);
+				entry.m_stateType = char (action.m_type);
+				entry.m_errorRule = 0; //state->m_hasErroItem ? 1 : 0;
 				entry.m_ruleIndex = short (reduceRule.m_ruleNumber);
 				entry.m_ruleSymbols = short (reduceRule.GetCount());
 				entry.m_nextState = short (symbolList.Find(reduceRule.m_nameCRC)->GetInfo().m_tokenId - lastTerminalTokenEnum);
@@ -1389,7 +1405,8 @@ void dParserCompiler::GenerateParserCode (
 				_ASSERTE (action.m_type == dACCEPT);
 
 				dActionEntry entry;
-				entry.m_stateType = short (action.m_type);
+				entry.m_stateType = char (action.m_type);
+				entry.m_errorRule = 0; //state->m_hasErroItem ? 1 : 0;
 				entry.m_ruleIndex = 0;
 				entry.m_ruleSymbols = 0;
 				entry.m_nextState = 0;
@@ -1403,7 +1420,7 @@ void dParserCompiler::GenerateParserCode (
 		dTree<dActionEntry, int>::Iterator iter (actionSort);
 		for (iter.Begin(); iter; iter ++) {
 			const dActionEntry& entry = iter.GetNode()->GetInfo();
-			sprintf (text, "%d, %d, %d, %d, %d, ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
+			sprintf (text, "%d, %d, %d, %d, %d, %d, ", entry.m_token, entry.m_errorRule, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
 			stateActions += text; 
 			entriesCount ++;
 		}
@@ -1421,7 +1438,7 @@ void dParserCompiler::GenerateParserCode (
 				}
 				newLineCount ++;
 				const dActionEntry& entry = iter.GetNode()->GetInfo();
-				sprintf (text, "dActionEntry (%d, %d, %d, %d, %d), ", entry.m_token, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
+				sprintf (text, "dActionEntry (%d, %d, %d, %d, %d, %d), ", entry.m_token, entry.m_errorRule, entry.m_stateType, entry.m_nextState, entry.m_ruleSymbols, entry.m_ruleIndex);
 				nextActionsStateList += text; 
 			}
 		}

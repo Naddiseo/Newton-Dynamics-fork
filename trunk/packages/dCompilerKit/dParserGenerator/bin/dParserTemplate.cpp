@@ -31,13 +31,14 @@ enum $(className)::ActionType
 class $(className)::dActionEntry
 {
 	public:
-	dActionEntry (short token, short stateType,	short nextState, short ruleSymbols, short ruleIndex)
-		:m_token(token), m_stateType(stateType), m_nextState(nextState), m_ruleSymbols(ruleSymbols), m_ruleIndex(ruleIndex)
+	dActionEntry (short token, char errorItem, char stateType, short nextState, short ruleSymbols, short ruleIndex)
+		:m_token(token), m_errorRule(errorItem), m_stateType (stateType), m_nextState(nextState), m_ruleSymbols(ruleSymbols), m_ruleIndex(ruleIndex)
 	{
 	}
 
 	short m_token;
-	short m_stateType;// 0 = shift, 1 = reduce, 2 = accept
+	char m_errorRule;
+	char m_stateType;// 0 = shift, 1 = reduce, 2 = accept
 	short m_nextState;
 	short m_ruleSymbols;
 	short m_ruleIndex;
