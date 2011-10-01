@@ -98,7 +98,27 @@ module
 	| import_module
 	| class_delaration
 	;			
-			
+
+
+error_token
+	: ';'				{ $$ = $1;}
+	| '{'				{ $$ = $1;}
+	| '}'				{ $$ = $1;}
+	| ')'				{ $$ = $1;}
+	| '('				{ $$ = $1;}
+	| '['				{ $$ = $1;}
+	| ']'				{ $$ = $1;}
+	| IDENTIFIER		{ $$ = $1;}
+	;
+		
+syntax_error	
+	: error error_token
+		{ 
+			dScriptCompiler* const me = (dScriptCompiler*) this;
+			me->SyntaxError (scanner, $1, $2); 
+		}
+	;
+		
 
 import_module 
 	: IMPORT IMPORT_FILE_NAME 
@@ -136,8 +156,8 @@ class_member_list
 				    
 class_member 
 	: class_contructor
-	| uninitialized_variable
 	| class_function_implementaion
+	| uninitialized_variable semicolon_marker
 	;
 			
 native_function
@@ -169,11 +189,7 @@ init_base_class
 	
 semicolon_marker
 	: semicolon_marker_list	
-	| error ';'	
-		{ 
-			dScriptCompiler* const me = (dScriptCompiler*) this;
-			me->SyntaxError (scanner, $1, $2); 
-		}
+	| syntax_error
 	;
 	
 semicolon_marker_list
@@ -251,50 +267,19 @@ array_type
 						  
 function_block 
 	: '{' '}'
-	| '{' function_statement_list '}'
+	| '{' statement_list '}'
 	;
 			   
 			   
-function_statement_list 
-	: function_statement
-	| function_statement_list function_statement
+statement_list 
+	: statement
+	| statement_list statement
 	;
 						 
-						 
-function_statement 
-	: statement 
-	| local_variable_declaration semicolon_marker
-	;			 
-	
-	
-local_variable_declaration
-	: uninitialized_variable
-	| initialized_variable
-	;
-	
-	
-error_token
-	: ';'				{ $$ = $1;}
-	| '{'				{ $$ = $1;}
-	| '}'				{ $$ = $1;}
-	| ')'				{ $$ = $1;}
-	| '('				{ $$ = $1;}
-	| '['				{ $$ = $1;}
-	| ']'				{ $$ = $1;}
-	| IDENTIFIER		{ $$ = $1;}
-	;
-
-statement_error	
-	: error error_token
-		{ 
-			dScriptCompiler* const me = (dScriptCompiler*) this;
-			me->SyntaxError (scanner, $1, $2); 
-		}
-	;
-
 	
 statement
-	: assigment_statement semicolon_marker
+	: local_variable_declaration semicolon_marker
+	| assigment_statement semicolon_marker
 	| CONTINUE semicolon_marker
 	| BREAK semicolon_marker
 	| function_call semicolon_marker
@@ -306,7 +291,12 @@ statement
 	| FOR '(' primitive_types assigment_statement ';' expression ';' assigment_statement ')' function_block
 	| WHILE '(' expression ')' function_block 
 	| DO function_block WHILE '(' expression ')' semicolon_marker
-	| statement_error	
+	| syntax_error	
+	;
+
+local_variable_declaration
+	: uninitialized_variable 
+	| initialized_variable
 	;
 
 	
