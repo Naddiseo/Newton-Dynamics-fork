@@ -78,7 +78,7 @@ void dScriptCompiler::SyntaxError (const dNewtonScriptLexical& scanner, const dU
 	}
 	_ASSERTE (end >= start);
 
-	int length = end - start;
+	int length = end - start + 1;
 	string errorLine (&data[start], length);
 	fprintf (stderr, "%s (%d) : syntax error on line: %s\n", m_fileName, lineNumber, errorLine.c_str());
 	DTRACE (("%s (%d) : syntax error on line: %s\n", m_fileName, lineNumber, errorLine.c_str()));

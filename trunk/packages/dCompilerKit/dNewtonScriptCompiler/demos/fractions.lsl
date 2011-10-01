@@ -10,18 +10,12 @@
 */
 
 // a simple integer number fraction class 
-class fractions
+class fraction
 {
-	fractions (int numerator, int denominator)
+	fraction (int numerator, int denominator)
 	{
-int a = cast<byte> (a);		
-int a = sizeof (a);
-int a = sizeof (int);
-	
 		m_numerator = numerator;
 		m_denominator = denominator;
-		
-
 		Reduce ();
 	}
 
@@ -44,6 +38,28 @@ int a = sizeof (int);
 		m_denominator = m_denominator / divisor;
 	}
 
+	// sample of operaotr overload +
+	class fraction operator + (class fraction argument)
+	{
+		// find lowest common denominator
+		int lcd = m_denominator / gcd(m_denominator, argument.m_denominator) * argument.m_denominator;
+	
+		int num1 = lcd / m_denominator * m_numerator;
+		int num2 = lcd / argument.m_denominator * argument.m_numerator;
+		return new class fraction (num1 + num2, lcd);
+	}
+
+	// sample of operaotr overload +
+	class fraction operator - (class fraction argument)
+	{
+		// find lowest common denominator
+		int lcd = m_denominator / gcd(m_denominator, argument.m_denominator) * argument.m_denominator;
+	
+		int num1 = lcd / m_denominator * m_numerator;
+		int num2 = lcd / argument.m_denominator * argument.m_numerator;
+		return new class fraction (num1 - num2, lcd);
+	}
+	
 	
 	int m_numerator;
 	int m_denominator;

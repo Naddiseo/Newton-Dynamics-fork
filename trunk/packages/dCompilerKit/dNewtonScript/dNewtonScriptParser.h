@@ -57,6 +57,7 @@ class dNewtonScriptParser
 		VOID_TYPE,
 		CAST,
 		SIZEOF,
+		OPERATOR,
 		NEW,
 		RETURN,
 		FOR,

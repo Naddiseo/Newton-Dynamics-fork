@@ -96,6 +96,7 @@ Integer			[\-\+]?[0-9]+
 "float"			{return dNewtonScriptParser::FLOAT;}
 "double"		{return dNewtonScriptParser::DOUBLE;}
 
+"operator"		{return dNewtonScriptParser::OPERATOR;}
 "sizeof"		{return dNewtonScriptParser::SIZEOF;}
 "cast"			{return dNewtonScriptParser::CAST;}
 "new"			{return dNewtonScriptParser::NEW;}

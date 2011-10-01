@@ -50,7 +50,7 @@
 %token PRIVATE CLASS BASE DOUBLE_COLOM IDENTIFIER EXTENDS GUI
 %token BOOLEAN BYTE SHORT INT LONG UNSIGNED FLOAT DOUBLE VOID_TYPE
 
-%token CAST SIZEOF
+%token CAST SIZEOF OPERATOR
 %token NEW
 %token RETURN
 %token FOR WHILE DO
@@ -102,14 +102,15 @@ module
 
 
 error_token
-	: ';'				{ $$ = $1;}
-	| '{'				{ $$ = $1;}
-	| '}'				{ $$ = $1;}
-	| ')'				{ $$ = $1;}
-	| '('				{ $$ = $1;}
-	| '['				{ $$ = $1;}
-	| ']'				{ $$ = $1;}
-	| IDENTIFIER		{ $$ = $1;}
+	: ';'			{ $$ = $1;}
+	| '{'			{ $$ = $1;}
+	| '}'			{ $$ = $1;}
+	| ')'			{ $$ = $1;}
+	| '('			{ $$ = $1;}
+	| '['			{ $$ = $1;}
+	| ']'			{ $$ = $1;}
+	| IDENTIFIER	{ $$ = $1;}
+	| OPERATOR		{ $$ = $1;}
 	;
 		
 syntax_error	
@@ -171,6 +172,7 @@ native_function
 parameter_list 
 	: parameter
 	| parameter_list ',' parameter
+	| syntax_error
 	;	
 	
 function_parameters
@@ -203,6 +205,15 @@ class_contructor
 	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker
 	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class function_block
 	;
+
+
+overlodable_operator
+	: '+'
+	| '-'
+	| '*'
+	| '/'
+	| '%'
+	; 	
 	
 	
 class_function_implementaion 
@@ -211,9 +222,10 @@ class_function_implementaion
 	| PRIVATE function_prototype function_block
 	;
 	
-	
 function_prototype
 	: type_specifier IDENTIFIER '(' function_parameters ')' const_function
+	| type_specifier OPERATOR overlodable_operator '(' function_parameters ')' const_function	
+	| syntax_error
 	;
 
 
@@ -292,7 +304,7 @@ statement
 	| FOR '(' primitive_types assigment_statement ';' expression ';' assigment_statement ')' function_block
 	| WHILE '(' expression ')' function_block 
 	| DO function_block WHILE '(' expression ')' semicolon_marker
-	| syntax_error	
+	| syntax_error
 	;
 
 local_variable_declaration
@@ -315,7 +327,7 @@ multidimention_array
 
 assigment_statement
 	: indentifier '=' expression
-	| indentifier '=' NEW primitive_types multidimention_array
+//	| indentifier '=' NEW primitive_types multidimention_array
 	;
 	
 	
@@ -361,10 +373,16 @@ return
 	| RETURN expression
 	;	
 	
+new_types 
+	: CLASS IDENTIFIER '(' ')'
+	| CLASS IDENTIFIER '(' argument_list ')'
+	| primitive_types array_type_list
+	| CLASS IDENTIFIER array_type_list
+	;
+	
 	
 expression
 	: expression LOGIC_OR expression
-	
 	| expression LOGIC_AND expression
 	| expression '|' expression
 	| expression '^' expression
@@ -381,12 +399,12 @@ expression
 	| expression '*' expression
 	| expression '%' expression
 	| expression '/' expression
-	
+	| NEW new_types 
 	| '(' expression ')'
 	| SIZEOF '(' indentifier ')'
 	| SIZEOF '(' type_specifier ')'
 	| CAST '<' type_specifier '>' '(' expression ')'
-	| indentifier
+	| compound_identifier_List
 	| function_call
 	| INTEGER_VALUE
 	;	
