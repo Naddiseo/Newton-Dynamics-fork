@@ -136,7 +136,7 @@ class_member_list
 				    
 class_member 
 	: class_contructor
-	| class_variable_declaration
+	| uninitialized_variable
 	| class_function_implementaion
 	;
 			
@@ -209,10 +209,6 @@ initialized_variable
 	: uninitialized_variable '=' expression		
 	;
 
-class_variable_declaration
-	: uninitialized_variable
-	;
-	 
 			  
 parameter
 	: type_specifier IDENTIFIER
@@ -278,14 +274,14 @@ local_variable_declaration
 	
 	
 error_token
-	: ';'			{ $$ = $1;}
-	| '{'			{ $$ = $1;}
-	| '}'			{ $$ = $1;}
-	| ')'			{ $$ = $1;}
-	| '('			{ $$ = $1;}
-	| '['			{ $$ = $1;}
-	| ']'			{ $$ = $1;}
-	| IDENTIFIER	{ $$ = $1;}
+	: ';'				{ $$ = $1;}
+	| '{'				{ $$ = $1;}
+	| '}'				{ $$ = $1;}
+	| ')'				{ $$ = $1;}
+	| '('				{ $$ = $1;}
+	| '['				{ $$ = $1;}
+	| ']'				{ $$ = $1;}
+	| IDENTIFIER		{ $$ = $1;}
 	;
 
 statement_error	

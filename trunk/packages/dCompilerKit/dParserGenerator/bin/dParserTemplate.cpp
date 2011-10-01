@@ -184,6 +184,10 @@ const dNewtonScriptParser::dActionEntry* $(className)::GetNextAction (dList<dSta
 		// find the next viable token to continues parsing
 		while (!FindAction (table, count, token)) {
 			token = dToken (scanner.NextToken());
+			if (token == -1) {
+				// reached end of the file, can not recover from this error;
+				return NULL;
+			}
 		}
 		action = FindAction (table, count, token);
 		

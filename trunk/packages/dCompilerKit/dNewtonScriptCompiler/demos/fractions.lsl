@@ -10,19 +10,18 @@
 */
 
 // naive method to calculate a fibonacci number
-class fibonacci
+class fractions
 {
-	int Calculate (int n)
-	{
-		if (n == 0)  {
-			return 0;
-		}
-		if (n == 1) {
-			return 1;
-			
-		}
+int m_numerator;
 
-		return Calculate (n - 1) + Calculate (n - 2);
+	fractions (int numerator, int denominator)
+	{
+		m_numerator = numerator;
+		m_denominator = denominator;
 	}
+	int[] m_data;
+	
+	int m_numerator;
+	int m_denominator;
 }
 
