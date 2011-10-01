@@ -14,7 +14,7 @@
 #include "dNewtonScriptLexical.h"
 
 //
-// Newton Script parser  
+// Newton Litle Scripting Language parser  specification 1.0.0
 // loosely based on a subset of Java and C sharp
 //
 %}
@@ -46,10 +46,11 @@
 
 %token NATIVE CONSTANT
 %token INTEGER_VALUE
-%token IMPORT IMPORT_FILE_NAME 
-%token PRIVATE CLASS IDENTIFIER EXTENDS GUI
+%token IMPORT 
+%token PRIVATE CLASS BASE DOUBLE_COLOM IDENTIFIER EXTENDS GUI
 %token BOOLEAN BYTE SHORT INT LONG UNSIGNED FLOAT DOUBLE VOID_TYPE
 
+%token CAST SIZEOF
 %token NEW
 %token RETURN
 %token FOR WHILE DO
@@ -121,7 +122,7 @@ syntax_error
 		
 
 import_module 
-	: IMPORT IMPORT_FILE_NAME 
+	: IMPORT '<' compound_identifier_List '>' 
 	;
 	
 	  
@@ -334,9 +335,25 @@ argument_list
 	| argument_list ',' expression
 	;
 		
+
+compound_identifier_List
+	: IDENTIFIER
+	| compound_identifier_List '.' IDENTIFIER		
+	;
+	
+base_class_indetifier_prefix	
+	: BASE DOUBLE_COLOM 
+	| base_class_indetifier_prefix BASE DOUBLE_COLOM
+	;
+	
+function_indentifier
+	: compound_identifier_List
+	| base_class_indetifier_prefix IDENTIFIER
+	;
+			
 function_call
-	: IDENTIFIER '(' ')'
-	| IDENTIFIER '(' argument_list ')'	
+	: function_indentifier '(' ')'
+	| function_indentifier '(' argument_list ')'	
 	;
 	
 return 
@@ -347,6 +364,7 @@ return
 	
 expression
 	: expression LOGIC_OR expression
+	
 	| expression LOGIC_AND expression
 	| expression '|' expression
 	| expression '^' expression
@@ -363,7 +381,11 @@ expression
 	| expression '*' expression
 	| expression '%' expression
 	| expression '/' expression
+	
 	| '(' expression ')'
+	| SIZEOF '(' indentifier ')'
+	| SIZEOF '(' type_specifier ')'
+	| CAST '<' type_specifier '>' '(' expression ')'
 	| indentifier
 	| function_call
 	| INTEGER_VALUE

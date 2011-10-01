@@ -9,15 +9,19 @@
 * freely
 */
 
-// naive method to calculate a fibonacci number
+// a simple integer number fraction class 
 class fractions
 {
-
 	fractions (int numerator, int denominator)
 	{
+int a = cast<byte> (a);		
+int a = sizeof (a);
+int a = sizeof (int);
+	
 		m_numerator = numerator;
 		m_denominator = denominator;
 		
+
 		Reduce ();
 	}
 

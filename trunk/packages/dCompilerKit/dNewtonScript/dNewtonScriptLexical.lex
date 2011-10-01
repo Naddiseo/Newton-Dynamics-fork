@@ -31,7 +31,7 @@ Comment			({Comment1}|{Comment2})
 
 
 Indetifier		[a-zA-Z_][0-9a-zA-Z_]*
-ImportFile		<{Indetifier}([\.]{Indetifier})*>
+
 
 
 Integer			[\-\+]?[0-9]+
@@ -64,6 +64,7 @@ Integer			[\-\+]?[0-9]+
 "\*"			{return '*';}
 "/"				{return '/';}
 "%"				{return '%';}
+"\."			{return '.';}
 "\["			{return '[';}
 "\]"			{return ']';}
 "\("			{return '(';}
@@ -82,6 +83,7 @@ Integer			[\-\+]?[0-9]+
 
 "=="			{return dNewtonScriptParser::IDENTICAL;}
 "!="			{return dNewtonScriptParser::DIFFERENT;}
+"::"			{return dNewtonScriptParser::DOUBLE_COLOM;}
  
 
 "void"			{return dNewtonScriptParser::VOID_TYPE;}
@@ -94,6 +96,8 @@ Integer			[\-\+]?[0-9]+
 "float"			{return dNewtonScriptParser::FLOAT;}
 "double"		{return dNewtonScriptParser::DOUBLE;}
 
+"sizeof"		{return dNewtonScriptParser::SIZEOF;}
+"cast"			{return dNewtonScriptParser::CAST;}
 "new"			{return dNewtonScriptParser::NEW;}
 "if"			{return dNewtonScriptParser::IF;}
 "else"			{return dNewtonScriptParser::ELSE;}
@@ -113,13 +117,14 @@ Integer			[\-\+]?[0-9]+
 "native"		{return dNewtonScriptParser::NATIVE;}
 "extends"		{return dNewtonScriptParser::EXTENDS;}
 "private"		{return dNewtonScriptParser::PRIVATE;}
+"base"			{return dNewtonScriptParser::BASE;}
 "class"			{return dNewtonScriptParser::CLASS;}
 "import"		{return dNewtonScriptParser::IMPORT;}
 
 
 {Integer}		{return dNewtonScriptParser::INTEGER_VALUE;}
 
-{ImportFile}	{return dNewtonScriptParser::IMPORT_FILE_NAME;}
+
 
 
 
