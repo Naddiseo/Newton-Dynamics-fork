@@ -60,7 +60,7 @@ class dVariable
 	friend class dVariableList;
 };
 
-class dVariableList: public dTree<dVariable, unsigned>
+class dVariableList: public dTree<dVariable, dCRCTYPE>
 {
 	public:
 	dVariableList();
@@ -69,13 +69,11 @@ class dVariableList: public dTree<dVariable, unsigned>
 
 	virtual dVariable* CreateVariable (const char* name);
 
-	virtual dVariable* FindVariable(unsigned crc) const;
+	virtual dVariable* FindVariable(dCRCTYPE crc) const;
 	virtual dVariable* FindVariable(const char* name) const;
 
 	virtual void Serialize(TiXmlElement* const rootNode) const;
 	virtual void Deserialize(TiXmlElement* const rootNode);
-	
-	
 };
 
 #endif

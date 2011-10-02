@@ -26,17 +26,17 @@ dInitRtti(dNodeInfo);
 
 unsigned dNodeInfo::m_uniqueIDCounter = 0;
 
-dTree<const dNodeInfo*, int>& dNodeInfo::GetSingletonDictionary()
+dTree<const dNodeInfo*, dCRCTYPE>& dNodeInfo::GetSingletonDictionary()
 {
-	static dTree<const dNodeInfo*, int> dictionary;
+	static dTree<const dNodeInfo*, dCRCTYPE> dictionary;
 	return dictionary;
 }
 
 
 dNodeInfo::dRegisterSingleton::dRegisterSingleton (const char* const className, const dNodeInfo* const singleton)
 {
-	int crc = dCRC (className);
-	dTree<const dNodeInfo*, int>& dictionary = dNodeInfo::GetSingletonDictionary();
+	dCRCTYPE crc = dCRC64 (className);
+	dTree<const dNodeInfo*, dCRCTYPE>& dictionary = dNodeInfo::GetSingletonDictionary();
 	dictionary.Insert (singleton, crc);
 }
 
@@ -73,9 +73,9 @@ dNodeInfo* dNodeInfo::MetaFunction(dScene* const world) const
 
 void dNodeInfo::ReplaceSingletonClass (const char* const className, const dNodeInfo* const singleton)
 {
-	int crc = dCRC (className);
-	dTree<const dNodeInfo*, int>& dictionary = dNodeInfo::GetSingletonDictionary();
-	dTree<const dNodeInfo*, int>::dTreeNode* const node = dictionary.Find(crc);
+	dCRCTYPE crc = dCRC64 (className);
+	dTree<const dNodeInfo*, dCRCTYPE>& dictionary = dNodeInfo::GetSingletonDictionary();
+	dTree<const dNodeInfo*, dCRCTYPE>::dTreeNode* const node = dictionary.Find(crc);
 	if (node) {
 		node->GetInfo() = singleton;
 	} else {
@@ -85,9 +85,9 @@ void dNodeInfo::ReplaceSingletonClass (const char* const className, const dNodeI
 
 dNodeInfo* dNodeInfo::CreateFromClassName (const char* className, dScene* world)
 {
-	int crc = dCRC (className);
-	dTree<const dNodeInfo*, int>& dictionary = dNodeInfo::GetSingletonDictionary();
-	dTree<const dNodeInfo*, int>::dTreeNode* const node = dictionary.Find(crc);
+	dCRCTYPE crc = dCRC64 (className);
+	dTree<const dNodeInfo*, dCRCTYPE>& dictionary = dNodeInfo::GetSingletonDictionary();
+	dTree<const dNodeInfo*, dCRCTYPE>::dTreeNode* const node = dictionary.Find(crc);
 	if (node) {
 		const dNodeInfo* const singleton = node->GetInfo();
 		return singleton->MetaFunction(world);

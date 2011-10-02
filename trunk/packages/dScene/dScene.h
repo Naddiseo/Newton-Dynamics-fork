@@ -87,14 +87,13 @@ public:
 	
 	
 	virtual dTreeNode* FindCameraNode(int camIndex) const;
-	virtual dTreeNode* FindTextureByTextId(dTreeNode* const parentNode, int textId) const;
-	virtual dTreeNode* FindChildByType(dTreeNode* const parentNode, int type) const;
-	virtual dTreeNode* FindParentByType(dTreeNode* const child, int type) const;
+	virtual dTreeNode* FindTextureByTextId(dTreeNode* const parentNode, dCRCTYPE textId) const;
+	virtual dTreeNode* FindChildByType(dTreeNode* const parentNode, dCRCTYPE type) const;
+	virtual dTreeNode* FindParentByType(dTreeNode* const child, dCRCTYPE type) const;
 
 	virtual NewtonWorld* GetNewtonWorld() const {return m_newton;}
 
 	virtual void DeleteNode (dTreeNode* const node);
-//	void UnlinkNode (dTreeNode* const node);
 	virtual void MergeScene (dScene* const scene);
 
 	virtual void Serialize (const char* const fileName);

@@ -109,12 +109,12 @@ const char* dVariable::GetString () const
 
 
 dVariableList::dVariableList()
-	:dTree<dVariable, unsigned>()
+	:dTree<dVariable, dCRCTYPE>()
 {
 }
 
 dVariableList::dVariableList(const dVariableList& me)
-	:dTree<dVariable, unsigned>()
+	:dTree<dVariable, dCRCTYPE>()
 {
 //	for (dListNode* node = me.GetFirst(); node; node = node->GetNext()) {
 	Iterator iter (me);
@@ -128,7 +128,7 @@ dVariableList::~dVariableList ()
 {
 }
 
-dVariable* dVariableList::FindVariable(unsigned crc) const
+dVariable* dVariableList::FindVariable(dCRCTYPE crc) const
 {
 	dTreeNode* node = Find (crc);
 	return node ? &node->GetInfo() : NULL;
@@ -136,12 +136,12 @@ dVariable* dVariableList::FindVariable(unsigned crc) const
 
 dVariable* dVariableList::FindVariable(const char* name) const
 {
-	return FindVariable(dCRC (name));
+	return FindVariable(dCRC64 (name));
 }
 
 dVariable* dVariableList::CreateVariable (const char* name)
 {
-	unsigned crc = dCRC(name);
+	dCRCTYPE crc = dCRC64(name);
 	dTreeNode* node = Find (crc);
 	if (!node) {
 		node = Insert(crc);

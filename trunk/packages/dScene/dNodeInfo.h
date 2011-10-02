@@ -148,7 +148,7 @@ class dNodeInfo: public dClassInfo, public dVariableList
 //	virtual dVariable* FindVariable(const char* name) const;
 
 	static dNodeInfo* CreateFromClassName (const char* className, dScene* world);
-	static dTree<const dNodeInfo*, int>& GetSingletonDictionary();
+	static dTree<const dNodeInfo*, dCRCTYPE>& GetSingletonDictionary();
 	static void ReplaceSingletonClass (const char* const className, const dNodeInfo* const singleton);
 
 	dAddRtti(dClassInfo);

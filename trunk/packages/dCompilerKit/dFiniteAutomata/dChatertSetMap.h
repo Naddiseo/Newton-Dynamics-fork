@@ -47,8 +47,8 @@ class dChatertSetMap
 	private:
 	int m_id;
 	dList <ChatertSet> m_sets;
-	dTree<dList <ChatertSet>::dListNode*, int> m_crcID;
-	dTree<dList <ChatertSet>::dListNode*, int> m_lable;
+	dTree<dList <ChatertSet>::dListNode*, dCRCTYPE> m_crcID;
+	dTree<dList <ChatertSet>::dListNode*, int> m_table;
 };
 
 

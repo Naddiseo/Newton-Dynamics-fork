@@ -22,39 +22,34 @@ struct TextureEntry
 	char m_textureName[TERXTURE_PATH_NAME_SIZE ];
 };
 
-class TextureCache: public dTree<TextureEntry, int>
+class TextureCache: public dTree<TextureEntry, dCRCTYPE>
 {
 public: 
 
-	GLuint GetTexture(const char* texName)
+	GLuint GetTexture(const char* const texName)
 	{
-		int crc;
-		GLuint texID;
-		dTreeNode* node;
-
-		texID = 0;
+		GLuint texID = 0;
 		_ASSERTE (texName);
 
 		TextureEntry entry;
 		strcpy (entry.m_textureName, texName);
 		strlwr (entry.m_textureName);
-		crc = dCRC (entry.m_textureName);
+		dCRCTYPE crc = dCRC64 (entry.m_textureName);
 
-		node = Find(crc);
+		dTreeNode* node = Find(crc);
 		if (node) {
 			texID = node->GetInfo().m_textureID;
 		}
 		return texID;
 	}
 
-	void InsertText (const char* texName, GLuint id) 
+	void InsertText (const char* const texName, GLuint id) 
 	{
-		int crc;
 		TextureEntry entry;
 		entry.m_textureID = id;
 		strcpy (entry.m_textureName, texName);
 		strlwr (entry.m_textureName);
-		crc = dCRC (entry.m_textureName);
+		dCRCTYPE crc = dCRC64 (entry.m_textureName);
 		Insert(entry, crc);
 	}
 
@@ -97,7 +92,6 @@ public:
 		static TextureCache texCache;
 		return texCache;
 	}
-
 };
 
 

@@ -12,9 +12,10 @@
 #ifndef __dCRC__
 #define __dCRC__
 
+#define dCRCTYPE long long
 
-unsigned dCRC (const char* const string, unsigned crcAcc = 0);
-unsigned dCRC (const void* const buffer, int size, unsigned crcAcc);
+dCRCTYPE dCRC64 (const char* const string, dCRCTYPE  crcAcc = 0);
+dCRCTYPE dCRC64 (const void* const buffer, int size, dCRCTYPE crcAcc);
 
 
 #endif

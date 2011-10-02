@@ -38,11 +38,11 @@ class dBaseHierarchy
 	dBaseHierarchy *GetNext() const;
 	dBaseHierarchy *GetPrev() const;
 
-	dBaseHierarchy *Find (unsigned nameCRC) const; 
+	dBaseHierarchy *Find (long long nameCRC) const; 
 	dBaseHierarchy *Find (const char *name) const;
 
 
-	unsigned GetNameID() const;
+	long long GetNameID() const;
 	const char* GetName() const;
 	void SetNameID(const char* name);
 	
@@ -63,7 +63,7 @@ class dBaseHierarchy
 	dBaseHierarchy *m_child;
 	dBaseHierarchy *m_sibling;
 
-	unsigned m_nameID;
+	long long m_nameID;
 	char m_name[D_NAME_STRING_LENGTH];
 
 };
@@ -84,7 +84,7 @@ class dHierarchy: public dBaseHierarchy
 	T *GetLast() const;
 	T *GetNext() const;
 	T *GetPrev() const;
-	T *Find (unsigned nameCRC) const;
+	T *Find (long long nameCRC) const;
 	T *Find (const char *name) const;
 
 	protected:
@@ -136,16 +136,16 @@ inline dBaseHierarchy *dBaseHierarchy::GetParent () const
 
 inline dBaseHierarchy *dBaseHierarchy::Find (const char *name) const
 {
-	return Find (dCRC (name)); 
+	return Find (dCRC64 (name)); 
 } 
 
 inline void dBaseHierarchy::SetNameID(const char* name)
 {
-	m_nameID = dCRC (name);
+	m_nameID = dCRC64 (name);
 	strcpy (m_name, name);
 }
 
-inline unsigned dBaseHierarchy::GetNameID() const
+inline long long  dBaseHierarchy::GetNameID() const
 {
 	return m_nameID;
 }
@@ -251,7 +251,7 @@ T *dHierarchy<T>::GetPrev() const
 
 
 template<class T>
-T *dHierarchy<T>::Find (unsigned nameCRC) const 
+T *dHierarchy<T>::Find (long long nameCRC) const 
 {
 	return (T*) dBaseHierarchy::Find (nameCRC);
 }

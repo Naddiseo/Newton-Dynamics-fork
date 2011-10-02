@@ -53,7 +53,7 @@ class dLexCompiler
 	};
 
 
-	class dDefinitionsMap: public dTree<string,unsigned>
+	class dDefinitionsMap: public dTree<string, dCRCTYPE>
 	{
 		public:
 		dDefinitionsMap ();

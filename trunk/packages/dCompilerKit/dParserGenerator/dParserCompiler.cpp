@@ -95,7 +95,7 @@ class dParserCompiler::dSymbol
 	dTokenType m_type;
 	dToken m_token;
 	string m_name;
-	unsigned m_nameCRC;
+	dCRCTYPE m_nameCRC;
 };
 
 
@@ -120,7 +120,7 @@ class dParserCompiler::dRuleInfo: public dParserCompiler::dSymbol, public dList<
 		return NULL;
 	}
 
-	int m_ruleId;
+	dCRCTYPE m_ruleId;
 	int m_ruleNumber;
 	bool m_ruleReduced;
 	string m_semanticActionCode;
@@ -132,7 +132,7 @@ class dParserCompiler::dProductionRule: public dList<dParserCompiler::dRuleInfo>
 {
 	public:
 
-	dListNode* Find (unsigned nameCRC) const
+	dListNode* Find (dCRCTYPE nameCRC) const
 	{
 		for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
 			if (node->GetInfo().m_nameCRC == nameCRC) {
@@ -149,7 +149,7 @@ class dParserCompiler::dTransition
 {
 	public:
 	string m_name;
-	unsigned m_symbol;
+	dCRCTYPE m_symbol;
 	dTokenType m_type;
 	dState* m_targetState;
 };
@@ -158,14 +158,14 @@ class dParserCompiler::dItem
 {
 	public:
 	dItem ()
-		:m_indexMarker(0), m_lookAheadSymbol(0), m_lastOperatorSymbol(0), m_lookAheadSymbolName(""), m_lastOperatorSymbolName (""), m_ruleNode(NULL)
+		:m_indexMarker(0), m_lookAheadSymbolCRC(0), m_lastOperatorSymbolCRC(0), m_lookAheadSymbolName(""), m_lastOperatorSymbolName (""), m_ruleNode(NULL)
 	{
 	}
 
 	int m_indexMarker;
 	
-	unsigned m_lookAheadSymbol;
-	unsigned m_lastOperatorSymbol;
+	dCRCTYPE m_lookAheadSymbolCRC;
+	dCRCTYPE m_lastOperatorSymbolCRC;
 	string m_lookAheadSymbolName;
 	string m_lastOperatorSymbolName;
 	dProductionRule::dListNode* m_ruleNode;
@@ -195,20 +195,20 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 	{
 		public:
 		dItemKey (const dItem& item)
-			:m_lookAheadSymbol (item.m_lookAheadSymbol), m_rule (item.m_ruleNode)
+			:m_lookAheadSymbolCRC (item.m_lookAheadSymbolCRC), m_rule (item.m_ruleNode)
 		{
 		}
 
-		dItemKey (unsigned symbol, dProductionRule::dListNode* rule)
-			:m_lookAheadSymbol (symbol), m_rule (rule)
+		dItemKey (dCRCTYPE symbol, dProductionRule::dListNode* rule)
+			:m_lookAheadSymbolCRC (symbol), m_rule (rule)
 		{
 		}
 
 		bool operator< (const dItemKey& key) const
 		{	
-			if (m_lookAheadSymbol < key.m_lookAheadSymbol) {
+			if (m_lookAheadSymbolCRC < key.m_lookAheadSymbolCRC) {
 				return true;	
-			} else if (m_lookAheadSymbol == key.m_lookAheadSymbol){
+			} else if (m_lookAheadSymbolCRC == key.m_lookAheadSymbolCRC){
 				if (m_rule < key.m_rule) {
 					return true;	
 				} 
@@ -218,9 +218,9 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 
 		bool operator> (const dItemKey& key) const
 		{
-			if (m_lookAheadSymbol > key.m_lookAheadSymbol) {
+			if (m_lookAheadSymbolCRC > key.m_lookAheadSymbolCRC) {
 				return true;	
-			} else if (m_lookAheadSymbol == key.m_lookAheadSymbol){
+			} else if (m_lookAheadSymbolCRC == key.m_lookAheadSymbolCRC){
 				if (m_rule > key.m_rule) {
 					return true;	
 				} 
@@ -228,7 +228,7 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 			return false;
 		}
 
-		unsigned m_lookAheadSymbol;
+		dCRCTYPE m_lookAheadSymbolCRC;
 		dProductionRule::dListNode* m_rule;
 		
 		
@@ -246,7 +246,7 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 	{
 		dState::dListNode* const node = Append(item);
 
-		static unsigned errorCRC = dCRC (DERROR_SYMBOL);
+		static dCRCTYPE errorCRC = dCRC64 (DERROR_SYMBOL);
 
 		dItemKey key (item);
 		dTree<dList<dState::dListNode*>, dItemKey>::dTreeNode* mapNode = m_itemMap.Find (key);
@@ -272,34 +272,34 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 		bucket.Append(node);
 	}
 
-	int GetKey() const
+	dCRCTYPE GetKey() const
 	{
 		return m_key;
 	}
 
 	void CalculateKey ()
 	{
-		int key = 0;
+		dCRCTYPE key = 0;
 		for (dState::dListNode* itemNode = GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
 			dItem& item = itemNode->GetInfo();
 			int index = 0;
-			key = dCRC (item.m_lookAheadSymbolName.c_str(), key);
+			key = dCRC64 (item.m_lookAheadSymbolName.c_str(), key);
 			for (dRuleInfo::dListNode* node = item.m_ruleNode->GetInfo().GetFirst(); node; node = node->GetNext()) {
 				if (index == item.m_indexMarker) {
-					key = dCRC (".", key);
+					key = dCRC64 (".", key);
 				}
 				const dSymbol& info = node->GetInfo();
-				key = dCRC (info.m_name.c_str(), key);
+				key = dCRC64 (info.m_name.c_str(), key);
 				index ++;
 			}
 			if (item.m_indexMarker == item.m_ruleNode->GetInfo().GetCount()) {
-				key = dCRC (".", key);
+				key = dCRC64 (".", key);
 			}
 		}
 		m_key = key;
 	}
 
-	dListNode* FindItem (dProductionRule::dListNode* const rule, int marker, unsigned lookAheadSymbol) const
+	dListNode* FindItem (dProductionRule::dListNode* const rule, int marker, dCRCTYPE lookAheadSymbol) const
 	{
 		dItemKey key (lookAheadSymbol, rule);
 		dTree<dList<dState::dListNode*>, dItemKey>::dTreeNode* const mapNode = m_itemMap.Find (key);
@@ -310,7 +310,7 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 					const dItem& item = nodeItem->GetInfo();
 				if (item.m_indexMarker == marker) {
 					_ASSERTE (item.m_ruleNode == rule);
-						_ASSERTE (item.m_lookAheadSymbol == lookAheadSymbol);
+						_ASSERTE (item.m_lookAheadSymbolCRC == lookAheadSymbol);
 						return nodeItem;
 					}
 				}
@@ -353,16 +353,16 @@ class dParserCompiler::dState: public dList<dParserCompiler::dItem>
 		fprintf (debugFile, "\n");
 	}
 
-	int m_key;
+	dCRCTYPE m_key;
 	int m_number;
 	bool m_hasErroItem;
-	dTree<dState*, unsigned> m_goto; 
-	dTree<dAction, unsigned> m_actions; 
+	dTree<dState*, dCRCTYPE> m_goto; 
+	dTree<dAction, dCRCTYPE> m_actions; 
 	dList<dTransition> m_transitions;
 	dTree<dList<dState::dListNode*>, dItemKey> m_itemMap;
 };
 
-class dParserCompiler::dOperatorsAssociation: public dList <unsigned>
+class dParserCompiler::dOperatorsAssociation: public dList <dCRCTYPE>
 {
 	public:
 	enum dAssoctivity
@@ -371,7 +371,7 @@ class dParserCompiler::dOperatorsAssociation: public dList <unsigned>
 		m_right
 	};
 
-	bool FindOperator(unsigned symbol) const
+	bool FindOperator(dCRCTYPE symbol) const
 	{
 		for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
 			if (symbol == node->GetInfo()) {
@@ -388,7 +388,7 @@ class dParserCompiler::dOperatorsAssociation: public dList <unsigned>
 class dParserCompiler::dOperatorsPrecedence: public dList <dOperatorsAssociation>
 {
 	public:
-	const dOperatorsAssociation* FindAssociation (unsigned symbol)	const
+	const dOperatorsAssociation* FindAssociation (dCRCTYPE symbol)	const
 	{
 		for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
 			const dOperatorsAssociation& association = node->GetInfo();
@@ -408,7 +408,7 @@ class dParserCompiler::dOperatorsPrecedence: public dList <dOperatorsAssociation
 			for (dRuleInfo::dListNode* infoSymbolNode = ruleInfo.GetFirst(); infoSymbolNode; infoSymbolNode = infoSymbolNode->GetNext()) {
 				const dSymbol& infoSymbol = infoSymbolNode->GetInfo();
 				if (FindAssociation(infoSymbol.m_nameCRC)) {
-					item.m_lastOperatorSymbol = infoSymbol.m_nameCRC;
+					item.m_lastOperatorSymbolCRC = infoSymbol.m_nameCRC;
 					item.m_lastOperatorSymbolName = infoSymbol.m_name;
 				}
 			}
@@ -423,15 +423,14 @@ dParserCompiler::dParserCompiler(const string& inputRules, const char* const out
 	int lastTerminalToken;
 	dProductionRule ruleList;
 	dOperatorsPrecedence operatorPrecedence;
-	dTree<dTokenInfo, unsigned> symbolList;
+	dTree<dTokenInfo, dCRCTYPE> symbolList;
 	string userCodeBlock;
 	string userVariableClass ("");
 	string endUserCode ("\n");
 
 	// scan grammar to a set of LR(1) rules
-	symbolList.Insert(dTokenInfo (DACCEPTING_TOKEN, TERMINAL, DACCEPT_SYMBOL), dCRC (DACCEPT_SYMBOL));
-	symbolList.Insert(dTokenInfo (DERROR_TOKEN, TERMINAL, DERROR_SYMBOL), dCRC (DERROR_SYMBOL));
-
+	symbolList.Insert(dTokenInfo (DACCEPTING_TOKEN, TERMINAL, DACCEPT_SYMBOL), dCRC64 (DACCEPT_SYMBOL));
+	symbolList.Insert(dTokenInfo (DERROR_TOKEN, TERMINAL, DERROR_SYMBOL), dCRC64 (DERROR_SYMBOL));
 	ScanGrammarFile(inputRules, ruleList, symbolList, operatorPrecedence, userCodeBlock, userVariableClass, endUserCode, lastTerminalToken);
 
 	// convert the rules into a NFA.
@@ -439,14 +438,14 @@ dParserCompiler::dParserCompiler(const string& inputRules, const char* const out
 	debugFileName += ".txt";
 	FILE* const debugFile = fopen (debugFileName.c_str(), "w");
 
-	dTree<dState*,int> stateList;
+	dTree<dState*, dCRCTYPE> stateList;
 	CanonicalItemSets (stateList, ruleList, symbolList, operatorPrecedence, debugFile);
 	fclose (debugFile);
 
 
 	// create a LR(1) parsing table from the NFA graphs
 	const string& startSymbol = ruleList.GetFirst()->GetInfo().m_name;
-	BuildParsingTable (stateList, dCRC (startSymbol.c_str()), operatorPrecedence);
+	BuildParsingTable (stateList, dCRC64 (startSymbol.c_str()), operatorPrecedence);
 
 
 	//Write Parser class and header file
@@ -454,7 +453,7 @@ dParserCompiler::dParserCompiler(const string& inputRules, const char* const out
 	GenerateHeaderFile (className, scannerClassName, outputFileName, symbolList, userVariableClass);
 	GenerateParserCode (className, scannerClassName, outputFileName, symbolList, stateList, userCodeBlock, endUserCode, lastTerminalToken);
 
-	dTree<dState*,int>::Iterator iter(stateList);
+	dTree<dState*, dCRCTYPE>::Iterator iter(stateList);
 	for (iter.Begin(); iter; iter ++) {
 		dState* const state = iter.GetNode()->GetInfo();
 		delete state;
@@ -541,7 +540,7 @@ void dParserCompiler::SaveFile(const char* const fileName, const char* const ext
 void dParserCompiler::ScanGrammarFile(
 	const string& inputRules, 
 	dProductionRule& ruleList, 
-	dTree<dTokenInfo, unsigned>& symbolList, 
+	dTree<dTokenInfo, dCRCTYPE>& symbolList, 
 	dOperatorsPrecedence& operatorPrecedence,
 	string& userCodeBlock,
 	string& userVariableClass,
@@ -571,7 +570,7 @@ void dParserCompiler::ScanGrammarFile(
 			{
 				for (token = dToken(lexical.NextToken()); token == LITERAL; token = dToken(lexical.NextToken())) {
 					const char* const name = lexical.GetTokenString();
-					symbolList.Insert(dTokenInfo (tokenEnumeration, TERMINAL, name), dCRC (name));
+					symbolList.Insert(dTokenInfo (tokenEnumeration, TERMINAL, name), dCRC64 (name));
 					tokenEnumeration ++;
 				}
 				break;
@@ -594,7 +593,7 @@ void dParserCompiler::ScanGrammarFile(
 				}
 
 				for (token = dToken(lexical.NextToken()); (token == LITERAL) || ((token < 256) && !isalnum (token)); token = dToken(lexical.NextToken())) {
-					association.Append(dCRC (lexical.GetTokenString()));
+					association.Append(dCRC64 (lexical.GetTokenString()));
 				}
 				break;
 			}
@@ -643,10 +642,9 @@ void dParserCompiler::ScanGrammarFile(
 				rule.m_token = token1;
 				rule.m_type = NONTERMINAL;
 				rule.m_name = lexical.GetTokenString();
-				rule.m_nameCRC = dCRC (lexical.GetTokenString());
+				rule.m_nameCRC = dCRC64 (lexical.GetTokenString());
 
-//				dTree<dTokenInfo, string>::dTreeNode* nonTerminalIdNode = symbolList.Find(rule.m_name);
-				dTree<dTokenInfo, unsigned>::dTreeNode* nonTerminalIdNode = symbolList.Find(rule.m_nameCRC);
+				dTree<dTokenInfo, dCRCTYPE>::dTreeNode* nonTerminalIdNode = symbolList.Find(rule.m_nameCRC);
 				if (!nonTerminalIdNode) {
 					nonTerminalIdNode = symbolList.Insert(dTokenInfo (tokenEnumeration, NONTERMINAL, rule.m_name), rule.m_nameCRC);
 					tokenEnumeration ++;
@@ -665,7 +663,7 @@ void dParserCompiler::ScanGrammarFile(
 
 	dProductionRule::dListNode* firtRuleNode = ruleList.GetFirst();	
 	if (startSymbol != "") {
-		firtRuleNode = ruleList.Find (dCRC (startSymbol.c_str()));	
+		firtRuleNode = ruleList.Find (dCRC64 (startSymbol.c_str()));	
 	}
 
 	//Expand the Grammar Rule by adding an empty start Rule;
@@ -677,7 +675,7 @@ void dParserCompiler::ScanGrammarFile(
 	rule.m_token = firstRule.m_token;
 	rule.m_type = NONTERMINAL;
 	rule.m_name = firstRule.m_name + string("__");
-	rule.m_nameCRC = dCRC (rule.m_name.c_str());
+	rule.m_nameCRC = dCRC64 (rule.m_name.c_str());
 	symbolList.Insert(dTokenInfo (tokenEnumeration, rule.m_type, rule.m_name), rule.m_nameCRC);
 	tokenEnumeration ++;
 	
@@ -698,11 +696,10 @@ void dParserCompiler::ScanGrammarFile(
 dParserCompiler::dToken dParserCompiler::ScanGrammarRule(
 	dParserLexical& lexical, 
 	dProductionRule& rules, 
-	dTree<dTokenInfo, unsigned>& symbolList, 
+	dTree<dTokenInfo, dCRCTYPE>& symbolList, 
 	int& ruleNumber,
 	int& tokenEnumeration)
 {
-
 	dRuleInfo* currentRule = &rules.GetLast()->GetInfo();
 	dToken token = dToken(lexical.NextToken());
 	do {
@@ -713,10 +710,6 @@ dParserCompiler::dToken dParserCompiler::ScanGrammarRule(
 			dTokenStringPair& pair = ruleTokens.Append()->GetInfo();
 			pair.m_token = token;
 			pair.m_info = lexical.GetTokenString();
-//			if (pair.m_info == DERROR_SYMBOL) {
-//				_ASSERTE (0);
-//				pair.m_token = DERROR_TOKEN;
-//			}
 		}
 		
 		dList<dTokenStringPair>::dListNode* lastNode = ruleTokens.GetLast();
@@ -733,9 +726,9 @@ dParserCompiler::dToken dParserCompiler::ScanGrammarRule(
 				dSymbol& symbol = currentRule->Append()->GetInfo();
 				symbol.m_token = pair.m_token;
 				symbol.m_name = pair.m_info;
-				symbol.m_nameCRC = dCRC (symbol.m_name.c_str());
+				symbol.m_nameCRC = dCRC64 (symbol.m_name.c_str());
 
-				dTree<dTokenInfo, unsigned>::dTreeNode* symbolNode = symbolList.Find(symbol.m_nameCRC);
+				dTree<dTokenInfo, dCRCTYPE>::dTreeNode* symbolNode = symbolList.Find(symbol.m_nameCRC);
 				if (!symbolNode) {
 					symbolNode = symbolList.Insert(dTokenInfo (tokenEnumeration, NONTERMINAL, symbol.m_name), symbol.m_nameCRC);
 					tokenEnumeration ++;
@@ -746,7 +739,7 @@ dParserCompiler::dToken dParserCompiler::ScanGrammarRule(
 				_ASSERTE (pair.m_info.length() == 1);
 				dSymbol& symbol = currentRule->Append()->GetInfo();
 				symbol.m_name = pair.m_info;
-				symbol.m_nameCRC = dCRC (symbol.m_name.c_str());
+				symbol.m_nameCRC = dCRC64 (symbol.m_name.c_str());
 
 				symbol.m_type = TERMINAL;
 				symbol.m_token = LITERAL;
@@ -777,15 +770,14 @@ dParserCompiler::dToken dParserCompiler::ScanGrammarRule(
 	} while (token != SIMICOLOM);
 
 	return token;
-
 }
 
 
 // generates the canonical Items set for a LR(1) grammar
 void dParserCompiler::CanonicalItemSets (
-	dTree<dState*,int>& stateMap, 
+	dTree<dState*, dCRCTYPE>& stateMap, 
 	const dProductionRule& ruleList, 
-	const dTree<dTokenInfo, unsigned>& symbolList, 
+	const dTree<dTokenInfo, dCRCTYPE>& symbolList, 
 	const dOperatorsPrecedence& operatorPrecence,
 	FILE* const debugFile)
 {
@@ -795,16 +787,16 @@ void dParserCompiler::CanonicalItemSets (
 	// start by building an item set with only the first rule
 	dItem& item = itemSet.Append()->GetInfo();
 	item.m_indexMarker = 0;
-	item.m_lookAheadSymbol = dCRC (DACCEPT_SYMBOL);
+	item.m_lookAheadSymbolCRC = dCRC64 (DACCEPT_SYMBOL);
 	item.m_lookAheadSymbolName = DACCEPT_SYMBOL;
 	item.m_ruleNode = ruleList.GetFirst();
 
 	// build a rule info map
-	dTree<dList<void*>, unsigned> ruleMap;
+	dTree<dList<void*>, dCRCTYPE> ruleMap;
 	for (dProductionRule::dListNode* ruleNode = ruleList.GetFirst(); ruleNode; ruleNode = ruleNode->GetNext()) {
 		dRuleInfo& info = ruleNode->GetInfo();
 
-		dTree<dList<void*>, unsigned>::dTreeNode* node = ruleMap.Find(info.m_nameCRC);
+		dTree<dList<void*>, dCRCTYPE>::dTreeNode* node = ruleMap.Find(info.m_nameCRC);
 		if (!node) {
 			node = ruleMap.Insert(info.m_nameCRC);
 		}
@@ -827,10 +819,10 @@ void dParserCompiler::CanonicalItemSets (
 	for (dList<dState*>::dListNode* node = stateList.GetFirst(); node; node = node->GetNext()) {
 		dState* const state = node->GetInfo();
 
-		dTree<dTokenInfo, unsigned>::Iterator iter (symbolList);
+		dTree<dTokenInfo, dCRCTYPE>::Iterator iter (symbolList);
 		for (iter.Begin(); iter; iter ++) {
 
-			unsigned symbol = iter.GetKey();
+			dCRCTYPE symbol = iter.GetKey();
 			dState* const newState = Goto (state, symbol, symbolList, ruleMap);
 
 			if (newState->GetCount()) {
@@ -839,10 +831,10 @@ void dParserCompiler::CanonicalItemSets (
 				transition.m_symbol = symbol;
 				transition.m_name = tokenInfo.m_name; 
 				transition.m_type = tokenInfo.m_type;
-				_ASSERTE (transition.m_symbol == dCRC(transition.m_name.c_str()));
+				_ASSERTE (transition.m_symbol == dCRC64(transition.m_name.c_str()));
 				transition.m_targetState = newState;
 
-				dTree<dState*,int>::dTreeNode* const targetStateNode = stateMap.Find(newState->GetKey());
+				dTree<dState*, dCRCTYPE>::dTreeNode* const targetStateNode = stateMap.Find(newState->GetKey());
 				if (!targetStateNode) {
 					newState->m_number = stateNumber;
 
@@ -868,8 +860,8 @@ void dParserCompiler::CanonicalItemSets (
 // Generate the closure for a Set of Item  
 dParserCompiler::dState* dParserCompiler::Closure (
 	const dList<dItem>& itemSet, 
-	const dTree<dTokenInfo, unsigned>& symbolList,
-	const dTree<dList<void*>, unsigned>& ruleMap) const
+	const dTree<dTokenInfo, dCRCTYPE>& symbolList,
+	const dTree<dList<void*>, dCRCTYPE>& ruleMap) const
 {
 	dState* const state = new dState (itemSet);
 	for (dState::dListNode* itemNode = state->GetFirst(); itemNode; itemNode = itemNode->GetNext()) {
@@ -885,16 +877,16 @@ dParserCompiler::dState* dParserCompiler::Closure (
 				ruleNode = ruleNode->GetNext();
 			}
 
-			dList<unsigned> firstSymbolList;
+			dList<dCRCTYPE> firstSymbolList;
 			for (ruleNode = ruleNode->GetNext(); ruleNode; ruleNode = ruleNode->GetNext()) {
 				const dSymbol& symbol = ruleNode->GetInfo();
 				firstSymbolList.Append(symbol.m_nameCRC);
 			}
 
-			firstSymbolList.Append(item.m_lookAheadSymbol);
+			firstSymbolList.Append(item.m_lookAheadSymbolCRC);
 			const dSymbol& sentenceSymbol = symbolNode->GetInfo();
 
-			dTree<dList<void*>, unsigned>::dTreeNode* const ruleNodes = ruleMap.Find(sentenceSymbol.m_nameCRC);
+			dTree<dList<void*>, dCRCTYPE>::dTreeNode* const ruleNodes = ruleMap.Find(sentenceSymbol.m_nameCRC);
 			if (ruleNodes) {
 				const dList<void*>& matchingRulesList = ruleNodes->GetInfo();
 				_ASSERTE (matchingRulesList);
@@ -902,17 +894,17 @@ dParserCompiler::dState* dParserCompiler::Closure (
 					dProductionRule::dListNode* const ruleNode = (dProductionRule::dListNode*) node->GetInfo();
 					const dRuleInfo& info = ruleNode->GetInfo();
 					_ASSERTE (info.m_name == sentenceSymbol.m_name);
-					dTree<int, unsigned> firstList;
+					dTree<int, dCRCTYPE> firstList;
 					First (firstSymbolList, symbolList, ruleMap, firstList);
-					dTree<int, unsigned>::Iterator firstIter (firstList);
+					dTree<int, dCRCTYPE>::Iterator firstIter (firstList);
 					for (firstIter.Begin(); firstIter; firstIter ++) {
-						unsigned symbol = firstIter.GetKey();
+						dCRCTYPE symbol = firstIter.GetKey();
 						dState::dListNode* const itemNode = state->FindItem(ruleNode, 0, symbol);
 						if (!itemNode) {
 							dItem newItem;
 							newItem.m_indexMarker = 0;
 							newItem.m_ruleNode = ruleNode;
-							newItem.m_lookAheadSymbol = symbol;
+							newItem.m_lookAheadSymbolCRC = symbol;
 							newItem.m_lookAheadSymbolName = symbolList.Find (symbol)->GetInfo().m_name;
 							state->AddItem(newItem);
 						}
@@ -929,28 +921,26 @@ dParserCompiler::dState* dParserCompiler::Closure (
 
 
 void dParserCompiler::First (
-	const dList<unsigned>& symbolSet, 
-	const dTree<dTokenInfo, unsigned>& symbolList, 
-	const dTree<dList<void*>, unsigned>& ruleMap,
-	dTree<int, unsigned>& firstSetOut) const
+	const dList<dCRCTYPE>& symbolSet, 
+	const dTree<dTokenInfo, dCRCTYPE>& symbolList, 
+	const dTree<dList<void*>, dCRCTYPE>& ruleMap,
+	dTree<int, dCRCTYPE>& firstSetOut) const
 {
 	if (symbolSet.GetCount() > 1) {
-		//string empty ("");
-		//unsigned empty = 0;
 
-		dList<unsigned>::dListNode* node = symbolSet.GetFirst();
+		dList<dCRCTYPE>::dListNode* node = symbolSet.GetFirst();
 		bool deriveEmpty = true;
 		while ((deriveEmpty) && node) {
-			unsigned symbol = node->GetInfo();
+			dCRCTYPE symbol = node->GetInfo();
 			node = node->GetNext();
 
-			dTree<int, unsigned> tmpFirst;
-			dTree<int, unsigned> symbolListMark; 
+			dTree<int, dCRCTYPE> tmpFirst;
+			dTree<int, dCRCTYPE> symbolListMark; 
 			First (symbol, symbolListMark, symbolList, ruleMap, tmpFirst);
-			dTree<int, unsigned>::Iterator iter (tmpFirst);
+			dTree<int, dCRCTYPE>::Iterator iter (tmpFirst);
 			deriveEmpty = false;  
 			for (iter.Begin(); iter; iter ++) {
-				unsigned symbol = iter.GetKey();
+				dCRCTYPE symbol = iter.GetKey();
 				if (symbol == 0) {
 					deriveEmpty = true;  
 				} else {
@@ -963,26 +953,26 @@ void dParserCompiler::First (
 		}
 
 	} else  {
-		unsigned symbol = symbolSet.GetFirst()->GetInfo();
-		dTree<int, unsigned> symbolListMark; 
+		dCRCTYPE symbol = symbolSet.GetFirst()->GetInfo();
+		dTree<int, dCRCTYPE> symbolListMark; 
 		First (symbol, symbolListMark, symbolList, ruleMap, firstSetOut);
 	}
 }
 
 
 void dParserCompiler::First (
-	unsigned symbol, 
-	dTree<int, unsigned>& symbolListMark, 
-	const dTree<dTokenInfo, unsigned>& symbolList, 
-	const dTree<dList<void*>, unsigned>& ruleMap,
-	dTree<int, unsigned>& firstSetOut) const
+	dCRCTYPE symbol, 
+	dTree<int, dCRCTYPE>& symbolListMark, 
+	const dTree<dTokenInfo, dCRCTYPE>& symbolList, 
+	const dTree<dList<void*>, dCRCTYPE>& ruleMap,
+	dTree<int, dCRCTYPE>& firstSetOut) const
 {
 	if (symbolListMark.Find(symbol)) {
 		return;
 	}
 	symbolListMark.Insert(0, symbol);
 
-	dTree<dTokenInfo, unsigned>::dTreeNode* const node = symbolList.Find(symbol);
+	dTree<dTokenInfo, dCRCTYPE>::dTreeNode* const node = symbolList.Find(symbol);
 	_ASSERTE (node);
 	if (node->GetInfo().m_type == TERMINAL) {
 		firstSetOut.Insert(0, symbol);
@@ -990,23 +980,23 @@ void dParserCompiler::First (
 		firstSetOut.Insert(0, 0);
 	} else {
 
-		dTree<dList<void*>, unsigned>::dTreeNode* const ruleNodes = ruleMap.Find(symbol);
+		dTree<dList<void*>, dCRCTYPE>::dTreeNode* const ruleNodes = ruleMap.Find(symbol);
 		if (ruleNodes) {
 			const dList<void*>& matchingRulesList = ruleNodes->GetInfo();
 			for (dList<void*>::dListNode* node = matchingRulesList.GetFirst(); node; node = node->GetNext()) {
 				dProductionRule::dListNode* const ruleInfoNode = (dProductionRule::dListNode*) node->GetInfo();
 				const dRuleInfo& info = ruleInfoNode->GetInfo();
-				//				if (symbol == info.m_name) {
+
 				bool allDeriveEmpty = true;
 				for (dRuleInfo::dListNode* sentenceSymbolNode = info.GetFirst(); sentenceSymbolNode; sentenceSymbolNode = sentenceSymbolNode->GetNext()) {
 					const dSymbol& sentenceSymnol = sentenceSymbolNode->GetInfo();
 					if (!DoesSymbolDeriveEmpty (sentenceSymnol.m_nameCRC, ruleMap)) {
 						allDeriveEmpty = false;
-						dTree<int, unsigned> newFirstSetOut;
+						dTree<int, dCRCTYPE> newFirstSetOut;
 						First (sentenceSymnol.m_nameCRC, symbolListMark, symbolList, ruleMap, newFirstSetOut);
-						dTree<int, unsigned>::Iterator iter (newFirstSetOut);
+						dTree<int, dCRCTYPE>::Iterator iter (newFirstSetOut);
 						for (iter.Begin(); iter; iter ++) {
-							unsigned symbol = iter.GetKey();
+							dCRCTYPE symbol = iter.GetKey();
 							_ASSERTE (symbol != 0);
 							_ASSERTE (symbolList.Find(symbol)->GetInfo().m_type == TERMINAL);
 							firstSetOut.Insert(0, symbol);
@@ -1023,9 +1013,9 @@ void dParserCompiler::First (
 }
 
 
-bool dParserCompiler::DoesSymbolDeriveEmpty (unsigned symbol, const dTree<dList<void*>, unsigned>& ruleMap) const 
+bool dParserCompiler::DoesSymbolDeriveEmpty (dCRCTYPE symbol, const dTree<dList<void*>, dCRCTYPE>& ruleMap) const 
 {
-	dTree<dList<void*>, unsigned>::dTreeNode* const ruleNodes = ruleMap.Find(symbol);
+	dTree<dList<void*>, dCRCTYPE>::dTreeNode* const ruleNodes = ruleMap.Find(symbol);
 	if (ruleNodes) {
 		//const dList<void*>& matchingRulesList = ruleMap.Find(symbol)->GetInfo();
 		const dList<void*>& matchingRulesList = ruleNodes->GetInfo();
@@ -1047,9 +1037,9 @@ bool dParserCompiler::DoesSymbolDeriveEmpty (unsigned symbol, const dTree<dList<
 // generates the got state for this symbol
 dParserCompiler::dState* dParserCompiler::Goto (
 	const dState* const state, 
-	unsigned symbol, 
-	const dTree<dTokenInfo, unsigned>& symbolList,
-	const dTree<dList<void*>, unsigned>& ruleMap) const
+	dCRCTYPE symbol, 
+	const dTree<dTokenInfo, dCRCTYPE>& symbolList,
+	const dTree<dList<void*>, dCRCTYPE>& ruleMap) const
 {
 	dList<dItem> itemSet;
 
@@ -1070,7 +1060,7 @@ dParserCompiler::dState* dParserCompiler::Goto (
 					dItem& newItem = itemSet.Append()->GetInfo();
 					newItem.m_indexMarker = index + 1;
 					newItem.m_ruleNode = item.m_ruleNode;
-					newItem.m_lookAheadSymbol = item.m_lookAheadSymbol;
+					newItem.m_lookAheadSymbolCRC = item.m_lookAheadSymbolCRC;
 					newItem.m_lookAheadSymbolName = item.m_lookAheadSymbolName;
 					break;
 				}
@@ -1086,16 +1076,15 @@ dParserCompiler::dState* dParserCompiler::Goto (
 
 
 void dParserCompiler::BuildParsingTable (
-	const dTree<dState*,int>& stateList, 
-	unsigned startSymbol, 
+	const dTree<dState*, dCRCTYPE>& stateList, 
+	dCRCTYPE startSymbol, 
 	const dOperatorsPrecedence& operatorPrecedence) const
 {
-	dTree<dState*,int>::Iterator stateIter (stateList);
+	dTree<dState*, dCRCTYPE>::Iterator stateIter (stateList);
 
-//	string emptySymbol ("");
 	unsigned emptySymbol = 0;
-//	string acceptingSymbol (DACCEPT_SYMBOL);
-	const unsigned acceptingSymbol = dCRC (DACCEPT_SYMBOL);
+
+	const dCRCTYPE acceptingSymbol = dCRC64 (DACCEPT_SYMBOL);
 	// create Shift Reduce action table
 	for (stateIter.Begin(); stateIter; stateIter ++) {
 		dState* const state = stateIter.GetNode()->GetInfo();
@@ -1109,7 +1098,7 @@ void dParserCompiler::BuildParsingTable (
 				// find item generating this shift action and mark it as used.
 				const dState* const targetState = transition.m_targetState;
 				_ASSERTE (!state->m_actions.Find (transition.m_symbol));
-				dTree<dAction, unsigned>::dTreeNode* const actionNode = state->m_actions.Insert (transition.m_symbol); 
+				dTree<dAction, dCRCTYPE>::dTreeNode* const actionNode = state->m_actions.Insert (transition.m_symbol); 
 				dAction& action = actionNode->GetInfo();
 				action.m_type = dSHIFT;
 				action.m_myItem = NULL;
@@ -1124,16 +1113,16 @@ void dParserCompiler::BuildParsingTable (
 			dItem& item = itemNode->GetInfo();
 			const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
 			if ((ruleInfo.m_ruleNumber == 0) && (item.m_indexMarker == 1)) {
-				dTree<dAction, unsigned>::dTreeNode* const actionNode = state->m_actions.Insert (acceptingSymbol); 
+				dTree<dAction, dCRCTYPE>::dTreeNode* const actionNode = state->m_actions.Insert (acceptingSymbol); 
 				_ASSERTE (actionNode);
 				dAction& action = actionNode->GetInfo();
 				action.m_type = dACCEPT;
 				action.m_myItem = &item;
 				action.m_reduceRuleNode = NULL;
 			} else if ((item.m_indexMarker == ruleInfo.GetCount()) && (ruleInfo.m_nameCRC != startSymbol)) {
-				dTree<dAction, unsigned>::dTreeNode* actionNode = state->m_actions.Find (item.m_lookAheadSymbol); 
+				dTree<dAction, dCRCTYPE>::dTreeNode* actionNode = state->m_actions.Find (item.m_lookAheadSymbolCRC); 
 				if (!actionNode) {
-					actionNode = state->m_actions.Insert (item.m_lookAheadSymbol); 
+					actionNode = state->m_actions.Insert (item.m_lookAheadSymbolCRC); 
 					dAction& action = actionNode->GetInfo();
 					action.m_type = dREDUCE;
 					action.m_myItem = &item;
@@ -1164,12 +1153,12 @@ void dParserCompiler::BuildParsingTable (
 				nextActionNode = actionNode->GetNext();
 
 				const dItem& item = *action->m_myItem;
-				if (item.m_lastOperatorSymbol != emptySymbol) {
-					const dOperatorsAssociation* const operatorAssosiation = operatorPrecedence.FindAssociation (item.m_lastOperatorSymbol);
+				if (item.m_lastOperatorSymbolCRC != emptySymbol) {
+					const dOperatorsAssociation* const operatorAssosiation = operatorPrecedence.FindAssociation (item.m_lastOperatorSymbolCRC);
 					_ASSERTE (operatorAssosiation);
 					if (operatorAssosiation->m_associativity == dOperatorsAssociation::m_left) {
 
-						const dOperatorsAssociation* const lookAheadOperatorAssosiation = operatorPrecedence.FindAssociation (item.m_lookAheadSymbol);
+						const dOperatorsAssociation* const lookAheadOperatorAssosiation = operatorPrecedence.FindAssociation (item.m_lookAheadSymbolCRC);
 						if (!(lookAheadOperatorAssosiation && (lookAheadOperatorAssosiation->m_prioprity > operatorAssosiation->m_prioprity))) {
 							action->m_type = dREDUCE;
 						}
@@ -1225,7 +1214,7 @@ void dParserCompiler::GenerateHeaderFile (
 	const string& className, 
 	const string& scannerClassName, 
 	const char* const outputFileName, 
-	const dTree<dTokenInfo, unsigned>& symbolList, 
+	const dTree<dTokenInfo, dCRCTYPE>& symbolList, 
 	const string& userVariableClass) 
 {
 	string templateHeader ("");
@@ -1236,8 +1225,8 @@ void dParserCompiler::GenerateHeaderFile (
 	ReplaceMacro (templateHeader, userVariableClass, "$(userVariableClass)");
 
 
-	dTree<dTree<dTokenInfo, unsigned>::dTreeNode*, int> sortToken;
-	dTree<dTokenInfo, unsigned>::Iterator iter (symbolList);
+	dTree<dTree<dTokenInfo, dCRCTYPE>::dTreeNode*, int> sortToken;
+	dTree<dTokenInfo, dCRCTYPE>::Iterator iter (symbolList);
 	for (iter.Begin(); iter; iter ++) {
 		const dTokenInfo& info = iter.GetNode()->GetInfo();
 		if ((info.m_type == TERMINAL) && (info.m_tokenId >= 256)) {
@@ -1245,7 +1234,7 @@ void dParserCompiler::GenerateHeaderFile (
 		}
 	} 
 
-	dTree<dTree<dTokenInfo, unsigned>::dTreeNode*, int>::Iterator iter1 (sortToken);
+	dTree<dTree<dTokenInfo, dCRCTYPE>::dTreeNode*, int>::Iterator iter1 (sortToken);
 	bool first = true;
 	char text[256];
 	sprintf (text, " = %d, \n", DACCEPTING_TOKEN);
@@ -1257,7 +1246,7 @@ void dParserCompiler::GenerateHeaderFile (
 	enumdTokens += text;
 
 	for (iter1.Begin(); iter1; iter1 ++) {
-		dTree<dTokenInfo, unsigned>::dTreeNode* const node = iter1.GetNode()->GetInfo();
+		dTree<dTokenInfo, dCRCTYPE>::dTreeNode* const node = iter1.GetNode()->GetInfo();
 		//const string& name = node->GetKey();
 		const string& name = node->GetInfo().m_name;
 		enumdTokens += "\t\t";
@@ -1282,8 +1271,8 @@ void dParserCompiler::GenerateParserCode (
 	const string& className, 
 	const string& scannerClassName, 
 	const char* const outputFileName, 
-	const dTree<dTokenInfo, unsigned>& symbolList, 
-	dTree<dState*,int>& stateList, 
+	const dTree<dTokenInfo, dCRCTYPE>& symbolList, 
+	dTree<dState*, dCRCTYPE>& stateList, 
 	const string& userCode, 
 	string& endUserCode,
 	int lastTerminalTokenEnum)
@@ -1302,8 +1291,8 @@ void dParserCompiler::GenerateParserCode (
 	sprintf (text, "%d", lastTerminalTokenEnum);
 	ReplaceMacro (templateHeader, text, "&(lastTerminalToken)");
 
-	dTree<dState*,int> sortedStates;
-	dTree<dState*,int>::Iterator stateIter (stateList);
+	dTree<dState*, dCRCTYPE> sortedStates;
+	dTree<dState*, dCRCTYPE>::Iterator stateIter (stateList);
 	for (stateIter.Begin(); stateIter; stateIter ++) {
 		dState* const state = stateIter.GetNode()->GetInfo();
 		sortedStates.Insert(state, state->m_number);
@@ -1320,19 +1309,19 @@ void dParserCompiler::GenerateParserCode (
 
 	int newLineCount = 0;
 	int starAndCountIndex = 0;
-	dTree<dState*,int>::Iterator sortStateIter (sortedStates);
+	dTree<dState*, dCRCTYPE>::Iterator sortStateIter (sortedStates);
 	for (sortStateIter.Begin(); sortStateIter; sortStateIter ++) {
 		dState* const state = sortStateIter.GetNode()->GetInfo();
 
 		int count = 0;
 		dTree<dActionEntry, int> actionSort;
-		dTree<dAction, unsigned>::Iterator actionIter (state->m_actions);
+		dTree<dAction, dCRCTYPE>::Iterator actionIter (state->m_actions);
 		for (actionIter.Begin(); actionIter; actionIter++) {
 			count ++;
 
 			dAction& action = actionIter.GetNode()->GetInfo();
 			if (action.m_type == dSHIFT) {
-				unsigned actionSymbol = actionIter.GetKey();
+				dCRCTYPE actionSymbol = actionIter.GetKey();
 				_ASSERTE (symbolList.Find(actionSymbol));
 
 				dActionEntry entry;
@@ -1347,7 +1336,7 @@ void dParserCompiler::GenerateParserCode (
 
 			} else if (action.m_type == dREDUCE) {
 
-				unsigned actionSymbol = actionIter.GetKey();
+				dCRCTYPE actionSymbol = actionIter.GetKey();
 				_ASSERTE (symbolList.Find(actionSymbol));
 
 				dRuleInfo& reduceRule = action.m_reduceRuleNode->GetInfo();
@@ -1480,14 +1469,14 @@ void dParserCompiler::GenerateParserCode (
 		int currentEntryuCount = entriesCount;
 
 		int count = 0;
-		dTree<dState*, unsigned>::Iterator gotoIter (state->m_goto); 
-		dTree<dTree<dState*, unsigned>::dTreeNode*, int> sortGotoActions;
+		dTree<dState*, dCRCTYPE>::Iterator gotoIter (state->m_goto); 
+		dTree<dTree<dState*, dCRCTYPE>::dTreeNode*, int> sortGotoActions;
 		for (gotoIter.Begin(); gotoIter; gotoIter++) {
 			int id = symbolList.Find(gotoIter.GetKey())->GetInfo().m_tokenId;
 			sortGotoActions.Insert(gotoIter.GetNode(), id);
 		}
 
-		dTree<dTree<dState*, unsigned>::dTreeNode*, int>::Iterator iter1 (sortGotoActions);
+		dTree<dTree<dState*, dCRCTYPE>::dTreeNode*, int>::Iterator iter1 (sortGotoActions);
 		for (iter1.Begin(); iter1; iter1++) {
 			count ++;
 			if ((newLine % 5) == 0) {
@@ -1495,7 +1484,7 @@ void dParserCompiler::GenerateParserCode (
 			}
 			newLine ++;
 
-			dTree<dState*, unsigned>::dTreeNode* const node = iter1.GetNode()->GetInfo();
+			dTree<dState*, dCRCTYPE>::dTreeNode* const node = iter1.GetNode()->GetInfo();
 			dState* const targetState = node->GetInfo();
 
 			dGotoEntry entry;

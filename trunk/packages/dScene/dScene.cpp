@@ -245,12 +245,12 @@ dScene::dTreeNode* dScene::CreateTextureNode (const char* const pathName)
 	dTreeNode* root = GetRootNode();
 
 	// see if this texture is already exist
-	unsigned crc = dCRC (dGetNameFromPath(pathName));
+	dCRCTYPE crc = dCRC64 (dGetNameFromPath(pathName));
 	for (void* ptr = GetFirstChild(root); ptr; ptr = GetNextChild(root, ptr)) {
 		dNodeInfo* const info = GetInfoFromNode(GetNodeFromLink (ptr));
 		if (info->IsType(dTextureNodeInfo::GetRttiType())) {
 			dTextureNodeInfo* texture = (dTextureNodeInfo*) info;
-			if (crc == unsigned (texture->GetId())) {
+			if (crc == texture->GetId()) {
 				// we found a texture, return the node
 				return GetNodeFromLink (ptr);
 			}
@@ -368,13 +368,27 @@ dScene::dTreeNode* dScene::FindCameraNode(int camIndex) const
 	return camera;
 }
 
-dScene::dTreeNode* dScene::FindTextureByTextId(dTreeNode* const parentNode, int textId) const
+dScene::dTreeNode* dScene::FindTextureByTextId(dTreeNode* const parentNode, dCRCTYPE textId) const
 {
 	for (void* ptr = GetFirstChild(parentNode); ptr; ptr = GetNextChild(parentNode, ptr)) {
 		dScene::dTreeNode* const node = GetNodeFromLink(ptr);
 		dNodeInfo* const info = GetInfoFromNode(node);
 		if (info->IsType(dTextureNodeInfo::GetRttiType())) {
-			if (((dTextureNodeInfo*) info)->GetId() == textId) {
+			const dTextureNodeInfo* const texture = (dTextureNodeInfo*) info;
+			if (texture->GetId() == textId) {
+				return node;
+			}
+		}
+	}
+
+	{
+		// hack!! return any texture if this was an old id
+		// maybe it is no god idea to make the texture ID form the texture name
+		// because change the texture cause the file to be invalid
+		for (void* ptr = GetFirstChild(parentNode); ptr; ptr = GetNextChild(parentNode, ptr)) {
+			dScene::dTreeNode* const node = GetNodeFromLink(ptr);
+			dNodeInfo* const info = GetInfoFromNode(node);
+			if (info->IsType(dTextureNodeInfo::GetRttiType())) {
 				return node;
 			}
 		}
@@ -383,7 +397,7 @@ dScene::dTreeNode* dScene::FindTextureByTextId(dTreeNode* const parentNode, int 
 }
 
 
-dScene::dTreeNode* dScene::FindChildByType(dTreeNode* const parentNode, int type) const
+dScene::dTreeNode* dScene::FindChildByType(dTreeNode* const parentNode, dCRCTYPE type) const
 {
 	for (void* child = GetFirstChild (parentNode); child; child = GetNextChild(parentNode, child)) {
 		dTreeNode* const tmpNode = GetNodeFromLink (child);
@@ -395,7 +409,7 @@ dScene::dTreeNode* dScene::FindChildByType(dTreeNode* const parentNode, int type
 	return NULL;
 }
 
-dScene::dTreeNode* dScene::FindParentByType(dTreeNode* const childNode, int type) const
+dScene::dTreeNode* dScene::FindParentByType(dTreeNode* const childNode, dCRCTYPE type) const
 {
 	for (void* parent = GetFirstParent(childNode); parent; parent = GetNextChild(childNode, parent)) {
 		dTreeNode* const tmpNode = GetNodeFromLink (parent);

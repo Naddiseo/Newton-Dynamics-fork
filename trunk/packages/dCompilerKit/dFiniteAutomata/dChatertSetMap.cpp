@@ -94,24 +94,24 @@ dChatertSetMap::~dChatertSetMap()
 
 const dTree<dList <dChatertSetMap::ChatertSet>::dListNode*, int>& dChatertSetMap::GetSets() const
 {
-	return m_lable;
+	return m_table;
 }
 
 const dChatertSetMap::ChatertSet* dChatertSetMap::FindSet (int id) const
 {
-	dTree<dList <ChatertSet>::dListNode*, int>::dTreeNode* node = m_lable.Find(id);
+	dTree<dList <ChatertSet>::dListNode*, int>::dTreeNode* node = m_table.Find(id);
 	return node ? &node->GetInfo()->GetInfo() : NULL; 
 }
 
 int dChatertSetMap::AddSet (const char* const set, int count)
 {
 	ChatertSet newSet (set, count, m_id);
-	int crc = dCRC (newSet.m_characters, 0);
+	dCRCTYPE crc = dCRC64 (newSet.m_characters, 0);
 
-	dTree<dList <ChatertSet>::dListNode*, int>::dTreeNode* node = m_crcID.Find(crc);
+	dTree<dList <ChatertSet>::dListNode*, dCRCTYPE>::dTreeNode* node = m_crcID.Find(crc);
 	if (!node) {
 		dList <ChatertSet>::dListNode* const setNode = m_sets.Append(newSet);
-		m_lable.Insert(setNode, newSet.m_id);
+		m_table.Insert(setNode, newSet.m_id);
 		m_id ++;
 		node = m_crcID.Insert(setNode, crc);
 	}

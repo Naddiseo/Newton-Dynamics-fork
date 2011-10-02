@@ -86,7 +86,8 @@ dMaterialNodeInfo::~dMaterialNodeInfo(void)
 void dMaterialNodeInfo::Serialize (TiXmlElement* const rootNode) const
 {
 	SerialiseBase(dNodeInfo, rootNode);
-
+	_ASSERTE (0);
+/*
 	char buffer[1024];
 	rootNode->SetAttribute("id", m_id);
 
@@ -121,28 +122,42 @@ void dMaterialNodeInfo::Serialize (TiXmlElement* const rootNode) const
 	TiXmlElement* opacity = new TiXmlElement ("opacity");
 	rootNode->LinkEndChild(opacity);
 	opacity->SetDoubleAttribute ("float", m_opacity);
+*/
 }
 
 bool dMaterialNodeInfo::Deserialize (TiXmlElement* const rootNode, int revisionNumber) 
 {
 	DeserialiseBase(dNodeInfo, rootNode, revisionNumber);
 
-	rootNode->Attribute("id", &m_id);
+	char text[1024];
+
+//	rootNode->Attribute("id", &m_id);
+	sprintf (text, rootNode->Attribute("id"));
+	m_id = _atoi64 (text);
+
 
 	TiXmlElement* const ambient = (TiXmlElement*) rootNode->FirstChild ("ambient");
-	ambient->Attribute("textureId", &m_ambientTexId);
+//	ambient->Attribute("textureId", &m_ambientTexId);
+	sprintf (text, ambient->Attribute("textureId"));
+	m_ambientTexId = _atoi64 (text);
 	dStringToFloatArray (ambient->Attribute("color"), &m_ambientColor[0], 4);
 
 	TiXmlElement* const diffuse = (TiXmlElement*) rootNode->FirstChild ("diffuse");
-	diffuse->Attribute("textureId", &m_diffuseTexId);
+//	diffuse->Attribute("textureId", &m_diffuseTexId);
+	sprintf (text, diffuse->Attribute("textureId"));
+	m_diffuseTexId = _atoi64 (text);
 	dStringToFloatArray (diffuse->Attribute("color"), &m_diffuseColor[0], 4);
 
 	TiXmlElement* const specular = (TiXmlElement*) rootNode->FirstChild ("specular");
-	specular->Attribute("textureId", &m_specularTexId);
+//	specular->Attribute("textureId", &m_specularTexId);
+	sprintf (text, specular->Attribute("textureId"));
+	m_emissiveTexId = _atoi64 (text);
 	dStringToFloatArray (specular->Attribute("color"), &m_specularColor[0], 4);
 
 	TiXmlElement* const emissive = (TiXmlElement*) rootNode->FirstChild ("emissive");
-	emissive->Attribute("textureId", &m_emissiveTexId);
+//	emissive->Attribute("textureId", &m_emissiveTexId);
+	sprintf (text, emissive->Attribute("textureId"));
+	m_emissiveTexId = _atoi64 (text);
 	dStringToFloatArray (emissive->Attribute("color"), &m_emissiveColor[0], 4);
 
 	TiXmlElement* const shininess = (TiXmlElement*) rootNode->FirstChild ("shininess");

@@ -33,12 +33,12 @@ class dTextureNodeInfo: public dNodeInfo
 	dTextureNodeInfo(const char* const pathName);
 	virtual ~dTextureNodeInfo(void);
 
-	virtual int GetId () const {return m_id;}
+	virtual dCRCTYPE GetId () const {return m_id;}
 	virtual const char* GetPathName () const {return m_path;}
 	virtual void SetPathName (const char* const path);
 
-	int GetInternalId() const {return m_internalUsage;}
-	void SetInternalId(int id) {m_internalUsage = id;}
+	dCRCTYPE GetInternalId() const {return m_internalUsage;}
+	void SetInternalId(dCRCTYPE id) {m_internalUsage = id;}
 
 
 	protected:
@@ -46,8 +46,8 @@ class dTextureNodeInfo: public dNodeInfo
 	virtual void Serialize (TiXmlElement* const rootNode) const; 
 	virtual bool Deserialize (TiXmlElement* const rootNode, int revisionNumber);
 
-	int m_id;
-	int m_internalUsage;
+	dCRCTYPE m_id;
+	dCRCTYPE m_internalUsage;
 	char m_path[D_MAX_TEXTURE_PATH_NAME_LENGTH];
 	
 };

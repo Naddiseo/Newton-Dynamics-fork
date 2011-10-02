@@ -53,7 +53,7 @@ void dTextureNodeInfo::SetPathName (const char* const path)
 {
 	const char* ptr = dGetNameFromPath (path);
 	strncpy (m_path, ptr, sizeof (m_path));
-	m_id = dCRC (m_path);
+	m_id = dCRC64 (m_path);
 }
 
 

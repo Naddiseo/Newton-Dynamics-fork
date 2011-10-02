@@ -46,7 +46,7 @@ void alchemediaTextureCache::LoadTexture (const char* const fileName, dTextureNo
 {
 	_ASSERTE (texture->GetInternalId() == -1);
 
-	unsigned key = dCRC(texture->GetPathName());
+	dCRCTYPE key = dCRC64(texture->GetPathName());
 	dTreeNode* node = Find(key);
 	if (!node) {
 
@@ -169,7 +169,7 @@ void alchemediaTextureCache::LoadTexture (const char* const fileName, dTextureNo
 //void alchemediaTextureCache::UnloadTexture (alchemediaTextureResource* texture)
 void alchemediaTextureCache::UnloadTexture (dTextureNodeInfo* const texture)
 {
-	unsigned key = dCRC(texture->GetPathName());
+	dCRCTYPE key = dCRC64(texture->GetPathName());
 	dTreeNode* const node = Find(key);
 	_ASSERTE (node);
 	alchemediaTextureResource& textIntry = node->GetInfo();

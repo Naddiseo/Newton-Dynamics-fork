@@ -32,17 +32,17 @@ class dMaterialNodeInfo: public dNodeInfo
 	dMaterialNodeInfo(int id);
 	virtual ~dMaterialNodeInfo(void);
 
-	virtual int GetId () const {return m_id;}
+	virtual dCRCTYPE GetId () const {return m_id;}
 
-	virtual void SetAmbientTextId(int id) {m_ambientTexId = id;}
-	virtual void SetDiffuseTextId(int id) {m_diffuseTexId = id;}
-	virtual void SetSpecularTextId(int id) {m_specularTexId = id;}
-	virtual void SetEmissiveTextId(int id) {m_emissiveTexId = id;}
+	virtual void SetAmbientTextId(dCRCTYPE id) {m_ambientTexId = id;}
+	virtual void SetDiffuseTextId(dCRCTYPE id) {m_diffuseTexId = id;}
+	virtual void SetSpecularTextId(dCRCTYPE id) {m_specularTexId = id;}
+	virtual void SetEmissiveTextId(dCRCTYPE id) {m_emissiveTexId = id;}
 
-	virtual int GetAmbientTextId() const {return m_ambientTexId;}
-	virtual int GetDiffuseTextId() const {return m_diffuseTexId;}
-	virtual int GetSpecularTextId() const {return m_specularTexId;}
-	virtual int GetEmissiveTextId() const {return m_emissiveTexId;}
+	virtual dCRCTYPE GetAmbientTextId() const {return m_ambientTexId;}
+	virtual dCRCTYPE GetDiffuseTextId() const {return m_diffuseTexId;}
+	virtual dCRCTYPE GetSpecularTextId() const {return m_specularTexId;}
+	virtual dCRCTYPE GetEmissiveTextId() const {return m_emissiveTexId;}
 
 
 
@@ -71,11 +71,11 @@ class dMaterialNodeInfo: public dNodeInfo
 	dVector m_emissiveColor;
 	dFloat m_shininess;
 	dFloat m_opacity;
-	int m_ambientTexId;
-	int m_diffuseTexId;
-	int m_specularTexId;
-	int m_emissiveTexId;
-	int m_id;
+	dCRCTYPE m_ambientTexId;
+	dCRCTYPE m_diffuseTexId;
+	dCRCTYPE m_specularTexId;
+	dCRCTYPE m_emissiveTexId;
+	dCRCTYPE m_id;
 	friend class dScene;
 };
 

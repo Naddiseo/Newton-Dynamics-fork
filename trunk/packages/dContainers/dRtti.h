@@ -18,24 +18,24 @@ class dRtti
 {
 	public:
 	dRtti(const char* typeName);
-	unsigned GetTypeId() const;
-	bool IsTypeID(unsigned id) const;
+	dCRCTYPE GetTypeId() const;
+	bool IsTypeID(dCRCTYPE id) const;
 
-private:
-	unsigned m_typeId;
+	private:
+	dCRCTYPE m_typeId;
 };
 
 inline dRtti::dRtti(const char* typeName)
 {
-	m_typeId = dCRC (typeName);
+	m_typeId = dCRC64 (typeName);
 }
 
-inline unsigned dRtti::GetTypeId() const
+inline dCRCTYPE dRtti::GetTypeId() const
 {
 	return m_typeId;
 }
 
-inline bool dRtti::IsTypeID (unsigned id) const
+inline bool dRtti::IsTypeID (dCRCTYPE id) const
 {
 	return m_typeId == id;
 }
@@ -46,7 +46,7 @@ inline bool dRtti::IsTypeID (unsigned id) const
 private:											\
 static dRtti m_rtti; 								\
 public:												\
-virtual bool IsType (unsigned typeId) const			\
+virtual bool IsType (dCRCTYPE  typeId) const		\
 {													\
 	if (m_rtti.IsTypeID (typeId)) {					\
 		return true;								\
@@ -54,12 +54,12 @@ virtual bool IsType (unsigned typeId) const			\
 	return baseClass::IsType (typeId);				\
 }													\
 													\
-virtual unsigned GetTypeId () const					\
+virtual dCRCTYPE GetTypeId () const					\
 {													\
 	return m_rtti.GetTypeId ();						\
 }													\
 													\
-static unsigned GetRttiType()						\
+static dCRCTYPE GetRttiType()						\
 {													\
 	return m_rtti.GetTypeId();						\
 }

@@ -40,27 +40,38 @@ class dNewtonScriptLexical
 		return m_tokenString.c_str();
 	}
 
+	const char* GetData() const
+	{
+		return m_data;
+	}
+
 	const char* GetNextBuffer() const
 	{
 		return &m_data[m_index];
 	}
 
-	void ReStartScanner()
+	int GetIndex() const
 	{
-		m_index = 0;
-		m_startIndex = 0;
-		m_tokenString = "";
+		return m_index;
 	}
 
-	protected:
 	int GetLineNumber () const
 	{
 		return m_lineNumber;
 	}
 
+	protected:
+	void SetIndex(int index)
+	{
+		m_index = index;
+		m_startIndex = index;
+		m_tokenString = "";
+	}
+
 	char NextChar ()
 	{
-		char ch = m_data[m_index++];
+		char ch = m_data[m_index];
+		m_index ++;
 		if (ch == '\n') {
 			m_lineNumber ++;
 		}
@@ -69,10 +80,11 @@ class dNewtonScriptLexical
 
 	void UnGetChar ()
 	{
-		char ch = m_data[--m_index];
-		if (ch == '\n') {
+		m_index--;
+		if (m_data[m_index] == '\n') {
 			m_lineNumber --;
 		}
+		
 	}
 
 	void ReadBalancedExpresion (char open, char close);

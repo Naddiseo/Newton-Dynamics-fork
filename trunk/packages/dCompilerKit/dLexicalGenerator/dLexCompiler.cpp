@@ -95,7 +95,7 @@ void dLexCompiler::dDefinitionsMap::PreProcessDefinitions (string& regularExpres
 		} 
 		if (i1 < size) {
 			string expressionName (&regularExpresionWithMacros[i0 + 1], i1 - i0 - 1);
-			dTreeNode* const node = Find(dCRC (expressionName.c_str()));
+			dTreeNode* const node = Find(dCRC64 (expressionName.c_str()));
 			if (node) {
 				string expression (node->GetInfo());
 				regularExpresionWithMacros.replace(i0, i1 - i0 + 1, expression);
@@ -111,7 +111,7 @@ void dLexCompiler::dDefinitionsMap::PreProcessDefinitions (string& regularExpres
 void dLexCompiler::dDefinitionsMap::AddDefinition (string& regularExpresion, string& key)
 {
 	PreProcessDefinitions (regularExpresion);
-	Insert (regularExpresion, dCRC (key.c_str()));
+	Insert (regularExpresion, dCRC64 (key.c_str()));
 }
 
 

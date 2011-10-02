@@ -31,7 +31,7 @@ class alchemediaTextureResource: public dRefCounter
 	GLuint m_textID;
 };
 
-class alchemediaTextureCache: public dTree<alchemediaTextureResource, unsigned>  
+class alchemediaTextureCache: public dTree<alchemediaTextureResource, dCRCTYPE>  
 {
 	public:
 	void LoadTexture (const char* const fileName, dTextureNodeInfo* const texture);

@@ -149,7 +149,7 @@ dBaseHierarchy* dBaseHierarchy::GetPrev() const
 }
 
 
-dBaseHierarchy* dBaseHierarchy::Find (unsigned nameCRC) const 
+dBaseHierarchy* dBaseHierarchy::Find (dCRCTYPE nameCRC) const 
 {
 	dBaseHierarchy *ptr;
 

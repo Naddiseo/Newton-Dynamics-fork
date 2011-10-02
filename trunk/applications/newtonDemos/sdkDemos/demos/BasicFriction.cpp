@@ -17,7 +17,7 @@
 #include "../PhysicsUtils.h"
 
 #define FRICTION_VAR_NAME "friction"
-static unsigned frictionCRC (dCRC (FRICTION_VAR_NAME));
+static dCRCTYPE frictionCRC (dCRC64 (FRICTION_VAR_NAME));
 
 static void UserContactFriction (const NewtonJoint* contactJoint, dFloat timestep, int threadIndex)
 {
@@ -30,16 +30,16 @@ static void UserContactFriction (const NewtonJoint* contactJoint, dFloat timeste
 	dFloat Izz;
 	dFloat mass;
 
-	const NewtonBody* body0 = NewtonJointGetBody0(contactJoint);
-	const NewtonBody* body1 = NewtonJointGetBody1(contactJoint);
+	const NewtonBody* const body0 = NewtonJointGetBody0(contactJoint);
+	const NewtonBody* const body1 = NewtonJointGetBody1(contactJoint);
 	const NewtonBody* body = body0;
 	NewtonBodyGetMassMatrix (body, &mass, &Ixx, &Iyy, &Izz);
 	if (mass == 0.0f) {
 		body = body1;
 	}
 
-	DemoEntity* entity = (DemoEntity*) NewtonBodyGetUserData (body);
-	dVariable* friction = entity->FindVariable (frictionCRC);
+	DemoEntity* const entity = (DemoEntity*) NewtonBodyGetUserData (body);
+	dVariable* const friction = entity->FindVariable (frictionCRC);
 	_ASSERTE (friction);
 	dFloat frictionValue = friction->GetFloat();
 	for (void* contact = NewtonContactJointGetFirstContact (contactJoint); contact; contact = NewtonContactJointGetNextContact (contactJoint, contact)) {
