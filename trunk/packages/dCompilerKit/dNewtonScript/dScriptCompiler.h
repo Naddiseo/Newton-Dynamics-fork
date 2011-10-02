@@ -20,10 +20,15 @@
 #include <dList.h>
 #include <dCRC.h>
 #include <dContainersStdAfx.h>
+
+#include <dSyntaxTreeCode.h>
+#include <dDirectAcyclicGraphNode.h>
+
 #include "dNewtonScriptParser.h"
 
 
 //class dVirtualMachine;
+class dSyntaxTreeCode;
 
 class dScriptCompiler: public dNewtonScriptParser
 {
@@ -38,7 +43,7 @@ class dScriptCompiler: public dNewtonScriptParser
 	void SyntaxError (const dNewtonScriptLexical& scanner, const dUserVariable& errorToken, const dUserVariable& errorTokenMarker);
 
 	const char* m_fileName;
-//	dVirtualMachine* m_virtualMachine;
+	dSyntaxTreeCode* m_syntaxTree;
 
 	friend class dNewtonScriptParser;
 };

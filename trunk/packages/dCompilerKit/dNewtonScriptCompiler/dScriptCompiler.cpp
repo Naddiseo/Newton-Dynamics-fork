@@ -46,9 +46,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	fclose (sourceFile);
 
 	dScriptCompiler compiler(sourceFileName);
-	dVirtualMachine virtualMachine;
-
-	compiler.CompileSource (&virtualMachine, source);
+//	dVirtualMachine virtualMachine;
+//	compiler.CompileSource (&virtualMachine, source);
+	compiler.CompileSource (source);
 
 	delete source;
 	return 0;

@@ -21,26 +21,28 @@
 
 dScriptCompiler::dScriptCompiler(const char* const sourceFileName)
 	:dNewtonScriptParser ()
-//	,m_virtualMachine (NULL)
 	,m_fileName(sourceFileName)
-//	,m_globalSymbols ()
-//	,m_codeSegmentSize(0)
-//	,m_codeSegment (NULL)
-//	,m_currentFunction(NULL)
+	,m_syntaxTree (NULL)
 {
 }
 
 dScriptCompiler::~dScriptCompiler()
 {
-//	if (m_codeSegment) {
-//		delete[] m_codeSegment;
-//	}
+	if (m_syntaxTree) {
+		delete m_syntaxTree;
+	}	
 }
 
 //int dScriptCompiler::CompileSource (dVirtualMachine* const virtualMachine, const char* const source)
 int dScriptCompiler::CompileSource (const char* const source)
 {
 	dNewtonScriptLexical scanner (source);
+
+	if (m_syntaxTree) {
+		delete m_syntaxTree;
+	}	
+	
+	m_syntaxTree = new dSyntaxTreeCode;
 
 //	m_virtualMachine = virtualMachine;
 	Parse(scanner);
@@ -52,6 +54,8 @@ bool dScriptCompiler::Parse(dNewtonScriptLexical& scanner)
 {
 //	m_codeSegmentSize = 0;
 //	m_codeSegment = new short[D_CODE_SEGMNET_ALLOC_SHUNK_SIZE];
+
+
 	dNewtonScriptParser::Parse(scanner);
 
 //	scanner.ReStartScanner();

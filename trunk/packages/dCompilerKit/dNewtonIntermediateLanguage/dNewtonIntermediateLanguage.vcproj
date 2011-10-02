@@ -45,7 +45,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="dDirectAcyclicGraphNode.h"
 				WarningLevel="3"
@@ -108,7 +108,7 @@
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="../../dContainers"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="dDirectAcyclicGraphNode.h"
@@ -169,6 +169,14 @@
 		</File>
 		<File
 			RelativePath=".\dDirectAcyclicGraphNode.h"
+			>
+		</File>
+		<File
+			RelativePath=".\dSyntaxTreeCode.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dSyntaxTreeCode.h"
 			>
 		</File>
 	</Files>
