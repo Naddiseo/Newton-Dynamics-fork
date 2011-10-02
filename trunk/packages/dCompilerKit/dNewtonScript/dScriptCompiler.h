@@ -18,26 +18,19 @@
 
 #include <dTree.h>
 #include <dList.h>
-#include <dVirtualMachine.h>
+#include <dCRC.h>
+#include <dContainersStdAfx.h>
 #include "dNewtonScriptParser.h"
 
-#ifdef _MSC_VER
-#include <windows.h>
-#include <crtdbg.h>
-#endif
 
-
-class dVirtualMachine;
+//class dVirtualMachine;
 
 class dScriptCompiler: public dNewtonScriptParser
 {
 	public:
-
-
 	dScriptCompiler(const char* const sourceFileName);
 	virtual ~dScriptCompiler();
-	int CompileSource (dVirtualMachine* const virtualMachine, const char* const source);
-
+	int CompileSource (const char* const source);
 
 	protected:
 	virtual bool Parse(dNewtonScriptLexical& scanner);
@@ -45,7 +38,7 @@ class dScriptCompiler: public dNewtonScriptParser
 	void SyntaxError (const dNewtonScriptLexical& scanner, const dUserVariable& errorToken, const dUserVariable& errorTokenMarker);
 
 	const char* m_fileName;
-	dVirtualMachine* m_virtualMachine;
+//	dVirtualMachine* m_virtualMachine;
 
 	friend class dNewtonScriptParser;
 };

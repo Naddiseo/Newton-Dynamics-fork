@@ -23,6 +23,7 @@
 #include <dTree.h>
 #include <dList.h>
 #include <dCRC.h>
+#include <dContainersStdAfx.h>
 
 #include <string>
 using namespace std;
@@ -39,7 +40,6 @@ class dLexCompiler
 	enum dToken;
 	class dTokenData;
 	class dExpandedNFA;
-//	class dExpandedDFA;
 	class dExpandedState;
 
 

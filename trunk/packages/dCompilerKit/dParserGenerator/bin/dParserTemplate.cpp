@@ -141,7 +141,7 @@ const $(className)::dGotoEntry* $(className)::FindGoto (const dGotoEntry* const 
 
 
 
-const dNewtonScriptParser::dActionEntry* $(className)::GetNextAction (dList<dStackPair>& stack, dToken token, $(scannerClass)& scanner) const
+const $(className)::dActionEntry* $(className)::GetNextAction (dList<dStackPair>& stack, dToken token, $(scannerClass)& scanner) const
 {
 	static short actionsCount[] = {$(actionsCount)};
 	static short actionsStart[] = {$(actionsStart)};

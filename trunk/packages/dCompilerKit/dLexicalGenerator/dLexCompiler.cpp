@@ -13,7 +13,6 @@
 //
 
 #include "dLexCompiler.h"
-//#include "dFiniteAutomata.h"
 #include "dLexScannerGenerator.h"
 
 enum dLexCompiler::dToken

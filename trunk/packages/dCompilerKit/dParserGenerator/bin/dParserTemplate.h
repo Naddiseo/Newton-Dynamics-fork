@@ -40,6 +40,25 @@ $(Tokens)
 	class dStackPair;
 	class dGotoEntry;
 	class dActionEntry;
+	class dDefualtUserVariable
+	{
+		public:
+		dDefualtUserVariable () 
+			:m_scannerLine (0), m_scannerIndex(0), m_token (dToken (0)), m_data("")
+		{
+		}
+
+		dDefualtUserVariable (dToken token, const char* const data, int scannerLine, int scannerIndex)
+			:m_scannerLine (scannerLine), m_scannerIndex(scannerIndex), m_token(token), m_data (data) 
+		{
+		}
+		int m_scannerLine;
+		int m_scannerIndex;
+		dToken m_token;
+		string m_data;
+	};
+
+
 	$(userVariableClass)
 
 	$(className)();
@@ -49,7 +68,7 @@ $(Tokens)
 	private:
 	const dGotoEntry* FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const;
 	const dActionEntry* FindAction (const dActionEntry* const list, int count, dToken token) const;
-	const dActionEntry* GetNextAction (dList<dStackPair>& stack, dToken token, dNewtonScriptLexical& scanner) const;
+	const dActionEntry* GetNextAction (dList<dStackPair>& stack, dToken token, $(scannerClass)& scanner) const;
 
 	bool m_grammarError;
 };

@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="dNewtonScript"
-	ProjectGUID="{0D66658C-24A9-416B-9866-89843D92823F}"
-	RootNamespace="dCompilerKit"
+	Name="dNewtonIntermediateLanguage"
+	ProjectGUID="{0BF56F49-1C3C-4D8C-9209-052E70919FE5}"
+	RootNamespace="dNewtonIntermediateLanguage"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -21,7 +21,7 @@
 			OutputDirectory="$(PlatformName)/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
-			CharacterSet="2"
+			CharacterSet="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -45,11 +45,11 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="dScriptCompiler.h"
-				WarningLevel="4"
-				DebugInformationFormat="3"
+				PrecompiledHeaderThrough="dDirectAcyclicGraphNode.h"
+				WarningLevel="3"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -84,7 +84,7 @@
 			OutputDirectory="$(PlatformName)/$(ProjectName)/$(ConfigurationName)"
 			IntermediateDirectory="$(PlatformName)/$(ProjectName)/$(ConfigurationName)"
 			ConfigurationType="4"
-			CharacterSet="2"
+			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -108,11 +108,11 @@
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="../../dContainers"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="dScriptCompiler.h"
-				WarningLevel="4"
+				PrecompiledHeaderThrough="dDirectAcyclicGraphNode.h"
+				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -148,71 +148,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\dNewtonScriptLexical.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\dNewtonScriptLexical.h"
-			>
-		</File>
-		<File
-			RelativePath=".\dNewtonScriptLexical.lex"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
-					Description="dLexicalGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="..\dLexicalGenerator\bin\dLexicalGenerator.exe $(InputFileName) $(InputDir)$(InputName).cpp&#x0D;&#x0A;"
-					Outputs="$(InputName).cpp"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
-					Description="dLexicalGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="..\dLexicalGenerator\bin\dLexicalGenerator.exe $(InputFileName) $(InputDir)$(InputName).cpp&#x0D;&#x0A;"
-					Outputs="$(InputName).cpp"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath=".\dNewtonScriptParser.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\dNewtonScriptParser.grm"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
-					Description="dParserGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="..\dParserGenerator\bin\dParserGenerator.exe $(InputFileName) dNewtonScriptLexical $(InputDir)$(InputName).cpp&#x0D;&#x0A;"
-					Outputs="$(InputName).cpp"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
-					Description="dParserGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="..\dParserGenerator\bin\dParserGenerator.exe $(InputFileName) dAssemblerLexical $(InputDir)$(InputName).cpp&#x0D;&#x0A;"
-					Outputs="$(InputName).cpp"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath=".\dNewtonScriptParser.h"
-			>
-		</File>
-		<File
-			RelativePath=".\dScriptCompiler.cpp"
+			RelativePath=".\dDirectAcyclicGraphNode.cpp"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"
@@ -220,7 +156,6 @@
 				<Tool
 					Name="VCCLCompilerTool"
 					UsePrecompiledHeader="1"
-					PrecompiledHeaderThrough="dScriptCompiler.h"
 				/>
 			</FileConfiguration>
 			<FileConfiguration
@@ -229,12 +164,11 @@
 				<Tool
 					Name="VCCLCompilerTool"
 					UsePrecompiledHeader="1"
-					PrecompiledHeaderThrough="dScriptCompiler.h"
 				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath=".\dScriptCompiler.h"
+			RelativePath=".\dDirectAcyclicGraphNode.h"
 			>
 		</File>
 	</Files>

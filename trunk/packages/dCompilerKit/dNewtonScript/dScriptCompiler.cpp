@@ -17,11 +17,11 @@
 #include "dNewtonScriptLexical.h"
 
 
-//#define D_CODE_SEGMNET_ALLOC_SHUNK_SIZE (1024 * 32)
+
 
 dScriptCompiler::dScriptCompiler(const char* const sourceFileName)
 	:dNewtonScriptParser ()
-	,m_virtualMachine (NULL)
+//	,m_virtualMachine (NULL)
 	,m_fileName(sourceFileName)
 //	,m_globalSymbols ()
 //	,m_codeSegmentSize(0)
@@ -37,11 +37,12 @@ dScriptCompiler::~dScriptCompiler()
 //	}
 }
 
-int dScriptCompiler::CompileSource (dVirtualMachine* const virtualMachine, const char* const source)
+//int dScriptCompiler::CompileSource (dVirtualMachine* const virtualMachine, const char* const source)
+int dScriptCompiler::CompileSource (const char* const source)
 {
 	dNewtonScriptLexical scanner (source);
 
-	m_virtualMachine = virtualMachine;
+//	m_virtualMachine = virtualMachine;
 	Parse(scanner);
 	return 0;
 }

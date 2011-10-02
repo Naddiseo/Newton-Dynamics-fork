@@ -80,6 +80,25 @@ class dNewtonScriptParser
 	class dStackPair;
 	class dGotoEntry;
 	class dActionEntry;
+	class dDefualtUserVariable
+	{
+		public:
+		dUserVariable () 
+			:m_scannerLine (0), m_scannerIndex(0), m_token (dToken (0)), m_data("")
+		{
+		}
+
+		dUserVariable (dToken token, const char* const data, int scannerLine, int scannerIndex)
+			:m_scannerLine (scannerLine), m_scannerIndex(scannerIndex), m_token(token), m_data (data) 
+		{
+		}
+		int m_scannerLine;
+		int m_scannerIndex;
+		dToken m_token;
+		string m_data;
+	};
+
+
 	
 	class dUserVariable
 	{
@@ -109,7 +128,7 @@ class dNewtonScriptParser
 	private:
 	const dGotoEntry* FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const;
 	const dActionEntry* FindAction (const dActionEntry* const list, int count, dToken token) const;
-	const dActionEntry* GetNextAction (dList<dStackPair>& stack, dToken token, dNewtonScriptLexical& scanner) const;
+	const dActionEntry* GetNextAction (dList<dStackPair>& stack, dToken token, xxx& scanner) const;
 
 	bool m_grammarError;
 };

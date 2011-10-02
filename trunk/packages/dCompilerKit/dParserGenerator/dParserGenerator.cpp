@@ -1,12 +1,6 @@
 // dParserGenerator.cpp : Defines the entry point for the console application.
 //
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <tchar.h>
-#include <crtdbg.h>
 #include "dParserCompiler.h"
-
 
 int main(int argc, char* argv[])
 {

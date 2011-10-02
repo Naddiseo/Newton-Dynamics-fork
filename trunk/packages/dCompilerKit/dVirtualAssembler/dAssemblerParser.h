@@ -33,7 +33,8 @@ class dAssemblerParser
 	public:
 	enum dToken
 	{
-		ACCEPTING_TOKEN = 255, 
+		ACCEPTING_TOKEN = 254, 
+		ERROR_TOKEN = 255, 
 		IMPORT = 256, 
 		IMPORT_FILENAME,
 		LITERAL,
@@ -86,23 +87,42 @@ class dAssemblerParser
 	class dStackPair;
 	class dGotoEntry;
 	class dActionEntry;
+	class dDefualtUserVariable
+	{
+		public:
+		dDefualtUserVariable () 
+			:m_scannerLine (0), m_scannerIndex(0), m_token (dToken (0)), m_data("")
+		{
+		}
+
+		dDefualtUserVariable (dToken token, const char* const data, int scannerLine, int scannerIndex)
+			:m_scannerLine (scannerLine), m_scannerIndex(scannerIndex), m_token(token), m_data (data) 
+		{
+		}
+		int m_scannerLine;
+		int m_scannerIndex;
+		dToken m_token;
+		string m_data;
+	};
+
+
 	
-	class dUserVariable
+	class dUserVariable: public dDefualtUserVariable
 	{
 		public:
 		dUserVariable () 
-			:m_token (dToken (0)), m_semanticValue(0), m_data("")
+			:dDefualtUserVariable ()
 		{
 		}
 		
-		
-		dUserVariable (dToken token, const char* const text)
-			:m_token(token), m_semanticValue(0), m_data (text) 
+//		dUserVariable (dToken token, const char* const text, int scannerLine, int scannerIndex)
+		dUserVariable (dToken token, const char* const text, int scannerLine = 0, int scannerIndex = 0)
+			:dDefualtUserVariable (token, text, scannerLine, scannerIndex)
+			,m_semanticValue(0)
 		{
 		}
-		dToken m_token;
+
 		int m_semanticValue;
-		string m_data;
 	};
 
 
@@ -110,11 +130,12 @@ class dAssemblerParser
 	virtual ~dAssemblerParser();
 	virtual bool Parse(dAssemblerLexical& scanner);
 
-	virtual bool ErrorHandler (const string& line) const;
-
 	private:
 	const dGotoEntry* FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const;
 	const dActionEntry* FindAction (const dActionEntry* const list, int count, dToken token) const;
+	const dActionEntry* GetNextAction (dList<dStackPair>& stack, dToken token, dAssemblerLexical& scanner) const;
+
+	bool m_grammarError;
 };
 
 #endif

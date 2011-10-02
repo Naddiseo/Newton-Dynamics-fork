@@ -16,12 +16,12 @@
 #include "dParserLexical.h"
 
 #define DACCEPT_SYMBOL "$$$"
-#define DACCEPTING_TOKEN 255	
+#define DACCEPTING_TOKEN 254	
 
 #define DDEBUG_STATES
 
 #define DERROR_SYMBOL	"error"
-#define DERROR_TOKEN	254
+#define DERROR_TOKEN	255
 
 
 

@@ -18,13 +18,10 @@
 
 #include <dTree.h>
 #include <dList.h>
+#include <dCRC.h>
+#include <dContainersStdAfx.h>
 #include <dVirtualMachine.h>
 #include "dAssemblerParser.h"
-
-#ifdef _MSC_VER
-#include <windows.h>
-#include <crtdbg.h>
-#endif
 
 
 class dAssemblerCompiler: public dAssemblerParser
