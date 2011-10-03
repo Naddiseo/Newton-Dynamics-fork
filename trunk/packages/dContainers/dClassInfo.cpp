@@ -14,4 +14,5 @@
 #include "dContainersStdAfx.h"
 #include "dClassInfo.h"
 
-dRtti dClassInfo::m_rtti ("dClassInfo");
+//dRtti dClassInfo::m_rtti ("dClassInfo");
+dRttiRootClassSupportImplement(dClassInfo);

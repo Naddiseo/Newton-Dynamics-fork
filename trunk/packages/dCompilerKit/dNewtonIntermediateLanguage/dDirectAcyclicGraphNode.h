@@ -1,4 +1,4 @@
-/* Copych1 (c) <2009> <Newton Game Dynamics>
+/* Copyright (c) <2009> <Newton Game Dynamics>
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -15,7 +15,11 @@
 #include <dTree.h>
 #include <dList.h>
 #include <dCRC.h>
+#include <dRtti.h>
 #include <dContainersStdAfx.h>
+
+#include <string>
+using namespace std;
 
 class dDirectAcyclicGraphNode
 {
@@ -23,10 +27,14 @@ class dDirectAcyclicGraphNode
 	dDirectAcyclicGraphNode(void);
 	virtual ~dDirectAcyclicGraphNode(void);
 
-	virtual void CalculateKey() = 0;
 	dCRCTYPE GetKey() const;
+	virtual void CalculateKey() {m_key = 0;}
+	
 
 	dCRCTYPE m_key;
+
+	dRttiRootClassSupportDeclare(dDirectAcyclicGraphNode);
+	
 };
 
 

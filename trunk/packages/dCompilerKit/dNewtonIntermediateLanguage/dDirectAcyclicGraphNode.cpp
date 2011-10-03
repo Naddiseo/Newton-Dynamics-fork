@@ -1,4 +1,4 @@
-/* Copych1 (c) <2009> <Newton Game Dynamics>
+/* Copyright (c) <2009> <Newton Game Dynamics>
 *
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -11,7 +11,10 @@
 
 #include "dDirectAcyclicGraphNode.h"
 
+dRttiRootClassSupportImplement(dDirectAcyclicGraphNode);
+
 dDirectAcyclicGraphNode::dDirectAcyclicGraphNode(void)
+	:m_key(0)
 {
 }
 

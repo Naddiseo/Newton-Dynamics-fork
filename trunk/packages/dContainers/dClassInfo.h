@@ -21,12 +21,13 @@ class dClassInfo: public dRefCounter
 	public:
 	dClassInfo(void);
 	virtual ~dClassInfo(void);
-	virtual dCRCTYPE GetTypeId () const;
-	virtual bool IsType (dCRCTYPE typeId) const;
-	static dCRCTYPE GetRttiType();
+//	virtual dCRCTYPE GetTypeId () const;
+//	virtual bool IsType (dCRCTYPE typeId) const;
+//	static dCRCTYPE GetRttiType();
+//	private:
+//	static dRtti m_rtti;
 
-	private:
-	static dRtti m_rtti;
+	dRttiRootClassSupportDeclare(dClassInfo);
 };
 
 
@@ -38,20 +39,20 @@ inline dClassInfo::~dClassInfo(void)
 {
 }
 
-inline dCRCTYPE dClassInfo::GetTypeId () const
-{
-	return m_rtti.GetTypeId ();
-}
+//inline dCRCTYPE dClassInfo::GetTypeId () const
+//{
+//	return m_rtti.GetTypeId ();
+//}
 
-inline dCRCTYPE dClassInfo::GetRttiType()
-{
-	return m_rtti.GetTypeId();
-}
+//inline dCRCTYPE dClassInfo::GetRttiType()
+//{
+//	return m_rtti.GetTypeId();
+//}
 
 
-inline bool dClassInfo::IsType (dCRCTYPE typeId) const
-{
-	return m_rtti.IsTypeID (typeId);
-}
+//inline bool dClassInfo::IsType (dCRCTYPE typeId) const
+//{
+//	return m_rtti.IsTypeID (typeId);
+//}
 
 #endif

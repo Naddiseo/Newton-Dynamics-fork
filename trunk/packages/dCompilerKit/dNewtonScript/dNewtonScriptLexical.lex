@@ -35,8 +35,9 @@ Indetifier		[a-zA-Z_][0-9a-zA-Z_]*
 
 
 Integer			[\-\+]?[0-9]+
+Float			{Integer}[\.][0-9]+(e{Integer})?
 string			["][^"]*["]
-//Float			{Integer}[\.][0-9]+(e{Integer})?
+
 
 
 
@@ -123,7 +124,7 @@ string			["][^"]*["]
 "class"			{return dNewtonScriptParser::CLASS;}
 "import"		{return dNewtonScriptParser::IMPORT;}
 
-
+{Float}			{return dNewtonScriptParser::FLOAT_VALUE;}
 {Integer}		{return dNewtonScriptParser::INTEGER_VALUE;}
 {string}		{return dNewtonScriptParser::STRING_VALUE;}	
 

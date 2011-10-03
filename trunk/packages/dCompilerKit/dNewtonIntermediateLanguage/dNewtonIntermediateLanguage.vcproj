@@ -148,6 +148,14 @@
 	</References>
 	<Files>
 		<File
+			RelativePath=".\dDAGClass.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGClass.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dDirectAcyclicGraphNode.cpp"
 			>
 			<FileConfiguration

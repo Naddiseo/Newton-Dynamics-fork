@@ -40,8 +40,30 @@ inline bool dRtti::IsTypeID (dCRCTYPE id) const
 	return m_typeId == id;
 }
 
+// add these macros only to the root base class that you want to have rtti 
+#define dRttiRootClassSupportDeclare(className)		\
+	public:											\
+	virtual dCRCTYPE GetTypeId () const				\
+	{												\
+		return m_rtti.GetTypeId ();					\
+	}												\
+	virtual bool IsType (dCRCTYPE typeId) const		\
+	{												\
+		return m_rtti.IsTypeID (typeId);			\
+	}												\
+	static dCRCTYPE GetRttiType()					\
+	{												\
+		return m_rtti.GetTypeId();					\
+	}												\
+	private:										\
+	static dRtti m_rtti;							
+
+#define dRttiRootClassSupportImplement(className)	\
+	dRtti className::m_rtti (#className);
 
 
+
+// add these macros to every derived class  
 #define dAddRtti(baseClass)							\
 private:											\
 static dRtti m_rtti; 								\

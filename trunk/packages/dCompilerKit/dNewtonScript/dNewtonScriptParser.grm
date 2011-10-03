@@ -12,6 +12,7 @@
 %{
 #include <dScriptCompiler.h>
 #include "dNewtonScriptLexical.h"
+#include "dDirectAcyclicGraphNode.h"
 
 //
 // Newton Litle Scripting Language parser  specification 1.0.0
@@ -26,22 +27,23 @@
 	{
 		public:
 		dUserVariable () 
-			:dDefualtUserVariable ()
+			:dDefualtUserVariable (), m_node(NULL)
 		{
 		}
 		
 		dUserVariable (dToken token, const char* const text, int scannerLine, int scannerIndex)
 			:dDefualtUserVariable (token, text, scannerLine, scannerIndex)
-			,m_semanticValue (0)
+			,m_node(NULL)
 		{
 		}
-		int m_semanticValue;		
+//		int m_semanticValue;
+		dDirectAcyclicGraphNode* m_node;
 	};
 }
 
 
 %token NATIVE CONSTANT
-%token INTEGER_VALUE STRING_VALUE
+%token INTEGER_VALUE FLOAT_VALUE STRING_VALUE
 %token IMPORT 
 %token PRIVATE CLASS BASE DOUBLE_COLOM IDENTIFIER EXTENDS GUI
 %token BOOLEAN BYTE SHORT INT LONG UNSIGNED FLOAT DOUBLE VOID_TYPE
@@ -122,14 +124,22 @@ import_module
 	: IMPORT '<' compound_identifier_List '>' 
 	;
 	
-	  
+class_definition
+	: class_visibility CLASS IDENTIFIER extends
+		{ 
+			dScriptCompiler* const me = (dScriptCompiler*) this;
+			$$ = me->NewClassDefinition ($1, $3, $4);
+			me->SyntaxError (scanner, $1, $2); 
+		}
+	;
+		  
 class_delaration 
-	: class_visibility CLASS IDENTIFIER extends gui_support '{' class_members '}'
+	: class_definition gui_support '{' class_members '}'
 	;			  
 
 class_visibility
 	:	
-	| PRIVATE
+	| PRIVATE {$$ = $1;}
 	;
 				
 gui_support 
@@ -262,7 +272,6 @@ primitive_types
 	;
 	
 	
-	
 array_type_list
 	: array_type
 	| array_type_list array_type
@@ -319,13 +328,9 @@ multidimention_array
 	| multidimention_array '[' expression ']'
 	;
 	
-
-
 assigment_statement
 	: indentifier '=' expression
-//	| indentifier '=' NEW primitive_types multidimention_array
 	;
-	
 	
 switch_case_list
 	: switch_case
@@ -378,7 +383,9 @@ new_types
 	
 	
 expression
-	: expression LOGIC_OR expression
+	: compound_identifier_List
+/*	
+	| expression LOGIC_OR expression
 	| expression LOGIC_AND expression
 	| expression '|' expression
 	| expression '^' expression
@@ -390,19 +397,20 @@ expression
 	| expression GREATHER_EQUAL expression
 	| expression LESS_EQUAL expression
 	| expression SHIFT_RIGHT expression
+*/	
 	| expression '+' expression
 	| expression '-' expression
 	| expression '*' expression
 	| expression '%' expression
 	| expression '/' expression
-	| NEW new_types 
 	| '(' expression ')'
-	| SIZEOF '(' indentifier ')'
-	| SIZEOF '(' type_specifier ')'
-	| CAST '<' type_specifier '>' '(' expression ')'
-	| compound_identifier_List
+//	| SIZEOF '(' indentifier ')'
+//	| SIZEOF '(' type_specifier ')'
+//	| CAST '<' type_specifier '>' '(' expression ')'
+//	| NEW new_types 
 	| function_call
 	| INTEGER_VALUE
-	| STRING_VALUE
+//	| FLOAT_VALUE
+//	| STRING_VALUE
 	;	
 	

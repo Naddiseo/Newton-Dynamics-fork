@@ -14,13 +14,14 @@ class fibonacci
 {
 	int Calculate (int n)
 	{
-		if (n == 0)  {
-			return 0;
-		}
-		if (n == 1) {
-			return 1;
-			
-		}
+	
+		a = a + a * (b - c) + (b - c) * d;
+//		if (n == 0)  {
+//			return 0;
+//		}
+//		if (n == 1) {
+//			return 1;
+//		}
 
 		return Calculate (n - 1) + Calculate (n - 2);
 	}

@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../../;../../../../packages;../../../../packages/dMath;../../../../packages/dScene;../../../../packages/dContainers;../../../../packages/dCustomJoints;../../../../packages/thirdParty/tinyxml;../../../../packages/thirdParty/glew/include;../../../../packages/thirdParty/Qt/4.7.1/include;../../../../packages/thirdParty/Qt/4.7.1/include/QtGui;../../../../packages/thirdParty/Qt/4.7.1/include/QtCore;../../../../packages/thirdParty/Qt/4.7.1/include/QtOpenGL"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_NEWTON_USE_LIB"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_NEWTON_USE_LIB;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -121,7 +121,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="../../;../../../../packages;../../../../packages/dMath;../../../../packages/dScene;../../../../packages/dContainers;../../../../packages/dCustomJoints;../../../../packages/thirdParty/tinyxml;../../../../packages/thirdParty/glew/include;../../../../packages/thirdParty/Qt/4.7.1/include;../../../../packages/thirdParty/Qt/4.7.1/include/QtGui;../../../../packages/thirdParty/Qt/4.7.1/include/QtCore;../../../../packages/thirdParty/Qt/4.7.1/include/QtOpenGL"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_NEWTON_USE_LIB"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_NEWTON_USE_LIB;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
@@ -211,7 +211,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="moc $(InputName).h"
-						CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../$(InputName).h -o ../../moc_$(InputName).cpp -f$(InputName).h"
+						CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../$(InputName).h -o ../../moc_$(InputName).cpp -f$(InputName).h&#x0D;&#x0A;"
 						AdditionalDependencies="$(InputName).h"
 						Outputs="../../moc_$(InputName).cpp"
 					/>
@@ -222,7 +222,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="moc $(InputName).h"
-						CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../$(InputName).h -o ../../moc_$(InputName).cpp -f$(InputName).h"
+						CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../$(InputName).h -o ../../moc_$(InputName).cpp -f$(InputName).h&#x0D;&#x0A;"
 						AdditionalDependencies="$(InputName).h"
 						Outputs="../../moc_$(InputName).cpp"
 					/>
@@ -241,7 +241,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="moc $(InputName).h"
-						CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../$(InputName).h -o ../../moc_$(InputName).cpp -falchemedia.h -f$(InputName).h"
+						CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../$(InputName).h -o ../../moc_$(InputName).cpp -falchemedia.h -f$(InputName).h&#x0D;&#x0A;"
 						AdditionalDependencies="$(InputName).h"
 						Outputs="../../moc_$(InputName).cpp"
 					/>
@@ -252,7 +252,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="moc $(InputName).h"
-						CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../$(InputName).h -o ../../moc_$(InputName).cpp -falchemedia.h -f$(InputName).h"
+						CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../$(InputName).h -o ../../moc_$(InputName).cpp -falchemedia.h -f$(InputName).h&#x0D;&#x0A;"
 						AdditionalDependencies="$(InputName).h"
 						Outputs="../../moc_$(InputName).cpp"
 					/>
@@ -271,7 +271,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="moc $(InputName).h"
-						CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../$(InputName).h -o ../../moc_$(InputName).cpp -falchemedia.h -f$(InputName).h"
+						CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../$(InputName).h -o ../../moc_$(InputName).cpp -falchemedia.h -f$(InputName).h&#x0D;&#x0A;"
 						AdditionalDependencies="$(InputName).h"
 						Outputs="../../moc_$(InputName).cpp"
 					/>
@@ -282,7 +282,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						Description="moc $(InputName).h"
-						CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../$(InputName).h -o ../../moc_$(InputName).cpp -falchemedia.h -f$(InputName).h"
+						CommandLine="..\..\..\..\packages\thirdParty\Qt\4.7.1\bin\moc  -DUNICODE -DWIN32 ../../$(InputName).h -o ../../moc_$(InputName).cpp -falchemedia.h -f$(InputName).h&#x0D;&#x0A;"
 						AdditionalDependencies="$(InputName).h"
 						Outputs="../../moc_$(InputName).cpp"
 					/>

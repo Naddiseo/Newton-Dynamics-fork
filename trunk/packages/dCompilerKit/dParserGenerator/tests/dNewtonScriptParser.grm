@@ -14,7 +14,7 @@
 #include "dNewtonScriptLexical.h"
 
 //
-// Newton Script parser  
+// Newton Litle Scripting Language parser  specification 1.0.0
 // loosely based on a subset of Java and C sharp
 //
 %}
@@ -22,34 +22,31 @@
 
 %union 
 {
-	class dUserVariable
+	class dUserVariable: public dDefualtUserVariable
 	{
 		public:
 		dUserVariable () 
-			:m_scannerLine (0), m_scannerIndex(0), m_semanticValue (0), m_token (dToken (0)), m_data("")
+			:dDefualtUserVariable ()
 		{
 		}
-		
 		
 		dUserVariable (dToken token, const char* const text, int scannerLine, int scannerIndex)
-			:m_scannerLine (scannerLine), m_scannerIndex(scannerIndex), m_semanticValue (0), m_token(token), m_data (text) 
+			:dDefualtUserVariable (token, text, scannerLine, scannerIndex)
+			,m_semanticValue (0)
 		{
 		}
-		int m_scannerLine;
-		int m_scannerIndex;
 		int m_semanticValue;		
-		dToken m_token;
-		string m_data;
 	};
 }
 
 
 %token NATIVE CONSTANT
-%token INTEGER_VALUE
-%token IMPORT IMPORT_FILE_NAME 
-%token PRIVATE CLASS IDENTIFIER EXTENDS GUI
+%token INTEGER_VALUE FLOAT_VALUE STRING_VALUE
+%token IMPORT 
+%token PRIVATE CLASS BASE DOUBLE_COLOM IDENTIFIER EXTENDS GUI
 %token BOOLEAN BYTE SHORT INT LONG UNSIGNED FLOAT DOUBLE VOID_TYPE
 
+%token CAST SIZEOF OPERATOR
 %token NEW
 %token RETURN
 %token FOR WHILE DO
@@ -98,10 +95,31 @@ module
 	| import_module
 	| class_delaration
 	;			
-			
+
+
+error_token
+	: ';'			{ $$ = $1;}
+	| '{'			{ $$ = $1;}
+	| '}'			{ $$ = $1;}
+	| ')'			{ $$ = $1;}
+	| '('			{ $$ = $1;}
+	| '['			{ $$ = $1;}
+	| ']'			{ $$ = $1;}
+	| IDENTIFIER	{ $$ = $1;}
+	| OPERATOR		{ $$ = $1;}
+	;
+		
+syntax_error	
+	: error error_token
+		{ 
+			dScriptCompiler* const me = (dScriptCompiler*) this;
+			me->SyntaxError (scanner, $1, $2); 
+		}
+	;
+		
 
 import_module 
-	: IMPORT IMPORT_FILE_NAME 
+	: IMPORT '<' compound_identifier_List '>' 
 	;
 	
 	  
@@ -136,8 +154,8 @@ class_member_list
 				    
 class_member 
 	: class_contructor
-	| class_variable_declaration
 	| class_function_implementaion
+	| uninitialized_variable semicolon_marker
 	;
 			
 native_function
@@ -150,6 +168,7 @@ native_function
 parameter_list 
 	: parameter
 	| parameter_list ',' parameter
+	| syntax_error
 	;	
 	
 function_parameters
@@ -169,11 +188,7 @@ init_base_class
 	
 semicolon_marker
 	: semicolon_marker_list	
-	| error ';'	
-		{ 
-			dScriptCompiler* const me = (dScriptCompiler*) this;
-			me->SyntaxError (scanner, $1, $2); 
-		}
+	| syntax_error
 	;
 	
 semicolon_marker_list
@@ -186,6 +201,15 @@ class_contructor
 	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker
 	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class function_block
 	;
+
+
+overlodable_operator
+	: '+'
+	| '-'
+	| '*'
+	| '/'
+	| '%'
+	; 	
 	
 	
 class_function_implementaion 
@@ -194,9 +218,10 @@ class_function_implementaion
 	| PRIVATE function_prototype function_block
 	;
 	
-	
 function_prototype
 	: type_specifier IDENTIFIER '(' function_parameters ')' const_function
+	| type_specifier OPERATOR overlodable_operator '(' function_parameters ')' const_function	
+	| syntax_error
 	;
 
 
@@ -209,10 +234,6 @@ initialized_variable
 	: uninitialized_variable '=' expression		
 	;
 
-class_variable_declaration
-	: uninitialized_variable
-	;
-	 
 			  
 parameter
 	: type_specifier IDENTIFIER
@@ -255,45 +276,19 @@ array_type
 						  
 function_block 
 	: '{' '}'
-	| '{' function_statement_list '}'
+	| '{' statement_list '}'
 	;
 			   
 			   
-function_statement_list 
-	: function_statement
-	| function_statement_list function_statement
+statement_list 
+	: statement
+	| statement_list statement
 	;
 						 
-						 
-function_statement 
-	: statement 
-	| local_variable_declaration semicolon_marker
-	;			 
-	
-	
-local_variable_declaration
-	: uninitialized_variable
-	| initialized_variable
-	;
-	
-
-statement_error	
-	: error '{'
-		{ 
-			dScriptCompiler* const me = (dScriptCompiler*) this;
-			me->SyntaxError (scanner, $1, $2); 
-		}
-	| error ';'
-		{ 
-			dScriptCompiler* const me = (dScriptCompiler*) this;
-			me->SyntaxError (scanner, $1, $2); 
-		}
-	;
-	
-
 	
 statement
-	: assigment_statement semicolon_marker
+	: local_variable_declaration semicolon_marker
+	| assigment_statement semicolon_marker
 	| CONTINUE semicolon_marker
 	| BREAK semicolon_marker
 	| function_call semicolon_marker
@@ -305,7 +300,12 @@ statement
 	| FOR '(' primitive_types assigment_statement ';' expression ';' assigment_statement ')' function_block
 	| WHILE '(' expression ')' function_block 
 	| DO function_block WHILE '(' expression ')' semicolon_marker
-	| statement_error	
+	| syntax_error
+	;
+
+local_variable_declaration
+	: uninitialized_variable 
+	| initialized_variable
 	;
 
 	
@@ -323,7 +323,7 @@ multidimention_array
 
 assigment_statement
 	: indentifier '=' expression
-	| indentifier '=' NEW primitive_types multidimention_array
+//	| indentifier '=' NEW primitive_types multidimention_array
 	;
 	
 	
@@ -343,15 +343,38 @@ argument_list
 	| argument_list ',' expression
 	;
 		
+
+compound_identifier_List
+	: IDENTIFIER
+	| compound_identifier_List '.' IDENTIFIER		
+	;
+	
+base_class_indetifier_prefix	
+	: BASE DOUBLE_COLOM 
+	| base_class_indetifier_prefix BASE DOUBLE_COLOM
+	;
+	
+function_indentifier
+	: compound_identifier_List
+	| base_class_indetifier_prefix IDENTIFIER
+	;
+			
 function_call
-	: IDENTIFIER '(' ')'
-	| IDENTIFIER '(' argument_list ')'	
+	: function_indentifier '(' ')'
+	| function_indentifier '(' argument_list ')'	
 	;
 	
 return 
 	: RETURN
 	| RETURN expression
 	;	
+	
+new_types 
+	: CLASS IDENTIFIER '(' ')'
+	| CLASS IDENTIFIER '(' argument_list ')'
+	| primitive_types array_type_list
+	| CLASS IDENTIFIER array_type_list
+	;
 	
 	
 expression
@@ -361,27 +384,28 @@ expression
 	| expression '|' expression
 	| expression '^' expression
 	| expression '&' expression
-*/	
 	| expression IDENTICAL expression
 	| expression DIFFERENT expression
-/*	
 	| expression '<' expression
 	| expression '>' expression
 	| expression GREATHER_EQUAL expression
 	| expression LESS_EQUAL expression
 	| expression SHIFT_RIGHT expression
+*/	
 	| expression '+' expression
 	| expression '-' expression
 	| expression '*' expression
 	| expression '%' expression
 	| expression '/' expression
-*/	
+	| NEW new_types 
 	| '(' expression ')'
-	| indentifier
+//	| SIZEOF '(' indentifier ')'
+//	| SIZEOF '(' type_specifier ')'
+//	| CAST '<' type_specifier '>' '(' expression ')'
+//	| compound_identifier_List
 	| function_call
 	| INTEGER_VALUE
+	| FLOAT_VALUE
+	| STRING_VALUE
 	;	
-
-
-
-
+	

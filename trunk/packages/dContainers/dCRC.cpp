@@ -13,7 +13,7 @@
 #include "dCRC.h"
 
 /*
-static unsigned randBits[] = 
+static dCRCTYPE randBits[] = 
 {
 	0x00000001, 0x2C11F801, 0xDFD8F60E, 0x6C8FA2B7, 
 	0xB573754C, 0x1522DCDD, 0x21615D3A, 0xE1B307F3, 
@@ -172,14 +172,13 @@ static dCRCTYPE randBits[] =
 // calculate a 32 bit crc of a string
 dCRCTYPE dCRC64 (const char* const name, dCRCTYPE crcAcc)
 {
-	if (!name) {
-		return 0;
-	}
-
-	for (unsigned char *ptr = (unsigned char*)name; *ptr; ptr ++) {
-		dCRCTYPE c = *ptr;
-		dCRCTYPE val = randBits[((crcAcc >> 24) ^ c) & 0xff];
-		crcAcc = (crcAcc << 8) ^ val;
+	if (name) {
+		const int bitshift = (sizeof (dCRCTYPE)<<3) - 8;
+		for (int i = 0; name[i]; i ++) {
+			char c = name[i];
+			dCRCTYPE val = randBits[((crcAcc >> bitshift) ^ c) & 0xff];
+			crcAcc = (crcAcc << 8) ^ val;
+		}
 	}
 	return crcAcc;
 }
@@ -187,11 +186,12 @@ dCRCTYPE dCRC64 (const char* const name, dCRCTYPE crcAcc)
 
 dCRCTYPE dCRC64 (const void* const buffer, int size, dCRCTYPE crcAcc)
 {
-	unsigned char *ptr = (unsigned char*)buffer;
+	const unsigned char* const ptr = (unsigned char*)buffer;
 
+	const int bitshift = (sizeof (dCRCTYPE)<<3) - 8;
 	for (int i = 0; i < size; i ++) {
-		dCRCTYPE  c = ptr[i];
-		dCRCTYPE  val = randBits[((crcAcc >> 24) ^ c) & 0xff];
+		char c = ptr[i];
+		dCRCTYPE  val = randBits[((crcAcc >> bitshift) ^ c) & 0xff];
 		crcAcc = (crcAcc << 8) ^ val;
 	}
 	return crcAcc;
