@@ -119,7 +119,6 @@ class dNewtonScriptParser
 			,m_node(NULL)
 		{
 		}
-//		int m_semanticValue;
 		dDirectAcyclicGraphNode* m_node;
 	};
 

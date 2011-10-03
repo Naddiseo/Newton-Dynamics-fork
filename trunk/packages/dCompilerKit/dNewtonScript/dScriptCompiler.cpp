@@ -114,7 +114,7 @@ void dScriptCompiler::SyntaxError (const dNewtonScriptLexical& scanner, const dU
 dScriptCompiler::dUserVariable dScriptCompiler::NewClassDefinition (const dUserVariable& visibility, const dUserVariable& name, const dUserVariable& deriveFrom)
 {
 	dUserVariable returnNode;
-	dDAGClass* classNode = new dDAGClass (name.m_data.c_str(), (dDAGClass*) deriveFrom.m_node);
+	dDAGClassNode* classNode = new dDAGClassNode (name.m_data.c_str(), (dDAGClassNode*) deriveFrom.m_node);
 
 	dSyntaxTreeCode::dTreeNode* node = m_syntaxTree->Find(classNode->GetKey());
 	if (node) {
@@ -127,5 +127,26 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewClassDefinition (const dUserV
 
 	m_currentClass = classNode;
 	returnNode.m_node = classNode;
+	return returnNode ;
+}
+
+
+
+dScriptCompiler::dUserVariable dScriptCompiler::EmitTypeNode (const dUserVariable& primitiveType0, const dUserVariable& primitiveType1)
+{
+	dUserVariable returnNode;
+
+	dDAGTypeNode* typeNode = new dDAGTypeNode (primitiveType0.m_data.c_str(), primitiveType1.m_data.c_str());
+	
+	returnNode.m_node = typeNode;
+	return returnNode;
+}
+
+
+dScriptCompiler::dUserVariable dScriptCompiler::ClassFunctionPrototype (const dUserVariable& returnType, const dUserVariable& functionName, const dUserVariable& parameterList, const dUserVariable& constFunction)
+{
+	dUserVariable returnNode;
+	_ASSERTE (m_currentClass);
+
 	return returnNode ;
 }

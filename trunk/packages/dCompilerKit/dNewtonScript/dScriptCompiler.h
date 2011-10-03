@@ -21,7 +21,8 @@
 #include <dCRC.h>
 #include <dContainersStdAfx.h>
 
-#include <dDAGClass.h>
+#include <dDAGTypeNode.h>
+#include <dDAGClassNode.h>
 #include <dSyntaxTreeCode.h>
 #include <dDirectAcyclicGraphNode.h>
 
@@ -45,14 +46,20 @@ class dScriptCompiler: public dNewtonScriptParser
 
 	void DisplayError (const char* format, ...) const;
 	void SyntaxError (const dNewtonScriptLexical& scanner, const dUserVariable& errorToken, const dUserVariable& errorTokenMarker);
-	dUserVariable NewClassDefinition (const dUserVariable& visibility, const dUserVariable& name, const dUserVariable& deriveFrom);
+
 
 	dDirectAcyclicGraphNode* AddNode (dDirectAcyclicGraphNode* const node);
+
+	dUserVariable NewClassDefinition (const dUserVariable& visibility, const dUserVariable& name, const dUserVariable& deriveFrom);
+	dUserVariable ClassFunctionPrototype (const dUserVariable& returnType, const dUserVariable& functionName, const dUserVariable& parameterList, const dUserVariable& constFunction);
+
+	dUserVariable EmitTypeNode (const dUserVariable& primitiveType0, const dUserVariable& primitiveType1 = dUserVariable());
+	
 
 	const char* m_fileName;
 	dSyntaxTreeCode* m_syntaxTree;
 
-	dDAGClass* m_currentClass;
+	dDAGClassNode* m_currentClass;
 
 	friend class dNewtonScriptParser;
 };
