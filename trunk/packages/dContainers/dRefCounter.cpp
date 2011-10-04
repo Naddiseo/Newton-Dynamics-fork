@@ -37,7 +37,7 @@ int dRefCounter::Release()
 	return m_refCount;
 }
 
-void dRefCounter::AddRef()
+void dRefCounter::AddRef() const
 {
 	m_refCount ++;
 }

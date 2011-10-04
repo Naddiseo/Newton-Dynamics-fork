@@ -9,21 +9,23 @@
 * freely
 */
 
-#include "dDirectAcyclicGraphNode.h"
+#include "dDirectAcyclicgraphNode.h"
 
-dRttiRootClassSupportImplement(dDirectAcyclicGraphNode);
+dRttiRootClassSupportImplement(dDirectAcyclicgraphNode);
 
-dDirectAcyclicGraphNode::dDirectAcyclicGraphNode(void)
-	:m_key(0)
+dDirectAcyclicgraphNode::dDirectAcyclicgraphNode()
+	:m_name ("")
+	,m_key(0)
 {
 }
 
-dDirectAcyclicGraphNode::~dDirectAcyclicGraphNode(void)
+dDirectAcyclicgraphNode::~dDirectAcyclicgraphNode(void)
 {
+	_ASSERTE (0);
 }
 
 
-dCRCTYPE dDirectAcyclicGraphNode::GetKey() const
+dCRCTYPE dDirectAcyclicgraphNode::GetKey() const
 {
 	return m_key;
 }

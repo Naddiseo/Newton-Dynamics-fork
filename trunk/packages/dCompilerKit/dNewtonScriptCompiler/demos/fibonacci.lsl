@@ -14,8 +14,24 @@ class fibonacci
 {
 	int Calculate (int n)
 	{
-	
+		int a;
+		int b;
+		int c = xxx();
 		a = a + a * (b - c) + (b - c) * d;
+		
+		{
+			x = 1;
+			{
+			} y = 0;
+		}
+		
+		{
+			x = 1;
+			{
+			} y = 0;
+		}
+		
+		
 //		if (n == 0)  {
 //			return 0;
 //		}
@@ -24,6 +40,11 @@ class fibonacci
 //		}
 
 		return Calculate (n - 1) + Calculate (n - 2);
+	}
+	
+	int xxx()
+	{
+		return 1;
 	}
 }
 

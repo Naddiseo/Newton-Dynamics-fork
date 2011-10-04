@@ -168,6 +168,10 @@ static dCRCTYPE randBits[] =
 };
 
 
+dCRCTYPE CombineCRC (dCRCTYPE a, dCRCTYPE b)
+{
+	return (a << 8) ^ b;
+}
 
 // calculate a 32 bit crc of a string
 dCRCTYPE dCRC64 (const char* const name, dCRCTYPE crcAcc)

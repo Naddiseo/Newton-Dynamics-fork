@@ -80,7 +80,7 @@
 %%
 
 compilation_unit
-	: 
+	: {/*xxxx0*/}
 	| module_list
 	; 
 
@@ -128,12 +128,12 @@ class_delaration
 	;			  
 
 class_visibility
-	:	
+	:	{/*xxxx1*/}
 	| PRIVATE
 	;
 				
 gui_support 
-	:
+	: {/*xxxx2*/}
 	| GUI
 	;				
 				

@@ -156,6 +156,30 @@
 			>
 		</File>
 		<File
+			RelativePath=".\dDAGFunctionNode.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGFunctionNode.h"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGParamerNode.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGParameterNode.h"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGScopeBlockNode.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGScopeBlockNode.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dDAGTypeNode.cpp"
 			>
 		</File>

@@ -33,15 +33,18 @@ class dNewtonScriptParser
 	public:
 	enum dToken
 	{
-		ACCEPTING_TOKEN = 255, 
-		ERROR_TOKEN = 254, 
+		ACCEPTING_TOKEN = 254, 
+		ERROR_TOKEN = 255, 
 		NATIVE = 256, 
 		CONSTANT,
 		INTEGER_VALUE,
+		FLOAT_VALUE,
+		STRING_VALUE,
 		IMPORT,
-		IMPORT_FILE_NAME,
 		PRIVATE,
 		CLASS,
+		BASE,
+		DOUBLE_COLOM,
 		IDENTIFIER,
 		EXTENDS,
 		GUI,
@@ -54,6 +57,9 @@ class dNewtonScriptParser
 		FLOAT,
 		DOUBLE,
 		VOID_TYPE,
+		CAST,
+		SIZEOF,
+		OPERATOR,
 		NEW,
 		RETURN,
 		FOR,
@@ -83,12 +89,12 @@ class dNewtonScriptParser
 	class dDefualtUserVariable
 	{
 		public:
-		dUserVariable () 
+		dDefualtUserVariable () 
 			:m_scannerLine (0), m_scannerIndex(0), m_token (dToken (0)), m_data("")
 		{
 		}
 
-		dUserVariable (dToken token, const char* const data, int scannerLine, int scannerIndex)
+		dDefualtUserVariable (dToken token, const char* const data, int scannerLine, int scannerIndex)
 			:m_scannerLine (scannerLine), m_scannerIndex(scannerIndex), m_token(token), m_data (data) 
 		{
 		}
@@ -100,24 +106,20 @@ class dNewtonScriptParser
 
 
 	
-	class dUserVariable
+	class dUserVariable: public dDefualtUserVariable
 	{
 		public:
 		dUserVariable () 
-			:m_scannerLine (0), m_scannerIndex(0), m_semanticValue (0), m_token (dToken (0)), m_data("")
+			:dDefualtUserVariable ()
 		{
 		}
-		
 		
 		dUserVariable (dToken token, const char* const text, int scannerLine, int scannerIndex)
-			:m_scannerLine (scannerLine), m_scannerIndex(scannerIndex), m_semanticValue (0), m_token(token), m_data (text) 
+			:dDefualtUserVariable (token, text, scannerLine, scannerIndex)
+			,m_semanticValue (0)
 		{
 		}
-		int m_scannerLine;
-		int m_scannerIndex;
 		int m_semanticValue;		
-		dToken m_token;
-		string m_data;
 	};
 
 

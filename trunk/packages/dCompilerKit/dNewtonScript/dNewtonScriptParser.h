@@ -119,7 +119,7 @@ class dNewtonScriptParser
 			,m_node(NULL)
 		{
 		}
-		dDirectAcyclicGraphNode* m_node;
+		dDirectAcyclicgraphNode* m_node;
 	};
 
 

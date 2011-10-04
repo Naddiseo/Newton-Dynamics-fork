@@ -9,31 +9,33 @@
 * freely
 */
 
-#ifndef __dDirectAcyclicGraphNode_h_
-#define __dDirectAcyclicGraphNode_h_
+#ifndef __dDirectAcyclicgraphNode_h_
+#define __dDirectAcyclicgraphNode_h_
 
 #include <dTree.h>
 #include <dList.h>
 #include <dCRC.h>
 #include <dRtti.h>
+#include <dRefCounter.h>
 #include <dContainersStdAfx.h>
 
 #include <string>
 using namespace std;
 
-class dDirectAcyclicGraphNode
+class dDirectAcyclicgraphNode: public dRefCounter
 {
 	public:
-	dDirectAcyclicGraphNode(void);
-	virtual ~dDirectAcyclicGraphNode(void);
+	dDirectAcyclicgraphNode(void);
+	virtual ~dDirectAcyclicgraphNode(void);
 
 	dCRCTYPE GetKey() const;
 	virtual void CalculateKey() {m_key = 0;}
 	
-
+	
+	string m_name;
 	dCRCTYPE m_key;
 
-	dRttiRootClassSupportDeclare(dDirectAcyclicGraphNode);
+	dRttiRootClassSupportDeclare(dDirectAcyclicgraphNode);
 	
 };
 

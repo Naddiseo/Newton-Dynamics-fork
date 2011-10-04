@@ -12,7 +12,7 @@
 %{
 #include <dScriptCompiler.h>
 #include "dNewtonScriptLexical.h"
-#include "dDirectAcyclicGraphNode.h"
+#include "dDirectAcyclicgraphNode.h"
 
 //
 // Newton Litle Scripting Language parser  specification 1.0.0
@@ -36,7 +36,7 @@
 			,m_node(NULL)
 		{
 		}
-		dDirectAcyclicGraphNode* m_node;
+		dDirectAcyclicgraphNode* m_node;
 	};
 }
 
@@ -127,16 +127,17 @@ import_module
 	: IMPORT '<' compound_identifier_List '>' 
 	;
 	
-class_definition
-	: class_visibility CLASS IDENTIFIER extends
-		{ 
+start_new_class
+	:  { 
 			GET_PARENT_CLASS; 
-			$$ = me->NewClassDefinition ($1, $3, $4);
-		}
+			$$ = me->NewClassDefinitionNode ();
+	   }
 	;
 		  
+	  
+		  
 class_delaration 
-	: class_definition gui_support '{' class_member_list '}'
+	: start_new_class class_visibility CLASS IDENTIFIER extends gui_support '{' class_member_list '}'
 	;			  
 
 class_visibility
@@ -161,7 +162,7 @@ class_member_list
 				    
 class_member 
 	: class_contructor
-	| class_function_implementaion
+	| class_function_implementation
 	| uninitialized_variable semicolon_marker
 	;
 			
@@ -173,8 +174,8 @@ native_function
 
 
 parameter_list 
-	: parameter							{$$ = $1; /*xxxx1*/}
-	| parameter_list ',' parameter		{/*xxxx*/}
+	: parameter							
+	| parameter_list ',' parameter		
 	| syntax_error
 	;	
 	
@@ -206,7 +207,7 @@ semicolon_marker_list
 			 
 class_contructor 
 	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker
-	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class function_block
+	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class block_scope
 	;
 
 
@@ -219,24 +220,34 @@ overlodable_operator
 	; 	
 	
 	
-class_function_implementaion 
+class_function_implementation 
 	: native_function function_prototype semicolon_marker
-	| function_prototype function_block
-	| PRIVATE function_prototype function_block
+	| function_prototype block_scope
+	| PRIVATE function_prototype block_scope
 	;
 	
-function_prototype
-	: type_specifier IDENTIFIER '(' function_parameters ')' const_function 
+	
+begin_new_function
+	: 
 		{
 			GET_PARENT_CLASS; 
-			$$ = me->ClassFunctionPrototype ($1, $2, $4, $5);
+			$$ = me->BeginBeginFunctionPrototypeNode ();
 		}
-	| type_specifier OPERATOR overlodable_operator '(' function_parameters ')' const_function	
+	;
+	
+	
+function_prototype
+	: type_specifier IDENTIFIER begin_new_function '(' function_parameters ')' const_function 
+		{
+			GET_PARENT_CLASS; 
+			$$ = me->FinalizeFunctionPrototypeNode ($1, $2, $7);
+		}
+	| type_specifier OPERATOR overlodable_operator begin_new_function '(' function_parameters ')' const_function	
 		{
 			GET_PARENT_CLASS; 
 			dUserVariable temp;
 			temp.m_data = string ("operator") + $3.m_data;
-			$$ = me->ClassFunctionPrototype ($1, temp, $5, $6);
+			$$ = me->FinalizeFunctionPrototypeNode ($1, temp, $8);
 		}
 
 	| syntax_error
@@ -255,6 +266,10 @@ initialized_variable
 			  
 parameter
 	: type_specifier IDENTIFIER
+		{
+			GET_PARENT_CLASS; 
+			$$ = me->NewParameterNode ($1, $2);
+		}
 	;
 	
 	
@@ -272,10 +287,10 @@ primitive_types
 	| SHORT				{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1);}
 	| INT				{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1);}
 	| LONG				{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1);}
-	| UNSIGNED BYTE		{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1, $2);}	
-	| UNSIGNED SHORT	{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1, $2);}	
-	| UNSIGNED INT		{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1, $2);}	
-	| UNSIGNED LONG		{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1, $2);}	
+	| UNSIGNED BYTE		{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($2, $1);}	
+	| UNSIGNED SHORT	{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($2, $1);}	
+	| UNSIGNED INT		{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($2, $1);}	
+	| UNSIGNED LONG		{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1, $1);}	
 	| FLOAT				{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1);}
 	| DOUBLE			{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1);}
 	| VOID_TYPE			{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1);}
@@ -296,10 +311,23 @@ array_type
 	| '[' expression ']'
 	;	
 		 
+		 
+begin_block_scope
+	: 
+		{
+			GET_PARENT_CLASS; $$ = me->BeginScopeBlock();
+		}
+	;
 						  
-function_block 
-	: '{' '}'
-	| '{' statement_list '}'
+block_scope 
+	: begin_block_scope '{' '}'
+		{
+			GET_PARENT_CLASS; $$ = me->FinalizeScopeBlock($1);
+		}
+	| begin_block_scope '{' statement_list '}'
+		{
+			GET_PARENT_CLASS; $$ = me->FinalizeScopeBlock($1);
+		}
 	;
 			   
 			   
@@ -316,13 +344,13 @@ statement
 	| BREAK semicolon_marker
 	| function_call semicolon_marker
 	| return semicolon_marker	
-	| function_block	
-	| IF '(' expression	')' function_block 
-	| IF '(' expression	')' function_block ELSE function_block
+	| block_scope	
+	| IF '(' expression	')' block_scope 
+	| IF '(' expression	')' block_scope ELSE block_scope
 	| SWITCH '(' expression ')' '{' switch_case_list '}' 
-	| FOR '(' primitive_types assigment_statement ';' expression ';' assigment_statement ')' function_block
-	| WHILE '(' expression ')' function_block 
-	| DO function_block WHILE '(' expression ')' semicolon_marker
+	| FOR '(' primitive_types assigment_statement ';' expression ';' assigment_statement ')' block_scope
+	| WHILE '(' expression ')' block_scope 
+	| DO block_scope WHILE '(' expression ')' semicolon_marker
 	| syntax_error
 	;
 
@@ -352,8 +380,8 @@ switch_case_list
 	;
 	
 switch_case
-	: CASE INTEGER_VALUE ':' function_block
-	| DEFAULT ':' function_block
+	: CASE INTEGER_VALUE ':' block_scope
+	| DEFAULT ':' block_scope
 	;  	
 	
 	

@@ -20,13 +20,13 @@ class dRefCounter
 	dRefCounter(void);
 	int GetRef() const;
 	int Release();
-	void AddRef();
+	void AddRef() const;
 
 	protected:
 	virtual ~dRefCounter(void);
 
 	private:
-	int m_refCount;
+	mutable int m_refCount;
 };
 
 #endif
