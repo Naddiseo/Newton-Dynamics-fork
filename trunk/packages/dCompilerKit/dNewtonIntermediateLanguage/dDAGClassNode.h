@@ -14,16 +14,23 @@
 
 #include "dDirectAcyclicgraphNode.h"
 
+class dDAGFunctionNode;
+
 class dDAGClassNode: public dDirectAcyclicgraphNode
 {
 	public:
 	dDAGClassNode();
 	~dDAGClassNode(void);
 
-	virtual void CalculateKey();
+	void FinalizeImplementation (const char* const visibility, const char* const name, dDAGClassNode* const baseClass);
 
+	virtual void CalculateKey();
+	void AddFunction (dDAGFunctionNode* const function);
+
+	bool m_isPublic;
 	string m_name;
 	const dDAGClassNode* m_baseClass;
+	dList<dDAGFunctionNode*> m_functionList;
 
 	dAddRtti(dDirectAcyclicgraphNode);
 };

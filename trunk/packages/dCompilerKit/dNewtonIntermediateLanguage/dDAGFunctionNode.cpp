@@ -10,15 +10,18 @@
 */
 
 #include "dDirectAcyclicgraphNode.h"
+#include "dDAGTypeNode.h"
 #include "dDAGFunctionNode.h"
 #include "dDAGParameterNode.h"
 #include "dDAGScopeBlockNode.h"
+
 
 dInitRtti(dDAGFunctionNode);
 
 dDAGFunctionNode::dDAGFunctionNode()
 	:dDirectAcyclicgraphNode()
-	,m_isconst (false)
+	,m_isConst (false)
+	,m_isPrivate(false)
 	,m_returnType (NULL)
 	,m_functionScopeBlock(NULL)
 	,m_scopeStack()
@@ -28,26 +31,33 @@ dDAGFunctionNode::dDAGFunctionNode()
 
 dDAGFunctionNode::~dDAGFunctionNode(void)
 {
-	_ASSERTE (0);
+	_ASSERTE (m_functionScopeBlock);
+	m_returnType->Release();
+	m_functionScopeBlock->Release();
+
+	for (dList<dDAGParameterNode*>::dListNode* node = m_parameters.GetFirst(); node; node = node->GetNext()) {
+		dDAGParameterNode* const parameter = node->GetInfo();
+		parameter->Release();
+	}
 }
 
 
 void dDAGFunctionNode::CalculateKey() 
 {
-	if (m_isconst) {
+	if (m_isConst) {
 		m_key = dCRC64 ("const", GetKey());
 	}
-	for (dList<const dDAGParameterNode*>::dListNode* node = m_parameters.GetFirst(); node; node = node->GetNext()) {
-		const dDAGParameterNode* const type = node->GetInfo();
-		m_key = CombineCRC (m_key, type->GetKey());
+	for (dList<dDAGParameterNode*>::dListNode* node = m_parameters.GetFirst(); node; node = node->GetNext()) {
+		dDAGParameterNode* const parameter = node->GetInfo();
+		m_key = CombineCRC (m_key, parameter->GetKey());
 	}
 	m_key = dCRC64 (m_name.c_str(), m_key);
 }
 
 
-void dDAGFunctionNode::AddParameter (const dDAGParameterNode* const parameter)
+void dDAGFunctionNode::AddParameter (dDAGParameterNode* const parameter)
 {
-	for (dList<const dDAGParameterNode*>::dListNode* node = m_parameters.GetFirst(); node; node = node->GetNext()) {
+	for (dList<dDAGParameterNode*>::dListNode* node = m_parameters.GetFirst(); node; node = node->GetNext()) {
 		if (parameter->GetKey() == node->GetInfo()->GetKey()) {
 			// error duplicated parameter
 			_ASSERTE (0);
@@ -58,11 +68,11 @@ void dDAGFunctionNode::AddParameter (const dDAGParameterNode* const parameter)
 }
 
 
-void dDAGFunctionNode::FinalizeFunctionPrototypeNode (dDAGTypeNode* const type, const char* const name, const char* const isConst)
+void dDAGFunctionNode::FinalizePrototype (dDAGTypeNode* const type, const char* const name, const char* const isConstant)
 {
 	m_name = name;
 	m_returnType = type;
-	m_isconst =  (isConst[0] == 0) ? false : true;
+	m_isConst =  (isConstant[0] == 0) ? false : true;
 
 	CalculateKey();
 }

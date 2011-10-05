@@ -55,28 +55,31 @@ class dScriptCompiler: public dNewtonScriptParser
 	void DisplayError (const char* format, ...) const;
 	void SyntaxError (const dNewtonScriptLexical& scanner, const dUserVariable& errorToken, const dUserVariable& errorTokenMarker);
 
+	void AddClass(const dUserVariable& classNode);
 
-	dDirectAcyclicgraphNode* AddNode (dDirectAcyclicgraphNode* const node);
+	dUserVariable BeginClassNode ();
+	dUserVariable FinalizeClassNode (const dUserVariable& classNode, const dUserVariable& visibility, const dUserVariable& name, const dUserVariable& baseClass, const dUserVariable& guiInterface);
 
-	dUserVariable NewClassDefinitionNode ();
-
+	dUserVariable AddClassFunction (const dUserVariable& returnType, const dUserVariable& function, const dUserVariable& functionBlock);
+	
 	dUserVariable BeginBeginFunctionPrototypeNode ();
-	dUserVariable FinalizeFunctionPrototypeNode (const dUserVariable& reurnType, const dUserVariable& funtionName, const dUserVariable& isConst);
+	dUserVariable FinalizePrototype (const dUserVariable& returnType, const dUserVariable& funtionName, const dUserVariable& isConst);
 
 	dUserVariable BeginScopeBlock ();
 	dUserVariable FinalizeScopeBlock (const dUserVariable& scope);
 
 	dUserVariable NewParameterNode (const dUserVariable& primitiveType, const dUserVariable& identifier);
-
 	dUserVariable EmitTypeNode (const dUserVariable& type, const dUserVariable& modifier = dUserVariable());
 	
 
 	dPasses m_pass;
 	const char* m_fileName;
-	dSyntaxTreeCode* m_syntaxTree;
+	
 
 	dDAGClassNode* m_currentClass;
 	dDAGFunctionNode* m_currentFunction;
+
+	dList<dDAGClassNode*> m_classList;
 
 	friend class dNewtonScriptParser;
 };

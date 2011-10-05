@@ -14,16 +14,23 @@
 
 dInitRtti(dDAGScopeBlockNode);
 
+
+
 dDAGScopeBlockNode::dDAGScopeBlockNode()
 	:dDirectAcyclicgraphNode()
 	,m_subScopeBlocks()
 {
+	
 }
 
 
-dDAGScopeBlockNode::~dDAGScopeBlockNode(void)
+dDAGScopeBlockNode::~dDAGScopeBlockNode()
 {
-	_ASSERTE (0);
+	for (dList<dDAGScopeBlockNode*>::dListNode* node = m_subScopeBlocks.GetFirst(); node; node = node->GetNext()) {
+		dDAGScopeBlockNode* const block = node->GetInfo();
+		block->Release();
+	}
+
 }
 
 

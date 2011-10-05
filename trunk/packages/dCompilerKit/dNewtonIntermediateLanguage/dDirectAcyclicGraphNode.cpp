@@ -21,7 +21,6 @@ dDirectAcyclicgraphNode::dDirectAcyclicgraphNode()
 
 dDirectAcyclicgraphNode::~dDirectAcyclicgraphNode(void)
 {
-	_ASSERTE (0);
 }
 
 

@@ -26,7 +26,7 @@ dDAGParameterNode::dDAGParameterNode(dDAGTypeNode* const type, const char* const
 
 dDAGParameterNode::~dDAGParameterNode(void)
 {
-	_ASSERTE (0);
+	m_type->Release();
 }
 
 

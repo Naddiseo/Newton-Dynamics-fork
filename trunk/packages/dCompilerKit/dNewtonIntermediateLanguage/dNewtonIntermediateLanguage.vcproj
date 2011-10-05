@@ -211,14 +211,6 @@
 			RelativePath=".\dDirectAcyclicGraphNode.h"
 			>
 		</File>
-		<File
-			RelativePath=".\dSyntaxTreeCode.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\dSyntaxTreeCode.h"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

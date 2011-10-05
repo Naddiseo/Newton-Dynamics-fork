@@ -24,7 +24,6 @@ dDAGTypeNode::dDAGTypeNode(const char* const type, const char* const modifier)
 
 dDAGTypeNode::~dDAGTypeNode(void)
 {
-	_ASSERTE (0);
 }
 
 

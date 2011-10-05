@@ -1197,8 +1197,14 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						case 19:// rule start_new_class : 
 						{ 
 			GET_PARENT_CLASS; 
-			entry.m_value = me->NewClassDefinitionNode ();
+			entry.m_value = me->BeginClassNode ();
 	   }
+						break;
+					case 7:// rule module : class_delaration 
+						{
+			GET_PARENT_CLASS; 
+			me->AddClass (parameter[0].m_value); 
+		}
 						break;
 					case 22:// rule class_visibility : PRIVATE 
 						{entry.m_value = parameter[0].m_value;}
@@ -1238,6 +1244,9 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 72:// rule primitive_types : SHORT 
 						{GET_PARENT_CLASS; entry.m_value = me->EmitTypeNode (parameter[0].m_value);}
 						break;
+					case 30:// rule class_member : class_function_implementation 
+						{entry.m_value = parameter[0].m_value;}
+						break;
 					case 82:// rule class_Type : CLASS IDENTIFIER 
 						{GET_PARENT_CLASS; entry.m_value = me->EmitTypeNode (parameter[0].m_value, parameter[1].m_value);}
 						break;
@@ -1258,6 +1267,19 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						break;
 					case 76:// rule primitive_types : UNSIGNED SHORT 
 						{GET_PARENT_CLASS; entry.m_value = me->EmitTypeNode (parameter[1].m_value, parameter[0].m_value);}
+						break;
+					case 56:// rule class_function_implementation : function_prototype block_scope 
+						{
+			GET_PARENT_CLASS; 
+			dUserVariable tmp;
+			entry.m_value = me->AddClassFunction (tmp, parameter[0].m_value, parameter[1].m_value);
+		}
+						break;
+					case 20:// rule class_delaration : start_new_class class_visibility CLASS IDENTIFIER extends gui_support { class_member_list } 
+						{
+			GET_PARENT_CLASS; 
+			entry.m_value = me->FinalizeClassNode (parameter[0].m_value, parameter[1].m_value, parameter[3].m_value, parameter[4].m_value, parameter[5].m_value);
+		}
 						break;
 					case 10:// rule error_token : } 
 						{ entry.m_value = parameter[0].m_value;}
@@ -1292,6 +1314,12 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 11:// rule error_token : ) 
 						{ entry.m_value = parameter[0].m_value;}
 						break;
+					case 57:// rule class_function_implementation : PRIVATE function_prototype block_scope 
+						{
+			GET_PARENT_CLASS; 
+			entry.m_value = me->AddClassFunction (parameter[0].m_value, parameter[1].m_value, parameter[2].m_value);
+		}
+						break;
 					case 39:// rule function_parameters : parameter_list 
 						{entry.m_value = parameter[0].m_value;}
 						break;
@@ -1314,7 +1342,7 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 59:// rule function_prototype : type_specifier IDENTIFIER begin_new_function ( function_parameters ) const_function 
 						{
 			GET_PARENT_CLASS; 
-			entry.m_value = me->FinalizeFunctionPrototypeNode (parameter[0].m_value, parameter[1].m_value, parameter[6].m_value);
+			entry.m_value = me->FinalizePrototype (parameter[0].m_value, parameter[1].m_value, parameter[6].m_value);
 		}
 						break;
 					case 60:// rule function_prototype : type_specifier OPERATOR overlodable_operator begin_new_function ( function_parameters ) const_function 
@@ -1322,7 +1350,7 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 			GET_PARENT_CLASS; 
 			dUserVariable temp;
 			temp.m_data = string ("operator") + parameter[2].m_value.m_data;
-			entry.m_value = me->FinalizeFunctionPrototypeNode (parameter[0].m_value, temp, parameter[7].m_value);
+			entry.m_value = me->FinalizePrototype (parameter[0].m_value, temp, parameter[7].m_value);
 		}
 						break;
 

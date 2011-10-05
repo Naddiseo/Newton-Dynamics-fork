@@ -17,26 +17,38 @@
 #include "dNewtonScriptLexical.h"
 
 
+void* operator new (size_t size)
+{
+	static int xxx;
+	xxx ++;
+	if (xxx == 24)
+	xxx *=1;
+
+	void* const ptr = malloc (size);
+//	DTRACE (("%x %d %d\n", ptr, size, xxx));
+	return ptr;
+}
 
 
 dScriptCompiler::dScriptCompiler(const char* const sourceFileName)
 	:dNewtonScriptParser ()
 	,m_pass (m_first)
 	,m_fileName(sourceFileName)
-	,m_syntaxTree (NULL)
 	,m_currentClass(NULL)
 	,m_currentFunction(NULL)
+	,m_classList()
 {
 }
 
 dScriptCompiler::~dScriptCompiler()
 {
-	if (m_syntaxTree) {
-		delete m_syntaxTree;
-	}	
+	for(dList<dDAGClassNode*>::dListNode* node = m_classList.GetFirst(); node; node = node->GetNext() ) {
+		dDAGClassNode* const classNode = node->GetInfo();
+		classNode->Release();
+	}
 }
 
-//inline void dExpandTraceMessage (const char *fmt, ...)
+
 void dScriptCompiler::DisplayError (const char* format, ...) const
 {
 	va_list v_args;
@@ -58,12 +70,6 @@ void dScriptCompiler::DisplayError (const char* format, ...) const
 int dScriptCompiler::CompileSource (const char* const source)
 {
 	dNewtonScriptLexical scanner (source);
-
-	if (m_syntaxTree) {
-		delete m_syntaxTree;
-	}	
-	
-	m_syntaxTree = new dSyntaxTreeCode;
 
 //	m_virtualMachine = virtualMachine;
 	Parse(scanner);
@@ -106,28 +112,22 @@ void dScriptCompiler::SyntaxError (const dNewtonScriptLexical& scanner, const dU
 
 	int length = end - start + 1;
 	string errorLine (&data[start], length);
-//	fprintf (stderr, "%s (%d) : syntax error on line: %s\n", m_fileName, lineNumber, errorLine.c_str());
-//	DTRACE (("%s (%d) : syntax error on line: %s\n", m_fileName, lineNumber, errorLine.c_str()));
 	DisplayError ("%s (%d) : syntax error on line: %s\n", m_fileName, lineNumber, errorLine.c_str());
 }
 
+void dScriptCompiler::AddClass(const dUserVariable& classNode)
+{
+	_ASSERTE ((dDAGClassNode*)classNode.m_node == m_currentClass);
+	m_classList.Append((dDAGClassNode*)classNode.m_node);
+	m_currentClass = NULL;
+}
 
-
-dScriptCompiler::dUserVariable dScriptCompiler::NewClassDefinitionNode ()
+dScriptCompiler::dUserVariable dScriptCompiler::BeginClassNode ()
 {
 	dUserVariable returnNode;
 
 	if (m_pass == m_first) {
 		dDAGClassNode* const classNode = new dDAGClassNode ();
-	
-	//	dSyntaxTreeCode::dTreeNode* node = m_syntaxTree->Find(classNode->GetKey());
-	//	if (node) {
-	//		DisplayError ("error class \"%s\" : already defined", name.m_data.c_str());
-	//		m_syntaxTree->Remove(node);
-	//		node = m_syntaxTree->Insert(classNode, classNode->GetKey());
-	//	} else {
-	//		node = m_syntaxTree->Insert(classNode, classNode->GetKey());
-	//	}
 
 		m_currentClass = classNode;
 		returnNode.m_node = classNode;
@@ -137,7 +137,21 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewClassDefinitionNode ()
 	return returnNode ;
 }
 
+dScriptCompiler::dUserVariable dScriptCompiler::FinalizeClassNode (const dUserVariable& classNode, const dUserVariable& visibility, const dUserVariable& name, const dUserVariable& baseClass, const dUserVariable& guiInterface)
+{
+	dUserVariable returnNode;
 
+	if (m_pass == m_first) {
+		_ASSERTE (classNode.m_node == m_currentClass);
+
+		m_currentClass->FinalizeImplementation(visibility.m_data.c_str(), name.m_data.c_str(), (dDAGClassNode*)baseClass.m_node);
+		returnNode.m_node = classNode.m_node;
+	} else {
+		_ASSERTE (0);
+	}
+	return returnNode ;
+
+}
 
 dScriptCompiler::dUserVariable dScriptCompiler::EmitTypeNode (const dUserVariable& type, const dUserVariable& modifier)
 {
@@ -189,7 +203,7 @@ dScriptCompiler::dUserVariable dScriptCompiler::BeginBeginFunctionPrototypeNode 
 	return returnNode;
 }
 
-dScriptCompiler::dUserVariable dScriptCompiler::FinalizeFunctionPrototypeNode (const dUserVariable& returnType, const dUserVariable& functionName, const dUserVariable& isConst)
+dScriptCompiler::dUserVariable dScriptCompiler::FinalizePrototype (const dUserVariable& returnType, const dUserVariable& functionName, const dUserVariable& isConst)
 {
 	dUserVariable returnNode;
 
@@ -198,7 +212,7 @@ dScriptCompiler::dUserVariable dScriptCompiler::FinalizeFunctionPrototypeNode (c
 		_ASSERTE (returnType.m_node && (returnType.m_node->GetTypeId() == dDAGTypeNode::GetRttiType()));
 		_ASSERTE (returnType.m_node);
 
-		m_currentFunction->FinalizeFunctionPrototypeNode ((dDAGTypeNode*)returnType.m_node, functionName.m_data.c_str(), isConst.m_data.c_str());
+		m_currentFunction->FinalizePrototype ((dDAGTypeNode*)returnType.m_node, functionName.m_data.c_str(), isConst.m_data.c_str());
 
 		returnNode.m_node = m_currentFunction;
 	} else {
@@ -208,6 +222,27 @@ dScriptCompiler::dUserVariable dScriptCompiler::FinalizeFunctionPrototypeNode (c
 	return returnNode;
 }
 
+dScriptCompiler::dUserVariable dScriptCompiler::AddClassFunction (const dUserVariable& isPrivate, const dUserVariable& function, const dUserVariable& functionBlock)
+{
+	dUserVariable returnNode;
+
+	if (m_pass == m_first) {
+		_ASSERTE (m_currentClass);
+		_ASSERTE (m_currentFunction);
+		_ASSERTE (function.m_node == m_currentFunction);
+		_ASSERTE (m_currentFunction->m_functionScopeBlock == (dDAGScopeBlockNode*) functionBlock.m_node);
+
+		m_currentFunction->m_isPrivate = (isPrivate.m_data == "") ? false : true;
+		m_currentClass->AddFunction (m_currentFunction);
+
+		returnNode.m_node = m_currentFunction;
+	} else {
+		_ASSERTE (0);
+	}
+
+	return returnNode;
+
+}
 
 dScriptCompiler::dUserVariable dScriptCompiler::BeginScopeBlock ()
 {

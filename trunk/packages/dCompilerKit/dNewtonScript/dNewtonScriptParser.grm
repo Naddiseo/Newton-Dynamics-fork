@@ -99,6 +99,10 @@ module
 	: ';'
 	| import_module
 	| class_delaration
+		{
+			GET_PARENT_CLASS; 
+			me->AddClass ($1); 
+		}
 	;			
 
 
@@ -130,7 +134,7 @@ import_module
 start_new_class
 	:  { 
 			GET_PARENT_CLASS; 
-			$$ = me->NewClassDefinitionNode ();
+			$$ = me->BeginClassNode ();
 	   }
 	;
 		  
@@ -138,6 +142,10 @@ start_new_class
 		  
 class_delaration 
 	: start_new_class class_visibility CLASS IDENTIFIER extends gui_support '{' class_member_list '}'
+		{
+			GET_PARENT_CLASS; 
+			$$ = me->FinalizeClassNode ($1, $2, $4, $5, $6);
+		}
 	;			  
 
 class_visibility
@@ -156,13 +164,13 @@ extends
 	;		
 	
 class_member_list	 
-	: class_member
+	: class_member							
 	| class_member_list	class_member
 	;
 				    
 class_member 
 	: class_contructor
-	| class_function_implementation
+	| class_function_implementation				{$$ = $1;}
 	| uninitialized_variable semicolon_marker
 	;
 			
@@ -223,7 +231,16 @@ overlodable_operator
 class_function_implementation 
 	: native_function function_prototype semicolon_marker
 	| function_prototype block_scope
+		{
+			GET_PARENT_CLASS; 
+			dUserVariable tmp;
+			$$ = me->AddClassFunction (tmp, $1, $2);
+		}
 	| PRIVATE function_prototype block_scope
+		{
+			GET_PARENT_CLASS; 
+			$$ = me->AddClassFunction ($1, $2, $3);
+		}
 	;
 	
 	
@@ -240,14 +257,14 @@ function_prototype
 	: type_specifier IDENTIFIER begin_new_function '(' function_parameters ')' const_function 
 		{
 			GET_PARENT_CLASS; 
-			$$ = me->FinalizeFunctionPrototypeNode ($1, $2, $7);
+			$$ = me->FinalizePrototype ($1, $2, $7);
 		}
 	| type_specifier OPERATOR overlodable_operator begin_new_function '(' function_parameters ')' const_function	
 		{
 			GET_PARENT_CLASS; 
 			dUserVariable temp;
 			temp.m_data = string ("operator") + $3.m_data;
-			$$ = me->FinalizeFunctionPrototypeNode ($1, temp, $8);
+			$$ = me->FinalizePrototype ($1, temp, $8);
 		}
 
 	| syntax_error
