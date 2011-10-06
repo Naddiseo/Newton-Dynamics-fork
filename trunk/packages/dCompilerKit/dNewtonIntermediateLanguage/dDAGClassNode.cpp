@@ -12,20 +12,27 @@
 #include "dDirectAcyclicgraphNode.h"
 #include "dDAGClassNode.h"
 #include "dDAGFunctionNode.h"
+#include "dDAGParameterNode.h"
 
 dInitRtti(dDAGClassNode);
 
 dDAGClassNode::dDAGClassNode()
 	:dDirectAcyclicgraphNode()
 	,m_isPublic(true)
-	,m_name ("")
 	,m_baseClass (NULL)
+	,m_variables()
+	,m_functionList()
 {
 }
 
 
 dDAGClassNode::~dDAGClassNode(void)
 {
+	for (dList<dDAGParameterNode*>::dListNode* node = m_variables.GetFirst(); node; node = node->GetNext()) {
+		dDAGParameterNode* const variable = node->GetInfo();
+		variable->Release();
+	}
+
 	for (dList<dDAGFunctionNode*>::dListNode* node = m_functionList.GetFirst(); node; node = node->GetNext()) {
 		dDAGFunctionNode* const function = node->GetInfo();
 		function->Release();
@@ -54,4 +61,12 @@ void dDAGClassNode::CalculateKey()
 void dDAGClassNode::AddFunction (dDAGFunctionNode* const function)
 {
 	m_functionList.Append(function);
+	function->AddRef();
+}
+
+
+void dDAGClassNode::AddVariable (dDAGParameterNode* const variable)
+{
+	m_variables.Append(variable);
+	variable->AddRef();
 }

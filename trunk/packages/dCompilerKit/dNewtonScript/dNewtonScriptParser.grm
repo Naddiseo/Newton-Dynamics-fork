@@ -173,7 +173,8 @@ class_member
 	| class_function_implementation				{$$ = $1;}
 	| uninitialized_variable semicolon_marker   
 		{
-			_ASSERTE (0);
+			GET_PARENT_CLASS; 
+			me->AddClassVariable($1);
 		}
 	;
 			
@@ -480,7 +481,9 @@ expression
 	| expression '|' expression
 	| expression '^' expression
 	| expression '&' expression
+*/	
 	| expression IDENTICAL expression
+/*	
 	| expression DIFFERENT expression
 	| expression '<' expression
 	| expression '>' expression

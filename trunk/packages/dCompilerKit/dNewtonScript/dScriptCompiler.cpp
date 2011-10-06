@@ -172,7 +172,6 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewParameterNode (const dUserVar
 
 	if (m_pass == m_first) {
 		_ASSERTE (m_currentClass);
-		_ASSERTE (m_currentFunction);
 
 		_ASSERTE (primitiveType.m_node && (primitiveType.m_node->GetTypeId() == dDAGTypeNode::GetRttiType()));
 		dDAGParameterNode* const parameter = new dDAGParameterNode((dDAGTypeNode*) primitiveType.m_node, identifier.m_data.c_str());
@@ -235,6 +234,7 @@ dScriptCompiler::dUserVariable dScriptCompiler::AddClassFunction (const dUserVar
 		m_currentClass->AddFunction (m_currentFunction);
 
 		returnNode.m_node = m_currentFunction;
+		m_currentFunction->Release();
 	} else {
 		_ASSERTE (0);
 	}
@@ -297,6 +297,25 @@ void dScriptCompiler::SetParamameterAsPrivateVariable(const dUserVariable& varia
 	} else {
 		_ASSERTE (0);
 	}
+}
+
+void dScriptCompiler::AddClassVariable(const dUserVariable& variable)
+{
+	dUserVariable returnNode;
+
+	if (m_pass == m_first) {	
+		_ASSERTE (m_currentClass);
+
+		_ASSERTE (variable.m_node);
+		_ASSERTE (variable.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType());
+		dDAGParameterNode* const var = (dDAGParameterNode*) variable.m_node;
+		m_currentClass->AddVariable(var);
+		var->Release();
+
+	} else {
+		_ASSERTE (0);
+	}
+
 }
 
 void dScriptCompiler::AddLocalVaribleToCurrentBlock(const dUserVariable& variable)

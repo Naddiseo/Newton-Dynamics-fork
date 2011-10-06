@@ -22,7 +22,6 @@ dDAGScopeBlockNode::dDAGScopeBlockNode()
 	:dDirectAcyclicgraphNode()
 	,m_subScopeBlocks()
 {
-	
 }
 
 

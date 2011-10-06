@@ -15,6 +15,7 @@
 #include "dDirectAcyclicgraphNode.h"
 
 class dDAGFunctionNode;
+class dDAGParameterNode;
 
 class dDAGClassNode: public dDirectAcyclicgraphNode
 {
@@ -25,11 +26,12 @@ class dDAGClassNode: public dDirectAcyclicgraphNode
 	void FinalizeImplementation (const char* const visibility, const char* const name, dDAGClassNode* const baseClass);
 
 	virtual void CalculateKey();
+	void AddVariable (dDAGParameterNode* const variable);
 	void AddFunction (dDAGFunctionNode* const function);
 
 	bool m_isPublic;
-	string m_name;
 	const dDAGClassNode* m_baseClass;
+	dList<dDAGParameterNode*> m_variables;
 	dList<dDAGFunctionNode*> m_functionList;
 
 	dAddRtti(dDirectAcyclicgraphNode);
