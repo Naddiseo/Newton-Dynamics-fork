@@ -49,7 +49,7 @@ void dDAGFunctionNode::CalculateKey()
 	}
 	for (dList<dDAGParameterNode*>::dListNode* node = m_parameters.GetFirst(); node; node = node->GetNext()) {
 		dDAGParameterNode* const parameter = node->GetInfo();
-		m_key = CombineCRC (m_key, parameter->GetKey());
+		m_key = dCombineCRC (m_key, parameter->GetKey());
 	}
 	m_key = dCRC64 (m_name.c_str(), m_key);
 }

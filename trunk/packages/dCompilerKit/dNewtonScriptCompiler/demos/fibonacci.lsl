@@ -22,7 +22,6 @@ int bbbb;
 		int c;
 		int d;
 //		int c = xxx();
-		x = a + b;
 		a = a + a * (b - c) + (b - c) * d;
 		
 		{
@@ -39,7 +38,6 @@ int bbbb;
 			} 
 			y = 0;
 		}
-		
 		
 		if (n == 0)  {
 			return 0;

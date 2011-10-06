@@ -168,7 +168,7 @@ static dCRCTYPE randBits[] =
 };
 
 
-dCRCTYPE CombineCRC (dCRCTYPE a, dCRCTYPE b)
+dCRCTYPE dCombineCRC (dCRCTYPE a, dCRCTYPE b)
 {
 	return (a << 8) ^ b;
 }

@@ -290,10 +290,35 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeBinaryOperator 
 {
 	dUserVariable returnNode;
 	
+	_ASSERTE (expressionA.m_node);
+	_ASSERTE (expressionB.m_node);
 	_ASSERTE (expressionA.m_node->IsType (dDAGExpressionNode::GetRttiType()));
 	_ASSERTE (expressionB.m_node->IsType(dDAGExpressionNode::GetRttiType()));
 
-	dDAGExpressionNodeBinaryOperator* const node = new dDAGExpressionNodeBinaryOperator (dDAGExpressionNodeBinaryOperator::plus, (dDAGExpressionNode*)expressionA.m_node, (dDAGExpressionNode*)expressionB.m_node);
+	dDAGExpressionNodeBinaryOperator::dBinaryOperator binOperator = dDAGExpressionNodeBinaryOperator::plus;
+	switch (int (binaryOperator.m_token))
+	{	
+		case '+':
+			binOperator = dDAGExpressionNodeBinaryOperator::plus;
+			break;
+
+		case '-':
+			binOperator = dDAGExpressionNodeBinaryOperator::minus;
+			break;
+
+		case '*':
+			binOperator = dDAGExpressionNodeBinaryOperator::mul;
+			break;
+
+
+		default:;
+			_ASSERTE (0);
+
+	}
+
+	dDAGExpressionNodeBinaryOperator* const node = new dDAGExpressionNodeBinaryOperator (binOperator, (dDAGExpressionNode*)expressionA.m_node, (dDAGExpressionNode*)expressionB.m_node);
+	expressionA.m_node->Release();
+	expressionB.m_node->Release();
 
 	returnNode.m_node = node;
 	return returnNode;

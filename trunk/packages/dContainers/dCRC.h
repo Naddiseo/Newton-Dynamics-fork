@@ -17,7 +17,7 @@
 dCRCTYPE dCRC64 (const char* const string, dCRCTYPE  crcAcc = 0);
 dCRCTYPE dCRC64 (const void* const buffer, int size, dCRCTYPE crcAcc);
 
-dCRCTYPE CombineCRC (dCRCTYPE a, dCRCTYPE b);
+dCRCTYPE dCombineCRC (dCRCTYPE a, dCRCTYPE b);
 
 #endif
 
