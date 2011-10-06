@@ -171,7 +171,10 @@ class_member_list
 class_member 
 	: class_contructor
 	| class_function_implementation				{$$ = $1;}
-	| uninitialized_variable semicolon_marker
+	| uninitialized_variable semicolon_marker   
+		{
+			_ASSERTE (0);
+		}
 	;
 			
 native_function
@@ -182,8 +185,16 @@ native_function
 
 
 parameter_list 
-	: parameter							
+	: parameter	
+		{
+			GET_PARENT_CLASS; 
+			me->AddParameterToCurrentFunction($1);
+		}
 	| parameter_list ',' parameter		
+		{
+			GET_PARENT_CLASS; 
+			me->AddParameterToCurrentFunction($3);
+		}
 	| syntax_error
 	;	
 	
@@ -272,12 +283,24 @@ function_prototype
 
 
 uninitialized_variable
-	:         type_specifier IDENTIFIER	
-	| PRIVATE type_specifier IDENTIFIER	
+	: parameter
+		{
+			$$ = $1;
+		}
+	| PRIVATE parameter 
+		{
+			GET_PARENT_CLASS; 
+			$$ = $1;
+			me->SetParamameterAsPrivateVariable($$);
+		}
 	;
 	
 initialized_variable	
-	: uninitialized_variable '=' expression		
+	: parameter '=' expression		
+		{
+			//GET_PARENT_CLASS; 
+			$$ = $1;
+		}
 	;
 
 			  
@@ -289,8 +312,6 @@ parameter
 		}
 	;
 	
-	
-
 type_specifier
 	: primitive_types					{$$ = $1;}
 	| class_Type						{$$ = $1;}
@@ -356,6 +377,10 @@ statement_list
 	
 statement
 	: local_variable_declaration semicolon_marker
+		{
+			GET_PARENT_CLASS; 
+			me->AddLocalVaribleToCurrentBlock($1);
+		}
 	| assigment_statement semicolon_marker
 	| CONTINUE semicolon_marker
 	| BREAK semicolon_marker
@@ -373,7 +398,13 @@ statement
 
 local_variable_declaration
 	: uninitialized_variable 
+		{
+			$$ = $1;
+		}
 	| initialized_variable
+		{
+			$$ = $1;
+		}
 	;
 
 	

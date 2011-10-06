@@ -14,14 +14,19 @@
 
 #include "dDirectAcyclicgraphNode.h"
 
+class dDAGParameterNode;
+
 class dDAGScopeBlockNode: public dDirectAcyclicgraphNode
 {
 	public:
 	dDAGScopeBlockNode();
 	~dDAGScopeBlockNode(void);
 
+	void AddLocalVariable (dDAGParameterNode* const variable);
+
 	dAddRtti(dDirectAcyclicgraphNode);
 
+	dList<dDAGParameterNode*> m_localVariables;
 	dList<dDAGScopeBlockNode*> m_subScopeBlocks;
 };
 

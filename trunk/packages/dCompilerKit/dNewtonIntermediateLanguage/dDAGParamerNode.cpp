@@ -10,13 +10,15 @@
 */
 
 #include "dDirectAcyclicgraphNode.h"
-#include "dDAGParameterNode.h"
 #include "dDAGTypeNode.h"
+#include "dDAGParameterNode.h"
+
 
 dInitRtti(dDAGParameterNode);
 
 dDAGParameterNode::dDAGParameterNode(dDAGTypeNode* const type, const char* const identifier)
 	:dDirectAcyclicgraphNode()
+	,m_isPublic(true)
 	,m_type(type)
 {
 	m_name = string (identifier);

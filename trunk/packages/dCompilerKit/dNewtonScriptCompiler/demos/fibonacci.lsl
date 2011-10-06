@@ -15,14 +15,15 @@ class fibonacci
 	int Calculate (int n)
 	{
 		int a;
-//		int b;
-//		int c = xxx();
+		int b;
+		int c = xxx();
 		a = a + a * (b - c) + (b - c) * d;
 		
 		{
 			int x = 1;
 			{
-			} y = 0;
+			}
+			y = 0;
 		}
 		
 		{

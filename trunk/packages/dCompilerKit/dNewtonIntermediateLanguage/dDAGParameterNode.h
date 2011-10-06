@@ -23,6 +23,7 @@ class dDAGParameterNode: public dDirectAcyclicgraphNode
 
 	virtual void CalculateKey();
 
+	bool m_isPublic;
 	dDAGTypeNode* m_type;
 	dAddRtti(dDirectAcyclicgraphNode);
 };

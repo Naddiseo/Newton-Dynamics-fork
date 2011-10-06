@@ -10,7 +10,9 @@
 */
 
 #include "dDirectAcyclicgraphNode.h"
+#include "dDAGParameterNode.h"
 #include "dDAGScopeBlockNode.h"
+
 
 dInitRtti(dDAGScopeBlockNode);
 
@@ -26,12 +28,22 @@ dDAGScopeBlockNode::dDAGScopeBlockNode()
 
 dDAGScopeBlockNode::~dDAGScopeBlockNode()
 {
+	for (dList<dDAGParameterNode*>::dListNode* node = m_localVariables.GetFirst(); node; node = node->GetNext()) {
+		dDAGParameterNode* const variable = node->GetInfo();
+		variable->Release();
+	}
+
 	for (dList<dDAGScopeBlockNode*>::dListNode* node = m_subScopeBlocks.GetFirst(); node; node = node->GetNext()) {
 		dDAGScopeBlockNode* const block = node->GetInfo();
 		block->Release();
 	}
-
 }
 
+
+void dDAGScopeBlockNode::AddLocalVariable (dDAGParameterNode* const variable)
+{
+	m_localVariables.Append(variable);
+	variable->AddRef();
+}
 
 

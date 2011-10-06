@@ -177,15 +177,14 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewParameterNode (const dUserVar
 		_ASSERTE (primitiveType.m_node && (primitiveType.m_node->GetTypeId() == dDAGTypeNode::GetRttiType()));
 		dDAGParameterNode* const parameter = new dDAGParameterNode((dDAGTypeNode*) primitiveType.m_node, identifier.m_data.c_str());
 
-		_ASSERTE (m_pass == m_first);
-		m_currentFunction->AddParameter(parameter);
-		parameter->Release();
+		returnNode.m_node = parameter;
 
 	} else {
 		_ASSERTE (0);
 	}
 	return returnNode;
 }
+
 
 dScriptCompiler::dUserVariable dScriptCompiler::BeginBeginFunctionPrototypeNode ()
 {
@@ -281,4 +280,59 @@ dScriptCompiler::dUserVariable dScriptCompiler::FinalizeScopeBlock (const dUserV
 	}
 
 	return returnNode;
+}
+
+void dScriptCompiler::SetParamameterAsPrivateVariable(const dUserVariable& variable)
+{
+	dUserVariable returnNode;
+
+	if (m_pass == m_first) {	
+		_ASSERTE (m_currentClass);
+		_ASSERTE (m_currentFunction);
+
+		_ASSERTE (variable.m_node);
+		_ASSERTE (variable.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType());
+		dDAGParameterNode* const tmp = (dDAGParameterNode*) variable.m_node;
+		tmp->m_isPublic = false;
+	} else {
+		_ASSERTE (0);
+	}
+}
+
+void dScriptCompiler::AddLocalVaribleToCurrentBlock(const dUserVariable& variable)
+{
+	dUserVariable returnNode;
+
+	if (m_pass == m_first) {	
+		_ASSERTE (m_currentClass);
+		_ASSERTE (m_currentFunction);
+
+		_ASSERTE (variable.m_node);
+		_ASSERTE (variable.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType());
+		dDAGParameterNode* const var = (dDAGParameterNode*) variable.m_node;
+
+		m_currentFunction->AddLocalVariable(var);
+		var->Release();
+
+	} else {
+		_ASSERTE (0);
+	}
+}
+
+
+void dScriptCompiler::AddParameterToCurrentFunction(const dUserVariable& parameter)
+{
+	if (m_pass == m_first) {
+		_ASSERTE (m_currentClass);
+		_ASSERTE (m_currentFunction);
+
+		_ASSERTE (parameter.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType());
+		dDAGParameterNode* const param = (dDAGParameterNode*) parameter.m_node;
+
+		m_currentFunction->AddParameter(param);
+		param->Release();
+
+	} else {
+		_ASSERTE (0);
+	}
 }

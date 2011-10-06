@@ -71,6 +71,9 @@ class dScriptCompiler: public dNewtonScriptParser
 	dUserVariable NewParameterNode (const dUserVariable& primitiveType, const dUserVariable& identifier);
 	dUserVariable EmitTypeNode (const dUserVariable& type, const dUserVariable& modifier = dUserVariable());
 	
+	void SetParamameterAsPrivateVariable(const dUserVariable& variable);
+	void AddLocalVaribleToCurrentBlock(const dUserVariable& variable);
+	void AddParameterToCurrentFunction(const dUserVariable& parameter);
 
 	dPasses m_pass;
 	const char* m_fileName;
