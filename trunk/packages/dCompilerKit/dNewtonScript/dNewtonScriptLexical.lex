@@ -89,6 +89,7 @@ string			["][^"]*["]
  
 
 "void"			{return dNewtonScriptParser::VOID_TYPE;}
+"enum"			{return dNewtonScriptParser::ENUM;}
 "bool"			{return dNewtonScriptParser::BOOLEAN;}
 "byte"			{return dNewtonScriptParser::BYTE;}
 "short"			{return dNewtonScriptParser::SHORT;}

@@ -156,6 +156,30 @@
 			>
 		</File>
 		<File
+			RelativePath=".\dDAGExpressionNode.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGExpressionNode.h"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGExpressionNodeBinaryOperator.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGExpressionNodeBinaryOperator.h"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGExpressionNodeVariable.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGExpressionNodeVariable.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dDAGFunctionNode.cpp"
 			>
 		</File>

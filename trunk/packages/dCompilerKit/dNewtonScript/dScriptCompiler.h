@@ -27,7 +27,10 @@
 #include <dDAGFunctionNode.h>
 #include <dDAGParameterNode.h>
 #include <dDAGScopeBlockNode.h>
+#include <dDAGExpressionNode.h>
 #include <dDirectAcyclicgraphNode.h>
+#include <dDAGExpressionNodeVariable.h>
+#include <dDAGExpressionNodeBinaryOperator.h>
 
 #include "dNewtonScriptParser.h"
 
@@ -39,11 +42,6 @@ class dDirectAcyclicgraphNode;
 class dScriptCompiler: public dNewtonScriptParser
 {
 	public:
-	enum dPasses
-	{
-		m_first,
-		m_secund,
-	};
 	dScriptCompiler(const char* const sourceFileName);
 	virtual ~dScriptCompiler();
 	int CompileSource (const char* const source);
@@ -70,6 +68,10 @@ class dScriptCompiler: public dNewtonScriptParser
 
 	dUserVariable NewParameterNode (const dUserVariable& primitiveType, const dUserVariable& identifier);
 	dUserVariable EmitTypeNode (const dUserVariable& type, const dUserVariable& modifier = dUserVariable());
+
+	dUserVariable NewExpressionNodeVariable (const dUserVariable& identifier);
+
+	dUserVariable NewExpressionNodeBinaryOperator (const dUserVariable& binaryOperator, const dUserVariable& expresionA, const dUserVariable& expresionB);
 	
 	void AddClassVariable(const dUserVariable& variable);
 	void SetParamameterAsPrivateVariable(const dUserVariable& variable);
@@ -77,10 +79,8 @@ class dScriptCompiler: public dNewtonScriptParser
 	void AddParameterToCurrentFunction(const dUserVariable& parameter);
 	
 
-	dPasses m_pass;
-	const char* m_fileName;
-	
 
+	const char* m_fileName;
 	dDAGClassNode* m_currentClass;
 	dDAGFunctionNode* m_currentFunction;
 

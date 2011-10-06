@@ -19,7 +19,10 @@ int bbbb;
 	{
 		int a;
 		int b;
-		int c = xxx();
+		int c;
+		int d;
+//		int c = xxx();
+		x = a + b;
 		a = a + a * (b - c) + (b - c) * d;
 		
 		{

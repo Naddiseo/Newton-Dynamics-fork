@@ -49,6 +49,7 @@ class dNewtonScriptParser
 		EXTENDS,
 		GUI,
 		BOOLEAN,
+		ENUM,
 		BYTE,
 		SHORT,
 		INT,

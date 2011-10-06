@@ -65,29 +65,29 @@ inline bool dRtti::IsTypeID (dCRCTYPE id) const
 
 // add these macros to every derived class  
 #define dAddRtti(baseClass)							\
-private:											\
-static dRtti m_rtti; 								\
-public:												\
-virtual bool IsType (dCRCTYPE  typeId) const		\
-{													\
-	if (m_rtti.IsTypeID (typeId)) {					\
-		return true;								\
-	}												\
-	return baseClass::IsType (typeId);				\
-}													\
-													\
-virtual dCRCTYPE GetTypeId () const					\
-{													\
-	return m_rtti.GetTypeId ();						\
-}													\
-													\
-static dCRCTYPE GetRttiType()						\
-{													\
-	return m_rtti.GetTypeId();						\
-}
+	private:											\
+	static dRtti m_rtti; 								\
+	public:												\
+	virtual bool IsType (dCRCTYPE  typeId) const		\
+	{													\
+		if (m_rtti.IsTypeID (typeId)) {					\
+			return true;								\
+		}												\
+		return baseClass::IsType (typeId);				\
+	}													\
+														\
+	virtual dCRCTYPE GetTypeId () const					\
+	{													\
+		return m_rtti.GetTypeId ();						\
+	}													\
+														\
+	static dCRCTYPE GetRttiType()						\
+	{													\
+		return m_rtti.GetTypeId();						\
+	}
 
 
-#define dInitRtti(className)						\
+#define dInitRtti(className)							\
 	dRtti className::m_rtti (#className)
 
 
