@@ -33,6 +33,8 @@ class dDAGFunctionNode: public dDirectAcyclicgraphNode
 	void PushScope (dDAGScopeBlockNode* const scope);
 	void PopScope ();
 
+	dDAGScopeBlockNode* GetCurrentBlock() const;
+
 	bool m_isConst;
 	bool m_isPrivate;
 	dDAGTypeNode* m_returnType;

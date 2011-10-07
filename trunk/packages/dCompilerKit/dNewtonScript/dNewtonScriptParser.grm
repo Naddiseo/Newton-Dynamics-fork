@@ -315,7 +315,7 @@ statement_list
 	
 statement
 	: local_variable_declaration semicolon_marker {GET_PARENT_CLASS; me->AddLocalVaribleToCurrentBlock($1);}
-	| assigment_statement semicolon_marker
+	| assigment_statement semicolon_marker		  {_ASSERTE (0);}	
 	| CONTINUE semicolon_marker
 	| BREAK semicolon_marker
 	| function_call semicolon_marker
@@ -324,11 +324,24 @@ statement
 	| IF '(' expression	')' block_scope 
 	| IF '(' expression	')' block_scope ELSE block_scope
 	| SWITCH '(' expression ')' '{' switch_case_list '}' 
-	| FOR '(' primitive_types assigment_statement ';' expression ';' assigment_statement ')' block_scope
+	| FOR '(' for_first_expression ';' expression ';' for_third_expression ')' block_scope
 	| WHILE '(' expression ')' block_scope 
 	| DO block_scope WHILE '(' expression ')' semicolon_marker
 	| syntax_error
 	;
+	
+for_first_expression
+	: 
+	| expression
+	| primitive_types assigment_statement
+	;
+	
+for_third_expression	
+	:
+	| expression
+	| primitive_types assigment_statement
+	;
+		
 
 local_variable_declaration
 	: uninitialized_variable {$$ = $1;}
@@ -347,7 +360,7 @@ multidimention_array
 	;
 	
 assigment_statement
-	: indentifier '=' expression
+	: indentifier '=' expression	{_ASSERTE (0);}
 	;
 	
 switch_case_list
@@ -424,13 +437,13 @@ expression
 	| expression '%' expression				{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
 	| expression '/' expression				{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
 	| '(' expression ')'					{$$ = $2;}
-//	| SIZEOF '(' indentifier ')'
-//	| SIZEOF '(' type_specifier ')'
-//	| CAST '<' type_specifier '>' '(' expression ')'
-//	| NEW new_types 
-	| function_call
-	| INTEGER_VALUE
-	| FLOAT_VALUE
-	| STRING_VALUE
+//	| SIZEOF '(' indentifier ')'			{_ASSERTE (0);}
+//	| SIZEOF '(' type_specifier ')'			{_ASSERTE (0);}
+//	| CAST '<' type_specifier '>' '(' expression ')'	{_ASSERTE (0);}
+//	| NEW new_types							{_ASSERTE (0);}
+	| function_call							{_ASSERTE (0);}
+	| INTEGER_VALUE							{GET_PARENT_CLASS; $$ = me->NewExpressionNodeConstant ($1);}
+	| FLOAT_VALUE							{GET_PARENT_CLASS; $$ = me->NewExpressionNodeConstant ($1);}
+	| STRING_VALUE							{GET_PARENT_CLASS; $$ = me->NewExpressionNodeConstant ($1);}
 	;	
 	

@@ -29,6 +29,7 @@
 #include <dDAGScopeBlockNode.h>
 #include <dDAGExpressionNode.h>
 #include <dDirectAcyclicgraphNode.h>
+#include <dDAGExpressionNodeConstant.h>
 #include <dDAGExpressionNodeVariable.h>
 #include <dDAGExpressionNodeBinaryOperator.h>
 
@@ -69,9 +70,10 @@ class dScriptCompiler: public dNewtonScriptParser
 	dUserVariable NewParameterNode (const dUserVariable& primitiveType, const dUserVariable& identifier);
 	dUserVariable EmitTypeNode (const dUserVariable& type, const dUserVariable& modifier = dUserVariable());
 
+	dUserVariable NewExpressionNodeConstant (const dUserVariable& identifier);
 	dUserVariable NewExpressionNodeVariable (const dUserVariable& identifier);
-
-	dUserVariable NewExpressionNodeBinaryOperator (const dUserVariable& binaryOperator, const dUserVariable& expresionA, const dUserVariable& expresionB);
+	
+	dUserVariable NewExpressionNodeBinaryOperator (const dUserVariable& binaryOperator, const dUserVariable& expressionA, const dUserVariable& expressionB);
 	
 	void AddClassVariable(const dUserVariable& variable);
 	void SetParamameterAsPrivateVariable(const dUserVariable& variable);

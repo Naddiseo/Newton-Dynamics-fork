@@ -99,7 +99,11 @@ void dDAGFunctionNode::PopScope ()
 
 void dDAGFunctionNode::AddLocalVariable (dDAGParameterNode* const variable)
 {
+	GetCurrentBlock()->AddLocalVariable(variable);
+}
+
+dDAGScopeBlockNode* dDAGFunctionNode::GetCurrentBlock() const
+{
 	_ASSERTE (m_scopeStack.GetCount());
-	dDAGScopeBlockNode* const block = m_scopeStack.GetFirst()->GetInfo();
-	block->AddLocalVariable(variable);
+	return m_scopeStack.GetFirst()->GetInfo();
 }

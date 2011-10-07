@@ -172,6 +172,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\dDAGExpressionNodeConstant.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGExpressionNodeConstant.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dDAGExpressionNodeVariable.cpp"
 			>
 		</File>

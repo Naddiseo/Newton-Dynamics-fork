@@ -280,15 +280,47 @@ void dScriptCompiler::AddParameterToCurrentFunction(const dUserVariable& paramet
 dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeVariable (const dUserVariable& identifier)
 {
 	dUserVariable returnNode;
-	dDAGExpressionNodeVariable* const node = new dDAGExpressionNodeVariable(identifier.m_data.c_str());
+
+	_ASSERTE (m_currentFunction);
+	dDAGScopeBlockNode* const block = m_currentFunction->GetCurrentBlock();
+	dDAGExpressionNodeVariable* const node = block->CreatedVariableNode (identifier.m_data.c_str());
 	returnNode.m_node = node;
 	return returnNode;
 }
 
 
+dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeConstant (const dUserVariable& value)
+{
+	dUserVariable returnNode;
+
+	_ASSERTE (m_currentFunction);
+	dDAGExpressionNodeConstant::dType type = dDAGExpressionNodeConstant::m_intValue;
+	switch (int (value.m_token))
+	{
+		case INTEGER_VALUE:
+			type = dDAGExpressionNodeConstant::m_intValue;
+			break;
+		case FLOAT_VALUE:
+			type = dDAGExpressionNodeConstant::m_floatValue;
+			break;
+		case STRING_VALUE:
+			type = dDAGExpressionNodeConstant::m_stringValue;
+			break;
+		default:
+			_ASSERTE (0);
+	}
+
+	dDAGScopeBlockNode* const block = m_currentFunction->GetCurrentBlock();
+	dDAGExpressionNodeConstant* const node = block->CreatedConstantNode(type, value.m_data.c_str());
+	returnNode.m_node = node;
+	return returnNode;
+}
+
 dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeBinaryOperator (const dUserVariable& binaryOperator, const dUserVariable& expressionA, const dUserVariable& expressionB)
 {
 	dUserVariable returnNode;
+
+	_ASSERTE (m_currentFunction);
 	
 	_ASSERTE (expressionA.m_node);
 	_ASSERTE (expressionB.m_node);
@@ -310,13 +342,13 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeBinaryOperator 
 			binOperator = dDAGExpressionNodeBinaryOperator::mul;
 			break;
 
-
 		default:;
 			_ASSERTE (0);
 
 	}
 
-	dDAGExpressionNodeBinaryOperator* const node = new dDAGExpressionNodeBinaryOperator (binOperator, (dDAGExpressionNode*)expressionA.m_node, (dDAGExpressionNode*)expressionB.m_node);
+	dDAGScopeBlockNode* const block = m_currentFunction->GetCurrentBlock();
+	dDAGExpressionNodeBinaryOperator* const node = block->CreateBinaryOperatorNode(binOperator, (dDAGExpressionNode*)expressionA.m_node, (dDAGExpressionNode*)expressionB.m_node);
 	expressionA.m_node->Release();
 	expressionB.m_node->Release();
 
