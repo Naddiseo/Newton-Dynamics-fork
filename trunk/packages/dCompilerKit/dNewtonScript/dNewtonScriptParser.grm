@@ -118,9 +118,14 @@ syntax_error
 	: error error_token	{ GET_PARENT_CLASS; me->SyntaxError (scanner, $1, $2); }
 	;
 		
+		
+compound_identifier_List
+	: IDENTIFIER								{$$ = $1;}
+	| compound_identifier_List '.' IDENTIFIER	{$$ = $1;	$$.m_data = $1.m_data + string (".") + $3.m_data;}
+	;
 
 import_module 
-	: IMPORT '<' compound_identifier_List '>' 
+	: IMPORT '<' compound_identifier_List '>'	{_ASSERTE (0);}
 	;
 	
 start_new_class
@@ -349,10 +354,10 @@ local_variable_declaration
 	;
 
 	
-indentifier
-	: IDENTIFIER
-	| IDENTIFIER multidimention_array
-	;
+//indentifier
+//	: IDENTIFIER								{$$ = $1;}
+//	| IDENTIFIER multidimention_array			{_ASSERTE (0); }
+//	;
 	
 multidimention_array
 	: '[' expression ']'
@@ -360,7 +365,8 @@ multidimention_array
 	;
 	
 assigment_statement
-	: indentifier '=' expression	{_ASSERTE (0);}
+	: compound_identifier_List '=' expression						{GET_PARENT_CLASS; $$ = me->NewAssigmentStatement ($1, $3);}
+	| compound_identifier_List multidimention_array	'=' expression	{_ASSERTE (0); }
 	;
 	
 switch_case_list
@@ -380,10 +386,6 @@ argument_list
 	;
 		
 
-compound_identifier_List
-	: IDENTIFIER {$$ = $1;}
-	| compound_identifier_List '.' IDENTIFIER {$$ = $1;	$$.m_data = $1.m_data + string (".") + $3.m_data;}
-	;
 	
 base_class_indetifier_prefix	
 	: BASE DOUBLE_COLOM 
@@ -414,7 +416,7 @@ new_types
 	
 	
 expression
-	: compound_identifier_List {GET_PARENT_CLASS; $$ = me->NewExpressionNodeVariable ($1);}
+	: compound_identifier_List				{GET_PARENT_CLASS; $$ = me->NewExpressionNodeVariable ($1);}
 /*	
 	| expression LOGIC_OR expression		{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
 	| expression LOGIC_AND expression		{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}	

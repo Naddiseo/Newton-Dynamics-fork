@@ -37,6 +37,7 @@ class dDAGScopeBlockNode: public dDirectAcyclicgraphNode
 	
 	dList<dDAGParameterNode*> m_localVariables;
 	dList<dDAGScopeBlockNode*> m_subScopeBlocks;
+	dList<dDirectAcyclicgraphNode*> m_statementList;
 	dTree<dDAGExpressionNode*, dCRCTYPE> m_expresionNodesCashe;
 };
 

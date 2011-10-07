@@ -23,6 +23,7 @@ dDAGScopeBlockNode::dDAGScopeBlockNode()
 	:dDirectAcyclicgraphNode()
 	,m_localVariables()
 	,m_subScopeBlocks()
+	,m_statementList()
 	,m_expresionNodesCashe()
 {
 }
@@ -35,6 +36,12 @@ dDAGScopeBlockNode::~dDAGScopeBlockNode()
 		dDAGExpressionNode* const node = iter.GetNode()->GetInfo();
 		node->Release();
 	}
+
+	for (dList<dDirectAcyclicgraphNode*>::dListNode* node = m_statementList.GetFirst(); node; node = node->GetNext()) {
+		dDirectAcyclicgraphNode* const stmnt = node->GetInfo();
+		stmnt->Release();
+	}
+
 
 	for (dList<dDAGParameterNode*>::dListNode* node = m_localVariables.GetFirst(); node; node = node->GetNext()) {
 		dDAGParameterNode* const variable = node->GetInfo();

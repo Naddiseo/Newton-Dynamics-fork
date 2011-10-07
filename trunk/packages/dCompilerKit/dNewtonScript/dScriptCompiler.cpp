@@ -355,3 +355,12 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeBinaryOperator 
 	returnNode.m_node = node;
 	return returnNode;
 }
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewAssigmentStatement (const dUserVariable& leftVariable, const dUserVariable& expression)
+{
+	dUserVariable binaryOperator;
+	binaryOperator.m_token = dToken('=');
+	dScriptCompiler::dUserVariable returnNode (NewExpressionNodeBinaryOperator (binaryOperator, leftVariable, expression));
+
+	return returnNode;
+}
