@@ -21,7 +21,7 @@ void* operator new (size_t size)
 {
 	static int xxx;
 	xxx ++;
-	if (xxx == 24)
+	if (xxx == 77)
 	xxx *=1;
 
 	void* const ptr = malloc (size);
@@ -65,7 +65,6 @@ void dScriptCompiler::DisplayError (const char* format, ...) const
 }
 
 
-//int dScriptCompiler::CompileSource (dVirtualMachine* const virtualMachine, const char* const source)
 int dScriptCompiler::CompileSource (const char* const source)
 {
 	dNewtonScriptLexical scanner (source);
@@ -248,9 +247,8 @@ void dScriptCompiler::AddClassVariable(const dUserVariable& variable)
 	var->Release();
 }
 
-void dScriptCompiler::AddLocalVaribleToCurrentBlock(const dUserVariable& variable)
+void dScriptCompiler::AddLocalVaribleToCurrentBlock(const dUserVariable& variable, const dUserVariable& initExpression)
 {
-	dUserVariable returnNode;
 	_ASSERTE (m_currentClass);
 	_ASSERTE (m_currentFunction);
 
@@ -258,8 +256,32 @@ void dScriptCompiler::AddLocalVaribleToCurrentBlock(const dUserVariable& variabl
 	_ASSERTE (variable.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType());
 	dDAGParameterNode* const var = (dDAGParameterNode*) variable.m_node;
 
-	m_currentFunction->AddLocalVariable(var);
+	dDAGScopeBlockNode* const block = m_currentFunction->GetCurrentBlock();
+	block->AddStatement(var);
 	var->Release();
+
+	if(initExpression.m_node) {
+		dUserVariable tmp;
+		tmp.m_data = var->m_name;
+		dUserVariable assigmentStatement (NewExpresionNodeAssigment (tmp, initExpression));
+		AddStatementToCurrentBlock(assigmentStatement);
+	}
+}
+
+void dScriptCompiler::AddStatementToCurrentBlock(const dUserVariable& statement)
+{
+	dUserVariable returnNode;
+
+	_ASSERTE (m_currentClass);
+	_ASSERTE (m_currentFunction);
+
+	_ASSERTE (statement.m_node);
+	_ASSERTE (statement.m_node->IsType(dDirectAcyclicgraphNode::GetRttiType()));
+	dDirectAcyclicgraphNode* const stmnt = (dDAGParameterNode*) statement.m_node;
+
+	dDAGScopeBlockNode* const block = m_currentFunction->GetCurrentBlock();
+	block->AddStatement(stmnt);
+	stmnt->Release();
 }
 
 
@@ -327,20 +349,29 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeBinaryOperator 
 	_ASSERTE (expressionA.m_node->IsType (dDAGExpressionNode::GetRttiType()));
 	_ASSERTE (expressionB.m_node->IsType(dDAGExpressionNode::GetRttiType()));
 
-	dDAGExpressionNodeBinaryOperator::dBinaryOperator binOperator = dDAGExpressionNodeBinaryOperator::plus;
+	dDAGExpressionNodeBinaryOperator::dBinaryOperator binOperator = dDAGExpressionNodeBinaryOperator::m_add;
 	switch (int (binaryOperator.m_token))
 	{	
+		case '=':
+			binOperator = dDAGExpressionNodeBinaryOperator::m_equal;
+			break;
+
 		case '+':
-			binOperator = dDAGExpressionNodeBinaryOperator::plus;
+			binOperator = dDAGExpressionNodeBinaryOperator::m_add;
 			break;
 
 		case '-':
-			binOperator = dDAGExpressionNodeBinaryOperator::minus;
+			binOperator = dDAGExpressionNodeBinaryOperator::m_sub;
 			break;
 
 		case '*':
-			binOperator = dDAGExpressionNodeBinaryOperator::mul;
+			binOperator = dDAGExpressionNodeBinaryOperator::m_mul;
 			break;
+
+		case '/':
+			binOperator = dDAGExpressionNodeBinaryOperator::m_div;
+			break;
+
 
 		default:;
 			_ASSERTE (0);
@@ -356,11 +387,12 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeBinaryOperator 
 	return returnNode;
 }
 
-dScriptCompiler::dUserVariable dScriptCompiler::NewAssigmentStatement (const dUserVariable& leftVariable, const dUserVariable& expression)
+dScriptCompiler::dUserVariable dScriptCompiler::NewExpresionNodeAssigment (const dUserVariable& leftVariable, const dUserVariable& expression)
 {
 	dUserVariable binaryOperator;
 	binaryOperator.m_token = dToken('=');
-	dScriptCompiler::dUserVariable returnNode (NewExpressionNodeBinaryOperator (binaryOperator, leftVariable, expression));
 
+	dScriptCompiler::dUserVariable leftSideVar (NewExpressionNodeVariable (leftVariable));
+	dScriptCompiler::dUserVariable returnNode (NewExpressionNodeBinaryOperator (binaryOperator, leftSideVar, expression));
 	return returnNode;
 }

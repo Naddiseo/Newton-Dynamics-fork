@@ -70,16 +70,21 @@ class dScriptCompiler: public dNewtonScriptParser
 	dUserVariable NewParameterNode (const dUserVariable& primitiveType, const dUserVariable& identifier);
 	dUserVariable EmitTypeNode (const dUserVariable& type, const dUserVariable& modifier = dUserVariable());
 
-	dUserVariable NewAssigmentStatement (const dUserVariable& leftVariable, const dUserVariable& expression);
+	
 	
 	dUserVariable NewExpressionNodeConstant (const dUserVariable& identifier);
 	dUserVariable NewExpressionNodeVariable (const dUserVariable& identifier);
+	dUserVariable NewExpresionNodeAssigment (const dUserVariable& leftVariable, const dUserVariable& expression);
 	dUserVariable NewExpressionNodeBinaryOperator (const dUserVariable& binaryOperator, const dUserVariable& expressionA, const dUserVariable& expressionB);
 	
 	void AddClassVariable(const dUserVariable& variable);
 	void SetParamameterAsPrivateVariable(const dUserVariable& variable);
-	void AddLocalVaribleToCurrentBlock(const dUserVariable& variable);
 	void AddParameterToCurrentFunction(const dUserVariable& parameter);
+
+
+	void AddStatementToCurrentBlock(const dUserVariable& statement);
+	void AddLocalVaribleToCurrentBlock(const dUserVariable& variable, const dUserVariable& initExpression);
+	
 	
 
 

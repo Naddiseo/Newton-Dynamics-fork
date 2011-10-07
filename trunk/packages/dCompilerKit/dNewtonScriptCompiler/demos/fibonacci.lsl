@@ -12,16 +12,13 @@
 // naive method to calculate a fibonacci number
 class fibonacci
 {
-int aaaa;
-int bbbb;
-
 	int Calculate (int n)
 	{
-		int a;
+		int a = 1;
 		int b;
 		int c;
 		int d;
-//		int c = xxx();
+
 		a = a + a * (b - c) + (b - c) * d;
 		
 		{
@@ -39,6 +36,9 @@ int bbbb;
 			y = 0;
 		}
 		
+//		int c = xxx();		
+
+/*		
 		if (n == 0)  {
 			return 0;
 		}
@@ -47,12 +47,13 @@ int bbbb;
 		}
 
 		return Calculate (n - 1) + Calculate (n - 2);
+*/		
 	}
 	
-	int xxx()
-	{
-		return 1;
-	}
+//	int xxx()
+//	{
+//		return 1;
+//	}
 	
 }
 

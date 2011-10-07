@@ -27,15 +27,17 @@ class dDAGScopeBlockNode: public dDirectAcyclicgraphNode
 	dDAGScopeBlockNode();
 	~dDAGScopeBlockNode(void);
 
-	void AddLocalVariable (dDAGParameterNode* const variable);
+	void AddStatement (dDirectAcyclicgraphNode* const statement);
+	
 
 	dDAGExpressionNodeVariable* CreatedVariableNode (const char* const identifier);
 	dDAGExpressionNodeConstant* CreatedConstantNode (dDAGExpressionNodeConstant::dType type, const char* const value);
 	dDAGExpressionNodeBinaryOperator* CreateBinaryOperatorNode (dDAGExpressionNodeBinaryOperator::dBinaryOperator binaryOperator, dDAGExpressionNode* const epresionA, dDAGExpressionNode* const epresionB);
 
+	
+
 	dAddRtti(dDirectAcyclicgraphNode);
 	
-	dList<dDAGParameterNode*> m_localVariables;
 	dList<dDAGScopeBlockNode*> m_subScopeBlocks;
 	dList<dDirectAcyclicgraphNode*> m_statementList;
 	dTree<dDAGExpressionNode*, dCRCTYPE> m_expresionNodesCashe;

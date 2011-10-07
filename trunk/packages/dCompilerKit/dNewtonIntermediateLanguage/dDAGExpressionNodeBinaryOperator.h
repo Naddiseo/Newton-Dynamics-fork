@@ -20,10 +20,11 @@ class dDAGExpressionNodeBinaryOperator: public dDAGExpressionNode
 
 	enum dBinaryOperator
 	{
-		plus = '+',
-		minus,
-		mul,
-		devide,
+		m_equal = '=',
+		m_add,
+		m_sub,
+		m_mul,
+		m_div,
 	};
 	
 	dDAGExpressionNodeBinaryOperator (dBinaryOperator binaryOperator, dDAGExpressionNode* const epresionA, dDAGExpressionNode* const epresionB);

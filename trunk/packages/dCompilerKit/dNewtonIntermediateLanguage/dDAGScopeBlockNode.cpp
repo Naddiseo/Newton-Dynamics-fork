@@ -21,7 +21,6 @@ dInitRtti(dDAGScopeBlockNode);
 
 dDAGScopeBlockNode::dDAGScopeBlockNode()
 	:dDirectAcyclicgraphNode()
-	,m_localVariables()
 	,m_subScopeBlocks()
 	,m_statementList()
 	,m_expresionNodesCashe()
@@ -42,12 +41,6 @@ dDAGScopeBlockNode::~dDAGScopeBlockNode()
 		stmnt->Release();
 	}
 
-
-	for (dList<dDAGParameterNode*>::dListNode* node = m_localVariables.GetFirst(); node; node = node->GetNext()) {
-		dDAGParameterNode* const variable = node->GetInfo();
-		variable->Release();
-	}
-
 	for (dList<dDAGScopeBlockNode*>::dListNode* node = m_subScopeBlocks.GetFirst(); node; node = node->GetNext()) {
 		dDAGScopeBlockNode* const block = node->GetInfo();
 		block->Release();
@@ -55,12 +48,12 @@ dDAGScopeBlockNode::~dDAGScopeBlockNode()
 }
 
 
-void dDAGScopeBlockNode::AddLocalVariable (dDAGParameterNode* const variable)
-{
-	m_localVariables.Append(variable);
-	variable->AddRef();
-}
 
+void dDAGScopeBlockNode::AddStatement (dDirectAcyclicgraphNode* const statement)
+{
+	m_statementList.Append(statement);
+	statement->AddRef();
+}
 
 dDAGExpressionNodeBinaryOperator* dDAGScopeBlockNode::CreateBinaryOperatorNode (dDAGExpressionNodeBinaryOperator::dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB)
 {

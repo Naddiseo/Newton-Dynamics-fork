@@ -31,6 +31,8 @@ dDAGExpressionNodeBinaryOperator::dDAGExpressionNodeBinaryOperator(dBinaryOperat
 
 dDAGExpressionNodeBinaryOperator::~dDAGExpressionNodeBinaryOperator(void)
 {
+	m_expressionA->Release();
+	m_expressionB->Release();
 }
 
 

@@ -28,7 +28,6 @@ class dDAGFunctionNode: public dDirectAcyclicgraphNode
 
 	virtual void CalculateKey();
 	void AddParameter (dDAGParameterNode* const parameter);
-	void AddLocalVariable (dDAGParameterNode* const variable);
 
 	void PushScope (dDAGScopeBlockNode* const scope);
 	void PopScope ();
