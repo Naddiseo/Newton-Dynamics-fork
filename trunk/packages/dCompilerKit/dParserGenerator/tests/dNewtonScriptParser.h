@@ -49,6 +49,7 @@ class dNewtonScriptParser
 		EXTENDS,
 		GUI,
 		BOOLEAN,
+		ENUM,
 		BYTE,
 		SHORT,
 		INT,
@@ -110,16 +111,16 @@ class dNewtonScriptParser
 	{
 		public:
 		dUserVariable () 
-			:dDefualtUserVariable ()
+			:dDefualtUserVariable (), m_node(NULL)
 		{
 		}
 		
 		dUserVariable (dToken token, const char* const text, int scannerLine, int scannerIndex)
 			:dDefualtUserVariable (token, text, scannerLine, scannerIndex)
-			,m_semanticValue (0)
+			,m_node(NULL)
 		{
 		}
-		int m_semanticValue;		
+		dDirectAcyclicgraphNode* m_node;
 	};
 
 

@@ -16,8 +16,10 @@ class fibonacci
 	{
 		if (n == 0)  {
 			int a = 1;
-		} else {
+		} else if (n == 1){
 			int b = 2;
+		} else {
+			int c = 3;
 		}
 /*	
 		int a = 1;

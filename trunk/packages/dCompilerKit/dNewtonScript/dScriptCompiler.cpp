@@ -284,11 +284,6 @@ void dScriptCompiler::AddStatementToCurrentBlock(const dUserVariable& statement)
 	block->AddStatement(stmnt);
 
 }
-void dScriptCompiler::AddStatementIFToCurrentBlock(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock)
-{
-	_ASSERTE (0);
-}
-
 
 
 dScriptCompiler::dUserVariable dScriptCompiler::BeginClassNode ()
@@ -432,3 +427,10 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeVariable (const
 
 	return returnNode;
 }
+
+
+void dScriptCompiler::AddStatementIFToCurrentBlock(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock)
+{
+	_ASSERTE (0);
+}
+

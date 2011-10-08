@@ -12,6 +12,7 @@
 %{
 #include <dScriptCompiler.h>
 #include "dNewtonScriptLexical.h"
+#include "dDirectAcyclicgraphNode.h"
 
 //
 // Newton Litle Scripting Language parser  specification 1.0.0
@@ -26,16 +27,16 @@
 	{
 		public:
 		dUserVariable () 
-			:dDefualtUserVariable ()
+			:dDefualtUserVariable (), m_node(NULL)
 		{
 		}
 		
 		dUserVariable (dToken token, const char* const text, int scannerLine, int scannerIndex)
 			:dDefualtUserVariable (token, text, scannerLine, scannerIndex)
-			,m_semanticValue (0)
+			,m_node(NULL)
 		{
 		}
-		int m_semanticValue;		
+		dDirectAcyclicgraphNode* m_node;
 	};
 }
 
@@ -44,7 +45,7 @@
 %token INTEGER_VALUE FLOAT_VALUE STRING_VALUE
 %token IMPORT 
 %token PRIVATE CLASS BASE DOUBLE_COLOM IDENTIFIER EXTENDS GUI
-%token BOOLEAN BYTE SHORT INT LONG UNSIGNED FLOAT DOUBLE VOID_TYPE
+%token BOOLEAN ENUM BYTE SHORT INT LONG UNSIGNED FLOAT DOUBLE VOID_TYPE
 
 %token CAST SIZEOF OPERATOR
 %token NEW
@@ -59,6 +60,8 @@
 %token LESS_EQUAL GREATHER_EQUAL
 %token IDENTICAL DIFFERENT
 
+%right ELSE
+%right IF
 %right '='
 %left LOGIC_OR 
 %left LOGIC_AND 
@@ -73,6 +76,10 @@
 
 //%right '-' '!' '~'
 
+%{
+#define GET_PARENT_CLASS  dScriptCompiler* const me = (dScriptCompiler*) this;
+%}
+
 
 	
 %start compilation_unit
@@ -80,7 +87,7 @@
 %%
 
 compilation_unit
-	: {/*xxxx0*/}
+	: 
 	| module_list
 	; 
 
@@ -93,7 +100,7 @@ module_list
 module 
 	: ';'
 	| import_module
-	| class_delaration
+	| class_delaration 
 	;			
 
 
@@ -110,30 +117,36 @@ error_token
 	;
 		
 syntax_error	
-	: error error_token
-		{ 
-			dScriptCompiler* const me = (dScriptCompiler*) this;
-			me->SyntaxError (scanner, $1, $2); 
-		}
+	: error error_token	{ GET_PARENT_CLASS; me->SyntaxError (scanner, $1, $2); }
 	;
 		
+		
+compound_identifier_List
+	: IDENTIFIER								{$$ = $1;}
+	| compound_identifier_List '.' IDENTIFIER	{$$ = $1;	$$.m_data = $1.m_data + string (".") + $3.m_data;}
+	;
 
 import_module 
-	: IMPORT '<' compound_identifier_List '>' 
+	: IMPORT '<' compound_identifier_List '>'	{_ASSERTE (0);}
 	;
 	
+start_new_class
+	:  { GET_PARENT_CLASS; $$ = me->BeginClassNode (); }
+	;
+		  
 	  
+		  
 class_delaration 
-	: class_visibility CLASS IDENTIFIER extends gui_support '{' class_members '}'
+	: start_new_class class_visibility CLASS IDENTIFIER extends gui_support '{' class_member_list '}' {GET_PARENT_CLASS; $$ = me->FinalizeClassNode ($1, $2, $4, $5, $6); }
 	;			  
 
 class_visibility
-	:	{/*xxxx1*/}
-	| PRIVATE
+	:	
+	| PRIVATE {$$ = $1;}
 	;
 				
 gui_support 
-	: {/*xxxx2*/}
+	:
 	| GUI
 	;				
 				
@@ -142,20 +155,15 @@ extends
 	| EXTENDS IDENTIFIER
 	;		
 	
-class_members
-	:
-	| class_member_list	
-	;
-		   
 class_member_list	 
-	: class_member
+	: class_member							
 	| class_member_list	class_member
 	;
 				    
 class_member 
 	: class_contructor
-	| class_function_implementaion
-	| uninitialized_variable semicolon_marker
+	| class_function_implementation				{$$ = $1;}
+	| uninitialized_variable semicolon_marker   {GET_PARENT_CLASS; me->AddClassVariable($1);}
 	;
 			
 native_function
@@ -166,14 +174,14 @@ native_function
 
 
 parameter_list 
-	: parameter
-	| parameter_list ',' parameter
+	: parameter						{GET_PARENT_CLASS; $$ = me->LinkParameters($1, dUserVariable());}
+	| parameter_list ',' parameter	{GET_PARENT_CLASS; $$ = me->LinkParameters($1, $3);}
 	| syntax_error
 	;	
 	
 function_parameters
 	:
-	| parameter_list 
+	| parameter_list				{$$ = $1;}
 	;
 	
 const_function
@@ -199,7 +207,7 @@ semicolon_marker_list
 			 
 class_contructor 
 	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker
-	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class function_block
+	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class block_scope
 	;
 
 
@@ -212,55 +220,63 @@ overlodable_operator
 	; 	
 	
 	
-class_function_implementaion 
+class_function_implementation 
 	: native_function function_prototype semicolon_marker
-	| function_prototype function_block
-	| PRIVATE function_prototype function_block
+	| function_prototype block_scope						{GET_PARENT_CLASS; dUserVariable tmp; $$ = me->AddClassFunction (tmp, $1, $2);}
+	| PRIVATE function_prototype block_scope				{GET_PARENT_CLASS; $$ = me->AddClassFunction ($1, $2, $3);}
 	;
 	
+	
 function_prototype
-	: type_specifier IDENTIFIER '(' function_parameters ')' const_function
-	| type_specifier OPERATOR overlodable_operator '(' function_parameters ')' const_function	
+	: type_specifier IDENTIFIER                    '(' function_parameters ')' const_function {GET_PARENT_CLASS; $$ = me->NewFunctionPrototype ($1, $2, $4, $6);}
+	| type_specifier OPERATOR overlodable_operator '(' function_parameters ')' const_function {GET_PARENT_CLASS; dUserVariable temp; temp.m_data = string ("operator") + $3.m_data; $$ = me->NewFunctionPrototype ($1, temp, $5, $7);}
 	| syntax_error
 	;
 
 
 uninitialized_variable
-	:         type_specifier IDENTIFIER	
-	| PRIVATE type_specifier IDENTIFIER	
+	: parameter								{ $$ = $1;}
+	| PRIVATE parameter						{GET_PARENT_CLASS; $$ = $1;	me->SetParamameterAsPrivateVariable($$);}
 	;
-	
-initialized_variable	
-	: uninitialized_variable '=' expression		
-	;
-
 			  
 parameter
-	: type_specifier IDENTIFIER
+	: type_specifier IDENTIFIER {GET_PARENT_CLASS; $$ = me->NewParameterNode ($1, $2);}
 	;
-
+	
 type_specifier
-	: primitive_types
-	| CLASS IDENTIFIER
+	: primitive_types					{$$ = $1;}
+	| class_Type						{$$ = $1;}
 	| primitive_types array_type_list
-	| CLASS IDENTIFIER array_type_list
+	| class_Type array_type_list
 	;		
 	
 primitive_types
-	: BOOLEAN
-	| BYTE
-	| SHORT
-	| INT
-	| LONG
-	| UNSIGNED BYTE
-	| UNSIGNED SHORT
-	| UNSIGNED INT
-	| UNSIGNED LONG
-	| FLOAT
-	| DOUBLE
-	| VOID_TYPE
+	: enum				{_ASSERTE (0);}
+	| BOOLEAN			{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1);}
+	| BYTE				{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1);}
+	| SHORT				{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1);}
+	| INT				{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1);}
+	| LONG				{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1);}
+	| UNSIGNED BYTE		{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($2, $1);}	
+	| UNSIGNED SHORT	{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($2, $1);}	
+	| UNSIGNED INT		{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($2, $1);}	
+	| UNSIGNED LONG		{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1, $1);}	
+	| FLOAT				{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1);}
+	| DOUBLE			{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1);}
+	| VOID_TYPE			{GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1);}
 	;
 	
+enum
+	: ENUM
+		{	
+			_ASSERTE (0);
+		}
+	;
+	
+	
+class_Type
+	: CLASS IDENTIFIER  {GET_PARENT_CLASS; $$ = me->EmitTypeNode ($1, $2);}	
+	;
 	
 	
 array_type_list
@@ -273,59 +289,63 @@ array_type
 	| '[' expression ']'
 	;	
 		 
-						  
-function_block 
-	: '{' '}'
-	| '{' statement_list '}'
+		 
+begin_scope
+	:														{GET_PARENT_CLASS; $$ = me->BeginScopeBlock();}
+	;
+	
+block_scope 
+	: begin_scope '{'  '}'									{GET_PARENT_CLASS; $$ = me->EndScopeBlock ($1);}
+	| begin_scope '{' statement_list '}'					{GET_PARENT_CLASS; $$ = me->EndScopeBlock ($1);}
 	;
 			   
 			   
 statement_list 
-	: statement
-	| statement_list statement
+	: statement										
+	| statement_list statement						
 	;
 						 
 	
 statement
-	: local_variable_declaration semicolon_marker
-	| assigment_statement semicolon_marker
+	: parameter semicolon_marker							{GET_PARENT_CLASS; me->AddLocalVaribleToCurrentBlock($1, dUserVariable());}
+	| parameter '=' expression semicolon_marker				{GET_PARENT_CLASS; me->AddLocalVaribleToCurrentBlock($1, $3);} 
+	| assigment_statement semicolon_marker					{GET_PARENT_CLASS; me->AddStatementToCurrentBlock($1);}	
 	| CONTINUE semicolon_marker
 	| BREAK semicolon_marker
 	| function_call semicolon_marker
 	| return semicolon_marker	
-	| function_block	
-	| IF '(' expression	')' function_block 
-	| IF '(' expression	')' function_block ELSE function_block
-	| SWITCH '(' expression ')' '{' switch_case_list '}' 
-	| FOR '(' primitive_types assigment_statement ';' expression ';' assigment_statement ')' function_block
-	| WHILE '(' expression ')' function_block 
-	| DO function_block WHILE '(' expression ')' semicolon_marker
+	| block_scope	
+	| SWITCH '(' expression ')' '{' switch_case_list '}' 	
+	| IF '(' expression	')' statement						{GET_PARENT_CLASS; me->AddStatementIFToCurrentBlock	($3, $5, dUserVariable());}	
+	| IF '(' expression	')' statement ELSE statement		{GET_PARENT_CLASS; me->AddStatementIFToCurrentBlock	($3, $5, $7);}
+	| FOR '(' for_first_expression ';' expression ';' for_third_expression ')' statement
+	| WHILE '(' expression ')' statement
+	| DO statement WHILE '(' expression ')' semicolon_marker
 	| syntax_error
 	;
-
-local_variable_declaration
-	: uninitialized_variable 
-	| initialized_variable
-	;
-
 	
-indentifier
-	: IDENTIFIER
-	| IDENTIFIER multidimention_array
+for_first_expression
+	: 
+	| expression
+	| primitive_types assigment_statement
 	;
+	
+for_third_expression	
+	:
+	| expression
+	| primitive_types assigment_statement
+	;
+
 	
 multidimention_array
 	: '[' expression ']'
 	| multidimention_array '[' expression ']'
 	;
 	
-
-
 assigment_statement
-	: indentifier '=' expression
-//	| indentifier '=' NEW primitive_types multidimention_array
+	: compound_identifier_List '=' expression						{GET_PARENT_CLASS; $$ = me->NewExpresionNodeAssigment ($1, $3);}
+	| compound_identifier_List multidimention_array	'=' expression	{_ASSERTE (0); }
 	;
-	
 	
 switch_case_list
 	: switch_case
@@ -333,8 +353,8 @@ switch_case_list
 	;
 	
 switch_case
-	: CASE INTEGER_VALUE ':' function_block
-	| DEFAULT ':' function_block
+	: CASE INTEGER_VALUE ':' block_scope
+	| DEFAULT ':' block_scope
 	;  	
 	
 	
@@ -344,10 +364,6 @@ argument_list
 	;
 		
 
-compound_identifier_List
-	: IDENTIFIER
-	| compound_identifier_List '.' IDENTIFIER		
-	;
 	
 base_class_indetifier_prefix	
 	: BASE DOUBLE_COLOM 
@@ -355,7 +371,7 @@ base_class_indetifier_prefix
 	;
 	
 function_indentifier
-	: compound_identifier_List
+	: compound_identifier_List {$$ = $1;}
 	| base_class_indetifier_prefix IDENTIFIER
 	;
 			
@@ -378,34 +394,37 @@ new_types
 	
 	
 expression
-	: expression LOGIC_OR expression
+	: compound_identifier_List				{GET_PARENT_CLASS; $$ = me->NewExpressionNodeVariable ($1);}
 /*	
-	| expression LOGIC_AND expression
-	| expression '|' expression
-	| expression '^' expression
-	| expression '&' expression
-	| expression IDENTICAL expression
-	| expression DIFFERENT expression
-	| expression '<' expression
-	| expression '>' expression
-	| expression GREATHER_EQUAL expression
-	| expression LESS_EQUAL expression
-	| expression SHIFT_RIGHT expression
+	| expression LOGIC_OR expression		{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
+	| expression LOGIC_AND expression		{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}	
+	| expression '|' expression				{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
+	| expression '^' expression				{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
+	| expression '&' expression				{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
 */	
-	| expression '+' expression
-	| expression '-' expression
-	| expression '*' expression
-	| expression '%' expression
-	| expression '/' expression
-	| NEW new_types 
-	| '(' expression ')'
-//	| SIZEOF '(' indentifier ')'
-//	| SIZEOF '(' type_specifier ')'
-//	| CAST '<' type_specifier '>' '(' expression ')'
-//	| compound_identifier_List
-	| function_call
-	| INTEGER_VALUE
-	| FLOAT_VALUE
-	| STRING_VALUE
+	| expression IDENTICAL expression		{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
+/*	
+	| expression DIFFERENT expression		{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
+	| expression '<' expression				{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
+	| expression '>' expression				{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
+	| expression GREATHER_EQUAL expression	{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
+	| expression LESS_EQUAL expression		{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
+	| expression SHIFT_RIGHT expression		{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
+*/	
+	| expression '+' expression				{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
+	| expression '-' expression				{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
+	| expression '*' expression				{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
+	| expression '%' expression				{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
+	| expression '/' expression				{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
+	| '(' expression ')'					{$$ = $2;}
+//	| SIZEOF '(' indentifier ')'			{_ASSERTE (0);}
+//	| SIZEOF '(' type_specifier ')'			{_ASSERTE (0);}
+//	| CAST '<' type_specifier '>' '(' expression ')'	{_ASSERTE (0);}
+//	| NEW new_types							{_ASSERTE (0);}
+	| function_call							{_ASSERTE (0);}
+	| INTEGER_VALUE							{GET_PARENT_CLASS; $$ = me->NewExpressionNodeConstant ($1);}
+	| FLOAT_VALUE							{GET_PARENT_CLASS; $$ = me->NewExpressionNodeConstant ($1);}
+	| STRING_VALUE							{GET_PARENT_CLASS; $$ = me->NewExpressionNodeConstant ($1);}
 	;	
+
 	

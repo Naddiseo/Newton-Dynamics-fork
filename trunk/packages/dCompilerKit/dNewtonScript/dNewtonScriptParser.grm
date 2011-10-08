@@ -60,6 +60,9 @@
 %token LESS_EQUAL GREATHER_EQUAL
 %token IDENTICAL DIFFERENT
 
+
+%right ELSE
+%right IF
 %right '='
 %left LOGIC_OR 
 %left LOGIC_AND 
@@ -312,13 +315,13 @@ statement
 	| BREAK semicolon_marker
 	| function_call semicolon_marker
 	| return semicolon_marker	
-	| block_scope	
-	| IF '(' expression	')' block_scope						{GET_PARENT_CLASS; me->AddStatementIFToCurrentBlock	($3, $5, dUserVariable());}	
-	| IF '(' expression	')' block_scope ELSE block_scope	{GET_PARENT_CLASS; me->AddStatementIFToCurrentBlock	($3, $5, $7);}
-	| SWITCH '(' expression ')' '{' switch_case_list '}' 
-	| FOR '(' for_first_expression ';' expression ';' for_third_expression ')' block_scope
-	| WHILE '(' expression ')' block_scope 
-	| DO block_scope WHILE '(' expression ')' semicolon_marker
+	| block_scope											{ $$ = $1; }
+	| SWITCH '(' expression ')' '{' switch_case_list '}' 	
+	| IF '(' expression	')' statement						{GET_PARENT_CLASS; me->AddStatementIFToCurrentBlock	($3, $5, dUserVariable());}	
+	| IF '(' expression	')' statement ELSE statement		{GET_PARENT_CLASS; me->AddStatementIFToCurrentBlock	($3, $5, $7);}
+	| FOR '(' for_first_expression ';' expression ';' for_third_expression ')' statement
+	| WHILE '(' expression ')' statement
+	| DO statement WHILE '(' expression ')' semicolon_marker
 	| syntax_error
 	;
 	
