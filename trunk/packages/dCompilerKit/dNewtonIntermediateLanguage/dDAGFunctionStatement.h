@@ -9,18 +9,20 @@
 * freely
 */
 
-#ifndef __dDAGExpressionNode_H__
-#define __dDAGExpressionNode_H__
+#ifndef __dDAGFunctionStatement_H__
+#define __dDAGFunctionStatement_H__
 
 #include "dDirectAcyclicgraphNode.h"
 
 
-class dDAGExpressionNode: public dDirectAcyclicgraphNode
+class dDAGFunctionStatement: public dDirectAcyclicgraphNode
 {
 	public:
-	dDAGExpressionNode (dList<dDirectAcyclicgraphNode*>& allNodes);
-	~dDAGExpressionNode(void);
+	dDAGFunctionStatement(dList<dDirectAcyclicgraphNode*>& allNodes);
+	~dDAGFunctionStatement();
 
+	dDAGFunctionStatement* m_last;
+	dDAGFunctionStatement* m_next;
 	dAddRtti(dDirectAcyclicgraphNode);
 };
 

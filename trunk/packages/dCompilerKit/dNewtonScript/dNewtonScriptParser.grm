@@ -98,7 +98,7 @@ module_list
 module 
 	: ';'
 	| import_module
-	| class_delaration {GET_PARENT_CLASS; me->AddClass ($1);}
+	| class_delaration 
 	;			
 
 
@@ -172,8 +172,8 @@ native_function
 
 
 parameter_list 
-	: parameter						{GET_PARENT_CLASS; me->AddParameterToCurrentFunction($1);}
-	| parameter_list ',' parameter	{GET_PARENT_CLASS; me->AddParameterToCurrentFunction($3);}
+	: parameter						{GET_PARENT_CLASS; $$ = me->LinkParameters($1, dUserVariable());}
+	| parameter_list ',' parameter	{GET_PARENT_CLASS; $$ = me->LinkParameters($1, $3);}
 	| syntax_error
 	;	
 	
@@ -220,19 +220,14 @@ overlodable_operator
 	
 class_function_implementation 
 	: native_function function_prototype semicolon_marker
-	| function_prototype block_scope {GET_PARENT_CLASS; dUserVariable tmp; $$ = me->AddClassFunction (tmp, $1, $2);}
-	| PRIVATE function_prototype block_scope {GET_PARENT_CLASS; $$ = me->AddClassFunction ($1, $2, $3);}
-	;
-	
-	
-begin_new_function
-	: {	GET_PARENT_CLASS; $$ = me->BeginBeginFunctionPrototypeNode (); }
+	| function_prototype block_scope						{GET_PARENT_CLASS; dUserVariable tmp; $$ = me->AddClassFunction (tmp, $1, $2);}
+	| PRIVATE function_prototype block_scope				{GET_PARENT_CLASS; $$ = me->AddClassFunction ($1, $2, $3);}
 	;
 	
 	
 function_prototype
-	: type_specifier IDENTIFIER begin_new_function '(' function_parameters ')' const_function {GET_PARENT_CLASS; $$ = me->FinalizePrototype ($1, $2, $7); }
-	| type_specifier OPERATOR overlodable_operator begin_new_function '(' function_parameters ')' const_function {GET_PARENT_CLASS; dUserVariable temp;	temp.m_data = string ("operator") + $3.m_data; $$ = me->FinalizePrototype ($1, temp, $8);}
+	: type_specifier IDENTIFIER                    '(' function_parameters ')' const_function {GET_PARENT_CLASS; $$ = me->NewFunctionPrototype ($1, $2, $4, $6);}
+	| type_specifier OPERATOR overlodable_operator '(' function_parameters ')' const_function {GET_PARENT_CLASS; dUserVariable temp; temp.m_data = string ("operator") + $3.m_data; $$ = me->NewFunctionPrototype ($1, temp, $5, $7);}
 	| syntax_error
 	;
 
@@ -292,20 +287,16 @@ array_type
 	| '[' expression ']'
 	;	
 		 
-		 
-begin_block_scope
-	: {	GET_PARENT_CLASS; $$ = me->BeginScopeBlock();}
-	;
 						  
 block_scope 
-	: begin_block_scope '{' '}' {GET_PARENT_CLASS; $$ = me->FinalizeScopeBlock($1);}
-	| begin_block_scope '{' statement_list '}' {GET_PARENT_CLASS; $$ = me->FinalizeScopeBlock($1);}
+	: '{' '}'										{GET_PARENT_CLASS; $$ = me->NewScopeBlock (dUserVariable());}
+	| '{' statement_list '}'						{_ASSERTE (0); GET_PARENT_CLASS; $$ = me->NewScopeBlock ($2); }
 	;
 			   
 			   
 statement_list 
-	: statement
-	| statement_list statement
+	: statement										{_ASSERTE (0); GET_PARENT_CLASS; }
+	| statement_list statement						{_ASSERTE (0); GET_PARENT_CLASS; }	
 	;
 						 
 	
@@ -318,8 +309,8 @@ statement
 	| function_call semicolon_marker
 	| return semicolon_marker	
 	| block_scope	
-	| IF '(' expression	')' block_scope 
-	| IF '(' expression	')' block_scope ELSE block_scope
+	| IF '(' expression	')' block_scope						{GET_PARENT_CLASS; me->AddStatementIFToCurrentBlock	($3, $5, dUserVariable());}	
+	| IF '(' expression	')' block_scope ELSE block_scope	{GET_PARENT_CLASS; me->AddStatementIFToCurrentBlock	($3, $5, $7);}
 	| SWITCH '(' expression ')' '{' switch_case_list '}' 
 	| FOR '(' for_first_expression ';' expression ';' for_third_expression ')' block_scope
 	| WHILE '(' expression ')' block_scope 

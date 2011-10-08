@@ -20,7 +20,7 @@ class dDAGParameterNode;
 class dDAGClassNode: public dDirectAcyclicgraphNode
 {
 	public:
-	dDAGClassNode();
+	dDAGClassNode(dList<dDirectAcyclicgraphNode*>& allNodes);
 	~dDAGClassNode(void);
 
 	void FinalizeImplementation (const char* const visibility, const char* const name, dDAGClassNode* const baseClass);

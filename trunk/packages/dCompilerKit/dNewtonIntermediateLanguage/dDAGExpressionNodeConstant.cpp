@@ -16,8 +16,8 @@
 
 dInitRtti(dDAGExpressionNodeConstant);
 
-dDAGExpressionNodeConstant::dDAGExpressionNodeConstant(dType type, const char* const value)
-	:dDAGExpressionNode()
+dDAGExpressionNodeConstant::dDAGExpressionNodeConstant(dList<dDirectAcyclicgraphNode*>& allNodes, dType type, const char* const value)
+	:dDAGExpressionNode(allNodes)
 	,m_type(type)
 {
 	m_name = value;

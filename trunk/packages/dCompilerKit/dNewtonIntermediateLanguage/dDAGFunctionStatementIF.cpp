@@ -9,20 +9,19 @@
 * freely
 */
 
-#ifndef __dDAGExpressionNode_H__
-#define __dDAGExpressionNode_H__
-
 #include "dDirectAcyclicgraphNode.h"
+#include "dDAGFunctionStatementIF.h"
 
+dInitRtti(dDAGFunctionStatementIF);
 
-class dDAGExpressionNode: public dDirectAcyclicgraphNode
+dDAGFunctionStatementIF::dDAGFunctionStatementIF(dList<dDirectAcyclicgraphNode*>& allNodes)
+	:dDAGFunctionStatement(allNodes)
 {
-	public:
-	dDAGExpressionNode (dList<dDirectAcyclicgraphNode*>& allNodes);
-	~dDAGExpressionNode(void);
-
-	dAddRtti(dDirectAcyclicgraphNode);
-};
+}
 
 
-#endif
+dDAGFunctionStatementIF::~dDAGFunctionStatementIF()
+{
+}
+
+

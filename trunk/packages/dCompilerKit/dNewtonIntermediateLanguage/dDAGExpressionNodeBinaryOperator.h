@@ -25,9 +25,11 @@ class dDAGExpressionNodeBinaryOperator: public dDAGExpressionNode
 		m_sub,
 		m_mul,
 		m_div,
+		m_identical,
+		m_different,
 	};
 	
-	dDAGExpressionNodeBinaryOperator (dBinaryOperator binaryOperator, dDAGExpressionNode* const epresionA, dDAGExpressionNode* const epresionB);
+	dDAGExpressionNodeBinaryOperator (dList<dDirectAcyclicgraphNode*>& allNodes, dBinaryOperator binaryOperator, dDAGExpressionNode* const epresionA, dDAGExpressionNode* const epresionB);
 	~dDAGExpressionNodeBinaryOperator(void);
 
 

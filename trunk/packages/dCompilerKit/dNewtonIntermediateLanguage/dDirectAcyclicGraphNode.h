@@ -25,7 +25,7 @@ using namespace std;
 class dDirectAcyclicgraphNode: public dRefCounter
 {
 	public:
-	dDirectAcyclicgraphNode(void);
+	dDirectAcyclicgraphNode(dList<dDirectAcyclicgraphNode*>& allNodes);
 	virtual ~dDirectAcyclicgraphNode(void);
 
 	dCRCTYPE GetKey() const;

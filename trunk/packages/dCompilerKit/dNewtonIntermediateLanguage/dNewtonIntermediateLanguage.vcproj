@@ -196,6 +196,22 @@
 			>
 		</File>
 		<File
+			RelativePath=".\dDAGFunctionStatement.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGFunctionStatement.h"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGFunctionStatementIF.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGFunctionStatementIF.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dDAGParamerNode.cpp"
 			>
 		</File>

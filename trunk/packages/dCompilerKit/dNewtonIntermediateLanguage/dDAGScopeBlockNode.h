@@ -12,7 +12,7 @@
 #ifndef __dDAGScopeBlockNode_H__
 #define __dDAGScopeBlockNode_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAGFunctionStatement.h"
 #include "dDAGExpressionNodeConstant.h"
 #include "dDAGExpressionNodeBinaryOperator.h"
 
@@ -21,25 +21,21 @@ class dDAGParameterNode;
 class dDAGExpressionNode;
 class dDAGExpressionNodeVariable;
 
-class dDAGScopeBlockNode: public dDirectAcyclicgraphNode
+class dDAGScopeBlockNode: public dDAGFunctionStatement
 {
 	public:
-	dDAGScopeBlockNode();
+	dDAGScopeBlockNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGFunctionStatement* const statementList);
 	~dDAGScopeBlockNode(void);
 
-	void AddStatement (dDirectAcyclicgraphNode* const statement);
-	
+	void AddStatement (dDAGFunctionStatement* const statement);
 
-	dDAGExpressionNodeVariable* CreatedVariableNode (const char* const identifier);
-	dDAGExpressionNodeConstant* CreatedConstantNode (dDAGExpressionNodeConstant::dType type, const char* const value);
-	dDAGExpressionNodeBinaryOperator* CreateBinaryOperatorNode (dDAGExpressionNodeBinaryOperator::dBinaryOperator binaryOperator, dDAGExpressionNode* const epresionA, dDAGExpressionNode* const epresionB);
+	dDAGExpressionNodeVariable* CreatedVariableNode (dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier);
+	dDAGExpressionNodeConstant* CreatedConstantNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeConstant::dType type, const char* const value);
+	dDAGExpressionNodeBinaryOperator* CreateBinaryOperatorNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeBinaryOperator::dBinaryOperator binaryOperator, dDAGExpressionNode* const epresionA, dDAGExpressionNode* const epresionB);
 
-	
+	dAddRtti(dDAGFunctionStatement);
 
-	dAddRtti(dDirectAcyclicgraphNode);
-	
-	dList<dDAGScopeBlockNode*> m_subScopeBlocks;
-	dList<dDirectAcyclicgraphNode*> m_statementList;
+	dList<dDAGFunctionStatement*> m_statementList;
 	dTree<dDAGExpressionNode*, dCRCTYPE> m_expresionNodesCashe;
 };
 

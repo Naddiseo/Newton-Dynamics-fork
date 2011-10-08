@@ -25,7 +25,7 @@ class dDAGExpressionNodeConstant: public dDAGExpressionNode
 		m_stringValue,
 	};
 
-	dDAGExpressionNodeConstant (dType type, const char* const identifier);
+	dDAGExpressionNodeConstant (dList<dDirectAcyclicgraphNode*>& allNodes, dType type, const char* const identifier);
 	~dDAGExpressionNodeConstant(void);
 
 	dType m_type;

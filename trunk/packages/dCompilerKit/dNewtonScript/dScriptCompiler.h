@@ -28,6 +28,8 @@
 #include <dDAGParameterNode.h>
 #include <dDAGScopeBlockNode.h>
 #include <dDAGExpressionNode.h>
+#include <dDAGFunctionStatement.h>
+#include "dDAGFunctionStatementIF.h"
 #include <dDirectAcyclicgraphNode.h>
 #include <dDAGExpressionNodeConstant.h>
 #include <dDAGExpressionNodeVariable.h>
@@ -54,22 +56,24 @@ class dScriptCompiler: public dNewtonScriptParser
 	void DisplayError (const char* format, ...) const;
 	void SyntaxError (const dNewtonScriptLexical& scanner, const dUserVariable& errorToken, const dUserVariable& errorTokenMarker);
 
-	void AddClass(const dUserVariable& classNode);
-
+	
 	dUserVariable BeginClassNode ();
 	dUserVariable FinalizeClassNode (const dUserVariable& classNode, const dUserVariable& visibility, const dUserVariable& name, const dUserVariable& baseClass, const dUserVariable& guiInterface);
 
 	dUserVariable AddClassFunction (const dUserVariable& returnType, const dUserVariable& function, const dUserVariable& functionBlock);
 	
-	dUserVariable BeginBeginFunctionPrototypeNode ();
-	dUserVariable FinalizePrototype (const dUserVariable& returnType, const dUserVariable& funtionName, const dUserVariable& isConst);
+//	dUserVariable BeginBeginFunctionPrototypeNode ();
+//	dUserVariable FinalizePrototype (const dUserVariable& returnType, const dUserVariable& funtionName, const dUserVariable& isConst);
+	dUserVariable NewFunctionPrototype (const dUserVariable& returnType, const dUserVariable& funtionName, const dUserVariable& parameterList, const dUserVariable& isConst);
 
-	dUserVariable BeginScopeBlock ();
-	dUserVariable FinalizeScopeBlock (const dUserVariable& scope);
+//	dUserVariable BeginScopeBlock ();
+//	dUserVariable FinalizeScopeBlock (const dUserVariable& scope);
+
+	dUserVariable NewScopeBlock (const dUserVariable& statementsList);
 
 	dUserVariable NewParameterNode (const dUserVariable& primitiveType, const dUserVariable& identifier);
 	dUserVariable EmitTypeNode (const dUserVariable& type, const dUserVariable& modifier = dUserVariable());
-
+	dUserVariable LinkParameters(const dUserVariable& parameterA, const dUserVariable& parameterB);
 	
 	
 	dUserVariable NewExpressionNodeConstant (const dUserVariable& identifier);
@@ -79,20 +83,18 @@ class dScriptCompiler: public dNewtonScriptParser
 	
 	void AddClassVariable(const dUserVariable& variable);
 	void SetParamameterAsPrivateVariable(const dUserVariable& variable);
-	void AddParameterToCurrentFunction(const dUserVariable& parameter);
-
-
+	
 	void AddStatementToCurrentBlock(const dUserVariable& statement);
 	void AddLocalVaribleToCurrentBlock(const dUserVariable& variable, const dUserVariable& initExpression);
-	
-	
+	void AddStatementIFToCurrentBlock(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock);
+
+	dDAGClassNode* GetCurrentClass() const;
 
 
 	const char* m_fileName;
-	dDAGClassNode* m_currentClass;
 	dDAGFunctionNode* m_currentFunction;
-
 	dList<dDAGClassNode*> m_classList;
+	dList<dDirectAcyclicgraphNode*> m_allNodes;
 
 	friend class dNewtonScriptParser;
 };

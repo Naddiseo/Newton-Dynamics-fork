@@ -17,30 +17,25 @@
 class dDAGTypeNode;
 class dDAGParameterNode;
 class dDAGScopeBlockNode;
+//class dDAGFunctionStatement;
 
 class dDAGFunctionNode: public dDirectAcyclicgraphNode
 {
 	public:
-	dDAGFunctionNode();
+	dDAGFunctionNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGTypeNode* const type, const char* const name, dDAGParameterNode* const parameterList, const char* const isConst);
 	~dDAGFunctionNode(void);
 
-	void FinalizePrototype (dDAGTypeNode* const type, const char* const name, const char* const isConst);
-
 	virtual void CalculateKey();
-	void AddParameter (dDAGParameterNode* const parameter);
 
-	void PushScope (dDAGScopeBlockNode* const scope);
-	void PopScope ();
-
-	dDAGScopeBlockNode* GetCurrentBlock() const;
+	void SetBody(dDAGScopeBlockNode* const body);
 
 	bool m_isConst;
 	bool m_isPrivate;
 	dDAGTypeNode* m_returnType;
-	dDAGScopeBlockNode* m_functionScopeBlock;
+	dDAGScopeBlockNode* m_body;
 	dList<dDAGParameterNode*> m_parameters; 
 	
-	dList<dDAGScopeBlockNode*> m_scopeStack;
+
 
 	dAddRtti(dDirectAcyclicgraphNode);
 };

@@ -14,8 +14,8 @@
 
 dInitRtti(dDAGTypeNode);
 
-dDAGTypeNode::dDAGTypeNode(const char* const type, const char* const modifier)
-	:dDirectAcyclicgraphNode()
+dDAGTypeNode::dDAGTypeNode(dList<dDirectAcyclicgraphNode*>& allNodes, const char* const type, const char* const modifier)
+	:dDirectAcyclicgraphNode(allNodes)
 {
 	m_name = string (modifier) + string (type);
 	CalculateKey();		

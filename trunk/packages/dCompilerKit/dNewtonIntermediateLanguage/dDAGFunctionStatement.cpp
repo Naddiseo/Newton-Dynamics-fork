@@ -10,32 +10,20 @@
 */
 
 #include "dDirectAcyclicgraphNode.h"
-#include "dDAGTypeNode.h"
-#include "dDAGParameterNode.h"
+#include "dDAGFunctionStatement.h"
 
+dInitRtti(dDAGFunctionStatement);
 
-dInitRtti(dDAGParameterNode);
-
-dDAGParameterNode::dDAGParameterNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGTypeNode* const type, const char* const identifier)
+dDAGFunctionStatement::dDAGFunctionStatement(dList<dDirectAcyclicgraphNode*>& allNodes)
 	:dDirectAcyclicgraphNode(allNodes)
-	,m_isPublic(true)
-	,m_type(type)
+	,m_last(NULL)
 	,m_next(NULL)
 {
-	type->AddRef();
-	m_name = string (identifier);
-	CalculateKey();		
 }
 
 
-dDAGParameterNode::~dDAGParameterNode(void)
+dDAGFunctionStatement::~dDAGFunctionStatement()
 {
-	m_type->Release();
 }
 
-
-void dDAGParameterNode::CalculateKey() 
-{
-	m_key = dCRC64 (m_name.c_str(), m_type->GetKey());
-}
 

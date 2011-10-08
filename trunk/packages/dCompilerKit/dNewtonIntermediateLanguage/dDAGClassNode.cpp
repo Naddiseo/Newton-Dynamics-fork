@@ -16,8 +16,8 @@
 
 dInitRtti(dDAGClassNode);
 
-dDAGClassNode::dDAGClassNode()
-	:dDirectAcyclicgraphNode()
+dDAGClassNode::dDAGClassNode(dList<dDirectAcyclicgraphNode*>& allNodes)
+	:dDirectAcyclicgraphNode(allNodes)
 	,m_isPublic(true)
 	,m_baseClass (NULL)
 	,m_variables()
@@ -44,6 +44,7 @@ void dDAGClassNode::FinalizeImplementation (const char* const visibility, const 
 	m_isPublic = (string (visibility) == "") ? true : false;
 	m_name = name;
 	m_baseClass = baseClass;
+	_ASSERTE (!m_baseClass);
 	CalculateKey() ;
 }
 

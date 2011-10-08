@@ -16,8 +16,10 @@
 
 dInitRtti(dDAGExpressionNodeBinaryOperator);
 
-dDAGExpressionNodeBinaryOperator::dDAGExpressionNodeBinaryOperator(dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB)
-	:dDAGExpressionNode()
+dDAGExpressionNodeBinaryOperator::dDAGExpressionNodeBinaryOperator(
+	dList<dDirectAcyclicgraphNode*>& allNodes,
+	dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB)
+	:dDAGExpressionNode(allNodes)
 	,m_operator (binaryOperator)
 	,m_expressionA (expressionA)
 	,m_expressionB (expressionB)

@@ -18,7 +18,7 @@
 class dDAGExpressionNodeVariable: public dDAGExpressionNode
 {
 	public:
-	dDAGExpressionNodeVariable (const char* const identifier);
+	dDAGExpressionNodeVariable (dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier);
 	~dDAGExpressionNodeVariable(void);
 
 

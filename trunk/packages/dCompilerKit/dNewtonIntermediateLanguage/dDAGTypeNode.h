@@ -17,7 +17,7 @@
 class dDAGTypeNode: public dDirectAcyclicgraphNode
 {
 	public:
-	dDAGTypeNode(const char* const type0, const char* const type1);
+	dDAGTypeNode(dList<dDirectAcyclicgraphNode*>& allNodes, const char* const type0, const char* const type1);
 	~dDAGTypeNode(void);
 
 	virtual void CalculateKey();

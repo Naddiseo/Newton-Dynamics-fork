@@ -10,6 +10,7 @@
 */
 
 #include "dDirectAcyclicgraphNode.h"
+#include "dDAGFunctionStatement.h"
 #include "dDAGParameterNode.h"
 #include "dDAGScopeBlockNode.h"
 #include "dDAGExpressionNodeVariable.h"
@@ -18,13 +19,14 @@
 dInitRtti(dDAGScopeBlockNode);
 
 
-
-dDAGScopeBlockNode::dDAGScopeBlockNode()
-	:dDirectAcyclicgraphNode()
-	,m_subScopeBlocks()
+dDAGScopeBlockNode::dDAGScopeBlockNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGFunctionStatement* const statementList)
+	:dDAGFunctionStatement(allNodes)
 	,m_statementList()
 	,m_expresionNodesCashe()
 {
+	for (dDAGFunctionStatement* node = statementList; node; node = node->m_next) {
+		_ASSERTE (0);
+	}
 }
 
 
@@ -36,32 +38,26 @@ dDAGScopeBlockNode::~dDAGScopeBlockNode()
 		node->Release();
 	}
 
-	for (dList<dDirectAcyclicgraphNode*>::dListNode* node = m_statementList.GetFirst(); node; node = node->GetNext()) {
-		dDirectAcyclicgraphNode* const stmnt = node->GetInfo();
+	for (dList<dDAGFunctionStatement*>::dListNode* node = m_statementList.GetFirst(); node; node = node->GetNext()) {
+		dDAGFunctionStatement* const stmnt = node->GetInfo();
 		stmnt->Release();
-	}
-
-	for (dList<dDAGScopeBlockNode*>::dListNode* node = m_subScopeBlocks.GetFirst(); node; node = node->GetNext()) {
-		dDAGScopeBlockNode* const block = node->GetInfo();
-		block->Release();
 	}
 }
 
 
-
-void dDAGScopeBlockNode::AddStatement (dDirectAcyclicgraphNode* const statement)
+void dDAGScopeBlockNode::AddStatement (dDAGFunctionStatement* const statement)
 {
 	m_statementList.Append(statement);
 	statement->AddRef();
 }
 
-dDAGExpressionNodeBinaryOperator* dDAGScopeBlockNode::CreateBinaryOperatorNode (dDAGExpressionNodeBinaryOperator::dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB)
+dDAGExpressionNodeBinaryOperator* dDAGScopeBlockNode::CreateBinaryOperatorNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeBinaryOperator::dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB)
 {
 	dCRCTYPE key = dDAGExpressionNodeBinaryOperator::CalculateKey (binaryOperator, expressionA, expressionB);
 	
 	dTree<dDAGExpressionNode*, dCRCTYPE>::dTreeNode* node = m_expresionNodesCashe.Find(key);
 	if (!node) {
-		dDAGExpressionNodeBinaryOperator* const expresionNode = new dDAGExpressionNodeBinaryOperator (binaryOperator, expressionA, expressionB);
+		dDAGExpressionNodeBinaryOperator* const expresionNode = new dDAGExpressionNodeBinaryOperator (allNodes, binaryOperator, expressionA, expressionB);
 		_ASSERTE (expresionNode->GetKey() == key);
 		node = m_expresionNodesCashe.Insert(expresionNode, key);
 	}
@@ -71,12 +67,12 @@ dDAGExpressionNodeBinaryOperator* dDAGScopeBlockNode::CreateBinaryOperatorNode (
 }
 
 
-dDAGExpressionNodeVariable* dDAGScopeBlockNode::CreatedVariableNode (const char* const identifier)
+dDAGExpressionNodeVariable* dDAGScopeBlockNode::CreatedVariableNode (dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier)
 {
 	dCRCTYPE key = dCRC64 (identifier);
 	dTree<dDAGExpressionNode*, dCRCTYPE>::dTreeNode* node = m_expresionNodesCashe.Find(key);
 	if (!node) {
-		dDAGExpressionNodeVariable* const expresionNode = new dDAGExpressionNodeVariable (identifier);
+		dDAGExpressionNodeVariable* const expresionNode = new dDAGExpressionNodeVariable (allNodes, identifier);
 		_ASSERTE (expresionNode->GetKey() == key);
 		node = m_expresionNodesCashe.Insert(expresionNode, key);
 	}
@@ -85,13 +81,13 @@ dDAGExpressionNodeVariable* dDAGScopeBlockNode::CreatedVariableNode (const char*
 	return expresionNode;
 }
 
-dDAGExpressionNodeConstant* dDAGScopeBlockNode::CreatedConstantNode (dDAGExpressionNodeConstant::dType type, const char* const value)
+dDAGExpressionNodeConstant* dDAGScopeBlockNode::CreatedConstantNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeConstant::dType type, const char* const value)
 {
 	dCRCTYPE key = dCRC64 (value);
 
 	dTree<dDAGExpressionNode*, dCRCTYPE>::dTreeNode* node = m_expresionNodesCashe.Find(key);
 	if (!node) {
-		dDAGExpressionNodeConstant* const expresionNode = new dDAGExpressionNodeConstant (type, value);
+		dDAGExpressionNodeConstant* const expresionNode = new dDAGExpressionNodeConstant (allNodes, type, value);
 		_ASSERTE (expresionNode->GetKey() == key);
 		node = m_expresionNodesCashe.Insert(expresionNode, key);
 	}

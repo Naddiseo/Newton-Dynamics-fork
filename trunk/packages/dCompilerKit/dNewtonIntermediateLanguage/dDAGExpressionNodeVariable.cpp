@@ -16,8 +16,8 @@
 
 dInitRtti(dDAGExpressionNodeVariable);
 
-dDAGExpressionNodeVariable::dDAGExpressionNodeVariable(const char* const identifier)
-	:dDAGExpressionNode()
+dDAGExpressionNodeVariable::dDAGExpressionNodeVariable(dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier)
+	:dDAGExpressionNode(allNodes)
 {
 	m_name = identifier;
 	m_key = dCRC64 (m_name.c_str());

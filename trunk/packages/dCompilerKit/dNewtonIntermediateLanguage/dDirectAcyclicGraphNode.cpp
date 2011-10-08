@@ -13,10 +13,11 @@
 
 dRttiRootClassSupportImplement(dDirectAcyclicgraphNode);
 
-dDirectAcyclicgraphNode::dDirectAcyclicgraphNode()
+dDirectAcyclicgraphNode::dDirectAcyclicgraphNode(dList<dDirectAcyclicgraphNode*>& allNodes)
 	:m_name ("")
 	,m_key(0)
 {
+	allNodes.Append(this);
 }
 
 dDirectAcyclicgraphNode::~dDirectAcyclicgraphNode(void)

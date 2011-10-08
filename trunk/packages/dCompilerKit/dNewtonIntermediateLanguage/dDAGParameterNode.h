@@ -18,13 +18,14 @@ class dDAGTypeNode;
 class dDAGParameterNode: public dDirectAcyclicgraphNode
 {
 	public:
-	dDAGParameterNode (dDAGTypeNode* const type, const char* const identifier);
+	dDAGParameterNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGTypeNode* const type, const char* const identifier);
 	~dDAGParameterNode(void);
 
 	virtual void CalculateKey();
 
 	bool m_isPublic;
 	dDAGTypeNode* m_type;
+	dDAGParameterNode* m_next;
 	dAddRtti(dDirectAcyclicgraphNode);
 };
 

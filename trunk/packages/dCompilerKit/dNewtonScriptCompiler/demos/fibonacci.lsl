@@ -12,8 +12,14 @@
 // naive method to calculate a fibonacci number
 class fibonacci
 {
-	int Calculate (int n)
+	int Calculate (int n, int n1, int n2)
 	{
+/*	
+		if (n == 0)  {
+			return 0;
+		}
+
+	
 		int a = 1;
 		int b;
 		int c;
@@ -36,9 +42,9 @@ class fibonacci
 			y = 0;
 		}
 		
-//		int c = xxx();		
+		int c = xxx();		
 
-/*		
+		
 		if (n == 0)  {
 			return 0;
 		}
@@ -54,6 +60,5 @@ class fibonacci
 //	{
 //		return 1;
 //	}
-	
 }
 

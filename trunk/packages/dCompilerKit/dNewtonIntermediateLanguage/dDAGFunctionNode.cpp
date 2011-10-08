@@ -18,22 +18,29 @@
 
 dInitRtti(dDAGFunctionNode);
 
-dDAGFunctionNode::dDAGFunctionNode()
-	:dDirectAcyclicgraphNode()
-	,m_isConst (false)
+dDAGFunctionNode::dDAGFunctionNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGTypeNode* const type, const char* const name, dDAGParameterNode* const parameterList, const char* const isConst)
+	:dDirectAcyclicgraphNode(allNodes)
+	,m_isConst (isConst[0] ? false : true)
 	,m_isPrivate(false)
-	,m_returnType (NULL)
-	,m_functionScopeBlock(NULL)
-	,m_scopeStack()
+	,m_returnType (type)
+	,m_body(NULL)
+	,m_parameters() 
 {
+	m_returnType->AddRef();
+	for (dDAGParameterNode* param = parameterList; param; param = param->m_next) {
+		_ASSERTE (param->IsType(dDAGParameterNode::GetRttiType()));
+		m_parameters.Append(param);
+		param->AddRef(); 
+	}
 }
 
 
 dDAGFunctionNode::~dDAGFunctionNode(void)
 {
-	_ASSERTE (m_functionScopeBlock);
+	_ASSERTE (m_body);
+	_ASSERTE (m_returnType);
 	m_returnType->Release();
-	m_functionScopeBlock->Release();
+	m_body->Release();
 
 	for (dList<dDAGParameterNode*>::dListNode* node = m_parameters.GetFirst(); node; node = node->GetNext()) {
 		dDAGParameterNode* const parameter = node->GetInfo();
@@ -54,52 +61,9 @@ void dDAGFunctionNode::CalculateKey()
 	m_key = dCRC64 (m_name.c_str(), m_key);
 }
 
-
-void dDAGFunctionNode::AddParameter (dDAGParameterNode* const parameter)
+void dDAGFunctionNode::SetBody(dDAGScopeBlockNode* const body)
 {
-	for (dList<dDAGParameterNode*>::dListNode* node = m_parameters.GetFirst(); node; node = node->GetNext()) {
-		if (parameter->GetKey() == node->GetInfo()->GetKey()) {
-			// error duplicated parameter
-			_ASSERTE (0);
-		}
-	}
-	m_parameters.Append(parameter);
-	parameter->AddRef();
+	m_body = body;
+	m_body->AddRef();
 }
 
-
-void dDAGFunctionNode::FinalizePrototype (dDAGTypeNode* const type, const char* const name, const char* const isConstant)
-{
-	m_name = name;
-	m_returnType = type;
-	m_isConst =  (isConstant[0] == 0) ? false : true;
-
-	CalculateKey();
-}
-
-
-void dDAGFunctionNode::PushScope (dDAGScopeBlockNode* const scope)
-{
-	scope->AddRef();
-	if (!m_functionScopeBlock) {
-		m_functionScopeBlock = scope;
-	} else {
-		_ASSERTE (m_scopeStack.GetCount() >= 1);
-		dDAGScopeBlockNode* const stackScopeBlock = m_scopeStack.GetFirst()->GetInfo();
-		stackScopeBlock->m_subScopeBlocks.Append(scope);
-	}
-	m_scopeStack.Addtop(scope);
-}
-
-void dDAGFunctionNode::PopScope ()
-{
-	_ASSERTE (m_scopeStack.GetCount() >= 1);
-	m_scopeStack.Remove(m_scopeStack.GetFirst());
-}
-
-
-dDAGScopeBlockNode* dDAGFunctionNode::GetCurrentBlock() const
-{
-	_ASSERTE (m_scopeStack.GetCount());
-	return m_scopeStack.GetFirst()->GetInfo();
-}
