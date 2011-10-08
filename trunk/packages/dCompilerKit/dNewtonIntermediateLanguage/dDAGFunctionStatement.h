@@ -21,8 +21,6 @@ class dDAGFunctionStatement: public dDirectAcyclicgraphNode
 	dDAGFunctionStatement(dList<dDirectAcyclicgraphNode*>& allNodes);
 	~dDAGFunctionStatement();
 
-	dDAGFunctionStatement* m_last;
-	dDAGFunctionStatement* m_next;
 	dAddRtti(dDirectAcyclicgraphNode);
 };
 

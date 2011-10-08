@@ -17,7 +17,7 @@
 dInitRtti(dDAGParameterNode);
 
 dDAGParameterNode::dDAGParameterNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGTypeNode* const type, const char* const identifier)
-	:dDirectAcyclicgraphNode(allNodes)
+	:dDAGFunctionStatement(allNodes)
 	,m_isPublic(true)
 	,m_type(type)
 	,m_next(NULL)

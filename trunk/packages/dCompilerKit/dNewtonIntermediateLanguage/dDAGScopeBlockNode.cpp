@@ -19,14 +19,11 @@
 dInitRtti(dDAGScopeBlockNode);
 
 
-dDAGScopeBlockNode::dDAGScopeBlockNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGFunctionStatement* const statementList)
+dDAGScopeBlockNode::dDAGScopeBlockNode(dList<dDirectAcyclicgraphNode*>& allNodes)
 	:dDAGFunctionStatement(allNodes)
 	,m_statementList()
 	,m_expresionNodesCashe()
 {
-	for (dDAGFunctionStatement* node = statementList; node; node = node->m_next) {
-		_ASSERTE (0);
-	}
 }
 
 

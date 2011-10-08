@@ -204,6 +204,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\dDAGFunctionStatementAssigment.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGFunctionStatementAssigment.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dDAGFunctionStatementIF.cpp"
 			>
 		</File>

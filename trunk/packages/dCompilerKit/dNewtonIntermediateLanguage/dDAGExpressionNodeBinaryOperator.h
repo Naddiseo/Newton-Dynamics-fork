@@ -20,8 +20,7 @@ class dDAGExpressionNodeBinaryOperator: public dDAGExpressionNode
 
 	enum dBinaryOperator
 	{
-		m_equal = '=',
-		m_add,
+		m_add = '+',
 		m_sub,
 		m_mul,
 		m_div,
@@ -29,7 +28,7 @@ class dDAGExpressionNodeBinaryOperator: public dDAGExpressionNode
 		m_different,
 	};
 	
-	dDAGExpressionNodeBinaryOperator (dList<dDirectAcyclicgraphNode*>& allNodes, dBinaryOperator binaryOperator, dDAGExpressionNode* const epresionA, dDAGExpressionNode* const epresionB);
+	dDAGExpressionNodeBinaryOperator (dList<dDirectAcyclicgraphNode*>& allNodes, dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB);
 	~dDAGExpressionNodeBinaryOperator(void);
 
 

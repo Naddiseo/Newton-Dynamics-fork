@@ -12,10 +12,10 @@
 #ifndef __dDAGParameterNode_H__
 #define __dDAGParameterNode_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAGFunctionStatement.h"
 
 class dDAGTypeNode;
-class dDAGParameterNode: public dDirectAcyclicgraphNode
+class dDAGParameterNode: public dDAGFunctionStatement
 {
 	public:
 	dDAGParameterNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGTypeNode* const type, const char* const identifier);
@@ -26,7 +26,7 @@ class dDAGParameterNode: public dDirectAcyclicgraphNode
 	bool m_isPublic;
 	dDAGTypeNode* m_type;
 	dDAGParameterNode* m_next;
-	dAddRtti(dDirectAcyclicgraphNode);
+	dAddRtti(dDAGFunctionStatement);
 };
 
 

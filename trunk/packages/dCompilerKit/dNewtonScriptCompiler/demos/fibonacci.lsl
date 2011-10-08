@@ -12,14 +12,14 @@
 // naive method to calculate a fibonacci number
 class fibonacci
 {
-	int Calculate (int n, int n1, int n2)
+	int Calculate (int n)
 	{
-/*	
 		if (n == 0)  {
-			return 0;
+			int a = 1;
+		} else {
+			int b = 2;
 		}
-
-	
+/*	
 		int a = 1;
 		int b;
 		int c;

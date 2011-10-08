@@ -287,23 +287,27 @@ array_type
 	| '[' expression ']'
 	;	
 		 
-						  
+		 
+begin_scope
+	:														{GET_PARENT_CLASS; $$ = me->BeginScopeBlock();}
+	;
+	
 block_scope 
-	: '{' '}'										{GET_PARENT_CLASS; $$ = me->NewScopeBlock (dUserVariable());}
-	| '{' statement_list '}'						{_ASSERTE (0); GET_PARENT_CLASS; $$ = me->NewScopeBlock ($2); }
+	: begin_scope '{'  '}'									{GET_PARENT_CLASS; $$ = me->EndScopeBlock ($1);}
+	| begin_scope '{' statement_list '}'					{GET_PARENT_CLASS; $$ = me->EndScopeBlock ($1);}
 	;
 			   
 			   
 statement_list 
-	: statement										{_ASSERTE (0); GET_PARENT_CLASS; }
-	| statement_list statement						{_ASSERTE (0); GET_PARENT_CLASS; }	
+	: statement										
+	| statement_list statement						
 	;
 						 
 	
 statement
-	: parameter semicolon_marker					{GET_PARENT_CLASS; me->AddLocalVaribleToCurrentBlock($1, dUserVariable());}
-	| parameter '=' expression semicolon_marker		{GET_PARENT_CLASS; me->AddLocalVaribleToCurrentBlock($1, $3);} 
-	| assigment_statement semicolon_marker			{GET_PARENT_CLASS; me->AddStatementToCurrentBlock($1);}	
+	: parameter semicolon_marker							{GET_PARENT_CLASS; me->AddLocalVaribleToCurrentBlock($1, dUserVariable());}
+	| parameter '=' expression semicolon_marker				{GET_PARENT_CLASS; me->AddLocalVaribleToCurrentBlock($1, $3);} 
+	| assigment_statement semicolon_marker					{GET_PARENT_CLASS; me->AddStatementToCurrentBlock($1);}	
 	| CONTINUE semicolon_marker
 	| BREAK semicolon_marker
 	| function_call semicolon_marker

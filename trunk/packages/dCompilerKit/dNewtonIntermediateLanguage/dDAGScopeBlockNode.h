@@ -24,14 +24,14 @@ class dDAGExpressionNodeVariable;
 class dDAGScopeBlockNode: public dDAGFunctionStatement
 {
 	public:
-	dDAGScopeBlockNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGFunctionStatement* const statementList);
+	dDAGScopeBlockNode(dList<dDirectAcyclicgraphNode*>& allNodes);
 	~dDAGScopeBlockNode(void);
 
 	void AddStatement (dDAGFunctionStatement* const statement);
 
 	dDAGExpressionNodeVariable* CreatedVariableNode (dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier);
 	dDAGExpressionNodeConstant* CreatedConstantNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeConstant::dType type, const char* const value);
-	dDAGExpressionNodeBinaryOperator* CreateBinaryOperatorNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeBinaryOperator::dBinaryOperator binaryOperator, dDAGExpressionNode* const epresionA, dDAGExpressionNode* const epresionB);
+	dDAGExpressionNodeBinaryOperator* CreateBinaryOperatorNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeBinaryOperator::dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB);
 
 	dAddRtti(dDAGFunctionStatement);
 

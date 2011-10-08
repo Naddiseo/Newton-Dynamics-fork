@@ -35,6 +35,7 @@ dScriptCompiler::dScriptCompiler(const char* const sourceFileName)
 	,m_fileName(sourceFileName)
 	,m_currentFunction(NULL)
 	,m_classList()
+	,m_scopeStack()
 	,m_allNodes()
 {
 }
@@ -125,7 +126,11 @@ dDAGClassNode* dScriptCompiler::GetCurrentClass() const
 	return m_classList.GetLast()->GetInfo();
 }
 
-
+dDAGScopeBlockNode* dScriptCompiler::GetCurrentScope() const
+{
+	_ASSERTE (m_scopeStack.GetCount());
+	return m_scopeStack.GetLast()->GetInfo();
+}
 
 
 
@@ -151,26 +156,12 @@ void dScriptCompiler::SetParamameterAsPrivateVariable(const dUserVariable& varia
 
 
 
-dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeVariable (const dUserVariable& identifier)
-{
-	dUserVariable returnNode;
-	_ASSERTE (0);
-/*
-	_ASSERTE (m_currentFunction);
-	dDAGScopeBlockNode* const block = m_currentFunction->GetCurrentBlock();
-	dDAGExpressionNodeVariable* const node = block->CreatedVariableNode (identifier.m_data.c_str());
-	returnNode.m_node = node;
-*/
-	return returnNode;
-}
 
 
 dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeConstant (const dUserVariable& value)
 {
 	dUserVariable returnNode;
-	_ASSERTE (0);
-/*
-	_ASSERTE (m_currentFunction);
+
 	dDAGExpressionNodeConstant::dType type = dDAGExpressionNodeConstant::m_intValue;
 	switch (int (value.m_token))
 	{
@@ -187,19 +178,17 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeConstant (const
 			_ASSERTE (0);
 	}
 
-	dDAGScopeBlockNode* const block = m_currentFunction->GetCurrentBlock();
-	dDAGExpressionNodeConstant* const node = block->CreatedConstantNode(type, value.m_data.c_str());
+	dDAGScopeBlockNode* const scope = GetCurrentScope();
+	_ASSERTE (scope);
+	dDAGExpressionNodeConstant* const node = scope->CreatedConstantNode(m_allNodes, type, value.m_data.c_str());
 	returnNode.m_node = node;
-*/
+
 	return returnNode;
 }
 
 dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeBinaryOperator (const dUserVariable& binaryOperator, const dUserVariable& expressionA, const dUserVariable& expressionB)
 {
 	dUserVariable returnNode;
-	_ASSERTE (0);
-/*
-	_ASSERTE (m_currentFunction);
 	
 	_ASSERTE (expressionA.m_node);
 	_ASSERTE (expressionB.m_node);
@@ -209,10 +198,6 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeBinaryOperator 
 	dDAGExpressionNodeBinaryOperator::dBinaryOperator binOperator = dDAGExpressionNodeBinaryOperator::m_add;
 	switch (int (binaryOperator.m_token))
 	{	
-		case '=':
-			binOperator = dDAGExpressionNodeBinaryOperator::m_equal;
-			break;
-
 		case '+':
 			binOperator = dDAGExpressionNodeBinaryOperator::m_add;
 			break;
@@ -243,24 +228,27 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeBinaryOperator 
 
 	}
 
-	dDAGScopeBlockNode* const block = m_currentFunction->GetCurrentBlock();
-	dDAGExpressionNodeBinaryOperator* const node = block->CreateBinaryOperatorNode(binOperator, (dDAGExpressionNode*)expressionA.m_node, (dDAGExpressionNode*)expressionB.m_node);
-	expressionA.m_node->Release();
-	expressionB.m_node->Release();
 
+	dDAGScopeBlockNode* const scope = GetCurrentScope();
+	_ASSERTE (scope);
+
+	dDAGExpressionNodeBinaryOperator* const node = scope->CreateBinaryOperatorNode(m_allNodes, binOperator, (dDAGExpressionNode*)expressionA.m_node, (dDAGExpressionNode*)expressionB.m_node);
 	returnNode.m_node = node;
-*/
 	return returnNode;
 }
 
 dScriptCompiler::dUserVariable dScriptCompiler::NewExpresionNodeAssigment (const dUserVariable& leftVariable, const dUserVariable& expression)
 {
-	_ASSERTE (0);
-	dUserVariable binaryOperator;
-	binaryOperator.m_token = dToken('=');
-
+	dUserVariable returnNode;
 	dScriptCompiler::dUserVariable leftSideVar (NewExpressionNodeVariable (leftVariable));
-	dScriptCompiler::dUserVariable returnNode (NewExpressionNodeBinaryOperator (binaryOperator, leftSideVar, expression));
+
+	dDAGExpressionNode* const exp = (dDAGExpressionNode*) expression.m_node;
+	dDAGExpressionNodeVariable* const variable = (dDAGExpressionNodeVariable*) leftSideVar.m_node;
+	_ASSERTE (exp->IsType(dDAGExpressionNode::GetRttiType()));
+	_ASSERTE (variable->IsType(dDAGExpressionNodeVariable::GetRttiType()));
+	
+	dDAGFunctionStatementAssigment* const assigment = new dDAGFunctionStatementAssigment(m_allNodes, variable, exp);
+	returnNode.m_node = assigment;
 	return returnNode;
 }
 
@@ -268,45 +256,33 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpresionNodeAssigment (const
 
 void dScriptCompiler::AddLocalVaribleToCurrentBlock(const dUserVariable& variable, const dUserVariable& initExpression)
 {
-	_ASSERTE (0);
-/*
-	_ASSERTE (m_currentClass);
-	_ASSERTE (m_currentFunction);
-
-	_ASSERTE (variable.m_node);
+//	_ASSERTE (variable.m_node);
 	_ASSERTE (variable.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType());
-	dDAGParameterNode* const var = (dDAGParameterNode*) variable.m_node;
+//	dDAGParameterNode* const var = (dDAGParameterNode*) variable.m_node;
+//	dDAGScopeBlockNode* const block = GetCurrentScope();
+//	block->AddStatement(var);
 
-	dDAGScopeBlockNode* const block = m_currentFunction->GetCurrentBlock();
-	block->AddStatement(var);
-	var->Release();
-
+	AddStatementToCurrentBlock(variable);
 	if(initExpression.m_node) {
 		dUserVariable tmp;
-		tmp.m_data = var->m_name;
+		_ASSERTE (variable.m_node);
+		tmp.m_data = variable.m_node->m_name;
 		dUserVariable assigmentStatement (NewExpresionNodeAssigment (tmp, initExpression));
 		AddStatementToCurrentBlock(assigmentStatement);
 	}
-*/
+
 }
 
 void dScriptCompiler::AddStatementToCurrentBlock(const dUserVariable& statement)
 {
-	_ASSERTE (0);
-/*
-	dUserVariable returnNode;
-
-	_ASSERTE (m_currentClass);
-	_ASSERTE (m_currentFunction);
-
 	_ASSERTE (statement.m_node);
-	_ASSERTE (statement.m_node->IsType(dDirectAcyclicgraphNode::GetRttiType()));
-	dDirectAcyclicgraphNode* const stmnt = (dDAGParameterNode*) statement.m_node;
+	_ASSERTE (statement.m_node->IsType(dDAGFunctionStatement::GetRttiType()));
+	dDAGFunctionStatement* const stmnt = (dDAGFunctionStatement*) statement.m_node;
 
-	dDAGScopeBlockNode* const block = m_currentFunction->GetCurrentBlock();
+	dDAGScopeBlockNode* const block = GetCurrentScope();
+	_ASSERTE (block);
 	block->AddStatement(stmnt);
-	stmnt->Release();
-*/
+
 }
 void dScriptCompiler::AddStatementIFToCurrentBlock(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock)
 {
@@ -385,72 +361,22 @@ dScriptCompiler::dUserVariable dScriptCompiler::LinkParameters(const dUserVariab
 }
 
 
-/*
-dScriptCompiler::dUserVariable dScriptCompiler::BeginBeginFunctionPrototypeNode ()
-{
-	dUserVariable returnNode;
-	_ASSERTE (0);
-	_ASSERTE (m_currentClass);
-	dDAGFunctionNode* const functionNode = new dDAGFunctionNode ();
-	returnNode.m_node = functionNode;
-	m_currentFunction = functionNode;
-	return returnNode;
-}
-
-dScriptCompiler::dUserVariable dScriptCompiler::FinalizePrototype (const dUserVariable& returnType, const dUserVariable& functionName, const dUserVariable& isConst)
-{
-	dUserVariable returnNode;
-	_ASSERTE (0);
-	_ASSERTE (returnType.m_node && (returnType.m_node->GetTypeId() == dDAGTypeNode::GetRttiType()));
-	_ASSERTE (returnType.m_node);
-	m_currentFunction->FinalizePrototype ((dDAGTypeNode*)returnType.m_node, functionName.m_data.c_str(), isConst.m_data.c_str());
-	returnNode.m_node = m_currentFunction;
-	return returnNode;
-}
-*/
-
-
-/*
 dScriptCompiler::dUserVariable dScriptCompiler::BeginScopeBlock ()
 {
 	dUserVariable returnNode;
-	_ASSERTE (0);
-
-	_ASSERTE (m_currentClass);
-	_ASSERTE (m_currentFunction);
-
-	dDAGScopeBlockNode* const scope = new dDAGScopeBlockNode;
+	dDAGScopeBlockNode* const scope = new dDAGScopeBlockNode (m_allNodes);
+	m_scopeStack.Append(scope);
 	returnNode.m_node = scope;
-
-	m_currentFunction->PushScope(scope);
-	scope->Release();
-
 	return returnNode;
 }
 
-dScriptCompiler::dUserVariable dScriptCompiler::FinalizeScopeBlock (const dUserVariable& scope)
+dScriptCompiler::dUserVariable dScriptCompiler::EndScopeBlock (const dUserVariable& block)
 {
 	dUserVariable returnNode;
-	_ASSERTE (0);
-
-	_ASSERTE (m_currentClass);
-	_ASSERTE (m_currentFunction);
-	m_currentFunction->PopScope();
-	returnNode.m_node = scope.m_node;
-
-	return returnNode;
-}
-*/
-
-dScriptCompiler::dUserVariable dScriptCompiler::NewScopeBlock (const dUserVariable& statementsList)
-{
-	dUserVariable returnNode;
-
-	dDAGFunctionStatement* const statements = (dDAGFunctionStatement*) statementsList.m_node;
-	_ASSERTE (!statements || statements->IsType(dDAGFunctionStatement::GetRttiType()));
-	dDAGScopeBlockNode* const scope = new dDAGScopeBlockNode (m_allNodes, statements);
-
-	returnNode.m_node = scope;
+	_ASSERTE (GetCurrentScope() == block.m_node);
+	_ASSERTE (block.m_node->IsType(dDAGScopeBlockNode::GetRttiType()));
+	returnNode.m_node = block.m_node;
+	m_scopeStack.Remove(m_scopeStack.GetLast());
 	return returnNode;
 }
 
@@ -493,3 +419,16 @@ dScriptCompiler::dUserVariable dScriptCompiler::AddClassFunction (const dUserVar
 	return returnNode;
 }
 
+
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeVariable (const dUserVariable& identifier)
+{
+	dUserVariable returnNode;
+
+	dDAGScopeBlockNode* const scope = GetCurrentScope();
+	_ASSERTE (scope);
+	dDAGExpressionNodeVariable* const node = scope->CreatedVariableNode (m_allNodes, identifier.m_data.c_str());
+	returnNode.m_node = node;
+
+	return returnNode;
+}

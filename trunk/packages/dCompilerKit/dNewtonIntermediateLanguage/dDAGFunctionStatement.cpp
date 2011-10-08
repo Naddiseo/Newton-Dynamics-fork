@@ -16,8 +16,6 @@ dInitRtti(dDAGFunctionStatement);
 
 dDAGFunctionStatement::dDAGFunctionStatement(dList<dDirectAcyclicgraphNode*>& allNodes)
 	:dDirectAcyclicgraphNode(allNodes)
-	,m_last(NULL)
-	,m_next(NULL)
 {
 }
 

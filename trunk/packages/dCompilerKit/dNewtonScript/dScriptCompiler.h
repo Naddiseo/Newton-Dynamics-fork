@@ -33,6 +33,7 @@
 #include <dDirectAcyclicgraphNode.h>
 #include <dDAGExpressionNodeConstant.h>
 #include <dDAGExpressionNodeVariable.h>
+#include <dDAGFunctionStatementAssigment.h>
 #include <dDAGExpressionNodeBinaryOperator.h>
 
 #include "dNewtonScriptParser.h"
@@ -69,7 +70,8 @@ class dScriptCompiler: public dNewtonScriptParser
 //	dUserVariable BeginScopeBlock ();
 //	dUserVariable FinalizeScopeBlock (const dUserVariable& scope);
 
-	dUserVariable NewScopeBlock (const dUserVariable& statementsList);
+	dUserVariable BeginScopeBlock ();
+	dUserVariable EndScopeBlock (const dUserVariable& block);
 
 	dUserVariable NewParameterNode (const dUserVariable& primitiveType, const dUserVariable& identifier);
 	dUserVariable EmitTypeNode (const dUserVariable& type, const dUserVariable& modifier = dUserVariable());
@@ -89,11 +91,12 @@ class dScriptCompiler: public dNewtonScriptParser
 	void AddStatementIFToCurrentBlock(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock);
 
 	dDAGClassNode* GetCurrentClass() const;
-
+	dDAGScopeBlockNode* GetCurrentScope() const;
 
 	const char* m_fileName;
 	dDAGFunctionNode* m_currentFunction;
 	dList<dDAGClassNode*> m_classList;
+	dList<dDAGScopeBlockNode*> m_scopeStack;
 	dList<dDirectAcyclicgraphNode*> m_allNodes;
 
 	friend class dNewtonScriptParser;
