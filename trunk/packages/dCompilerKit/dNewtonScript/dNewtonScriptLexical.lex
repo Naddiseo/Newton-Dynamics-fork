@@ -56,17 +56,17 @@ string			["][^"]*["]
 ","				{return ',';}
 "{"				{return '{';}
 "}"				{return '}';}
-
 "!"				{return '!';}
 "~"				{return '~';}
 "&"				{return '&';}
 "="				{return '=';}
+"/"				{return '/';}
+"%"				{return '%';}
 "\+"			{return '+';}
 "\-"			{return '-';}
 "\*"			{return '*';}
-"/"				{return '/';}
-"%"				{return '%';}
 "\."			{return '.';}
+"\?"			{return '?';}
 "\["			{return '[';}
 "\]"			{return ']';}
 "\("			{return '(';}

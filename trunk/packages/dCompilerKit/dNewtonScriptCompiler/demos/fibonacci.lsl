@@ -14,16 +14,21 @@ class fibonacci
 {
 	int Calculate (int n)
 	{
-	
-		if (n == 0)  int x;
+		// simple if
 		if (n == 0)  int b;
 		
+		// defficult if
+		if (n == 0) if (q == 1) int a; else int b;
+		
+		// complex if
 		if (n == 0)  int a;
 		else if (n == 1)  int b;
 		else int c;
 	
+		// compund simple if
 		if (n == 0)  { int a = 1;}
 
+		// comploudn and complex if
 		if (n == 0)  {
 			int a;
 			a = 1;

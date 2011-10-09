@@ -64,6 +64,8 @@
 %right ELSE
 %right IF
 %right '='
+%right '?'
+%right ':'
 %left LOGIC_OR 
 %left LOGIC_AND 
 %left '|'
@@ -422,6 +424,7 @@ expression
 	| expression '%' expression							{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
 	| expression '/' expression							{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
 	| '(' expression ')'								{$$ = $2;}
+	| expression '?' expression ':' expression			{_ASSERTE (0);}		
 //	| SIZEOF '(' indentifier ')'						{_ASSERTE (0);}
 //	| SIZEOF '(' type_specifier ')'						{_ASSERTE (0);}
 //	| CAST '<' type_specifier '>' '(' expression ')'	{_ASSERTE (0);}
