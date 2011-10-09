@@ -57,9 +57,9 @@ dDAGExpressionNodeBinaryOperator* dDAGScopeBlockNode::CreateBinaryOperatorNode (
 		dDAGExpressionNodeBinaryOperator* const expresionNode = new dDAGExpressionNodeBinaryOperator (allNodes, binaryOperator, expressionA, expressionB);
 		_ASSERTE (expresionNode->GetKey() == key);
 		node = m_expresionNodesCashe.Insert(expresionNode, key);
+		expresionNode->AddRef();
 	}
 	dDAGExpressionNodeBinaryOperator* const expresionNode = (dDAGExpressionNodeBinaryOperator*)node->GetInfo();
-	expresionNode->AddRef();
 	return expresionNode;
 }
 
@@ -72,9 +72,9 @@ dDAGExpressionNodeVariable* dDAGScopeBlockNode::CreatedVariableNode (dList<dDire
 		dDAGExpressionNodeVariable* const expresionNode = new dDAGExpressionNodeVariable (allNodes, identifier);
 		_ASSERTE (expresionNode->GetKey() == key);
 		node = m_expresionNodesCashe.Insert(expresionNode, key);
+		expresionNode->AddRef();
 	}
 	dDAGExpressionNodeVariable* const expresionNode = (dDAGExpressionNodeVariable*)node->GetInfo();
-	expresionNode->AddRef();
 	return expresionNode;
 }
 
@@ -87,8 +87,8 @@ dDAGExpressionNodeConstant* dDAGScopeBlockNode::CreatedConstantNode (dList<dDire
 		dDAGExpressionNodeConstant* const expresionNode = new dDAGExpressionNodeConstant (allNodes, type, value);
 		_ASSERTE (expresionNode->GetKey() == key);
 		node = m_expresionNodesCashe.Insert(expresionNode, key);
+		expresionNode->AddRef();
 	}
 	dDAGExpressionNodeConstant* const expresionNode = (dDAGExpressionNodeConstant*)node->GetInfo();
-	expresionNode->AddRef();
 	return expresionNode;
 }

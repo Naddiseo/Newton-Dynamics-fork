@@ -15,17 +15,21 @@
 #include "dDAGFunctionStatement.h"
 
 class dDAGTypeNode;
+class dDAGExpressionNode;
 class dDAGParameterNode: public dDAGFunctionStatement
 {
 	public:
 	dDAGParameterNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGTypeNode* const type, const char* const identifier);
 	~dDAGParameterNode(void);
 
+	void SetInitializationExpression(dDAGExpressionNode* exp);
+
 	virtual void CalculateKey();
 
 	bool m_isPublic;
 	dDAGTypeNode* m_type;
 	dDAGParameterNode* m_next;
+	dDAGExpressionNode* m_initializationExp;
 	dAddRtti(dDAGFunctionStatement);
 };
 

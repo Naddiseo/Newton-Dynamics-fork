@@ -14,7 +14,19 @@ class fibonacci
 {
 	int Calculate (int n)
 	{
+	
+		if (n == 0)  int x;
+		if (n == 0)  int b;
+		
+		if (n == 0)  int a;
+		else if (n == 1)  int b;
+		else int c;
+	
+		if (n == 0)  { int a = 1;}
+
 		if (n == 0)  {
+			int a;
+			a = 1;
 			int a = 1;
 		} else if (n == 1){
 			int b = 2;

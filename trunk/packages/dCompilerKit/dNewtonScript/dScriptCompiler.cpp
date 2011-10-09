@@ -21,7 +21,7 @@ void* operator new (size_t size)
 {
 	static int xxx;
 	xxx ++;
-	if (xxx == 77)
+	if (xxx == 83)
 	xxx *=1;
 
 	void* const ptr = malloc (size);
@@ -253,39 +253,6 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpresionNodeAssigment (const
 }
 
 
-
-void dScriptCompiler::AddLocalVaribleToCurrentBlock(const dUserVariable& variable, const dUserVariable& initExpression)
-{
-//	_ASSERTE (variable.m_node);
-	_ASSERTE (variable.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType());
-//	dDAGParameterNode* const var = (dDAGParameterNode*) variable.m_node;
-//	dDAGScopeBlockNode* const block = GetCurrentScope();
-//	block->AddStatement(var);
-
-	AddStatementToCurrentBlock(variable);
-	if(initExpression.m_node) {
-		dUserVariable tmp;
-		_ASSERTE (variable.m_node);
-		tmp.m_data = variable.m_node->m_name;
-		dUserVariable assigmentStatement (NewExpresionNodeAssigment (tmp, initExpression));
-		AddStatementToCurrentBlock(assigmentStatement);
-	}
-
-}
-
-void dScriptCompiler::AddStatementToCurrentBlock(const dUserVariable& statement)
-{
-	_ASSERTE (statement.m_node);
-	_ASSERTE (statement.m_node->IsType(dDAGFunctionStatement::GetRttiType()));
-	dDAGFunctionStatement* const stmnt = (dDAGFunctionStatement*) statement.m_node;
-
-	dDAGScopeBlockNode* const block = GetCurrentScope();
-	_ASSERTE (block);
-	block->AddStatement(stmnt);
-
-}
-
-
 dScriptCompiler::dUserVariable dScriptCompiler::BeginClassNode ()
 {
 	dUserVariable returnNode;
@@ -429,8 +396,51 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeVariable (const
 }
 
 
-void dScriptCompiler::AddStatementIFToCurrentBlock(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock)
+
+
+
+
+
+void dScriptCompiler::AddStatementToCurrentBlock(const dUserVariable& statement)
 {
-	_ASSERTE (0);
+	_ASSERTE (statement.m_node);
+	_ASSERTE (statement.m_node->IsType(dDAGFunctionStatement::GetRttiType()));
+	dDAGFunctionStatement* const stmnt = (dDAGFunctionStatement*) statement.m_node;
+
+	dDAGScopeBlockNode* const block = GetCurrentScope();
+	_ASSERTE (block);
+	block->AddStatement(stmnt);
 }
 
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewLocalVariableStamement(const dUserVariable& variable, const dUserVariable& initializationExpression)
+{
+	dUserVariable returnNode;
+
+	dDAGParameterNode* const node = (dDAGParameterNode*)variable.m_node;
+	_ASSERTE (node->GetTypeId() ==  dDAGParameterNode::GetRttiType());
+	if (initializationExpression.m_node) {
+		dDAGExpressionNode* const exp = (dDAGExpressionNode*) initializationExpression.m_node;
+		_ASSERTE (exp->IsType(dDAGExpressionNode::GetRttiType()));
+		node->SetInitializationExpression(exp);
+	}
+	returnNode.m_node = node;
+	return returnNode;
+}
+
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewIFStamement(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock)
+{
+	dUserVariable returnNode;
+
+	dDAGExpressionNode* const exp = (dDAGExpressionNode*) expression.m_node;
+	dDAGFunctionStatement* const thenStmt = (dDAGFunctionStatement*) thenBlock.m_node;
+	dDAGFunctionStatement* const elseStmt = (dDAGFunctionStatement*) elseBlock.m_node;
+	_ASSERTE (exp->IsType(dDAGExpressionNode::GetRttiType()));
+	_ASSERTE (thenStmt->IsType(dDAGFunctionStatement::GetRttiType()));
+	_ASSERTE (!elseStmt || (elseStmt->IsType(dDAGFunctionStatement::GetRttiType())));
+
+	dDAGFunctionStatementIF* const ifStmnt = new dDAGFunctionStatementIF(m_allNodes, exp, thenStmt, elseStmt);
+	returnNode.m_node = ifStmnt;
+	return returnNode;
+}

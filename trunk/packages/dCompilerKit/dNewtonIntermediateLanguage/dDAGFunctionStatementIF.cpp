@@ -11,17 +11,36 @@
 
 #include "dDirectAcyclicgraphNode.h"
 #include "dDAGFunctionStatementIF.h"
+#include "dDAGExpressionNode.h"
 
 dInitRtti(dDAGFunctionStatementIF);
 
-dDAGFunctionStatementIF::dDAGFunctionStatementIF(dList<dDirectAcyclicgraphNode*>& allNodes)
+dDAGFunctionStatementIF::dDAGFunctionStatementIF(dList<dDirectAcyclicgraphNode*>& allNodes, 
+	dDAGExpressionNode* const expression,
+	 dDAGFunctionStatement* const thenStmt, 
+	 dDAGFunctionStatement* const elseStmt)
 	:dDAGFunctionStatement(allNodes)
+	,m_expression(expression)
+	,m_thenStmt (thenStmt)
+	,m_elseStmt (elseStmt)
 {
+	_ASSERTE (m_expression);
+	_ASSERTE (m_thenStmt);
+	m_expression->AddRef();
+	m_thenStmt->AddRef();
+	if (m_elseStmt) {
+		m_elseStmt->AddRef();
+	}
 }
 
 
 dDAGFunctionStatementIF::~dDAGFunctionStatementIF()
 {
+	m_expression->Release();
+	m_thenStmt->Release();
+	if (m_elseStmt) {
+		m_elseStmt->Release();
+	}
 }
 
 

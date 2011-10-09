@@ -57,38 +57,30 @@ class dScriptCompiler: public dNewtonScriptParser
 	void DisplayError (const char* format, ...) const;
 	void SyntaxError (const dNewtonScriptLexical& scanner, const dUserVariable& errorToken, const dUserVariable& errorTokenMarker);
 
+	void AddClassVariable(const dUserVariable& variable);
+	void SetParamameterAsPrivateVariable(const dUserVariable& variable);
+	void AddStatementToCurrentBlock(const dUserVariable& statement);
+
 	
 	dUserVariable BeginClassNode ();
 	dUserVariable FinalizeClassNode (const dUserVariable& classNode, const dUserVariable& visibility, const dUserVariable& name, const dUserVariable& baseClass, const dUserVariable& guiInterface);
 
 	dUserVariable AddClassFunction (const dUserVariable& returnType, const dUserVariable& function, const dUserVariable& functionBlock);
-	
-//	dUserVariable BeginBeginFunctionPrototypeNode ();
-//	dUserVariable FinalizePrototype (const dUserVariable& returnType, const dUserVariable& funtionName, const dUserVariable& isConst);
 	dUserVariable NewFunctionPrototype (const dUserVariable& returnType, const dUserVariable& funtionName, const dUserVariable& parameterList, const dUserVariable& isConst);
-
-//	dUserVariable BeginScopeBlock ();
-//	dUserVariable FinalizeScopeBlock (const dUserVariable& scope);
-
 	dUserVariable BeginScopeBlock ();
 	dUserVariable EndScopeBlock (const dUserVariable& block);
-
 	dUserVariable NewParameterNode (const dUserVariable& primitiveType, const dUserVariable& identifier);
 	dUserVariable EmitTypeNode (const dUserVariable& type, const dUserVariable& modifier = dUserVariable());
 	dUserVariable LinkParameters(const dUserVariable& parameterA, const dUserVariable& parameterB);
-	
-	
 	dUserVariable NewExpressionNodeConstant (const dUserVariable& identifier);
 	dUserVariable NewExpressionNodeVariable (const dUserVariable& identifier);
 	dUserVariable NewExpresionNodeAssigment (const dUserVariable& leftVariable, const dUserVariable& expression);
 	dUserVariable NewExpressionNodeBinaryOperator (const dUserVariable& binaryOperator, const dUserVariable& expressionA, const dUserVariable& expressionB);
 	
-	void AddClassVariable(const dUserVariable& variable);
-	void SetParamameterAsPrivateVariable(const dUserVariable& variable);
 	
-	void AddStatementToCurrentBlock(const dUserVariable& statement);
-	void AddLocalVaribleToCurrentBlock(const dUserVariable& variable, const dUserVariable& initExpression);
-	void AddStatementIFToCurrentBlock(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock);
+	
+	dUserVariable NewLocalVariableStamement(const dUserVariable& variable, const dUserVariable& initializationExpression);
+	dUserVariable NewIFStamement(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock);
 
 	dDAGClassNode* GetCurrentClass() const;
 	dDAGScopeBlockNode* GetCurrentScope() const;

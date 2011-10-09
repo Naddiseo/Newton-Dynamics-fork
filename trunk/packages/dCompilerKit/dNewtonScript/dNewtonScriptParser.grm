@@ -307,26 +307,32 @@ statement_list
 	;
 						 
 primary_statement	
-	: statement
+	: statement				{GET_PARENT_CLASS; me->AddStatementToCurrentBlock($1);}	
 	;					 
 	
 statement
-	: parameter semicolon_marker							{GET_PARENT_CLASS; me->AddLocalVaribleToCurrentBlock($1, dUserVariable());}
-	| parameter '=' expression semicolon_marker				{GET_PARENT_CLASS; me->AddLocalVaribleToCurrentBlock($1, $3);} 
-	| assigment_statement semicolon_marker					{GET_PARENT_CLASS; me->AddStatementToCurrentBlock($1);}	
+	: block_scope																			{ $$ = $1;}
+	| assigment_statement semicolon_marker													{ $$ = $1;}		
+	| parameter semicolon_marker															{GET_PARENT_CLASS; $$ = me->NewLocalVariableStamement($1, dUserVariable());}
+	| parameter '=' expression semicolon_marker												{GET_PARENT_CLASS; $$ = me->NewLocalVariableStamement($1, $3);} 
 	| CONTINUE semicolon_marker
 	| BREAK semicolon_marker
 	| function_call semicolon_marker
 	| return semicolon_marker	
-	| block_scope											{ $$ = $1; }
 	| SWITCH '(' expression ')' '{' switch_case_list '}' 	
-	| IF '(' expression	')' statement														{GET_PARENT_CLASS; me->AddStatementIFToCurrentBlock	($3, $5, dUserVariable());}	
-	| IF '(' expression	')' statement ELSE statement										{GET_PARENT_CLASS; me->AddStatementIFToCurrentBlock	($3, $5, $7);}
+	| IF '(' expression	')' statement														{GET_PARENT_CLASS; $$ = me->NewIFStamement($3, $5, dUserVariable());}	
+	| IF '(' expression	')' statement ELSE statement										{GET_PARENT_CLASS; $$ = me->NewIFStamement ($3, $5, $7);}
 	| FOR '(' for_first_expression ';' expression ';' for_third_expression ')' statement
 	| WHILE '(' expression ')' statement
 	| DO statement WHILE '(' expression ')' semicolon_marker
 	| syntax_error
 	;
+	
+assigment_statement
+	: compound_identifier_List '=' expression												{GET_PARENT_CLASS; $$ = me->NewExpresionNodeAssigment ($1, $3);}
+	| compound_identifier_List multidimention_array	'=' expression							{_ASSERTE (0); }
+	;
+	
 	
 for_first_expression
 	: 
@@ -346,10 +352,6 @@ multidimention_array
 	| multidimention_array '[' expression ']'
 	;
 	
-assigment_statement
-	: compound_identifier_List '=' expression						{GET_PARENT_CLASS; $$ = me->NewExpresionNodeAssigment ($1, $3);}
-	| compound_identifier_List multidimention_array	'=' expression	{_ASSERTE (0); }
-	;
 	
 switch_case_list
 	: switch_case

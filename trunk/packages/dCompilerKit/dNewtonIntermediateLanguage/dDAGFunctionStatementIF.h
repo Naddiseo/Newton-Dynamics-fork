@@ -14,14 +14,19 @@
 
 #include "dDAGFunctionStatement.h"
 
+class dDAGExpressionNode;
 
 class dDAGFunctionStatementIF: public dDAGFunctionStatement
 {
 	public:
-	dDAGFunctionStatementIF(dList<dDirectAcyclicgraphNode*>& allNodes);
+	dDAGFunctionStatementIF(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNode* const expression, dDAGFunctionStatement* const thenStmt, dDAGFunctionStatement* const elseStmt);
 	~dDAGFunctionStatementIF();
 
 	dAddRtti(dDAGFunctionStatement);
+
+	dDAGExpressionNode* m_expression;
+	dDAGFunctionStatement* m_thenStmt;
+	dDAGFunctionStatement* m_elseStmt;
 };
 
 
