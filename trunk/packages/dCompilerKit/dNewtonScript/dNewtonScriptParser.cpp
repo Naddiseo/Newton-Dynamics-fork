@@ -1883,7 +1883,7 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						{GET_PARENT_CLASS; entry.m_value = me->NewExpressionNodeConstant (parameter[0].m_value);}
 						break;
 					case 146:// rule expression : function_call 
-						{_ASSERTE (0);}
+						{entry.m_value = parameter[0].m_value;}
 						break;
 					case 59:// rule class_function_implementation : PRIVATE function_prototype block_scope 
 						{GET_PARENT_CLASS; entry.m_value = me->AddClassFunction (parameter[0].m_value, parameter[1].m_value, parameter[2].m_value);}
@@ -1894,8 +1894,14 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 37:// rule parameter_list : parameter 
 						{GET_PARENT_CLASS; entry.m_value = me->LinkParameters(parameter[0].m_value, dUserVariable());}
 						break;
+					case 129:// rule function_indentifier : base_class_indetifier_prefix IDENTIFIER 
+						{_ASSERTE (0);}
+						break;
 					case 90:// rule block_scope : begin_scope { } 
 						{GET_PARENT_CLASS; entry.m_value = me->EndScopeBlock (parameter[0].m_value);}
+						break;
+					case 132:// rule return : RETURN 
+						{_ASSERTE (0);}
 						break;
 					case 94:// rule primary_statement : statement 
 						{GET_PARENT_CLASS; me->AddStatementToCurrentBlock(parameter[0].m_value);}
@@ -1924,11 +1930,23 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 143:// rule expression : expression % expression 
 						{GET_PARENT_CLASS; entry.m_value = me->NewExpressionNodeBinaryOperator (parameter[1].m_value, parameter[0].m_value, parameter[2].m_value);}
 						break;
+					case 124:// rule argument_list : expression 
+						{GET_PARENT_CLASS; entry.m_value = me->LinkExpressions(parameter[0].m_value, dUserVariable());}
+						break;
+					case 130:// rule function_call : function_indentifier ( ) 
+						{GET_PARENT_CLASS; entry.m_value = me->NewExpressionFunctionCall (parameter[0].m_value, dUserVariable());}
+						break;
 					case 91:// rule block_scope : begin_scope { statement_list } 
 						{GET_PARENT_CLASS; entry.m_value = me->EndScopeBlock (parameter[0].m_value);}
 						break;
 					case 96:// rule statement : assigment_statement semicolon_marker 
 						{ entry.m_value = parameter[0].m_value;}
+						break;
+					case 133:// rule return : RETURN expression 
+						{_ASSERTE (0);}
+						break;
+					case 102:// rule statement : return semicolon_marker 
+						{_ASSERTE (0); }
 						break;
 					case 97:// rule statement : parameter semicolon_marker 
 						{GET_PARENT_CLASS; entry.m_value = me->NewLocalVariableStamement(parameter[0].m_value, dUserVariable());}
@@ -1939,11 +1957,17 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 38:// rule parameter_list : parameter_list , parameter 
 						{GET_PARENT_CLASS; entry.m_value = me->LinkParameters(parameter[0].m_value, parameter[2].m_value);}
 						break;
+					case 131:// rule function_call : function_indentifier ( argument_list ) 
+						{GET_PARENT_CLASS; entry.m_value = me->NewExpressionFunctionCall (parameter[0].m_value, parameter[2].m_value);}
+						break;
 					case 110:// rule assigment_statement : compound_identifier_List = expression 
 						{GET_PARENT_CLASS; entry.m_value = me->NewExpresionNodeAssigment (parameter[0].m_value, parameter[2].m_value);}
 						break;
 					case 61:// rule function_prototype : type_specifier OPERATOR overlodable_operator ( function_parameters ) const_function 
 						{GET_PARENT_CLASS; dUserVariable temp; temp.m_data = string ("operator") + parameter[2].m_value.m_data; entry.m_value = me->NewFunctionPrototype (parameter[0].m_value, temp, parameter[4].m_value, parameter[6].m_value);}
+						break;
+					case 125:// rule argument_list : argument_list , expression 
+						{GET_PARENT_CLASS; entry.m_value = me->LinkExpressions(parameter[0].m_value, parameter[2].m_value);}
 						break;
 					case 111:// rule assigment_statement : compound_identifier_List multidimention_array = expression 
 						{_ASSERTE (0); }

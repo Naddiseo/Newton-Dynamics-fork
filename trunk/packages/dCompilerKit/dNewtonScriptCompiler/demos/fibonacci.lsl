@@ -33,7 +33,7 @@ class fibonacci
 		} else {
 			int c = 3;
 		}
-/*	
+	
 		int a = 1;
 		int b;
 		int c;
@@ -56,7 +56,7 @@ class fibonacci
 			y = 0;
 		}
 		
-		int c = xxx();		
+		int c = xxx.zzz.yyy (a, b, c);		
 
 		
 		if (n == 0)  {
@@ -67,7 +67,6 @@ class fibonacci
 		}
 
 		return Calculate (n - 1) + Calculate (n - 2);
-*/		
 	}
 	
 //	int xxx()

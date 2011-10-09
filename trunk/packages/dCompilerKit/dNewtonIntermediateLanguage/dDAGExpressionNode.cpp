@@ -18,6 +18,7 @@ dInitRtti(dDAGExpressionNode);
 
 dDAGExpressionNode::dDAGExpressionNode(dList<dDirectAcyclicgraphNode*>& allNodes)
 	:dDirectAcyclicgraphNode(allNodes)
+	,m_argumentListNext(NULL)
 {
 }
 

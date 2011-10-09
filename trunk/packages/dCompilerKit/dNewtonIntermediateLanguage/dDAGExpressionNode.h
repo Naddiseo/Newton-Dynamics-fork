@@ -21,6 +21,8 @@ class dDAGExpressionNode: public dDirectAcyclicgraphNode
 	dDAGExpressionNode (dList<dDirectAcyclicgraphNode*>& allNodes);
 	~dDAGExpressionNode(void);
 
+
+	dDAGExpressionNode* m_argumentListNext;
 	dAddRtti(dDirectAcyclicgraphNode);
 };
 

@@ -322,6 +322,21 @@ dScriptCompiler::dUserVariable dScriptCompiler::LinkParameters(const dUserVariab
 	return returnNode;
 }
 
+dScriptCompiler::dUserVariable dScriptCompiler::LinkExpressions(const dUserVariable& ExpressionA, const dUserVariable& ExpressionB)
+{
+	dUserVariable returnNode (ExpressionA);
+
+	_ASSERTE (ExpressionA.m_node->IsType(dDAGExpressionNode::GetRttiType()));
+	_ASSERTE (!ExpressionB.m_node || (ExpressionB.m_node->IsType(dDAGExpressionNode::GetRttiType())));
+	dDAGExpressionNode* expression = (dDAGExpressionNode*) ExpressionA.m_node;
+
+	for ( ;expression->m_argumentListNext; expression = expression->m_argumentListNext);
+	expression->m_argumentListNext = (dDAGExpressionNode*) ExpressionB.m_node;
+
+	return returnNode;
+}
+
+
 
 dScriptCompiler::dUserVariable dScriptCompiler::BeginScopeBlock ()
 {
@@ -442,5 +457,17 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewIFStamement(const dUserVariab
 
 	dDAGFunctionStatementIF* const ifStmnt = new dDAGFunctionStatementIF(m_allNodes, exp, thenStmt, elseStmt);
 	returnNode.m_node = ifStmnt;
+	return returnNode;
+}
+
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionFunctionCall (const dUserVariable& functionName, const dUserVariable& argumnetList)
+{
+	dUserVariable returnNode;
+	
+	_ASSERTE (argumnetList.m_node->IsType(dDAGExpressionNode::GetRttiType()));
+	dDAGExpressionNode* const argument = (dDAGExpressionNode*) argumnetList.m_node;
+	dDAGExpressionFunctionCall* const fntCall = new dDAGExpressionFunctionCall(m_allNodes, functionName.m_data.c_str(), argument);
+	returnNode.m_node = fntCall;
 	return returnNode;
 }

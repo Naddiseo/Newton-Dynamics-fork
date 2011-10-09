@@ -29,8 +29,9 @@
 #include <dDAGScopeBlockNode.h>
 #include <dDAGExpressionNode.h>
 #include <dDAGFunctionStatement.h>
-#include "dDAGFunctionStatementIF.h"
+#include <dDAGFunctionStatementIF.h>
 #include <dDirectAcyclicgraphNode.h>
+#include <dDAGExpressionFunctionCall.h>
 #include <dDAGExpressionNodeConstant.h>
 #include <dDAGExpressionNodeVariable.h>
 #include <dDAGFunctionStatementAssigment.h>
@@ -72,12 +73,13 @@ class dScriptCompiler: public dNewtonScriptParser
 	dUserVariable NewParameterNode (const dUserVariable& primitiveType, const dUserVariable& identifier);
 	dUserVariable EmitTypeNode (const dUserVariable& type, const dUserVariable& modifier = dUserVariable());
 	dUserVariable LinkParameters(const dUserVariable& parameterA, const dUserVariable& parameterB);
+	dUserVariable LinkExpressions(const dUserVariable& ExpressionA, const dUserVariable& ExpressionB);
 	dUserVariable NewExpressionNodeConstant (const dUserVariable& identifier);
 	dUserVariable NewExpressionNodeVariable (const dUserVariable& identifier);
 	dUserVariable NewExpresionNodeAssigment (const dUserVariable& leftVariable, const dUserVariable& expression);
 	dUserVariable NewExpressionNodeBinaryOperator (const dUserVariable& binaryOperator, const dUserVariable& expressionA, const dUserVariable& expressionB);
 	
-	
+	dUserVariable NewExpressionFunctionCall (const dUserVariable& funtionName, const dUserVariable& argumnetList);
 	
 	dUserVariable NewLocalVariableStamement(const dUserVariable& variable, const dUserVariable& initializationExpression);
 	dUserVariable NewIFStamement(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock);
