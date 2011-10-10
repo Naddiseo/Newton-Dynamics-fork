@@ -228,6 +228,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\dDAGFunctionStatementReturn.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGFunctionStatementReturn.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dDAGParamerNode.cpp"
 			>
 		</File>

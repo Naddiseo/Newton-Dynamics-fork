@@ -412,6 +412,16 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeVariable (const
 
 
 
+dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionFunctionCall (const dUserVariable& functionName, const dUserVariable& argumnetList)
+{
+	dUserVariable returnNode;
+
+	_ASSERTE (argumnetList.m_node->IsType(dDAGExpressionNode::GetRttiType()));
+	dDAGExpressionNode* const argument = (dDAGExpressionNode*) argumnetList.m_node;
+	dDAGExpressionFunctionCall* const fntCall = new dDAGExpressionFunctionCall(m_allNodes, functionName.m_data.c_str(), argument);
+	returnNode.m_node = fntCall;
+	return returnNode;
+}
 
 
 
@@ -455,19 +465,23 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewIFStamement(const dUserVariab
 	_ASSERTE (thenStmt->IsType(dDAGFunctionStatement::GetRttiType()));
 	_ASSERTE (!elseStmt || (elseStmt->IsType(dDAGFunctionStatement::GetRttiType())));
 
-	dDAGFunctionStatementIF* const ifStmnt = new dDAGFunctionStatementIF(m_allNodes, exp, thenStmt, elseStmt);
-	returnNode.m_node = ifStmnt;
+	dDAGFunctionStatementIF* const stmt = new dDAGFunctionStatementIF(m_allNodes, exp, thenStmt, elseStmt);
+	returnNode.m_node = stmt;
 	return returnNode;
 }
 
 
-dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionFunctionCall (const dUserVariable& functionName, const dUserVariable& argumnetList)
+dScriptCompiler::dUserVariable dScriptCompiler::NewReturnStamement(const dUserVariable& expression)
 {
 	dUserVariable returnNode;
-	
-	_ASSERTE (argumnetList.m_node->IsType(dDAGExpressionNode::GetRttiType()));
-	dDAGExpressionNode* const argument = (dDAGExpressionNode*) argumnetList.m_node;
-	dDAGExpressionFunctionCall* const fntCall = new dDAGExpressionFunctionCall(m_allNodes, functionName.m_data.c_str(), argument);
-	returnNode.m_node = fntCall;
+
+	dDAGExpressionNode* exp = NULL;
+	if (expression.m_node) {
+		dDAGExpressionNode* const exp = (dDAGExpressionNode*) expression.m_node;
+		_ASSERTE (exp->IsType(dDAGExpressionNode::GetRttiType()));
+	}
+
+	dDAGFunctionStatementReturn* const stmt = new dDAGFunctionStatementReturn(m_allNodes, exp);
+	returnNode.m_node = stmt;
 	return returnNode;
 }

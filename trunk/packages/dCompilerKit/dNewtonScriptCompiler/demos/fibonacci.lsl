@@ -14,69 +14,13 @@ class fibonacci
 {
 	int Calculate (int n)
 	{
-		// simple if
-		if (n == 0)  int b;
-		
-		// defficult if
-		if (n == 0) if (q == 1) int a; else int b;
-		
-		// complex if
-		if (n == 0)  int a;
-		else if (n == 1)  int b;
-		else int c;
-	
-		// compund simple if
-		if (n == 0)  { int a = 1;}
-
-		// comploudn and complex if
-		if (n == 0)  {
-			int a;
-			a = 1;
-			int a = 1;
-		} else if (n == 1){
-			int b = 2;
-		} else {
-			int c = 3;
-		}
-	
-		int a = 1;
-		int b;
-		int c;
-		int d;
-
-		a = a + a * (b - c) + (b - c) * d;
-		
-		{
-			int x = 1;
-			{
-			}
-			y = 0;
-		}
-		
-		{
-			x = 1;
-			{
-				int y = 0;
-			} 
-			y = 0;
-		}
-		
-		int c = xxx.zzz.yyy (a, b, c);		
-
-		
 		if (n == 0)  {
 			return 0;
 		}
 		if (n == 1) {
 			return 1;
 		}
-
 		return Calculate (n - 1) + Calculate (n - 2);
 	}
-	
-//	int xxx()
-//	{
-//		return 1;
-//	}
 }
 
