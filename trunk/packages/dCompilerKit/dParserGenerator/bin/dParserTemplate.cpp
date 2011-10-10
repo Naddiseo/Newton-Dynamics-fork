@@ -296,6 +296,6 @@ bool $(className)::Parse($(scannerClass)& scanner)
 			}
 		}
 	}
-	return m_grammarError;
+	return !m_grammarError;
 }
 

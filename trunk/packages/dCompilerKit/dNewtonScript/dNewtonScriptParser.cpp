@@ -2049,7 +2049,7 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 			}
 		}
 	}
-	return m_grammarError;
+	return !m_grammarError;
 }
 
 

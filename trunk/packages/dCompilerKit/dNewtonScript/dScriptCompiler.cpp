@@ -75,24 +75,17 @@ int dScriptCompiler::CompileSource (const char* const source)
 {
 	dNewtonScriptLexical scanner (source);
 
-//	m_virtualMachine = virtualMachine;
-	Parse(scanner);
+	bool status = Parse(scanner);
+	if (status) {
+		_ASSERTE (0);
+	}
 	return 0;
 }
 
 
 bool dScriptCompiler::Parse(dNewtonScriptLexical& scanner)
 {
-//	m_codeSegmentSize = 0;
-//	m_codeSegment = new short[D_CODE_SEGMNET_ALLOC_SHUNK_SIZE];
-
-
-	dNewtonScriptParser::Parse(scanner);
-
-//	scanner.ReStartScanner();
-//	dAssemblerParser::Parse(scanner);
-
-	return true;
+	return dNewtonScriptParser::Parse(scanner);
 }
 
 
