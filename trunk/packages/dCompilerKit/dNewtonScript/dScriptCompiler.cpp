@@ -428,8 +428,7 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionFunctionCall (const
 
 void dScriptCompiler::AddStatementToCurrentBlock(const dUserVariable& statement)
 {
-	_ASSERTE (statement.m_node);
-	_ASSERTE (statement.m_node->IsType(dDAGFunctionStatement::GetRttiType()));
+	_ASSERTE (statement.m_node && statement.m_node->IsType(dDAGFunctionStatement::GetRttiType()));
 	dDAGFunctionStatement* const stmnt = (dDAGFunctionStatement*) statement.m_node;
 
 	dDAGScopeBlockNode* const block = GetCurrentScope();
@@ -482,6 +481,18 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewReturnStamement(const dUserVa
 	}
 
 	dDAGFunctionStatementReturn* const stmt = new dDAGFunctionStatementReturn(m_allNodes, exp);
+	returnNode.m_node = stmt;
+	return returnNode;
+}
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewFunctionCallStamement(const dUserVariable& functionExpression)
+{
+	dUserVariable returnNode;
+
+	dDAGExpressionFunctionCall* const fnt  = (dDAGExpressionFunctionCall*) functionExpression.m_node;
+	_ASSERTE (fnt->IsType(dDAGExpressionFunctionCall::GetRttiType()));
+
+	dDAGFunctionStatementFunctionCall* const stmt = new dDAGFunctionStatementFunctionCall(m_allNodes, fnt);
 	returnNode.m_node = stmt;
 	return returnNode;
 }

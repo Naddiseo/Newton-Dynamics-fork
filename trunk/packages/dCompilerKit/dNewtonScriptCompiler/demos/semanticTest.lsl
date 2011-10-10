@@ -38,13 +38,21 @@ class TestSemantic
 		} else {
 			int c = 3;
 		}
+		
+		// test extra semicoloms
+		;
+		;;
+		 
 	
+		// test local varicables
 		int a = 1;
 		int b;
 		int c;
 		int d;
 		
+		; ;
 		
+		// test block with local variable and oteh subblocks
 		{
 			int x = 1;
 			{
@@ -60,15 +68,21 @@ class TestSemantic
 			y = 0;
 		}
 		
+		// test function call	
+		xxx.zzz.yyy (a, b, c, d);		
+		
+		// test assigment
 		int c = xxx.zzz.yyy (a, b, c);		
 
-		
+		// test expression
 		a = a + a * (b - c) + (b - c) * d;
 		if (n == 0)  {
+			// test another expression	
 			a = a + a * (b - c) + (b - c) * d + d;
 			return 0;
 		}
 		if (n == 1) {
+			// test some more another expression	
 			a = a + a * (b - c) + (b - c) * d + d;
 			return 1;
 		}

@@ -37,6 +37,7 @@
 #include <dDAGFunctionStatementReturn.h>
 #include <dDAGFunctionStatementAssigment.h>
 #include <dDAGExpressionNodeBinaryOperator.h>
+#include <dDAGFunctionStatementFunctionCall.h>
 
 #include "dNewtonScriptParser.h"
 
@@ -85,6 +86,8 @@ class dScriptCompiler: public dNewtonScriptParser
 	dUserVariable NewLocalVariableStamement(const dUserVariable& variable, const dUserVariable& initializationExpression);
 	dUserVariable NewIFStamement(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock);
 	dUserVariable NewReturnStamement(const dUserVariable& expression);
+	dUserVariable NewFunctionCallStamement(const dUserVariable& functionExpression);
+	
 
 	dDAGClassNode* GetCurrentClass() const;
 	dDAGScopeBlockNode* GetCurrentScope() const;

@@ -22,11 +22,15 @@ dDAGExpressionFunctionCall::dDAGExpressionFunctionCall(dList<dDirectAcyclicgraph
 {
 	m_name = identifier;
 
-	for (dDAGExpressionNode* param = argumentList; param; param = param->m_argumentListNext) {
+	dDAGExpressionNode* next;
+	for (dDAGExpressionNode* param = argumentList; param; param = next) {
+		next = param->m_argumentListNext;
+		param->m_argumentListNext = NULL;
 		_ASSERTE (param->IsType(dDAGExpressionNode::GetRttiType()));
 		m_argumentList.Append(param);
 		param->AddRef(); 
 	}
+
 
 	m_key = dCRC64 (m_name.c_str());
 }

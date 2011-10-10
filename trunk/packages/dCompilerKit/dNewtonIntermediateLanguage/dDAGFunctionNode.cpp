@@ -27,7 +27,10 @@ dDAGFunctionNode::dDAGFunctionNode(dList<dDirectAcyclicgraphNode*>& allNodes, dD
 	,m_parameters() 
 {
 	m_returnType->AddRef();
-	for (dDAGParameterNode* param = parameterList; param; param = param->m_next) {
+	dDAGParameterNode* next;
+	for (dDAGParameterNode* param = parameterList; param; param = next) {
+		next = param->m_next;
+		param->m_next = NULL;
 		_ASSERTE (param->IsType(dDAGParameterNode::GetRttiType()));
 		m_parameters.Append(param);
 		param->AddRef(); 

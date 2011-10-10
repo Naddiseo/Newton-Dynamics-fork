@@ -309,22 +309,23 @@ statement_list
 	;
 						 
 primary_statement	
-	: statement				{GET_PARENT_CLASS; me->AddStatementToCurrentBlock($1);}	
+	: ';'
+	| statement																				{GET_PARENT_CLASS; me->AddStatementToCurrentBlock($1);}	
 	;					 
 	
 statement
 	: block_scope																			{$$ = $1;}
-	| assigment_statement semicolon_marker													{$$ = $1;}		
-	| parameter semicolon_marker															{GET_PARENT_CLASS; $$ = me->NewLocalVariableStamement($1, dUserVariable());}
-	| parameter '=' expression semicolon_marker												{GET_PARENT_CLASS; $$ = me->NewLocalVariableStamement($1, $3);} 
-	| CONTINUE semicolon_marker
-	| BREAK semicolon_marker
-	| SWITCH '(' expression ')' '{' switch_case_list '}' 	
-	| FOR '(' for_first_expression ';' expression ';' for_third_expression ')' statement
-	| WHILE '(' expression ')' statement
-	| DO statement WHILE '(' expression ')' semicolon_marker
-	| return semicolon_marker																{$$ = $1;}
-	| function_call semicolon_marker														{_ASSERTE (0);}
+	| assigment_statement ';'																{$$ = $1;}		
+	| parameter ';'																			{GET_PARENT_CLASS; $$ = me->NewLocalVariableStamement($1, dUserVariable());}
+	| parameter '=' expression ';'															{GET_PARENT_CLASS; $$ = me->NewLocalVariableStamement($1, $3);} 
+	| CONTINUE ';'																			{_ASSERTE (0);}
+	| BREAK ';'																				{_ASSERTE (0);}
+	| SWITCH '(' expression ')' '{' switch_case_list '}' 									{_ASSERTE (0);}
+	| FOR '(' for_first_expression ';' expression ';' for_third_expression ')' statement	{_ASSERTE (0);}
+	| WHILE '(' expression ')' statement													{_ASSERTE (0);}
+	| DO statement WHILE '(' expression ')' ';'												{_ASSERTE (0);}
+	| return ';'																			{$$ = $1;}
+	| function_call ';'																		{GET_PARENT_CLASS; $$ = me->NewFunctionCallStamement($1);}
 	| IF '(' expression	')' statement														{GET_PARENT_CLASS; $$ = me->NewIFStamement($3, $5, dUserVariable());}	
 	| IF '(' expression	')' statement ELSE statement										{GET_PARENT_CLASS; $$ = me->NewIFStamement ($3, $5, $7);}
 	| syntax_error

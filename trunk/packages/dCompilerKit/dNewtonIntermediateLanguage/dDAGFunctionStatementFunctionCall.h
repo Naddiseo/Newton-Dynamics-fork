@@ -9,22 +9,22 @@
 * freely
 */
 
-#ifndef __dDAGFunctionStatementReturn_H__
-#define __dDAGFunctionStatementReturn_H__
+#ifndef __dDAGFunctionStatementFunctionCall_H__
+#define __dDAGFunctionStatementFunctionCall_H__
 
 #include "dDAGFunctionStatement.h"
 #include "dDAGExpressionNode.h"
 
+class dDAGExpressionFunctionCall;
 
-class dDAGFunctionStatementReturn: public dDAGFunctionStatement
+class dDAGFunctionStatementFunctionCall: public dDAGFunctionStatement
 {
 	public:
-	dDAGFunctionStatementReturn(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNode* const expression);
-	~dDAGFunctionStatementReturn();
+	dDAGFunctionStatementFunctionCall(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionFunctionCall* const function);
+	~dDAGFunctionStatementFunctionCall();
 
-	dDAGExpressionNode* m_expression;
+	dDAGExpressionFunctionCall* m_function;
 	
-
 
 	dAddRtti(dDAGFunctionStatement);
 };
