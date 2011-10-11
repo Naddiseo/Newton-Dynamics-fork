@@ -59,7 +59,7 @@
 %token SHIFT_RIGHT SHIFT_LEFT
 %token LESS_EQUAL GREATHER_EQUAL
 %token IDENTICAL DIFFERENT
-%token UNUARY
+
 
 %right ELSE
 %right IF
@@ -76,9 +76,7 @@
 %left SHIFT_RIGHT SHIFT_LEFT
 %left '+' '-'
 %left '*' '/' '%'
-%left '!'
-%left '~'
-%left UNUARY
+%left '!' '~'
 
 %{
 #define GET_PARENT_CLASS  dScriptCompiler* const me = (dScriptCompiler*) this;
@@ -425,10 +423,10 @@ expression
 	| expression '*' expression							{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
 	| expression '%' expression							{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
 	| expression '/' expression							{GET_PARENT_CLASS; $$ = me->NewExpressionNodeBinaryOperator ($2, $1, $3);}
-	| '!' expression %prec UNUARY						{GET_PARENT_CLASS; $$ = me->NewExpressionNodeUnuaryOperator ($1, $2);}
-	| '~' expression %prec UNUARY						{GET_PARENT_CLASS; $$ = me->NewExpressionNodeUnuaryOperator ($1, $2);}
-	| '-' expression %prec UNUARY						{GET_PARENT_CLASS; $$ = me->NewExpressionNodeUnuaryOperator ($1, $2);}
-	| '+' expression %prec UNUARY						{_ASSERTE (0); $$ = $2;}
+	| '!' expression 									{GET_PARENT_CLASS; $$ = me->NewExpressionNodeUnuaryOperator ($1, $2);}
+	| '~' expression 									{GET_PARENT_CLASS; $$ = me->NewExpressionNodeUnuaryOperator ($1, $2);}
+	| '-' expression %prec '~'							{GET_PARENT_CLASS; $$ = me->NewExpressionNodeUnuaryOperator ($1, $2);}
+	| '+' expression %prec '~'							{$$ = $2;}
 	| expression '?' expression ':' expression			{_ASSERTE (0);}		
 //	| SIZEOF '(' indentifier ')'						{_ASSERTE (0);}
 //	| SIZEOF '(' type_specifier ')'						{_ASSERTE (0);}

@@ -79,7 +79,9 @@ int a = 1;
 int b = 1;
 int c = 1;
 
-int x = a - - - b * - c;
+int x = a - - ! ~ b * - c;
+x = a - - ~ ! b * - c;
+
 
 	bool status = Parse(scanner);
 	if (status) {
