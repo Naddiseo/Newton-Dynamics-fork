@@ -1522,7 +1522,7 @@ void dParserCompiler::GenerateParserCode (
 			entriesCount ++;
 		}
 
-		if ((gotoStateCount % 32) == 0) {
+		if ((gotoStateCount % 24) == 0) {
 			stateGotoStart += "\n\t\t\t";
 			stateGotoCount += "\n\t\t\t";
 		}
