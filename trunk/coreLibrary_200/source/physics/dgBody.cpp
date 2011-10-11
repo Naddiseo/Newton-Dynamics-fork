@@ -847,8 +847,6 @@ void dgBody::Unfreeze ()
 
 void dgBody::AddImpulse (const dgVector& pointDeltaVeloc, const dgVector& pointPosit)
 {
-	dgInt32 i;
-	dgInt32 j;
 	dgMatrix tmpMatrix;
 
 	tmpMatrix[0][0] = m_invMass[0] * m_matrix[0][0];
@@ -902,8 +900,8 @@ void dgBody::AddImpulse (const dgVector& pointDeltaVeloc, const dgVector& pointP
 	tmp[3][3] = dgFloat32 (1.0f);
 
 	dgMatrix contactMatrix (tmp * invInertia * tmp);
-	for (i = 0; i < 3; i ++) {
-		for (j = 0; j < 3; j ++) {
+	for (int i = 0; i < 3; i ++) {
+		for (int j = 0; j < 3; j ++) {
 			contactMatrix[i][j] *= -dgFloat32 (1.0f);
 		}
 	}
