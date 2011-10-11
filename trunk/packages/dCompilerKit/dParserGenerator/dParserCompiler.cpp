@@ -95,6 +95,7 @@ class dParserCompiler::dSymbol
 	dTokenType m_type;
 	dToken m_token;
 	string m_name;
+	string m_operatorPrecendeceOverright;
 	dCRCTYPE m_nameCRC;
 };
 
@@ -407,9 +408,18 @@ class dParserCompiler::dOperatorsPrecedence: public dList <dOperatorsAssociation
 			const dRuleInfo& ruleInfo = item.m_ruleNode->GetInfo();
 			for (dRuleInfo::dListNode* infoSymbolNode = ruleInfo.GetFirst(); infoSymbolNode; infoSymbolNode = infoSymbolNode->GetNext()) {
 				const dSymbol& infoSymbol = infoSymbolNode->GetInfo();
-				if (FindAssociation(infoSymbol.m_nameCRC)) {
-					item.m_lastOperatorSymbolCRC = infoSymbol.m_nameCRC;
-					item.m_lastOperatorSymbolName = infoSymbol.m_name;
+				if (infoSymbol.m_operatorPrecendeceOverright.size()) {
+					dCRCTYPE crc = dCRC64(infoSymbol.m_operatorPrecendeceOverright.c_str());
+					if (FindAssociation(crc)) {
+						item.m_lastOperatorSymbolCRC = crc;
+						item.m_lastOperatorSymbolName = infoSymbol.m_operatorPrecendeceOverright;
+					}
+
+				} else {
+					if (FindAssociation(infoSymbol.m_nameCRC)) {
+						item.m_lastOperatorSymbolCRC = infoSymbol.m_nameCRC;
+						item.m_lastOperatorSymbolName = infoSymbol.m_name;
+					}
 				}
 			}
 		}
@@ -653,7 +663,7 @@ void dParserCompiler::ScanGrammarFile(
 				rule.m_ruleNumber = ruleNumber;
 				ruleNumber ++;
 
-				token1 = ScanGrammarRule(lexical, ruleList, symbolList, ruleNumber, tokenEnumeration); 
+				token1 = ScanGrammarRule(lexical, ruleList, symbolList, ruleNumber, tokenEnumeration, operatorPrecedence); 
 				break;
 			}
 			default:
@@ -698,7 +708,8 @@ dParserCompiler::dToken dParserCompiler::ScanGrammarRule(
 	dProductionRule& rules, 
 	dTree<dTokenInfo, dCRCTYPE>& symbolList, 
 	int& ruleNumber,
-	int& tokenEnumeration)
+	int& tokenEnumeration,
+	const dOperatorsPrecedence& operatorPrecedence)
 {
 	dRuleInfo* currentRule = &rules.GetLast()->GetInfo();
 	dToken token = dToken(lexical.NextToken());
@@ -707,6 +718,7 @@ dParserCompiler::dToken dParserCompiler::ScanGrammarRule(
 		dList<dTokenStringPair> ruleTokens;
 		for (token = dToken(lexical.NextToken()); !((token == SIMICOLOM) || (token == OR)); token = dToken(lexical.NextToken())) {
 			_ASSERTE (token != -1);
+
 			dTokenStringPair& pair = ruleTokens.Append()->GetInfo();
 			pair.m_token = token;
 			pair.m_info = lexical.GetTokenString();
@@ -722,6 +734,7 @@ dParserCompiler::dToken dParserCompiler::ScanGrammarRule(
 		}
 		for (dList<dTokenStringPair>::dListNode* node = ruleTokens.GetFirst(); node != lastNode; node = node->GetNext()) {
 			dTokenStringPair& pair = node->GetInfo();
+
 			if (pair.m_token == LITERAL) {
 				dSymbol& symbol = currentRule->Append()->GetInfo();
 				symbol.m_token = pair.m_token;
@@ -745,9 +758,22 @@ dParserCompiler::dToken dParserCompiler::ScanGrammarRule(
 				symbol.m_token = LITERAL;
 				symbolList.Insert(dTokenInfo (pair.m_token, TERMINAL, symbol.m_name), symbol.m_nameCRC);
 
+			} else if (pair.m_token == PREC) {
+				node = node->GetNext();
+				for (dRuleInfo::dListNode* ruleNode = currentRule->GetLast(); ruleNode; ruleNode = ruleNode->GetPrev()) {
+					dSymbol& symbol = ruleNode->GetInfo();
+					if (operatorPrecedence.FindAssociation (symbol.m_nameCRC)) {
+						dTokenStringPair& pair = node->GetInfo();		
+						symbol.m_operatorPrecendeceOverright = pair.m_info;
+						break;
+					}
+				}
+
+
 			} else if (pair.m_token != SEMANTIC_ACTION) {
 				// no user action allowed in the middle of a sentence
 				_ASSERTE (pair.m_token == SEMANTIC_ACTION);
+
 			} else {
 				_ASSERTE (0);
 			}
@@ -778,7 +804,7 @@ void dParserCompiler::CanonicalItemSets (
 	dTree<dState*, dCRCTYPE>& stateMap, 
 	const dProductionRule& ruleList, 
 	const dTree<dTokenInfo, dCRCTYPE>& symbolList, 
-	const dOperatorsPrecedence& operatorPrecence,
+	const dOperatorsPrecedence& operatorPrecedence,
 	FILE* const debugFile)
 {
 	dList<dItem> itemSet;
@@ -807,7 +833,7 @@ void dParserCompiler::CanonicalItemSets (
 
 	// find the closure for the first this item set with only the first rule
 	dState* const state = Closure (itemSet, symbolList, ruleMap);
-	operatorPrecence.SaveLastOperationSymbol (state);
+	operatorPrecedence.SaveLastOperationSymbol (state);
 
 	stateMap.Insert(state, state->GetKey());
 	stateList.Append(state);
@@ -843,7 +869,7 @@ void dParserCompiler::CanonicalItemSets (
 					newState->Trace(debugFile);
 					stateList.Append(newState);
 
-					operatorPrecence.SaveLastOperationSymbol (newState);
+					operatorPrecedence.SaveLastOperationSymbol (newState);
 
 				} else {
 					transition.m_targetState = targetStateNode->GetInfo();

@@ -37,6 +37,7 @@
 #include <dDAGFunctionStatementReturn.h>
 #include <dDAGFunctionStatementAssigment.h>
 #include <dDAGExpressionNodeBinaryOperator.h>
+#include <dDAGExpressionNodeUnuaryOperator.h>
 #include <dDAGFunctionStatementFunctionCall.h>
 
 #include "dNewtonScriptParser.h"
@@ -79,6 +80,7 @@ class dScriptCompiler: public dNewtonScriptParser
 	dUserVariable NewExpressionNodeConstant (const dUserVariable& identifier);
 	dUserVariable NewExpressionNodeVariable (const dUserVariable& identifier);
 	dUserVariable NewExpresionNodeAssigment (const dUserVariable& leftVariable, const dUserVariable& expression);
+	dUserVariable NewExpressionNodeUnuaryOperator (const dUserVariable& unuaryOperator, const dUserVariable& expression);
 	dUserVariable NewExpressionNodeBinaryOperator (const dUserVariable& binaryOperator, const dUserVariable& expressionA, const dUserVariable& expressionB);
 	
 	dUserVariable NewExpressionFunctionCall (const dUserVariable& funtionName, const dUserVariable& argumnetList);

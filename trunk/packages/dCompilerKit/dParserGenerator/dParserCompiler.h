@@ -39,6 +39,7 @@ class dParserCompiler
 		OR = 256,
 		COLOM,
 		SIMICOLOM,
+		PREC,
 		TOKEN,
 		UNION,
 		LEFT,
@@ -85,7 +86,7 @@ class dParserCompiler
 
 	void ScanGrammarFile(const string& inputRules, dProductionRule& rules, dTree<dTokenInfo, dCRCTYPE>& symbolList, dOperatorsPrecedence& operatorPrecence,
 						 string& userCodeBlock, string& userVariableClass, string& endUserCode, int& lastTokenEnum);
-	dToken ScanGrammarRule(dParserLexical& lexical, dProductionRule& rules, dTree<dTokenInfo, dCRCTYPE>& symbolList, int& ruleNumber, int& tokenEnumeration);
+	dToken ScanGrammarRule(dParserLexical& lexical, dProductionRule& rules, dTree<dTokenInfo, dCRCTYPE>& symbolList, int& ruleNumber, int& tokenEnumeration, const dOperatorsPrecedence& operatorPrecence);
 
 	
 	bool DoesSymbolDeriveEmpty (dCRCTYPE symbol, const dTree<dList<void*>, dCRCTYPE>& ruleMap) const ;

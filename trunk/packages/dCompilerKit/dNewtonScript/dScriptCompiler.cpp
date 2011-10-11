@@ -75,9 +75,15 @@ int dScriptCompiler::CompileSource (const char* const source)
 {
 	dNewtonScriptLexical scanner (source);
 
+int a = 1;
+int b = 1;
+int c = 1;
+
+int x = a - - - b * - c;
+
 	bool status = Parse(scanner);
 	if (status) {
-		_ASSERTE (0);
+//		_ASSERTE (0);
 	}
 	return 0;
 }
@@ -144,13 +150,6 @@ void dScriptCompiler::SetParamameterAsPrivateVariable(const dUserVariable& varia
 }
 
 
-
-
-
-
-
-
-
 dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeConstant (const dUserVariable& value)
 {
 	dUserVariable returnNode;
@@ -179,56 +178,6 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeConstant (const
 	return returnNode;
 }
 
-dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeBinaryOperator (const dUserVariable& binaryOperator, const dUserVariable& expressionA, const dUserVariable& expressionB)
-{
-	dUserVariable returnNode;
-	
-	_ASSERTE (expressionA.m_node);
-	_ASSERTE (expressionB.m_node);
-	_ASSERTE (expressionA.m_node->IsType (dDAGExpressionNode::GetRttiType()));
-	_ASSERTE (expressionB.m_node->IsType(dDAGExpressionNode::GetRttiType()));
-
-	dDAGExpressionNodeBinaryOperator::dBinaryOperator binOperator = dDAGExpressionNodeBinaryOperator::m_add;
-	switch (int (binaryOperator.m_token))
-	{	
-		case '+':
-			binOperator = dDAGExpressionNodeBinaryOperator::m_add;
-			break;
-
-		case '-':
-			binOperator = dDAGExpressionNodeBinaryOperator::m_sub;
-			break;
-
-		case '*':
-			binOperator = dDAGExpressionNodeBinaryOperator::m_mul;
-			break;
-
-		case '/':
-			binOperator = dDAGExpressionNodeBinaryOperator::m_div;
-			break;
-
-		case IDENTICAL:
-			binOperator = dDAGExpressionNodeBinaryOperator::m_identical;
-			break;
-
-		case DIFFERENT:
-			binOperator = dDAGExpressionNodeBinaryOperator::m_different;
-			break;
-
-
-		default:;
-			_ASSERTE (0);
-
-	}
-
-
-	dDAGScopeBlockNode* const scope = GetCurrentScope();
-	_ASSERTE (scope);
-
-	dDAGExpressionNodeBinaryOperator* const node = scope->CreateBinaryOperatorNode(m_allNodes, binOperator, (dDAGExpressionNode*)expressionA.m_node, (dDAGExpressionNode*)expressionB.m_node);
-	returnNode.m_node = node;
-	return returnNode;
-}
 
 dScriptCompiler::dUserVariable dScriptCompiler::NewExpresionNodeAssigment (const dUserVariable& leftVariable, const dUserVariable& expression)
 {
@@ -487,5 +436,90 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewFunctionCallStamement(const d
 
 	dDAGFunctionStatementFunctionCall* const stmt = new dDAGFunctionStatementFunctionCall(m_allNodes, fnt);
 	returnNode.m_node = stmt;
+	return returnNode;
+}
+
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeBinaryOperator (const dUserVariable& binaryOperator, const dUserVariable& expressionA, const dUserVariable& expressionB)
+{
+	dUserVariable returnNode;
+
+	_ASSERTE (expressionA.m_node && expressionA.m_node->IsType (dDAGExpressionNode::GetRttiType()));
+	_ASSERTE (expressionB.m_node && expressionB.m_node->IsType(dDAGExpressionNode::GetRttiType()));
+
+	dDAGExpressionNodeBinaryOperator::dBinaryOperator binOperator = dDAGExpressionNodeBinaryOperator::m_add;
+	switch (int (binaryOperator.m_token))
+	{	
+		case '+':
+			binOperator = dDAGExpressionNodeBinaryOperator::m_add;
+			break;
+
+		case '-':
+			binOperator = dDAGExpressionNodeBinaryOperator::m_sub;
+			break;
+
+		case '*':
+			binOperator = dDAGExpressionNodeBinaryOperator::m_mul;
+			break;
+
+		case '/':
+			binOperator = dDAGExpressionNodeBinaryOperator::m_div;
+			break;
+
+		case IDENTICAL:
+			binOperator = dDAGExpressionNodeBinaryOperator::m_identical;
+			break;
+
+		case DIFFERENT:
+			binOperator = dDAGExpressionNodeBinaryOperator::m_different;
+			break;
+
+		default:;
+			_ASSERTE (0);
+
+	}
+
+
+	dDAGScopeBlockNode* const scope = GetCurrentScope();
+	_ASSERTE (scope);
+
+	dDAGExpressionNodeBinaryOperator* const node = scope->CreateBinaryOperatorNode(m_allNodes, binOperator, (dDAGExpressionNode*)expressionA.m_node, (dDAGExpressionNode*)expressionB.m_node);
+	returnNode.m_node = node;
+	return returnNode;
+}
+
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeUnuaryOperator (const dUserVariable& unuaryOperator, const dUserVariable& expression)
+{
+
+	dUserVariable returnNode;
+
+	_ASSERTE (expression.m_node && expression.m_node->IsType(dDAGExpressionNode::GetRttiType()));
+
+	dDAGExpressionNodeUnuaryOperator::dUnuaryOperator unuOperator = dDAGExpressionNodeUnuaryOperator::m_minus;
+	switch (int (unuaryOperator.m_token))
+	{	
+		case '-':
+			unuOperator = dDAGExpressionNodeUnuaryOperator::m_minus;
+			break;
+
+		case '~':
+			unuOperator = dDAGExpressionNodeUnuaryOperator::m_notBinay;
+			break;
+
+		case '!':
+			unuOperator = dDAGExpressionNodeUnuaryOperator::m_notLogical;
+			break;
+
+		default:;
+			_ASSERTE (0);
+
+	}
+
+	dDAGScopeBlockNode* const scope = GetCurrentScope();
+	_ASSERTE (scope);
+
+	dDAGExpressionNodeUnuaryOperator* const node = scope->CreateUnuaryOperatorNode(m_allNodes, unuOperator, (dDAGExpressionNode*)expression.m_node);
+	returnNode.m_node = node;
 	return returnNode;
 }

@@ -14,6 +14,7 @@
 
 #include "dDAGFunctionStatement.h"
 #include "dDAGExpressionNodeConstant.h"
+#include "dDAGExpressionNodeUnuaryOperator.h"
 #include "dDAGExpressionNodeBinaryOperator.h"
 
 
@@ -31,6 +32,7 @@ class dDAGScopeBlockNode: public dDAGFunctionStatement
 
 	dDAGExpressionNodeVariable* CreatedVariableNode (dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier);
 	dDAGExpressionNodeConstant* CreatedConstantNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeConstant::dType type, const char* const value);
+	dDAGExpressionNodeUnuaryOperator* CreateUnuaryOperatorNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeUnuaryOperator::dUnuaryOperator unuaryOperator, dDAGExpressionNode* const expression);
 	dDAGExpressionNodeBinaryOperator* CreateBinaryOperatorNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeBinaryOperator::dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB);
 
 	dAddRtti(dDAGFunctionStatement);

@@ -64,6 +64,22 @@ dDAGExpressionNodeBinaryOperator* dDAGScopeBlockNode::CreateBinaryOperatorNode (
 }
 
 
+dDAGExpressionNodeUnuaryOperator* dDAGScopeBlockNode::CreateUnuaryOperatorNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeUnuaryOperator::dUnuaryOperator unuaryOperator, dDAGExpressionNode* const expression)
+{
+	dCRCTYPE key = dDAGExpressionNodeUnuaryOperator::CalculateKey (unuaryOperator, expression);
+
+	dTree<dDAGExpressionNode*, dCRCTYPE>::dTreeNode* node = m_expresionNodesCashe.Find(key);
+	if (!node) {
+		dDAGExpressionNodeUnuaryOperator* const expresionNode = new dDAGExpressionNodeUnuaryOperator (allNodes, unuaryOperator, expression);
+		_ASSERTE (expresionNode->GetKey() == key);
+		node = m_expresionNodesCashe.Insert(expresionNode, key);
+		expresionNode->AddRef();
+	}
+	dDAGExpressionNodeUnuaryOperator* const expresionNode = (dDAGExpressionNodeUnuaryOperator*)node->GetInfo();
+	return expresionNode;
+}
+
+
 dDAGExpressionNodeVariable* dDAGScopeBlockNode::CreatedVariableNode (dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier)
 {
 	dCRCTYPE key = dCRC64 (identifier);

@@ -188,6 +188,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\dDAGExpressionNodeUnuaryOperator.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGExpressionNodeUnuaryOperator.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dDAGExpressionNodeVariable.cpp"
 			>
 		</File>

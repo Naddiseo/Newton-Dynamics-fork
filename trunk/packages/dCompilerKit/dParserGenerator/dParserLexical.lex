@@ -35,6 +35,7 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 {WhiteSpace}		{}
 {Comment}			{}
 "%%"				{ return dParserCompiler::GRAMMAR_SEGMENT;}
+"%prec"				{ return dParserCompiler::PREC;}
 "%start"			{ return dParserCompiler::START;}
 "%token"			{ return dParserCompiler::TOKEN;}
 "%union"			{ return dParserCompiler::UNION;}

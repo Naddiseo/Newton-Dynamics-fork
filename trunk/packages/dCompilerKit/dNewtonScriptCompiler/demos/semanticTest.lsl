@@ -14,6 +14,8 @@ class TestSemantic
 {
 	int Test (int n)
 	{
+		x = a - ! ~ + - b * - c;
+/*	
 		// simple if
 		if (n == 0)  int b;
 		
@@ -88,6 +90,7 @@ class TestSemantic
 		}
 
 		return Calculate (n - 1) + Calculate (n - 2);
+*/		
 	}
 
 }

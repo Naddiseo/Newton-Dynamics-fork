@@ -80,7 +80,8 @@ class dNewtonScriptParser
 		LESS_EQUAL,
 		GREATHER_EQUAL,
 		IDENTICAL,
-		DIFFERENT
+		DIFFERENT,
+		UNUARY
 	};
 
 	enum ActionType;
