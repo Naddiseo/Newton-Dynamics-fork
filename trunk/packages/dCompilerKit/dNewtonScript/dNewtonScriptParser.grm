@@ -269,10 +269,7 @@ primitive_types
 	;
 	
 enum
-	: ENUM
-		{	
-			_ASSERTE (0);
-		}
+	: ENUM				{_ASSERTE (0);}
 	;
 	
 	
@@ -428,10 +425,10 @@ expression
 	| '-' expression %prec '~'							{GET_PARENT_CLASS; $$ = me->NewExpressionNodeUnuaryOperator ($1, $2);}
 	| '+' expression %prec '~'							{$$ = $2;}
 	| expression '?' expression ':' expression			{_ASSERTE (0);}		
-//	| SIZEOF '(' indentifier ')'						{_ASSERTE (0);}
-//	| SIZEOF '(' type_specifier ')'						{_ASSERTE (0);}
-//	| CAST '<' type_specifier '>' '(' expression ')'	{_ASSERTE (0);}
-//	| NEW new_types										{_ASSERTE (0);}
+	| SIZEOF '(' indentifier ')'						{_ASSERTE (0);}
+	| SIZEOF '(' type_specifier ')'						{_ASSERTE (0);}
+	| CAST '<' type_specifier '>' '(' expression ')'	{_ASSERTE (0);}
+	| NEW new_types										{_ASSERTE (0);}
 	| INTEGER_VALUE										{GET_PARENT_CLASS; $$ = me->NewExpressionNodeConstant ($1);}
 	| FLOAT_VALUE										{GET_PARENT_CLASS; $$ = me->NewExpressionNodeConstant ($1);}
 	| STRING_VALUE										{GET_PARENT_CLASS; $$ = me->NewExpressionNodeConstant ($1);}
