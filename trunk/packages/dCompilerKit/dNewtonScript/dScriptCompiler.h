@@ -46,6 +46,7 @@
 
 //class dVirtualMachine;
 class dSyntaxTreeCode;
+class dNewtonScriptLexical;
 class dDirectAcyclicgraphNode;
 
 class dScriptCompiler: public dNewtonScriptParser
