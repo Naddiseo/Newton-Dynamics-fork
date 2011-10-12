@@ -423,7 +423,9 @@ void dgRadixSort (T* const array, T* const tmpArray, dgInt32 elements, dgInt32 r
 template <class T> 
 void dgSort (T* const array, dgInt32 elements, dgInt32 (*compare) (const T* const  A, const T* const B, void* const context), void* const context = NULL)
 {
+	dgInt32 stride = 8;
 	dgInt32 stack[1024][2];
+	
 
 	stack[0][0] = 0;
 	stack[0][1] = elements - 1;
@@ -432,7 +434,7 @@ void dgSort (T* const array, dgInt32 elements, dgInt32 (*compare) (const T* cons
 		stackIndex --;
 		dgInt32 lo = stack[stackIndex][0];
 		dgInt32 hi = stack[stackIndex][1];
-		if ((hi - lo) > 8) {
+		if ((hi - lo) > stride) {
 			dgInt32 i = lo;
 			dgInt32 j = hi;
 			T val (array[(lo + hi) >> 1]);
@@ -463,11 +465,25 @@ void dgSort (T* const array, dgInt32 elements, dgInt32 (*compare) (const T* cons
 		}
 	}
 
+	
+	if (elements < stride) {
+		stride = elements;
+	}
+	
+	for (dgInt32 i = 1; i < stride; i ++) {
+		if (compare (&array[0], &array[i], context) > 0) {
+			T tmp (array[0]);
+			array[0] = array[i];
+			array[i] = tmp;
+		}
+	}
 
 	for (dgInt32 i = 1; i < elements; i ++) {
 		dgInt32 j = i;
 		T tmp (array[i]);
-		for (; j && (compare (&array[j - 1], &tmp, context) > 0); j --) {
+		//for (; j && (compare (&array[j - 1], &tmp, context) > 0); j --) {
+		for (; compare (&array[j - 1], &tmp, context) > 0; j --) {
+			_ASSERTE (j > 0);
 			array[j] = array[j - 1];
 		}
 		array[j] = tmp;
@@ -486,6 +502,7 @@ void dgSort (T* const array, dgInt32 elements, dgInt32 (*compare) (const T* cons
 template <class T> 
 void dgSortIndirect (T** const array, dgInt32 elements, dgInt32 (*compare) (const T* const  A, const T* const B, void* const context), void* const context = NULL)
 {
+	dgInt32 stride = 8;
 	dgInt32 stack[1024][2];
 
 	stack[0][0] = 0;
@@ -495,7 +512,7 @@ void dgSortIndirect (T** const array, dgInt32 elements, dgInt32 (*compare) (cons
 		stackIndex --;
 		dgInt32 lo = stack[stackIndex][0];
 		dgInt32 hi = stack[stackIndex][1];
-		if ((hi - lo) > 8) {
+		if ((hi - lo) > stride) {
 			dgInt32 i = lo;
 			dgInt32 j = hi;
 			T* val (array[(lo + hi) >> 1]);
@@ -527,10 +544,25 @@ void dgSortIndirect (T** const array, dgInt32 elements, dgInt32 (*compare) (cons
 	}
 
 
+	if (elements < stride) {
+		stride = elements;
+	}
+
+	for (dgInt32 i = 1; i < stride; i ++) {
+		if (compare (&array[0], &array[i], context) > 0) {
+			T tmp (array[0]);
+			array[0] = array[i];
+			array[i] = tmp;
+		}
+	}
+
+
 	for (dgInt32 i = 1; i < elements; i ++) {
 		dgInt32 j = i;
 		T* tmp (array[i]);
-		for (; j && (compare (array[j - 1], tmp, context) > 0); j --) {
+		//for (; j && (compare (array[j - 1], tmp, context) > 0); j --) {
+		for (; compare (array[j - 1], tmp, context) > 0; j --) {
+			_ASSERTE (j > 0);
 			array[j] = array[j - 1];
 		}
 		array[j] = tmp;
