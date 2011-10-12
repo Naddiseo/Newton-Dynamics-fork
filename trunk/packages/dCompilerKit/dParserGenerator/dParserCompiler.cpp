@@ -768,14 +768,11 @@ dParserCompiler::dToken dParserCompiler::ScanGrammarRule(
 						break;
 					}
 				}
-
-
-			} else if (pair.m_token != SEMANTIC_ACTION) {
-				// no user action allowed in the middle of a sentence
-				_ASSERTE (pair.m_token == SEMANTIC_ACTION);
-
-			} else {
-				_ASSERTE (0);
+//			} else if (pair.m_token != SEMANTIC_ACTION) {
+//				// no user action allowed in the middle of a sentence
+//				_ASSERTE (pair.m_token == SEMANTIC_ACTION);
+//			} else {
+//				_ASSERTE (0);
 			}
 		}
 

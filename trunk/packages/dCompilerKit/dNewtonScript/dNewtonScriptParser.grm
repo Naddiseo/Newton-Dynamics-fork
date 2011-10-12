@@ -89,37 +89,37 @@
 %%
 
 compilation_unit
-	: 
-	| module_list
+	:											{_ASSERTE (0);}	
+	| module_list								{_ASSERTE (0);}	
 	; 
 
 
 module_list 
-	: module
-	| module_list module
+	: module									{_ASSERTE (0);}
+	| module_list module						{_ASSERTE (0);}		
 	;
 			
 module 
-	: ';'
-	| import_module
-	| class_delaration 
+	: ';'										
+	| import_module								{_ASSERTE (0);}
+	| class_delaration							{_ASSERTE (0);}	
 	;			
 
 
 error_token
-	: ';'			{ $$ = $1;}
-	| '{'			{ $$ = $1;}
-	| '}'			{ $$ = $1;}
-	| ')'			{ $$ = $1;}
-	| '('			{ $$ = $1;}
-	| '['			{ $$ = $1;}
-	| ']'			{ $$ = $1;}
-	| IDENTIFIER	{ $$ = $1;}
-	| OPERATOR		{ $$ = $1;}
+	: ';'										{ $$ = $1;}
+	| '{'										{ $$ = $1;}
+	| '}'										{ $$ = $1;}
+	| ')'										{ $$ = $1;}
+	| '('										{ $$ = $1;}
+	| '['										{ $$ = $1;}
+	| ']'										{ $$ = $1;}
+	| IDENTIFIER								{ $$ = $1;}
+	| OPERATOR									{ $$ = $1;}
 	;
 		
 syntax_error	
-	: error error_token	{ GET_PARENT_CLASS; me->SyntaxError (scanner, $1, $2); }
+	: error error_token							{ GET_PARENT_CLASS; me->SyntaxError (scanner, $1, $2); }
 	;
 		
 		
@@ -133,7 +133,7 @@ import_module
 	;
 	
 start_new_class
-	:  { GET_PARENT_CLASS; $$ = me->BeginClassNode (); }
+	:											{ GET_PARENT_CLASS; $$ = me->BeginClassNode (); }
 	;
 		  
 	  
@@ -143,35 +143,35 @@ class_delaration
 	;			  
 
 class_visibility
-	:	
-	| PRIVATE {$$ = $1;}
+	:											
+	| PRIVATE {$$ = $1;}						{_ASSERTE (0);}
 	;
 				
 gui_support 
-	:
-	| GUI
+	:											
+	| GUI										{_ASSERTE (0);}
 	;				
 				
 extends 
 	:
-	| EXTENDS IDENTIFIER
+	| EXTENDS IDENTIFIER						{_ASSERTE (0);}
 	;		
 	
 class_member_list	 
-	: class_member							
-	| class_member_list	class_member
+	: class_member								{_ASSERTE (0);}
+	| class_member_list	class_member			{_ASSERTE (0);}
 	;
 				    
 class_member 
-	: class_contructor
+	: class_contructor							{_ASSERTE (0);}
 	| class_function_implementation				{$$ = $1;}
 	| uninitialized_variable semicolon_marker   {GET_PARENT_CLASS; me->AddClassVariable($1);}
 	;
 			
 native_function
-	: NATIVE
-	| NATIVE PRIVATE
-	| PRIVATE NATIVE 
+	: NATIVE									{_ASSERTE (0);}	
+	| NATIVE PRIVATE							{_ASSERTE (0);}
+	| PRIVATE NATIVE							{_ASSERTE (0);}	
 	;
 
 
@@ -182,23 +182,23 @@ parameter_list
 	;	
 	
 function_parameters
-	:
-	| parameter_list				{$$ = $1;}
+	:									{_ASSERTE (0);}
+	| parameter_list					{$$ = $1;}
 	;
 	
 const_function
-	: 
-	| CONSTANT
+	:									
+	| CONSTANT							{_ASSERTE (0);}
 	;
 	
 init_base_class
-	: 
-	| ':' function_call	
+	:									
+	| ':' function_call					{_ASSERTE (0);}
 	;
 	
 semicolon_marker
-	: semicolon_marker_list	
-	| syntax_error
+	: semicolon_marker_list					
+	| syntax_error							
 	;
 	
 semicolon_marker_list
@@ -208,22 +208,22 @@ semicolon_marker_list
 
 			 
 class_contructor 
-	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker
-	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class block_scope
+	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker				{_ASSERTE (0);}
+	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class block_scope	{_ASSERTE (0);}
 	;
 
 
 overlodable_operator
-	: '+'
-	| '-'
-	| '*'
-	| '/'
-	| '%'
+	: '+'									{_ASSERTE (0);}
+	| '-'									{_ASSERTE (0);}	
+	| '*'									{_ASSERTE (0);}
+	| '/'									{_ASSERTE (0);}
+	| '%'									{_ASSERTE (0);}
 	; 	
 	
 	
 class_function_implementation 
-	: native_function function_prototype semicolon_marker
+	: native_function function_prototype semicolon_marker	{_ASSERTE (0);}
 	| function_prototype block_scope						{GET_PARENT_CLASS; dUserVariable tmp; $$ = me->AddClassFunction (tmp, $1, $2);}
 	| PRIVATE function_prototype block_scope				{GET_PARENT_CLASS; $$ = me->AddClassFunction ($1, $2, $3);}
 	;
@@ -248,8 +248,8 @@ parameter
 type_specifier
 	: primitive_types					{$$ = $1;}
 	| class_Type						{$$ = $1;}
-	| primitive_types array_type_list
-	| class_Type array_type_list
+	| primitive_types array_type_list	{_ASSERTE (0);}
+	| class_Type array_type_list		{_ASSERTE (0);}
 	;		
 	
 primitive_types
@@ -279,13 +279,13 @@ class_Type
 	
 	
 array_type_list
-	: array_type
-	| array_type_list array_type
+	: array_type											{_ASSERTE (0);}
+	| array_type_list array_type							{_ASSERTE (0);}
 	;
 	
 array_type
-	: '[' ']'
-	| '[' expression ']'
+	: '[' ']'												{_ASSERTE (0);}
+	| '[' expression ']'									{_ASSERTE (0);}	
 	;	
 		 
 		 
@@ -300,8 +300,8 @@ block_scope
 			   
 			   
 statement_list 
-	: primary_statement	
-	| statement_list primary_statement						
+	: primary_statement										{_ASSERTE (0);}	
+	| statement_list primary_statement						{_ASSERTE (0);}	
 	;
 						 
 primary_statement	
@@ -329,37 +329,37 @@ statement
 	
 assigment_statement
 	: compound_identifier_List '=' expression												{GET_PARENT_CLASS; $$ = me->NewExpresionNodeAssigment ($1, $3);}
-	| compound_identifier_List multidimention_array	'=' expression							{_ASSERTE (0); }
+	| compound_identifier_List multidimention_array	'=' expression							{_ASSERTE (0);}
 	;
 	
 	
 for_first_expression
-	: 
-	| expression
-	| primitive_types assigment_statement
+	:													{_ASSERTE (0);}
+	| expression										{_ASSERTE (0);}
+	| primitive_types assigment_statement				{_ASSERTE (0);}	
 	;
 	
 for_third_expression	
-	:
-	| expression
-	| primitive_types assigment_statement
+	:													{_ASSERTE (0);}
+	| expression										{_ASSERTE (0);}
+	| primitive_types assigment_statement				{_ASSERTE (0);}		
 	;
 
 	
 multidimention_array
-	: '[' expression ']'
-	| multidimention_array '[' expression ']'
+	: '[' expression ']'								{_ASSERTE (0);}
+	| multidimention_array '[' expression ']'			{_ASSERTE (0);}
 	;
 	
 	
 switch_case_list
-	: switch_case
-	| switch_case_list switch_case
+	: switch_case										{_ASSERTE (0);}
+	| switch_case_list switch_case						{_ASSERTE (0);}
 	;
 	
 switch_case
-	: CASE INTEGER_VALUE ':' block_scope
-	| DEFAULT ':' block_scope
+	: CASE INTEGER_VALUE ':' block_scope				{_ASSERTE (0);}		
+	| DEFAULT ':' block_scope							{_ASSERTE (0);}	
 	;  	
 	
 	
@@ -390,10 +390,10 @@ return
 	;	
 	
 new_types 
-	: CLASS IDENTIFIER '(' ')'
-	| CLASS IDENTIFIER '(' argument_list ')'
-	| primitive_types array_type_list
-	| CLASS IDENTIFIER array_type_list
+	: CLASS IDENTIFIER '(' ')'								{_ASSERTE (0);}
+	| CLASS IDENTIFIER '(' argument_list ')'				{_ASSERTE (0);}
+	| primitive_types array_type_list						{_ASSERTE (0);}
+	| CLASS IDENTIFIER array_type_list						{_ASSERTE (0);}
 	;
 	
 	

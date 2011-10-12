@@ -12,9 +12,9 @@
 // a very naive qsort for integers
 class qsort
 {
-	qsort (int a[], int size)
+	qsort (int[] a, int size)
 	{
-		// first make sure tha the first element is the smallest of the array 
+		// first make sure the first element is the smallest of the array 
 		// and that the last element is the largest of the array. 
 		for (int i = 1; i < size; i ++) {
 			if (a[0] > a[i]) {
@@ -34,7 +34,7 @@ class qsort
 	}
 
 	// very primitive qsort 
-	private void sort (int a[], int m, int n)
+	private void sort (int[] a, int m, int n)
 	{
 		if (n <= m) {
 			return ;

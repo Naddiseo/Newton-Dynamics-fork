@@ -2266,8 +2266,26 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						case 21:// rule start_new_class : 
 						{ GET_PARENT_CLASS; entry.m_value = me->BeginClassNode (); }
 						break;
+					case 1:// rule compilation_unit : 
+						{_ASSERTE (0);}
+						break;
+					case 6:// rule module : import_module 
+						{_ASSERTE (0);}
+						break;
+					case 3:// rule module_list : module 
+						{_ASSERTE (0);}
+						break;
+					case 2:// rule compilation_unit : module_list 
+						{_ASSERTE (0);}
+						break;
+					case 7:// rule module : class_delaration 
+						{_ASSERTE (0);}
+						break;
+					case 4:// rule module_list : module_list module 
+						{_ASSERTE (0);}
+						break;
 					case 24:// rule class_visibility : PRIVATE 
-						{entry.m_value = parameter[0].m_value;}
+						{_ASSERTE (0);}
 						break;
 					case 18:// rule compound_identifier_List : IDENTIFIER 
 						{entry.m_value = parameter[0].m_value;}
@@ -2278,10 +2296,22 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 19:// rule compound_identifier_List : compound_identifier_List . IDENTIFIER 
 						{entry.m_value = parameter[0].m_value;	entry.m_value.m_data = parameter[0].m_value.m_data + string (".") + parameter[2].m_value.m_data;}
 						break;
+					case 26:// rule gui_support : GUI 
+						{_ASSERTE (0);}
+						break;
+					case 28:// rule extends : EXTENDS IDENTIFIER 
+						{_ASSERTE (0);}
+						break;
+					case 31:// rule class_member : class_contructor 
+						{_ASSERTE (0);}
+						break;
 					case 82:// rule primitive_types : VOID_TYPE 
 						{GET_PARENT_CLASS; entry.m_value = me->EmitTypeNode (parameter[0].m_value);}
 						break;
 					case 83:// rule enum : ENUM 
+						{_ASSERTE (0);}
+						break;
+					case 29:// rule class_member_list : class_member 
 						{_ASSERTE (0);}
 						break;
 					case 72:// rule primitive_types : BYTE 
@@ -2314,6 +2344,9 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 89:// rule begin_scope : 
 						{GET_PARENT_CLASS; entry.m_value = me->BeginScopeBlock();}
 						break;
+					case 34:// rule native_function : NATIVE 
+						{_ASSERTE (0);}
+						break;
 					case 73:// rule primitive_types : SHORT 
 						{GET_PARENT_CLASS; entry.m_value = me->EmitTypeNode (parameter[0].m_value);}
 						break;
@@ -2341,17 +2374,35 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 77:// rule primitive_types : UNSIGNED SHORT 
 						{GET_PARENT_CLASS; entry.m_value = me->EmitTypeNode (parameter[1].m_value, parameter[0].m_value);}
 						break;
+					case 69:// rule type_specifier : class_Type array_type_list 
+						{_ASSERTE (0);}
+						break;
+					case 85:// rule array_type_list : array_type 
+						{_ASSERTE (0);}
+						break;
+					case 68:// rule type_specifier : primitive_types array_type_list 
+						{_ASSERTE (0);}
+						break;
 					case 33:// rule class_member : uninitialized_variable semicolon_marker 
 						{GET_PARENT_CLASS; me->AddClassVariable(parameter[0].m_value);}
 						break;
 					case 58:// rule class_function_implementation : function_prototype block_scope 
 						{GET_PARENT_CLASS; dUserVariable tmp; entry.m_value = me->AddClassFunction (tmp, parameter[0].m_value, parameter[1].m_value);}
 						break;
+					case 36:// rule native_function : PRIVATE NATIVE 
+						{_ASSERTE (0);}
+						break;
 					case 64:// rule uninitialized_variable : PRIVATE parameter 
 						{GET_PARENT_CLASS; entry.m_value = parameter[0].m_value;	me->SetParamameterAsPrivateVariable(entry.m_value);}
 						break;
 					case 22:// rule class_delaration : start_new_class class_visibility CLASS IDENTIFIER extends gui_support { class_member_list } 
 						{GET_PARENT_CLASS; entry.m_value = me->FinalizeClassNode (parameter[0].m_value, parameter[1].m_value, parameter[3].m_value, parameter[4].m_value, parameter[5].m_value); }
+						break;
+					case 30:// rule class_member_list : class_member_list class_member 
+						{_ASSERTE (0);}
+						break;
+					case 35:// rule native_function : NATIVE PRIVATE 
+						{_ASSERTE (0);}
 						break;
 					case 10:// rule error_token : } 
 						{ entry.m_value = parameter[0].m_value;}
@@ -2383,8 +2434,32 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 11:// rule error_token : ) 
 						{ entry.m_value = parameter[0].m_value;}
 						break;
+					case 40:// rule function_parameters : 
+						{_ASSERTE (0);}
+						break;
+					case 55:// rule overlodable_operator : / 
+						{_ASSERTE (0);}
+						break;
+					case 54:// rule overlodable_operator : * 
+						{_ASSERTE (0);}
+						break;
+					case 52:// rule overlodable_operator : + 
+						{_ASSERTE (0);}
+						break;
+					case 53:// rule overlodable_operator : - 
+						{_ASSERTE (0);}
+						break;
+					case 56:// rule overlodable_operator : % 
+						{_ASSERTE (0);}
+						break;
+					case 86:// rule array_type_list : array_type_list array_type 
+						{_ASSERTE (0);}
+						break;
 					case 159:// rule expression : STRING_VALUE 
 						{GET_PARENT_CLASS; entry.m_value = me->NewExpressionNodeConstant (parameter[0].m_value);}
+						break;
+					case 87:// rule array_type : [ ] 
+						{_ASSERTE (0);}
 						break;
 					case 158:// rule expression : FLOAT_VALUE 
 						{GET_PARENT_CLASS; entry.m_value = me->NewExpressionNodeConstant (parameter[0].m_value);}
@@ -2401,6 +2476,9 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 140:// rule expression : function_call 
 						{entry.m_value = parameter[0].m_value;}
 						break;
+					case 57:// rule class_function_implementation : native_function function_prototype semicolon_marker 
+						{_ASSERTE (0);}
+						break;
 					case 59:// rule class_function_implementation : PRIVATE function_prototype block_scope 
 						{GET_PARENT_CLASS; entry.m_value = me->AddClassFunction (parameter[0].m_value, parameter[1].m_value, parameter[2].m_value);}
 						break;
@@ -2412,6 +2490,9 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						break;
 					case 149:// rule expression : ~ expression 
 						{GET_PARENT_CLASS; entry.m_value = me->NewExpressionNodeUnuaryOperator (parameter[0].m_value, parameter[1].m_value);}
+						break;
+					case 88:// rule array_type : [ expression ] 
+						{_ASSERTE (0);}
 						break;
 					case 151:// rule expression : + expression 
 						{entry.m_value = parameter[1].m_value;}
@@ -2430,6 +2511,9 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						break;
 					case 90:// rule block_scope : begin_scope { } 
 						{GET_PARENT_CLASS; entry.m_value = me->EndScopeBlock (parameter[0].m_value);}
+						break;
+					case 92:// rule statement_list : primary_statement 
+						{_ASSERTE (0);}
 						break;
 					case 133:// rule return : RETURN 
 						{GET_PARENT_CLASS; entry.m_value = me->NewReturnStamement(dUserVariable());}
@@ -2461,6 +2545,9 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 146:// rule expression : expression % expression 
 						{GET_PARENT_CLASS; entry.m_value = me->NewExpressionNodeBinaryOperator (parameter[1].m_value, parameter[0].m_value, parameter[2].m_value);}
 						break;
+					case 137:// rule new_types : primitive_types array_type_list 
+						{_ASSERTE (0);}
+						break;
 					case 125:// rule argument_list : expression 
 						{GET_PARENT_CLASS; entry.m_value = me->LinkExpressions(parameter[0].m_value, dUserVariable());}
 						break;
@@ -2469,6 +2556,12 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						break;
 					case 91:// rule block_scope : begin_scope { statement_list } 
 						{GET_PARENT_CLASS; entry.m_value = me->EndScopeBlock (parameter[0].m_value);}
+						break;
+					case 93:// rule statement_list : statement_list primary_statement 
+						{_ASSERTE (0);}
+						break;
+					case 113:// rule for_first_expression : 
+						{_ASSERTE (0);}
 						break;
 					case 97:// rule statement : assigment_statement ; 
 						{entry.m_value = parameter[0].m_value;}
@@ -2494,8 +2587,14 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 60:// rule function_prototype : type_specifier IDENTIFIER ( function_parameters ) const_function 
 						{GET_PARENT_CLASS; entry.m_value = me->NewFunctionPrototype (parameter[0].m_value, parameter[1].m_value, parameter[3].m_value, parameter[5].m_value);}
 						break;
+					case 43:// rule const_function : CONSTANT 
+						{_ASSERTE (0);}
+						break;
 					case 38:// rule parameter_list : parameter_list , parameter 
 						{GET_PARENT_CLASS; entry.m_value = me->LinkParameters(parameter[0].m_value, parameter[2].m_value);}
+						break;
+					case 138:// rule new_types : CLASS IDENTIFIER array_type_list 
+						{_ASSERTE (0);}
 						break;
 					case 154:// rule expression : SIZEOF ( type_specifier ) 
 						{_ASSERTE (0);}
@@ -2506,6 +2605,12 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 132:// rule function_call : function_indentifier ( argument_list ) 
 						{GET_PARENT_CLASS; entry.m_value = me->NewExpressionFunctionCall (parameter[0].m_value, parameter[2].m_value);}
 						break;
+					case 50:// rule class_contructor : native_function IDENTIFIER ( function_parameters ) semicolon_marker 
+						{_ASSERTE (0);}
+						break;
+					case 114:// rule for_first_expression : expression 
+						{_ASSERTE (0);}
+						break;
 					case 111:// rule assigment_statement : compound_identifier_List = expression 
 						{GET_PARENT_CLASS; entry.m_value = me->NewExpresionNodeAssigment (parameter[0].m_value, parameter[2].m_value);}
 						break;
@@ -2515,16 +2620,37 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 152:// rule expression : expression ? expression : expression 
 						{_ASSERTE (0);}
 						break;
+					case 135:// rule new_types : CLASS IDENTIFIER ( ) 
+						{_ASSERTE (0);}
+						break;
 					case 126:// rule argument_list : argument_list , expression 
 						{GET_PARENT_CLASS; entry.m_value = me->LinkExpressions(parameter[0].m_value, parameter[2].m_value);}
 						break;
+					case 45:// rule init_base_class : : function_call 
+						{_ASSERTE (0);}
+						break;
+					case 51:// rule class_contructor : class_visibility IDENTIFIER ( function_parameters ) init_base_class block_scope 
+						{_ASSERTE (0);}
+						break;
+					case 115:// rule for_first_expression : primitive_types assigment_statement 
+						{_ASSERTE (0);}
+						break;
 					case 112:// rule assigment_statement : compound_identifier_List multidimention_array = expression 
-						{_ASSERTE (0); }
+						{_ASSERTE (0);}
+						break;
+					case 119:// rule multidimention_array : [ expression ] 
+						{_ASSERTE (0);}
 						break;
 					case 99:// rule statement : parameter = expression ; 
 						{GET_PARENT_CLASS; entry.m_value = me->NewLocalVariableStamement(parameter[0].m_value, parameter[2].m_value);}
 						break;
+					case 136:// rule new_types : CLASS IDENTIFIER ( argument_list ) 
+						{_ASSERTE (0);}
+						break;
 					case 104:// rule statement : WHILE ( expression ) statement 
+						{_ASSERTE (0);}
+						break;
+					case 120:// rule multidimention_array : multidimention_array [ expression ] 
 						{_ASSERTE (0);}
 						break;
 					case 108:// rule statement : IF ( expression ) statement 
@@ -2533,7 +2659,19 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 155:// rule expression : CAST < type_specifier > ( expression ) 
 						{_ASSERTE (0);}
 						break;
+					case 116:// rule for_third_expression : 
+						{_ASSERTE (0);}
+						break;
+					case 121:// rule switch_case_list : switch_case 
+						{_ASSERTE (0);}
+						break;
+					case 117:// rule for_third_expression : expression 
+						{_ASSERTE (0);}
+						break;
 					case 102:// rule statement : SWITCH ( expression ) { switch_case_list } 
+						{_ASSERTE (0);}
+						break;
+					case 122:// rule switch_case_list : switch_case_list switch_case 
 						{_ASSERTE (0);}
 						break;
 					case 105:// rule statement : DO statement WHILE ( expression ) ; 
@@ -2542,7 +2680,16 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 109:// rule statement : IF ( expression ) statement ELSE statement 
 						{GET_PARENT_CLASS; entry.m_value = me->NewIFStamement (parameter[2].m_value, parameter[4].m_value, parameter[6].m_value);}
 						break;
+					case 118:// rule for_third_expression : primitive_types assigment_statement 
+						{_ASSERTE (0);}
+						break;
+					case 124:// rule switch_case : DEFAULT : block_scope 
+						{_ASSERTE (0);}
+						break;
 					case 103:// rule statement : FOR ( for_first_expression ; expression ; for_third_expression ) statement 
+						{_ASSERTE (0);}
+						break;
+					case 123:// rule switch_case : CASE INTEGER_VALUE : block_scope 
 						{_ASSERTE (0);}
 						break;
 
