@@ -163,7 +163,7 @@ class_member_list
 	;
 				    
 class_member 
-	: class_contructor							{_ASSERTE (0);}
+	: class_constructor							{_ASSERTE (0);}
 	| class_function_implementation				{$$ = $1;}
 	| uninitialized_variable semicolon_marker   {GET_PARENT_CLASS; me->AddClassVariable($1);}
 	;
@@ -176,8 +176,8 @@ native_function
 
 
 parameter_list 
-	: parameter						{GET_PARENT_CLASS; $$ = me->LinkParameters($1, dUserVariable());}
-	| parameter_list ',' parameter	{GET_PARENT_CLASS; $$ = me->LinkParameters($1, $3);}
+	: parameter									{$$ = $1;}
+	| parameter_list ',' parameter				{GET_PARENT_CLASS; $$ = me->LinkParameters($1, $3);}
 	| syntax_error
 	;	
 	
@@ -207,9 +207,9 @@ semicolon_marker_list
 	;	
 
 			 
-class_contructor 
+class_constructor 
 	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker				{_ASSERTE (0);}
-	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class block_scope	{_ASSERTE (0);}
+	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class block_scope	{_ASSERTE (0)/*xxx*/;}
 	;
 
 
@@ -248,8 +248,8 @@ parameter
 type_specifier
 	: primitive_types					{$$ = $1;}
 	| class_Type						{$$ = $1;}
-	| primitive_types array_type_list	{_ASSERTE (0);}
-	| class_Type array_type_list		{_ASSERTE (0);}
+	| primitive_types array_type_list	{GET_PARENT_CLASS; $$ = me->TypeAddDimention($1, $2);}
+	| class_Type array_type_list		{_ASSERTE (0); GET_PARENT_CLASS; $$ = me->TypeAddDimention($1, $2);}
 	;		
 	
 primitive_types
@@ -279,13 +279,13 @@ class_Type
 	
 	
 array_type_list
-	: array_type											{_ASSERTE (0);}
+	: array_type											{$$ = $1;}
 	| array_type_list array_type							{_ASSERTE (0);}
 	;
 	
 array_type
-	: '[' ']'												{_ASSERTE (0);}
-	| '[' expression ']'									{_ASSERTE (0);}	
+	: '[' ']'												{GET_PARENT_CLASS; $$ = me->NewDimensionNode(dUserVariable());}
+	| '[' expression ']'									{GET_PARENT_CLASS; $$ = me->NewDimensionNode($2);}	
 	;	
 		 
 		 
@@ -364,7 +364,7 @@ switch_case
 	
 	
 argument_list
-	: expression										{GET_PARENT_CLASS; $$ = me->LinkExpressions($1, dUserVariable());}
+	: expression										{$$ = $1;}
 	| argument_list ',' expression						{GET_PARENT_CLASS; $$ = me->LinkExpressions($1, $3);}
 	;
 	

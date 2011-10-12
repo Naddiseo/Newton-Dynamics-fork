@@ -81,7 +81,7 @@ void qsort (int a[], int m, int n)
 	int j = n;
 	int v = a[n];
 	int x;
-	while (1) {
+	for (;;){
 		do 
 			i = i + 1;
 		while (a[i] < v);
@@ -126,15 +126,13 @@ int dScriptCompiler::CompileSource (const char* const source)
 {
 	dNewtonScriptLexical scanner (source);
 
-	int aa[] = {4, 5,6,1,6,7,9,8,5};
-qsort(aa, sizeof(aa)/sizeof (int));
-
-int a = 1;
-int b = 1;
-int c = 1;
-
-int x = a - - ! ~ b * - c;
-x = a - - ~ ! b * - c;
+//int aa[] = {4, 5,6,1,6,7,9,8,5};
+//qsort(aa, sizeof(aa)/sizeof (int));
+//int a = 1;
+//int b = 1;
+//int c = 1;
+//int x = a - - ! ~ b * - c;
+//x = a - - ~ ! b * - c;
 
 
 	bool status = Parse(scanner);
@@ -273,16 +271,6 @@ dScriptCompiler::dUserVariable dScriptCompiler::FinalizeClassNode (const dUserVa
 }
 
 
-dScriptCompiler::dUserVariable dScriptCompiler::EmitTypeNode (const dUserVariable& type, const dUserVariable& modifier)
-{
-	dUserVariable returnNode;
-	dDAGTypeNode* const typeNode = new dDAGTypeNode (m_allNodes, type.m_data.c_str(), modifier.m_data.c_str());
-	returnNode.m_node = typeNode;
-	return returnNode;
-}
-
-
-
 
 
 void dScriptCompiler::AddClassVariable(const dUserVariable& variable)
@@ -311,7 +299,8 @@ dScriptCompiler::dUserVariable dScriptCompiler::LinkParameters(const dUserVariab
 	dUserVariable returnNode (parameterA);
 
 	_ASSERTE (parameterA.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType());
-	_ASSERTE (!parameterB.m_node || (parameterB.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType()));
+//	_ASSERTE (!parameterB.m_node || (parameterB.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType()));
+	_ASSERTE (parameterB.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType());
 	dDAGParameterNode* param = (dDAGParameterNode*) parameterA.m_node;
 
 	for ( ;param->m_next; param = param->m_next);
@@ -325,7 +314,8 @@ dScriptCompiler::dUserVariable dScriptCompiler::LinkExpressions(const dUserVaria
 	dUserVariable returnNode (ExpressionA);
 
 	_ASSERTE (ExpressionA.m_node->IsType(dDAGExpressionNode::GetRttiType()));
-	_ASSERTE (!ExpressionB.m_node || (ExpressionB.m_node->IsType(dDAGExpressionNode::GetRttiType())));
+//	_ASSERTE (!ExpressionB.m_node || (ExpressionB.m_node->IsType(dDAGExpressionNode::GetRttiType())));
+	_ASSERTE (ExpressionB.m_node->IsType(dDAGExpressionNode::GetRttiType()));
 	dDAGExpressionNode* expression = (dDAGExpressionNode*) ExpressionA.m_node;
 
 	for ( ;expression->m_argumentListNext; expression = expression->m_argumentListNext);
@@ -577,5 +567,41 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeUnuaryOperator 
 
 	dDAGExpressionNodeUnuaryOperator* const node = scope->CreateUnuaryOperatorNode(m_allNodes, unuOperator, (dDAGExpressionNode*)expression.m_node);
 	returnNode.m_node = node;
+	return returnNode;
+}
+
+
+dScriptCompiler::dUserVariable dScriptCompiler::EmitTypeNode (const dUserVariable& type, const dUserVariable& modifier)
+{
+	dUserVariable returnNode;
+	dDAGTypeNode* const typeNode = new dDAGTypeNode (m_allNodes, type.m_data.c_str(), modifier.m_data.c_str());
+	returnNode.m_node = typeNode;
+	return returnNode;
+}
+
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewDimensionNode(const dUserVariable& expression)
+{
+	dUserVariable returnNode;
+
+	dDAGExpressionNodeConstant* const exp = (dDAGExpressionNodeConstant*)expression.m_node;
+	_ASSERTE (!exp || (exp->GetTypeId() == dDAGExpressionNodeConstant::GetRttiType()));
+	dDAGDimensionNode* const node = new dDAGDimensionNode (m_allNodes, exp);
+	returnNode.m_node = node;
+	return returnNode;
+}
+
+dScriptCompiler::dUserVariable dScriptCompiler::TypeAddDimention(const dUserVariable& type, const dUserVariable& dimension)
+{
+	dUserVariable returnNode(type);
+
+	dDAGTypeNode* const typeNode = (dDAGTypeNode*) type.m_node;
+	_ASSERTE (typeNode->IsType(dDAGTypeNode::GetRttiType()));
+
+	dDAGDimensionNode* const dim = (dDAGDimensionNode*) dimension.m_node;
+	_ASSERTE (dim->IsType(dDAGDimensionNode::GetRttiType()));
+
+	typeNode->AddDimensions(dim);
+
 	return returnNode;
 }

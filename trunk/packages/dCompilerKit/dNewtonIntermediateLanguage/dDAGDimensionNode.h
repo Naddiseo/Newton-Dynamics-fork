@@ -9,24 +9,22 @@
 * freely
 */
 
-#ifndef __dDAGTypeNode_H__
-#define __dDAGTypeNode_H__
+#ifndef __dDAGDimensionNode_H__
+#define __dDAGDimensionNode_H__
 
 #include "dDirectAcyclicgraphNode.h"
 
-class dDAGDimensionNode;
+class dDAGExpressionNodeConstant;
 
-class dDAGTypeNode: public dDirectAcyclicgraphNode
+class dDAGDimensionNode: public dDirectAcyclicgraphNode
 {
 	public:
-	dDAGTypeNode(dList<dDirectAcyclicgraphNode*>& allNodes, const char* const type0, const char* const type1);
-	~dDAGTypeNode(void);
+	dDAGDimensionNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeConstant* const size);
+	~dDAGDimensionNode(void);
 
-	void AddDimensions (dDAGDimensionNode* dimList);
 
-	virtual void CalculateKey();
-
-	dList<dDAGDimensionNode*> m_dimensions;
+	dDAGExpressionNodeConstant* m_size;
+	dDAGDimensionNode* m_next;
 
 	dAddRtti(dDirectAcyclicgraphNode);
 };

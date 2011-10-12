@@ -156,6 +156,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\dDAGDimensionNode.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGDimensionNode.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dDAGExpressionNode.cpp"
 			>
 		</File>

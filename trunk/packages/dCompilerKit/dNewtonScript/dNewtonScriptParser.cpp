@@ -156,7 +156,7 @@ const dNewtonScriptParser::dActionEntry* dNewtonScriptParser::GetNextAction (dLi
 {
 	static short actionsCount[] = {
 			4, 4, 4, 4, 4, 4, 1, 2, 1, 4, 1, 1, 1, 2, 2, 1, 1, 4, 2, 2, 2, 1, 1, 1, 
-			1, 15, 16, 1, 2, 3, 3, 4, 16, 3, 3, 3, 3, 3, 3, 2, 3, 3, 1, 13, 3, 1, 14, 16, 
+			1, 15, 1, 2, 16, 3, 3, 4, 16, 3, 3, 3, 3, 3, 3, 2, 3, 3, 1, 13, 3, 1, 14, 16, 
 			14, 3, 1, 16, 9, 2, 3, 3, 5, 3, 3, 3, 3, 3, 14, 3, 3, 17, 16, 16, 9, 17, 1, 2, 
 			1, 2, 2, 9, 1, 16, 1, 13, 2, 4, 16, 14, 13, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 
 			1, 1, 1, 1, 1, 1, 3, 13, 13, 10, 8, 13, 1, 8, 3, 2, 1, 11, 13, 8, 13, 10, 1, 1, 
@@ -203,7 +203,7 @@ const dNewtonScriptParser::dActionEntry* dNewtonScriptParser::GetNextAction (dLi
 			23, 23, 26, 2};
 	static short actionsStart[] = {
 			0, 4, 8, 12, 16, 20, 24, 25, 27, 28, 32, 33, 34, 35, 37, 39, 40, 41, 45, 47, 49, 51, 52, 53, 
-			54, 55, 70, 86, 87, 89, 92, 95, 99, 115, 118, 121, 124, 127, 130, 133, 135, 138, 141, 142, 155, 158, 159, 173, 
+			54, 55, 70, 71, 73, 89, 92, 95, 99, 115, 118, 121, 124, 127, 130, 133, 135, 138, 141, 142, 155, 158, 159, 173, 
 			189, 203, 206, 207, 223, 232, 234, 237, 240, 245, 248, 251, 254, 257, 260, 274, 277, 280, 297, 313, 329, 338, 355, 356, 
 			358, 133, 359, 361, 370, 371, 158, 387, 400, 402, 406, 159, 422, 435, 436, 437, 438, 439, 440, 441, 442, 443, 444, 445, 
 			458, 459, 460, 461, 462, 463, 464, 467, 480, 493, 503, 480, 511, 512, 520, 523, 525, 526, 480, 537, 480, 545, 555, 556, 
@@ -263,15 +263,15 @@ const dNewtonScriptParser::dActionEntry* dNewtonScriptParser::GetNextAction (dLi
 			dActionEntry (263, 0, 1, 3, 4, 20), dActionEntry (123, 0, 1, 10, 0, 27), dActionEntry (267, 0, 0, 21, 0, 0), dActionEntry (46, 0, 1, 7, 3, 19), 
 			dActionEntry (62, 0, 1, 7, 3, 19), dActionEntry (123, 0, 1, 11, 0, 25), dActionEntry (268, 0, 0, 23, 0, 0), dActionEntry (266, 0, 0, 24, 0, 0), 
 			dActionEntry (123, 0, 0, 25, 0, 0), dActionEntry (123, 0, 1, 11, 1, 26), dActionEntry (123, 0, 1, 10, 2, 28), dActionEntry (255, 1, 0, 52, 0, 0), 
-			dActionEntry (256, 1, 0, 48, 0, 0), dActionEntry (262, 1, 0, 46, 0, 0), dActionEntry (263, 1, 0, 27, 0, 0), dActionEntry (266, 0, 1, 9, 0, 23), 
+			dActionEntry (256, 1, 0, 48, 0, 0), dActionEntry (262, 1, 0, 46, 0, 0), dActionEntry (263, 1, 0, 26, 0, 0), dActionEntry (266, 0, 1, 9, 0, 23), 
 			dActionEntry (269, 1, 0, 36, 0, 0), dActionEntry (270, 1, 0, 30, 0, 0), dActionEntry (271, 1, 0, 33, 0, 0), dActionEntry (272, 1, 0, 49, 0, 0), 
 			dActionEntry (273, 1, 0, 37, 0, 0), dActionEntry (274, 1, 0, 40, 0, 0), dActionEntry (275, 1, 0, 31, 0, 0), dActionEntry (276, 1, 0, 35, 0, 0), 
-			dActionEntry (277, 1, 0, 44, 0, 0), dActionEntry (278, 1, 0, 29, 0, 0), dActionEntry (125, 0, 1, 13, 1, 31), dActionEntry (255, 0, 1, 13, 1, 31), 
-			dActionEntry (256, 0, 1, 13, 1, 31), dActionEntry (262, 0, 1, 13, 1, 31), dActionEntry (263, 0, 1, 13, 1, 31), dActionEntry (266, 0, 1, 13, 1, 31), 
-			dActionEntry (269, 0, 1, 13, 1, 31), dActionEntry (270, 0, 1, 13, 1, 31), dActionEntry (271, 0, 1, 13, 1, 31), dActionEntry (272, 0, 1, 13, 1, 31), 
-			dActionEntry (273, 0, 1, 13, 1, 31), dActionEntry (274, 0, 1, 13, 1, 31), dActionEntry (275, 0, 1, 13, 1, 31), dActionEntry (276, 0, 1, 13, 1, 31), 
-			dActionEntry (277, 0, 1, 13, 1, 31), dActionEntry (278, 0, 1, 13, 1, 31), dActionEntry (266, 0, 0, 54, 0, 0), dActionEntry (266, 0, 0, 55, 0, 0), 
-			dActionEntry (281, 0, 0, 56, 0, 0), dActionEntry (91, 0, 1, 30, 1, 82), dActionEntry (266, 0, 1, 30, 1, 82), dActionEntry (281, 0, 1, 30, 1, 82), 
+			dActionEntry (277, 1, 0, 44, 0, 0), dActionEntry (278, 1, 0, 29, 0, 0), dActionEntry (266, 0, 0, 54, 0, 0), dActionEntry (266, 0, 0, 55, 0, 0), 
+			dActionEntry (281, 0, 0, 56, 0, 0), dActionEntry (125, 0, 1, 13, 1, 31), dActionEntry (255, 0, 1, 13, 1, 31), dActionEntry (256, 0, 1, 13, 1, 31), 
+			dActionEntry (262, 0, 1, 13, 1, 31), dActionEntry (263, 0, 1, 13, 1, 31), dActionEntry (266, 0, 1, 13, 1, 31), dActionEntry (269, 0, 1, 13, 1, 31), 
+			dActionEntry (270, 0, 1, 13, 1, 31), dActionEntry (271, 0, 1, 13, 1, 31), dActionEntry (272, 0, 1, 13, 1, 31), dActionEntry (273, 0, 1, 13, 1, 31), 
+			dActionEntry (274, 0, 1, 13, 1, 31), dActionEntry (275, 0, 1, 13, 1, 31), dActionEntry (276, 0, 1, 13, 1, 31), dActionEntry (277, 0, 1, 13, 1, 31), 
+			dActionEntry (278, 0, 1, 13, 1, 31), dActionEntry (91, 0, 1, 30, 1, 82), dActionEntry (266, 0, 1, 30, 1, 82), dActionEntry (281, 0, 1, 30, 1, 82), 
 			dActionEntry (91, 0, 1, 33, 1, 83), dActionEntry (266, 0, 1, 33, 1, 83), dActionEntry (281, 0, 1, 33, 1, 83), dActionEntry (271, 0, 0, 57, 0, 0), 
 			dActionEntry (272, 0, 0, 60, 0, 0), dActionEntry (273, 0, 0, 58, 0, 0), dActionEntry (274, 0, 0, 59, 0, 0), dActionEntry (125, 0, 1, 12, 1, 29), 
 			dActionEntry (255, 0, 1, 12, 1, 29), dActionEntry (256, 0, 1, 12, 1, 29), dActionEntry (262, 0, 1, 12, 1, 29), dActionEntry (263, 0, 1, 12, 1, 29), 
@@ -284,16 +284,16 @@ const dNewtonScriptParser::dActionEntry* dNewtonScriptParser::GetNextAction (dLi
 			dActionEntry (266, 0, 1, 30, 1, 74), dActionEntry (281, 0, 1, 30, 1, 74), dActionEntry (91, 0, 0, 62, 0, 0), dActionEntry (266, 0, 1, 29, 1, 66), 
 			dActionEntry (281, 0, 1, 29, 1, 66), dActionEntry (59, 1, 0, 65, 0, 0), dActionEntry (255, 1, 0, 68, 0, 0), dActionEntry (91, 0, 1, 30, 1, 75), 
 			dActionEntry (266, 0, 1, 30, 1, 75), dActionEntry (281, 0, 1, 30, 1, 75), dActionEntry (91, 0, 1, 30, 1, 70), dActionEntry (266, 0, 1, 30, 1, 70), 
-			dActionEntry (281, 0, 1, 30, 1, 70), dActionEntry (266, 0, 0, 70, 0, 0), dActionEntry (255, 1, 0, 75, 0, 0), dActionEntry (263, 1, 0, 27, 0, 0), 
+			dActionEntry (281, 0, 1, 30, 1, 70), dActionEntry (266, 0, 0, 70, 0, 0), dActionEntry (255, 1, 0, 75, 0, 0), dActionEntry (263, 1, 0, 26, 0, 0), 
 			dActionEntry (266, 1, 0, 72, 0, 0), dActionEntry (269, 1, 0, 36, 0, 0), dActionEntry (270, 1, 0, 30, 0, 0), dActionEntry (271, 1, 0, 33, 0, 0), 
 			dActionEntry (272, 1, 0, 49, 0, 0), dActionEntry (273, 1, 0, 37, 0, 0), dActionEntry (274, 1, 0, 40, 0, 0), dActionEntry (275, 1, 0, 31, 0, 0), 
 			dActionEntry (276, 1, 0, 35, 0, 0), dActionEntry (277, 1, 0, 44, 0, 0), dActionEntry (278, 1, 0, 29, 0, 0), dActionEntry (91, 0, 1, 30, 1, 81), 
 			dActionEntry (266, 0, 1, 30, 1, 81), dActionEntry (281, 0, 1, 30, 1, 81), dActionEntry (123, 0, 1, 36, 0, 89), dActionEntry (255, 1, 0, 52, 0, 0), 
-			dActionEntry (256, 1, 0, 79, 0, 0), dActionEntry (263, 1, 0, 27, 0, 0), dActionEntry (266, 0, 1, 9, 1, 24), dActionEntry (269, 1, 0, 36, 0, 0), 
+			dActionEntry (256, 1, 0, 79, 0, 0), dActionEntry (263, 1, 0, 26, 0, 0), dActionEntry (266, 0, 1, 9, 1, 24), dActionEntry (269, 1, 0, 36, 0, 0), 
 			dActionEntry (270, 1, 0, 30, 0, 0), dActionEntry (271, 1, 0, 33, 0, 0), dActionEntry (272, 1, 0, 49, 0, 0), dActionEntry (273, 1, 0, 37, 0, 0), 
 			dActionEntry (274, 1, 0, 40, 0, 0), dActionEntry (275, 1, 0, 31, 0, 0), dActionEntry (276, 1, 0, 35, 0, 0), dActionEntry (277, 1, 0, 44, 0, 0), 
 			dActionEntry (278, 1, 0, 29, 0, 0), dActionEntry (125, 1, 0, 81, 0, 0), dActionEntry (255, 1, 0, 52, 0, 0), dActionEntry (256, 1, 0, 48, 0, 0), 
-			dActionEntry (262, 1, 0, 83, 0, 0), dActionEntry (263, 1, 0, 27, 0, 0), dActionEntry (266, 0, 1, 9, 0, 23), dActionEntry (269, 1, 0, 36, 0, 0), 
+			dActionEntry (262, 1, 0, 83, 0, 0), dActionEntry (263, 1, 0, 26, 0, 0), dActionEntry (266, 0, 1, 9, 0, 23), dActionEntry (269, 1, 0, 36, 0, 0), 
 			dActionEntry (270, 1, 0, 30, 0, 0), dActionEntry (271, 1, 0, 33, 0, 0), dActionEntry (272, 1, 0, 49, 0, 0), dActionEntry (273, 1, 0, 37, 0, 0), 
 			dActionEntry (274, 1, 0, 40, 0, 0), dActionEntry (275, 1, 0, 31, 0, 0), dActionEntry (276, 1, 0, 35, 0, 0), dActionEntry (277, 1, 0, 44, 0, 0), 
 			dActionEntry (278, 1, 0, 29, 0, 0), dActionEntry (255, 0, 1, 18, 1, 34), dActionEntry (262, 0, 0, 84, 0, 0), dActionEntry (263, 0, 1, 18, 1, 34), 
@@ -1890,20 +1890,20 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 			dGotoEntry (302, 8), dGotoEntry (303, 3), dGotoEntry (304, 2), dGotoEntry (305, 1), dGotoEntry (306, 5), 
 			dGotoEntry (310, 7), dGotoEntry (304, 9), dGotoEntry (305, 1), dGotoEntry (306, 5), dGotoEntry (310, 7), 
 			dGotoEntry (311, 11), dGotoEntry (309, 14), dGotoEntry (312, 20), dGotoEntry (313, 22), dGotoEntry (308, 50), 
-			dGotoEntry (311, 42), dGotoEntry (314, 47), dGotoEntry (315, 32), dGotoEntry (316, 26), dGotoEntry (317, 51), 
-			dGotoEntry (318, 39), dGotoEntry (320, 43), dGotoEntry (322, 53), dGotoEntry (330, 45), dGotoEntry (331, 28), 
+			dGotoEntry (311, 42), dGotoEntry (314, 47), dGotoEntry (315, 32), dGotoEntry (316, 28), dGotoEntry (317, 51), 
+			dGotoEntry (318, 39), dGotoEntry (320, 43), dGotoEntry (322, 53), dGotoEntry (330, 45), dGotoEntry (331, 27), 
 			dGotoEntry (332, 38), dGotoEntry (333, 34), dGotoEntry (335, 41), dGotoEntry (334, 61), dGotoEntry (336, 63), 
 			dGotoEntry (334, 64), dGotoEntry (336, 63), dGotoEntry (308, 67), dGotoEntry (319, 66), dGotoEntry (327, 69), 
 			dGotoEntry (308, 74), dGotoEntry (330, 73), dGotoEntry (331, 71), dGotoEntry (332, 38), dGotoEntry (333, 34), 
 			dGotoEntry (335, 41), dGotoEntry (328, 77), dGotoEntry (338, 76), dGotoEntry (308, 50), dGotoEntry (322, 80), 
-			dGotoEntry (330, 78), dGotoEntry (331, 28), dGotoEntry (332, 38), dGotoEntry (333, 34), dGotoEntry (335, 41), 
-			dGotoEntry (308, 50), dGotoEntry (311, 42), dGotoEntry (315, 82), dGotoEntry (316, 26), dGotoEntry (317, 51), 
-			dGotoEntry (318, 39), dGotoEntry (320, 43), dGotoEntry (322, 53), dGotoEntry (330, 45), dGotoEntry (331, 28), 
+			dGotoEntry (330, 78), dGotoEntry (331, 27), dGotoEntry (332, 38), dGotoEntry (333, 34), dGotoEntry (335, 41), 
+			dGotoEntry (308, 50), dGotoEntry (311, 42), dGotoEntry (315, 82), dGotoEntry (316, 28), dGotoEntry (317, 51), 
+			dGotoEntry (318, 39), dGotoEntry (320, 43), dGotoEntry (322, 53), dGotoEntry (330, 45), dGotoEntry (331, 27), 
 			dGotoEntry (332, 38), dGotoEntry (333, 34), dGotoEntry (335, 41), dGotoEntry (307, 93), dGotoEntry (329, 101), 
 			dGotoEntry (336, 102), dGotoEntry (309, 117), dGotoEntry (326, 121), dGotoEntry (337, 106), dGotoEntry (350, 111), 
 			dGotoEntry (351, 119), dGotoEntry (336, 102), dGotoEntry (307, 130), dGotoEntry (308, 67), dGotoEntry (319, 137), 
 			dGotoEntry (327, 69), dGotoEntry (307, 146), dGotoEntry (328, 149), dGotoEntry (338, 76), dGotoEntry (308, 50), 
-			dGotoEntry (322, 80), dGotoEntry (330, 78), dGotoEntry (331, 28), dGotoEntry (332, 38), dGotoEntry (333, 34), 
+			dGotoEntry (322, 80), dGotoEntry (330, 78), dGotoEntry (331, 27), dGotoEntry (332, 38), dGotoEntry (333, 34), 
 			dGotoEntry (335, 41), dGotoEntry (308, 167), dGotoEntry (321, 165), dGotoEntry (322, 169), dGotoEntry (323, 164), 
 			dGotoEntry (331, 151), dGotoEntry (332, 160), dGotoEntry (333, 156), dGotoEntry (335, 162), dGotoEntry (309, 182), 
 			dGotoEntry (326, 186), dGotoEntry (337, 174), dGotoEntry (350, 111), dGotoEntry (351, 184), dGotoEntry (309, 189), 
@@ -2302,7 +2302,7 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 28:// rule extends : EXTENDS IDENTIFIER 
 						{_ASSERTE (0);}
 						break;
-					case 31:// rule class_member : class_contructor 
+					case 31:// rule class_member : class_constructor 
 						{_ASSERTE (0);}
 						break;
 					case 82:// rule primitive_types : VOID_TYPE 
@@ -2375,13 +2375,13 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						{GET_PARENT_CLASS; entry.m_value = me->EmitTypeNode (parameter[1].m_value, parameter[0].m_value);}
 						break;
 					case 69:// rule type_specifier : class_Type array_type_list 
-						{_ASSERTE (0);}
+						{_ASSERTE (0); GET_PARENT_CLASS; entry.m_value = me->TypeAddDimention(parameter[0].m_value, parameter[1].m_value);}
 						break;
 					case 85:// rule array_type_list : array_type 
-						{_ASSERTE (0);}
+						{entry.m_value = parameter[0].m_value;}
 						break;
 					case 68:// rule type_specifier : primitive_types array_type_list 
-						{_ASSERTE (0);}
+						{GET_PARENT_CLASS; entry.m_value = me->TypeAddDimention(parameter[0].m_value, parameter[1].m_value);}
 						break;
 					case 33:// rule class_member : uninitialized_variable semicolon_marker 
 						{GET_PARENT_CLASS; me->AddClassVariable(parameter[0].m_value);}
@@ -2459,7 +2459,7 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						{GET_PARENT_CLASS; entry.m_value = me->NewExpressionNodeConstant (parameter[0].m_value);}
 						break;
 					case 87:// rule array_type : [ ] 
-						{_ASSERTE (0);}
+						{GET_PARENT_CLASS; entry.m_value = me->NewDimensionNode(dUserVariable());}
 						break;
 					case 158:// rule expression : FLOAT_VALUE 
 						{GET_PARENT_CLASS; entry.m_value = me->NewExpressionNodeConstant (parameter[0].m_value);}
@@ -2486,13 +2486,13 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						{entry.m_value = parameter[0].m_value;}
 						break;
 					case 37:// rule parameter_list : parameter 
-						{GET_PARENT_CLASS; entry.m_value = me->LinkParameters(parameter[0].m_value, dUserVariable());}
+						{entry.m_value = parameter[0].m_value;}
 						break;
 					case 149:// rule expression : ~ expression 
 						{GET_PARENT_CLASS; entry.m_value = me->NewExpressionNodeUnuaryOperator (parameter[0].m_value, parameter[1].m_value);}
 						break;
 					case 88:// rule array_type : [ expression ] 
-						{_ASSERTE (0);}
+						{GET_PARENT_CLASS; entry.m_value = me->NewDimensionNode(parameter[1].m_value);}
 						break;
 					case 151:// rule expression : + expression 
 						{entry.m_value = parameter[1].m_value;}
@@ -2549,7 +2549,7 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						{_ASSERTE (0);}
 						break;
 					case 125:// rule argument_list : expression 
-						{GET_PARENT_CLASS; entry.m_value = me->LinkExpressions(parameter[0].m_value, dUserVariable());}
+						{entry.m_value = parameter[0].m_value;}
 						break;
 					case 131:// rule function_call : function_indentifier ( ) 
 						{GET_PARENT_CLASS; entry.m_value = me->NewExpressionFunctionCall (parameter[0].m_value, dUserVariable());}
@@ -2605,7 +2605,7 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 132:// rule function_call : function_indentifier ( argument_list ) 
 						{GET_PARENT_CLASS; entry.m_value = me->NewExpressionFunctionCall (parameter[0].m_value, parameter[2].m_value);}
 						break;
-					case 50:// rule class_contructor : native_function IDENTIFIER ( function_parameters ) semicolon_marker 
+					case 50:// rule class_constructor : native_function IDENTIFIER ( function_parameters ) semicolon_marker 
 						{_ASSERTE (0);}
 						break;
 					case 114:// rule for_first_expression : expression 
@@ -2629,8 +2629,8 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 					case 45:// rule init_base_class : : function_call 
 						{_ASSERTE (0);}
 						break;
-					case 51:// rule class_contructor : class_visibility IDENTIFIER ( function_parameters ) init_base_class block_scope 
-						{_ASSERTE (0);}
+					case 51:// rule class_constructor : class_visibility IDENTIFIER ( function_parameters ) init_base_class block_scope 
+						{_ASSERTE (0)/*xxx*/;}
 						break;
 					case 115:// rule for_first_expression : primitive_types assigment_statement 
 						{_ASSERTE (0);}

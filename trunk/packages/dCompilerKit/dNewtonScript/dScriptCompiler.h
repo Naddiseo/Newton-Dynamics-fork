@@ -26,6 +26,7 @@
 #include <dSyntaxTreeCode.h>
 #include <dDAGFunctionNode.h>
 #include <dDAGParameterNode.h>
+#include <dDAGDimensionNode.h>
 #include <dDAGScopeBlockNode.h>
 #include <dDAGExpressionNode.h>
 #include <dDAGFunctionStatement.h>
@@ -84,6 +85,9 @@ class dScriptCompiler: public dNewtonScriptParser
 	dUserVariable NewExpressionNodeBinaryOperator (const dUserVariable& binaryOperator, const dUserVariable& expressionA, const dUserVariable& expressionB);
 	
 	dUserVariable NewExpressionFunctionCall (const dUserVariable& funtionName, const dUserVariable& argumnetList);
+
+	dUserVariable NewDimensionNode(const dUserVariable& expression);
+	dUserVariable TypeAddDimention(const dUserVariable& type, const dUserVariable& dimension);
 	
 	dUserVariable NewLocalVariableStamement(const dUserVariable& variable, const dUserVariable& initializationExpression);
 	dUserVariable NewIFStamement(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock);

@@ -17,7 +17,6 @@
 class dDAGTypeNode;
 class dDAGParameterNode;
 class dDAGScopeBlockNode;
-//class dDAGFunctionStatement;
 
 class dDAGFunctionNode: public dDirectAcyclicgraphNode
 {
