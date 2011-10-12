@@ -425,7 +425,6 @@ void dgSort (T* const array, dgInt32 elements, dgInt32 (*compare) (const T* cons
 {
 	dgInt32 stride = 8;
 	dgInt32 stack[1024][2];
-	
 
 	stack[0][0] = 0;
 	stack[0][1] = elements - 1;
@@ -543,11 +542,9 @@ void dgSortIndirect (T** const array, dgInt32 elements, dgInt32 (*compare) (cons
 		}
 	}
 
-
 	if (elements < stride) {
 		stride = elements;
 	}
-
 	for (dgInt32 i = 1; i < stride; i ++) {
 		if (compare (&array[0], &array[i], context) > 0) {
 			T tmp (array[0]);
@@ -555,7 +552,6 @@ void dgSortIndirect (T** const array, dgInt32 elements, dgInt32 (*compare) (cons
 			array[i] = tmp;
 		}
 	}
-
 
 	for (dgInt32 i = 1; i < elements; i ++) {
 		dgInt32 j = i;
