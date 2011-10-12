@@ -156,14 +156,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\dDAGExpressionFunctionCall.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\dDAGExpressionFunctionCall.h"
-			>
-		</File>
-		<File
 			RelativePath=".\dDAGExpressionNode.cpp"
 			>
 		</File>
@@ -185,6 +177,14 @@
 		</File>
 		<File
 			RelativePath=".\dDAGExpressionNodeConstant.h"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGExpressionNodeFunctionCall.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGExpressionNodeFunctionCall.h"
 			>
 		</File>
 		<File

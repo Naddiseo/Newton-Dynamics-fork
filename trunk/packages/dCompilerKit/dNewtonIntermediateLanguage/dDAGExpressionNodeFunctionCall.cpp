@@ -11,12 +11,12 @@
 
 #include "dDirectAcyclicgraphNode.h"
 #include "dDAGTypeNode.h"
-#include "dDAGExpressionFunctionCall.h"
+#include "dDAGExpressionNodeFunctionCall.h"
 
 
-dInitRtti(dDAGExpressionFunctionCall);
+dInitRtti(dDAGExpressionNodeFunctionCall);
 
-dDAGExpressionFunctionCall::dDAGExpressionFunctionCall(dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier, dDAGExpressionNode* const argumentList)
+dDAGExpressionNodeFunctionCall::dDAGExpressionNodeFunctionCall(dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier, dDAGExpressionNode* const argumentList)
 	:dDAGExpressionNode(allNodes)
 	,m_argumentList()
 {
@@ -36,7 +36,7 @@ dDAGExpressionFunctionCall::dDAGExpressionFunctionCall(dList<dDirectAcyclicgraph
 }
 
 
-dDAGExpressionFunctionCall::~dDAGExpressionFunctionCall(void)
+dDAGExpressionNodeFunctionCall::~dDAGExpressionNodeFunctionCall(void)
 {
 	for (dList<dDAGExpressionNode*>::dListNode* node = m_argumentList.GetFirst(); node; node = node->GetNext()) {
 		dDAGExpressionNode* const parameter = node->GetInfo();

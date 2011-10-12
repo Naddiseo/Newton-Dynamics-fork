@@ -9,17 +9,17 @@
 * freely
 */
 
-#ifndef __dDAGExpressionFunctionCall_H__
-#define __dDAGExpressionFunctionCall_H__
+#ifndef __dDAGExpressionNodeFunctionCall_H__
+#define __dDAGExpressionNodeFunctionCall_H__
 
 #include "dDAGExpressionNode.h"
 
 
-class dDAGExpressionFunctionCall: public dDAGExpressionNode
+class dDAGExpressionNodeFunctionCall: public dDAGExpressionNode
 {
 	public:
-	dDAGExpressionFunctionCall (dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier, dDAGExpressionNode* const argumentList);
-	~dDAGExpressionFunctionCall(void);
+	dDAGExpressionNodeFunctionCall (dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier, dDAGExpressionNode* const argumentList);
+	~dDAGExpressionNodeFunctionCall(void);
 
 	dList<dDAGExpressionNode*> m_argumentList;
 	dAddRtti(dDAGExpressionNode);

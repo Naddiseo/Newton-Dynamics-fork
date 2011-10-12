@@ -71,9 +71,63 @@ void dScriptCompiler::DisplayError (const char* format, ...) const
 }
 
 
+void qsort (int a[], int m, int n)
+{
+	if (n <= m) {
+		return ;
+	}
+
+	int i = m - 1;
+	int j = n;
+	int v = a[n];
+	int x;
+	while (1) {
+		do 
+			i = i + 1;
+		while (a[i] < v);
+
+		do 
+			j = j - 1;
+		while (a[j] > v);
+
+		if (i >= j) {
+			break;
+		}
+		x = a[i];
+		a[i] = a[j];
+		a[j] = x;
+	}
+	x = a[i];
+	a[i] = a[n];
+	a[n] = x;
+	qsort (a, m, j);
+	qsort (a, i + 1, n);
+}
+
+void qsort (int a[], int size)
+{
+	for (int i = 1; i < size; i ++) {
+		if (a[0] > a[i]) {
+			int x = a[0];
+			a[0] = a[i];
+			a[i] = x;
+		}
+		if (a[size - i - 1] > a[size - 1]) {
+			int x = a[size - i - 1];
+			a[size - i - 1] = a[size - 1];
+			a[size - 1] = x;
+		}
+	}
+	qsort (a, 1, size-1);
+}
+
+
 int dScriptCompiler::CompileSource (const char* const source)
 {
 	dNewtonScriptLexical scanner (source);
+
+	int aa[] = {4, 5,6,1,6,7,9,8,5};
+qsort(aa, sizeof(aa)/sizeof (int));
 
 int a = 1;
 int b = 1;
@@ -362,7 +416,7 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionFunctionCall (const
 
 	_ASSERTE (argumnetList.m_node->IsType(dDAGExpressionNode::GetRttiType()));
 	dDAGExpressionNode* const argument = (dDAGExpressionNode*) argumnetList.m_node;
-	dDAGExpressionFunctionCall* const fntCall = new dDAGExpressionFunctionCall(m_allNodes, functionName.m_data.c_str(), argument);
+	dDAGExpressionNodeFunctionCall* const fntCall = new dDAGExpressionNodeFunctionCall(m_allNodes, functionName.m_data.c_str(), argument);
 	returnNode.m_node = fntCall;
 	return returnNode;
 }
@@ -433,8 +487,8 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewFunctionCallStamement(const d
 {
 	dUserVariable returnNode;
 
-	dDAGExpressionFunctionCall* const fnt  = (dDAGExpressionFunctionCall*) functionExpression.m_node;
-	_ASSERTE (fnt->IsType(dDAGExpressionFunctionCall::GetRttiType()));
+	dDAGExpressionNodeFunctionCall* const fnt  = (dDAGExpressionNodeFunctionCall*) functionExpression.m_node;
+	_ASSERTE (fnt->IsType(dDAGExpressionNodeFunctionCall::GetRttiType()));
 
 	dDAGFunctionStatementFunctionCall* const stmt = new dDAGFunctionStatementFunctionCall(m_allNodes, fnt);
 	returnNode.m_node = stmt;

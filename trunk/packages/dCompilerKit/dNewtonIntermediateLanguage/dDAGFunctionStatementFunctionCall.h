@@ -15,15 +15,15 @@
 #include "dDAGFunctionStatement.h"
 #include "dDAGExpressionNode.h"
 
-class dDAGExpressionFunctionCall;
+class dDAGExpressionNodeFunctionCall;
 
 class dDAGFunctionStatementFunctionCall: public dDAGFunctionStatement
 {
 	public:
-	dDAGFunctionStatementFunctionCall(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionFunctionCall* const function);
+	dDAGFunctionStatementFunctionCall(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeFunctionCall* const function);
 	~dDAGFunctionStatementFunctionCall();
 
-	dDAGExpressionFunctionCall* m_function;
+	dDAGExpressionNodeFunctionCall* m_function;
 	
 
 	dAddRtti(dDAGFunctionStatement);

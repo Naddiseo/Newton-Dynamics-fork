@@ -31,7 +31,7 @@
 #include <dDAGFunctionStatement.h>
 #include <dDAGFunctionStatementIF.h>
 #include <dDirectAcyclicgraphNode.h>
-#include <dDAGExpressionFunctionCall.h>
+#include <dDAGExpressionNodeFunctionCall.h>
 #include <dDAGExpressionNodeConstant.h>
 #include <dDAGExpressionNodeVariable.h>
 #include <dDAGFunctionStatementReturn.h>
