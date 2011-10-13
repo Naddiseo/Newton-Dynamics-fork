@@ -233,10 +233,10 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeConstant (const
 }
 
 
-dScriptCompiler::dUserVariable dScriptCompiler::NewExpresionNodeAssigment (const dUserVariable& leftVariable, const dUserVariable& expression)
+dScriptCompiler::dUserVariable dScriptCompiler::NewExpresionNodeAssigment (const dUserVariable& leftVariable, const dUserVariable& dimArray, const dUserVariable& expression)
 {
 	dUserVariable returnNode;
-	dScriptCompiler::dUserVariable leftSideVar (NewExpressionNodeVariable (leftVariable));
+	dScriptCompiler::dUserVariable leftSideVar (NewExpressionNodeVariable (leftVariable, dimArray));
 
 	dDAGExpressionNode* const exp = (dDAGExpressionNode*) expression.m_node;
 	dDAGExpressionNodeVariable* const variable = (dDAGExpressionNodeVariable*) leftSideVar.m_node;
@@ -386,7 +386,7 @@ dScriptCompiler::dUserVariable dScriptCompiler::AddClassFunction (const dUserVar
 
 
 
-dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeVariable (const dUserVariable& identifier)
+dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeVariable (const dUserVariable& identifier, const dUserVariable& dimArray)
 {
 	dUserVariable returnNode;
 
@@ -441,21 +441,6 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewLocalVariableStamement(const 
 }
 
 
-dScriptCompiler::dUserVariable dScriptCompiler::NewIFStamement(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock)
-{
-	dUserVariable returnNode;
-
-	dDAGExpressionNode* const exp = (dDAGExpressionNode*) expression.m_node;
-	dDAGFunctionStatement* const thenStmt = (dDAGFunctionStatement*) thenBlock.m_node;
-	dDAGFunctionStatement* const elseStmt = (dDAGFunctionStatement*) elseBlock.m_node;
-	_ASSERTE (exp->IsType(dDAGExpressionNode::GetRttiType()));
-	_ASSERTE (thenStmt->IsType(dDAGFunctionStatement::GetRttiType()));
-	_ASSERTE (!elseStmt || (elseStmt->IsType(dDAGFunctionStatement::GetRttiType())));
-
-	dDAGFunctionStatementIF* const stmt = new dDAGFunctionStatementIF(m_allNodes, exp, thenStmt, elseStmt);
-	returnNode.m_node = stmt;
-	return returnNode;
-}
 
 
 dScriptCompiler::dUserVariable dScriptCompiler::NewReturnStamement(const dUserVariable& expression)
@@ -512,6 +497,22 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeBinaryOperator 
 			binOperator = dDAGExpressionNodeBinaryOperator::m_div;
 			break;
 
+		case '<':
+			binOperator = dDAGExpressionNodeBinaryOperator::m_less;
+			break;
+
+		case '>':
+			binOperator = dDAGExpressionNodeBinaryOperator::m_greather;
+			break;
+
+		case LESS_EQUAL:
+			binOperator = dDAGExpressionNodeBinaryOperator::m_lessEqual;
+			break;
+
+		case GREATHER_EQUAL:
+			binOperator = dDAGExpressionNodeBinaryOperator::m_greatherEqual;
+			break;
+
 		case IDENTICAL:
 			binOperator = dDAGExpressionNodeBinaryOperator::m_identical;
 			break;
@@ -519,6 +520,8 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeBinaryOperator 
 		case DIFFERENT:
 			binOperator = dDAGExpressionNodeBinaryOperator::m_different;
 			break;
+
+		
 
 		default:;
 			_ASSERTE (0);
@@ -584,8 +587,8 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewDimensionNode(const dUserVari
 {
 	dUserVariable returnNode;
 
-	dDAGExpressionNodeConstant* const exp = (dDAGExpressionNodeConstant*)expression.m_node;
-	_ASSERTE (!exp || (exp->GetTypeId() == dDAGExpressionNodeConstant::GetRttiType()));
+	dDAGExpressionNode* const exp = (dDAGExpressionNode*)expression.m_node;
+	_ASSERTE (!exp || (exp->IsType (dDAGExpressionNode::GetRttiType())));
 	dDAGDimensionNode* const node = new dDAGDimensionNode (m_allNodes, exp);
 	returnNode.m_node = node;
 	return returnNode;
@@ -604,4 +607,38 @@ dScriptCompiler::dUserVariable dScriptCompiler::TypeAddDimention(const dUserVari
 	typeNode->AddDimensions(dim);
 
 	return returnNode;
+}
+
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewIFStamement(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock)
+{
+	dUserVariable returnNode;
+
+	dDAGExpressionNode* const exp = (dDAGExpressionNode*) expression.m_node;
+	dDAGFunctionStatement* const thenStmt = (dDAGFunctionStatement*) thenBlock.m_node;
+	dDAGFunctionStatement* const elseStmt = (dDAGFunctionStatement*) elseBlock.m_node;
+	_ASSERTE (exp->IsType(dDAGExpressionNode::GetRttiType()));
+	_ASSERTE (thenStmt->IsType(dDAGFunctionStatement::GetRttiType()));
+	_ASSERTE (!elseStmt || (elseStmt->IsType(dDAGFunctionStatement::GetRttiType())));
+
+	dDAGFunctionStatementIF* const stmt = new dDAGFunctionStatementIF(m_allNodes, exp, thenStmt, elseStmt);
+	returnNode.m_node = stmt;
+	return returnNode;
+}
+
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewForStamement(const dUserVariable& init_exp, const dUserVariable& conditional, const dUserVariable& step_Exp, const dUserVariable& statement)
+{
+	dUserVariable returnNode;
+
+//	dDAGExpressionNode* const exp = (dDAGExpressionNode*) expression.m_node;
+//	dDAGFunctionStatement* const thenStmt = (dDAGFunctionStatement*) thenBlock.m_node;
+//	dDAGFunctionStatement* const elseStmt = (dDAGFunctionStatement*) elseBlock.m_node;
+//	_ASSERTE (exp->IsType(dDAGExpressionNode::GetRttiType()));
+//	_ASSERTE (thenStmt->IsType(dDAGFunctionStatement::GetRttiType()));
+//	_ASSERTE (!elseStmt || (elseStmt->IsType(dDAGFunctionStatement::GetRttiType())));
+//	dDAGFunctionStatementIF* const stmt = new dDAGFunctionStatementIF(m_allNodes, exp, thenStmt, elseStmt);
+//	returnNode.m_node = stmt;
+
+	return EndScopeBlock (returnNode);
 }

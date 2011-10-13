@@ -14,16 +14,16 @@
 
 #include "dDirectAcyclicgraphNode.h"
 
-class dDAGExpressionNodeConstant;
+class dDAGExpressionNode;
 
 class dDAGDimensionNode: public dDirectAcyclicgraphNode
 {
 	public:
-	dDAGDimensionNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeConstant* const size);
+	dDAGDimensionNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNode* const size);
 	~dDAGDimensionNode(void);
 
 
-	dDAGExpressionNodeConstant* m_size;
+	dDAGExpressionNode* m_size;
 	dDAGDimensionNode* m_next;
 
 	dAddRtti(dDirectAcyclicgraphNode);

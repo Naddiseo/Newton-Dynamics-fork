@@ -17,7 +17,7 @@
 
 dInitRtti(dDAGDimensionNode);
 
-dDAGDimensionNode::dDAGDimensionNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeConstant* const size)
+dDAGDimensionNode::dDAGDimensionNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNode* const size)
 	:dDirectAcyclicgraphNode(allNodes)
 	,m_size (size)
 	,m_next (NULL)

@@ -24,6 +24,10 @@ class dDAGExpressionNodeBinaryOperator: public dDAGExpressionNode
 		m_sub,
 		m_mul,
 		m_div,
+		m_less,
+		m_greather,
+		m_lessEqual,
+		m_greatherEqual,
 		m_identical,
 		m_different,
 	};

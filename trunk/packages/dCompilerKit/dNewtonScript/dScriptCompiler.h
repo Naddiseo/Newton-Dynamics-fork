@@ -80,8 +80,8 @@ class dScriptCompiler: public dNewtonScriptParser
 	dUserVariable LinkParameters(const dUserVariable& parameterA, const dUserVariable& parameterB);
 	dUserVariable LinkExpressions(const dUserVariable& ExpressionA, const dUserVariable& ExpressionB);
 	dUserVariable NewExpressionNodeConstant (const dUserVariable& identifier);
-	dUserVariable NewExpressionNodeVariable (const dUserVariable& identifier);
-	dUserVariable NewExpresionNodeAssigment (const dUserVariable& leftVariable, const dUserVariable& expression);
+	dUserVariable NewExpressionNodeVariable (const dUserVariable& identifier, const dUserVariable& dimArray);
+	dUserVariable NewExpresionNodeAssigment (const dUserVariable& leftVariable, const dUserVariable& dimArray, const dUserVariable& expression);
 	dUserVariable NewExpressionNodeUnuaryOperator (const dUserVariable& unuaryOperator, const dUserVariable& expression);
 	dUserVariable NewExpressionNodeBinaryOperator (const dUserVariable& binaryOperator, const dUserVariable& expressionA, const dUserVariable& expressionB);
 	
@@ -92,6 +92,7 @@ class dScriptCompiler: public dNewtonScriptParser
 	
 	dUserVariable NewLocalVariableStamement(const dUserVariable& variable, const dUserVariable& initializationExpression);
 	dUserVariable NewIFStamement(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock);
+	dUserVariable NewForStamement(const dUserVariable& init_exp, const dUserVariable& conditional, const dUserVariable& step_Exp, const dUserVariable& statement);
 	dUserVariable NewReturnStamement(const dUserVariable& expression);
 	dUserVariable NewFunctionCallStamement(const dUserVariable& functionExpression);
 	

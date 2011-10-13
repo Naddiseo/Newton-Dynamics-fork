@@ -1381,13 +1381,14 @@ void dParserCompiler::GenerateParserCode (
 					reduceRule.m_ruleReduced = true;
 					char text[128];
 					string userSematicAction (reduceRule.m_semanticActionCode);
-					for (int i = 0; i < int (entry.m_ruleSymbols); i ++) {
+					int symbolsCount = int (entry.m_ruleSymbols);
+					for (int i = 0; i < symbolsCount; i ++) {
 
-						sprintf (text, "%d", i + 1);
+						sprintf (text, "%d", symbolsCount - i);
 						string macro ("$");
 						macro += text;
 
-						sprintf (text, "%d", i);
+						sprintf (text, "%d", symbolsCount - i - 1);
 						string macroVariable ("parameter[");
 						macroVariable += text;
 						macroVariable += "].m_value";

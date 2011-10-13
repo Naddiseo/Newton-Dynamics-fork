@@ -16,7 +16,7 @@ class qsort
 	{
 		// first make sure the first element is the smallest of the array 
 		// and that the last element is the largest of the array. 
-		for (int i = 1; i < size; i ++) {
+		for (int i = 1; i < size; i = i + 1) {
 			if (a[0] > a[i]) {
 				int x = a[0];
 				a[0] = a[i];
