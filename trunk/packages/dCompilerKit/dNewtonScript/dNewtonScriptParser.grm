@@ -304,8 +304,8 @@ statement
 	| CONTINUE ';'																			{_ASSERTE (0);}
 	| BREAK	';'																				{_ASSERTE (0);}
 	| SWITCH '(' expression ')' '{' switch_case_list '}' 									{_ASSERTE (0);}
-	| FOR for_begin '(' for_first_expression ';' expression ';' for_third_expression ')' statement 	{GET_PARENT_CLASS; $$ = me->NewForStamement($4, $6, $8, $10);}
-//| FOR for_begin '(' for_first_expression ';' for_secund_expression ';' for_third_expression ')' statement 	{GET_PARENT_CLASS; $$ = me->NewForStamement($4, $6, $8, $10);}
+	| FOR for_begin '(' for_first_expression ';' expression ';' for_third_expression ')' statement 	{GET_PARENT_CLASS; $$ = me->NewForStamement($2, $4, $6, $8, $10);}
+//| FOR for_begin '(' for_first_expression ';' for_secund_expression ';' for_third_expression ')' statement 	{GET_PARENT_CLASS; $$ = me->NewForStamement($2, $4, $6, $8, $10);}
 	| WHILE '(' expression ')' statement													{_ASSERTE (0);}
 	| DO statement WHILE '(' expression ')' ';'												{_ASSERTE (0);}
 	| return ';'																			{$$ = $1;}
@@ -315,6 +315,27 @@ statement
 	| syntax_error
 	;
 
+for_begin
+	:													{GET_PARENT_CLASS; $$ = me->BeginScopeBlock();}
+	;
+	
+for_first_expression
+	:													{/* nothing here */}
+	| expression										{$$ = $1;} 
+	| parameter '=' expression							{GET_PARENT_CLASS; $$ = me->NewLocalVariableStamement($1, $3);} 
+	;
+	
+//for_secund_expression
+//	:													{/* nothing here */}
+//	| expression										{$$ = $1;} 
+//	;
+	
+	
+for_third_expression	
+	:													{/* nothing here */}
+	| expression										{$$ = $1;}
+	| assigment_statement								{$$ = $1;}
+	;
 
 array_type_list
 	: array_type											{$$ = $1;}
@@ -336,30 +357,6 @@ assigment_statement
 	: compound_identifier_List '=' expression												{GET_PARENT_CLASS; $$ = me->NewExpresionNodeAssigment ($1, dUserVariable(), $3);}
 	| compound_identifier_List multidimention_array	'=' expression							{GET_PARENT_CLASS; $$ = me->NewExpresionNodeAssigment ($1, $2, $4);}
 	;
-	
-for_begin
-	:													{GET_PARENT_CLASS; $$ = me->BeginScopeBlock();}
-	;
-	
-	
-for_first_expression
-	:													{/* nothing here */}
-	| expression										{$$ = $1;} 
-	| parameter '=' expression							{GET_PARENT_CLASS; $$ = me->NewLocalVariableStamement($1, $3);} 
-	;
-	
-//for_secund_expression
-//	:													{/* nothing here */}
-//	| expression										{$$ = $1;} 
-//	;
-	
-	
-for_third_expression	
-	:													{/* nothing here */}
-	| expression										{$$ = $1;}
-	| assigment_statement								{$$ = $1;}
-	;
-	
 	
 	
 switch_case_list

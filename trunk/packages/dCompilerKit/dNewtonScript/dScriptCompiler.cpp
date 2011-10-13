@@ -418,11 +418,11 @@ void dScriptCompiler::AddStatementToCurrentBlock(const dUserVariable& statement)
 {
 	if (statement.m_node) {
 		_ASSERTE (statement.m_node && statement.m_node->IsType(dDAGFunctionStatement::GetRttiType()));
-		dDAGFunctionStatement* const stmnt = (dDAGFunctionStatement*) statement.m_node;
+		dDAGFunctionStatement* const stmt = (dDAGFunctionStatement*) statement.m_node;
 
 		dDAGScopeBlockNode* const block = GetCurrentScope();
 		_ASSERTE (block);
-		block->AddStatement(stmnt);
+		block->AddStatement(stmt);
 	}
 }
 
@@ -629,7 +629,7 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewIFStamement(const dUserVariab
 }
 
 
-dScriptCompiler::dUserVariable dScriptCompiler::NewForStamement(const dUserVariable& init_exp, const dUserVariable& conditional, const dUserVariable& step_Exp, const dUserVariable& statement)
+dScriptCompiler::dUserVariable dScriptCompiler::NewForStamement(const dUserVariable& forScope, const dUserVariable& init_exp, const dUserVariable& conditional, const dUserVariable& step_Exp, const dUserVariable& statement)
 {
 	dUserVariable returnNode;
 
@@ -643,5 +643,8 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewForStamement(const dUserVaria
 	_ASSERTE (!forStmt || forStmt->IsType(dDAGFunctionStatement::GetRttiType()));
 	dDAGFunctionStatementFOR* const stmt = new dDAGFunctionStatementFOR(m_allNodes, firstStmt, exp, thirdStmt, forStmt);
 	returnNode.m_node = stmt;
+
+	AddStatementToCurrentBlock(returnNode);
+	returnNode.m_node = GetCurrentScope();
 	return EndScopeBlock (returnNode);
 }
