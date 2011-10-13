@@ -30,8 +30,9 @@
 #include <dDAGScopeBlockNode.h>
 #include <dDAGExpressionNode.h>
 #include <dDAGFunctionStatement.h>
-#include <dDAGFunctionStatementIF.h>
 #include <dDirectAcyclicgraphNode.h>
+#include <dDAGFunctionStatementIF.h>
+#include <dDAGFunctionStatementFOR.h>
 #include <dDAGExpressionNodeFunctionCall.h>
 #include <dDAGExpressionNodeConstant.h>
 #include <dDAGExpressionNodeVariable.h>

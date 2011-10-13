@@ -236,6 +236,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\dDAGFunctionStatementFOR.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGFunctionStatementFOR.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dDAGFunctionStatementFunctionCall.cpp"
 			>
 		</File>

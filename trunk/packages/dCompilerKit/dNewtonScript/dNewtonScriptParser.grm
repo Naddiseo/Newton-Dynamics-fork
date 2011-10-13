@@ -290,24 +290,22 @@ block_scope
 			   
 			   
 statement_list 
-	: primary_statement										{/* nothing here */}
-	| statement_list primary_statement						{/* nothing here */}
+	: statement												{GET_PARENT_CLASS; me->AddStatementToCurrentBlock($1);}	
+	| statement_list statement								{GET_PARENT_CLASS; me->AddStatementToCurrentBlock($2);}	
 	;
-						 
-primary_statement	
-	: ';'													{/* nothing here */}
-	| statement												{GET_PARENT_CLASS; me->AddStatementToCurrentBlock($1);}	
-	;					 
+
 	
 statement
-	: block_scope																			{$$ = $1;}
+	: ';'																					{$$ = $1;}
+	| block_scope																			{$$ = $1;}
 	| assigment_statement ';'																{$$ = $1;}		
 	| parameter ';'																			{GET_PARENT_CLASS; $$ = me->NewLocalVariableStamement($1, dUserVariable());}
 	| parameter '=' expression ';'															{GET_PARENT_CLASS; $$ = me->NewLocalVariableStamement($1, $3);} 
 	| CONTINUE ';'																			{_ASSERTE (0);}
-	| BREAK ';'																				{_ASSERTE (0);}
+	| BREAK	';'																				{_ASSERTE (0);}
 	| SWITCH '(' expression ')' '{' switch_case_list '}' 									{_ASSERTE (0);}
 	| FOR for_begin '(' for_first_expression ';' expression ';' for_third_expression ')' statement 	{GET_PARENT_CLASS; $$ = me->NewForStamement($4, $6, $8, $10);}
+//| FOR for_begin '(' for_first_expression ';' for_secund_expression ';' for_third_expression ')' statement 	{GET_PARENT_CLASS; $$ = me->NewForStamement($4, $6, $8, $10);}
 	| WHILE '(' expression ')' statement													{_ASSERTE (0);}
 	| DO statement WHILE '(' expression ')' ';'												{_ASSERTE (0);}
 	| return ';'																			{$$ = $1;}
@@ -349,6 +347,12 @@ for_first_expression
 	| expression										{$$ = $1;} 
 	| parameter '=' expression							{GET_PARENT_CLASS; $$ = me->NewLocalVariableStamement($1, $3);} 
 	;
+	
+//for_secund_expression
+//	:													{/* nothing here */}
+//	| expression										{$$ = $1;} 
+//	;
+	
 	
 for_third_expression	
 	:													{/* nothing here */}
