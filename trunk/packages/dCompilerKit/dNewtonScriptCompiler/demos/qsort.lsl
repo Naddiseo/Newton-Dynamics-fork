@@ -14,12 +14,6 @@ class qsort
 {
 	qsort (int[] a, int size)
 	{
-for (int i = 1; i < size; i = i + 1) i = 0;	
-for (int i = 1; i < size; i = i + 1) ;
-for (int i = 1; i < size; i = i + 1) {}
-for (int i = 1; i < size; i = i + 1) {i = 0;}
-
-	
 		// first make sure the first element is the smallest of the array 
 		// and that the last element is the largest of the array. 
 		for (int i = 1; i < size; i = i + 1) {

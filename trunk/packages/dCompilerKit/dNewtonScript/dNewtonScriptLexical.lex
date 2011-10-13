@@ -34,7 +34,7 @@ Indetifier		[a-zA-Z_][0-9a-zA-Z_]*
 
 
 
-Integer			[\-\+]?[0-9]+
+Integer			[0-9]+
 Float			{Integer}[\.][0-9]+(e{Integer})?
 string			["][^"]*["]
 

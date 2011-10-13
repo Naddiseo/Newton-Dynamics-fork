@@ -305,7 +305,7 @@ statement
 	| BREAK	';'																				{_ASSERTE (0);}
 	| SWITCH '(' expression ')' '{' switch_case_list '}' 									{_ASSERTE (0);}
 	| FOR for_begin '(' for_first_expression ';' expression ';' for_third_expression ')' statement 	{GET_PARENT_CLASS; $$ = me->NewForStamement($2, $4, $6, $8, $10);}
-//| FOR for_begin '(' for_first_expression ';' for_secund_expression ';' for_third_expression ')' statement 	{GET_PARENT_CLASS; $$ = me->NewForStamement($2, $4, $6, $8, $10);}
+//	| FOR for_begin '(' for_first_expression ';' xxxx ';' for_third_expression ')' statement 	{GET_PARENT_CLASS; $$ = me->NewForStamement($2, $4, $6, $8, $10);}
 	| WHILE '(' expression ')' statement													{_ASSERTE (0);}
 	| DO statement WHILE '(' expression ')' ';'												{_ASSERTE (0);}
 	| return ';'																			{$$ = $1;}
@@ -324,11 +324,6 @@ for_first_expression
 	| expression										{$$ = $1;} 
 	| parameter '=' expression							{GET_PARENT_CLASS; $$ = me->NewLocalVariableStamement($1, $3);} 
 	;
-	
-//for_secund_expression
-//	:													{/* nothing here */}
-//	| expression										{$$ = $1;} 
-//	;
 	
 	
 for_third_expression	
