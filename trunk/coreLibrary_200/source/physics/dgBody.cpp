@@ -843,9 +843,33 @@ void dgBody::Unfreeze ()
 	}
 }
 
+dgMatrix dgBody::CalculateInertiaMatrix () const
+{
+	dgMatrix tmpMatrix;
 
+	tmpMatrix[0][0] = m_mass[0] * m_matrix[0][0];
+	tmpMatrix[0][1] = m_mass[1] * m_matrix[1][0];
+	tmpMatrix[0][2] = m_mass[2] * m_matrix[2][0];
+	tmpMatrix[0][3] = dgFloat32 (0.0f);
 
-void dgBody::AddImpulse (const dgVector& pointDeltaVeloc, const dgVector& pointPosit)
+	tmpMatrix[1][0] = m_mass[0] * m_matrix[0][1];
+	tmpMatrix[1][1] = m_mass[1] * m_matrix[1][1];
+	tmpMatrix[1][2] = m_mass[2] * m_matrix[2][1];
+	tmpMatrix[1][3] = dgFloat32 (0.0f);
+
+	tmpMatrix[2][0] = m_mass[0] * m_matrix[0][2];
+	tmpMatrix[2][1] = m_mass[1] * m_matrix[1][2];
+	tmpMatrix[2][2] = m_mass[2] * m_matrix[2][2];
+	tmpMatrix[2][3] = dgFloat32 (0.0f);
+
+	tmpMatrix[3][0] = dgFloat32 (0.0f);
+	tmpMatrix[3][1] = dgFloat32 (0.0f);
+	tmpMatrix[3][2] = dgFloat32 (0.0f);
+	tmpMatrix[3][3] = dgFloat32 (1.0f);
+	return tmpMatrix * m_matrix;
+}
+
+dgMatrix dgBody::CalculateInvInertiaMatrix () const
 {
 	dgMatrix tmpMatrix;
 
@@ -868,7 +892,30 @@ void dgBody::AddImpulse (const dgVector& pointDeltaVeloc, const dgVector& pointP
 	tmpMatrix[3][1] = dgFloat32 (0.0f);
 	tmpMatrix[3][2] = dgFloat32 (0.0f);
 	tmpMatrix[3][3] = dgFloat32 (1.0f);
-	dgMatrix invInertia (tmpMatrix * m_matrix);
+	return tmpMatrix * m_matrix;
+}
+
+
+void dgBody::AddImpulse (const dgVector& pointDeltaVeloc, const dgVector& pointPosit)
+{
+//	dgMatrix tmpMatrix;
+//	tmpMatrix[0][0] = m_invMass[0] * m_matrix[0][0];
+//	tmpMatrix[0][1] = m_invMass[1] * m_matrix[1][0];
+//	tmpMatrix[0][2] = m_invMass[2] * m_matrix[2][0];
+//	tmpMatrix[0][3] = dgFloat32 (0.0f);
+//	tmpMatrix[1][0] = m_invMass[0] * m_matrix[0][1];
+//	tmpMatrix[1][1] = m_invMass[1] * m_matrix[1][1];
+//	tmpMatrix[1][2] = m_invMass[2] * m_matrix[2][1];
+//	tmpMatrix[1][3] = dgFloat32 (0.0f);
+//	tmpMatrix[2][0] = m_invMass[0] * m_matrix[0][2];
+//	tmpMatrix[2][1] = m_invMass[1] * m_matrix[1][2];
+//	tmpMatrix[2][2] = m_invMass[2] * m_matrix[2][2];
+//	tmpMatrix[2][3] = dgFloat32 (0.0f);
+//	tmpMatrix[3][0] = dgFloat32 (0.0f);
+//	tmpMatrix[3][1] = dgFloat32 (0.0f);
+//	tmpMatrix[3][2] = dgFloat32 (0.0f);
+//	tmpMatrix[3][3] = dgFloat32 (1.0f);
+	dgMatrix invInertia (CalculateInvInertiaMatrix());
 
 	// get contact matrix
 	dgMatrix tmp;
@@ -900,8 +947,8 @@ void dgBody::AddImpulse (const dgVector& pointDeltaVeloc, const dgVector& pointP
 	tmp[3][3] = dgFloat32 (1.0f);
 
 	dgMatrix contactMatrix (tmp * invInertia * tmp);
-	for (int i = 0; i < 3; i ++) {
-		for (int j = 0; j < 3; j ++) {
+	for (dgInt32 i = 0; i < 3; i ++) {
+		for (dgInt32 j = 0; j < 3; j ++) {
 			contactMatrix[i][j] *= -dgFloat32 (1.0f);
 		}
 	}
@@ -924,6 +971,36 @@ void dgBody::AddImpulse (const dgVector& pointDeltaVeloc, const dgVector& pointP
 	m_sleeping	= false;
 	m_equilibrium = false;
 	Unfreeze ();
+}
+
+void dgBody::ApplyImpulseArray (dgInt32 count, dgInt32 strideInBytes, const dgFloat32* const impulseArray, const dgFloat32* const pointArray)
+{
+	dgInt32 stride = strideInBytes / sizeof (dgFloat32);
+
+	dgMatrix inertia (CalculateInertiaMatrix());
+
+	dgVector impulse (m_veloc.Scale (m_mass.m_w));
+	dgVector angularImpulse (inertia.RotateVector (m_omega));
+
+	dgVector com (m_globalCentreOfMass);
+	for (dgInt32 i = 0; i < count; i ++) {
+		dgInt32 index = i * stride;
+		dgVector r (pointArray[index], pointArray[index + 1], pointArray[index + 2], dgFloat32 (0.0f));
+		dgVector L (impulseArray[index], impulseArray[index + 1], impulseArray[index + 2], dgFloat32 (0.0f));
+		dgVector Q ((r - com) * L);
+
+		impulse += L;
+		angularImpulse += Q;
+	}
+
+	dgMatrix invInertia (CalculateInvInertiaMatrix());
+	m_veloc = impulse.Scale(m_invMass.m_w);
+	m_omega = invInertia.RotateVector(angularImpulse);
+
+	m_sleeping	= false;
+	m_equilibrium = false;
+	Unfreeze ();
+
 }
 
 void dgBody::InvalidateCache ()

@@ -6348,6 +6348,38 @@ void NewtonBodyAddImpulse(const NewtonBody* const bodyPtr, const dFloat* const p
 }
 
 
+// Name: NewtonBodyAddImpulse
+// Add an train of impulses to a specific point on a body.
+//
+// Parameters:
+// *const NewtonWorld* *newtonWorld - pointer to the Newton world.
+// *const NewtonBody* *bodyPtr - is the pointer to the body.
+// int impulseCount	- number of impulses and distances in the array distance	
+// int strideInByte	- sized in bytes of vector impulse and 
+// *const dFloat* impulseArray - pointer to an array containing the desired impulse to apply ate psoition pointarray.
+// *const dFloat* pointArray    - pointer to an array of at least three floats containing the center of the impulse in global space.
+//
+// Return: Nothing.
+// 
+// Remarks: This function will activate the body.
+//
+// Remarks: *pointPosit* and *pointDeltaVeloc* must be specified in global space.
+//
+//
+// Remarks: this function apply at general impulse to a body a oppose to a desired change on velocity
+// this mean that the body mass, and Inertia will determine the gain on velocity.
+void NewtonBodyApplyImpulseArray (const NewtonBody* const bodyPtr, int impuleCount, int strideInByte, const dFloat* const impulseArray, const dFloat* const pointArray)
+{
+	dgBody *body;
+	dgWorld *world;
+
+	TRACE_FUNTION(__FUNCTION__);
+	body = (dgBody *)bodyPtr;
+	world = body->GetWorld();
+
+	world->ApplyImpulseArray (body, impuleCount, strideInByte, impulseArray, pointArray);
+}
+
 // ***************************************************************************************************************
 //
 // Name: Ball and Socket joint interface

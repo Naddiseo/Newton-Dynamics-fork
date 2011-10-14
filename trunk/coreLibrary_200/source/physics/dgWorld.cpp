@@ -1028,6 +1028,14 @@ void dgWorld::AddBodyImpulse (dgBody* body, const dgVector& pointVeloc, const dg
 	}
 }
 
+void dgWorld::ApplyImpulseArray (dgBody* body, dgInt32 count, dgInt32 strideInBytes, const dgFloat32* const impulseArray, const dgFloat32* const pointArray)
+{
+	if (body->m_invMass.m_w > dgFloat32 (0.0f)) {
+		//		UnfreezeBody (body);
+		body->ApplyImpulseArray (count, strideInBytes, impulseArray, pointArray);
+	}
+}
+
 /*
 dgInt32 dgWorld::GetBodyArray (dgBody* root, dgBody** array, dgInt32 maxSize) const
 {

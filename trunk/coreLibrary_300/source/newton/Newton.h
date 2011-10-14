@@ -786,6 +786,9 @@ extern "C" {
 	NEWTON_API void NewtonBodyAddImpulse (const NewtonBody* const body, const dFloat* const pointDeltaVeloc, const dFloat* const pointPosit);
 
 
+	NEWTON_API void NewtonBodyApplyImpulseArray (const NewtonBody* const body, int impuleCount, int strideInByte, const dFloat* const impulseArray, const dFloat* const pointArray);
+	
+	
 	// **********************************************************************************************
 	//
 	// Common joint functions

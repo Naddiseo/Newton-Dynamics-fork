@@ -208,6 +208,8 @@ class dgWorld:
 	// pointVeloc and pointPosit are in world space
 	void AddBodyImpulse (dgBody* body, const dgVector& pointDeltaVeloc, const dgVector& pointPosit);
 
+	void ApplyImpulseArray (dgBody* body, dgInt32 count, dgInt32 strideInBytes, const dgFloat32* const impulseArray, const dgFloat32* const pointArray);
+
 	// apply the transform matrix to the body and recurse trough all bodies attached to this body with a 
 	// bilateral joint contact joint are ignored.
 	void BodySetMatrix (dgBody* body, const dgMatrix& matrix);

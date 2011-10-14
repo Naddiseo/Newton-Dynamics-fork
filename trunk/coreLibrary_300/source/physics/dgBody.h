@@ -203,10 +203,13 @@ class dgBody
 	void ApplyExtenalForces (dgFloat32 timestep, dgInt32 threadIndex);
 	void AddImpulse (const dgVector& pointVeloc, const dgVector& pointPosit);
 
+	void ApplyImpulseArray (dgInt32 count, dgInt32 strideInBytes, const dgFloat32* const impulseArray, const dgFloat32* const pointArray);
+
 //	void AddGyroscopicTorque();
 	void AddDamingAcceleration();
 
-
+	dgMatrix CalculateInertiaMatrix () const;
+	dgMatrix CalculateInvInertiaMatrix () const;
 
 	dgMatrix m_matrix;
 	dgMatrix m_collisionWorldMatrix;
