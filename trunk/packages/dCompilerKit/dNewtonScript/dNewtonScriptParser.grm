@@ -180,6 +180,12 @@ class_member
 	| uninitialized_variable semicolon_marker   {GET_PARENT_CLASS; me->AddClassVariable($1);}
 	;
 	
+uninitialized_variable
+	: parameter								{ $$ = $1;}
+	| PRIVATE parameter						{GET_PARENT_CLASS; $$ = $1;	me->SetParamameterAsPrivateVariable($$);}
+	;
+
+	
 class_constructor 
 	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker				{_ASSERTE (0);}
 	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class block_scope	{_ASSERTE (0);}
@@ -246,10 +252,6 @@ overlodable_operator
 	
 	
 
-uninitialized_variable
-	: parameter								{ $$ = $1;}
-	| PRIVATE parameter						{GET_PARENT_CLASS; $$ = $1;	me->SetParamameterAsPrivateVariable($$);}
-	;
 			  
 parameter
 	: type_specifier IDENTIFIER				{GET_PARENT_CLASS; $$ = me->NewParameterNode ($1, $2);}
