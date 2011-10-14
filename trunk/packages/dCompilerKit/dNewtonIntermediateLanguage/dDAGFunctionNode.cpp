@@ -22,6 +22,7 @@ dDAGFunctionNode::dDAGFunctionNode(dList<dDirectAcyclicgraphNode*>& allNodes, dD
 	:dDirectAcyclicgraphNode(allNodes)
 	,m_isConst (isConst[0] ? false : true)
 	,m_isPrivate(false)
+	,m_isConstructor(false)
 	,m_returnType (type)
 	,m_body(NULL)
 	,m_parameters() 

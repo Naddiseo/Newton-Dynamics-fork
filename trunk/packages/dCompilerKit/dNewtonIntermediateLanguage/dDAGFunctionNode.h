@@ -30,6 +30,7 @@ class dDAGFunctionNode: public dDirectAcyclicgraphNode
 
 	bool m_isConst;
 	bool m_isPrivate;
+	bool m_isConstructor;
 	dDAGTypeNode* m_returnType;
 	dDAGScopeBlockNode* m_body;
 	dList<dDAGParameterNode*> m_parameters; 

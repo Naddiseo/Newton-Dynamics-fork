@@ -157,6 +157,18 @@ extends
 	| EXTENDS IDENTIFIER						{_ASSERTE (0);}
 	;		
 	
+
+semicolon_marker
+	: semicolon_marker_list					{/* nothing here */}
+	| syntax_error							{/* nothing here */}
+	;
+	
+semicolon_marker_list
+	: ';'								{/* nothing here */}
+	| semicolon_marker_list ';'			{/* nothing here */}
+	;	
+	
+	
 class_member_list	 
 	: class_member								{_ASSERTE (0);}
 	| class_member_list	class_member			{_ASSERTE (0);}
@@ -167,12 +179,40 @@ class_member
 	| class_function_implementation				{$$ = $1;}
 	| uninitialized_variable semicolon_marker   {GET_PARENT_CLASS; me->AddClassVariable($1);}
 	;
+	
+class_constructor 
+	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker				{_ASSERTE (0);}
+	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class block_scope	{_ASSERTE (0);}
+	;
+	
+	
+class_function_implementation 
+	: native_function function_prototype semicolon_marker	{_ASSERTE (0);}
+	| function_prototype block_scope						{GET_PARENT_CLASS; dUserVariable tmp; $$ = me->AddClassFunction (tmp, $1, $2);}
+	| PRIVATE function_prototype block_scope				{GET_PARENT_CLASS; $$ = me->AddClassFunction ($1, $2, $3);}
+	;
+	
+	
+function_prototype
+	: type_specifier IDENTIFIER                    '(' function_parameters ')' const_function {GET_PARENT_CLASS; $$ = me->NewFunctionPrototype ($1, $2, $4, $6);}
+	| type_specifier OPERATOR overlodable_operator '(' function_parameters ')' const_function {GET_PARENT_CLASS; dUserVariable temp; temp.m_data = string ("operator") + $3.m_data; $$ = me->NewFunctionPrototype ($1, temp, $5, $7);}
+	| syntax_error
+	;
+
+	
 			
 native_function
 	: NATIVE									{_ASSERTE (0);}	
 	| NATIVE PRIVATE							{_ASSERTE (0);}
 	| PRIVATE NATIVE							{_ASSERTE (0);}	
 	;
+
+
+
+
+
+
+
 
 
 parameter_list 
@@ -195,23 +235,6 @@ init_base_class
 	:									
 	| ':' function_call					{_ASSERTE (0);}
 	;
-	
-semicolon_marker
-	: semicolon_marker_list					{/* nothing here */}
-	| syntax_error							{/* nothing here */}
-	;
-	
-semicolon_marker_list
-	: ';'								{/* nothing here */}
-	| semicolon_marker_list ';'			{/* nothing here */}
-	;	
-
-			 
-class_constructor 
-	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker				{_ASSERTE (0);}
-	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class block_scope	{_ASSERTE (0);}
-	;
-
 
 overlodable_operator
 	: '+'									{_ASSERTE (0);}
@@ -222,19 +245,6 @@ overlodable_operator
 	; 	
 	
 	
-class_function_implementation 
-	: native_function function_prototype semicolon_marker	{_ASSERTE (0);}
-	| function_prototype block_scope						{GET_PARENT_CLASS; dUserVariable tmp; $$ = me->AddClassFunction (tmp, $1, $2);}
-	| PRIVATE function_prototype block_scope				{GET_PARENT_CLASS; $$ = me->AddClassFunction ($1, $2, $3);}
-	;
-	
-	
-function_prototype
-	: type_specifier IDENTIFIER                    '(' function_parameters ')' const_function {GET_PARENT_CLASS; $$ = me->NewFunctionPrototype ($1, $2, $4, $6);}
-	| type_specifier OPERATOR overlodable_operator '(' function_parameters ')' const_function {GET_PARENT_CLASS; dUserVariable temp; temp.m_data = string ("operator") + $3.m_data; $$ = me->NewFunctionPrototype ($1, temp, $5, $7);}
-	| syntax_error
-	;
-
 
 uninitialized_variable
 	: parameter								{ $$ = $1;}
