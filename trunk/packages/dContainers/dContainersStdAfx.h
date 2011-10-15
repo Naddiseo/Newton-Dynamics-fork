@@ -52,17 +52,19 @@
 	#ifdef _DEBUG
 		inline void dExpandTraceMessage (const char *fmt, ...)
 		{
-			va_list v_args;
-			char* const text = (char*) malloc (strlen (fmt) + 2048);
+			#ifdef _MSC_VER 
+				va_list v_args;
+				char* const text = (char*) malloc (strlen (fmt) + 2048);
 
-			text[0] = 0;
-			va_start (v_args, fmt);     
-			vsprintf(text, fmt, v_args);
-			va_end (v_args);            
+				text[0] = 0;
+				va_start (v_args, fmt);     
+				vsprintf(text, fmt, v_args);
+				va_end (v_args);            
 
-			OutputDebugStringA (text);
+				OutputDebugStringA (text);
 
-			free (text);
+				free (text);
+			#endif
 		}
 
 		#define DTRACE(x)										\
