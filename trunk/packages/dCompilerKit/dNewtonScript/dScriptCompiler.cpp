@@ -189,23 +189,6 @@ dDAGScopeBlockNode* dScriptCompiler::GetCurrentScope() const
 
 
 
-
-void dScriptCompiler::SetParamameterAsPrivateVariable(const dUserVariable& variable)
-{
-//	dUserVariable returnNode;
-	_ASSERTE (0);
-/*
-	_ASSERTE (m_currentClass);
-	_ASSERTE (m_currentFunction);
-
-	_ASSERTE (variable.m_node);
-	_ASSERTE (variable.m_node->GetTypeId() == dDAGParameterNode::GetRttiType());
-	dDAGParameterNode* const tmp = (dDAGParameterNode*) variable.m_node;
-	tmp->m_isPublic = false;
-*/
-}
-
-
 dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeConstant (const dUserVariable& value)
 {
 	dUserVariable returnNode;

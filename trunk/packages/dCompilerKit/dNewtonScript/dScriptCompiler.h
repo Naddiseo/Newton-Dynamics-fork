@@ -67,7 +67,6 @@ class dScriptCompiler: public dNewtonScriptParser
 
 	void AddClassFunction(const dUserVariable& function);
 	void AddClassVariable(const dUserVariable& variable);
-	void SetParamameterAsPrivateVariable(const dUserVariable& variable);
 	void AddStatementToCurrentBlock(const dUserVariable& statement);
 
 	

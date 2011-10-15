@@ -208,15 +208,13 @@ class_member_list
 class_member 
 	: ';'										{/* nothing here */}
 	| syntax_error								{/* nothing here */}
-//	| uninitialized_variable					{GET_PARENT_CLASS; me->AddClassVariable($1);}
+	| parameter	';'								{GET_PARENT_CLASS; me->AddClassVariable($1);}
+// this line generate a shif reduce error and make the parcel malfuntion	
+//	| PRIVATE parameter ';'						{GET_PARENT_CLASS; me->AddClassVariable($1);}
 	| class_function							{GET_PARENT_CLASS; me->AddClassFunction($1);}
 	;
 
 
-uninitialized_variable
-	: parameter	';'								{ $$ = $1;}
-	| PRIVATE parameter ';'						{GET_PARENT_CLASS; $$ = $1;	me->SetParamameterAsPrivateVariable($$);}
-	;
 
 class_function
 	: function_prototype ';'											{GET_PARENT_CLASS; $$ = me->NewClassFunction (dUserVariable(), $1, dUserVariable());}

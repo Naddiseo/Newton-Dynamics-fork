@@ -16,7 +16,7 @@ void sort (int[] a, int m, int n) ;
 private private native void sort (int[] a, int m, int n) ;
 int sort () ;
 
-
+int x;
 
 	qsort (int[] a, int size)
 	{
