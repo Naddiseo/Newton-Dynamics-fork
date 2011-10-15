@@ -19,7 +19,7 @@
 #include "dDirectAcyclicgraphNode.h"
 
 //
-// Newton Litle Scripting Language parser  specification 1.0.0
+// Newton Little Scripting Language parser  specification 1.0.0
 // loosely based on a subset of Java and C sharp
 //
 
