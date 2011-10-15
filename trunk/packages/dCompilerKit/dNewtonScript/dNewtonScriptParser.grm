@@ -212,7 +212,7 @@ class_member
 	: ';'										{/* nothing here */}
 	| syntax_error								{/* nothing here */}
 	| uninitialized_variable					{GET_PARENT_CLASS; me->AddClassVariable($1);}
-	| class_function							{_ASSERTE (0);}
+	| class_function							{GET_PARENT_CLASS; me->AddClassFunction($1);}
 	;
 
 
@@ -222,8 +222,8 @@ uninitialized_variable
 	;
 
 class_function
-	: function_modifiers function_prototype ';'						{_ASSERTE (0);}
-	| function_modifiers function_prototype block_scope				{GET_PARENT_CLASS; dUserVariable tmp; $$ = me->AddClassFunction ($1, $2, $3);}
+	: function_modifiers function_prototype ';'						{GET_PARENT_CLASS; $$ = me->NewClassFunction ($1, $2, dUserVariable());}
+	| function_modifiers function_prototype block_scope				{GET_PARENT_CLASS; $$ = me->NewClassFunction ($1, $2, $3);}
 	;
 
 function_prototype
@@ -231,6 +231,9 @@ function_prototype
 	| type_specifier IDENTIFIER '(' function_parameters ')' const_function {GET_PARENT_CLASS; $$ = me->NewFunctionPrototype ($1, $2, $4, $6);}
 	;
 
+parameter
+	: type_specifier IDENTIFIER				{GET_PARENT_CLASS; $$ = me->NewParameterNode ($1, $2);}
+	;
 
 parameter_list 
 	: parameter									{$$ = $1;}
@@ -262,9 +265,6 @@ overlodable_operator
 	; 	
 	
 			  
-parameter
-	: type_specifier IDENTIFIER				{GET_PARENT_CLASS; $$ = me->NewParameterNode ($1, $2);}
-	;
 	
 type_specifier
 	: primitive_types						{$$ = $1;}
