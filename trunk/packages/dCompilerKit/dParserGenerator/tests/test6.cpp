@@ -10,16 +10,18 @@
 */
 
 //
-//Auto generated Parser Generator class: dNewtonScriptParser.cpp
+//Auto generated Parser Generator class: test6.cpp
 //
 
 
-#include "dNewtonScriptParser.h"
+	// test0 grammar
+
+#include "test6.h"
 #include <dList.h>
 
 #define MAX_USER_PARAM	64
 
-enum dNewtonScriptParser::ActionType
+enum test6::ActionType
 {
 	dSHIFT = 0,
 	dREDUCE,
@@ -28,7 +30,7 @@ enum dNewtonScriptParser::ActionType
 };
 
 
-class dNewtonScriptParser::dActionEntry
+class test6::dActionEntry
 {
 	public:
 	dActionEntry (short token, char errorItem, char stateType, short nextState, short ruleSymbols, short ruleIndex)
@@ -44,7 +46,7 @@ class dNewtonScriptParser::dActionEntry
 	short m_ruleIndex;
 };
 
-class dNewtonScriptParser::dGotoEntry
+class test6::dGotoEntry
 {
 	public:
 	dGotoEntry (short token, short nextState)
@@ -58,7 +60,7 @@ class dNewtonScriptParser::dGotoEntry
 
 
 
-class dNewtonScriptParser::dStackPair
+class test6::dStackPair
 {
 	public:
 	dStackPair()
@@ -74,16 +76,16 @@ class dNewtonScriptParser::dStackPair
 };
 
 
-dNewtonScriptParser::dNewtonScriptParser()
+test6::test6()
 {
 }
 
-dNewtonScriptParser::~dNewtonScriptParser()
+test6::~test6()
 {
 }
 
 
-const dNewtonScriptParser::dActionEntry* dNewtonScriptParser::FindAction (const dActionEntry* const actionList, int count, dToken token) const
+const test6::dActionEntry* test6::FindAction (const dActionEntry* const actionList, int count, dToken token) const
 {
 	int i0 = 0;
 	int i1 = count - 1;
@@ -111,7 +113,7 @@ const dNewtonScriptParser::dActionEntry* dNewtonScriptParser::FindAction (const 
 	return NULL;
 }
 
-const dNewtonScriptParser::dGotoEntry* dNewtonScriptParser::FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const
+const test6::dGotoEntry* test6::FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const
 {
 	int i0 = 0;
 	int i1 = count - 1;
@@ -141,15 +143,15 @@ const dNewtonScriptParser::dGotoEntry* dNewtonScriptParser::FindGoto (const dGot
 
 
 
-const dNewtonScriptParser::dActionEntry* dNewtonScriptParser::GetNextAction (dList<dStackPair>& stack, dToken token, xxx& scanner) const
+const test6::dActionEntry* test6::GetNextAction (dList<dStackPair>& stack, dToken token, xxx& scanner) const
 {
 	static short actionsCount[] = {
-			2, 1, 1, 1, 2, 1};
+			2, 1, 1, 1, 1};
 	static short actionsStart[] = {
-			0, 2, 3, 4, 5, 7};
+			0, 2, 3, 4, 5};
 	static dActionEntry actionTable[] = {
-			dActionEntry (257, 0, 0, 3, 0, 0), dActionEntry (258, 0, 0, 2, 0, 0), dActionEntry (254, 0, 2, 0, 0, 0), dActionEntry (254, 0, 1, 0, 1, 1), 
-			dActionEntry (258, 0, 0, 4, 0, 0), dActionEntry (254, 0, 1, 0, 2, 2), dActionEntry (256, 0, 0, 5, 0, 0), dActionEntry (254, 0, 1, 0, 3, 3)};
+			dActionEntry (254, 0, 1, 0, 0, 1), dActionEntry (256, 0, 1, 1, 0, 3), dActionEntry (254, 0, 2, 0, 0, 0), dActionEntry (256, 0, 1, 2, 0, 4), 
+			dActionEntry (256, 0, 0, 4, 0, 0), dActionEntry (254, 0, 1, 0, 3, 2)};
 
 	bool errorMode = false;
 	const dStackPair& stackTop = stack.GetLast()->GetInfo();
@@ -207,17 +209,17 @@ const dNewtonScriptParser::dActionEntry* dNewtonScriptParser::GetNextAction (dLi
 }
 
 
-bool dNewtonScriptParser::Parse(xxx& scanner)
+bool test6::Parse(xxx& scanner)
 {
 	static short gotoCount[] = {
-			1, 0, 0, 0, 0, 0};
+			2, 0, 1, 0, 0};
 	static short gotoStart[] = {
-			0, 1, 1, 1, 1, 1};
+			0, 2, 2, 3, 3};
 	static dGotoEntry gotoTable[] = {
-			dGotoEntry (259, 1)};
+			dGotoEntry (257, 1), dGotoEntry (258, 2), dGotoEntry (259, 3)};
 
 	dList<dStackPair> stack;
-	const int lastToken = 259;
+	const int lastToken = 257;
 	
 	stack.Append ();
 	m_grammarError = false;
@@ -275,7 +277,16 @@ bool dNewtonScriptParser::Parse(xxx& scanner)
 					switch (action->m_ruleIndex) 
 					{
 						//do user semantic Actions
-	
+						case 3:// rule rule0 : 
+						{/*xxx1*/}
+						break;
+					case 1:// rule E : 
+						{/*xxx0*/}
+						break;
+					case 4:// rule rule1 : 
+						{/*xxx2*/}
+						break;
+
 						default:;
 					}
 
@@ -303,7 +314,11 @@ bool dNewtonScriptParser::Parse(xxx& scanner)
 			}
 		}
 	}
-	return !m_grammarError;
+	return m_grammarError;
 }
+
+
+
+
 
 

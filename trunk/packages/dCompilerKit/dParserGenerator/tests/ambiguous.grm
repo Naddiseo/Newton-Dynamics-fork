@@ -1,0 +1,20 @@
+
+%token CONSTANT
+%token PRIVATE 
+%token INT 
+
+%%
+	
+class_member 
+	: PRIVATE  INT 
+	| modifier INT  CONSTANT 
+	;	
+
+modifier
+	: PRIVATE
+	;
+	
+	
+	
+	 
+			   
