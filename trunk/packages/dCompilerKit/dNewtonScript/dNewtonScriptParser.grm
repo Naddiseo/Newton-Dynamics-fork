@@ -60,7 +60,7 @@
 %token LESS_EQUAL GREATHER_EQUAL
 %token IDENTICAL DIFFERENT
 
-%expect 2
+//%expect 2
 
 
 %right ELSE
@@ -91,20 +91,20 @@
 %%
 
 compilation_unit
-	:											{_ASSERTE (0);}	
-	| module_list								{_ASSERTE (0);}	
+	:											
+	| module_list								
 	; 
 
 
 module_list 
-	: module									{_ASSERTE (0);}
-	| module_list module						{_ASSERTE (0);}		
+	: module									
+	| module_list module						
 	;
 			
 module 
 	: ';'										
 	| import_module								{_ASSERTE (0);}
-	| class_delaration							{_ASSERTE (0);}	
+	| class_delaration							
 	;			
 
 
@@ -160,10 +160,6 @@ extends
 	;		
 	
 
-class_member_list	 
-	: class_member								{_ASSERTE (0);}
-	| class_member_list	class_member			{_ASSERTE (0);}
-	;
 
 /*				    
 class_member 
@@ -193,8 +189,8 @@ function_prototype
 */	
 
 function_modifier
-	: NATIVE										{_ASSERTE (0);}
-	| PRIVATE										{_ASSERTE (0);}
+	: NATIVE										{$$ = $1;}
+	| PRIVATE										{$$ = $1;}
 	;
 			
 function_modifier_list
@@ -204,14 +200,19 @@ function_modifier_list
 	
 function_modifiers
 	:												{/* Nothing Here*/}	
-	| function_modifier_list						{_ASSERTE (0);}
+	| function_modifier_list						{$$ = $1;}
 	;	
 
+
+class_member_list	 
+	: class_member								{/* nothing here */}
+	| class_member_list	class_member			{/* nothing here */}
+	;
 			
 class_member 
 	: ';'										{/* nothing here */}
 	| syntax_error								{/* nothing here */}
-	| uninitialized_variable					{GET_PARENT_CLASS; me->AddClassVariable($1);}
+//	| uninitialized_variable					{GET_PARENT_CLASS; me->AddClassVariable($1);}
 	| class_function							{GET_PARENT_CLASS; me->AddClassFunction($1);}
 	;
 
@@ -242,17 +243,17 @@ parameter_list
 	;	
 	
 function_parameters
-	:									{_ASSERTE (0);}
+	:									{/* nothing here */}
 	| parameter_list					{$$ = $1;}
 	;
 	
 const_function
-	:									
+	:									{/* nothing here */}
 	| CONSTANT							{_ASSERTE (0);}
 	;
 	
 init_base_class
-	:									
+	:									{/* nothing here */}
 	| ':' function_call					{_ASSERTE (0);}
 	;
 
