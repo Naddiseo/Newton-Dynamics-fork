@@ -160,34 +160,6 @@ extends
 	;		
 	
 
-
-/*				    
-class_member 
-	: class_constructor							{_ASSERTE (0);}
-	| class_function_implementation				{$$ = $1;}
-	| uninitialized_variable semicolon_marker   {GET_PARENT_CLASS; me->AddClassVariable($1);}
-	;
-	
-class_constructor 
-	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker				{_ASSERTE (0);}
-	| class_visibility IDENTIFIER '(' function_parameters ')' init_base_class block_scope	{_ASSERTE (0);}
-	;
-	
-	
-class_function_implementation 
-	: native_function function_prototype semicolon_marker	{_ASSERTE (0);}
-	| function_prototype block_scope						{GET_PARENT_CLASS; dUserVariable tmp; $$ = me->AddClassFunction (tmp, $1, $2);}
-	| PRIVATE function_prototype block_scope				{GET_PARENT_CLASS; $$ = me->AddClassFunction ($1, $2, $3);}
-	;
-	
-	
-function_prototype
-	: type_specifier IDENTIFIER                    '(' function_parameters ')' const_function {GET_PARENT_CLASS; $$ = me->NewFunctionPrototype ($1, $2, $4, $6);}
-	| type_specifier OPERATOR overlodable_operator '(' function_parameters ')' const_function {GET_PARENT_CLASS; dUserVariable temp; temp.m_data = string ("operator") + $3.m_data; $$ = me->NewFunctionPrototype ($1, temp, $5, $7);}
-	| syntax_error
-	;
-*/	
-
 function_modifier
 	: NATIVE										{$$ = $1;}
 	| PRIVATE										{$$ = $1;}
@@ -224,9 +196,11 @@ class_function
 	;
 
 function_prototype
-	: IDENTIFIER '(' function_parameters ')' init_base_class 			   {GET_PARENT_CLASS; $$ = me->NewConstructorPrototype ($1, $3, $5);}
-	| type_specifier IDENTIFIER '(' function_parameters ')' const_function {GET_PARENT_CLASS; $$ = me->NewFunctionPrototype ($1, $2, $4, $6);}
+	: IDENTIFIER '(' function_parameters ')' init_base_class 								  {GET_PARENT_CLASS; $$ = me->NewConstructorPrototype ($1, $3, $5);}
+	| type_specifier IDENTIFIER '(' function_parameters ')' const_function					  {GET_PARENT_CLASS; $$ = me->NewFunctionPrototype ($1, $2, $4, $6);}
+	| type_specifier OPERATOR overlodable_operator '(' function_parameters ')' const_function {GET_PARENT_CLASS; dUserVariable temp; temp.m_data = string ("operator") + $3.m_data; $$ = me->NewFunctionPrototype ($1, temp, $5, $7);}
 	;
+	
 
 parameter
 	: type_specifier IDENTIFIER				{GET_PARENT_CLASS; $$ = me->NewParameterNode ($1, $2);}
@@ -443,7 +417,7 @@ expression
 //	| '-' expression %prec '~'							{GET_PARENT_CLASS; $$ = me->NewExpressionNodeUnuaryOperator ($1, $2);}
 //	| '+' expression %prec '~'							{$$ = $2;}
 //	| expression '?' expression ':' expression			{_ASSERTE (0);}		
-	| SIZEOF '(' indentifier ')'						{_ASSERTE (0);}
+	| SIZEOF '(' compound_identifier_List ')'			{_ASSERTE (0);}
 	| SIZEOF '(' type_specifier ')'						{_ASSERTE (0);}
 	| CAST '<' type_specifier '>' '(' expression ')'	{_ASSERTE (0);}
 	| NEW new_types										{_ASSERTE (0);}
