@@ -29,7 +29,7 @@ AnyButPercent		[^\%]
 AnyButCloseCurly	[^\}]
 CodeBlock			%[\{]({AnyButPercent}|%{AnyButCloseCurly})*%[\}]
 Literal				[a-zA-Z_][0-9a-zA-Z_]*
-
+Integer				[0-9]+
 
 %%
 {WhiteSpace}		{}
@@ -41,7 +41,9 @@ Literal				[a-zA-Z_][0-9a-zA-Z_]*
 "%union"			{ return dParserCompiler::UNION;}
 "%left"				{ return dParserCompiler::LEFT;}
 "%right"			{ return dParserCompiler::RIGHT;}
+"%expect"			{ return dParserCompiler::EXPECT;}
 {Literal}			{ return dParserCompiler::LITERAL;}
+{Integer}			{ return dParserCompiler::INTEGER;}
 {CodeBlock}			{ m_tokenString.replace(0, 2, ""); m_tokenString.replace(m_tokenString.size() - 2, 2, ""); return dParserCompiler::CODE_BLOCK;}
 
 [|]					{ return(dParserCompiler::OR); }

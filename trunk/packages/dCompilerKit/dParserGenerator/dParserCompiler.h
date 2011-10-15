@@ -46,6 +46,8 @@ class dParserCompiler
 		RIGHT,
 		START,
 		LITERAL,
+		EXPECT,
+		INTEGER,
 		CODE_BLOCK,
 		SEMANTIC_ACTION,
 		GRAMMAR_SEGMENT,
@@ -101,6 +103,10 @@ class dParserCompiler
 							 const dTree<dTokenInfo, dCRCTYPE>& symbolList, const string& userVariableClass); 
 	void GenerateParserCode (const string& className, const string& scannerClassName, const char* const outputFileName, 
 							 const dTree<dTokenInfo, dCRCTYPE>& symbolList, dTree<dState*, dCRCTYPE>& stateList, const string& userCode, string& endUserCode, int lastTerminalTokenEnum);
+
+	void DisplayError (const char* format, ...) const;
+
+	mutable int m_shiftReduceExpectedWarnings;
 
 };
 

@@ -35,9 +35,52 @@ class dNewtonScriptParser
 	{
 		ACCEPTING_TOKEN = 254, 
 		ERROR_TOKEN = 255, 
-		CONSTANT = 256, 
+		NATIVE = 256, 
+		CONSTANT,
+		INTEGER_VALUE,
+		FLOAT_VALUE,
+		STRING_VALUE,
+		IMPORT,
 		PRIVATE,
-		INT
+		CLASS,
+		BASE,
+		DOUBLE_COLOM,
+		IDENTIFIER,
+		EXTENDS,
+		GUI,
+		BOOLEAN,
+		ENUM,
+		BYTE,
+		SHORT,
+		INT,
+		LONG,
+		UNSIGNED,
+		FLOAT,
+		DOUBLE,
+		VOID_TYPE,
+		CAST,
+		SIZEOF,
+		OPERATOR,
+		NEW,
+		RETURN,
+		FOR,
+		WHILE,
+		DO,
+		IF,
+		ELSE,
+		SWITCH,
+		CASE,
+		DEFAULT,
+		CONTINUE,
+		BREAK,
+		LOGIC_AND,
+		LOGIC_OR,
+		SHIFT_RIGHT,
+		SHIFT_LEFT,
+		LESS_EQUAL,
+		GREATHER_EQUAL,
+		IDENTICAL,
+		DIFFERENT
 	};
 
 	enum ActionType;
@@ -63,20 +106,22 @@ class dNewtonScriptParser
 	};
 
 
-		class dUserVariable: public dDefualtUserVariable
+	
+	class dUserVariable: public dDefualtUserVariable
 	{
 		public:
 		dUserVariable () 
-			:dDefualtUserVariable ()
+			:dDefualtUserVariable (), m_node(NULL)
 		{
 		}
-
-		dUserVariable (dToken token, const char* const data, int scannerLine, int scannerIndex)
-			:dDefualtUserVariable  (token, data, scannerLine, scannerIndex)
+		
+		dUserVariable (dToken token, const char* const text, int scannerLine, int scannerIndex)
+			:dDefualtUserVariable (token, text, scannerLine, scannerIndex)
+			,m_node(NULL)
 		{
 		}
+		dDirectAcyclicgraphNode* m_node;
 	};
-
 
 
 	dNewtonScriptParser();
