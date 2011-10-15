@@ -158,33 +158,37 @@ extends
 	;		
 	
 
-semicolon_marker
-	: semicolon_marker_list					{/* nothing here */}
-	| syntax_error							{/* nothing here */}
-	;
+
+
+//semicolon_marker
+//	: semicolon_marker_list					{/* nothing here */}
+//	| syntax_error							{/* nothing here */}
+//	;
 	
-semicolon_marker_list
-	: ';'								{/* nothing here */}
-	| semicolon_marker_list ';'			{/* nothing here */}
-	;	
+//semicolon_marker_list
+//	: ';'								{/* nothing here */}
+//	| semicolon_marker_list ';'			{/* nothing here */}
+//	;	
+
+//native_function
+//	: NATIVE									{_ASSERTE (0);}	
+//	| NATIVE PRIVATE							{_ASSERTE (0);}
+//	| PRIVATE NATIVE							{_ASSERTE (0);}	
+//	;
+	
 	
 	
 class_member_list	 
 	: class_member								{_ASSERTE (0);}
 	| class_member_list	class_member			{_ASSERTE (0);}
 	;
-				    
+
+/*				    
 class_member 
 	: class_constructor							{_ASSERTE (0);}
 	| class_function_implementation				{$$ = $1;}
 	| uninitialized_variable semicolon_marker   {GET_PARENT_CLASS; me->AddClassVariable($1);}
 	;
-	
-uninitialized_variable
-	: parameter								{ $$ = $1;}
-	| PRIVATE parameter						{GET_PARENT_CLASS; $$ = $1;	me->SetParamameterAsPrivateVariable($$);}
-	;
-
 	
 class_constructor 
 	: native_function  IDENTIFIER '(' function_parameters ')' semicolon_marker				{_ASSERTE (0);}
@@ -204,21 +208,49 @@ function_prototype
 	| type_specifier OPERATOR overlodable_operator '(' function_parameters ')' const_function {GET_PARENT_CLASS; dUserVariable temp; temp.m_data = string ("operator") + $3.m_data; $$ = me->NewFunctionPrototype ($1, temp, $5, $7);}
 	| syntax_error
 	;
+*/	
 
-	
+
 			
-native_function
-	: NATIVE									{_ASSERTE (0);}	
-	| NATIVE PRIVATE							{_ASSERTE (0);}
-	| PRIVATE NATIVE							{_ASSERTE (0);}	
+class_member 
+	: ';'										{/* nothing here */}
+	| syntax_error								{/* nothing here */}
+	| uninitialized_variable					{GET_PARENT_CLASS; me->AddClassVariable($1);}
+	| class_function							
+//	| class_constructor							{_ASSERTE (0);}
+//	| class_function_implementation				{$$ = $1;}
 	;
 
 
+uninitialized_variable
+	: parameter	';'								{ $$ = $1;}
+	| PRIVATE parameter ';'						{GET_PARENT_CLASS; $$ = $1;	me->SetParamameterAsPrivateVariable($$);}
+	;
 
 
+function_modifier
+	: NATIVE										{_ASSERTE (0);}
+	| PRIVATE										{_ASSERTE (0);}
+	;
+			
+function_modifier_list
+	: function_modifier								{_ASSERTE (0);}
+	| function_modifier_list function_modifier		{_ASSERTE (0);}
+	;
+	
+function_modifiers
+	:												{_ASSERTE (0);}	
+	| function_modifier_list						{_ASSERTE (0);}
+	;	
+
+class_function
+	: function_modifiers  function_prototype ';'
+	;
 
 
-
+function_prototype
+	: type_specifier IDENTIFIER '(' function_parameters ')' const_function {GET_PARENT_CLASS; $$ = me->NewFunctionPrototype ($1, $2, $4, $6);}
+	;
 
 
 parameter_list 
@@ -250,8 +282,6 @@ overlodable_operator
 	| '%'									{_ASSERTE (0);}
 	; 	
 	
-	
-
 			  
 parameter
 	: type_specifier IDENTIFIER				{GET_PARENT_CLASS; $$ = me->NewParameterNode ($1, $2);}
@@ -397,7 +427,6 @@ function_call
 	| function_indentifier '(' argument_list ')'			{GET_PARENT_CLASS; $$ = me->NewExpressionFunctionCall ($1, $3);}
 	;
 
-	
 return 
 	: RETURN												{GET_PARENT_CLASS; $$ = me->NewReturnStamement(dUserVariable());}
 	| RETURN expression										{GET_PARENT_CLASS; $$ = me->NewReturnStamement($2);}
@@ -446,4 +475,5 @@ expression
 	| FLOAT_VALUE										{GET_PARENT_CLASS; $$ = me->NewExpressionNodeConstant ($1);}
 	| STRING_VALUE										{GET_PARENT_CLASS; $$ = me->NewExpressionNodeConstant ($1);}
 	;	
+
 	

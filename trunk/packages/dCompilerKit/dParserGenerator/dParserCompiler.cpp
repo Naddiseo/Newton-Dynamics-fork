@@ -104,8 +104,13 @@ class dParserCompiler::dRuleInfo: public dParserCompiler::dSymbol, public dList<
 {
 	public:
 	dRuleInfo()
-		:dSymbol(), dList<dSymbol>()
-		,m_ruleId(0), m_ruleNumber(0), m_ruleReduced(false), m_semanticActionCode("")
+		:dSymbol()
+		,dList<dSymbol>()
+		,m_ruleId(0)
+		,m_ruleNumber(0)
+		,m_ruleReduced(false)
+		,m_shiftReduceErrorMark(false)
+		,m_semanticActionCode("")
 	{
 	}
 
@@ -124,6 +129,7 @@ class dParserCompiler::dRuleInfo: public dParserCompiler::dSymbol, public dList<
 	dCRCTYPE m_ruleId;
 	int m_ruleNumber;
 	bool m_ruleReduced;
+	bool m_shiftReduceErrorMark;
 	string m_semanticActionCode;
 
 };
@@ -1058,7 +1064,8 @@ void dParserCompiler::First (
 					}
 				}
 				if (allDeriveEmpty) {
-					firstSetOut.Insert(0, 0);
+					DTRACE (("this could be a bug here, I am not sure if I should closure with the accepting state or not, need more debugging\n"))
+//					firstSetOut.Insert(0, 0);
 				}
 			}
 		}
@@ -1557,7 +1564,7 @@ void dParserCompiler::BuildParsingTable (
 			for (dList<dAction*>::dListNode* actionNode = potencialConflictinActions.GetFirst(); actionNode; actionNode = actionNode->GetNext()) {
 				dAction* const action = actionNode->GetInfo();
 
-				const dRuleInfo& rule = action->m_reduceRuleNode->GetInfo();
+				dRuleInfo& rule = action->m_reduceRuleNode->GetInfo();
 				string sentence;
 				sentence += rule.m_name;
 				sentence += " : ";
@@ -1567,12 +1574,17 @@ void dParserCompiler::BuildParsingTable (
 				}
 
 				if (action->m_type == dSHIFT) {
-					if (m_shiftReduceExpectedWarnings <= 0) {
-						DisplayError ("\nstate %d: shift reduce warning resolved in favor of shift. on rule\n", state->m_number);
-						DisplayError ("  %s\n", sentence.c_str());
+					if (!rule.m_shiftReduceErrorMark) {
+						rule.m_shiftReduceErrorMark = true;
+						if (m_shiftReduceExpectedWarnings <= 0) {
+							DisplayError ("\nstate %d: shift reduce warning resolved in favor of shift. on rule\n", state->m_number);
+							DisplayError ("  %s\n", sentence.c_str());
+						}
+						m_shiftReduceExpectedWarnings --;
 					}
-					m_shiftReduceExpectedWarnings --;
+					
 				} else {
+					_ASSERTE (0);
 					DisplayError ("\nstate %d: reduce reduce error resolved in favor of first sentence. on rule\n", state->m_number);
 					DisplayError ("  %s\n", sentence.c_str());
 				}
