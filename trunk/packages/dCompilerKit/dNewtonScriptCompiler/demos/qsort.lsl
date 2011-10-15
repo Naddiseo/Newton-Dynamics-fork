@@ -51,25 +51,26 @@ int x;
 		int j = n;
 		int v = a[n];
 		int x;
-/*		
+		
 		while (1) {
-	
+/*	
 			do 
 				i = i + 1;
 			while (a[i] < v);
-
+			
 			do 
 				j = j - 1;
 			while (a[j] > v);
-
+*/
 			if (i >= j) {
 				break;
 			}
+			
 			x = a[i];
 			a[i] = a[j];
 			a[j] = x;
 		}
-*/		
+		
 		x = a[i];
 		a[i] = a[n];
 		a[n] = x;
