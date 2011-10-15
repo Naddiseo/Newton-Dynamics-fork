@@ -19,7 +19,7 @@ class dDAGDimensionNode;
 class dDAGTypeNode: public dDirectAcyclicgraphNode
 {
 	public:
-	dDAGTypeNode(dList<dDirectAcyclicgraphNode*>& allNodes, const char* const type0, const char* const type1);
+	dDAGTypeNode(dList<dDirectAcyclicgraphNode*>& allNodes, const char* const type, const char* const modifier);
 	~dDAGTypeNode(void);
 
 	void AddDimensions (dDAGDimensionNode* dimList);

@@ -72,8 +72,9 @@ class dScriptCompiler: public dNewtonScriptParser
 	dUserVariable BeginClassNode ();
 	dUserVariable FinalizeClassNode (const dUserVariable& classNode, const dUserVariable& visibility, const dUserVariable& name, const dUserVariable& baseClass, const dUserVariable& guiInterface);
 
-	dUserVariable AddClassFunction (const dUserVariable& returnType, const dUserVariable& function, const dUserVariable& functionBlock);
-	dUserVariable NewFunctionPrototype (const dUserVariable& returnType, const dUserVariable& funtionName, const dUserVariable& parameterList, const dUserVariable& isConst);
+	dUserVariable AddClassFunction (const dUserVariable& modifier, const dUserVariable& functionProtype, const dUserVariable& functionBody);
+	dUserVariable NewConstructorPrototype (const dUserVariable& functionName, const dUserVariable& parameterList, const dUserVariable& initBaseClass);
+	dUserVariable NewFunctionPrototype (const dUserVariable& returnType, const dUserVariable& functionName, const dUserVariable& parameterList, const dUserVariable& isConst);
 	dUserVariable BeginScopeBlock ();
 	dUserVariable EndScopeBlock (const dUserVariable& block);
 	dUserVariable NewParameterNode (const dUserVariable& primitiveType, const dUserVariable& identifier);
@@ -86,7 +87,7 @@ class dScriptCompiler: public dNewtonScriptParser
 	dUserVariable NewExpressionNodeUnuaryOperator (const dUserVariable& unuaryOperator, const dUserVariable& expression);
 	dUserVariable NewExpressionNodeBinaryOperator (const dUserVariable& binaryOperator, const dUserVariable& expressionA, const dUserVariable& expressionB);
 	
-	dUserVariable NewExpressionFunctionCall (const dUserVariable& funtionName, const dUserVariable& argumnetList);
+	dUserVariable NewExpressionFunctionCall (const dUserVariable& functionName, const dUserVariable& argumnetList);
 
 	dUserVariable NewDimensionNode(const dUserVariable& expression);
 	dUserVariable TypeAddDimention(const dUserVariable& type, const dUserVariable& dimension);

@@ -348,43 +348,9 @@ dScriptCompiler::dUserVariable dScriptCompiler::EndScopeBlock (const dUserVariab
 }
 
 
-dScriptCompiler::dUserVariable dScriptCompiler::NewFunctionPrototype (const dUserVariable& returnType, const dUserVariable& functionName, const dUserVariable& parameterList, const dUserVariable& isConst)
-{
-	dUserVariable returnNode;
-
-	dDAGTypeNode* const type = (dDAGTypeNode*) returnType.m_node;
-	_ASSERTE (type->IsType(dDAGTypeNode::GetRttiType()));
-
-	dDAGParameterNode* const parameters = (dDAGParameterNode*)parameterList.m_node;
-	_ASSERTE (parameters->IsType(dDAGParameterNode::GetRttiType()));
-
-	dDAGFunctionNode* const function = new dDAGFunctionNode(m_allNodes, type, functionName.m_data.c_str(), parameters, isConst.m_data.c_str());
-
-	GetCurrentClass()->AddFunction(function);
-
-	returnNode.m_node = function;
-	return returnNode;
-}
 
 
 
-dScriptCompiler::dUserVariable dScriptCompiler::AddClassFunction (const dUserVariable& isPrivate, const dUserVariable& function, const dUserVariable& functionBlock)
-{
-	dUserVariable returnNode;
-
-	dDAGScopeBlockNode* const block = (dDAGScopeBlockNode*) functionBlock.m_node;
-	_ASSERTE (!block || block->IsType(dDAGScopeBlockNode::GetRttiType()));
-
-	dDAGFunctionNode* const fnct = (dDAGFunctionNode*) function.m_node;
-	_ASSERTE (fnct && fnct->IsType(dDAGFunctionNode::GetRttiType()));
-
-	fnct->m_isPrivate = (isPrivate.m_data == "") ? false : true;
-	fnct->CalculateKey();
-	fnct->SetBody(block);
-
-	returnNode.m_node = fnct;
-	return returnNode;
-}
 
 
 
@@ -649,4 +615,58 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewForStamement(const dUserVaria
 	AddStatementToCurrentBlock(returnNode);
 	returnNode.m_node = GetCurrentScope();
 	return EndScopeBlock (returnNode);
+}
+
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewFunctionPrototype (const dUserVariable& returnType, const dUserVariable& functionName, const dUserVariable& parameterList, const dUserVariable& isConst)
+{
+	dUserVariable returnNode;
+
+	dDAGTypeNode* const type = (dDAGTypeNode*) returnType.m_node;
+	_ASSERTE (type->IsType(dDAGTypeNode::GetRttiType()));
+
+	dDAGParameterNode* const parameters = (dDAGParameterNode*)parameterList.m_node;
+	_ASSERTE (parameters->IsType(dDAGParameterNode::GetRttiType()));
+
+	dDAGFunctionNode* const function = new dDAGFunctionNode(m_allNodes, type, functionName.m_data.c_str(), parameters, isConst.m_data.c_str());
+
+	GetCurrentClass()->AddFunction(function);
+
+	returnNode.m_node = function;
+	return returnNode;
+}
+
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewConstructorPrototype (const dUserVariable& functionName, const dUserVariable& parameterList, const dUserVariable& initBaseClass)
+{
+	dUserVariable typeVar;
+	typeVar.m_node = new dDAGTypeNode (m_allNodes, "void", "");
+
+	dUserVariable returnNode (NewFunctionPrototype (typeVar, functionName, parameterList, dUserVariable()));
+
+	dDAGFunctionNode* const function = (dDAGFunctionNode*) returnNode.m_node;
+	function->m_isConstructor = true;
+
+	_ASSERTE (!initBaseClass.m_node);
+
+	return returnNode;
+}
+
+dScriptCompiler::dUserVariable dScriptCompiler::AddClassFunction (const dUserVariable& modifier, const dUserVariable& functionProtype, const dUserVariable& functionBody)
+{
+	dUserVariable returnNode;
+/*
+	dDAGScopeBlockNode* const block = (dDAGScopeBlockNode*) functionBlock.m_node;
+	_ASSERTE (!block || block->IsType(dDAGScopeBlockNode::GetRttiType()));
+
+	dDAGFunctionNode* const fnct = (dDAGFunctionNode*) function.m_node;
+	_ASSERTE (fnct && fnct->IsType(dDAGFunctionNode::GetRttiType()));
+
+	fnct->m_isPrivate = (isPrivate.m_data == "") ? false : true;
+	fnct->CalculateKey();
+	fnct->SetBody(block);
+
+	returnNode.m_node = fnct;
+*/
+	return returnNode;
 }
