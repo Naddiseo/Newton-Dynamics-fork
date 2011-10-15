@@ -65,7 +65,9 @@ void dScriptCompiler::DisplayError (const char* format, ...) const
 	va_end (v_args);            
 
 	fprintf (stderr, text);
-	OutputDebugStringA (text);
+	#ifdef _MSC_VER  
+		OutputDebugStringA (text);
+	#endif	
 
 	free (text);
 }
