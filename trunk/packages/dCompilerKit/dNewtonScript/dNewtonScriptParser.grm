@@ -194,14 +194,10 @@ function_modifier
 	;
 			
 function_modifier_list
-	: function_modifier								{_ASSERTE (0);}
-	| function_modifier_list function_modifier		{_ASSERTE (0);}
+	: function_modifier								{GET_PARENT_CLASS; $$ = me->NewFunctionModifier (dUserVariable(), $1);}
+	| function_modifier_list function_modifier		{GET_PARENT_CLASS; $$ = me->NewFunctionModifier ($1, $2);}
 	;
 	
-function_modifiers
-	:												{/* Nothing Here*/}	
-	| function_modifier_list						{$$ = $1;}
-	;	
 
 
 class_member_list	 
@@ -223,8 +219,10 @@ uninitialized_variable
 	;
 
 class_function
-	: function_modifiers function_prototype ';'						{GET_PARENT_CLASS; $$ = me->NewClassFunction ($1, $2, dUserVariable());}
-	| function_modifiers function_prototype block_scope				{GET_PARENT_CLASS; $$ = me->NewClassFunction ($1, $2, $3);}
+	: function_prototype ';'											{GET_PARENT_CLASS; $$ = me->NewClassFunction (dUserVariable(), $1, dUserVariable());}
+	| function_prototype block_scope									{GET_PARENT_CLASS; $$ = me->NewClassFunction (dUserVariable(), $1, $2);}
+	| function_modifier_list function_prototype ';'						{GET_PARENT_CLASS; $$ = me->NewClassFunction ($1, $2, dUserVariable());}
+	| function_modifier_list function_prototype block_scope				{GET_PARENT_CLASS; $$ = me->NewClassFunction ($1, $2, $3);}
 	;
 
 function_prototype

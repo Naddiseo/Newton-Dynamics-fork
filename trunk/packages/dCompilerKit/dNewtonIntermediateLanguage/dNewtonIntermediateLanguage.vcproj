@@ -212,6 +212,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\dDAGFunctionModifier.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGFunctionModifier.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dDAGFunctionNode.cpp"
 			>
 		</File>

@@ -14,7 +14,7 @@
 #include "dDAGFunctionNode.h"
 #include "dDAGParameterNode.h"
 #include "dDAGScopeBlockNode.h"
-
+#include "dDAGFunctionModifier.h"
 
 dInitRtti(dDAGFunctionNode);
 
@@ -25,6 +25,7 @@ dDAGFunctionNode::dDAGFunctionNode(dList<dDirectAcyclicgraphNode*>& allNodes, dD
 	,m_isConstructor(false)
 	,m_returnType (type)
 	,m_body(NULL)
+	,m_modifier(NULL)
 	,m_parameters() 
 {
 	m_returnType->AddRef();
@@ -41,11 +42,14 @@ dDAGFunctionNode::dDAGFunctionNode(dList<dDirectAcyclicgraphNode*>& allNodes, dD
 
 dDAGFunctionNode::~dDAGFunctionNode(void)
 {
-	_ASSERTE (m_body);
 	_ASSERTE (m_returnType);
 	m_returnType->Release();
-	m_body->Release();
-
+	if (m_body) {
+		m_body->Release();
+	}
+	if (m_modifier) {
+		m_modifier->Release();
+	}
 	for (dList<dDAGParameterNode*>::dListNode* node = m_parameters.GetFirst(); node; node = node->GetNext()) {
 		dDAGParameterNode* const parameter = node->GetInfo();
 		parameter->Release();
@@ -71,3 +75,8 @@ void dDAGFunctionNode::SetBody(dDAGScopeBlockNode* const body)
 	m_body->AddRef();
 }
 
+void dDAGFunctionNode::SetModifier(dDAGFunctionModifier* const modifier)
+{
+	m_modifier = modifier;
+	m_modifier->AddRef();
+}

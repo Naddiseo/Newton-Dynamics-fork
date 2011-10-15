@@ -17,6 +17,7 @@
 class dDAGTypeNode;
 class dDAGParameterNode;
 class dDAGScopeBlockNode;
+class dDAGFunctionModifier;
 
 class dDAGFunctionNode: public dDirectAcyclicgraphNode
 {
@@ -27,12 +28,15 @@ class dDAGFunctionNode: public dDirectAcyclicgraphNode
 	virtual void CalculateKey();
 
 	void SetBody(dDAGScopeBlockNode* const body);
+	void SetModifier(dDAGFunctionModifier* const modifier);
 
 	bool m_isConst;
 	bool m_isPrivate;
 	bool m_isConstructor;
+	
 	dDAGTypeNode* m_returnType;
 	dDAGScopeBlockNode* m_body;
+	dDAGFunctionModifier* m_modifier;
 	dList<dDAGParameterNode*> m_parameters; 
 	
 

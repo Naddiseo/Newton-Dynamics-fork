@@ -12,6 +12,12 @@
 // a very naive qsort for integers
 class qsort
 {
+void sort (int[] a, int m, int n) ;
+private private native void sort (int[] a, int m, int n) ;
+int sort () ;
+
+
+
 	qsort (int[] a, int size)
 	{
 		// first make sure the first element is the smallest of the array 
@@ -33,6 +39,7 @@ class qsort
 		sort (a, 1, size -1);
 	}
 
+
 	// very primitive qsort 
 	private void sort (int[] a, int m, int n)
 	{
@@ -44,7 +51,9 @@ class qsort
 		int j = n;
 		int v = a[n];
 		int x;
+/*		
 		while (1) {
+	
 			do 
 				i = i + 1;
 			while (a[i] < v);
@@ -60,11 +69,13 @@ class qsort
 			a[i] = a[j];
 			a[j] = x;
 		}
+*/		
 		x = a[i];
 		a[i] = a[n];
 		a[n] = x;
 		qsort (a, m, j);
 		qsort (a, i + 1, n);
 	}
+	
 }
 

@@ -199,7 +199,7 @@ void dScriptCompiler::SetParamameterAsPrivateVariable(const dUserVariable& varia
 	_ASSERTE (m_currentFunction);
 
 	_ASSERTE (variable.m_node);
-	_ASSERTE (variable.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType());
+	_ASSERTE (variable.m_node->GetTypeId() == dDAGParameterNode::GetRttiType());
 	dDAGParameterNode* const tmp = (dDAGParameterNode*) variable.m_node;
 	tmp->m_isPublic = false;
 */
@@ -275,13 +275,6 @@ dScriptCompiler::dUserVariable dScriptCompiler::FinalizeClassNode (const dUserVa
 
 
 
-void dScriptCompiler::AddClassVariable(const dUserVariable& variable)
-{
-	_ASSERTE (variable.m_node);
-	_ASSERTE (variable.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType());
-	dDAGParameterNode* const var = (dDAGParameterNode*) variable.m_node;
-	GetCurrentClass()->AddVariable(var);
-}
 
 
 
@@ -300,9 +293,9 @@ dScriptCompiler::dUserVariable dScriptCompiler::LinkParameters(const dUserVariab
 {
 	dUserVariable returnNode (parameterA);
 
-	_ASSERTE (parameterA.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType());
-//	_ASSERTE (!parameterB.m_node || (parameterB.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType()));
-	_ASSERTE (parameterB.m_node->GetTypeId() ==  dDAGParameterNode::GetRttiType());
+	_ASSERTE (parameterA.m_node->GetTypeId() == dDAGParameterNode::GetRttiType());
+//	_ASSERTE (!parameterB.m_node || (parameterB.m_node->GetTypeId() == dDAGParameterNode::GetRttiType()));
+	_ASSERTE (parameterB.m_node->GetTypeId() == dDAGParameterNode::GetRttiType());
 	dDAGParameterNode* param = (dDAGParameterNode*) parameterA.m_node;
 
 	for ( ;param->m_next; param = param->m_next);
@@ -400,7 +393,7 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewLocalVariableStamement(const 
 	dUserVariable returnNode;
 
 	dDAGParameterNode* const node = (dDAGParameterNode*)variable.m_node;
-	_ASSERTE (node->GetTypeId() ==  dDAGParameterNode::GetRttiType());
+	_ASSERTE (node->GetTypeId() == dDAGParameterNode::GetRttiType());
 	if (initializationExpression.m_node) {
 		dDAGExpressionNode* const exp = (dDAGExpressionNode*) initializationExpression.m_node;
 		_ASSERTE (exp->IsType(dDAGExpressionNode::GetRttiType()));
@@ -626,11 +619,11 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewFunctionPrototype (const dUse
 	_ASSERTE (type->IsType(dDAGTypeNode::GetRttiType()));
 
 	dDAGParameterNode* const parameters = (dDAGParameterNode*)parameterList.m_node;
-	_ASSERTE (parameters->IsType(dDAGParameterNode::GetRttiType()));
+	_ASSERTE (!parameters || parameters->IsType(dDAGParameterNode::GetRttiType()));
 
 	dDAGFunctionNode* const function = new dDAGFunctionNode(m_allNodes, type, functionName.m_data.c_str(), parameters, isConst.m_data.c_str());
 
-	GetCurrentClass()->AddFunction(function);
+//	GetCurrentClass()->AddFunction(function);
 
 	returnNode.m_node = function;
 	return returnNode;
@@ -652,21 +645,66 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewConstructorPrototype (const d
 	return returnNode;
 }
 
-dScriptCompiler::dUserVariable dScriptCompiler::AddClassFunction (const dUserVariable& modifier, const dUserVariable& functionProtype, const dUserVariable& functionBody)
+void dScriptCompiler::AddClassVariable(const dUserVariable& variable)
+{
+	_ASSERTE (variable.m_node);
+	_ASSERTE (variable.m_node->GetTypeId() == dDAGParameterNode::GetRttiType());
+	dDAGParameterNode* const var = (dDAGParameterNode*) variable.m_node;
+	GetCurrentClass()->AddVariable(var);
+}
+
+void dScriptCompiler::AddClassFunction(const dUserVariable& function)
+{
+	_ASSERTE (function.m_node);
+	_ASSERTE (function.m_node->GetTypeId() == dDAGFunctionNode::GetRttiType());
+	dDAGFunctionNode* const fnt = (dDAGFunctionNode*) function.m_node;
+	GetCurrentClass()->AddFunction(fnt);
+}
+
+
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewClassFunction (const dUserVariable& modifier, const dUserVariable& functionProtype, const dUserVariable& functionBody)
 {
 	dUserVariable returnNode;
-/*
-	dDAGScopeBlockNode* const block = (dDAGScopeBlockNode*) functionBlock.m_node;
-	_ASSERTE (!block || block->IsType(dDAGScopeBlockNode::GetRttiType()));
 
-	dDAGFunctionNode* const fnct = (dDAGFunctionNode*) function.m_node;
-	_ASSERTE (fnct && fnct->IsType(dDAGFunctionNode::GetRttiType()));
+	dDAGFunctionNode* const function = (dDAGFunctionNode*) functionProtype.m_node;
+	_ASSERTE (function && function->IsType(dDAGFunctionNode::GetRttiType()));
 
-	fnct->m_isPrivate = (isPrivate.m_data == "") ? false : true;
-	fnct->CalculateKey();
-	fnct->SetBody(block);
+	if (functionBody.m_node) {
+		dDAGScopeBlockNode* const block = (dDAGScopeBlockNode*) functionBody.m_node;
+		_ASSERTE (block->IsType(dDAGScopeBlockNode::GetRttiType()));
+		function->SetBody(block);
+	}
 
-	returnNode.m_node = fnct;
-*/
+	if (modifier.m_node) {
+		dDAGFunctionModifier* const mod = (dDAGFunctionModifier*) modifier.m_node;
+		_ASSERTE (mod->IsType(dDAGFunctionModifier::GetRttiType()));
+		function->SetModifier (mod);
+	}
+
+	function->CalculateKey();
+
+	returnNode.m_node = function;
+	return returnNode;
+}
+
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewFunctionModifier (const dUserVariable& modifier, const dUserVariable& appendModifirer)
+{
+	dUserVariable returnNode;
+	
+	dDAGFunctionModifier* mod = (dDAGFunctionModifier*)modifier.m_node;
+	if (!mod) {
+		mod = new dDAGFunctionModifier(m_allNodes) ;
+	}
+	_ASSERTE (mod->IsType(dDAGFunctionModifier::GetRttiType()));
+
+	if (appendModifirer.m_token == PRIVATE) {
+		mod->m_private = true;
+	}
+	if (appendModifirer.m_token == NATIVE) {
+		mod->m_native = true;
+	}
+	returnNode.m_node = mod;
 	return returnNode;
 }

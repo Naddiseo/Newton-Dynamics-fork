@@ -29,6 +29,7 @@
 #include <dDAGDimensionNode.h>
 #include <dDAGScopeBlockNode.h>
 #include <dDAGExpressionNode.h>
+#include <dDAGFunctionModifier.h>
 #include <dDAGFunctionStatement.h>
 #include <dDirectAcyclicgraphNode.h>
 #include <dDAGFunctionStatementIF.h>
@@ -64,6 +65,7 @@ class dScriptCompiler: public dNewtonScriptParser
 	void DisplayError (const char* format, ...) const;
 	void SyntaxError (const dNewtonScriptLexical& scanner, const dUserVariable& errorToken, const dUserVariable& errorTokenMarker);
 
+	void AddClassFunction(const dUserVariable& function);
 	void AddClassVariable(const dUserVariable& variable);
 	void SetParamameterAsPrivateVariable(const dUserVariable& variable);
 	void AddStatementToCurrentBlock(const dUserVariable& statement);
@@ -72,9 +74,10 @@ class dScriptCompiler: public dNewtonScriptParser
 	dUserVariable BeginClassNode ();
 	dUserVariable FinalizeClassNode (const dUserVariable& classNode, const dUserVariable& visibility, const dUserVariable& name, const dUserVariable& baseClass, const dUserVariable& guiInterface);
 
-	dUserVariable AddClassFunction (const dUserVariable& modifier, const dUserVariable& functionProtype, const dUserVariable& functionBody);
+	dUserVariable NewClassFunction (const dUserVariable& modifier, const dUserVariable& functionProtype, const dUserVariable& functionBody);
 	dUserVariable NewConstructorPrototype (const dUserVariable& functionName, const dUserVariable& parameterList, const dUserVariable& initBaseClass);
 	dUserVariable NewFunctionPrototype (const dUserVariable& returnType, const dUserVariable& functionName, const dUserVariable& parameterList, const dUserVariable& isConst);
+	dUserVariable NewFunctionModifier (const dUserVariable& modifirer, const dUserVariable& appendModifirer);
 	dUserVariable BeginScopeBlock ();
 	dUserVariable EndScopeBlock (const dUserVariable& block);
 	dUserVariable NewParameterNode (const dUserVariable& primitiveType, const dUserVariable& identifier);
