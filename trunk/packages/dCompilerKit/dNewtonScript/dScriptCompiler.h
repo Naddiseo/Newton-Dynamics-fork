@@ -34,6 +34,8 @@
 #include <dDirectAcyclicgraphNode.h>
 #include <dDAGFunctionStatementIF.h>
 #include <dDAGFunctionStatementFOR.h>
+#include <dDAGFunctionStatementBREAK.h>
+#include <dDAGFunctionStatementWHILE.h>
 #include <dDAGExpressionNodeFunctionCall.h>
 #include <dDAGExpressionNodeConstant.h>
 #include <dDAGExpressionNodeVariable.h>
@@ -94,11 +96,13 @@ class dScriptCompiler: public dNewtonScriptParser
 	dUserVariable NewDimensionNode(const dUserVariable& expression);
 	dUserVariable TypeAddDimention(const dUserVariable& type, const dUserVariable& dimension);
 	
-	dUserVariable NewLocalVariableStamement(const dUserVariable& variable, const dUserVariable& initializationExpression);
-	dUserVariable NewIFStamement(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock);
-	dUserVariable NewForStamement(const dUserVariable& forScope, const dUserVariable& init_exp, const dUserVariable& conditional, const dUserVariable& step_Exp, const dUserVariable& statement);
-	dUserVariable NewReturnStamement(const dUserVariable& expression);
-	dUserVariable NewFunctionCallStamement(const dUserVariable& functionExpression);
+	dUserVariable NewLocalVariableStatement(const dUserVariable& variable, const dUserVariable& initializationExpression);
+	dUserVariable NewBreakStatement();
+	dUserVariable NewWhileStatement(const dUserVariable& expression, const dUserVariable& statement);
+	dUserVariable NewIFStatement(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock);
+	dUserVariable NewForStatement(const dUserVariable& forScope, const dUserVariable& init_exp, const dUserVariable& conditional, const dUserVariable& step_Exp, const dUserVariable& statement);
+	dUserVariable NewReturnStatement(const dUserVariable& expression);
+	dUserVariable NewFunctionCallStatement(const dUserVariable& functionExpression);
 	
 
 	dDAGClassNode* GetCurrentClass() const;

@@ -2408,7 +2408,7 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						{GET_PARENT_CLASS; entry.m_value = me->BeginScopeBlock();}
 						break;
 					case 128:// rule return : RETURN 
-						{GET_PARENT_CLASS; entry.m_value = me->NewReturnStamement(dUserVariable());}
+						{GET_PARENT_CLASS; entry.m_value = me->NewReturnStatement(dUserVariable());}
 						break;
 					case 85:// rule statement : ; 
 						{entry.m_value = parameter[0].m_value;}
@@ -2477,19 +2477,19 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						{entry.m_value = parameter[0].m_value;}
 						break;
 					case 129:// rule return : RETURN expression 
-						{GET_PARENT_CLASS; entry.m_value = me->NewReturnStamement(parameter[1].m_value);}
+						{GET_PARENT_CLASS; entry.m_value = me->NewReturnStatement(parameter[1].m_value);}
 						break;
 					case 91:// rule statement : BREAK ; 
-						{_ASSERTE (0);}
+						{GET_PARENT_CLASS; entry.m_value = me->NewBreakStatement();}
 						break;
 					case 96:// rule statement : return ; 
 						{entry.m_value = parameter[0].m_value;}
 						break;
 					case 97:// rule statement : function_call ; 
-						{GET_PARENT_CLASS; entry.m_value = me->NewFunctionCallStamement(parameter[0].m_value);}
+						{GET_PARENT_CLASS; entry.m_value = me->NewFunctionCallStatement(parameter[0].m_value);}
 						break;
 					case 88:// rule statement : parameter ; 
-						{GET_PARENT_CLASS; entry.m_value = me->NewLocalVariableStamement(parameter[0].m_value, dUserVariable());}
+						{GET_PARENT_CLASS; entry.m_value = me->NewLocalVariableStatement(parameter[0].m_value, dUserVariable());}
 						break;
 					case 90:// rule statement : CONTINUE ; 
 						{_ASSERTE (0);}
@@ -2543,22 +2543,22 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						{GET_PARENT_CLASS; entry.m_value = me->NewExpresionNodeAssigment (parameter[0].m_value, parameter[1].m_value, parameter[3].m_value);}
 						break;
 					case 89:// rule statement : parameter = expression ; 
-						{GET_PARENT_CLASS; entry.m_value = me->NewLocalVariableStamement(parameter[0].m_value, parameter[2].m_value);}
+						{GET_PARENT_CLASS; entry.m_value = me->NewLocalVariableStatement(parameter[0].m_value, parameter[2].m_value);}
 						break;
 					case 131:// rule new_types : CLASS IDENTIFIER ( argument_list ) 
 						{_ASSERTE (0);}
 						break;
 					case 94:// rule statement : WHILE ( expression ) statement 
-						{_ASSERTE (0);}
+						{GET_PARENT_CLASS; entry.m_value = me->NewWhileStatement(parameter[2].m_value, parameter[4].m_value);}
 						break;
 					case 98:// rule statement : IF ( expression ) statement 
-						{GET_PARENT_CLASS; entry.m_value = me->NewIFStamement(parameter[2].m_value, parameter[4].m_value, dUserVariable());}
+						{GET_PARENT_CLASS; entry.m_value = me->NewIFStatement(parameter[2].m_value, parameter[4].m_value, dUserVariable());}
 						break;
 					case 149:// rule expression : CAST < type_specifier > ( expression ) 
 						{_ASSERTE (0);}
 						break;
 					case 104:// rule for_first_expression : parameter = expression 
-						{GET_PARENT_CLASS; entry.m_value = me->NewLocalVariableStamement(parameter[0].m_value, parameter[2].m_value);}
+						{GET_PARENT_CLASS; entry.m_value = me->NewLocalVariableStatement(parameter[0].m_value, parameter[2].m_value);}
 						break;
 					case 116:// rule switch_case_list : switch_case 
 						{_ASSERTE (0);}
@@ -2576,7 +2576,7 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						{_ASSERTE (0);}
 						break;
 					case 99:// rule statement : IF ( expression ) statement ELSE statement 
-						{GET_PARENT_CLASS; entry.m_value = me->NewIFStamement (parameter[2].m_value, parameter[4].m_value, parameter[6].m_value);}
+						{GET_PARENT_CLASS; entry.m_value = me->NewIFStatement (parameter[2].m_value, parameter[4].m_value, parameter[6].m_value);}
 						break;
 					case 106:// rule for_third_expression : expression 
 						{entry.m_value = parameter[0].m_value;}
@@ -2591,7 +2591,7 @@ bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
 						{_ASSERTE (0);}
 						break;
 					case 93:// rule statement : FOR for_begin ( for_first_expression ; expression ; for_third_expression ) statement 
-						{GET_PARENT_CLASS; entry.m_value = me->NewForStamement(parameter[1].m_value, parameter[3].m_value, parameter[5].m_value, parameter[7].m_value, parameter[9].m_value);}
+						{GET_PARENT_CLASS; entry.m_value = me->NewForStatement(parameter[1].m_value, parameter[3].m_value, parameter[5].m_value, parameter[7].m_value, parameter[9].m_value);}
 						break;
 
 						default:;

@@ -53,11 +53,11 @@ int x;
 		int x;
 		
 		while (1) {
-/*	
+	
 			do 
 				i = i + 1;
 			while (a[i] < v);
-			
+/*			
 			do 
 				j = j - 1;
 			while (a[j] > v);

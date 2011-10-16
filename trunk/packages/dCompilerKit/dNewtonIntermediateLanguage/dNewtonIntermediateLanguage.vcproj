@@ -244,6 +244,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\dDAGFunctionStatementBREAK.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGFunctionStatementBREAK.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dDAGFunctionStatementFOR.cpp"
 			>
 		</File>
@@ -273,6 +281,14 @@
 		</File>
 		<File
 			RelativePath=".\dDAGFunctionStatementReturn.h"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGFunctionStatementWHILE.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dDAGFunctionStatementWHILE.h"
 			>
 		</File>
 		<File
