@@ -33,6 +33,7 @@
 #include <dDAGFunctionStatement.h>
 #include <dDirectAcyclicgraphNode.h>
 #include <dDAGFunctionStatementIF.h>
+#include <dDAGFunctionStatementDO.h>
 #include <dDAGFunctionStatementFOR.h>
 #include <dDAGFunctionStatementBREAK.h>
 #include <dDAGFunctionStatementWHILE.h>
@@ -98,8 +99,10 @@ class dScriptCompiler: public dNewtonScriptParser
 	
 	dUserVariable NewLocalVariableStatement(const dUserVariable& variable, const dUserVariable& initializationExpression);
 	dUserVariable NewBreakStatement();
+	dUserVariable NewDoStatement(const dUserVariable& expression, const dUserVariable& statement);
 	dUserVariable NewWhileStatement(const dUserVariable& expression, const dUserVariable& statement);
 	dUserVariable NewIFStatement(const dUserVariable& expression, const dUserVariable& thenBlock, const dUserVariable& elseBlock);
+	
 	dUserVariable NewForStatement(const dUserVariable& forScope, const dUserVariable& init_exp, const dUserVariable& conditional, const dUserVariable& step_Exp, const dUserVariable& statement);
 	dUserVariable NewReturnStatement(const dUserVariable& expression);
 	dUserVariable NewFunctionCallStatement(const dUserVariable& functionExpression);

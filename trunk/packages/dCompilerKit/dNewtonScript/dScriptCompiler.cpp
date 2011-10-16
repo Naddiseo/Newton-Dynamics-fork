@@ -714,3 +714,17 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewWhileStatement(const dUserVar
 	returnNode.m_node = stmtNode;
 	return returnNode;
 }
+
+dScriptCompiler::dUserVariable dScriptCompiler::NewDoStatement(const dUserVariable& expression, const dUserVariable& statement)
+{
+	dUserVariable returnNode;
+
+	dDAGExpressionNode* const exp = (dDAGExpressionNode*) expression.m_node;
+	dDAGFunctionStatement* const stmt = (dDAGFunctionStatement*) statement.m_node;
+	_ASSERTE (exp->IsType(dDAGExpressionNode::GetRttiType()));
+	_ASSERTE (stmt->IsType(dDAGFunctionStatement::GetRttiType()));
+
+	dDAGFunctionStatementDO* const stmtNode = new dDAGFunctionStatementDO(m_allNodes, exp, stmt);
+	returnNode.m_node = stmtNode;
+	return returnNode;
+}
