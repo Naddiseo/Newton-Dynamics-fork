@@ -25,7 +25,7 @@
 #include "dDAGExpressionNode.h"
 #include "dDAGFunctionModifier.h"
 #include "dDAGFunctionStatement.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGFunctionStatementIF.h"
 #include "dDAGFunctionStatementDO.h"
 #include "dDAGFunctionStatementFOR.h"
@@ -71,8 +71,8 @@ dScriptCompiler::~dScriptCompiler()
 		classNode->Release();
 	}
 
-	for(dList<dDirectAcyclicgraphNode*>::dListNode* node = m_allNodes.GetFirst(); node; node = node->GetNext() ) {
-		dDirectAcyclicgraphNode* const dagNode = node->GetInfo();
+	for(dList<dDAG*>::dListNode* node = m_allNodes.GetFirst(); node; node = node->GetNext() ) {
+		dDAG* const dagNode = node->GetInfo();
 		dagNode->Release();
 	}
 }

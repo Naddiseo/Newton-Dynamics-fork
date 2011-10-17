@@ -10,14 +10,14 @@
 */
 
 #include "dLittleScriptCompiler.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGTypeNode.h"
 #include "dDAGExpressionNodeConstant.h"
 
 
 dInitRtti(dDAGExpressionNodeConstant);
 
-dDAGExpressionNodeConstant::dDAGExpressionNodeConstant(dList<dDirectAcyclicgraphNode*>& allNodes, dType type, const char* const value)
+dDAGExpressionNodeConstant::dDAGExpressionNodeConstant(dList<dDAG*>& allNodes, dType type, const char* const value)
 	:dDAGExpressionNode(allNodes)
 	,m_type(type)
 {

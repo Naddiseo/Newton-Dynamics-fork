@@ -12,7 +12,7 @@
 #ifndef __dDAGFunctionStatementBREAK_H__
 #define __dDAGFunctionStatementBREAK_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGFunctionStatement.h"
 #include "dDAGExpressionNode.h"
 
@@ -20,7 +20,7 @@
 class dDAGFunctionStatementBREAK: public dDAGFunctionStatement
 {
 	public:
-	dDAGFunctionStatementBREAK(dList<dDirectAcyclicgraphNode*>& allNodes);
+	dDAGFunctionStatementBREAK(dList<dDAG*>& allNodes);
 	~dDAGFunctionStatementBREAK();
 
 	dAddRtti(dDAGFunctionStatement);

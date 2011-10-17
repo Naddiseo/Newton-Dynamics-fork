@@ -12,7 +12,7 @@
 #ifndef __dDAGFunctionStatementAssigment_H__
 #define __dDAGFunctionStatementAssigment_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGFunctionStatement.h"
 #include "dDAGExpressionNodeVariable.h"
 #include "dDAGExpressionNodeBinaryOperator.h"
@@ -20,7 +20,7 @@
 class dDAGFunctionStatementAssigment: public dDAGFunctionStatement
 {
 	public:
-	dDAGFunctionStatementAssigment(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeVariable* const leftVariable, dDAGExpressionNode* const expression);
+	dDAGFunctionStatementAssigment(dList<dDAG*>& allNodes, dDAGExpressionNodeVariable* const leftVariable, dDAGExpressionNode* const expression);
 	~dDAGFunctionStatementAssigment();
 
 	dDAGExpressionNode* m_expression;

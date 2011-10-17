@@ -10,7 +10,7 @@
 */
 
 #include "dLittleScriptCompiler.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGTypeNode.h"
 #include "dDAGExpressionNodeBinaryOperator.h"
 
@@ -18,7 +18,7 @@
 dInitRtti(dDAGExpressionNodeBinaryOperator);
 
 dDAGExpressionNodeBinaryOperator::dDAGExpressionNodeBinaryOperator(
-	dList<dDirectAcyclicgraphNode*>& allNodes,
+	dList<dDAG*>& allNodes,
 	dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB)
 	:dDAGExpressionNode(allNodes)
 	,m_operator (binaryOperator)

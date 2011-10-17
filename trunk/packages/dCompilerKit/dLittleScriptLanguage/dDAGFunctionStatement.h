@@ -12,17 +12,17 @@
 #ifndef __dDAGFunctionStatement_H__
 #define __dDAGFunctionStatement_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dLittleScriptCompiler.h"
 
 
-class dDAGFunctionStatement: public dDirectAcyclicgraphNode
+class dDAGFunctionStatement: public dDAG
 {
 	public:
-	dDAGFunctionStatement(dList<dDirectAcyclicgraphNode*>& allNodes);
+	dDAGFunctionStatement(dList<dDAG*>& allNodes);
 	~dDAGFunctionStatement();
 
-	dAddRtti(dDirectAcyclicgraphNode);
+	dAddRtti(dDAG);
 };
 
 

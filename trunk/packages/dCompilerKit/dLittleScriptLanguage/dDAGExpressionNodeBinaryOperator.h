@@ -12,7 +12,7 @@
 #ifndef __dDAGExpressionNodeBinaryOperator_H__
 #define __dDAGExpressionNodeBinaryOperator_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGExpressionNode.h"
 
 class dDAGExpressionNodeBinaryOperator: public dDAGExpressionNode
@@ -33,7 +33,7 @@ class dDAGExpressionNodeBinaryOperator: public dDAGExpressionNode
 		m_different,
 	};
 	
-	dDAGExpressionNodeBinaryOperator (dList<dDirectAcyclicgraphNode*>& allNodes, dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB);
+	dDAGExpressionNodeBinaryOperator (dList<dDAG*>& allNodes, dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB);
 	~dDAGExpressionNodeBinaryOperator(void);
 
 

@@ -13,14 +13,14 @@
 #define __dDAGFunctionStatementReturn_H__
 
 #include "dDAGFunctionStatement.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGExpressionNode.h"
 
 
 class dDAGFunctionStatementReturn: public dDAGFunctionStatement
 {
 	public:
-	dDAGFunctionStatementReturn(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNode* const expression);
+	dDAGFunctionStatementReturn(dList<dDAG*>& allNodes, dDAGExpressionNode* const expression);
 	~dDAGFunctionStatementReturn();
 
 	dDAGExpressionNode* m_expression;

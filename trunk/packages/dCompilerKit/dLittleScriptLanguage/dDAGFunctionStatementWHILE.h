@@ -12,7 +12,7 @@
 #ifndef __dDAGFunctionStatementWHILE_H__
 #define __dDAGFunctionStatementWHILE_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGFunctionStatement.h"
 
 class dDAGExpressionNode;
@@ -20,7 +20,7 @@ class dDAGExpressionNode;
 class dDAGFunctionStatementWHILE: public dDAGFunctionStatement
 {
 	public:
-	dDAGFunctionStatementWHILE(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNode* const expression, dDAGFunctionStatement* const stmt);
+	dDAGFunctionStatementWHILE(dList<dDAG*>& allNodes, dDAGExpressionNode* const expression, dDAGFunctionStatement* const stmt);
 	~dDAGFunctionStatementWHILE();
 
 	dAddRtti(dDAGFunctionStatement);

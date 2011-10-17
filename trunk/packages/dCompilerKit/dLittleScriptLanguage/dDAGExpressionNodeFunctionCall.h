@@ -12,14 +12,14 @@
 #ifndef __dDAGExpressionNodeFunctionCall_H__
 #define __dDAGExpressionNodeFunctionCall_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGExpressionNode.h"
 
 
 class dDAGExpressionNodeFunctionCall: public dDAGExpressionNode
 {
 	public:
-	dDAGExpressionNodeFunctionCall (dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier, dDAGExpressionNode* const argumentList);
+	dDAGExpressionNodeFunctionCall (dList<dDAG*>& allNodes, const char* const identifier, dDAGExpressionNode* const argumentList);
 	~dDAGExpressionNodeFunctionCall(void);
 
 	dList<dDAGExpressionNode*> m_argumentList;

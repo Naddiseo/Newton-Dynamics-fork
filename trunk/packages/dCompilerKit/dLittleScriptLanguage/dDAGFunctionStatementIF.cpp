@@ -10,13 +10,13 @@
 */
 
 #include "dLittleScriptCompiler.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGFunctionStatementIF.h"
 #include "dDAGExpressionNode.h"
 
 dInitRtti(dDAGFunctionStatementIF);
 
-dDAGFunctionStatementIF::dDAGFunctionStatementIF(dList<dDirectAcyclicgraphNode*>& allNodes, 
+dDAGFunctionStatementIF::dDAGFunctionStatementIF(dList<dDAG*>& allNodes, 
 	dDAGExpressionNode* const expression,
 	 dDAGFunctionStatement* const thenStmt, 
 	 dDAGFunctionStatement* const elseStmt)

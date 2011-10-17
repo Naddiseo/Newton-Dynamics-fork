@@ -10,12 +10,12 @@
 */
 
 #include "dLittleScriptCompiler.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGFunctionStatementAssigment.h"
 
 dInitRtti(dDAGFunctionStatementAssigment);
 
-dDAGFunctionStatementAssigment::dDAGFunctionStatementAssigment(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeVariable* const leftVariable, dDAGExpressionNode* const expression)
+dDAGFunctionStatementAssigment::dDAGFunctionStatementAssigment(dList<dDAG*>& allNodes, dDAGExpressionNodeVariable* const leftVariable, dDAGExpressionNode* const expression)
 	:dDAGFunctionStatement(allNodes)
 	,m_expression(expression)
 	,m_leftVariable(leftVariable)

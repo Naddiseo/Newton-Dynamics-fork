@@ -12,7 +12,7 @@
 #ifndef __dDAGExpressionNodeConstant_H__
 #define __dDAGExpressionNodeConstant_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGExpressionNode.h"
 
 
@@ -26,7 +26,7 @@ class dDAGExpressionNodeConstant: public dDAGExpressionNode
 		m_stringValue,
 	};
 
-	dDAGExpressionNodeConstant (dList<dDirectAcyclicgraphNode*>& allNodes, dType type, const char* const identifier);
+	dDAGExpressionNodeConstant (dList<dDAG*>& allNodes, dType type, const char* const identifier);
 	~dDAGExpressionNodeConstant(void);
 
 	dType m_type;

@@ -10,15 +10,15 @@
 */
 
 #include "dLittleScriptCompiler.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGTypeNode.h"
 #include "dDAGExpressionNode.h"
 
 
 dInitRtti(dDAGExpressionNode);
 
-dDAGExpressionNode::dDAGExpressionNode(dList<dDirectAcyclicgraphNode*>& allNodes)
-	:dDirectAcyclicgraphNode(allNodes)
+dDAGExpressionNode::dDAGExpressionNode(dList<dDAG*>& allNodes)
+	:dDAG(allNodes)
 	,m_argumentListNext(NULL)
 {
 }

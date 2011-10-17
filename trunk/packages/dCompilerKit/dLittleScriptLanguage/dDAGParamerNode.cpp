@@ -10,7 +10,7 @@
 */
 
 #include "dLittleScriptCompiler.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGTypeNode.h"
 #include "dDAGParameterNode.h"
 #include "dDAGExpressionNode.h"
@@ -18,7 +18,7 @@
 
 dInitRtti(dDAGParameterNode);
 
-dDAGParameterNode::dDAGParameterNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGTypeNode* const type, const char* const identifier)
+dDAGParameterNode::dDAGParameterNode(dList<dDAG*>& allNodes, dDAGTypeNode* const type, const char* const identifier)
 	:dDAGFunctionStatement(allNodes)
 	,m_isPublic(true)
 	,m_type(type)

@@ -12,7 +12,7 @@
 #ifndef __dDAGScopeBlockNode_H__
 #define __dDAGScopeBlockNode_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGFunctionStatement.h"
 #include "dDAGExpressionNodeConstant.h"
 #include "dDAGExpressionNodeUnuaryOperator.h"
@@ -26,15 +26,15 @@ class dDAGExpressionNodeVariable;
 class dDAGScopeBlockNode: public dDAGFunctionStatement
 {
 	public:
-	dDAGScopeBlockNode(dList<dDirectAcyclicgraphNode*>& allNodes);
+	dDAGScopeBlockNode(dList<dDAG*>& allNodes);
 	~dDAGScopeBlockNode(void);
 
 	void AddStatement (dDAGFunctionStatement* const statement);
 
-	dDAGExpressionNodeVariable* CreatedVariableNode (dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier);
-	dDAGExpressionNodeConstant* CreatedConstantNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeConstant::dType type, const char* const value);
-	dDAGExpressionNodeUnuaryOperator* CreateUnuaryOperatorNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeUnuaryOperator::dUnuaryOperator unuaryOperator, dDAGExpressionNode* const expression);
-	dDAGExpressionNodeBinaryOperator* CreateBinaryOperatorNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeBinaryOperator::dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB);
+	dDAGExpressionNodeVariable* CreatedVariableNode (dList<dDAG*>& allNodes, const char* const identifier);
+	dDAGExpressionNodeConstant* CreatedConstantNode (dList<dDAG*>& allNodes, dDAGExpressionNodeConstant::dType type, const char* const value);
+	dDAGExpressionNodeUnuaryOperator* CreateUnuaryOperatorNode (dList<dDAG*>& allNodes, dDAGExpressionNodeUnuaryOperator::dUnuaryOperator unuaryOperator, dDAGExpressionNode* const expression);
+	dDAGExpressionNodeBinaryOperator* CreateBinaryOperatorNode (dList<dDAG*>& allNodes, dDAGExpressionNodeBinaryOperator::dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB);
 
 	dAddRtti(dDAGFunctionStatement);
 

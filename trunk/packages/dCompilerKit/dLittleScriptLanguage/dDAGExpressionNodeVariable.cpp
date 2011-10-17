@@ -10,14 +10,14 @@
 */
 
 #include "dLittleScriptCompiler.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGTypeNode.h"
 #include "dDAGExpressionNodeVariable.h"
 
 
 dInitRtti(dDAGExpressionNodeVariable);
 
-dDAGExpressionNodeVariable::dDAGExpressionNodeVariable(dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier)
+dDAGExpressionNodeVariable::dDAGExpressionNodeVariable(dList<dDAG*>& allNodes, const char* const identifier)
 	:dDAGExpressionNode(allNodes)
 {
 	m_name = identifier;

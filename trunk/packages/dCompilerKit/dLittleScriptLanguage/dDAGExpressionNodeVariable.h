@@ -12,14 +12,14 @@
 #ifndef __dDAGExpressionNodeVariable_H__
 #define __dDAGExpressionNodeVariable_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGExpressionNode.h"
 
 
 class dDAGExpressionNodeVariable: public dDAGExpressionNode
 {
 	public:
-	dDAGExpressionNodeVariable (dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier);
+	dDAGExpressionNodeVariable (dList<dDAG*>& allNodes, const char* const identifier);
 	~dDAGExpressionNodeVariable(void);
 
 

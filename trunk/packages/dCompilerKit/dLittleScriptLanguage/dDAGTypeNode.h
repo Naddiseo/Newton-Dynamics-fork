@@ -12,15 +12,15 @@
 #ifndef __dDAGTypeNode_H__
 #define __dDAGTypeNode_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dLittleScriptCompiler.h"
 
 class dDAGDimensionNode;
 
-class dDAGTypeNode: public dDirectAcyclicgraphNode
+class dDAGTypeNode: public dDAG
 {
 	public:
-	dDAGTypeNode(dList<dDirectAcyclicgraphNode*>& allNodes, const char* const type, const char* const modifier);
+	dDAGTypeNode(dList<dDAG*>& allNodes, const char* const type, const char* const modifier);
 	~dDAGTypeNode(void);
 
 	void AddDimensions (dDAGDimensionNode* dimList);
@@ -29,7 +29,7 @@ class dDAGTypeNode: public dDirectAcyclicgraphNode
 
 	dList<dDAGDimensionNode*> m_dimensions;
 
-	dAddRtti(dDirectAcyclicgraphNode);
+	dAddRtti(dDAG);
 };
 
 

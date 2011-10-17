@@ -10,7 +10,7 @@
 */
 
 #include "dLittleScriptCompiler.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGTypeNode.h"
 #include "dDAGDimensionNode.h"
 #include "dDAGExpressionNodeConstant.h"
@@ -18,8 +18,8 @@
 
 dInitRtti(dDAGDimensionNode);
 
-dDAGDimensionNode::dDAGDimensionNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNode* const size)
-	:dDirectAcyclicgraphNode(allNodes)
+dDAGDimensionNode::dDAGDimensionNode(dList<dDAG*>& allNodes, dDAGExpressionNode* const size)
+	:dDAG(allNodes)
 	,m_size (size)
 	,m_next (NULL)
 {

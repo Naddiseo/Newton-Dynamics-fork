@@ -25,7 +25,7 @@
 #include <dRefCounter.h>
 #include <dContainersStdAfx.h>
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dLittleScriptParser.h"
 
 
@@ -35,7 +35,7 @@ class dSyntaxTreeCode;
 class dDAGFunctionNode;
 class dDAGScopeBlockNode;
 class dLittleScriptLexical;
-class dDirectAcyclicgraphNode;
+class dDAG;
 
 class dScriptCompiler: public dLittleScriptParser
 {
@@ -98,7 +98,7 @@ class dScriptCompiler: public dLittleScriptParser
 	dDAGFunctionNode* m_currentFunction;
 	dList<dDAGClassNode*> m_classList;
 	dList<dDAGScopeBlockNode*> m_scopeStack;
-	dList<dDirectAcyclicgraphNode*> m_allNodes;
+	dList<dDAG*> m_allNodes;
 
 	friend class dLittleScriptParser;
 };

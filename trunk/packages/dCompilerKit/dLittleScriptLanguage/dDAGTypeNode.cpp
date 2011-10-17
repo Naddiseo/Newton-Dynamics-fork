@@ -10,14 +10,14 @@
 */
 
 #include "dLittleScriptCompiler.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGTypeNode.h"
 #include "dDAGDimensionNode.h"
 
 dInitRtti(dDAGTypeNode);
 
-dDAGTypeNode::dDAGTypeNode(dList<dDirectAcyclicgraphNode*>& allNodes, const char* const type, const char* const modifier)
-	:dDirectAcyclicgraphNode(allNodes)
+dDAGTypeNode::dDAGTypeNode(dList<dDAG*>& allNodes, const char* const type, const char* const modifier)
+	:dDAG(allNodes)
 	,m_dimensions()
 {
 	m_name = string (modifier) + string (type);

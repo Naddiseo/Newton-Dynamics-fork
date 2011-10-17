@@ -12,7 +12,7 @@
 #ifndef __dDAGFunctionNode_H__
 #define __dDAGFunctionNode_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dLittleScriptCompiler.h"
 
 class dDAGTypeNode;
@@ -20,10 +20,10 @@ class dDAGParameterNode;
 class dDAGScopeBlockNode;
 class dDAGFunctionModifier;
 
-class dDAGFunctionNode: public dDirectAcyclicgraphNode
+class dDAGFunctionNode: public dDAG
 {
 	public:
-	dDAGFunctionNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGTypeNode* const type, const char* const name, dDAGParameterNode* const parameterList, const char* const isConst);
+	dDAGFunctionNode(dList<dDAG*>& allNodes, dDAGTypeNode* const type, const char* const name, dDAGParameterNode* const parameterList, const char* const isConst);
 	~dDAGFunctionNode(void);
 
 	virtual void CalculateKey();
@@ -42,7 +42,7 @@ class dDAGFunctionNode: public dDirectAcyclicgraphNode
 	
 
 
-	dAddRtti(dDirectAcyclicgraphNode);
+	dAddRtti(dDAG);
 };
 
 

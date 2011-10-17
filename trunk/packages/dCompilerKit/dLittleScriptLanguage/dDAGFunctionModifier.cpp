@@ -10,14 +10,14 @@
 */
 
 #include "dLittleScriptCompiler.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGFunctionModifier.h"
 
 
 dInitRtti(dDAGFunctionModifier);
 
-dDAGFunctionModifier::dDAGFunctionModifier(dList<dDirectAcyclicgraphNode*>& allNodes)
-	:dDirectAcyclicgraphNode(allNodes)
+dDAGFunctionModifier::dDAGFunctionModifier(dList<dDAG*>& allNodes)
+	:dDAG(allNodes)
 	,m_private(false)
 	,m_native(false)
 {

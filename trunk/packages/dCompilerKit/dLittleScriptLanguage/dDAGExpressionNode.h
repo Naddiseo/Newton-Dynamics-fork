@@ -12,19 +12,19 @@
 #ifndef __dDAGExpressionNode_H__
 #define __dDAGExpressionNode_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dLittleScriptCompiler.h"
 
 
-class dDAGExpressionNode: public dDirectAcyclicgraphNode
+class dDAGExpressionNode: public dDAG
 {
 	public:
-	dDAGExpressionNode (dList<dDirectAcyclicgraphNode*>& allNodes);
+	dDAGExpressionNode (dList<dDAG*>& allNodes);
 	~dDAGExpressionNode(void);
 
 
 	dDAGExpressionNode* m_argumentListNext;
-	dAddRtti(dDirectAcyclicgraphNode);
+	dAddRtti(dDAG);
 };
 
 

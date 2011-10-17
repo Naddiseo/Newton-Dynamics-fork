@@ -12,22 +12,22 @@
 #ifndef __dDAGDimensionNode_H__
 #define __dDAGDimensionNode_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dLittleScriptCompiler.h"
 
 class dDAGExpressionNode;
 
-class dDAGDimensionNode: public dDirectAcyclicgraphNode
+class dDAGDimensionNode: public dDAG
 {
 	public:
-	dDAGDimensionNode(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNode* const size);
+	dDAGDimensionNode(dList<dDAG*>& allNodes, dDAGExpressionNode* const size);
 	~dDAGDimensionNode(void);
 
 
 	dDAGExpressionNode* m_size;
 	dDAGDimensionNode* m_next;
 
-	dAddRtti(dDirectAcyclicgraphNode);
+	dAddRtti(dDAG);
 };
 
 

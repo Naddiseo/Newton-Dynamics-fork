@@ -10,14 +10,14 @@
 */
 
 #include "dLittleScriptCompiler.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGTypeNode.h"
 #include "dDAGExpressionNodeUnuaryOperator.h"
 
 
 dInitRtti(dDAGExpressionNodeUnuaryOperator);
 
-dDAGExpressionNodeUnuaryOperator::dDAGExpressionNodeUnuaryOperator(dList<dDirectAcyclicgraphNode*>& allNodes, dUnuaryOperator unuaryOperator, dDAGExpressionNode* const expression)
+dDAGExpressionNodeUnuaryOperator::dDAGExpressionNodeUnuaryOperator(dList<dDAG*>& allNodes, dUnuaryOperator unuaryOperator, dDAGExpressionNode* const expression)
 	:dDAGExpressionNode(allNodes)
 	,m_operator (unuaryOperator)
 	,m_expression (expression)

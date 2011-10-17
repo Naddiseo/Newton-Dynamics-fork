@@ -12,8 +12,8 @@
 #ifndef __dDAGExpressionNodeUnuaryOperator_H__
 #define __dDAGExpressionNodeUnuaryOperator_H__
 
-#include "dDirectAcyclicgraphNode.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
+#include "dDAG.h"
 #include "dDAGExpressionNode.h"
 
 class dDAGExpressionNodeUnuaryOperator: public dDAGExpressionNode
@@ -27,7 +27,7 @@ class dDAGExpressionNodeUnuaryOperator: public dDAGExpressionNode
 		m_notLogical
 	};
 	
-	dDAGExpressionNodeUnuaryOperator (dList<dDirectAcyclicgraphNode*>& allNodes, dUnuaryOperator unuaryOperator, dDAGExpressionNode* const expression);
+	dDAGExpressionNodeUnuaryOperator (dList<dDAG*>& allNodes, dUnuaryOperator unuaryOperator, dDAGExpressionNode* const expression);
 	~dDAGExpressionNodeUnuaryOperator(void);
 
 

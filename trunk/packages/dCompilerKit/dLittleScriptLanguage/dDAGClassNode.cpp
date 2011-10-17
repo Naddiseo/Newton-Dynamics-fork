@@ -10,15 +10,15 @@
 */
 
 #include "dLittleScriptCompiler.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGClassNode.h"
 #include "dDAGFunctionNode.h"
 #include "dDAGParameterNode.h"
 
 dInitRtti(dDAGClassNode);
 
-dDAGClassNode::dDAGClassNode(dList<dDirectAcyclicgraphNode*>& allNodes)
-	:dDirectAcyclicgraphNode(allNodes)
+dDAGClassNode::dDAGClassNode(dList<dDAG*>& allNodes)
+	:dDAG(allNodes)
 	,m_isPublic(true)
 	,m_baseClass (NULL)
 	,m_variables()

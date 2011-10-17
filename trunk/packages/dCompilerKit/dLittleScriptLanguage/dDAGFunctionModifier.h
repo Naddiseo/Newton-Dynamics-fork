@@ -12,7 +12,7 @@
 #ifndef __dDAGFunctionModifier_H__
 #define __dDAGFunctionModifier_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dLittleScriptCompiler.h"
 
 
@@ -20,16 +20,16 @@ class dDAGTypeNode;
 class dDAGParameterNode;
 class dDAGScopeBlockNode;
 
-class dDAGFunctionModifier: public dDirectAcyclicgraphNode
+class dDAGFunctionModifier: public dDAG
 {
 	public:
-	dDAGFunctionModifier(dList<dDirectAcyclicgraphNode*>& allNodes);
+	dDAGFunctionModifier(dList<dDAG*>& allNodes);
 	~dDAGFunctionModifier(void);
 
 	bool m_private;
 	bool m_native;
 
-	dAddRtti(dDirectAcyclicgraphNode);
+	dAddRtti(dDAG);
 };
 
 

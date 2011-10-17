@@ -12,7 +12,7 @@
 #ifndef __dDAGParameterNode_H__
 #define __dDAGParameterNode_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGFunctionStatement.h"
 
 class dDAGTypeNode;
@@ -20,7 +20,7 @@ class dDAGExpressionNode;
 class dDAGParameterNode: public dDAGFunctionStatement
 {
 	public:
-	dDAGParameterNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGTypeNode* const type, const char* const identifier);
+	dDAGParameterNode (dList<dDAG*>& allNodes, dDAGTypeNode* const type, const char* const identifier);
 	~dDAGParameterNode(void);
 
 	void SetInitializationExpression(dDAGExpressionNode* exp);

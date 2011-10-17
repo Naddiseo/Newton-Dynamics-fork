@@ -225,6 +225,14 @@
 			Name="SyntaxTree"
 			>
 			<File
+				RelativePath=".\dDAG.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dDAG.h"
+				>
+			</File>
+			<File
 				RelativePath=".\dDAGClassNode.cpp"
 				>
 			</File>
@@ -398,14 +406,6 @@
 			</File>
 			<File
 				RelativePath=".\dDAGTypeNode.h"
-				>
-			</File>
-			<File
-				RelativePath=".\dDirectAcyclicGraphNode.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\dDirectAcyclicGraphNode.h"
 				>
 			</File>
 		</Filter>

@@ -12,7 +12,7 @@
 #ifndef __dDAGFunctionStatementDO_H__
 #define __dDAGFunctionStatementDO_H__
 
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGFunctionStatement.h"
 
 class dDAGExpressionNode;
@@ -20,7 +20,7 @@ class dDAGExpressionNode;
 class dDAGFunctionStatementDO: public dDAGFunctionStatement
 {
 	public:
-	dDAGFunctionStatementDO(dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNode* const expression, dDAGFunctionStatement* const stmt);
+	dDAGFunctionStatementDO(dList<dDAG*>& allNodes, dDAGExpressionNode* const expression, dDAGFunctionStatement* const stmt);
 	~dDAGFunctionStatementDO();
 
 	dAddRtti(dDAGFunctionStatement);

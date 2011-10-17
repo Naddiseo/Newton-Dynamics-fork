@@ -10,7 +10,7 @@
 */
 
 #include "dLittleScriptCompiler.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dDAG.h"
 #include "dDAGFunctionStatement.h"
 #include "dDAGParameterNode.h"
 #include "dDAGScopeBlockNode.h"
@@ -20,7 +20,7 @@
 dInitRtti(dDAGScopeBlockNode);
 
 
-dDAGScopeBlockNode::dDAGScopeBlockNode(dList<dDirectAcyclicgraphNode*>& allNodes)
+dDAGScopeBlockNode::dDAGScopeBlockNode(dList<dDAG*>& allNodes)
 	:dDAGFunctionStatement(allNodes)
 	,m_statementList()
 	,m_expresionNodesCashe()
@@ -49,7 +49,7 @@ void dDAGScopeBlockNode::AddStatement (dDAGFunctionStatement* const statement)
 	statement->AddRef();
 }
 
-dDAGExpressionNodeBinaryOperator* dDAGScopeBlockNode::CreateBinaryOperatorNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeBinaryOperator::dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB)
+dDAGExpressionNodeBinaryOperator* dDAGScopeBlockNode::CreateBinaryOperatorNode (dList<dDAG*>& allNodes, dDAGExpressionNodeBinaryOperator::dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB)
 {
 	dCRCTYPE key = dDAGExpressionNodeBinaryOperator::CalculateKey (binaryOperator, expressionA, expressionB);
 	
@@ -65,7 +65,7 @@ dDAGExpressionNodeBinaryOperator* dDAGScopeBlockNode::CreateBinaryOperatorNode (
 }
 
 
-dDAGExpressionNodeUnuaryOperator* dDAGScopeBlockNode::CreateUnuaryOperatorNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeUnuaryOperator::dUnuaryOperator unuaryOperator, dDAGExpressionNode* const expression)
+dDAGExpressionNodeUnuaryOperator* dDAGScopeBlockNode::CreateUnuaryOperatorNode (dList<dDAG*>& allNodes, dDAGExpressionNodeUnuaryOperator::dUnuaryOperator unuaryOperator, dDAGExpressionNode* const expression)
 {
 	dCRCTYPE key = dDAGExpressionNodeUnuaryOperator::CalculateKey (unuaryOperator, expression);
 
@@ -81,7 +81,7 @@ dDAGExpressionNodeUnuaryOperator* dDAGScopeBlockNode::CreateUnuaryOperatorNode (
 }
 
 
-dDAGExpressionNodeVariable* dDAGScopeBlockNode::CreatedVariableNode (dList<dDirectAcyclicgraphNode*>& allNodes, const char* const identifier)
+dDAGExpressionNodeVariable* dDAGScopeBlockNode::CreatedVariableNode (dList<dDAG*>& allNodes, const char* const identifier)
 {
 	dCRCTYPE key = dCRC64 (identifier);
 	dTree<dDAGExpressionNode*, dCRCTYPE>::dTreeNode* node = m_expresionNodesCashe.Find(key);
@@ -95,7 +95,7 @@ dDAGExpressionNodeVariable* dDAGScopeBlockNode::CreatedVariableNode (dList<dDire
 	return expresionNode;
 }
 
-dDAGExpressionNodeConstant* dDAGScopeBlockNode::CreatedConstantNode (dList<dDirectAcyclicgraphNode*>& allNodes, dDAGExpressionNodeConstant::dType type, const char* const value)
+dDAGExpressionNodeConstant* dDAGScopeBlockNode::CreatedConstantNode (dList<dDAG*>& allNodes, dDAGExpressionNodeConstant::dType type, const char* const value)
 {
 	dCRCTYPE key = dCRC64 (value);
 

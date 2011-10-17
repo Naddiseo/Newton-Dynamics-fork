@@ -120,7 +120,7 @@ class dLittleScriptParser
 			,m_node(NULL)
 		{
 		}
-		dDirectAcyclicgraphNode* m_node;
+		dDAG* m_node;
 	};
 
 
