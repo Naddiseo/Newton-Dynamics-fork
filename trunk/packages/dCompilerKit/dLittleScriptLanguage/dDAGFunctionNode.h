@@ -31,17 +31,15 @@ class dDAGFunctionNode: public dDAG
 	void SetBody(dDAGScopeBlockNode* const body);
 	void SetModifier(dDAGFunctionModifier* const modifier);
 
+	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
+
 	bool m_isConst;
 	bool m_isPrivate;
 	bool m_isConstructor;
-	
 	dDAGTypeNode* m_returnType;
 	dDAGScopeBlockNode* m_body;
 	dDAGFunctionModifier* m_modifier;
 	dList<dDAGParameterNode*> m_parameters; 
-	
-
-
 	dAddRtti(dDAG);
 };
 

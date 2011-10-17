@@ -23,6 +23,8 @@ class dDAGFunctionStatementBREAK: public dDAGFunctionStatement
 	dDAGFunctionStatementBREAK(dList<dDAG*>& allNodes);
 	~dDAGFunctionStatementBREAK();
 
+	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
+
 	dAddRtti(dDAGFunctionStatement);
 };
 

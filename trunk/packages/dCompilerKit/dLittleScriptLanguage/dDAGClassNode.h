@@ -30,6 +30,8 @@ class dDAGClassNode: public dDAG
 	void AddVariable (dDAGParameterNode* const variable);
 	void AddFunction (dDAGFunctionNode* const function);
 
+	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
+
 	bool m_isPublic;
 	const dDAGClassNode* m_baseClass;
 	dList<dDAGParameterNode*> m_variables;

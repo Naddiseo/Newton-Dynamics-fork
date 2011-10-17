@@ -30,6 +30,7 @@ class dDAGExpressionNodeUnuaryOperator: public dDAGExpressionNode
 	dDAGExpressionNodeUnuaryOperator (dList<dDAG*>& allNodes, dUnuaryOperator unuaryOperator, dDAGExpressionNode* const expression);
 	~dDAGExpressionNodeUnuaryOperator(void);
 
+	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
 
 	static dCRCTYPE CalculateKey (dUnuaryOperator unuaryOperator, dDAGExpressionNode* const expression);
 

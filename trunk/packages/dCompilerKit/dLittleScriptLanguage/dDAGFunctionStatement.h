@@ -22,6 +22,7 @@ class dDAGFunctionStatement: public dDAG
 	dDAGFunctionStatement(dList<dDAG*>& allNodes);
 	~dDAGFunctionStatement();
 
+	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
 	dAddRtti(dDAG);
 };
 

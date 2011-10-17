@@ -26,9 +26,10 @@ class dDAGFunctionModifier: public dDAG
 	dDAGFunctionModifier(dList<dDAG*>& allNodes);
 	~dDAGFunctionModifier(void);
 
+	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
+
 	bool m_private;
 	bool m_native;
-
 	dAddRtti(dDAG);
 };
 

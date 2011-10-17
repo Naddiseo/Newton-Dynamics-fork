@@ -23,11 +23,11 @@ class dDAGFunctionStatementAssigment: public dDAGFunctionStatement
 	dDAGFunctionStatementAssigment(dList<dDAG*>& allNodes, dDAGExpressionNodeVariable* const leftVariable, dDAGExpressionNode* const expression);
 	~dDAGFunctionStatementAssigment();
 
+
+	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
+
 	dDAGExpressionNode* m_expression;
 	dDAGExpressionNodeVariable* m_leftVariable;
-	
-
-
 	dAddRtti(dDAGFunctionStatement);
 };
 

@@ -30,6 +30,7 @@ class dDAGScopeBlockNode: public dDAGFunctionStatement
 	~dDAGScopeBlockNode(void);
 
 	void AddStatement (dDAGFunctionStatement* const statement);
+	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
 
 	dDAGExpressionNodeVariable* CreatedVariableNode (dList<dDAG*>& allNodes, const char* const identifier);
 	dDAGExpressionNodeConstant* CreatedConstantNode (dList<dDAG*>& allNodes, dDAGExpressionNodeConstant::dType type, const char* const value);

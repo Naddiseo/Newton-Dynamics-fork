@@ -26,6 +26,8 @@ class dDAGTypeNode: public dDAG
 	void AddDimensions (dDAGDimensionNode* dimList);
 
 	virtual void CalculateKey();
+	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
+
 
 	dList<dDAGDimensionNode*> m_dimensions;
 
