@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="dNewtonScript"
-	ProjectGUID="{0D66658C-24A9-416B-9866-89843D92823F}"
+	Name="dLittleScriptLanguage"
+	ProjectGUID="{96AE3E6F-7B6E-4570-A220-D16C3523D43C}"
 	RootNamespace="dCompilerKit"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
