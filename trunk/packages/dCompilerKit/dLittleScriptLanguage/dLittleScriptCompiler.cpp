@@ -13,8 +13,8 @@
 //Auto generated Parser Generator class: dScriptCompiler.cpp
 //
 
-#include "dScriptCompiler.h"
-#include "dNewtonScriptLexical.h"
+#include "dLittleScriptCompiler.h"
+#include "dLittleScriptLexical.h"
 
 
 void* operator new (size_t size)
@@ -31,7 +31,7 @@ void* operator new (size_t size)
 
 
 dScriptCompiler::dScriptCompiler(const char* const sourceFileName)
-	:dNewtonScriptParser ()
+	:dLittleScriptParser ()
 	,m_fileName(sourceFileName)
 	,m_currentFunction(NULL)
 	,m_classList()
@@ -126,7 +126,7 @@ void qsort (int a[], int size)
 
 int dScriptCompiler::CompileSource (const char* const source)
 {
-	dNewtonScriptLexical scanner (source);
+	dLittleScriptLexical scanner (source);
 
 //int aa[] = {4, 5,6,1,6,7,9,8,5};
 //qsort(aa, sizeof(aa)/sizeof (int));
@@ -145,13 +145,13 @@ int dScriptCompiler::CompileSource (const char* const source)
 }
 
 
-bool dScriptCompiler::Parse(dNewtonScriptLexical& scanner)
+bool dScriptCompiler::Parse(dLittleScriptLexical& scanner)
 {
-	return dNewtonScriptParser::Parse(scanner);
+	return dLittleScriptParser::Parse(scanner);
 }
 
 
-void dScriptCompiler::SyntaxError (const dNewtonScriptLexical& scanner, const dUserVariable& errorToken, const dUserVariable& errorTokenMarker)
+void dScriptCompiler::SyntaxError (const dLittleScriptLexical& scanner, const dUserVariable& errorToken, const dUserVariable& errorTokenMarker)
 {
 	const char* const data = scanner.GetData();
 	int start = errorToken.m_scannerIndex;

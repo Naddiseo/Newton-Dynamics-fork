@@ -47,7 +47,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="dScriptCompiler.h"
+				PrecompiledHeaderThrough="dLittleScriptCompiler.h"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -111,7 +111,7 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="dScriptCompiler.h"
+				PrecompiledHeaderThrough="dLittleScriptCompiler.h"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -148,15 +148,41 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\dNewtonScriptLexical.cpp"
+			RelativePath=".\dLittleScriptCompiler.cpp"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+					PrecompiledHeaderThrough="dLittleScriptCompiler.h"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="1"
+					PrecompiledHeaderThrough="dLittleScriptCompiler.h"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath=".\dLittleScriptCompiler.h"
 			>
 		</File>
 		<File
-			RelativePath=".\dNewtonScriptLexical.h"
+			RelativePath=".\dLittleScriptLexical.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\dNewtonScriptLexical.lex"
+			RelativePath=".\dLittleScriptLexical.h"
+			>
+		</File>
+		<File
+			RelativePath=".\dLittleScriptLexical.lex"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"
@@ -182,11 +208,11 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath=".\dNewtonScriptParser.cpp"
+			RelativePath=".\dLittleScriptParser.cpp"
 			>
 		</File>
 		<File
-			RelativePath=".\dNewtonScriptParser.grm"
+			RelativePath=".\dLittleScriptParser.grm"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"
@@ -194,7 +220,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="dParserGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="..\dParserGenerator\bin\dParserGenerator.exe $(InputFileName) dNewtonScriptLexical $(InputDir)$(InputName).cpp&#x0D;&#x0A;"
+					CommandLine="..\dParserGenerator\bin\dParserGenerator.exe $(InputFileName) dLittleScriptLexical $(InputDir)$(InputName).cpp&#x0D;&#x0A;"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>
@@ -204,39 +230,13 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="dParserGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="..\dParserGenerator\bin\dParserGenerator.exe $(InputFileName) dNewtonScriptLexical $(InputDir)$(InputName).cpp&#x0D;&#x0A;"
+					CommandLine="..\dParserGenerator\bin\dParserGenerator.exe $(InputFileName) dLittleScriptLexical $(InputDir)$(InputName).cpp&#x0D;&#x0A;"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath=".\dNewtonScriptParser.h"
-			>
-		</File>
-		<File
-			RelativePath=".\dScriptCompiler.cpp"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="1"
-					PrecompiledHeaderThrough="dScriptCompiler.h"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					UsePrecompiledHeader="1"
-					PrecompiledHeaderThrough="dScriptCompiler.h"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath=".\dScriptCompiler.h"
+			RelativePath=".\dLittleScriptParser.h"
 			>
 		</File>
 	</Files>

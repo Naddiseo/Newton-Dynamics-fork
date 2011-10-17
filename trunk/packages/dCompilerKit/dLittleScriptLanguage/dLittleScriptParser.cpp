@@ -10,12 +10,12 @@
 */
 
 //
-//Auto generated Parser Generator class: dNewtonScriptParser.cpp
+//Auto generated Parser Generator class: dLittleScriptParser.cpp
 //
 
 
-#include <dScriptCompiler.h>
-#include "dNewtonScriptLexical.h"
+#include <dLittleScriptCompiler.h>
+#include "dLittleScriptLexical.h"
 #include "dDirectAcyclicgraphNode.h"
 
 //
@@ -25,12 +25,12 @@
 
 #define GET_PARENT_CLASS  dScriptCompiler* const me = (dScriptCompiler*) this;
 
-#include "dNewtonScriptParser.h"
+#include "dLittleScriptParser.h"
 #include <dList.h>
 
 #define MAX_USER_PARAM	64
 
-enum dNewtonScriptParser::ActionType
+enum dLittleScriptParser::ActionType
 {
 	dSHIFT = 0,
 	dREDUCE,
@@ -39,7 +39,7 @@ enum dNewtonScriptParser::ActionType
 };
 
 
-class dNewtonScriptParser::dActionEntry
+class dLittleScriptParser::dActionEntry
 {
 	public:
 	dActionEntry (short token, char errorItem, char stateType, short nextState, short ruleSymbols, short ruleIndex)
@@ -55,7 +55,7 @@ class dNewtonScriptParser::dActionEntry
 	short m_ruleIndex;
 };
 
-class dNewtonScriptParser::dGotoEntry
+class dLittleScriptParser::dGotoEntry
 {
 	public:
 	dGotoEntry (short token, short nextState)
@@ -69,7 +69,7 @@ class dNewtonScriptParser::dGotoEntry
 
 
 
-class dNewtonScriptParser::dStackPair
+class dLittleScriptParser::dStackPair
 {
 	public:
 	dStackPair()
@@ -85,16 +85,16 @@ class dNewtonScriptParser::dStackPair
 };
 
 
-dNewtonScriptParser::dNewtonScriptParser()
+dLittleScriptParser::dLittleScriptParser()
 {
 }
 
-dNewtonScriptParser::~dNewtonScriptParser()
+dLittleScriptParser::~dLittleScriptParser()
 {
 }
 
 
-const dNewtonScriptParser::dActionEntry* dNewtonScriptParser::FindAction (const dActionEntry* const actionList, int count, dToken token) const
+const dLittleScriptParser::dActionEntry* dLittleScriptParser::FindAction (const dActionEntry* const actionList, int count, dToken token) const
 {
 	int i0 = 0;
 	int i1 = count - 1;
@@ -122,7 +122,7 @@ const dNewtonScriptParser::dActionEntry* dNewtonScriptParser::FindAction (const 
 	return NULL;
 }
 
-const dNewtonScriptParser::dGotoEntry* dNewtonScriptParser::FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const
+const dLittleScriptParser::dGotoEntry* dLittleScriptParser::FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const
 {
 	int i0 = 0;
 	int i1 = count - 1;
@@ -152,7 +152,7 @@ const dNewtonScriptParser::dGotoEntry* dNewtonScriptParser::FindGoto (const dGot
 
 
 
-const dNewtonScriptParser::dActionEntry* dNewtonScriptParser::GetNextAction (dList<dStackPair>& stack, dToken token, dNewtonScriptLexical& scanner) const
+const dLittleScriptParser::dActionEntry* dLittleScriptParser::GetNextAction (dList<dStackPair>& stack, dToken token, dLittleScriptLexical& scanner) const
 {
 	static short actionsCount[] = {
 			4, 4, 4, 4, 4, 4, 1, 2, 1, 4, 1, 1, 1, 2, 2, 1, 1, 4, 2, 2, 2, 1, 1, 1, 
@@ -1744,7 +1744,7 @@ const dNewtonScriptParser::dActionEntry* dNewtonScriptParser::GetNextAction (dLi
 }
 
 
-bool dNewtonScriptParser::Parse(dNewtonScriptLexical& scanner)
+bool dLittleScriptParser::Parse(dLittleScriptLexical& scanner)
 {
 	static short gotoCount[] = {
 			6, 0, 0, 4, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 

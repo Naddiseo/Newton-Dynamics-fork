@@ -10,8 +10,8 @@
 */
 
 %{
-#include <dScriptCompiler.h>
-#include "dNewtonScriptLexical.h"
+#include <dLittleScriptCompiler.h>
+#include "dLittleScriptLexical.h"
 #include "dDirectAcyclicgraphNode.h"
 
 //

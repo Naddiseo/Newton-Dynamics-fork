@@ -11,21 +11,21 @@
 
 
 //
-//Auto generated Lexical Analyzer class: dNewtonScriptLexical.cpp
+//Auto generated Lexical Analyzer class: dLittleScriptLexical.cpp
 //
 
-#include "dScriptCompiler.h"
-#include "dNewtonScriptParser.h"
+#include "dLittleScriptCompiler.h"
+#include "dLittleScriptParser.h"
 
 //
 // Newton Script lexer 
 // loosely based on a subset of Java and C sharp
 //
 
-#include "dNewtonScriptLexical.h"
+#include "dLittleScriptLexical.h"
 
 
-dNewtonScriptLexical::dNewtonScriptLexical(const char* const data)
+dLittleScriptLexical::dLittleScriptLexical(const char* const data)
 	:m_tokenString ("")
 	,m_data(data)
 	,m_index(0)
@@ -34,12 +34,12 @@ dNewtonScriptLexical::dNewtonScriptLexical(const char* const data)
 {
 }
 
-dNewtonScriptLexical::~dNewtonScriptLexical()
+dLittleScriptLexical::~dLittleScriptLexical()
 {
 }
 
 
-void dNewtonScriptLexical::ReadBalancedExpresion (char open, char close)
+void dLittleScriptLexical::ReadBalancedExpresion (char open, char close)
 {
 	int count = 1;
 	while (count) {
@@ -75,7 +75,7 @@ void dNewtonScriptLexical::ReadBalancedExpresion (char open, char close)
 }
 
 
-void dNewtonScriptLexical::GetLexString ()
+void dLittleScriptLexical::GetLexString ()
 {
 	int length = m_index - m_startIndex;
 	m_tokenString = string (&m_data[m_startIndex], length);
@@ -83,7 +83,7 @@ void dNewtonScriptLexical::GetLexString ()
 }
 
 
-int dNewtonScriptLexical::GetNextStateIndex (char symbol, int count, const char* const characterSet) const
+int dLittleScriptLexical::GetNextStateIndex (char symbol, int count, const char* const characterSet) const
 {
 	int i0 = 0;
 	int i1 = count - 1;
@@ -104,7 +104,7 @@ int dNewtonScriptLexical::GetNextStateIndex (char symbol, int count, const char*
 	return -1;
 }
 
-int dNewtonScriptLexical::NextToken ()
+int dLittleScriptLexical::NextToken ()
 {
 	static short transitionsCount[] = {
 			92, 4, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 126, 126, 2, 10, 11, 11, 0, 1, 
@@ -791,7 +791,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 2:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::DIFFERENT;}
+					{return dLittleScriptParser::DIFFERENT;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -807,7 +807,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 4:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::STRING_VALUE;}
+					{return dLittleScriptParser::STRING_VALUE;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -823,7 +823,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 6:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::LOGIC_AND;}
+					{return dLittleScriptParser::LOGIC_AND;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -927,7 +927,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 19:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::FLOAT_VALUE;}
+					{return dLittleScriptParser::FLOAT_VALUE;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -935,7 +935,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 20:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::FLOAT_VALUE;}
+					{return dLittleScriptParser::FLOAT_VALUE;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -943,7 +943,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 21:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::INTEGER_VALUE;}
+					{return dLittleScriptParser::INTEGER_VALUE;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -951,7 +951,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 22:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::DOUBLE_COLOM;}
+					{return dLittleScriptParser::DOUBLE_COLOM;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -975,7 +975,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 25:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::SHIFT_LEFT;}
+					{return dLittleScriptParser::SHIFT_LEFT;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -983,7 +983,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 26:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::LESS_EQUAL;}
+					{return dLittleScriptParser::LESS_EQUAL;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -999,7 +999,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 28:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTICAL;}
+					{return dLittleScriptParser::IDENTICAL;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1015,7 +1015,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 30:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::GREATHER_EQUAL;}
+					{return dLittleScriptParser::GREATHER_EQUAL;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1023,7 +1023,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 31:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::SHIFT_RIGHT;}
+					{return dLittleScriptParser::SHIFT_RIGHT;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1047,7 +1047,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 34:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1079,7 +1079,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 38:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::BASE;}
+					{return dLittleScriptParser::BASE;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1087,7 +1087,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 39:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1095,7 +1095,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 40:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1103,7 +1103,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 41:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::BOOLEAN;}
+					{return dLittleScriptParser::BOOLEAN;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1111,7 +1111,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 42:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1119,7 +1119,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 43:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1127,7 +1127,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 44:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::BREAK;}
+					{return dLittleScriptParser::BREAK;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1135,7 +1135,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 45:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1143,7 +1143,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 46:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1151,7 +1151,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 47:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1159,7 +1159,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 48:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::BYTE;}
+					{return dLittleScriptParser::BYTE;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1167,7 +1167,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 49:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1175,7 +1175,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 50:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1183,7 +1183,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 51:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1191,7 +1191,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 52:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::CASE;}
+					{return dLittleScriptParser::CASE;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1199,7 +1199,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 53:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::CAST;}
+					{return dLittleScriptParser::CAST;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1207,7 +1207,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 54:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1215,7 +1215,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 55:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1223,7 +1223,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 56:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::CLASS;}
+					{return dLittleScriptParser::CLASS;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1231,7 +1231,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 57:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1239,7 +1239,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 58:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1247,7 +1247,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 59:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1255,7 +1255,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 60:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::CONSTANT;}
+					{return dLittleScriptParser::CONSTANT;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1263,7 +1263,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 61:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1271,7 +1271,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 62:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::CONTINUE;}
+					{return dLittleScriptParser::CONTINUE;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1279,7 +1279,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 63:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1287,7 +1287,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 64:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1295,7 +1295,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 65:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1303,7 +1303,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 66:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1311,7 +1311,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 67:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1319,7 +1319,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 68:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1327,7 +1327,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 69:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1335,7 +1335,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 70:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::DEFAULT;}
+					{return dLittleScriptParser::DEFAULT;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1343,7 +1343,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 71:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1351,7 +1351,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 72:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1359,7 +1359,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 73:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1367,7 +1367,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 74:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1375,7 +1375,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 75:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1383,7 +1383,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 76:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::DOUBLE;}
+					{return dLittleScriptParser::DOUBLE;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1391,7 +1391,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 77:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1399,7 +1399,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 78:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1407,7 +1407,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 79:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1415,7 +1415,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 80:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::DO;}
+					{return dLittleScriptParser::DO;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1423,7 +1423,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 81:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1431,7 +1431,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 82:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::ELSE;}
+					{return dLittleScriptParser::ELSE;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1439,7 +1439,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 83:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1447,7 +1447,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 84:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1455,7 +1455,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 85:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::ENUM;}
+					{return dLittleScriptParser::ENUM;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1463,7 +1463,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 86:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1471,7 +1471,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 87:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1479,7 +1479,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 88:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::EXTENDS;}
+					{return dLittleScriptParser::EXTENDS;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1487,7 +1487,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 89:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1495,7 +1495,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 90:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1503,7 +1503,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 91:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1511,7 +1511,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 92:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1519,7 +1519,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 93:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1527,7 +1527,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 94:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1535,7 +1535,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 95:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::FLOAT;}
+					{return dLittleScriptParser::FLOAT;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1543,7 +1543,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 96:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1551,7 +1551,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 97:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1559,7 +1559,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 98:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1567,7 +1567,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 99:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::FOR;}
+					{return dLittleScriptParser::FOR;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1575,7 +1575,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 100:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1583,7 +1583,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 101:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1591,7 +1591,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 102:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::GUI;}
+					{return dLittleScriptParser::GUI;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1599,7 +1599,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 103:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1607,7 +1607,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 104:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1615,7 +1615,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 105:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IF;}
+					{return dLittleScriptParser::IF;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1623,7 +1623,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 106:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IMPORT;}
+					{return dLittleScriptParser::IMPORT;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1631,7 +1631,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 107:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1639,7 +1639,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 108:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1647,7 +1647,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 109:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1655,7 +1655,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 110:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1663,7 +1663,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 111:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::INT;}
+					{return dLittleScriptParser::INT;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1671,7 +1671,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 112:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1679,7 +1679,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 113:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1687,7 +1687,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 114:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::LONG;}
+					{return dLittleScriptParser::LONG;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1695,7 +1695,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 115:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1703,7 +1703,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 116:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1711,7 +1711,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 117:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1719,7 +1719,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 118:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::NATIVE;}
+					{return dLittleScriptParser::NATIVE;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1727,7 +1727,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 119:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1735,7 +1735,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 120:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1743,7 +1743,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 121:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1751,7 +1751,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 122:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1759,7 +1759,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 123:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::NEW;}
+					{return dLittleScriptParser::NEW;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1767,7 +1767,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 124:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1775,7 +1775,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 125:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1783,7 +1783,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 126:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::OPERATOR;}
+					{return dLittleScriptParser::OPERATOR;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1791,7 +1791,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 127:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1799,7 +1799,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 128:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1807,7 +1807,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 129:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1815,7 +1815,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 130:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1823,7 +1823,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 131:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1831,7 +1831,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 132:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1839,7 +1839,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 133:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1847,7 +1847,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 134:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::PRIVATE;}
+					{return dLittleScriptParser::PRIVATE;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1855,7 +1855,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 135:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1863,7 +1863,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 136:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1871,7 +1871,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 137:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1879,7 +1879,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 138:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1887,7 +1887,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 139:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1895,7 +1895,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 140:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1903,7 +1903,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 141:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::RETURN;}
+					{return dLittleScriptParser::RETURN;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1911,7 +1911,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 142:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1919,7 +1919,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 143:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1927,7 +1927,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 144:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1935,7 +1935,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 145:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1943,7 +1943,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 146:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1951,7 +1951,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 147:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::SHORT;}
+					{return dLittleScriptParser::SHORT;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1959,7 +1959,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 148:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1967,7 +1967,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 149:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1975,7 +1975,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 150:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1983,7 +1983,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 151:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::SIZEOF;}
+					{return dLittleScriptParser::SIZEOF;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1991,7 +1991,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 152:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1999,7 +1999,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 153:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2007,7 +2007,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 154:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2015,7 +2015,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 155:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2023,7 +2023,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 156:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::SWITCH;}
+					{return dLittleScriptParser::SWITCH;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2031,7 +2031,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 157:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2039,7 +2039,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 158:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2047,7 +2047,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 159:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2055,7 +2055,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 160:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2063,7 +2063,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 161:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2071,7 +2071,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 162:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::UNSIGNED;}
+					{return dLittleScriptParser::UNSIGNED;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2079,7 +2079,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 163:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2087,7 +2087,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 164:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2095,7 +2095,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 165:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2103,7 +2103,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 166:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2111,7 +2111,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 167:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2119,7 +2119,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 168:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2127,7 +2127,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 169:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2135,7 +2135,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 170:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::VOID_TYPE;}
+					{return dLittleScriptParser::VOID_TYPE;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2143,7 +2143,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 171:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2151,7 +2151,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 172:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2159,7 +2159,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 173:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2167,7 +2167,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 174:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2175,7 +2175,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 175:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::WHILE;}
+					{return dLittleScriptParser::WHILE;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2183,7 +2183,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 176:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2191,7 +2191,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 177:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2199,7 +2199,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 178:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2207,7 +2207,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 179:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::IDENTIFIER;}
+					{return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2223,7 +2223,7 @@ int dNewtonScriptLexical::NextToken ()
 				case 181:
 				{
 					GetLexString ();
-					{return dNewtonScriptParser::LOGIC_OR;}
+					{return dLittleScriptParser::LOGIC_OR;}
 					state = 0;
 					ch = NextChar();
 					break;

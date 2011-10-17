@@ -11,11 +11,11 @@
 
 
 //
-//Auto generated Lexical Analyzer class: dNewtonScriptLexical.h
+//Auto generated Lexical Analyzer class: dLittleScriptLexical.h
 //
 
-#ifndef __dNewtonScriptLexical_h__
-#define __dNewtonScriptLexical_h__
+#ifndef __dLittleScriptLexical_h__
+#define __dLittleScriptLexical_h__
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4702) // warning C4702: unreachable code
@@ -27,11 +27,11 @@
 #include <string>
 using namespace std;
 
-class dNewtonScriptLexical
+class dLittleScriptLexical
 {
 	public:
-	dNewtonScriptLexical(const char* const data);
-	virtual ~dNewtonScriptLexical();
+	dLittleScriptLexical(const char* const data);
+	virtual ~dLittleScriptLexical();
 
 	virtual int NextToken ();
 

@@ -10,11 +10,11 @@
 */
 
 //
-//Auto generated Parser Generator class: dNewtonScriptParser.h
+//Auto generated Parser Generator class: dLittleScriptParser.h
 //
 
-#ifndef __dNewtonScriptParser_h__
-#define __dNewtonScriptParser_h__
+#ifndef __dLittleScriptParser_h__
+#define __dLittleScriptParser_h__
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4702) // warning C4702: unreachable code
@@ -26,9 +26,9 @@
 #include <string>
 using namespace std;
 
-class dNewtonScriptLexical;
+class dLittleScriptLexical;
 
-class dNewtonScriptParser
+class dLittleScriptParser
 {
 	public:
 	enum dToken
@@ -124,14 +124,14 @@ class dNewtonScriptParser
 	};
 
 
-	dNewtonScriptParser();
-	virtual ~dNewtonScriptParser();
-	virtual bool Parse(dNewtonScriptLexical& scanner);
+	dLittleScriptParser();
+	virtual ~dLittleScriptParser();
+	virtual bool Parse(dLittleScriptLexical& scanner);
 
 	private:
 	const dGotoEntry* FindGoto (const dGotoEntry* const gotoList, int count, dToken token) const;
 	const dActionEntry* FindAction (const dActionEntry* const list, int count, dToken token) const;
-	const dActionEntry* GetNextAction (dList<dStackPair>& stack, dToken token, dNewtonScriptLexical& scanner) const;
+	const dActionEntry* GetNextAction (dList<dStackPair>& stack, dToken token, dLittleScriptLexical& scanner) const;
 
 	bool m_grammarError;
 };

@@ -10,7 +10,7 @@
 */
 
 //
-//Auto generated Parser Generator class: dScriptCompiler.h
+//Auto generated Parser Generator class: dLittleScriptCompiler.h
 //
 
 #ifndef __dScriptCompiler_h__
@@ -46,15 +46,15 @@
 #include <dDAGExpressionNodeUnuaryOperator.h>
 #include <dDAGFunctionStatementFunctionCall.h>
 
-#include "dNewtonScriptParser.h"
+#include "dLittleScriptParser.h"
 
 
 //class dVirtualMachine;
 class dSyntaxTreeCode;
-class dNewtonScriptLexical;
+class dLittleScriptLexical;
 class dDirectAcyclicgraphNode;
 
-class dScriptCompiler: public dNewtonScriptParser
+class dScriptCompiler: public dLittleScriptParser
 {
 	public:
 	dScriptCompiler(const char* const sourceFileName);
@@ -62,11 +62,11 @@ class dScriptCompiler: public dNewtonScriptParser
 	int CompileSource (const char* const source);
 
 	protected:
-	virtual bool Parse(dNewtonScriptLexical& scanner);
+	virtual bool Parse(dLittleScriptLexical& scanner);
 
 
 	void DisplayError (const char* format, ...) const;
-	void SyntaxError (const dNewtonScriptLexical& scanner, const dUserVariable& errorToken, const dUserVariable& errorTokenMarker);
+	void SyntaxError (const dLittleScriptLexical& scanner, const dUserVariable& errorToken, const dUserVariable& errorTokenMarker);
 
 	void AddClassFunction(const dUserVariable& function);
 	void AddClassVariable(const dUserVariable& variable);
@@ -117,7 +117,7 @@ class dScriptCompiler: public dNewtonScriptParser
 	dList<dDAGScopeBlockNode*> m_scopeStack;
 	dList<dDirectAcyclicgraphNode*> m_allNodes;
 
-	friend class dNewtonScriptParser;
+	friend class dLittleScriptParser;
 };
 
 #endif

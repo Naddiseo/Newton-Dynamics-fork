@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <tchar.h>
 #include <dVirtualMachine.h>
-#include <dScriptCompiler.h>
+#include <dLittleScriptCompiler.h>
 
 
 #ifdef _MSC_VER
