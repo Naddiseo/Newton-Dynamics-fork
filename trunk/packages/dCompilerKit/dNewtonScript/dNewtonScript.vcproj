@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../dContainers;../dNewtonIntermediateLanguage"
+				AdditionalIncludeDirectories="../../dContainers;../dIntermediateLanguage"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -106,7 +106,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="../../dContainers;../dNewtonIntermediateLanguage"
+				AdditionalIncludeDirectories="../../dContainers;../dIntermediateLanguage"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -204,7 +204,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="dParserGenerator.exe $(InputFileName) -&gt; $(InputName).h $(InputName).cpp "
-					CommandLine="..\dParserGenerator\bin\dParserGenerator.exe $(InputFileName) dNewtonScriptLexical $(InputDir)$(InputName).cpp"
+					CommandLine="..\dParserGenerator\bin\dParserGenerator.exe $(InputFileName) dNewtonScriptLexical $(InputDir)$(InputName).cpp&#x0D;&#x0A;"
 					Outputs="$(InputName).cpp"
 				/>
 			</FileConfiguration>
