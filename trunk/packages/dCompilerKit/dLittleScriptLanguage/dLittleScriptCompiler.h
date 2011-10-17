@@ -16,41 +16,24 @@
 #ifndef __dScriptCompiler_h__
 #define __dScriptCompiler_h__
 
+
+
+#include <dCRC.h>
 #include <dTree.h>
 #include <dList.h>
-#include <dCRC.h>
+#include <dRtti.h>
+#include <dRefCounter.h>
 #include <dContainersStdAfx.h>
 
-#include <dDAGTypeNode.h>
-#include <dDAGClassNode.h>
-#include <dSyntaxTreeCode.h>
-#include <dDAGFunctionNode.h>
-#include <dDAGParameterNode.h>
-#include <dDAGDimensionNode.h>
-#include <dDAGScopeBlockNode.h>
-#include <dDAGExpressionNode.h>
-#include <dDAGFunctionModifier.h>
-#include <dDAGFunctionStatement.h>
-#include <dDirectAcyclicgraphNode.h>
-#include <dDAGFunctionStatementIF.h>
-#include <dDAGFunctionStatementDO.h>
-#include <dDAGFunctionStatementFOR.h>
-#include <dDAGFunctionStatementBREAK.h>
-#include <dDAGFunctionStatementWHILE.h>
-#include <dDAGExpressionNodeFunctionCall.h>
-#include <dDAGExpressionNodeConstant.h>
-#include <dDAGExpressionNodeVariable.h>
-#include <dDAGFunctionStatementReturn.h>
-#include <dDAGFunctionStatementAssigment.h>
-#include <dDAGExpressionNodeBinaryOperator.h>
-#include <dDAGExpressionNodeUnuaryOperator.h>
-#include <dDAGFunctionStatementFunctionCall.h>
-
+#include "dDirectAcyclicgraphNode.h"
 #include "dLittleScriptParser.h"
 
 
 //class dVirtualMachine;
+class dDAGClassNode;
 class dSyntaxTreeCode;
+class dDAGFunctionNode;
+class dDAGScopeBlockNode;
 class dLittleScriptLexical;
 class dDirectAcyclicgraphNode;
 

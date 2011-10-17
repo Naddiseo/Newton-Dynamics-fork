@@ -10,9 +10,9 @@
 */
 
 %{
-#include <dLittleScriptCompiler.h>
+#include "dLittleScriptCompiler.h"
 #include "dLittleScriptLexical.h"
-#include "dDirectAcyclicgraphNode.h"
+#include "dLittleScriptCompiler.h"
 
 //
 // Newton Little Scripting Language parser  specification 1.0.0
