@@ -22,6 +22,7 @@ class dDAGExpressionNodeVariable: public dDAGExpressionNode
 	dDAGExpressionNodeVariable (dList<dDAG*>& allNodes, const char* const identifier);
 	~dDAGExpressionNodeVariable(void);
 
+	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
 	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
 
 	dAddRtti(dDAGExpressionNode);

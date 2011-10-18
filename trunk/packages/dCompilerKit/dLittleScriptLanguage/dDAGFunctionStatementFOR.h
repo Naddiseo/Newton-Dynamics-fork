@@ -24,6 +24,7 @@ class dDAGFunctionStatementFOR: public dDAGFunctionStatement
 	dDAGFunctionStatementFOR(dList<dDAG*>& allNodes, dDAGFunctionStatement* const beginStmt, dDAGExpressionNode* const expression, dDAGFunctionStatement* const endStmt, dDAGFunctionStatement* const stmt);
 	~dDAGFunctionStatementFOR();
 
+	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
 	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
 
 	dAddRtti(dDAGFunctionStatement);

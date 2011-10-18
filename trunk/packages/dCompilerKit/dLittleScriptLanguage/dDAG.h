@@ -28,6 +28,7 @@ class dDAG: public dRefCounter
 	dCRCTYPE GetKey() const;
 	virtual void CalculateKey() {m_key = 0;}
 	
+	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
 	virtual void ConnectParents(dDAG* const parent) = 0;
 	
 	string m_name;

@@ -22,6 +22,7 @@ class dDAGExpressionNodeFunctionCall: public dDAGExpressionNode
 	dDAGExpressionNodeFunctionCall (dList<dDAG*>& allNodes, const char* const identifier, dDAGExpressionNode* const argumentList);
 	~dDAGExpressionNodeFunctionCall(void);
 
+	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
 	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
 
 	dList<dDAGExpressionNode*> m_argumentList;

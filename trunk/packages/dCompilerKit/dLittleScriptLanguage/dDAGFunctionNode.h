@@ -31,6 +31,7 @@ class dDAGFunctionNode: public dDAG
 	void SetBody(dDAGScopeBlockNode* const body);
 	void SetModifier(dDAGFunctionModifier* const modifier);
 
+	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
 	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
 
 	bool m_isConst;

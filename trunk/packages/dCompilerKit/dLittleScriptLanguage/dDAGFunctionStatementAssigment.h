@@ -23,7 +23,7 @@ class dDAGFunctionStatementAssigment: public dDAGFunctionStatement
 	dDAGFunctionStatementAssigment(dList<dDAG*>& allNodes, dDAGExpressionNodeVariable* const leftVariable, dDAGExpressionNode* const expression);
 	~dDAGFunctionStatementAssigment();
 
-
+	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
 	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
 
 	dDAGExpressionNode* m_expression;

@@ -30,6 +30,8 @@ class dDAGScopeBlockNode: public dDAGFunctionStatement
 	~dDAGScopeBlockNode(void);
 
 	void AddStatement (dDAGFunctionStatement* const statement);
+
+	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
 	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
 
 	dDAGExpressionNodeVariable* CreatedVariableNode (dList<dDAG*>& allNodes, const char* const identifier);

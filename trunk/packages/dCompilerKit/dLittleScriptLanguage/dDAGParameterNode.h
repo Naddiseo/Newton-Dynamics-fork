@@ -24,6 +24,8 @@ class dDAGParameterNode: public dDAGFunctionStatement
 	~dDAGParameterNode(void);
 
 	void SetInitializationExpression(dDAGExpressionNode* exp);
+
+	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
 	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
 
 	virtual void CalculateKey();

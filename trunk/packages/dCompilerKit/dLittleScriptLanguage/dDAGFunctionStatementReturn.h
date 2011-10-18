@@ -23,7 +23,9 @@ class dDAGFunctionStatementReturn: public dDAGFunctionStatement
 	dDAGFunctionStatementReturn(dList<dDAG*>& allNodes, dDAGExpressionNode* const expression);
 	~dDAGFunctionStatementReturn();
 
+	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
 	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
+
 	dDAGExpressionNode* m_expression;
 	dAddRtti(dDAGFunctionStatement);
 };
