@@ -951,8 +951,8 @@ dParserCompiler::dState* dParserCompiler::Closure (
 				_ASSERTE (matchingRulesList);
 				for (dList<void*>::dListNode* node = matchingRulesList.GetFirst(); node; node = node->GetNext()) {
 					dProductionRule::dListNode* const ruleNode = (dProductionRule::dListNode*) node->GetInfo();
-					const dRuleInfo& info = ruleNode->GetInfo();
-					_ASSERTE (info.m_name == sentenceSymbol.m_name);
+					//const dRuleInfo& info = ruleNode->GetInfo();
+					_ASSERTE (ruleNode->GetInfo().m_name == sentenceSymbol.m_name);
 					dTree<int, dCRCTYPE> firstList;
 					First (firstSymbolList, symbolList, ruleMap, firstList);
 					dTree<int, dCRCTYPE>::Iterator firstIter (firstList);
