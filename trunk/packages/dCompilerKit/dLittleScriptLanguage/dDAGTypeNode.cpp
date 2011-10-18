@@ -9,7 +9,7 @@
 * freely
 */
 
-#include "dLittleScriptCompiler.h"
+#include "dLSCstdafx.h"
 #include "dDAG.h"
 #include "dDAGTypeNode.h"
 #include "dDAGDimensionNode.h"

@@ -120,7 +120,7 @@ class dLittleScriptParser
 			,m_node(NULL)
 		{
 		}
-		dDAG* m_node;
+		class dDAG* m_node;
 	};
 
 

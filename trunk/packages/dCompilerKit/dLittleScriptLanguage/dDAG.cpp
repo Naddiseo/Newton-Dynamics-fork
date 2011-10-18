@@ -11,18 +11,23 @@
 
 #include "dLSCstdafx.h"
 #include "dDAG.h"
-#include "dDAGFunctionStatement.h"
 
-dInitRtti(dDAGFunctionStatement);
+dRttiRootClassSupportImplement(dDAG);
 
-dDAGFunctionStatement::dDAGFunctionStatement(dList<dDAG*>& allNodes)
-	:dDAG(allNodes)
+dDAG::dDAG(dList<dDAG*>& allNodes)
+	:m_name ("")
+	,m_key(0)
+	,m_parent (NULL)
+{
+	allNodes.Append(this);
+}
+
+dDAG::~dDAG(void)
 {
 }
 
 
-dDAGFunctionStatement::~dDAGFunctionStatement()
+dCRCTYPE dDAG::GetKey() const
 {
+	return m_key;
 }
-
-

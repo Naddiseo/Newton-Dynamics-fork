@@ -47,7 +47,7 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="dLittleScriptCompiler.h"
+				PrecompiledHeaderThrough="dLSCstdafx.h"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -111,7 +111,7 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderThrough="dLittleScriptCompiler.h"
+				PrecompiledHeaderThrough="dLSCstdafx.h"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
@@ -417,8 +417,33 @@
 				>
 				<Tool
 					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="2"
+					PrecompiledHeaderThrough="dLSCstdafx.h"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
+					UsePrecompiledHeader="2"
+					PrecompiledHeaderThrough="dLSCstdafx.h"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath=".\dLittleScriptCompiler.h"
+			>
+		</File>
+		<File
+			RelativePath=".\dLSCstdafx.cpp"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCLCompilerTool"
 					UsePrecompiledHeader="1"
-					PrecompiledHeaderThrough="dLittleScriptCompiler.h"
 				/>
 			</FileConfiguration>
 			<FileConfiguration
@@ -427,12 +452,11 @@
 				<Tool
 					Name="VCCLCompilerTool"
 					UsePrecompiledHeader="1"
-					PrecompiledHeaderThrough="dLittleScriptCompiler.h"
 				/>
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath=".\dLittleScriptCompiler.h"
+			RelativePath=".\dLSCstdafx.h"
 			>
 		</File>
 	</Files>

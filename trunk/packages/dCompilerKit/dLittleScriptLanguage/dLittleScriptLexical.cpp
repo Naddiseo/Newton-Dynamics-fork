@@ -14,7 +14,7 @@
 //Auto generated Lexical Analyzer class: dLittleScriptLexical.cpp
 //
 
-#include "dLittleScriptCompiler.h"
+#include "dLSCstdafx.h"
 #include "dLittleScriptParser.h"
 
 //

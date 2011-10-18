@@ -13,9 +13,11 @@
 //Auto generated Parser Generator class: dScriptCompiler.cpp
 //
 
-#include "dLittleScriptCompiler.h"
+#include "dLSCstdafx.h"
 #include "dLittleScriptLexical.h"
+#include "dLittleScriptCompiler.h"
 
+#include "dDAG.h"
 #include "dDAGTypeNode.h"
 #include "dDAGClassNode.h"
 #include "dDAGFunctionNode.h"
@@ -25,7 +27,6 @@
 #include "dDAGExpressionNode.h"
 #include "dDAGFunctionModifier.h"
 #include "dDAGFunctionStatement.h"
-#include "dDAG.h"
 #include "dDAGFunctionStatementIF.h"
 #include "dDAGFunctionStatementDO.h"
 #include "dDAGFunctionStatementFOR.h"

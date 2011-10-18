@@ -14,7 +14,8 @@
 //
 
 
-#include "dLittleScriptCompiler.h"
+#include "dLSCstdafx.h"
+#include "dLittleScriptParser.h"
 #include "dLittleScriptLexical.h"
 #include "dLittleScriptCompiler.h"
 

@@ -11,7 +11,7 @@
 */
 
 %{
-#include "dLittleScriptCompiler.h"
+#include "dLSCstdafx.h"
 #include "dLittleScriptParser.h"
 
 //

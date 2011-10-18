@@ -13,7 +13,7 @@
 #define __dDAGFunctionStatement_H__
 
 #include "dDAG.h"
-#include "dLittleScriptCompiler.h"
+#include "dLSCstdafx.h"
 
 
 class dDAGFunctionStatement: public dDAG
