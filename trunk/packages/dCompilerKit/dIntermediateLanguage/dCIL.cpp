@@ -2,6 +2,7 @@
 #include "dCIL.h"
 
 dCIL::dCIL(void)
+	:m_program()
 {
 }
 

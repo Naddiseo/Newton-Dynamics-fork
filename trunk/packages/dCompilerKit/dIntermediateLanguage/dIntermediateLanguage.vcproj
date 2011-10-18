@@ -179,6 +179,14 @@
 			RelativePath=".\dCILstdafx.h"
 			>
 		</File>
+		<File
+			RelativePath=".\dTreeAdressStmt.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dTreeAdressStmt.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

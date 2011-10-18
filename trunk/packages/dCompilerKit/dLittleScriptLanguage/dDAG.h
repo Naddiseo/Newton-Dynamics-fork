@@ -12,14 +12,12 @@
 #ifndef __dDAG_h_
 #define __dDAG_h_
 
-#include <dTree.h>
-#include <dList.h>
-#include <dCRC.h>
-#include <dRtti.h>
-#include <dRefCounter.h>
+#include "dLSCstdafx.h"
 
-#include <string>
-using namespace std;
+#ifdef _MSC_VER
+#pragma warning (disable: 4100) // warning C4100: unreferenced formal parameter
+#endif
+
 
 class dDAG: public dRefCounter
 {
