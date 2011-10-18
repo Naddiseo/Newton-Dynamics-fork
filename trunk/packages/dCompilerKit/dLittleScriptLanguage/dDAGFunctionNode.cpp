@@ -81,3 +81,12 @@ void dDAGFunctionNode::SetModifier(dDAGFunctionModifier* const modifier)
 	m_modifier = modifier;
 	m_modifier->AddRef();
 }
+
+
+void dDAGFunctionNode::CompileCIL(dCIL& cil)  
+{
+	_ASSERTE (m_body);
+	
+	DTRACE (("emit the function prototype here\n"));
+	m_body->CompileCIL(cil);
+}

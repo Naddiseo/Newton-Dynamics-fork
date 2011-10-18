@@ -72,3 +72,14 @@ void dDAGClassNode::AddVariable (dDAGParameterNode* const variable)
 	m_variables.Append(variable);
 	variable->AddRef();
 }
+
+
+void dDAGClassNode::CompileCIL(dCIL& cil)  
+{
+	DTRACE (("emit the class variables here\n"));
+
+	for (dList<dDAGFunctionNode*>::dListNode* node = m_functionList.GetFirst(); node; node = node->GetNext()) {
+		dDAGFunctionNode* const function = node->GetInfo();
+		function->CompileCIL(cil);
+	}
+}

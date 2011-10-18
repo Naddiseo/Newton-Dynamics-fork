@@ -97,7 +97,7 @@ void dScriptCompiler::DisplayError (const char* format, ...) const
 	free (text);
 }
 
-
+/*
 void qsort (int a[], int m, int n)
 {
 	if (n <= m) {
@@ -147,7 +147,7 @@ void qsort (int a[], int size)
 	}
 	qsort (a, 1, size-1);
 }
-
+*/
 
 int dScriptCompiler::CompileSource (const char* const source)
 {
@@ -161,10 +161,14 @@ int dScriptCompiler::CompileSource (const char* const source)
 //int x = a - - ! ~ b * - c;
 //x = a - - ~ ! b * - c;
 
-
+	
 	bool status = Parse(scanner);
 	if (status) {
-//		_ASSERTE (0);
+		dCIL cil;
+		for (dList<dDAGClassNode*>::dListNode* node = m_classList.GetFirst(); node; node = node->GetNext()) {
+			dDAGClassNode* const scripClass =  node->GetInfo();
+			scripClass->CompileCIL (cil);
+		}
 	}
 	return 0;
 }

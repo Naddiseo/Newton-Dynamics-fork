@@ -109,3 +109,9 @@ dDAGExpressionNodeConstant* dDAGScopeBlockNode::CreatedConstantNode (dList<dDAG*
 	dDAGExpressionNodeConstant* const expresionNode = (dDAGExpressionNodeConstant*)node->GetInfo();
 	return expresionNode;
 }
+
+
+void dDAGScopeBlockNode::CompileCIL(dCIL& cil)  
+{
+	_ASSERTE (0);
+}

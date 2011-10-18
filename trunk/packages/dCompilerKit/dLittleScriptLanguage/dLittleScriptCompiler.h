@@ -100,6 +100,7 @@ class dScriptCompiler: public dLittleScriptParser
 	dList<dDAGScopeBlockNode*> m_scopeStack;
 	dList<dDAG*> m_allNodes;
 
+//	dCIL m_cil;
 	friend class dLittleScriptParser;
 };
 
