@@ -4,16 +4,23 @@
 #include "dCILstdafx.h"
 #include "dTreeAdressStmt.h"
 
+
+
 class dCIL
 {
+	public:
 	class dProgram: public dList<dTreeAdressStmt>
 	{
 		
 	};
-	public:
+	
 	dCIL(void);
 	virtual ~dCIL(void);
 
+	string NewTemp (); 
+	dProgram::dListNode* NewStatement();
+
+	int m_tempIndex;
 	dProgram m_program;
 };
 

@@ -45,3 +45,21 @@ dDAGFunctionStatementIF::~dDAGFunctionStatementIF()
 }
 
 
+void dDAGFunctionStatementIF::CompileCIL(dCIL& cil)  
+{
+	m_expression->CompileCIL(cil);
+
+	dTreeAdressStmt& stmnt = cil.NewStatement()->GetInfo();
+
+	stmnt.m_instrution = dTreeAdressStmt::m_ifNot;
+	stmnt.m_arg0 = m_expression->m_name;
+
+	if (!m_elseStmt) {
+		m_thenStmt->CompileCIL(cil);
+		
+		stmnt.m_jmpTarget = cil.NewStatement();
+	} else {
+		_ASSERTE (0);
+	}
+	
+}

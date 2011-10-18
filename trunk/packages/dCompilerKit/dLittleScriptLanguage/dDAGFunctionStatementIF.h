@@ -24,7 +24,7 @@ class dDAGFunctionStatementIF: public dDAGFunctionStatement
 	dDAGFunctionStatementIF(dList<dDAG*>& allNodes, dDAGExpressionNode* const expression, dDAGFunctionStatement* const thenStmt, dDAGFunctionStatement* const elseStmt);
 	~dDAGFunctionStatementIF();
 
-	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
+	virtual void CompileCIL(dCIL& cil);
 	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
 
 	dAddRtti(dDAGFunctionStatement);

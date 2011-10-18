@@ -42,7 +42,7 @@ class dDAGScopeBlockNode: public dDAGFunctionStatement
 	dAddRtti(dDAGFunctionStatement);
 
 	dList<dDAGFunctionStatement*> m_statementList;
-	dTree<dDAGExpressionNode*, dCRCTYPE> m_expresionNodesCashe;
+	dTree<dDAGExpressionNode*, dCRCTYPE> m_expressionNodesCache;
 };
 
 

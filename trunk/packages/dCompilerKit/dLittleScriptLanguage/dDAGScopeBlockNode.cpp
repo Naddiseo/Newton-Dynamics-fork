@@ -23,14 +23,14 @@ dInitRtti(dDAGScopeBlockNode);
 dDAGScopeBlockNode::dDAGScopeBlockNode(dList<dDAG*>& allNodes)
 	:dDAGFunctionStatement(allNodes)
 	,m_statementList()
-	,m_expresionNodesCashe()
+	,m_expressionNodesCache()
 {
 }
 
 
 dDAGScopeBlockNode::~dDAGScopeBlockNode()
 {
-	dTree<dDAGExpressionNode*, dCRCTYPE>::Iterator iter (m_expresionNodesCashe);
+	dTree<dDAGExpressionNode*, dCRCTYPE>::Iterator iter (m_expressionNodesCache);
 	for (iter.Begin(); iter; iter ++) {
 		dDAGExpressionNode* const node = iter.GetNode()->GetInfo();
 		node->Release();
@@ -53,11 +53,11 @@ dDAGExpressionNodeBinaryOperator* dDAGScopeBlockNode::CreateBinaryOperatorNode (
 {
 	dCRCTYPE key = dDAGExpressionNodeBinaryOperator::CalculateKey (binaryOperator, expressionA, expressionB);
 	
-	dTree<dDAGExpressionNode*, dCRCTYPE>::dTreeNode* node = m_expresionNodesCashe.Find(key);
+	dTree<dDAGExpressionNode*, dCRCTYPE>::dTreeNode* node = m_expressionNodesCache.Find(key);
 	if (!node) {
 		dDAGExpressionNodeBinaryOperator* const expresionNode = new dDAGExpressionNodeBinaryOperator (allNodes, binaryOperator, expressionA, expressionB);
 		_ASSERTE (expresionNode->GetKey() == key);
-		node = m_expresionNodesCashe.Insert(expresionNode, key);
+		node = m_expressionNodesCache.Insert(expresionNode, key);
 		expresionNode->AddRef();
 	}
 	dDAGExpressionNodeBinaryOperator* const expresionNode = (dDAGExpressionNodeBinaryOperator*)node->GetInfo();
@@ -69,11 +69,11 @@ dDAGExpressionNodeUnuaryOperator* dDAGScopeBlockNode::CreateUnuaryOperatorNode (
 {
 	dCRCTYPE key = dDAGExpressionNodeUnuaryOperator::CalculateKey (unuaryOperator, expression);
 
-	dTree<dDAGExpressionNode*, dCRCTYPE>::dTreeNode* node = m_expresionNodesCashe.Find(key);
+	dTree<dDAGExpressionNode*, dCRCTYPE>::dTreeNode* node = m_expressionNodesCache.Find(key);
 	if (!node) {
 		dDAGExpressionNodeUnuaryOperator* const expresionNode = new dDAGExpressionNodeUnuaryOperator (allNodes, unuaryOperator, expression);
 		_ASSERTE (expresionNode->GetKey() == key);
-		node = m_expresionNodesCashe.Insert(expresionNode, key);
+		node = m_expressionNodesCache.Insert(expresionNode, key);
 		expresionNode->AddRef();
 	}
 	dDAGExpressionNodeUnuaryOperator* const expresionNode = (dDAGExpressionNodeUnuaryOperator*)node->GetInfo();
@@ -84,11 +84,11 @@ dDAGExpressionNodeUnuaryOperator* dDAGScopeBlockNode::CreateUnuaryOperatorNode (
 dDAGExpressionNodeVariable* dDAGScopeBlockNode::CreatedVariableNode (dList<dDAG*>& allNodes, const char* const identifier)
 {
 	dCRCTYPE key = dCRC64 (identifier);
-	dTree<dDAGExpressionNode*, dCRCTYPE>::dTreeNode* node = m_expresionNodesCashe.Find(key);
+	dTree<dDAGExpressionNode*, dCRCTYPE>::dTreeNode* node = m_expressionNodesCache.Find(key);
 	if (!node) {
 		dDAGExpressionNodeVariable* const expresionNode = new dDAGExpressionNodeVariable (allNodes, identifier);
 		_ASSERTE (expresionNode->GetKey() == key);
-		node = m_expresionNodesCashe.Insert(expresionNode, key);
+		node = m_expressionNodesCache.Insert(expresionNode, key);
 		expresionNode->AddRef();
 	}
 	dDAGExpressionNodeVariable* const expresionNode = (dDAGExpressionNodeVariable*)node->GetInfo();
@@ -99,11 +99,11 @@ dDAGExpressionNodeConstant* dDAGScopeBlockNode::CreatedConstantNode (dList<dDAG*
 {
 	dCRCTYPE key = dCRC64 (value);
 
-	dTree<dDAGExpressionNode*, dCRCTYPE>::dTreeNode* node = m_expresionNodesCashe.Find(key);
+	dTree<dDAGExpressionNode*, dCRCTYPE>::dTreeNode* node = m_expressionNodesCache.Find(key);
 	if (!node) {
 		dDAGExpressionNodeConstant* const expresionNode = new dDAGExpressionNodeConstant (allNodes, type, value);
 		_ASSERTE (expresionNode->GetKey() == key);
-		node = m_expresionNodesCashe.Insert(expresionNode, key);
+		node = m_expressionNodesCache.Insert(expresionNode, key);
 		expresionNode->AddRef();
 	}
 	dDAGExpressionNodeConstant* const expresionNode = (dDAGExpressionNodeConstant*)node->GetInfo();
@@ -113,5 +113,8 @@ dDAGExpressionNodeConstant* dDAGScopeBlockNode::CreatedConstantNode (dList<dDAG*
 
 void dDAGScopeBlockNode::CompileCIL(dCIL& cil)  
 {
-	_ASSERTE (0);
+	for (dList<dDAGFunctionStatement*>::dListNode* node = m_statementList.GetFirst(); node; node = node->GetNext()) {
+		dDAGFunctionStatement* const stmt = node->GetInfo();
+		stmt->CompileCIL(cil);
+	}
 }

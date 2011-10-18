@@ -4,18 +4,30 @@
 class dTreeAdressStmt
 {
 	public:
-	enum operand
+	enum dOperator
 	{
-		m_assigment,
+		m_nothing,
+		m_lessEqual,
+		m_greatherEqual,
+		
+	};
 
+	enum dInstruction
+	{
+		m_nop,
+		m_assigment,
+		m_if, 
+		m_ifNot, 
 	};
 	dTreeAdressStmt(void);
 	~dTreeAdressStmt(void);
 
-	operand m_code;
+	dInstruction m_instrution;
+	dOperator m_operator;
 	string m_arg0;
 	string m_arg1;
 	string m_arg2;
+	dList<dTreeAdressStmt>::dListNode* m_jmpTarget;
 };
 
 

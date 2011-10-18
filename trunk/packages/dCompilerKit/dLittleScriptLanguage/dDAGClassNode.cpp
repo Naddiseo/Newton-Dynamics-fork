@@ -78,7 +78,8 @@ void dDAGClassNode::CompileCIL(dCIL& cil)
 {
 	DTRACE (("emit the class variables here\n"));
 
-	for (dList<dDAGFunctionNode*>::dListNode* node = m_functionList.GetFirst(); node; node = node->GetNext()) {
+//	for (dList<dDAGFunctionNode*>::dListNode* node = m_functionList.GetFirst(); node; node = node->GetNext()) {
+	for (dList<dDAGFunctionNode*>::dListNode* node = m_functionList.GetFirst()->GetNext(); node; node = node->GetNext()) {
 		dDAGFunctionNode* const function = node->GetInfo();
 		function->CompileCIL(cil);
 	}

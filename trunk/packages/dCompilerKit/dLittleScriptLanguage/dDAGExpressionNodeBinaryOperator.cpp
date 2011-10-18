@@ -44,3 +44,32 @@ dCRCTYPE dDAGExpressionNodeBinaryOperator::CalculateKey (dBinaryOperator binaryO
 	int tmp = binaryOperator;
 	return dCRC64(&tmp, sizeof (tmp), dCombineCRC (expressionA->GetKey(), expressionB->GetKey()));
 }
+
+
+void dDAGExpressionNodeBinaryOperator::CompileCIL(dCIL& cil)  
+{
+	if (m_name == "") {
+		dTreeAdressStmt& stmnt = cil.NewStatement()->GetInfo();
+		m_name = cil.NewTemp ();		
+
+		stmnt.m_instrution = dTreeAdressStmt::m_assigment;
+		stmnt.m_arg0 = m_name;
+		stmnt.m_arg1 = m_expressionA->m_name;
+		stmnt.m_arg2 = m_expressionB->m_name;
+
+		switch (m_operator) 
+		{
+			case m_lessEqual:
+			{
+				stmnt.m_operator = dTreeAdressStmt::m_lessEqual;
+				break;
+			}
+			
+
+
+			
+			default:;
+			_ASSERTE (0);
+		}
+	}
+}
