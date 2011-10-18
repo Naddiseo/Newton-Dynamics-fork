@@ -424,7 +424,7 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewReturnStatement(const dUserVa
 
 	dDAGExpressionNode* exp = NULL;
 	if (expression.m_node) {
-		dDAGExpressionNode* const exp = (dDAGExpressionNode*) expression.m_node;
+		exp = (dDAGExpressionNode*) expression.m_node;
 		_ASSERTE (exp->IsType(dDAGExpressionNode::GetRttiType()));
 	}
 
