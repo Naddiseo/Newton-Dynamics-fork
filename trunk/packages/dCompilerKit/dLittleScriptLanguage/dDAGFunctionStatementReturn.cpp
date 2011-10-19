@@ -33,3 +33,16 @@ dDAGFunctionStatementReturn::~dDAGFunctionStatementReturn()
 }
 
 
+void dDAGFunctionStatementReturn::CompileCIL(dCIL& cil)
+{
+
+	if (m_expression) {
+		m_expression->CompileCIL(cil);
+	}
+
+	dTreeAdressStmt& stmnt = cil.NewStatement()->GetInfo();
+	stmnt.m_instrution = dTreeAdressStmt::m_goto;
+	stmnt.m_arg0 = "exit";
+
+	
+}

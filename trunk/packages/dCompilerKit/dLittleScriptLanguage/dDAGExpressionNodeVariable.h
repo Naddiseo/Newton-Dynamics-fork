@@ -15,16 +15,18 @@
 #include "dDAG.h"
 #include "dDAGExpressionNode.h"
 
+class dDAGDimensionNode;
 
 class dDAGExpressionNodeVariable: public dDAGExpressionNode
 {
 	public:
-	dDAGExpressionNodeVariable (dList<dDAG*>& allNodes, const char* const identifier);
+	dDAGExpressionNodeVariable (dList<dDAG*>& allNodes, const char* const identifier, dDAGDimensionNode* const expressionDimIndex);
 	~dDAGExpressionNodeVariable(void);
 
-	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
+	virtual void CompileCIL(dCIL& cil);
 	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
 
+	dDAGDimensionNode* m_expressionDimIndex;
 	dAddRtti(dDAGExpressionNode);
 };
 

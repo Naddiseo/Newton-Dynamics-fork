@@ -1047,7 +1047,7 @@ int dLittleScriptLexical::NextToken ()
 				case 34:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1087,7 +1087,7 @@ int dLittleScriptLexical::NextToken ()
 				case 39:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1095,7 +1095,7 @@ int dLittleScriptLexical::NextToken ()
 				case 40:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1111,7 +1111,7 @@ int dLittleScriptLexical::NextToken ()
 				case 42:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1119,7 +1119,7 @@ int dLittleScriptLexical::NextToken ()
 				case 43:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1135,7 +1135,7 @@ int dLittleScriptLexical::NextToken ()
 				case 45:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1143,7 +1143,7 @@ int dLittleScriptLexical::NextToken ()
 				case 46:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1151,7 +1151,7 @@ int dLittleScriptLexical::NextToken ()
 				case 47:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1167,7 +1167,7 @@ int dLittleScriptLexical::NextToken ()
 				case 49:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1175,7 +1175,7 @@ int dLittleScriptLexical::NextToken ()
 				case 50:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1183,7 +1183,7 @@ int dLittleScriptLexical::NextToken ()
 				case 51:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1207,7 +1207,7 @@ int dLittleScriptLexical::NextToken ()
 				case 54:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1215,7 +1215,7 @@ int dLittleScriptLexical::NextToken ()
 				case 55:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1231,7 +1231,7 @@ int dLittleScriptLexical::NextToken ()
 				case 57:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1239,7 +1239,7 @@ int dLittleScriptLexical::NextToken ()
 				case 58:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1247,7 +1247,7 @@ int dLittleScriptLexical::NextToken ()
 				case 59:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1263,7 +1263,7 @@ int dLittleScriptLexical::NextToken ()
 				case 61:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1279,7 +1279,7 @@ int dLittleScriptLexical::NextToken ()
 				case 63:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1287,7 +1287,7 @@ int dLittleScriptLexical::NextToken ()
 				case 64:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1295,7 +1295,7 @@ int dLittleScriptLexical::NextToken ()
 				case 65:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1303,7 +1303,7 @@ int dLittleScriptLexical::NextToken ()
 				case 66:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1311,7 +1311,7 @@ int dLittleScriptLexical::NextToken ()
 				case 67:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1319,7 +1319,7 @@ int dLittleScriptLexical::NextToken ()
 				case 68:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1327,7 +1327,7 @@ int dLittleScriptLexical::NextToken ()
 				case 69:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1343,7 +1343,7 @@ int dLittleScriptLexical::NextToken ()
 				case 71:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1351,7 +1351,7 @@ int dLittleScriptLexical::NextToken ()
 				case 72:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1359,7 +1359,7 @@ int dLittleScriptLexical::NextToken ()
 				case 73:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1367,7 +1367,7 @@ int dLittleScriptLexical::NextToken ()
 				case 74:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1375,7 +1375,7 @@ int dLittleScriptLexical::NextToken ()
 				case 75:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1391,7 +1391,7 @@ int dLittleScriptLexical::NextToken ()
 				case 77:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1399,7 +1399,7 @@ int dLittleScriptLexical::NextToken ()
 				case 78:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1407,7 +1407,7 @@ int dLittleScriptLexical::NextToken ()
 				case 79:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1423,7 +1423,7 @@ int dLittleScriptLexical::NextToken ()
 				case 81:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1439,7 +1439,7 @@ int dLittleScriptLexical::NextToken ()
 				case 83:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1447,7 +1447,7 @@ int dLittleScriptLexical::NextToken ()
 				case 84:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1463,7 +1463,7 @@ int dLittleScriptLexical::NextToken ()
 				case 86:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1471,7 +1471,7 @@ int dLittleScriptLexical::NextToken ()
 				case 87:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1487,7 +1487,7 @@ int dLittleScriptLexical::NextToken ()
 				case 89:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1495,7 +1495,7 @@ int dLittleScriptLexical::NextToken ()
 				case 90:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1503,7 +1503,7 @@ int dLittleScriptLexical::NextToken ()
 				case 91:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1511,7 +1511,7 @@ int dLittleScriptLexical::NextToken ()
 				case 92:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1519,7 +1519,7 @@ int dLittleScriptLexical::NextToken ()
 				case 93:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1527,7 +1527,7 @@ int dLittleScriptLexical::NextToken ()
 				case 94:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1543,7 +1543,7 @@ int dLittleScriptLexical::NextToken ()
 				case 96:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1551,7 +1551,7 @@ int dLittleScriptLexical::NextToken ()
 				case 97:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1559,7 +1559,7 @@ int dLittleScriptLexical::NextToken ()
 				case 98:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1575,7 +1575,7 @@ int dLittleScriptLexical::NextToken ()
 				case 100:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1583,7 +1583,7 @@ int dLittleScriptLexical::NextToken ()
 				case 101:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1599,7 +1599,7 @@ int dLittleScriptLexical::NextToken ()
 				case 103:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1607,7 +1607,7 @@ int dLittleScriptLexical::NextToken ()
 				case 104:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1631,7 +1631,7 @@ int dLittleScriptLexical::NextToken ()
 				case 107:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1639,7 +1639,7 @@ int dLittleScriptLexical::NextToken ()
 				case 108:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1647,7 +1647,7 @@ int dLittleScriptLexical::NextToken ()
 				case 109:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1655,7 +1655,7 @@ int dLittleScriptLexical::NextToken ()
 				case 110:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1671,7 +1671,7 @@ int dLittleScriptLexical::NextToken ()
 				case 112:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1679,7 +1679,7 @@ int dLittleScriptLexical::NextToken ()
 				case 113:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1695,7 +1695,7 @@ int dLittleScriptLexical::NextToken ()
 				case 115:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1703,7 +1703,7 @@ int dLittleScriptLexical::NextToken ()
 				case 116:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1711,7 +1711,7 @@ int dLittleScriptLexical::NextToken ()
 				case 117:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1727,7 +1727,7 @@ int dLittleScriptLexical::NextToken ()
 				case 119:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1735,7 +1735,7 @@ int dLittleScriptLexical::NextToken ()
 				case 120:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1743,7 +1743,7 @@ int dLittleScriptLexical::NextToken ()
 				case 121:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1751,7 +1751,7 @@ int dLittleScriptLexical::NextToken ()
 				case 122:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1767,7 +1767,7 @@ int dLittleScriptLexical::NextToken ()
 				case 124:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1775,7 +1775,7 @@ int dLittleScriptLexical::NextToken ()
 				case 125:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1791,7 +1791,7 @@ int dLittleScriptLexical::NextToken ()
 				case 127:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1799,7 +1799,7 @@ int dLittleScriptLexical::NextToken ()
 				case 128:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1807,7 +1807,7 @@ int dLittleScriptLexical::NextToken ()
 				case 129:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1815,7 +1815,7 @@ int dLittleScriptLexical::NextToken ()
 				case 130:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1823,7 +1823,7 @@ int dLittleScriptLexical::NextToken ()
 				case 131:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1831,7 +1831,7 @@ int dLittleScriptLexical::NextToken ()
 				case 132:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1839,7 +1839,7 @@ int dLittleScriptLexical::NextToken ()
 				case 133:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1855,7 +1855,7 @@ int dLittleScriptLexical::NextToken ()
 				case 135:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1863,7 +1863,7 @@ int dLittleScriptLexical::NextToken ()
 				case 136:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1871,7 +1871,7 @@ int dLittleScriptLexical::NextToken ()
 				case 137:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1879,7 +1879,7 @@ int dLittleScriptLexical::NextToken ()
 				case 138:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1887,7 +1887,7 @@ int dLittleScriptLexical::NextToken ()
 				case 139:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1895,7 +1895,7 @@ int dLittleScriptLexical::NextToken ()
 				case 140:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1911,7 +1911,7 @@ int dLittleScriptLexical::NextToken ()
 				case 142:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1919,7 +1919,7 @@ int dLittleScriptLexical::NextToken ()
 				case 143:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1927,7 +1927,7 @@ int dLittleScriptLexical::NextToken ()
 				case 144:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1935,7 +1935,7 @@ int dLittleScriptLexical::NextToken ()
 				case 145:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1943,7 +1943,7 @@ int dLittleScriptLexical::NextToken ()
 				case 146:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1959,7 +1959,7 @@ int dLittleScriptLexical::NextToken ()
 				case 148:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1967,7 +1967,7 @@ int dLittleScriptLexical::NextToken ()
 				case 149:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1975,7 +1975,7 @@ int dLittleScriptLexical::NextToken ()
 				case 150:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1991,7 +1991,7 @@ int dLittleScriptLexical::NextToken ()
 				case 152:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -1999,7 +1999,7 @@ int dLittleScriptLexical::NextToken ()
 				case 153:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2007,7 +2007,7 @@ int dLittleScriptLexical::NextToken ()
 				case 154:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2015,7 +2015,7 @@ int dLittleScriptLexical::NextToken ()
 				case 155:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2031,7 +2031,7 @@ int dLittleScriptLexical::NextToken ()
 				case 157:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2039,7 +2039,7 @@ int dLittleScriptLexical::NextToken ()
 				case 158:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2047,7 +2047,7 @@ int dLittleScriptLexical::NextToken ()
 				case 159:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2055,7 +2055,7 @@ int dLittleScriptLexical::NextToken ()
 				case 160:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2063,7 +2063,7 @@ int dLittleScriptLexical::NextToken ()
 				case 161:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2079,7 +2079,7 @@ int dLittleScriptLexical::NextToken ()
 				case 163:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2087,7 +2087,7 @@ int dLittleScriptLexical::NextToken ()
 				case 164:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2095,7 +2095,7 @@ int dLittleScriptLexical::NextToken ()
 				case 165:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2103,7 +2103,7 @@ int dLittleScriptLexical::NextToken ()
 				case 166:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2111,7 +2111,7 @@ int dLittleScriptLexical::NextToken ()
 				case 167:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2119,7 +2119,7 @@ int dLittleScriptLexical::NextToken ()
 				case 168:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2127,7 +2127,7 @@ int dLittleScriptLexical::NextToken ()
 				case 169:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2143,7 +2143,7 @@ int dLittleScriptLexical::NextToken ()
 				case 171:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2151,7 +2151,7 @@ int dLittleScriptLexical::NextToken ()
 				case 172:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2159,7 +2159,7 @@ int dLittleScriptLexical::NextToken ()
 				case 173:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2167,7 +2167,7 @@ int dLittleScriptLexical::NextToken ()
 				case 174:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2183,7 +2183,7 @@ int dLittleScriptLexical::NextToken ()
 				case 176:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2191,7 +2191,7 @@ int dLittleScriptLexical::NextToken ()
 				case 177:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2199,7 +2199,7 @@ int dLittleScriptLexical::NextToken ()
 				case 178:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;
@@ -2207,7 +2207,7 @@ int dLittleScriptLexical::NextToken ()
 				case 179:
 				{
 					GetLexString ();
-					{return dLittleScriptParser::IDENTIFIER;}
+					{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 					state = 0;
 					ch = NextChar();
 					break;

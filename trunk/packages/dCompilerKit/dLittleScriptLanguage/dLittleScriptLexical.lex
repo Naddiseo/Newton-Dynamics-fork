@@ -30,7 +30,7 @@ Comment2        [\/][\*]({AnyButAstr}|[\*]{AnyButSlash})*[\*][\/]
 Comment			({Comment1}|{Comment2})
 
 
-Indetifier		[a-zA-Z_][0-9a-zA-Z_]*
+Indentifier		[a-zA-Z_][0-9a-zA-Z_]*
 
 
 
@@ -48,7 +48,7 @@ string			["][^"]*["]
 {Comment}		{/* skip commnets */}
 
 
-{Indetifier}	{return dLittleScriptParser::IDENTIFIER;}
+{Indentifier}	{m_tokenString = '_' + m_tokenString ; return dLittleScriptParser::IDENTIFIER;}
 
 
 ";"				{return ';';}

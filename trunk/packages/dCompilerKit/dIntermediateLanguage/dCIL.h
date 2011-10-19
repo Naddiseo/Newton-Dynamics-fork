@@ -18,9 +18,11 @@ class dCIL
 	virtual ~dCIL(void);
 
 	string NewTemp (); 
+	string NewLabel (); 
 	dProgram::dListNode* NewStatement();
 
 	int m_tempIndex;
+	int m_labelIndex;
 	dProgram m_program;
 };
 

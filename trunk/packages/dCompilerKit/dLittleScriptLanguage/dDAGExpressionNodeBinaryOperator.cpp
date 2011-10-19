@@ -59,6 +59,13 @@ void dDAGExpressionNodeBinaryOperator::CompileCIL(dCIL& cil)
 
 		switch (m_operator) 
 		{
+
+			case m_sub:
+			{
+				stmnt.m_operator = dTreeAdressStmt::m_sub;
+				break;
+			}
+
 			case m_lessEqual:
 			{
 				stmnt.m_operator = dTreeAdressStmt::m_lessEqual;

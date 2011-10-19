@@ -365,7 +365,9 @@ dScriptCompiler::dUserVariable dScriptCompiler::NewExpressionNodeVariable (const
 
 	dDAGScopeBlockNode* const scope = GetCurrentScope();
 	_ASSERTE (scope);
-	dDAGExpressionNodeVariable* const node = scope->CreatedVariableNode (m_allNodes, identifier.m_data.c_str());
+	_ASSERTE (!dimArray.m_node || dimArray.m_node->IsType(dDAGDimensionNode::GetRttiType()));
+
+	dDAGExpressionNodeVariable* const node = scope->CreatedVariableNode (m_allNodes, identifier.m_data.c_str(), (dDAGDimensionNode*)dimArray.m_node);
 	returnNode.m_node = node;
 
 	return returnNode;

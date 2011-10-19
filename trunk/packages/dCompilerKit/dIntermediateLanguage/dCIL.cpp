@@ -4,6 +4,7 @@
 dCIL::dCIL(void)
 	:m_program()
 	,m_tempIndex (0)
+	,m_labelIndex (0)
 {
 }
 
@@ -14,11 +15,18 @@ dCIL::~dCIL(void)
 string dCIL::NewTemp ()
 {
 	char tmp[256];
-	sprintf (tmp, "__tmp%d", m_tempIndex);
+	sprintf (tmp, "t_%d", m_tempIndex);
 	m_tempIndex ++;
 	return string (tmp);
 }
 
+string dCIL::NewLabel ()
+{
+	char tmp[256];
+	sprintf (tmp, "label_%d", m_labelIndex);
+	m_labelIndex ++;
+	return string (tmp);
+}
 
 dCIL::dProgram::dListNode* dCIL::NewStatement()
 {

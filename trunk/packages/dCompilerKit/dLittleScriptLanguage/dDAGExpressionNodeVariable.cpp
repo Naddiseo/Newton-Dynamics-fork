@@ -12,21 +12,35 @@
 #include "dLSCstdafx.h"
 #include "dDAG.h"
 #include "dDAGTypeNode.h"
+#include "dDAGDimensionNode.h"
 #include "dDAGExpressionNodeVariable.h"
 
 
 dInitRtti(dDAGExpressionNodeVariable);
 
-dDAGExpressionNodeVariable::dDAGExpressionNodeVariable(dList<dDAG*>& allNodes, const char* const identifier)
+dDAGExpressionNodeVariable::dDAGExpressionNodeVariable(dList<dDAG*>& allNodes, const char* const identifier, dDAGDimensionNode* const expressionDimIndex)
 	:dDAGExpressionNode(allNodes)
+	,m_expressionDimIndex (expressionDimIndex)
 {
 	m_name = identifier;
-	m_key = dCRC64 (m_name.c_str());
+	
+	dCRCTYPE crc = 0;
+	if (m_expressionDimIndex) {
+		m_expressionDimIndex->AddRef();
+		crc = m_expressionDimIndex->GetKey();
+	}
+	m_key = dCRC64 (m_name.c_str(), crc);
 }
 
 
 dDAGExpressionNodeVariable::~dDAGExpressionNodeVariable(void)
 {
+	if (m_expressionDimIndex) {
+		m_expressionDimIndex->Release();
+	}
 }
 
-
+void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
+{
+	
+}

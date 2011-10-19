@@ -81,12 +81,12 @@ dDAGExpressionNodeUnuaryOperator* dDAGScopeBlockNode::CreateUnuaryOperatorNode (
 }
 
 
-dDAGExpressionNodeVariable* dDAGScopeBlockNode::CreatedVariableNode (dList<dDAG*>& allNodes, const char* const identifier)
+dDAGExpressionNodeVariable* dDAGScopeBlockNode::CreatedVariableNode (dList<dDAG*>& allNodes, const char* const identifier, dDAGDimensionNode* const expressionDimIndex)
 {
 	dCRCTYPE key = dCRC64 (identifier);
 	dTree<dDAGExpressionNode*, dCRCTYPE>::dTreeNode* node = m_expressionNodesCache.Find(key);
 	if (!node) {
-		dDAGExpressionNodeVariable* const expresionNode = new dDAGExpressionNodeVariable (allNodes, identifier);
+		dDAGExpressionNodeVariable* const expresionNode = new dDAGExpressionNodeVariable (allNodes, identifier, expressionDimIndex);
 		_ASSERTE (expresionNode->GetKey() == key);
 		node = m_expressionNodesCache.Insert(expresionNode, key);
 		expresionNode->AddRef();

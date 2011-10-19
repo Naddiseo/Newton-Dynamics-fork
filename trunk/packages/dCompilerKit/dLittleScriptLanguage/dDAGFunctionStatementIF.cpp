@@ -51,13 +51,17 @@ void dDAGFunctionStatementIF::CompileCIL(dCIL& cil)
 
 	dTreeAdressStmt& stmnt = cil.NewStatement()->GetInfo();
 
-	stmnt.m_instrution = dTreeAdressStmt::m_ifNot;
+	stmnt.m_instrution = dTreeAdressStmt::m_ifnot;
 	stmnt.m_arg0 = m_expression->m_name;
-
+//	stmnt.m_arg1 = cil.NewLabel();
 	if (!m_elseStmt) {
 		m_thenStmt->CompileCIL(cil);
 		
+		stmnt.m_arg1 = cil.NewLabel();
 		stmnt.m_jmpTarget = cil.NewStatement();
+		dTreeAdressStmt& jmpTarget = stmnt.m_jmpTarget->GetInfo();
+		jmpTarget.m_arg0 = stmnt.m_arg1;
+
 	} else {
 		_ASSERTE (0);
 	}

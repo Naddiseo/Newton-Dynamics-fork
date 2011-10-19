@@ -7,6 +7,7 @@ class dTreeAdressStmt
 	enum dOperator
 	{
 		m_nothing,
+		m_sub,
 		m_lessEqual,
 		m_greatherEqual,
 		
@@ -17,7 +18,8 @@ class dTreeAdressStmt
 		m_nop,
 		m_assigment,
 		m_if, 
-		m_ifNot, 
+		m_ifnot, 
+		m_goto,
 	};
 	dTreeAdressStmt(void);
 	~dTreeAdressStmt(void);

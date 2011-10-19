@@ -50,3 +50,14 @@ void dDAGParameterNode::CalculateKey()
 	m_key = dCRC64 (m_name.c_str(), m_type->GetKey());
 }
 
+void dDAGParameterNode::CompileCIL(dCIL& cil)  
+{
+	if (m_initializationExp) {
+		m_initializationExp->CompileCIL(cil);
+
+		dTreeAdressStmt& stmnt = cil.NewStatement()->GetInfo();
+		stmnt.m_instrution = dTreeAdressStmt::m_assigment;
+		stmnt.m_arg0 = m_name;
+		stmnt.m_arg1 = m_initializationExp->m_name;
+	}
+}
