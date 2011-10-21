@@ -72,13 +72,30 @@ void dDAGExpressionNodeBinaryOperator::CompileCIL(dCIL& cil)
 			break;
 		}
 
+
+		case m_less:
+		{
+			stmt.m_operator = dTreeAdressStmt::m_less;
+			break;
+		}
+
 		case m_lessEqual:
 		{
 			stmt.m_operator = dTreeAdressStmt::m_lessEqual;
 			break;
 		}
 		
-		
+		case m_greather:
+		{
+			stmt.m_operator = dTreeAdressStmt::m_greather;
+			break;
+		}
+	
+		case m_greatherEqual:
+		{
+			stmt.m_operator = dTreeAdressStmt::m_greatherEqual;
+			break;
+		}
 
 		
 		default:;

@@ -13,7 +13,9 @@ class dTreeAdressStmt
 		m_add,
 		m_sub,
 		m_mul,
+		m_less,
 		m_lessEqual,
+		m_greather,
 		m_greatherEqual,
 		
 	};

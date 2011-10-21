@@ -44,11 +44,30 @@ void dTreeAdressStmt::TraceAssigment () const
 			break;
 		}
 
+		case m_less:
+		{
+			DTRACE ((" < "));
+			break;
+		}
+
+		case m_greather:
+		{
+			DTRACE ((" > "));
+			break;
+		}
+
 		case m_lessEqual:
 		{
 			DTRACE ((" <= "));
 			break;
 		}
+
+		case m_greatherEqual:
+		{
+			DTRACE ((" >= "));
+			break;
+		}
+
 
 		default:;
 			_ASSERTE (0);
@@ -65,6 +84,12 @@ void dTreeAdressStmt::Trace () const
 		case m_assigment:
 		{
 			TraceAssigment ();
+			break;
+		}
+
+		case m_if:
+		{
+			DTRACE (("if (%s) goto %s\n", m_arg0.c_str(), m_arg1.c_str()));
 			break;
 		}
 

@@ -39,3 +39,23 @@ void dDAGFunctionStatementDO::ConnectParent(dDAG* const parent)
 	m_stmt->ConnectParent(this);
 	m_expression->ConnectParent(this);
 }
+
+
+void dDAGFunctionStatementDO::CompileCIL(dCIL& cil)  
+{
+	dTreeAdressStmt& startLabel = cil.NewStatement()->GetInfo();
+	startLabel.m_instrution = dTreeAdressStmt::m_target;
+	startLabel.m_arg0 = cil.NewLabel();
+	dTRACE_INTRUCTION (&startLabel);
+
+	_ASSERTE (m_stmt);
+	m_stmt->CompileCIL(cil);
+
+	m_expression->CompileCIL(cil);
+
+	dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
+	stmt.m_instrution = dTreeAdressStmt::m_if;
+	stmt.m_arg0 = m_expression->m_result;
+	stmt.m_arg1 = startLabel.m_arg0;
+	dTRACE_INTRUCTION (&stmt);
+}
