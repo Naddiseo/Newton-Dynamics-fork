@@ -25,7 +25,7 @@ class dDAGFunctionStatementIF: public dDAGFunctionStatement
 	~dDAGFunctionStatementIF();
 
 	virtual void CompileCIL(dCIL& cil);
-	virtual void ConnectParent(dDAG* const parent)  {_ASSERTE (0);}
+	virtual void ConnectParent(dDAG* const parent);
 
 	dAddRtti(dDAGFunctionStatement);
 

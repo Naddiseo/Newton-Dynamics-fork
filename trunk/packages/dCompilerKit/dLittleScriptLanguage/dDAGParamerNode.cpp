@@ -45,6 +45,15 @@ void dDAGParameterNode::SetInitializationExpression(dDAGExpressionNode* exp)
 }
 
 
+void dDAGParameterNode::ConnectParent(dDAG* const parent)  
+{
+	m_parent = parent;
+	m_type->ConnectParent(this);
+	if (m_initializationExp) {
+		m_initializationExp->ConnectParent(this);
+	}
+}
+
 void dDAGParameterNode::CompileCIL(dCIL& cil)  
 {
 	if (m_initializationExp) {
@@ -53,6 +62,7 @@ void dDAGParameterNode::CompileCIL(dCIL& cil)
 		dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
 		stmt.m_instrution = dTreeAdressStmt::m_assigment;
 		stmt.m_arg0 = m_name;
-		stmt.m_arg1 = m_initializationExp->m_name;
+		stmt.m_arg1 = m_initializationExp->m_result;
+		dTRACE_INTRUCTION (&stmt);
 	}
 }

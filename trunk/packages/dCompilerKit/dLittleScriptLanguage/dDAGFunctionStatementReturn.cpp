@@ -33,16 +33,26 @@ dDAGFunctionStatementReturn::~dDAGFunctionStatementReturn()
 }
 
 
+void dDAGFunctionStatementReturn::ConnectParent(dDAG* const parent)
+{
+	m_parent = parent;
+	if (m_expression) {
+		m_expression->ConnectParent(this);
+	}
+
+}
+
 void dDAGFunctionStatementReturn::CompileCIL(dCIL& cil)
 {
-
 	if (m_expression) {
 		m_expression->CompileCIL(cil);
 	}
+
+
 
 	dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
 	stmt.m_instrution = dTreeAdressStmt::m_goto;
 	stmt.m_arg0 = "exit";
 
-	
+	dTRACE_INTRUCTION (&stmt);
 }

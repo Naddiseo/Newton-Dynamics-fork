@@ -20,6 +20,7 @@ dDAGFunctionStatementFunctionCall::dDAGFunctionStatementFunctionCall(dList<dDAG*
 	:dDAGFunctionStatement(allNodes)
 	,m_function(function)
 {
+	_ASSERTE (m_function);
 	if (m_function) {
 		m_function->AddRef();
 	}
@@ -34,3 +35,10 @@ dDAGFunctionStatementFunctionCall::~dDAGFunctionStatementFunctionCall()
 }
 
 
+void dDAGFunctionStatementFunctionCall::ConnectParent(dDAG* const parent)  
+{
+	m_parent = parent;
+	if (m_function) {
+		m_function->ConnectParent(this);
+	}
+}

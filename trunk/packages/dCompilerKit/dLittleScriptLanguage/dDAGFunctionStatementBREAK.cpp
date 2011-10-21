@@ -25,4 +25,7 @@ dDAGFunctionStatementBREAK::~dDAGFunctionStatementBREAK()
 {
 }
 
-
+void dDAGFunctionStatementBREAK::ConnectParent(dDAG* const parent)
+{
+	m_parent = parent;
+}

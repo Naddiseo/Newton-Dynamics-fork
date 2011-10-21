@@ -24,7 +24,7 @@ class dDAGFunctionStatementDO: public dDAGFunctionStatement
 	~dDAGFunctionStatementDO();
 
 	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
-	virtual void ConnectParent(dDAG* const parent)  {_ASSERTE (0);}
+	virtual void ConnectParent(dDAG* const parent);
 
 	dAddRtti(dDAGFunctionStatement);
 	dDAGExpressionNode* m_expression;

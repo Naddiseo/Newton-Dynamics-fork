@@ -45,6 +45,16 @@ dDAGFunctionStatementIF::~dDAGFunctionStatementIF()
 }
 
 
+void dDAGFunctionStatementIF::ConnectParent(dDAG* const parent)  
+{
+	m_parent = parent;
+	m_expression->ConnectParent(this);
+	m_thenStmt->ConnectParent(this);
+	if (m_elseStmt) {
+		m_elseStmt->ConnectParent(this);
+	}
+}
+
 void dDAGFunctionStatementIF::CompileCIL(dCIL& cil)  
 {
 	m_expression->CompileCIL(cil);
@@ -52,15 +62,20 @@ void dDAGFunctionStatementIF::CompileCIL(dCIL& cil)
 	dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
 
 	stmt.m_instrution = dTreeAdressStmt::m_ifnot;
-	stmt.m_arg0 = m_expression->m_name;
-//	stmt.m_arg1 = cil.NewLabel();
+	stmt.m_arg0 = m_expression->m_result;
+
 	if (!m_elseStmt) {
+		stmt.m_arg1 = cil.NewLabel();
+		dTRACE_INTRUCTION (&stmt);
+
 		m_thenStmt->CompileCIL(cil);
 		
-		stmt.m_arg1 = cil.NewLabel();
 		stmt.m_jmpTarget = cil.NewStatement();
 		dTreeAdressStmt& jmpTarget = stmt.m_jmpTarget->GetInfo();
+
+		jmpTarget.m_instrution = dTreeAdressStmt::m_target;
 		jmpTarget.m_arg0 = stmt.m_arg1;
+		dTRACE_INTRUCTION (&jmpTarget);
 
 	} else {
 		_ASSERTE (0);

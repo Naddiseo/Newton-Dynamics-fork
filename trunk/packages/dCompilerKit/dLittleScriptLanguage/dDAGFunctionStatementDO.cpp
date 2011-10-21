@@ -33,4 +33,9 @@ dDAGFunctionStatementDO::~dDAGFunctionStatementDO()
 	m_stmt->Release();
 }
 
-
+void dDAGFunctionStatementDO::ConnectParent(dDAG* const parent)
+{
+	m_parent = parent;
+	m_stmt->ConnectParent(this);
+	m_expression->ConnectParent(this);
+}

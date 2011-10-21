@@ -42,4 +42,12 @@ dDAGExpressionNodeFunctionCall::~dDAGExpressionNodeFunctionCall(void)
 	}
 }
 
+void dDAGExpressionNodeFunctionCall::ConnectParent(dDAG* const parent)
+{
+	m_parent = parent;
+	for (dList<dDAGExpressionNode*>::dListNode* node = m_argumentList.GetFirst(); node; node = node->GetNext()) {
+		dDAGExpressionNode* const parameter = node->GetInfo();
+		parameter->ConnectParent(this);
+	}
 
+}

@@ -34,3 +34,9 @@ dDAGFunctionStatementWHILE::~dDAGFunctionStatementWHILE()
 }
 
 
+void dDAGFunctionStatementWHILE::ConnectParent(dDAG* const parent)
+{
+	m_parent = parent;
+	m_stmt->ConnectParent(this);
+	m_expression->ConnectParent(this);
+}

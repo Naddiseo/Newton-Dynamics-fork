@@ -23,7 +23,7 @@ class dDAGExpressionNodeFunctionCall: public dDAGExpressionNode
 	~dDAGExpressionNodeFunctionCall(void);
 
 	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
-	virtual void ConnectParent(dDAG* const parent)  {_ASSERTE (0);}
+	virtual void ConnectParent(dDAG* const parent);
 
 	dList<dDAGExpressionNode*> m_argumentList;
 	dAddRtti(dDAGExpressionNode);

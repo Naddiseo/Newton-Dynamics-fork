@@ -28,4 +28,7 @@ dDAGFunctionModifier::~dDAGFunctionModifier(void)
 {
 }
 
-
+void dDAGFunctionModifier::ConnectParent(dDAG* const parent)
+{
+	m_private = parent;
+}

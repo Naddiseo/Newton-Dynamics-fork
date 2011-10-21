@@ -23,7 +23,7 @@ string dCIL::NewTemp ()
 string dCIL::NewLabel ()
 {
 	char tmp[256];
-	sprintf (tmp, "label_%d", m_labelIndex);
+	sprintf (tmp, "label%d", m_labelIndex);
 	m_labelIndex ++;
 	return string (tmp);
 }

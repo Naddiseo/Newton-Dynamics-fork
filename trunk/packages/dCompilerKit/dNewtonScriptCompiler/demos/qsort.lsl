@@ -12,10 +12,6 @@
 // a very naive qsort for integers
 class qsort
 {
-	xxx ()
-	{
-	b[x][y][z] = b[x][y][z] + 1;	
-	}
 /*
 	qsort (int[] a, int size)
 	{
@@ -37,7 +33,7 @@ class qsort
 		// now do a recursive qsort 
 		sort (a, 1, size -1);
 	}
-
+*/
 
 	// very primitive qsort 
 	private void sort (int[] a, int m, int n)
@@ -76,6 +72,5 @@ class qsort
 		qsort (a, m, j);
 		qsort (a, i + 1, n);
 	}
-*/	
 }
 

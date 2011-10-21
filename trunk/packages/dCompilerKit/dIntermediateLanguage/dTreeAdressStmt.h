@@ -25,6 +25,7 @@ class dTreeAdressStmt
 		m_if, 
 		m_ifnot, 
 		m_goto,
+		m_target,
 	};
 	dTreeAdressStmt(void);
 	~dTreeAdressStmt(void);

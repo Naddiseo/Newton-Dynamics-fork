@@ -66,6 +66,7 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 		addressIndex.m_arg0 = cil.NewTemp();
 		addressIndex.m_arg1 = dim->m_result; 
 
+		string result = addressIndex.m_arg0;
 		dTRACE_INTRUCTION (&addressIndex);
 
 		for (dList<dDAGDimensionNode*>::dListNode* node = m_dimExpressions.GetFirst()->GetNext(); node; node = node->GetNext()) {
@@ -75,8 +76,8 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 			dTreeAdressStmt& stmtMul = cil.NewStatement()->GetInfo();
 			stmtMul.m_instrution = dTreeAdressStmt::m_assigment;
 			stmtMul.m_operator = dTreeAdressStmt::m_mul;
-			stmtMul.m_arg0 = addressIndex.m_arg0;
-			stmtMul.m_arg1 = addressIndex.m_arg0;
+			stmtMul.m_arg0 = cil.NewTemp();
+			stmtMul.m_arg1 = result;
 			stmtMul.m_arg2 = dim->m_arraySize;
 
 			dTRACE_INTRUCTION (&stmtMul);
@@ -84,9 +85,11 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 			dTreeAdressStmt& stmtAdd = cil.NewStatement()->GetInfo();
 			stmtAdd.m_instrution = dTreeAdressStmt::m_assigment;
 			stmtAdd.m_operator = dTreeAdressStmt::m_add;
-			stmtAdd.m_arg0 = addressIndex.m_arg0;
-			stmtAdd.m_arg1 = addressIndex.m_arg0;;
+			stmtAdd.m_arg0 = cil.NewTemp();
+			stmtAdd.m_arg1 = stmtMul.m_arg0;
 			stmtAdd.m_arg2 = dim->m_result;
+
+			result = stmtAdd.m_arg0;
 
 			dTRACE_INTRUCTION (&stmtAdd);
 		}
@@ -95,14 +98,14 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 		if (m_parent->GetTypeId() == dDAGFunctionStatementAssigment::GetRttiType()) {
 			dDAGFunctionStatementAssigment* const asmt = (dDAGFunctionStatementAssigment*) m_parent;
 			if (asmt->m_leftVariable == this) {
-				m_result = m_name + '[' + addressIndex.m_arg0 + ']';
+				m_result = m_name + '[' + result + ']';
 			} else {
 				// emit an indirect addressing mode
 				dTreeAdressStmt& tmp = cil.NewStatement()->GetInfo();
 				m_result = m_name + '[' + addressIndex.m_arg0 + ']';
 				tmp.m_instrution = dTreeAdressStmt::m_assigment;
 				tmp.m_arg0 = cil.NewTemp();
-				tmp.m_arg1 = m_name + '[' + addressIndex.m_arg0 + ']';
+				tmp.m_arg1 = m_name + '[' + result + ']';
 				dTRACE_INTRUCTION (&tmp);
 				m_result = tmp.m_arg0; 
 			}
@@ -112,12 +115,11 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 			dTreeAdressStmt& tmp = cil.NewStatement()->GetInfo();
 			m_result = m_name + '[' + addressIndex.m_arg0 + ']';
 			tmp.m_instrution = dTreeAdressStmt::m_assigment;
-			tmp.m_arg0 = cil.NewTemp();
-			tmp.m_arg1 = m_name + '[' + addressIndex.m_arg0 + ']';
+			tmp.m_arg0 = cil.NewTemp();;
+			tmp.m_arg1 = m_name + '[' + result + ']';
 			dTRACE_INTRUCTION (&tmp);
 			m_result = tmp.m_arg0; 
 		}
-		
 
 
 	} else {
