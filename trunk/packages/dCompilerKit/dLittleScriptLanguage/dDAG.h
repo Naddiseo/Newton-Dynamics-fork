@@ -24,15 +24,12 @@ class dDAG: public dRefCounter
 	public:
 	dDAG(dList<dDAG*>& allNodes);
 	virtual ~dDAG(void);
-
-	dCRCTYPE GetKey() const;
-	virtual void CalculateKey() {m_key = 0;}
 	
 	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
-	virtual void ConnectParents(dDAG* const parent) = 0;
+	virtual void ConnectParent(dDAG* const parent) = 0;
 	
 	string m_name;
-	dCRCTYPE m_key;
+	string m_result;
 	dDAG* m_parent;
 
 	dRttiRootClassSupportDeclare(dDAG);

@@ -31,9 +31,6 @@ dDAGExpressionNodeFunctionCall::dDAGExpressionNodeFunctionCall(dList<dDAG*>& all
 		m_argumentList.Append(param);
 		param->AddRef(); 
 	}
-
-
-	m_key = dCRC64 (m_name.c_str());
 }
 
 

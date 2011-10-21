@@ -25,7 +25,7 @@ class dDAGFunctionStatementFOR: public dDAGFunctionStatement
 	~dDAGFunctionStatementFOR();
 
 	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
-	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
+	virtual void ConnectParent(dDAG* const parent)  {_ASSERTE (0);}
 
 	dAddRtti(dDAGFunctionStatement);
 	dDAGFunctionStatement* m_initialStmt;

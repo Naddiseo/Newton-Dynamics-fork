@@ -14,33 +14,114 @@
 #include "dDAGTypeNode.h"
 #include "dDAGDimensionNode.h"
 #include "dDAGExpressionNodeVariable.h"
-
+#include "dDAGFunctionStatementAssigment.h"
 
 dInitRtti(dDAGExpressionNodeVariable);
 
 dDAGExpressionNodeVariable::dDAGExpressionNodeVariable(dList<dDAG*>& allNodes, const char* const identifier, dDAGDimensionNode* const expressionDimIndex)
 	:dDAGExpressionNode(allNodes)
-	,m_expressionDimIndex (expressionDimIndex)
+	,m_dimExpressions ()
 {
 	m_name = identifier;
-	
-	dCRCTYPE crc = 0;
-	if (m_expressionDimIndex) {
-		m_expressionDimIndex->AddRef();
-		crc = m_expressionDimIndex->GetKey();
+
+
+	dDAGDimensionNode* next;
+	for (dDAGDimensionNode* node = expressionDimIndex; node; node = next) {
+		next = node->m_next;
+		node->m_next = NULL;
+		_ASSERTE (node->IsType(dDAGDimensionNode::GetRttiType()));
+		m_dimExpressions.Append(node);
+		node->AddRef();
 	}
-	m_key = dCRC64 (m_name.c_str(), crc);
 }
+
 
 
 dDAGExpressionNodeVariable::~dDAGExpressionNodeVariable(void)
 {
-	if (m_expressionDimIndex) {
-		m_expressionDimIndex->Release();
+	for (dList<dDAGDimensionNode*>::dListNode* node = m_dimExpressions.GetFirst(); node; node = node->GetNext()) {
+		dDAGDimensionNode* const dim = node->GetInfo();
+		dim->Release();
 	}
+}
+
+void dDAGExpressionNodeVariable::ConnectParent(dDAG* const parent)  
+{
+	m_parent = parent;
+	for (dList<dDAGDimensionNode*>::dListNode* node = m_dimExpressions.GetFirst(); node; node = node->GetNext()) {
+		dDAGDimensionNode* const dim = node->GetInfo();
+		dim->ConnectParent(this);
+	}
+
 }
 
 void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 {
-	
+	if (m_dimExpressions.GetCount()) {
+		dDAGDimensionNode* const dim = m_dimExpressions.GetFirst()->GetInfo();
+		dim->CompileCIL(cil);
+		dCIL::dProgram::dListNode* const dimInstruction = cil.NewStatement();
+		dTreeAdressStmt& addressIndex = dimInstruction->GetInfo();
+		addressIndex.m_instrution = dTreeAdressStmt::m_assigment;
+		addressIndex.m_arg0 = cil.NewTemp();
+		addressIndex.m_arg1 = dim->m_result; 
+
+		dTRACE_INTRUCTION (&addressIndex);
+
+		for (dList<dDAGDimensionNode*>::dListNode* node = m_dimExpressions.GetFirst()->GetNext(); node; node = node->GetNext()) {
+			dDAGDimensionNode* const dim = node->GetInfo();
+			dim->CompileCIL(cil);
+			
+			dTreeAdressStmt& stmtMul = cil.NewStatement()->GetInfo();
+			stmtMul.m_instrution = dTreeAdressStmt::m_assigment;
+			stmtMul.m_operator = dTreeAdressStmt::m_mul;
+			stmtMul.m_arg0 = addressIndex.m_arg0;
+			stmtMul.m_arg1 = addressIndex.m_arg0;
+			stmtMul.m_arg2 = dim->m_arraySize;
+
+			dTRACE_INTRUCTION (&stmtMul);
+
+			dTreeAdressStmt& stmtAdd = cil.NewStatement()->GetInfo();
+			stmtAdd.m_instrution = dTreeAdressStmt::m_assigment;
+			stmtAdd.m_operator = dTreeAdressStmt::m_add;
+			stmtAdd.m_arg0 = addressIndex.m_arg0;
+			stmtAdd.m_arg1 = addressIndex.m_arg0;;
+			stmtAdd.m_arg2 = dim->m_result;
+
+			dTRACE_INTRUCTION (&stmtAdd);
+		}
+
+		_ASSERTE (m_parent);
+		if (m_parent->GetTypeId() == dDAGFunctionStatementAssigment::GetRttiType()) {
+			dDAGFunctionStatementAssigment* const asmt = (dDAGFunctionStatementAssigment*) m_parent;
+			if (asmt->m_leftVariable == this) {
+				m_result = m_name + '[' + addressIndex.m_arg0 + ']';
+			} else {
+				// emit an indirect addressing mode
+				dTreeAdressStmt& tmp = cil.NewStatement()->GetInfo();
+				m_result = m_name + '[' + addressIndex.m_arg0 + ']';
+				tmp.m_instrution = dTreeAdressStmt::m_assigment;
+				tmp.m_arg0 = cil.NewTemp();
+				tmp.m_arg1 = m_name + '[' + addressIndex.m_arg0 + ']';
+				dTRACE_INTRUCTION (&tmp);
+				m_result = tmp.m_arg0; 
+			}
+			
+		} else {
+			// emit an indirect addressing mode
+			dTreeAdressStmt& tmp = cil.NewStatement()->GetInfo();
+			m_result = m_name + '[' + addressIndex.m_arg0 + ']';
+			tmp.m_instrution = dTreeAdressStmt::m_assigment;
+			tmp.m_arg0 = cil.NewTemp();
+			tmp.m_arg1 = m_name + '[' + addressIndex.m_arg0 + ']';
+			dTRACE_INTRUCTION (&tmp);
+			m_result = tmp.m_arg0; 
+		}
+		
+
+
+	} else {
+		m_result = m_name;
+	}
+
 }

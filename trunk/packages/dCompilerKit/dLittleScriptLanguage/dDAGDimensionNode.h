@@ -23,10 +23,11 @@ class dDAGDimensionNode: public dDAG
 	dDAGDimensionNode(dList<dDAG*>& allNodes, dDAGExpressionNode* const size);
 	~dDAGDimensionNode(void);
 
-	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
-	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
+	virtual void CompileCIL(dCIL& cil);
+	virtual void ConnectParent(dDAG* const parent);
 
-	dDAGExpressionNode* m_size;
+	string m_arraySize;
+	dDAGExpressionNode* m_dimExp;
 	dDAGDimensionNode* m_next;
 	dAddRtti(dDAG);
 };

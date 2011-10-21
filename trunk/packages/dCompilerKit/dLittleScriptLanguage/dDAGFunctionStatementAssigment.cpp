@@ -33,4 +33,22 @@ dDAGFunctionStatementAssigment::~dDAGFunctionStatementAssigment()
 	m_leftVariable->Release();
 }
 
+void dDAGFunctionStatementAssigment::ConnectParent(dDAG* const parent)  
+{
+	m_parent = parent;
+	m_expression->ConnectParent(this);
+	m_leftVariable->ConnectParent(this);
+}
 
+
+void dDAGFunctionStatementAssigment::CompileCIL(dCIL& cil)  
+{
+	m_expression->CompileCIL(cil); 
+	m_leftVariable->CompileCIL(cil); 
+
+	dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
+	stmt.m_instrution = dTreeAdressStmt::m_assigment;
+	stmt.m_arg0 = m_leftVariable->m_result;
+	stmt.m_arg1 = m_expression->m_result;
+	dTRACE_INTRUCTION (&stmt);
+}

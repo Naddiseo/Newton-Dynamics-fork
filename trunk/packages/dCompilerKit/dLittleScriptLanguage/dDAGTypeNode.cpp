@@ -21,7 +21,6 @@ dDAGTypeNode::dDAGTypeNode(dList<dDAG*>& allNodes, const char* const type, const
 	,m_dimensions()
 {
 	m_name = string (modifier) + string (type);
-	CalculateKey();		
 }
 
 
@@ -34,10 +33,6 @@ dDAGTypeNode::~dDAGTypeNode(void)
 }
 
 
-void dDAGTypeNode::CalculateKey() 
-{
-	m_key = dCRC64 (m_name.c_str());
-}
 
 void dDAGTypeNode::AddDimensions (dDAGDimensionNode* dimList)
 {
@@ -48,5 +43,15 @@ void dDAGTypeNode::AddDimensions (dDAGDimensionNode* dimList)
 		_ASSERTE (node->IsType(dDAGDimensionNode::GetRttiType()));
 		m_dimensions.Append(node);
 		node->AddRef();
+	}
+}
+
+
+void dDAGTypeNode::ConnectParent(dDAG* const parent)  
+{
+	m_parent = parent;
+	for (dList<dDAGDimensionNode*>::dListNode* node = m_dimensions.GetFirst(); node; node = node->GetNext()) {
+		dDAGDimensionNode* const dim = node->GetInfo();
+		dim->ConnectParent(this);
 	}
 }

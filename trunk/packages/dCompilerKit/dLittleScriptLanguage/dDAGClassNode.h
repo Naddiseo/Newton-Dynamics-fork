@@ -26,12 +26,11 @@ class dDAGClassNode: public dDAG
 
 	void FinalizeImplementation (const char* const visibility, const char* const name, dDAGClassNode* const baseClass);
 
-	virtual void CalculateKey();
 	void AddVariable (dDAGParameterNode* const variable);
 	void AddFunction (dDAGFunctionNode* const function);
 
 	virtual void CompileCIL(dCIL& cil);
-	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
+	virtual void ConnectParent(dDAG* const parent);
 
 	bool m_isPublic;
 	const dDAGClassNode* m_baseClass;

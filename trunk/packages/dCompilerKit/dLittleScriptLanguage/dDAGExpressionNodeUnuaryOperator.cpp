@@ -23,8 +23,6 @@ dDAGExpressionNodeUnuaryOperator::dDAGExpressionNodeUnuaryOperator(dList<dDAG*>&
 	,m_expression (expression)
 {
 	m_expression->AddRef();
-
-	m_key = CalculateKey (m_operator, expression);
 }
 
 
@@ -33,9 +31,3 @@ dDAGExpressionNodeUnuaryOperator::~dDAGExpressionNodeUnuaryOperator(void)
 	m_expression->Release();
 }
 
-
-dCRCTYPE dDAGExpressionNodeUnuaryOperator::CalculateKey (dUnuaryOperator unuaryOperator, dDAGExpressionNode* const expression)
-{
-	int tmp = unuaryOperator;
-	return dCRC64(&tmp, sizeof (tmp), expression->GetKey());
-}

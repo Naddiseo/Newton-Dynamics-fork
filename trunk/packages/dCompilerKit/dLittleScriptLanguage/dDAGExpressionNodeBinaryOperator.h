@@ -37,9 +37,7 @@ class dDAGExpressionNodeBinaryOperator: public dDAGExpressionNode
 	~dDAGExpressionNodeBinaryOperator(void);
 
 	virtual void CompileCIL(dCIL& cil);
-	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
-
-	static dCRCTYPE CalculateKey (dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB);
+	virtual void ConnectParent(dDAG* const parent);
 
 	dBinaryOperator m_operator;
 	dDAGExpressionNode* m_expressionA;

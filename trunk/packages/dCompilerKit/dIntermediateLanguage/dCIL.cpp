@@ -15,7 +15,7 @@ dCIL::~dCIL(void)
 string dCIL::NewTemp ()
 {
 	char tmp[256];
-	sprintf (tmp, "t_%d", m_tempIndex);
+	sprintf (tmp, "t%0d", m_tempIndex);
 	m_tempIndex ++;
 	return string (tmp);
 }

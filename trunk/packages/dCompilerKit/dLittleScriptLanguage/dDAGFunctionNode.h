@@ -26,13 +26,12 @@ class dDAGFunctionNode: public dDAG
 	dDAGFunctionNode(dList<dDAG*>& allNodes, dDAGTypeNode* const type, const char* const name, dDAGParameterNode* const parameterList, const char* const isConst);
 	~dDAGFunctionNode(void);
 
-	virtual void CalculateKey();
 
 	void SetBody(dDAGScopeBlockNode* const body);
 	void SetModifier(dDAGFunctionModifier* const modifier);
 
 	virtual void CompileCIL(dCIL& cil);
-	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
+	virtual void ConnectParent(dDAG* const parent);
 
 	bool m_isConst;
 	bool m_isPrivate;

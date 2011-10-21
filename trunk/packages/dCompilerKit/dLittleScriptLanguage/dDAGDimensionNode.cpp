@@ -20,20 +20,37 @@ dInitRtti(dDAGDimensionNode);
 
 dDAGDimensionNode::dDAGDimensionNode(dList<dDAG*>& allNodes, dDAGExpressionNode* const size)
 	:dDAG(allNodes)
-	,m_size (size)
+	,m_arraySize("fix_ArraySize")
+	,m_dimExp (size)
 	,m_next (NULL)
 {
-	if (m_size) {
-		m_size->AddRef();
+	if (m_dimExp) {
+		m_dimExp->AddRef();
 	}
 }
 
 
 dDAGDimensionNode::~dDAGDimensionNode(void)
 {
-	if (m_size) {
-		m_size->Release();
+	if (m_dimExp) {
+		m_dimExp->Release();
 	}
 }
 
+void dDAGDimensionNode::ConnectParent(dDAG* const parent)  
+{
+	m_parent = parent;
+	if (m_dimExp) {
+		m_dimExp->ConnectParent(this);
+	}
+}
 
+void dDAGDimensionNode::CompileCIL(dCIL& cil)  
+{
+	if (m_dimExp) {
+		m_dimExp->CompileCIL(cil) ;
+		m_result = m_dimExp->m_result;
+	} else {
+		_ASSERTE (0);
+	}
+}

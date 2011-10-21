@@ -32,17 +32,11 @@ class dDAGScopeBlockNode: public dDAGFunctionStatement
 	void AddStatement (dDAGFunctionStatement* const statement);
 
 	virtual void CompileCIL(dCIL& cil);
-	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
-
-	dDAGExpressionNodeVariable* CreatedVariableNode (dList<dDAG*>& allNodes, const char* const identifier, dDAGDimensionNode* const expressionDimIndex);
-	dDAGExpressionNodeConstant* CreatedConstantNode (dList<dDAG*>& allNodes, dDAGExpressionNodeConstant::dType type, const char* const value);
-	dDAGExpressionNodeUnuaryOperator* CreateUnuaryOperatorNode (dList<dDAG*>& allNodes, dDAGExpressionNodeUnuaryOperator::dUnuaryOperator unuaryOperator, dDAGExpressionNode* const expression);
-	dDAGExpressionNodeBinaryOperator* CreateBinaryOperatorNode (dList<dDAG*>& allNodes, dDAGExpressionNodeBinaryOperator::dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB);
+	virtual void ConnectParent(dDAG* const parent);
 
 	dAddRtti(dDAGFunctionStatement);
 
 	dList<dDAGFunctionStatement*> m_statementList;
-	dTree<dDAGExpressionNode*, dCRCTYPE> m_expressionNodesCache;
 };
 
 

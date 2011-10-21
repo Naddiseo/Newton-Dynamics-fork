@@ -27,7 +27,7 @@ class dDAGFunctionModifier: public dDAG
 	~dDAGFunctionModifier(void);
 
 	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
-	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
+	virtual void ConnectParent(dDAG* const parent)  {_ASSERTE (0);}
 
 	bool m_private;
 	bool m_native;

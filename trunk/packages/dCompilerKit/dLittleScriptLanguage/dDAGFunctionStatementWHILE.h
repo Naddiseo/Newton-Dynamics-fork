@@ -24,7 +24,7 @@ class dDAGFunctionStatementWHILE: public dDAGFunctionStatement
 	~dDAGFunctionStatementWHILE();
 
 	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
-	virtual void ConnectParents(dDAG* const parent)  {_ASSERTE (0);}
+	virtual void ConnectParent(dDAG* const parent)  {_ASSERTE (0);}
 
 	dAddRtti(dDAGFunctionStatement);
 

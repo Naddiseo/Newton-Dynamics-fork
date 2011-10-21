@@ -78,7 +78,8 @@ class dScriptCompiler: public dLittleScriptParser
 	dUserVariable NewExpressionFunctionCall (const dUserVariable& functionName, const dUserVariable& argumnetList);
 
 	dUserVariable NewDimensionNode(const dUserVariable& expression);
-	dUserVariable TypeAddDimention(const dUserVariable& type, const dUserVariable& dimension);
+	dUserVariable LinkDimensionNode(const dUserVariable& dim0, const dUserVariable& dim1);
+	dUserVariable TypeAddDimension(const dUserVariable& type, const dUserVariable& dimension);
 	
 	dUserVariable NewLocalVariableStatement(const dUserVariable& variable, const dUserVariable& initializationExpression);
 	dUserVariable NewBreakStatement();

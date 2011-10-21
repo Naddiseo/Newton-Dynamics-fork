@@ -22,7 +22,6 @@ dDAGExpressionNodeConstant::dDAGExpressionNodeConstant(dList<dDAG*>& allNodes, d
 	,m_type(type)
 {
 	m_name = value;
-	m_key = dCRC64 (m_name.c_str());
 }
 
 
@@ -31,3 +30,14 @@ dDAGExpressionNodeConstant::~dDAGExpressionNodeConstant(void)
 }
 
 
+void dDAGExpressionNodeConstant::ConnectParent(dDAG* const parent) 
+{
+	m_parent = parent;
+}
+
+void dDAGExpressionNodeConstant::CompileCIL(dCIL& cil)
+{
+	// may have to work on float and strings
+	// but for now do nothing the const can be load it 
+	m_result = m_name;
+}

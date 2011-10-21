@@ -27,8 +27,6 @@ dDAGExpressionNodeBinaryOperator::dDAGExpressionNodeBinaryOperator(
 {
 	m_expressionA->AddRef();
 	m_expressionB->AddRef();
-
-	m_key = CalculateKey (binaryOperator, expressionA, expressionB);
 }
 
 
@@ -38,45 +36,54 @@ dDAGExpressionNodeBinaryOperator::~dDAGExpressionNodeBinaryOperator(void)
 	m_expressionB->Release();
 }
 
-
-dCRCTYPE dDAGExpressionNodeBinaryOperator::CalculateKey (dBinaryOperator binaryOperator, dDAGExpressionNode* const expressionA, dDAGExpressionNode* const expressionB)
+void dDAGExpressionNodeBinaryOperator::ConnectParent(dDAG* const parent)  
 {
-	int tmp = binaryOperator;
-	return dCRC64(&tmp, sizeof (tmp), dCombineCRC (expressionA->GetKey(), expressionB->GetKey()));
+	m_parent = this;
+	m_expressionA->ConnectParent(this);
+	m_expressionB->ConnectParent(this);
 }
 
 
 void dDAGExpressionNodeBinaryOperator::CompileCIL(dCIL& cil)  
 {
-	if (m_name == "") {
-		dTreeAdressStmt& stmnt = cil.NewStatement()->GetInfo();
-		m_name = cil.NewTemp ();		
+	m_expressionA->CompileCIL(cil);
+	m_expressionB->CompileCIL(cil);
 
-		stmnt.m_instrution = dTreeAdressStmt::m_assigment;
-		stmnt.m_arg0 = m_name;
-		stmnt.m_arg1 = m_expressionA->m_name;
-		stmnt.m_arg2 = m_expressionB->m_name;
+	dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
+	m_result = cil.NewTemp ();		
 
-		switch (m_operator) 
+	stmt.m_instrution = dTreeAdressStmt::m_assigment;
+	stmt.m_arg0 = m_result;
+	stmt.m_arg1 = m_expressionA->m_result;
+	stmt.m_arg2 = m_expressionB->m_result;
+
+	switch (m_operator) 
+	{
+		case m_add:
 		{
-
-			case m_sub:
-			{
-				stmnt.m_operator = dTreeAdressStmt::m_sub;
-				break;
-			}
-
-			case m_lessEqual:
-			{
-				stmnt.m_operator = dTreeAdressStmt::m_lessEqual;
-				break;
-			}
-			
-
-
-			
-			default:;
-			_ASSERTE (0);
+			stmt.m_operator = dTreeAdressStmt::m_add;
+			break;
 		}
+
+
+		case m_sub:
+		{
+			stmt.m_operator = dTreeAdressStmt::m_sub;
+			break;
+		}
+
+		case m_lessEqual:
+		{
+			stmt.m_operator = dTreeAdressStmt::m_lessEqual;
+			break;
+		}
+		
+		
+
+		
+		default:;
+		_ASSERTE (0);
 	}
+
+	dTRACE_INTRUCTION (&stmt);
 }

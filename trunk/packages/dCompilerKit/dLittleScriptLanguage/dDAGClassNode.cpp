@@ -46,19 +46,8 @@ void dDAGClassNode::FinalizeImplementation (const char* const visibility, const 
 	m_name = name;
 	m_baseClass = baseClass;
 	_ASSERTE (!m_baseClass);
-	CalculateKey() ;
 }
 
-void dDAGClassNode::CalculateKey() 
-{
-	if (m_baseClass) {
-		m_key = m_baseClass->GetKey();
-	}
-	if (!m_isPublic) {
-		m_key = dCRC64 ("private", m_key);
-	}
-	m_key = dCRC64 (m_name.c_str(), m_key);
-}
 
 void dDAGClassNode::AddFunction (dDAGFunctionNode* const function)
 {
@@ -74,12 +63,25 @@ void dDAGClassNode::AddVariable (dDAGParameterNode* const variable)
 }
 
 
+void dDAGClassNode::ConnectParent(dDAG* const parent)  
+{
+	m_parent = parent;
+	for (dList<dDAGParameterNode*>::dListNode* node = m_variables.GetFirst(); node; node = node->GetNext()) {
+		dDAGParameterNode* const variable = node->GetInfo();
+		variable->ConnectParent(this);
+	}
+
+	for (dList<dDAGFunctionNode*>::dListNode* node = m_functionList.GetFirst(); node; node = node->GetNext()) {
+		dDAGFunctionNode* const function = node->GetInfo();
+		function->ConnectParent(this);
+	}
+}
+
 void dDAGClassNode::CompileCIL(dCIL& cil)  
 {
 	DTRACE (("emit the class variables here\n"));
 
-//	for (dList<dDAGFunctionNode*>::dListNode* node = m_functionList.GetFirst(); node; node = node->GetNext()) {
-	for (dList<dDAGFunctionNode*>::dListNode* node = m_functionList.GetFirst()->GetNext(); node; node = node->GetNext()) {
+	for (dList<dDAGFunctionNode*>::dListNode* node = m_functionList.GetFirst(); node; node = node->GetNext()) {
 		dDAGFunctionNode* const function = node->GetInfo();
 		function->CompileCIL(cil);
 	}

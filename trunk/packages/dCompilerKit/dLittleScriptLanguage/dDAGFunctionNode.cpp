@@ -58,18 +58,6 @@ dDAGFunctionNode::~dDAGFunctionNode(void)
 }
 
 
-void dDAGFunctionNode::CalculateKey() 
-{
-	if (m_isConst) {
-		m_key = dCRC64 ("const", GetKey());
-	}
-	for (dList<dDAGParameterNode*>::dListNode* node = m_parameters.GetFirst(); node; node = node->GetNext()) {
-		dDAGParameterNode* const parameter = node->GetInfo();
-		m_key = dCombineCRC (m_key, parameter->GetKey());
-	}
-	m_key = dCRC64 (m_name.c_str(), m_key);
-}
-
 void dDAGFunctionNode::SetBody(dDAGScopeBlockNode* const body)
 {
 	m_body = body;
@@ -82,6 +70,22 @@ void dDAGFunctionNode::SetModifier(dDAGFunctionModifier* const modifier)
 	m_modifier->AddRef();
 }
 
+
+void dDAGFunctionNode::ConnectParent(dDAG* const parent)
+{
+	m_parent = parent;
+	m_body->ConnectParent(this);
+	m_returnType->ConnectParent(this);
+
+	if (m_modifier) {
+		m_modifier->ConnectParent(this);
+	}
+
+	for (dList<dDAGParameterNode*>::dListNode* node = m_parameters.GetFirst(); node; node = node->GetNext()) {
+		dDAGParameterNode* const variable = node->GetInfo();
+		variable->ConnectParent(this);
+	}
+}
 
 void dDAGFunctionNode::CompileCIL(dCIL& cil)  
 {
