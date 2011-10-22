@@ -68,6 +68,6 @@ bool dDAG::RenameLocalVariable(string& variable) const
 		return true;
 	}
 
-
+	_ASSERTE (0);
 	return false;
 }
