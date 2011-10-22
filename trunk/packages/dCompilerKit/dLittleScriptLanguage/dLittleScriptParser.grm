@@ -424,7 +424,9 @@ statement
 	| BREAK	';'																						{GET_PARENT_CLASS; $$ = me->NewBreakStatement();}
 	| SWITCH '(' expression ')' '{' switch_case_list '}' 											{_ASSERTE (0);}
 	| FOR for_begin '(' for_first_expression ';' expression ';' for_third_expression ')' statement 	{GET_PARENT_CLASS; $$ = me->NewForStatement($2, $4, $6, $8, $10);}
+	| WHILE '(' ')' statement																		{GET_PARENT_CLASS; $$ = me->NewWhileStatement(dUserVariable(), $4);}
 	| WHILE '(' expression ')' statement															{GET_PARENT_CLASS; $$ = me->NewWhileStatement($3, $5);}
+	| DO statement WHILE '(' ')' ';'																{GET_PARENT_CLASS; $$ = me->NewDoStatement(dUserVariable(), $2);}
 	| DO statement WHILE '(' expression ')' ';'														{GET_PARENT_CLASS; $$ = me->NewDoStatement($5, $2);}
 	| return ';'																					{$$ = $1;}
 	| function_call ';'																				{GET_PARENT_CLASS; $$ = me->NewFunctionCallStatement($1);}

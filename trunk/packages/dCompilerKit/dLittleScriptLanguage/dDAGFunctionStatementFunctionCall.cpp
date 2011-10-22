@@ -42,3 +42,8 @@ void dDAGFunctionStatementFunctionCall::ConnectParent(dDAG* const parent)
 		m_function->ConnectParent(this);
 	}
 }
+
+void dDAGFunctionStatementFunctionCall::CompileCIL(dCIL& cil)  
+{
+	m_function->CompileCIL(cil);
+}

@@ -23,11 +23,18 @@ class dTreeAdressStmt
 	enum dInstruction
 	{
 		m_nop,
+		m_function,
+		m_argument,
+		m_local,
 		m_assigment,
 		m_if, 
 		m_ifnot, 
 		m_goto,
 		m_target,
+		m_param,
+		m_call,
+		m_ret,
+		m_restoreParam,
 	};
 	dTreeAdressStmt(void);
 	~dTreeAdressStmt(void);

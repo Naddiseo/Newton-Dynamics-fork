@@ -16,6 +16,7 @@
 #include "dDAG.h"
 #include "dDAGExpressionNode.h"
 
+#define	D_RETURN_LABEL "exit"
 
 class dDAGFunctionStatementReturn: public dDAGFunctionStatement
 {

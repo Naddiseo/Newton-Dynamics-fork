@@ -22,29 +22,39 @@ dDAGFunctionStatementDO::dDAGFunctionStatementDO(dList<dDAG*>& allNodes, dDAGExp
 	,m_expression(expression)
 	,m_stmt (stmt)
 {
-	_ASSERTE (m_stmt);
-	m_expression->AddRef();
-	m_stmt->AddRef();
+	if (m_expression) {
+		m_expression->AddRef();
+	}
+	if (m_stmt) {
+		m_stmt->AddRef();
+	}
 }
 
 
 dDAGFunctionStatementDO::~dDAGFunctionStatementDO()
 {
-	m_expression->Release();
-	m_stmt->Release();
+	if (m_expression) {
+		m_expression->Release();
+	}
+	if (m_stmt) {
+		m_stmt->Release();
+	}
 }
 
 void dDAGFunctionStatementDO::ConnectParent(dDAG* const parent)
 {
 	m_parent = parent;
-	m_stmt->ConnectParent(this);
-	m_expression->ConnectParent(this);
+	if (m_stmt) {
+		m_stmt->ConnectParent(this);
+	}
+	if (m_expression) {
+		m_expression->ConnectParent(this);
+	}
 }
 
 
 void dDAGFunctionStatementDO::CompileCIL(dCIL& cil)  
 {
-
 	dDAGFunctionStatementFlow::CompileCIL(cil);
 	
 	dTreeAdressStmt& startLabel = cil.NewStatement()->GetInfo();
@@ -52,10 +62,13 @@ void dDAGFunctionStatementDO::CompileCIL(dCIL& cil)
 	startLabel.m_arg0 = cil.NewLabel();
 	dTRACE_INTRUCTION (&startLabel);
 
-	_ASSERTE (m_stmt);
-	m_stmt->CompileCIL(cil);
+	if (m_stmt) {
+		m_stmt->CompileCIL(cil);
+	}
 
-	m_expression->CompileCIL(cil);
+	if (m_expression) {
+		m_expression->CompileCIL(cil);
+	}
 
 	dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
 	stmt.m_instruction = dTreeAdressStmt::m_if;

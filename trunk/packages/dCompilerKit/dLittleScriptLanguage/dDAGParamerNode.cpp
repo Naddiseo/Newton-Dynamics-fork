@@ -56,6 +56,11 @@ void dDAGParameterNode::ConnectParent(dDAG* const parent)
 
 void dDAGParameterNode::CompileCIL(dCIL& cil)  
 {
+	dTreeAdressStmt& local = cil.NewStatement()->GetInfo();
+	local.m_instruction = dTreeAdressStmt::m_local;
+	local.m_arg0 = m_name;
+	dTRACE_INTRUCTION (&local);
+
 	if (m_initializationExp) {
 		m_initializationExp->CompileCIL(cil);
 

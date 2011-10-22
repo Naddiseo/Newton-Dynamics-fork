@@ -24,7 +24,7 @@ class dDAGFunctionStatementFunctionCall: public dDAGFunctionStatement
 	dDAGFunctionStatementFunctionCall(dList<dDAG*>& allNodes, dDAGExpressionNodeFunctionCall* const function);
 	~dDAGFunctionStatementFunctionCall();
 
-	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
+	virtual void CompileCIL(dCIL& cil);
 	virtual void ConnectParent(dDAG* const parent);
 
 	dDAGExpressionNodeFunctionCall* m_function;

@@ -41,7 +41,6 @@ void dDAGFunctionStatementBREAK::CompileCIL(dCIL& cil)
 			stmt.m_instruction = dTreeAdressStmt::m_goto;
 			stmt.m_arg0 = flowControl->m_currentExitLabel;
 			dTRACE_INTRUCTION (&stmt);
-
 			return ;
 		} 
 	}

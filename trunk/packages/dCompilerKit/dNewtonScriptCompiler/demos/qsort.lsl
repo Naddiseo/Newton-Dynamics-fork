@@ -12,9 +12,16 @@
 // a very naive qsort for integers
 class qsort
 {
-/*
+
 	qsort (int[] a, int size)
 	{
+	
+while ();	
+for (;1;);	
+
+for (int i = 1; i < size; i = i + 1);	
+
+	
 		// first make sure the first element is the smallest of the array 
 		// and that the last element is the largest of the array. 
 		for (int i = 1; i < size; i = i + 1) {
@@ -33,24 +40,12 @@ class qsort
 		// now do a recursive qsort 
 		sort (a, 1, size -1);
 	}
-*/
+
 
 	// very primitive qsort 
 	private void sort (int[] a, int m, int n)
 	{
-	
-while (x > 1) {
-	x = 0;
-	while (x + 1 > 10) {
-		y = 0;
-		break;
-	}
-	break;
-}
-	
-	
-/*	
-	
+
 		if (n <= m) {
 			return ;
 		}
@@ -82,9 +77,8 @@ while (x > 1) {
 		x = a[i];
 		a[i] = a[n];
 		a[n] = x;
-		qsort (a, m, j);
-		qsort (a, i + 1, n);
-*/		
+		sort (a, m, j);
+		sort (a, i + 1, n);
 	}
 }
 

@@ -16,6 +16,7 @@
 #include "dDAGParameterNode.h"
 #include "dDAGScopeBlockNode.h"
 #include "dDAGFunctionModifier.h"
+#include "dDAGFunctionStatementReturn.h"
 
 dInitRtti(dDAGFunctionNode);
 
@@ -29,6 +30,7 @@ dDAGFunctionNode::dDAGFunctionNode(dList<dDAG*>& allNodes, dDAGTypeNode* const t
 	,m_modifier(NULL)
 	,m_parameters() 
 {
+	m_name = name;
 	m_returnType->AddRef();
 	dDAGParameterNode* next;
 	for (dDAGParameterNode* param = parameterList; param; param = next) {
@@ -90,7 +92,50 @@ void dDAGFunctionNode::ConnectParent(dDAG* const parent)
 void dDAGFunctionNode::CompileCIL(dCIL& cil)  
 {
 	_ASSERTE (m_body);
-	
-	DTRACE (("emit the function prototype here\n"));
+
+	dCIL::dProgram::dListNode* const functionNode = cil.NewStatement();
+	dTreeAdressStmt& function = functionNode->GetInfo();
+	function.m_instruction = dTreeAdressStmt::m_function;
+	function.m_arg0 = m_name;
+	dTRACE_INTRUCTION (&function);
+	for (dList<dDAGParameterNode*>::dListNode* argNode = m_parameters.GetFirst(); argNode; argNode = argNode->GetNext()) {
+		dDAGParameterNode* const arg = argNode->GetInfo();
+
+		dTreeAdressStmt& fntArg = cil.NewStatement()->GetInfo();
+		fntArg.m_instruction = dTreeAdressStmt::m_argument;
+		fntArg.m_arg0 = arg->m_name;
+		dTRACE_INTRUCTION (&fntArg);
+	}
+
+	cil.ResetTemporaries();
 	m_body->CompileCIL(cil);
+
+	bool returnStmt = false;
+	for (dCIL::dProgram::dListNode* node = functionNode; node; node = node->GetNext()) {
+		dTreeAdressStmt& stmt = node->GetInfo();
+		if ((stmt.m_instruction == dTreeAdressStmt::m_goto) && (stmt.m_arg0 == D_RETURN_LABEL))  {
+			returnStmt = true;
+			break;
+		}
+	}
+
+	if (returnStmt) {
+		dCIL::dProgram::dListNode* const retLabelNode = cil.NewStatement();
+		dTreeAdressStmt& retLabel = retLabelNode->GetInfo();
+		retLabel.m_instruction = dTreeAdressStmt::m_target;
+		retLabel.m_arg0 = D_RETURN_LABEL;
+		dTRACE_INTRUCTION (&retLabel);
+
+		for (dCIL::dProgram::dListNode* node = functionNode; node; node = node->GetNext()) {
+			dTreeAdressStmt& stmt = node->GetInfo();
+			if ((stmt.m_instruction == dTreeAdressStmt::m_goto) && (stmt.m_arg0 == D_RETURN_LABEL))  {
+				stmt.m_jmpTarget = retLabelNode;
+			}
+		}
+	}
+
+	dCIL::dProgram::dListNode* const retNode = cil.NewStatement();
+	dTreeAdressStmt& ret = retNode->GetInfo();
+	ret.m_instruction = dTreeAdressStmt::m_ret;
+	dTRACE_INTRUCTION (&ret);
 }

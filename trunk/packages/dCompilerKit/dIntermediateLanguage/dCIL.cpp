@@ -12,6 +12,12 @@ dCIL::~dCIL(void)
 {
 }
 
+void dCIL::ResetTemporaries()
+{
+	m_tempIndex = 0;
+	m_labelIndex = 0;
+}
+
 string dCIL::NewTemp ()
 {
 	char tmp[256];

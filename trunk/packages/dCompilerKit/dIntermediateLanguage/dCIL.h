@@ -19,6 +19,7 @@ class dCIL
 
 	string NewTemp (); 
 	string NewLabel (); 
+	void ResetTemporaries();
 	dProgram::dListNode* NewStatement();
 
 	int m_tempIndex;

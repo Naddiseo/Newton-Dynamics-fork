@@ -49,5 +49,34 @@ void dDAGExpressionNodeFunctionCall::ConnectParent(dDAG* const parent)
 		dDAGExpressionNode* const parameter = node->GetInfo();
 		parameter->ConnectParent(this);
 	}
+}
+
+
+void dDAGExpressionNodeFunctionCall::CompileCIL(dCIL& cil)  
+{
+	for (dList<dDAGExpressionNode*>::dListNode* node = m_argumentList.GetLast(); node; node = node->GetPrev()) {
+		dDAGExpressionNode* const exp = node->GetInfo();
+		exp->CompileCIL(cil);
+		dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
+		stmt.m_instruction = dTreeAdressStmt::m_param;
+		stmt.m_arg0 = exp->m_result;
+		dTRACE_INTRUCTION (&stmt);
+	}
+
+	dTreeAdressStmt& call = cil.NewStatement()->GetInfo();
+	call.m_instruction = dTreeAdressStmt::m_call;
+	call.m_arg0 = m_name;
+	dTRACE_INTRUCTION (&call);
+
+	if (m_argumentList.GetCount()) {
+		dTreeAdressStmt& param = cil.NewStatement()->GetInfo();
+		char text[256];
+		sprintf (text, "%d", m_argumentList.GetCount());
+		param.m_instruction = dTreeAdressStmt::m_restoreParam;
+		param.m_arg0 = text;
+		dTRACE_INTRUCTION (&param);
+	}
+
+	
 
 }
