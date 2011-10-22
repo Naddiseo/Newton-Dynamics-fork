@@ -72,6 +72,17 @@ void dDAGFunctionNode::SetModifier(dDAGFunctionModifier* const modifier)
 	m_modifier->AddRef();
 }
 
+bool dDAGFunctionNode::FindArgumentVariable(const char* name) const
+{
+	for (dList<dDAGParameterNode*>::dListNode* node = m_parameters.GetFirst(); node; node = node->GetNext()) {
+		dDAGParameterNode* const variable = node->GetInfo();
+		if (variable->m_name == name) {
+			return true;
+		}
+	}
+
+	return false;
+}
 
 void dDAGFunctionNode::ConnectParent(dDAG* const parent)
 {

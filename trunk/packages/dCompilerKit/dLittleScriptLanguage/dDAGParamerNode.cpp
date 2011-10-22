@@ -56,21 +56,25 @@ void dDAGParameterNode::ConnectParent(dDAG* const parent)
 	}
 }
 
+
+
 void dDAGParameterNode::CompileCIL(dCIL& cil)  
 {
+	char text[256];
+	dDAGScopeBlockNode* const scope = GetScope();
+
+	sprintf (text, "%s%d%s", D_SCOPE_PREFIX, scope->m_scopeLayer, m_name.c_str());
+	if (scope->m_localVariablesFilter.FindVariable (text)) {
+		DTRACE (("duplicated local variable\n"));
+		_ASSERTE (0);
+	}
+	m_name = text;
+	scope->m_localVariablesFilter.Append(m_name);
+
+
 	dTreeAdressStmt& local = cil.NewStatement()->GetInfo();
 	local.m_instruction = dTreeAdressStmt::m_local;
 	local.m_arg0 = m_name;
-//	int stackLayer = -1;
-//	for (dDAG* node = this; node->GetTypeId() != dDAGFunctionNode::GetRttiType(); node = node->m_parent) {
-//		if (node->GetTypeId() == dDAGScopeBlockNode::GetRttiType()) {
-//			stackLayer ++;
-//		}
-//	}
-//	_ASSERTE (stackLayer >= 0);
-//	char text[256];
-//	sprintf (text, "layer_%d", stackLayer);
-//	local.m_arg1 = text;
 	dTRACE_INTRUCTION (&local);
 
 	if (m_initializationExp) {

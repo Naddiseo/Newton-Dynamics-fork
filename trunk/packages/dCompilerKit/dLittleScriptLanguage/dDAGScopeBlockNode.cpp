@@ -23,6 +23,8 @@ dInitRtti(dDAGScopeBlockNode);
 dDAGScopeBlockNode::dDAGScopeBlockNode(dList<dDAG*>& allNodes)
 	:dDAGFunctionStatement(allNodes)
 	,m_statementList()
+	,m_scopeLayer(0)
+	,m_localVariablesFilter()
 {
 
 }
@@ -48,12 +50,30 @@ void dDAGScopeBlockNode::AddStatement (dDAGFunctionStatement* const statement)
 void dDAGScopeBlockNode::ConnectParent(dDAG* const parent)  
 {
 	m_parent = parent;
+
+	for (dDAG* node = m_parent; node; node = node->m_parent) {
+		if (node->GetTypeId() == dDAGScopeBlockNode::GetRttiType()) {
+			dDAGScopeBlockNode* const scope = (dDAGScopeBlockNode*) node;
+			m_scopeLayer = scope->m_scopeLayer + 1;
+			break;
+		}
+	}
+
 	for (dList<dDAGFunctionStatement*>::dListNode* node = m_statementList.GetFirst(); node; node = node->GetNext()) {
 		dDAGFunctionStatement* const stmt = node->GetInfo();
 		stmt->ConnectParent(this);
 	}
-
 }
+
+/*
+void dDAGScopeBlockNode::RenameLocalVariables(dDAGScopeBlockNode* scope)
+{
+	for (dList<dDAGFunctionStatement*>::dListNode* node = m_statementList.GetFirst(); node; node = node->GetNext()) {
+		dDAGFunctionStatement* const stmt = node->GetInfo();
+		stmt->RenameLocalVariables(this);
+	}
+}
+*/
 
 void dDAGScopeBlockNode::CompileCIL(dCIL& cil)  
 {

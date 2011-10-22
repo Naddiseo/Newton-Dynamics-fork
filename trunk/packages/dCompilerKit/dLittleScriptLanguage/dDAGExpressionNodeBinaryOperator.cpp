@@ -38,7 +38,7 @@ dDAGExpressionNodeBinaryOperator::~dDAGExpressionNodeBinaryOperator(void)
 
 void dDAGExpressionNodeBinaryOperator::ConnectParent(dDAG* const parent)  
 {
-	m_parent = this;
+	m_parent = parent;
 	m_expressionA->ConnectParent(this);
 	m_expressionB->ConnectParent(this);
 }
@@ -69,6 +69,12 @@ void dDAGExpressionNodeBinaryOperator::CompileCIL(dCIL& cil)
 		case m_sub:
 		{
 			stmt.m_operator = dTreeAdressStmt::m_sub;
+			break;
+		}
+
+		case m_mul:
+		{
+			stmt.m_operator = dTreeAdressStmt::m_mul;
 			break;
 		}
 

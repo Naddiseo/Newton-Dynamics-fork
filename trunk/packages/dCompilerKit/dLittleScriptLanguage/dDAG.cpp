@@ -11,6 +11,8 @@
 
 #include "dLSCstdafx.h"
 #include "dDAG.h"
+#include "dDAGFunctionNode.h"
+#include "dDAGScopeBlockNode.h"
 
 dRttiRootClassSupportImplement(dDAG);
 
@@ -27,3 +29,45 @@ dDAG::~dDAG(void)
 }
 
 
+
+dDAGScopeBlockNode* dDAG::GetScope() const
+{
+	for (const dDAG* node = this; node; node = node->m_parent) {
+		if (node->GetTypeId() == dDAGScopeBlockNode::GetRttiType()) {
+			return (dDAGScopeBlockNode*) node;
+		}
+	}
+	return NULL;
+}
+
+dDAGFunctionNode* dDAG::GetFunction() const
+{
+	for (const dDAG* node = this; node; node = node->m_parent) {
+		if (node->GetTypeId() == dDAGFunctionNode::GetRttiType()) {
+			return (dDAGFunctionNode*) node;
+		}
+	}
+	_ASSERTE (0);
+	return NULL;
+}
+
+bool dDAG::RenameLocalVariable(string& variable) const
+{
+	for (dDAGScopeBlockNode* scope = GetScope(); scope; scope = (dDAGScopeBlockNode*)scope->m_parent->GetScope()) {
+		char text[256];
+		sprintf (text, "%s%d%s", D_SCOPE_PREFIX, scope->m_scopeLayer, variable.c_str());
+
+		if (scope->m_localVariablesFilter.FindVariable(text)) {
+			variable = text;
+			return true;
+		}
+	}
+
+	dDAGFunctionNode* const function = GetFunction();
+	if (function->FindArgumentVariable(variable.c_str())) {
+		return true;
+	}
+
+
+	return false;
+}

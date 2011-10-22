@@ -17,6 +17,8 @@
 
 class dDAGTypeNode;
 class dDAGExpressionNode;
+class dDAGScopeBlockNode;
+
 class dDAGParameterNode: public dDAGFunctionStatement
 {
 	public:
@@ -33,6 +35,7 @@ class dDAGParameterNode: public dDAGFunctionStatement
 	dDAGTypeNode* m_type;
 	dDAGParameterNode* m_next;
 	dDAGExpressionNode* m_initializationExp;
+	
 	dAddRtti(dDAGFunctionStatement);
 };
 

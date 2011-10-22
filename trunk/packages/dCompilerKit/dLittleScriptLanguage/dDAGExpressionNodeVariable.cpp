@@ -13,6 +13,7 @@
 #include "dDAG.h"
 #include "dDAGTypeNode.h"
 #include "dDAGDimensionNode.h"
+#include "dDAGScopeBlockNode.h"
 #include "dDAGExpressionNodeVariable.h"
 #include "dDAGFunctionStatementAssigment.h"
 
@@ -52,11 +53,40 @@ void dDAGExpressionNodeVariable::ConnectParent(dDAG* const parent)
 		dDAGDimensionNode* const dim = node->GetInfo();
 		dim->ConnectParent(this);
 	}
-
 }
+
+/*
+void dDAGExpressionNodeVariable::RenameLocalVariables(dDAGScopeBlockNode* const myScope)
+{
+	size_t pos =  m_name.find (D_SCOPE_PREFIX, 0, strlen (D_SCOPE_PREFIX));
+	if (pos != 0) {
+		char text[256];
+		myScope->m_localVariablesFilter.Append(m_name);
+		sprintf (text, "%s%d%s", D_SCOPE_PREFIX, myScope->m_scopeLayer, m_name.c_str());
+		if (myScope->m_localVariablesFilter.FindVariable (text)) {
+			m_name = text;
+		}
+	}
+
+	for (dList<dDAGDimensionNode*>::dListNode* node = m_dimExpressions.GetFirst(); node; node = node->GetNext()) {
+		dDAGDimensionNode* const dim = node->GetInfo();
+		dim->RenameLocalVariables(myScope);
+	}
+}
+*/
 
 void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 {
+	size_t pos =  m_name.find (D_SCOPE_PREFIX, 0, strlen (D_SCOPE_PREFIX));
+	if (pos != 0) {
+		bool state = RenameLocalVariable(m_name);
+		if (!state) {
+			DTRACE (("undefined local variable\n"));
+			_ASSERTE (0);
+		}
+	}
+
+
 	if (m_dimExpressions.GetCount()) {
 		dDAGDimensionNode* const dim = m_dimExpressions.GetFirst()->GetInfo();
 		dim->CompileCIL(cil);
@@ -120,8 +150,6 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 			dTRACE_INTRUCTION (&tmp);
 			m_result = tmp.m_arg0; 
 		}
-
-
 	} else {
 		m_result = m_name;
 	}

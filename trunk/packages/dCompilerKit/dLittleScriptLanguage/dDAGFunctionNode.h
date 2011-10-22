@@ -33,6 +33,8 @@ class dDAGFunctionNode: public dDAG
 	virtual void CompileCIL(dCIL& cil);
 	virtual void ConnectParent(dDAG* const parent);
 
+	bool FindArgumentVariable(const char* name) const;
+
 	bool m_isConst;
 	bool m_isPrivate;
 	bool m_isConstructor;

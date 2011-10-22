@@ -23,9 +23,30 @@ class dDAGParameterNode;
 class dDAGExpressionNode;
 class dDAGExpressionNodeVariable;
 
+#define D_SCOPE_PREFIX	"scope" 
+
 class dDAGScopeBlockNode: public dDAGFunctionStatement
 {
 	public:
+	class dLocalVariables: public dList<string>
+	{
+		public:
+		dLocalVariables()
+		{
+		}
+
+		bool FindVariable (const char* const name) const
+		{
+			for (dListNode* node = GetFirst(); node; node = node->GetNext()) {
+				if (node->GetInfo() == name) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+	};
+
 	dDAGScopeBlockNode(dList<dDAG*>& allNodes);
 	~dDAGScopeBlockNode(void);
 
@@ -36,7 +57,9 @@ class dDAGScopeBlockNode: public dDAGFunctionStatement
 
 	dAddRtti(dDAGFunctionStatement);
 
+	int m_scopeLayer;
 	dList<dDAGFunctionStatement*> m_statementList;
+	dLocalVariables m_localVariablesFilter;
 };
 
 

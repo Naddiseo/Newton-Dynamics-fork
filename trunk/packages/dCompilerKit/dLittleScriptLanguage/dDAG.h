@@ -18,6 +18,8 @@
 #pragma warning (disable: 4100) // warning C4100: unreferenced formal parameter
 #endif
 
+class dDAGFunctionNode;
+class dDAGScopeBlockNode;
 
 class dDAG: public dRefCounter
 {
@@ -26,7 +28,13 @@ class dDAG: public dRefCounter
 	virtual ~dDAG(void);
 	
 	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
-	virtual void ConnectParent(dDAG* const parent) = 0;
+	virtual void ConnectParent(dDAG* const parent) {_ASSERTE (0);}
+
+	dDAGScopeBlockNode* GetScope() const;
+	dDAGFunctionNode* GetFunction() const;
+	bool RenameLocalVariable(string& variable) const;
+
+
 	
 	string m_name;
 	string m_result;

@@ -131,7 +131,7 @@ void dTreeAdressStmt::Trace () const
 
 		case m_local:
 		{
-			DTRACE (("local(%s) %s\n", m_arg1.c_str(), m_arg0.c_str()));
+			DTRACE (("local %s\n", m_arg0.c_str()));
 			break;
 		}
 
