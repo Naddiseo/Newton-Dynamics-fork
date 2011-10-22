@@ -49,7 +49,7 @@ void dDAGFunctionStatementReturn::CompileCIL(dCIL& cil)
 	}
 
 	dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
-	stmt.m_instrution = dTreeAdressStmt::m_goto;
+	stmt.m_instruction = dTreeAdressStmt::m_goto;
 	stmt.m_arg0 = "exit";
 
 	dTRACE_INTRUCTION (&stmt);

@@ -11,8 +11,9 @@
 
 #include "dLSCstdafx.h"
 #include "dDAG.h"
-#include "dDAGFunctionStatementFOR.h"
 #include "dDAGExpressionNode.h"
+#include "dDAGFunctionStatementFOR.h"
+
 
 dInitRtti(dDAGFunctionStatementFOR);
 
@@ -21,7 +22,7 @@ dDAGFunctionStatementFOR::dDAGFunctionStatementFOR(dList<dDAG*>& allNodes,
 	dDAGExpressionNode* const expression, 
 	dDAGFunctionStatement* const endStmt, 
 	dDAGFunctionStatement* const stmt)
-	:dDAGFunctionStatement(allNodes)
+	:dDAGFunctionStatementFlow(allNodes)
 	,m_initialStmt(beginStmt)
 	,m_expression(expression)
 	,m_endStmt(endStmt)

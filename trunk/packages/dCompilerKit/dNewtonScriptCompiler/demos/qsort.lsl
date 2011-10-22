@@ -38,6 +38,19 @@ class qsort
 	// very primitive qsort 
 	private void sort (int[] a, int m, int n)
 	{
+	
+while (x > 1) {
+	x = 0;
+	while (x + 1 > 10) {
+		y = 0;
+		break;
+	}
+	break;
+}
+	
+	
+/*	
+	
 		if (n <= m) {
 			return ;
 		}
@@ -71,6 +84,7 @@ class qsort
 		a[n] = x;
 		qsort (a, m, j);
 		qsort (a, i + 1, n);
+*/		
 	}
 }
 

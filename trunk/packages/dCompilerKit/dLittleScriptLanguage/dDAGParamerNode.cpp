@@ -60,7 +60,7 @@ void dDAGParameterNode::CompileCIL(dCIL& cil)
 		m_initializationExp->CompileCIL(cil);
 
 		dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
-		stmt.m_instrution = dTreeAdressStmt::m_assigment;
+		stmt.m_instruction = dTreeAdressStmt::m_assigment;
 		stmt.m_arg0 = m_name;
 		stmt.m_arg1 = m_initializationExp->m_result;
 		dTRACE_INTRUCTION (&stmt);

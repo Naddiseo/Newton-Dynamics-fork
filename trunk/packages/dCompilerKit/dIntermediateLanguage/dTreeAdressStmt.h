@@ -32,7 +32,7 @@ class dTreeAdressStmt
 	dTreeAdressStmt(void);
 	~dTreeAdressStmt(void);
 
-	dInstruction m_instrution;
+	dInstruction m_instruction;
 	dOperator m_operator;
 	string m_arg0;
 	string m_arg1;

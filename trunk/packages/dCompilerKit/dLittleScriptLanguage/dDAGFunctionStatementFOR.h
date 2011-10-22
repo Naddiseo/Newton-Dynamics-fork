@@ -13,12 +13,12 @@
 #define __dDAGFunctionStatementFOR_H__
 
 #include "dDAG.h"
-#include "dDAGFunctionStatement.h"
+#include "dDAGFunctionStatementFlow.h"
 
 
 class dDAGExpressionNode;
 
-class dDAGFunctionStatementFOR: public dDAGFunctionStatement
+class dDAGFunctionStatementFOR: public dDAGFunctionStatementFlow
 {
 	public:
 	dDAGFunctionStatementFOR(dList<dDAG*>& allNodes, dDAGFunctionStatement* const beginStmt, dDAGExpressionNode* const expression, dDAGFunctionStatement* const endStmt, dDAGFunctionStatement* const stmt);
@@ -27,7 +27,9 @@ class dDAGFunctionStatementFOR: public dDAGFunctionStatement
 	virtual void CompileCIL(dCIL& cil)  {_ASSERTE (0);}
 	virtual void ConnectParent(dDAG* const parent)  {_ASSERTE (0);}
 
-	dAddRtti(dDAGFunctionStatement);
+
+	dAddRtti(dDAGFunctionStatementFlow);
+
 	dDAGFunctionStatement* m_initialStmt;
 	dDAGExpressionNode* m_expression;
 	dDAGFunctionStatement* m_endStmt;

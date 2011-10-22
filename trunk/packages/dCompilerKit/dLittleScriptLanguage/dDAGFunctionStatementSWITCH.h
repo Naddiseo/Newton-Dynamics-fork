@@ -9,19 +9,19 @@
 * freely
 */
 
-#ifndef __dDAGFunctionStatementWHILE_H__
-#define __dDAGFunctionStatementWHILE_H__
+#ifndef __dDAGFunctionStatementSWITCH_H__
+#define __dDAGFunctionStatementSWITCH_H__
 
 #include "dDAG.h"
 #include "dDAGFunctionStatementFlow.h"
 
 class dDAGExpressionNode;
 
-class dDAGFunctionStatementWHILE: public dDAGFunctionStatementFlow
+class dDAGFunctionStatementSWITCH: public dDAGFunctionStatementFlow
 {
 	public:
-	dDAGFunctionStatementWHILE(dList<dDAG*>& allNodes, dDAGExpressionNode* const expression, dDAGFunctionStatement* const stmt);
-	~dDAGFunctionStatementWHILE();
+	dDAGFunctionStatementSWITCH(dList<dDAG*>& allNodes, dDAGExpressionNode* const expression, dDAGFunctionStatement* const stmt);
+	~dDAGFunctionStatementSWITCH();
 
 	virtual void CompileCIL(dCIL& cil);
 	virtual void ConnectParent(dDAG* const parent);

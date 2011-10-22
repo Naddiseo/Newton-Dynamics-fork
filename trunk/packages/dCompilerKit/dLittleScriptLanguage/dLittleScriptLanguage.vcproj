@@ -345,6 +345,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\dDAGFunctionStatementFlow.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dDAGFunctionStatementFlow.h"
+				>
+			</File>
+			<File
 				RelativePath=".\dDAGFunctionStatementFOR.cpp"
 				>
 			</File>
@@ -377,6 +385,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\dDAGFunctionStatementSWITCH.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\dDAGFunctionStatementSWITCH.h"
+				>
+			</File>
+			<File
 				RelativePath=".\dDAGFunctionStatementWHILE.cpp"
 				>
 			</File>
@@ -395,6 +411,14 @@
 			<File
 				RelativePath=".\dDAGScopeBlockNode.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AssemblerOutput="0"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\dDAGScopeBlockNode.h"

@@ -2,7 +2,7 @@
 #include "dTreeAdressStmt.h"
 
 dTreeAdressStmt::dTreeAdressStmt(void)
-	:m_instrution(m_nop)
+	:m_instruction(m_nop)
 	,m_operator(m_nothing)
 	,m_arg0()
 	,m_arg1()
@@ -79,7 +79,7 @@ void dTreeAdressStmt::TraceAssigment () const
 
 void dTreeAdressStmt::Trace () const
 {
-	switch (m_instrution)
+	switch (m_instruction)
 	{
 		case m_assigment:
 		{

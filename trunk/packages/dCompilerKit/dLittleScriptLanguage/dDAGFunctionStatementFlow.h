@@ -9,27 +9,29 @@
 * freely
 */
 
-#ifndef __dDAGFunctionStatementWHILE_H__
-#define __dDAGFunctionStatementWHILE_H__
+#ifndef __dDAGFunctionStatementFlow_H__
+#define __dDAGFunctionStatementFlow_H__
 
 #include "dDAG.h"
-#include "dDAGFunctionStatementFlow.h"
+#include "dDAGFunctionStatement.h"
 
 class dDAGExpressionNode;
 
-class dDAGFunctionStatementWHILE: public dDAGFunctionStatementFlow
+class dDAGFunctionStatementFlow: public dDAGFunctionStatement
 {
 	public:
-	dDAGFunctionStatementWHILE(dList<dDAG*>& allNodes, dDAGExpressionNode* const expression, dDAGFunctionStatement* const stmt);
-	~dDAGFunctionStatementWHILE();
+	dDAGFunctionStatementFlow(dList<dDAG*>& allNodes);
+	~dDAGFunctionStatementFlow();
 
 	virtual void CompileCIL(dCIL& cil);
 	virtual void ConnectParent(dDAG* const parent);
 
-	dAddRtti(dDAGFunctionStatementFlow);
+	void BackPatch (dCIL& cil);
 
-	dDAGExpressionNode* m_expression;
-	dDAGFunctionStatement* m_stmt;
+	dAddRtti(dDAGFunctionStatement);
+
+	string m_currentExitLabel;
+	dCIL::dProgram::dListNode* m_backPatchStart;
 };
 
 

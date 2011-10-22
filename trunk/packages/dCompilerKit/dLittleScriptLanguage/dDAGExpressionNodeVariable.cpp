@@ -62,7 +62,7 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 		dim->CompileCIL(cil);
 		dCIL::dProgram::dListNode* const dimInstruction = cil.NewStatement();
 		dTreeAdressStmt& addressIndex = dimInstruction->GetInfo();
-		addressIndex.m_instrution = dTreeAdressStmt::m_assigment;
+		addressIndex.m_instruction = dTreeAdressStmt::m_assigment;
 		addressIndex.m_arg0 = cil.NewTemp();
 		addressIndex.m_arg1 = dim->m_result; 
 
@@ -74,7 +74,7 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 			dim->CompileCIL(cil);
 			
 			dTreeAdressStmt& stmtMul = cil.NewStatement()->GetInfo();
-			stmtMul.m_instrution = dTreeAdressStmt::m_assigment;
+			stmtMul.m_instruction = dTreeAdressStmt::m_assigment;
 			stmtMul.m_operator = dTreeAdressStmt::m_mul;
 			stmtMul.m_arg0 = cil.NewTemp();
 			stmtMul.m_arg1 = result;
@@ -83,7 +83,7 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 			dTRACE_INTRUCTION (&stmtMul);
 
 			dTreeAdressStmt& stmtAdd = cil.NewStatement()->GetInfo();
-			stmtAdd.m_instrution = dTreeAdressStmt::m_assigment;
+			stmtAdd.m_instruction = dTreeAdressStmt::m_assigment;
 			stmtAdd.m_operator = dTreeAdressStmt::m_add;
 			stmtAdd.m_arg0 = cil.NewTemp();
 			stmtAdd.m_arg1 = stmtMul.m_arg0;
@@ -103,7 +103,7 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 				// emit an indirect addressing mode
 				dTreeAdressStmt& tmp = cil.NewStatement()->GetInfo();
 				m_result = m_name + '[' + addressIndex.m_arg0 + ']';
-				tmp.m_instrution = dTreeAdressStmt::m_assigment;
+				tmp.m_instruction = dTreeAdressStmt::m_assigment;
 				tmp.m_arg0 = cil.NewTemp();
 				tmp.m_arg1 = m_name + '[' + result + ']';
 				dTRACE_INTRUCTION (&tmp);
@@ -114,7 +114,7 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 			// emit an indirect addressing mode
 			dTreeAdressStmt& tmp = cil.NewStatement()->GetInfo();
 			m_result = m_name + '[' + addressIndex.m_arg0 + ']';
-			tmp.m_instrution = dTreeAdressStmt::m_assigment;
+			tmp.m_instruction = dTreeAdressStmt::m_assigment;
 			tmp.m_arg0 = cil.NewTemp();;
 			tmp.m_arg1 = m_name + '[' + result + ']';
 			dTRACE_INTRUCTION (&tmp);

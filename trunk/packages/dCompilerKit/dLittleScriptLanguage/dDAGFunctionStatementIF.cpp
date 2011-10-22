@@ -61,7 +61,7 @@ void dDAGFunctionStatementIF::CompileCIL(dCIL& cil)
 
 	dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
 
-	stmt.m_instrution = dTreeAdressStmt::m_ifnot;
+	stmt.m_instruction = dTreeAdressStmt::m_ifnot;
 	stmt.m_arg0 = m_expression->m_result;
 
 	if (!m_elseStmt) {
@@ -73,7 +73,7 @@ void dDAGFunctionStatementIF::CompileCIL(dCIL& cil)
 		stmt.m_jmpTarget = cil.NewStatement();
 		dTreeAdressStmt& jmpTarget = stmt.m_jmpTarget->GetInfo();
 
-		jmpTarget.m_instrution = dTreeAdressStmt::m_target;
+		jmpTarget.m_instruction = dTreeAdressStmt::m_target;
 		jmpTarget.m_arg0 = stmt.m_arg1;
 		dTRACE_INTRUCTION (&jmpTarget);
 

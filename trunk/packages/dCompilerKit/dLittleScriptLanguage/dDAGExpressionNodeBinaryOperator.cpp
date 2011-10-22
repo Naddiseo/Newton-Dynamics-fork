@@ -52,7 +52,7 @@ void dDAGExpressionNodeBinaryOperator::CompileCIL(dCIL& cil)
 	dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
 	m_result = cil.NewTemp ();		
 
-	stmt.m_instrution = dTreeAdressStmt::m_assigment;
+	stmt.m_instruction = dTreeAdressStmt::m_assigment;
 	stmt.m_arg0 = m_result;
 	stmt.m_arg1 = m_expressionA->m_result;
 	stmt.m_arg2 = m_expressionB->m_result;
