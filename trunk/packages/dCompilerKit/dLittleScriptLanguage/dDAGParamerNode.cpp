@@ -12,8 +12,10 @@
 #include "dLSCstdafx.h"
 #include "dDAG.h"
 #include "dDAGTypeNode.h"
+#include "dDAGFunctionNode.h"
 #include "dDAGParameterNode.h"
 #include "dDAGExpressionNode.h"
+#include "dDAGScopeBlockNode.h"
 
 
 dInitRtti(dDAGParameterNode);
@@ -59,6 +61,16 @@ void dDAGParameterNode::CompileCIL(dCIL& cil)
 	dTreeAdressStmt& local = cil.NewStatement()->GetInfo();
 	local.m_instruction = dTreeAdressStmt::m_local;
 	local.m_arg0 = m_name;
+//	int stackLayer = -1;
+//	for (dDAG* node = this; node->GetTypeId() != dDAGFunctionNode::GetRttiType(); node = node->m_parent) {
+//		if (node->GetTypeId() == dDAGScopeBlockNode::GetRttiType()) {
+//			stackLayer ++;
+//		}
+//	}
+//	_ASSERTE (stackLayer >= 0);
+//	char text[256];
+//	sprintf (text, "layer_%d", stackLayer);
+//	local.m_arg1 = text;
 	dTRACE_INTRUCTION (&local);
 
 	if (m_initializationExp) {

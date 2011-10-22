@@ -15,11 +15,8 @@ class qsort
 
 	qsort (int[] a, int size)
 	{
-	
-while ();	
-for (;1;);	
+for (int i = 1; i < size; i = i + 1) int i = 10;	
 
-for (int i = 1; i < size; i = i + 1);	
 
 	
 		// first make sure the first element is the smallest of the array 
