@@ -68,17 +68,10 @@ void dDAGScopeBlockNode::ConnectParent(dDAG* const parent)
 
 void dDAGScopeBlockNode::CompileCIL(dCIL& cil)  
 {
-	dCIL::dProgram::dListNode* blockStart= cil.m_program.GetLast();
-//DTRACE (("\n"));
 	for (dList<dDAGFunctionStatement*>::dListNode* node = m_statementList.GetFirst(); node; node = node->GetNext()) {
 		dDAGFunctionStatement* const stmt = node->GetInfo();
 		stmt->CompileCIL(cil);
 	}
-
-	if (!blockStart) {
-		blockStart = cil.m_program.GetFirst();
-	}
-	cil.Optimize(blockStart->GetNext());
 }
 
 

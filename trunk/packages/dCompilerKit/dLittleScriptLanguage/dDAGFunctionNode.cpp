@@ -118,6 +118,7 @@ void dDAGFunctionNode::CompileCIL(dCIL& cil)
 		dTRACE_INTRUCTION (&fntArg);
 	}
 
+	dCIL::dProgram::dListNode* const blockStart= cil.m_program.GetLast();
 	cil.ResetTemporaries();
 	m_body->CompileCIL(cil);
 
@@ -149,4 +150,6 @@ void dDAGFunctionNode::CompileCIL(dCIL& cil)
 	dTreeAdressStmt& ret = retNode->GetInfo();
 	ret.m_instruction = dTreeAdressStmt::m_ret;
 	dTRACE_INTRUCTION (&ret);
+
+	cil.Optimize(blockStart->GetNext());
 }
