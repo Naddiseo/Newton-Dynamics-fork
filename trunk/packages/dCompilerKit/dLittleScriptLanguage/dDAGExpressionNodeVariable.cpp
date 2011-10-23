@@ -109,7 +109,7 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 		dimSize.m_instruction = dTreeAdressStmt::m_assigment;
 		dimSize.m_operator = dTreeAdressStmt::m_mul;
 		dimSize.m_arg0 = cil.NewTemp();
-		dimSize.m_arg1 = dim->m_result; 
+		dimSize.m_arg1 = result; 
 		dimSize.m_arg2 = "4"; 
 		dTRACE_INTRUCTION (&dimSize);
 

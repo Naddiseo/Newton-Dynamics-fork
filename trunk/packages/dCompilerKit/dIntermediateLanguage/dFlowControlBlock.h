@@ -12,11 +12,19 @@
 #ifndef __dFlowControlBlock_H_
 #define __dFlowControlBlock_H_
 
+class dCIL;
+class dTreeAdressStmt;
+
 class dFlowControlBlock
 {
 	public:
-	dFlowControlBlock(void);
+	dFlowControlBlock(dCIL::dListNode* const root);
 	virtual ~dFlowControlBlock(void);
+
+	dCIL::dListNode* m_begin;
+	dCIL::dListNode* m_end;
+	dFlowControlBlock* m_nextBlock;
+	dFlowControlBlock* m_branchBlock;
 };
 
 

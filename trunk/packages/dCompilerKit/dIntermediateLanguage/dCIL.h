@@ -29,7 +29,7 @@ class dCIL: public dList<dTreeAdressStmt>
 	void ResetTemporaries();
 	dListNode* NewStatement();
 
-	void Optimize(dListNode* const scopeSegment);
+	void Optimize(dListNode* const function);
 
 	int m_tempIndex;
 	int m_labelIndex;

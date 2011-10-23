@@ -11,6 +11,7 @@
 
 #include "dCILstdafx.h"
 #include "dCIL.h"
+#include "dFlowControlBlock.h"
 
 dCIL::dCIL(void)
 	:dList()
@@ -51,7 +52,11 @@ dCIL::dListNode* dCIL::NewStatement()
 }
 
 
-void dCIL::Optimize(dListNode* const scopeSegment)
+void dCIL::Optimize(dListNode* const function)
 {
+	dFlowControlBlock* const flowDiagram = new dFlowControlBlock(function);
 
+
+
+	delete flowDiagram;
 }
