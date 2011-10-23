@@ -105,5 +105,22 @@ void dFlowControlBlock::AddBlock(dCIL::dListNode* const root, dTree<dFlowControl
 			}
 		}
 	}
+}
 
+void dFlowControlBlock::Trace() const
+{
+	DTRACE(("\n"));
+	dCIL::dListNode* node = m_begin;
+	const dTreeAdressStmt& stmt = node->GetInfo();
+	dTRACE_INTRUCTION(&stmt);
+	while (node != m_end) {
+		node = node->GetNext();
+		const dTreeAdressStmt& stmt = node->GetInfo();
+		dTRACE_INTRUCTION(&stmt);
+	}
+}
+
+void dFlowControlBlock::LocalOptimizations()
+{
+	Trace();
 }

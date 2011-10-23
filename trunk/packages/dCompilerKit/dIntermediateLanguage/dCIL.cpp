@@ -88,6 +88,12 @@ void dCIL::Optimize(dListNode* const function)
 
 	for (dList<dFlowControlBlock*>::dListNode* node = flowBlockList.GetFirst(); node; node = node->GetNext()) {
 		dFlowControlBlock* const flowBlock = node->GetInfo();
+		flowBlock->LocalOptimizations();
+	}
+		
+
+	for (dList<dFlowControlBlock*>::dListNode* node = flowBlockList.GetFirst(); node; node = node->GetNext()) {
+		dFlowControlBlock* const flowBlock = node->GetInfo();
 		delete flowBlock;
 	}
 }
