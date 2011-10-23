@@ -55,25 +55,6 @@ void dDAGExpressionNodeVariable::ConnectParent(dDAG* const parent)
 	}
 }
 
-/*
-void dDAGExpressionNodeVariable::RenameLocalVariables(dDAGScopeBlockNode* const myScope)
-{
-	size_t pos =  m_name.find (D_SCOPE_PREFIX, 0, strlen (D_SCOPE_PREFIX));
-	if (pos != 0) {
-		char text[256];
-		myScope->m_localVariablesFilter.Append(m_name);
-		sprintf (text, "%s%d%s", D_SCOPE_PREFIX, myScope->m_scopeLayer, m_name.c_str());
-		if (myScope->m_localVariablesFilter.FindVariable (text)) {
-			m_name = text;
-		}
-	}
-
-	for (dList<dDAGDimensionNode*>::dListNode* node = m_dimExpressions.GetFirst(); node; node = node->GetNext()) {
-		dDAGDimensionNode* const dim = node->GetInfo();
-		dim->RenameLocalVariables(myScope);
-	}
-}
-*/
 
 void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 {
@@ -123,6 +104,16 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 
 			dTRACE_INTRUCTION (&stmtAdd);
 		}
+
+		dTreeAdressStmt& dimSize = cil.NewStatement()->GetInfo();
+		dimSize.m_instruction = dTreeAdressStmt::m_assigment;
+		dimSize.m_operator = dTreeAdressStmt::m_mul;
+		dimSize.m_arg0 = cil.NewTemp();
+		dimSize.m_arg1 = dim->m_result; 
+		dimSize.m_arg2 = "4"; 
+		dTRACE_INTRUCTION (&dimSize);
+
+		result = dimSize.m_arg0;
 
 		_ASSERTE (m_parent);
 		if (m_parent->GetTypeId() == dDAGFunctionStatementAssigment::GetRttiType()) {

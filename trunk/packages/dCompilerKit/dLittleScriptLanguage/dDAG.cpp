@@ -11,6 +11,7 @@
 
 #include "dLSCstdafx.h"
 #include "dDAG.h"
+#include "dDAGClassNode.h"
 #include "dDAGFunctionNode.h"
 #include "dDAGScopeBlockNode.h"
 
@@ -51,6 +52,17 @@ dDAGFunctionNode* dDAG::GetFunction() const
 	return NULL;
 }
 
+dDAGClassNode* dDAG::GetClass() const
+{
+	for (const dDAG* node = this; node; node = node->m_parent) {
+		if (node->GetTypeId() == dDAGClassNode::GetRttiType()) {
+			return (dDAGClassNode*) node;
+		}
+	}
+	_ASSERTE (0);
+	return NULL;
+}
+
 bool dDAG::RenameLocalVariable(string& variable) const
 {
 	for (dDAGScopeBlockNode* scope = GetScope(); scope; scope = (dDAGScopeBlockNode*)scope->m_parent->GetScope()) {
@@ -65,6 +77,11 @@ bool dDAG::RenameLocalVariable(string& variable) const
 
 	dDAGFunctionNode* const function = GetFunction();
 	if (function->FindArgumentVariable(variable.c_str())) {
+		return true;
+	}
+
+	dDAGClassNode* const classNode = function->GetClass();
+	if (classNode->FindVariable(variable.c_str())) {
 		return true;
 	}
 

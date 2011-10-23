@@ -29,8 +29,12 @@ class dDAGClassNode: public dDAG
 	void AddVariable (dDAGParameterNode* const variable);
 	void AddFunction (dDAGFunctionNode* const function);
 
+	dDAGParameterNode* FindVariable(const char* name) const;
+
 	virtual void CompileCIL(dCIL& cil);
 	virtual void ConnectParent(dDAG* const parent);
+
+
 
 	bool m_isPublic;
 	const dDAGClassNode* m_baseClass;

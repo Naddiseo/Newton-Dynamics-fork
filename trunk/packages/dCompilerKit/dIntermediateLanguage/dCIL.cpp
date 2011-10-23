@@ -38,3 +38,9 @@ dCIL::dProgram::dListNode* dCIL::NewStatement()
 {
 	return m_program.Append();
 }
+
+
+void dCIL::Optimize(dProgram::dListNode* const scopeSegment)
+{
+
+}

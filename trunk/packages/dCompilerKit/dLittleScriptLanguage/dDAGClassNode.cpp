@@ -62,6 +62,16 @@ void dDAGClassNode::AddVariable (dDAGParameterNode* const variable)
 	variable->AddRef();
 }
 
+dDAGParameterNode* dDAGClassNode::FindVariable(const char* name) const
+{
+	for (dList<dDAGParameterNode*>::dListNode* node = m_variables.GetFirst(); node; node = node->GetNext()) {
+		dDAGParameterNode* const variable = node->GetInfo();
+		if (variable->m_name == name) {
+			return variable;
+		}
+	}
+	return NULL;
+}
 
 void dDAGClassNode::ConnectParent(dDAG* const parent)  
 {
@@ -86,3 +96,5 @@ void dDAGClassNode::CompileCIL(dCIL& cil)
 		function->CompileCIL(cil);
 	}
 }
+
+

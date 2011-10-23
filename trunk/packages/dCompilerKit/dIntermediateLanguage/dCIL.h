@@ -22,6 +22,8 @@ class dCIL
 	void ResetTemporaries();
 	dProgram::dListNode* NewStatement();
 
+	void Optimize(dProgram::dListNode* const scopeSegment);
+
 	int m_tempIndex;
 	int m_labelIndex;
 	dProgram m_program;
