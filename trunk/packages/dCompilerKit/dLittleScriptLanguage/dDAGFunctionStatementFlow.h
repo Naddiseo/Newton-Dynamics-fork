@@ -31,7 +31,7 @@ class dDAGFunctionStatementFlow: public dDAGFunctionStatement
 	dAddRtti(dDAGFunctionStatement);
 
 	string m_currentExitLabel;
-	dCIL::dProgram::dListNode* m_backPatchStart;
+	dCIL::dListNode* m_backPatchStart;
 };
 
 

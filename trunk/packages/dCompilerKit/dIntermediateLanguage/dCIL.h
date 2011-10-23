@@ -1,3 +1,14 @@
+/* Copyright (c) <2009> <Newton Game Dynamics>
+*
+* This software is provided 'as-is', without any express or implied
+* warranty. In no event will the authors be held liable for any damages
+* arising from the use of this software.
+*
+* Permission is granted to anyone to use this software for any purpose,
+* including commercial applications, and to alter it and redistribute it
+* freely
+*/
+
 #ifndef __dCIL_H_
 #define __dCIL_H_
 
@@ -6,13 +17,9 @@
 
 
 
-class dCIL
+class dCIL: public dList<dTreeAdressStmt>
 {
 	public:
-	class dProgram: public dList<dTreeAdressStmt>
-	{
-		
-	};
 	
 	dCIL(void);
 	virtual ~dCIL(void);
@@ -20,13 +27,12 @@ class dCIL
 	string NewTemp (); 
 	string NewLabel (); 
 	void ResetTemporaries();
-	dProgram::dListNode* NewStatement();
+	dListNode* NewStatement();
 
-	void Optimize(dProgram::dListNode* const scopeSegment);
+	void Optimize(dListNode* const scopeSegment);
 
 	int m_tempIndex;
 	int m_labelIndex;
-	dProgram m_program;
 };
 
 

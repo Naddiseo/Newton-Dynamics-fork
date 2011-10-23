@@ -71,7 +71,7 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 	if (m_dimExpressions.GetCount()) {
 		dDAGDimensionNode* const dim = m_dimExpressions.GetFirst()->GetInfo();
 		dim->CompileCIL(cil);
-		dCIL::dProgram::dListNode* const dimInstruction = cil.NewStatement();
+		dCIL::dListNode* const dimInstruction = cil.NewStatement();
 		dTreeAdressStmt& addressIndex = dimInstruction->GetInfo();
 		addressIndex.m_instruction = dTreeAdressStmt::m_assigment;
 		addressIndex.m_arg0 = cil.NewTemp();

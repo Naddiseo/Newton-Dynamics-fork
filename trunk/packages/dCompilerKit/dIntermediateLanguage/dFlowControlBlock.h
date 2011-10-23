@@ -9,5 +9,15 @@
 * freely
 */
 
-#include "dCILstdafx.h"
+#ifndef __dFlowControlBlock_H_
+#define __dFlowControlBlock_H_
 
+class dFlowControlBlock
+{
+	public:
+	dFlowControlBlock(void);
+	virtual ~dFlowControlBlock(void);
+};
+
+
+#endif

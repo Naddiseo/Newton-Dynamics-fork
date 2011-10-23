@@ -104,7 +104,7 @@ void dDAGFunctionNode::CompileCIL(dCIL& cil)
 {
 	_ASSERTE (m_body);
 
-	dCIL::dProgram::dListNode* const functionNode = cil.NewStatement();
+	dCIL::dListNode* const functionNode = cil.NewStatement();
 	dTreeAdressStmt& function = functionNode->GetInfo();
 	function.m_instruction = dTreeAdressStmt::m_function;
 	function.m_arg0 = m_name;
@@ -118,12 +118,12 @@ void dDAGFunctionNode::CompileCIL(dCIL& cil)
 		dTRACE_INTRUCTION (&fntArg);
 	}
 
-	dCIL::dProgram::dListNode* const blockStart= cil.m_program.GetLast();
+	dCIL::dListNode* const blockStart= cil.GetLast();
 	cil.ResetTemporaries();
 	m_body->CompileCIL(cil);
 
 	bool returnStmt = false;
-	for (dCIL::dProgram::dListNode* node = functionNode; node; node = node->GetNext()) {
+	for (dCIL::dListNode* node = functionNode; node; node = node->GetNext()) {
 		dTreeAdressStmt& stmt = node->GetInfo();
 		if ((stmt.m_instruction == dTreeAdressStmt::m_goto) && (stmt.m_arg0 == D_RETURN_LABEL))  {
 			returnStmt = true;
@@ -132,13 +132,13 @@ void dDAGFunctionNode::CompileCIL(dCIL& cil)
 	}
 
 	if (returnStmt) {
-		dCIL::dProgram::dListNode* const retLabelNode = cil.NewStatement();
+		dCIL::dListNode* const retLabelNode = cil.NewStatement();
 		dTreeAdressStmt& retLabel = retLabelNode->GetInfo();
 		retLabel.m_instruction = dTreeAdressStmt::m_target;
 		retLabel.m_arg0 = D_RETURN_LABEL;
 		dTRACE_INTRUCTION (&retLabel);
 
-		for (dCIL::dProgram::dListNode* node = functionNode; node; node = node->GetNext()) {
+		for (dCIL::dListNode* node = functionNode; node; node = node->GetNext()) {
 			dTreeAdressStmt& stmt = node->GetInfo();
 			if ((stmt.m_instruction == dTreeAdressStmt::m_goto) && (stmt.m_arg0 == D_RETURN_LABEL))  {
 				stmt.m_jmpTarget = retLabelNode;
@@ -146,7 +146,7 @@ void dDAGFunctionNode::CompileCIL(dCIL& cil)
 		}
 	}
 
-	dCIL::dProgram::dListNode* const retNode = cil.NewStatement();
+	dCIL::dListNode* const retNode = cil.NewStatement();
 	dTreeAdressStmt& ret = retNode->GetInfo();
 	ret.m_instruction = dTreeAdressStmt::m_ret;
 	dTRACE_INTRUCTION (&ret);

@@ -58,13 +58,13 @@ void dDAGFunctionStatementWHILE::CompileCIL(dCIL& cil)
 {
 	dDAGFunctionStatementFlow::CompileCIL(cil);
 
-	dCIL::dProgram::dListNode* const startFlow = cil.NewStatement();
+	dCIL::dListNode* const startFlow = cil.NewStatement();
 	dTreeAdressStmt& startLabel = startFlow->GetInfo();
 	startLabel.m_instruction = dTreeAdressStmt::m_target;
 	startLabel.m_arg0 = cil.NewLabel();
 	dTRACE_INTRUCTION (&startLabel);
 
-	dCIL::dProgram::dListNode* expressionNode = NULL;
+	dCIL::dListNode* expressionNode = NULL;
 	if (m_expression) {
 		m_expression->CompileCIL(cil);
 		expressionNode = cil.NewStatement();

@@ -38,7 +38,7 @@ void dDAGFunctionStatementFlow::ConnectParent(dDAG* const parent)
 
 void dDAGFunctionStatementFlow::CompileCIL(dCIL& cil)  
 {
-	m_backPatchStart = cil.m_program.GetLast();
+	m_backPatchStart = cil.GetLast();
 	m_currentExitLabel = cil.NewLabel();
 }
 
@@ -46,10 +46,10 @@ void dDAGFunctionStatementFlow::BackPatch (dCIL& cil)
 {
 	bool flowBreak = false;
 	if (!m_backPatchStart) {
-		m_backPatchStart = cil.m_program.GetFirst();
+		m_backPatchStart = cil.GetFirst();
 	}
 	
-	for (dCIL::dProgram::dListNode* node = m_backPatchStart->GetNext(); node; node = node->GetNext()) {
+	for (dCIL::dListNode* node = m_backPatchStart->GetNext(); node; node = node->GetNext()) {
 		dTreeAdressStmt& stmt = node->GetInfo();
 		if ((stmt.m_instruction == dTreeAdressStmt::m_goto) && !stmt.m_jmpTarget)  {
 			flowBreak = true;
@@ -58,13 +58,13 @@ void dDAGFunctionStatementFlow::BackPatch (dCIL& cil)
 	}
 
 	if (flowBreak) {
-		dCIL::dProgram::dListNode* const target = cil.NewStatement();
+		dCIL::dListNode* const target = cil.NewStatement();
 		dTreeAdressStmt& jmpTarget = target->GetInfo();
 		jmpTarget.m_instruction = dTreeAdressStmt::m_target;
 		jmpTarget.m_arg0 = m_currentExitLabel;
 		dTRACE_INTRUCTION (&jmpTarget);
 
-		for (dCIL::dProgram::dListNode* node = m_backPatchStart->GetNext(); node; node = node->GetNext()) {
+		for (dCIL::dListNode* node = m_backPatchStart->GetNext(); node; node = node->GetNext()) {
 			dTreeAdressStmt& stmt = node->GetInfo();
 			if ((stmt.m_instruction == dTreeAdressStmt::m_goto) && !stmt.m_jmpTarget)  {
 				stmt.m_jmpTarget = target;

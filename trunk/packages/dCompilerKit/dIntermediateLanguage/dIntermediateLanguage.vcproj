@@ -180,6 +180,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\dFlowControlBlock.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\dFlowControlBlock.h"
+			>
+		</File>
+		<File
 			RelativePath=".\dTreeAdressStmt.cpp"
 			>
 		</File>
