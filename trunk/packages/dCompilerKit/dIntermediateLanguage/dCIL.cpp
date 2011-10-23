@@ -52,11 +52,42 @@ dCIL::dListNode* dCIL::NewStatement()
 }
 
 
+void dCIL::GetFlowControlBlockList (dFlowControlBlock* const root, dList<dFlowControlBlock*>& list)
+{
+	int stack = 1;
+	dFlowControlBlock* pool[256];
+
+	int mark = root->m_mark + 1;
+	pool[0] = root;
+	while (stack) {
+		stack --;
+		dFlowControlBlock* const block = pool[stack];
+		if (block->m_mark != mark) {
+			list.Append(block);
+			block->m_mark = mark; 
+		}
+
+		if (block->m_branchBlock && (block->m_branchBlock->m_mark < mark)) {
+			pool[stack] = block->m_branchBlock;
+			stack ++;
+		}
+		if (block->m_nextBlock && (block->m_nextBlock->m_mark < mark)) {
+			pool[stack] = block->m_nextBlock;
+			stack ++;
+		}
+	}
+
+}
+
 void dCIL::Optimize(dListNode* const function)
 {
-	dFlowControlBlock* const flowDiagram = new dFlowControlBlock(function);
+	dFlowControlBlock* const flowDiagramRoot = new dFlowControlBlock(function);
 
+	dList<dFlowControlBlock*> flowBlockList;
+	GetFlowControlBlockList (flowDiagramRoot, flowBlockList);
 
-
-	delete flowDiagram;
+	for (dList<dFlowControlBlock*>::dListNode* node = flowBlockList.GetFirst(); node; node = node->GetNext()) {
+		dFlowControlBlock* const flowBlock = node->GetInfo();
+		delete flowBlock;
+	}
 }

@@ -21,10 +21,18 @@ class dFlowControlBlock
 	dFlowControlBlock(dCIL::dListNode* const root);
 	virtual ~dFlowControlBlock(void);
 
+	private:
+	dFlowControlBlock(dCIL::dListNode* const root, dTree<dFlowControlBlock*, dCIL::dListNode*>& filter);
+
+	void AddBlock(dCIL::dListNode* const root, dTree<dFlowControlBlock*, dCIL::dListNode*>& filter);
+
+	int m_mark;
 	dCIL::dListNode* m_begin;
 	dCIL::dListNode* m_end;
 	dFlowControlBlock* m_nextBlock;
 	dFlowControlBlock* m_branchBlock;
+
+	friend dCIL;
 };
 
 

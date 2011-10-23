@@ -15,7 +15,7 @@
 #include "dCILstdafx.h"
 #include "dTreeAdressStmt.h"
 
-
+class dFlowControlBlock;
 
 class dCIL: public dList<dTreeAdressStmt>
 {
@@ -30,6 +30,9 @@ class dCIL: public dList<dTreeAdressStmt>
 	dListNode* NewStatement();
 
 	void Optimize(dListNode* const function);
+
+	private:
+	void GetFlowControlBlockList (dFlowControlBlock* const root, dList<dFlowControlBlock*>& list);
 
 	int m_tempIndex;
 	int m_labelIndex;
