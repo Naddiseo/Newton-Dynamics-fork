@@ -41,7 +41,7 @@ class qsort
 	{
 int[10] b;
 for (int i = 0; i < 10; i = i + 1) {
-b[i] = a[i];
+  b[i] = a[i];
 }	
 
 /*	

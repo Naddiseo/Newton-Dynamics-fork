@@ -27,7 +27,7 @@ class dFlowControlBlock
 	void AddBlock(dCIL::dListNode* const root, dTree<dFlowControlBlock*, dCIL::dListNode*>& filter);
 
 	void Trace() const;
-	void LocalOptimizations();
+	void OptimizeSubexpression();
 
 	int m_mark;
 	dCIL::dListNode* m_begin;

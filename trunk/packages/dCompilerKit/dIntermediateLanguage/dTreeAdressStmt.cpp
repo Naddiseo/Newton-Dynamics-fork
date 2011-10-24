@@ -30,7 +30,7 @@ dTreeAdressStmt::~dTreeAdressStmt(void)
 void dTreeAdressStmt::TraceAssigment () const
 {
 
-	DTRACE (("%s = %s", m_arg0.c_str(), m_arg1.c_str()));
+	DTRACE (("\t%s = %s", m_arg0.c_str(), m_arg1.c_str()));
 	switch (m_operator)
 	{
 		case m_nothing:
@@ -106,19 +106,19 @@ void dTreeAdressStmt::Trace () const
 
 		case m_if:
 		{
-			DTRACE (("if (%s) goto %s\n", m_arg0.c_str(), m_arg1.c_str()));
+			DTRACE (("\tif (%s) goto %s\n", m_arg0.c_str(), m_arg1.c_str()));
 			break;
 		}
 
 		case m_ifnot:
 		{
-			DTRACE (("if (!%s) goto %s\n", m_arg0.c_str(), m_arg1.c_str()));
+			DTRACE (("\tifnot (%s) goto %s\n", m_arg0.c_str(), m_arg1.c_str()));
 			break;
 		}
 
 		case m_goto:
 		{
-			DTRACE (("goto %s\n", m_arg0.c_str()));
+			DTRACE (("\tgoto %s\n", m_arg0.c_str()));
 			break;
 		}
 
@@ -130,38 +130,38 @@ void dTreeAdressStmt::Trace () const
 
 		case m_param:
 		{
-			DTRACE (("param %s\n", m_arg0.c_str()));
+			DTRACE (("\tparam %s\n", m_arg0.c_str()));
 			break;
 		}
 
 		case m_argument:
 		{
-			DTRACE (("argument %s\n", m_arg0.c_str()));
+			DTRACE (("\targument %s\n", m_arg0.c_str()));
 			break;
 		}
 
 		case m_local:
 		{
-			DTRACE (("local %s\n", m_arg0.c_str()));
+			DTRACE (("\tlocal %s\n", m_arg0.c_str()));
 			break;
 		}
 
 
 		case m_restoreParam:
 		{
-			DTRACE (("restoreParam %s\n", m_arg0.c_str()));
+			DTRACE (("\trestoreParam %s\n", m_arg0.c_str()));
 			break;
 		}
 
 		case m_call:
 		{
-			DTRACE (("call %s\n", m_arg0.c_str()));
+			DTRACE (("\tcall %s\n", m_arg0.c_str()));
 			break;
 		}
 
 		case m_ret:
 		{
-			DTRACE (("ret\n"));
+			DTRACE (("\tret\n"));
 			break;
 		}
 

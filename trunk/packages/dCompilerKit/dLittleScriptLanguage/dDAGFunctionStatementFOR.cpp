@@ -80,13 +80,16 @@ void dDAGFunctionStatementFOR::ConnectParent(dDAG* const parent)
 
 void dDAGFunctionStatementFOR::CompileCIL(dCIL& cil)  
 {
-
-	dDAGFunctionStatementFlow::CompileCIL(cil);
-
 	if (m_initialStmt) {
 		m_initialStmt->CompileCIL(cil);
 	}
 
+	dTreeAdressStmt& endStmt = cil.NewStatement()->GetInfo();
+	endStmt.m_instruction = dTreeAdressStmt::m_goto;
+	endStmt.m_arg0 = cil.NewLabel();
+	dTRACE_INTRUCTION (&endStmt);
+
+	dDAGFunctionStatementFlow::CompileCIL(cil);
 
 	dCIL::dListNode* const startFlow = cil.NewStatement();
 	dTreeAdressStmt& startLabel = startFlow->GetInfo();
@@ -94,40 +97,38 @@ void dDAGFunctionStatementFOR::CompileCIL(dCIL& cil)
 	startLabel.m_arg0 = cil.NewLabel();
 	dTRACE_INTRUCTION (&startLabel);
 
+	if (m_stmt) {
+		m_stmt->CompileCIL(cil);
+	}
+
+	if (m_endStmt) {
+		m_endStmt->CompileCIL(cil);
+	}
+
+	dCIL::dListNode* const testFlow = cil.NewStatement();
+	endStmt.m_jmpTarget = testFlow;
+
+	dTreeAdressStmt& test = testFlow->GetInfo();
+	test.m_instruction = dTreeAdressStmt::m_target;
+	test.m_arg0 = endStmt.m_arg0;
+	dTRACE_INTRUCTION (&test);
+
 	dCIL::dListNode* expressionNode = NULL;
 	if (m_expression) {
 		m_expression->CompileCIL(cil);
 		expressionNode = cil.NewStatement();
 		dTreeAdressStmt& stmt = expressionNode->GetInfo();
-		stmt.m_instruction = dTreeAdressStmt::m_ifnot;
+		stmt.m_instruction = dTreeAdressStmt::m_if;
 		stmt.m_arg0 = m_expression->m_result;
-		stmt.m_arg1 = cil.NewLabel();
+		stmt.m_arg1 = startLabel.m_arg0; 
+		stmt.m_jmpTarget = startFlow;
 		dTRACE_INTRUCTION (&stmt);
-	}
-
-	if (m_stmt) {
-		m_stmt->CompileCIL(cil);
-	}
-	
-	if (m_endStmt) {
-		m_endStmt->CompileCIL(cil);
-	}
-
-	dTreeAdressStmt& endStmt = cil.NewStatement()->GetInfo();
-	endStmt.m_instruction = dTreeAdressStmt::m_goto;
-	endStmt.m_arg0 = startLabel.m_arg0;
-	endStmt.m_jmpTarget = startFlow;
-	dTRACE_INTRUCTION (&endStmt);
-
-
-	dCIL::dListNode* const exitLabel = cil.NewStatement();
-	if (expressionNode) {
-		dTreeAdressStmt& stmt = expressionNode->GetInfo();
-		stmt.m_jmpTarget = exitLabel;
-		dTreeAdressStmt& jmpTarget = exitLabel->GetInfo();
-		jmpTarget.m_instruction = dTreeAdressStmt::m_target;
-		jmpTarget.m_arg0 = stmt.m_arg1;
-		dTRACE_INTRUCTION (&jmpTarget);
+	} else {
+		dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
+		stmt.m_instruction = dTreeAdressStmt::m_goto;
+		stmt.m_arg0 = startLabel.m_arg0; 
+		stmt.m_jmpTarget = startFlow;
+		dTRACE_INTRUCTION (&stmt);
 	}
 
 	BackPatch (cil);

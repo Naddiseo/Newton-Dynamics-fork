@@ -86,9 +86,14 @@ void dCIL::Optimize(dListNode* const function)
 	dList<dFlowControlBlock*> flowBlockList;
 	GetFlowControlBlockList (flowDiagramRoot, flowBlockList);
 
+	// eliminate local common sub expression
+DTRACE(("\n"));
 	for (dList<dFlowControlBlock*>::dListNode* node = flowBlockList.GetFirst(); node; node = node->GetNext()) {
 		dFlowControlBlock* const flowBlock = node->GetInfo();
-		flowBlock->LocalOptimizations();
+
+		flowBlock->Trace();
+		flowBlock->OptimizeSubexpression();
+		flowBlock->Trace();
 	}
 		
 

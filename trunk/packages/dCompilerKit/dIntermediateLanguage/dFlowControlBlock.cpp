@@ -24,10 +24,6 @@ dFlowControlBlock::dFlowControlBlock(dCIL::dListNode* const root)
 {
 	dTree<dFlowControlBlock*, dCIL::dListNode*> filter;
 	AddBlock(root, filter);
-	if (!m_end) {
-		m_end = m_begin;
-	}
-
 }
 
 dFlowControlBlock::dFlowControlBlock(dCIL::dListNode* const root, dTree<dFlowControlBlock*, dCIL::dListNode*>& filter)
@@ -38,14 +34,29 @@ dFlowControlBlock::dFlowControlBlock(dCIL::dListNode* const root, dTree<dFlowCon
 	,m_branchBlock(NULL)
 {
 	AddBlock(root, filter);
-	if (!m_end) {
-		m_end = m_begin;
-	}
 }
 
 dFlowControlBlock::~dFlowControlBlock(void)
 {
 }
+
+
+
+void dFlowControlBlock::Trace() const
+{
+
+	dCIL::dListNode* node = m_begin;
+	const dTreeAdressStmt& stmt = node->GetInfo();
+	dTRACE_INTRUCTION(&stmt);
+	while (node != m_end) {
+		node = node->GetNext();
+		const dTreeAdressStmt& stmt = node->GetInfo();
+		dTRACE_INTRUCTION(&stmt);
+	}
+	DTRACE(("\n"));
+}
+
+
 
 
 void dFlowControlBlock::AddBlock(dCIL::dListNode* const root, dTree<dFlowControlBlock*, dCIL::dListNode*>& filter)
@@ -56,12 +67,12 @@ void dFlowControlBlock::AddBlock(dCIL::dListNode* const root, dTree<dFlowControl
 	m_begin = root;
 
 	for (dCIL::dListNode* node = m_begin; node; node = node->GetNext()) {
+		m_end = node;
 		const dTreeAdressStmt& stmt = node->GetInfo();
 		switch (stmt.m_instruction)
 		{
 			case dTreeAdressStmt::m_target:
 			{
-				m_end = node;
 				dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const block = filter.Find(node->GetNext()); 
 				if (block) {
 					m_nextBlock = block->GetInfo();
@@ -74,7 +85,6 @@ void dFlowControlBlock::AddBlock(dCIL::dListNode* const root, dTree<dFlowControl
 			case dTreeAdressStmt::m_if:
 			case dTreeAdressStmt::m_ifnot:
 			{
-				m_end = node;
 				dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const block = filter.Find(node->GetNext()); 
 				if (block) {
 					m_nextBlock = block->GetInfo();
@@ -93,7 +103,6 @@ void dFlowControlBlock::AddBlock(dCIL::dListNode* const root, dTree<dFlowControl
 
 			case dTreeAdressStmt::m_goto:
 			{
-				m_end = node;
 				dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const branchBlock = filter.Find(stmt.m_jmpTarget->GetNext()); 
 				if (branchBlock) {
 					m_branchBlock = branchBlock->GetInfo();
@@ -107,20 +116,9 @@ void dFlowControlBlock::AddBlock(dCIL::dListNode* const root, dTree<dFlowControl
 	}
 }
 
-void dFlowControlBlock::Trace() const
+
+void dFlowControlBlock::OptimizeSubexpression()
 {
-	DTRACE(("\n"));
-	dCIL::dListNode* node = m_begin;
-	const dTreeAdressStmt& stmt = node->GetInfo();
-	dTRACE_INTRUCTION(&stmt);
-	while (node != m_end) {
-		node = node->GetNext();
-		const dTreeAdressStmt& stmt = node->GetInfo();
-		dTRACE_INTRUCTION(&stmt);
-	}
+
 }
 
-void dFlowControlBlock::LocalOptimizations()
-{
-	Trace();
-}

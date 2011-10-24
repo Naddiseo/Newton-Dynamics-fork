@@ -55,9 +55,11 @@ void dDAGFunctionStatementDO::ConnectParent(dDAG* const parent)
 
 void dDAGFunctionStatementDO::CompileCIL(dCIL& cil)  
 {
+
 	dDAGFunctionStatementFlow::CompileCIL(cil);
-	
-	dTreeAdressStmt& startLabel = cil.NewStatement()->GetInfo();
+
+	dCIL::dListNode* const startFlow = cil.NewStatement();
+	dTreeAdressStmt& startLabel = startFlow->GetInfo();
 	startLabel.m_instruction = dTreeAdressStmt::m_target;
 	startLabel.m_arg0 = cil.NewLabel();
 	dTRACE_INTRUCTION (&startLabel);
@@ -66,15 +68,23 @@ void dDAGFunctionStatementDO::CompileCIL(dCIL& cil)
 		m_stmt->CompileCIL(cil);
 	}
 
+	dCIL::dListNode* expressionNode = NULL;
 	if (m_expression) {
 		m_expression->CompileCIL(cil);
+		expressionNode = cil.NewStatement();
+		dTreeAdressStmt& stmt = expressionNode->GetInfo();
+		stmt.m_instruction = dTreeAdressStmt::m_if;
+		stmt.m_arg0 = m_expression->m_result;
+		stmt.m_arg1 = startLabel.m_arg0; 
+		stmt.m_jmpTarget = startFlow;
+		dTRACE_INTRUCTION (&stmt);
+	} else {
+		dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
+		stmt.m_instruction = dTreeAdressStmt::m_goto;
+		stmt.m_arg0 = startLabel.m_arg0; 
+		stmt.m_jmpTarget = startFlow;
+		dTRACE_INTRUCTION (&stmt);
 	}
-
-	dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
-	stmt.m_instruction = dTreeAdressStmt::m_if;
-	stmt.m_arg0 = m_expression->m_result;
-	stmt.m_arg1 = startLabel.m_arg0;
-	dTRACE_INTRUCTION (&stmt);
 
 	BackPatch (cil);
 }
