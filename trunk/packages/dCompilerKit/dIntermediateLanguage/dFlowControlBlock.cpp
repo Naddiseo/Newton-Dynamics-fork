@@ -83,7 +83,6 @@ void dFlowControlBlock::AddBlock(dCIL::dListNode* const root, dTree<dFlowControl
 			}
 
 			case dTreeAdressStmt::m_if:
-			case dTreeAdressStmt::m_ifnot:
 			{
 				dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const block = filter.Find(node->GetNext()); 
 				if (block) {

@@ -29,6 +29,7 @@ class dFlowControlBlock
 	void Trace() const;
 	void OptimizeSubexpression();
 
+
 	int m_mark;
 	dCIL::dListNode* m_begin;
 	dCIL::dListNode* m_end;
