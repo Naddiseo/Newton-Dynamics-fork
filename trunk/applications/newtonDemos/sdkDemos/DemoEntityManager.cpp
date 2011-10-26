@@ -316,13 +316,15 @@ void DemoEntityManager::SetAutoSleepState (bool state)
 	int autosleep = state ? 1 : 0;
 	for (NewtonBody* body = NewtonWorldGetFirstBody(m_world); body; body = NewtonWorldGetNextBody(m_world, body)) {
 		NewtonBodySetAutoSleep(body, autosleep);
+
+		//NewtonBodySetFreezeState (body, 1);
 	}
 }
 
 
 void DemoEntityManager::InterpolateMatrices ()
 {
-	// calculate the fraction of the time step for intepolations
+	// calculate the fraction of the time step for interpolations
 	unsigned64 timeStep = dGetTimeInMicrosenconds () - m_microsecunds;		
 	dFloat step = (dFloat (timeStep) * MAX_PHYSICS_FPS) / 1.0e6f;
 	_ASSERTE (step >= 0.0f);

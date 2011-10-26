@@ -4,7 +4,7 @@
 
 dInitRtti(DemoEntity);
 
-#define DEMO_GRAVITY	10.0f
+//#define DEMO_GRAVITY	10.0f
 
 DemoEntity::DemoEntity(DemoEntity* parent)
 	:dClassInfo()
