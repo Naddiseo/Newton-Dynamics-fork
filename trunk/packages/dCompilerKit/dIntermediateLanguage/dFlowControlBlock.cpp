@@ -67,57 +67,77 @@ void dFlowControlBlock::AddBlock(dCIL::dListNode* const root, dTree<dFlowControl
 	m_begin = root;
 
 	for (dCIL::dListNode* node = m_begin; node; node = node->GetNext()) {
-		m_end = node;
 		const dTreeAdressStmt& stmt = node->GetInfo();
-		switch (stmt.m_instruction)
-		{
-			case dTreeAdressStmt::m_target:
+		if (stmt.m_instruction != dTreeAdressStmt::m_nop) {
+			m_end = node;
+
+			switch (stmt.m_instruction)
 			{
-				dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const block = filter.Find(node->GetNext()); 
-				if (block) {
-					m_nextBlock = block->GetInfo();
-				} else {
-					m_nextBlock = new dFlowControlBlock (node->GetNext(), filter);
-				}
-				return;
-			}
-
-			case dTreeAdressStmt::m_if:
-			{
-				dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const block = filter.Find(node->GetNext()); 
-				if (block) {
-					m_nextBlock = block->GetInfo();
-				} else {
-					m_nextBlock = new dFlowControlBlock (node->GetNext(), filter);
+				case dTreeAdressStmt::m_target:
+				{
+					dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const block = filter.Find(node->GetNext()); 
+					if (block) {
+						m_nextBlock = block->GetInfo();
+					} else {
+						m_nextBlock = new dFlowControlBlock (node->GetNext(), filter);
+					}
+					return;
 				}
 
-				dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const branchBlock = filter.Find(stmt.m_jmpTarget->GetNext()); 
-				if (branchBlock) {
-					m_branchBlock = branchBlock->GetInfo();
-				} else {
-					m_branchBlock = new dFlowControlBlock (stmt.m_jmpTarget->GetNext(), filter);
-				}
-				return;
-			}
+				case dTreeAdressStmt::m_if:
+				{
+					dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const block = filter.Find(node->GetNext()); 
+					if (block) {
+						m_nextBlock = block->GetInfo();
+					} else {
+						m_nextBlock = new dFlowControlBlock (node->GetNext(), filter);
+					}
 
-			case dTreeAdressStmt::m_goto:
-			{
-				dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const branchBlock = filter.Find(stmt.m_jmpTarget->GetNext()); 
-				if (branchBlock) {
-					m_branchBlock = branchBlock->GetInfo();
-				} else {
-					m_branchBlock = new dFlowControlBlock (stmt.m_jmpTarget->GetNext(), filter);
+					dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const branchBlock = filter.Find(stmt.m_jmpTarget->GetNext()); 
+					if (branchBlock) {
+						m_branchBlock = branchBlock->GetInfo();
+					} else {
+						m_branchBlock = new dFlowControlBlock (stmt.m_jmpTarget->GetNext(), filter);
+					}
+					return;
 				}
 
-				return;
+				case dTreeAdressStmt::m_goto:
+				{
+					dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const branchBlock = filter.Find(stmt.m_jmpTarget->GetNext()); 
+					if (branchBlock) {
+						m_branchBlock = branchBlock->GetInfo();
+					} else {
+						m_branchBlock = new dFlowControlBlock (stmt.m_jmpTarget->GetNext(), filter);
+					}
+
+					return;
+				}
 			}
 		}
 	}
 }
 
 
-void dFlowControlBlock::OptimizeSubexpression()
+void dFlowControlBlock::ApplyLocalOptimizations()
+{
+	Trace();
+	RemoveSubExpressions();
+}
+
+void dFlowControlBlock::RemoveSubExpressions()
+{
+	const dCIL::dListNode* const lastNode = m_end->GetNext();
+	_ASSERTE (lastNode);
+	for (dCIL::dListNode* node = m_begin; node != lastNode; node = node->GetNext()) {
+		dTreeAdressStmt& stmt = node->GetInfo();
+		int xxx = 0;
+//		if (stmt.m_)
+	}
+	
+}
+
+void dFlowControlBlock::ApplyCopyProgation()
 {
 
 }
-

@@ -91,9 +91,9 @@ DTRACE(("\n"));
 	for (dList<dFlowControlBlock*>::dListNode* node = flowBlockList.GetFirst(); node; node = node->GetNext()) {
 		dFlowControlBlock* const flowBlock = node->GetInfo();
 
-		flowBlock->Trace();
-		flowBlock->OptimizeSubexpression();
-		flowBlock->Trace();
+
+		flowBlock->ApplyLocalOptimizations();
+//		flowBlock->Trace();
 	}
 		
 

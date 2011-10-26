@@ -151,5 +151,6 @@ void dDAGFunctionNode::CompileCIL(dCIL& cil)
 	ret.m_instruction = dTreeAdressStmt::m_ret;
 	dTRACE_INTRUCTION (&ret);
 
+	cil.NewStatement();
 	cil.Optimize(blockStart->GetNext());
 }

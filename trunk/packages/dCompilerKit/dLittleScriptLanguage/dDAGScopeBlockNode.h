@@ -23,7 +23,7 @@ class dDAGParameterNode;
 class dDAGExpressionNode;
 class dDAGExpressionNodeVariable;
 
-#define D_SCOPE_PREFIX	"scope" 
+#define D_SCOPE_PREFIX	"_scope" 
 
 class dDAGScopeBlockNode: public dDAGFunctionStatement
 {

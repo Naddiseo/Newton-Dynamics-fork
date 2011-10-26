@@ -39,10 +39,10 @@ class qsort
 	// very primitive qsort 
 	private void sort (int[] a, int m, int n)
 	{
-//int[10] b;
-//for (int i = 0; i < 10; i = i + 1) {
-//  b[i] = a[i];
-//}	
+int[10] b;
+for (int i = 0; i < 10; i = i + 1) {
+  b[i] = a[i];
+}	
 
 	
 //		if (n <= m) {
@@ -80,5 +80,6 @@ class qsort
 //		sort (a, i + 1, n);
 
 	}
+	
 }
 
