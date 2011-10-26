@@ -814,11 +814,8 @@ void dgBody::Freeze ()
 	if (m_invMass.m_w > dgFloat32 (0.0f)) {
 		if (!m_freeze) {
 			m_freeze = true;
-			dgBodyMasterListRow::dgListNode* node; 	
-
-			for (node = m_masterNode->GetInfo().GetFirst(); node; node = node->GetNext()) {
-				dgBody* body;
-				body = node->GetInfo().m_bodyNode;
+			for (dgBodyMasterListRow::dgListNode* node = m_masterNode->GetInfo().GetFirst(); node; node = node->GetNext()) {
+				dgBody* const body = node->GetInfo().m_bodyNode;
 				body->Freeze ();
 			}
 		}
@@ -832,11 +829,8 @@ void dgBody::Unfreeze ()
 //		m_equilibrium = false;			
 		if (m_freeze) {
 			m_freeze = false;
-			dgBodyMasterListRow::dgListNode* node; 	
-
-			for (node = m_masterNode->GetInfo().GetFirst(); node; node = node->GetNext()) {
-				dgBody* body;
-				body = node->GetInfo().m_bodyNode;
+			for (dgBodyMasterListRow::dgListNode* node = m_masterNode->GetInfo().GetFirst(); node; node = node->GetNext()) {
+				dgBody* const body = node->GetInfo().m_bodyNode;
 				body->Unfreeze ();
 			}
 		}
