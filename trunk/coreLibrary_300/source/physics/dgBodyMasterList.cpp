@@ -162,10 +162,11 @@ void dgBodyMasterList::AttachConstraint(dgConstraint* const constraint,	dgBody* 
 	constraint->m_link1 = body1->m_masterNode->GetInfo().AddJoint (constraint, body0);
 
 // note this is in observation (to prevent bodies from not going to sleep  inside triggers		
-//	body0->m_equilibrium = body0->m_invMass.m_w ? false : true;
-//	body1->m_equilibrium = body1->m_invMass.m_w ? false : true;
-	body0->Unfreeze();
-	body1->Unfreeze();
+	body0->m_equilibrium = body0->m_invMass.m_w ? false : true;
+	body1->m_equilibrium = body1->m_invMass.m_w ? false : true;
+
+//	body0->Unfreeze();
+//	body1->Unfreeze();
 
 	m_constraintCount = m_constraintCount + 1;
 }
@@ -189,8 +190,11 @@ void dgBodyMasterList::RemoveConstraint (dgConstraint* const constraint)
 	body0->m_masterNode->GetInfo().Remove(constraint->m_link0);
 	body1->m_masterNode->GetInfo().Remove(constraint->m_link1);
 
-	body0->Unfreeze();
-	body1->Unfreeze();
+	body0->m_equilibrium = body0->m_invMass.m_w ? false : true;
+	body1->m_equilibrium = body1->m_invMass.m_w ? false : true;
+
+//	body0->Unfreeze();
+//	body1->Unfreeze();
 }
 
 
