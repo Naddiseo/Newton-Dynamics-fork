@@ -15,36 +15,24 @@
 #include "dFlowControlBlock.h"
 
 
-dFlowControlBlock::dFlowControlBlock(dCIL::dListNode* const root)
+dFlowControlBlock::dFlowControlBlock(dCIL::dListNode* const leader)
 	:m_mark(0)
-	,m_begin(root)
+	,m_leader(leader)
 	,m_end(NULL)
 	,m_nextBlock(NULL)
-	,m_branchBlock(NULL)
+	,m_branchTarget(NULL)
 {
-	dTree<dFlowControlBlock*, dCIL::dListNode*> filter;
-	AddBlock(root, filter);
-}
-
-dFlowControlBlock::dFlowControlBlock(dCIL::dListNode* const root, dTree<dFlowControlBlock*, dCIL::dListNode*>& filter)
-	:m_mark(0)
-	,m_begin(root)
-	,m_end(NULL)
-	,m_nextBlock(NULL)
-	,m_branchBlock(NULL)
-{
-	AddBlock(root, filter);
 }
 
 dFlowControlBlock::~dFlowControlBlock(void)
 {
-}
 
+}
 
 
 void dFlowControlBlock::Trace() const
 {
-	dCIL::dListNode* node = m_begin;
+	dCIL::dListNode* node = m_leader;
 	const dTreeAdressStmt& stmt = node->GetInfo();
 	dTRACE_INTRUCTION(&stmt);
 	while (node != m_end) {
@@ -57,76 +45,17 @@ void dFlowControlBlock::Trace() const
 
 
 
-
-void dFlowControlBlock::AddBlock(dCIL::dListNode* const root, dTree<dFlowControlBlock*, dCIL::dListNode*>& filter)
-{
-	_ASSERTE (!filter.Find(root));
-	filter.Insert(this, root);
-
-	m_begin = root;
-
-	for (dCIL::dListNode* node = m_begin; node; node = node->GetNext()) {
-		const dTreeAdressStmt& stmt = node->GetInfo();
-		if (stmt.m_instruction != dTreeAdressStmt::m_nop) {
-			m_end = node;
-
-			switch (stmt.m_instruction)
-			{
-				case dTreeAdressStmt::m_target:
-				{
-					dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const block = filter.Find(node->GetNext()); 
-					if (block) {
-						m_nextBlock = block->GetInfo();
-					} else {
-						m_nextBlock = new dFlowControlBlock (node->GetNext(), filter);
-					}
-					return;
-				}
-
-				case dTreeAdressStmt::m_if:
-				{
-					dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const block = filter.Find(node->GetNext()); 
-					if (block) {
-						m_nextBlock = block->GetInfo();
-					} else {
-						m_nextBlock = new dFlowControlBlock (node->GetNext(), filter);
-					}
-
-					dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const branchBlock = filter.Find(stmt.m_jmpTarget->GetNext()); 
-					if (branchBlock) {
-						m_branchBlock = branchBlock->GetInfo();
-					} else {
-						m_branchBlock = new dFlowControlBlock (stmt.m_jmpTarget->GetNext(), filter);
-					}
-					return;
-				}
-
-				case dTreeAdressStmt::m_goto:
-				{
-					dTree<dFlowControlBlock*, dCIL::dListNode*>::dTreeNode* const branchBlock = filter.Find(stmt.m_jmpTarget->GetNext()); 
-					if (branchBlock) {
-						m_branchBlock = branchBlock->GetInfo();
-					} else {
-						m_branchBlock = new dFlowControlBlock (stmt.m_jmpTarget->GetNext(), filter);
-					}
-
-					return;
-				}
-			}
-		}
-	}
-}
-
-
 void dFlowControlBlock::ApplyLocalOptimizations(dCIL& program)
 {
 static int xxx = 0;
 xxx ++;
-if(xxx < 4)
+if(xxx != 3)
 return;
 
 	Trace();
 	RemoveSubExpressions_1(program);
+
+Trace();
 	RemoveSubExpressions_2(program);
 
 Trace();
@@ -144,7 +73,7 @@ bool dFlowControlBlock::RemoveSubExpressions_1(dCIL& program)
 	bool ret = false;
 	const dCIL::dListNode* const lastNode = m_end->GetNext();
 	_ASSERTE (lastNode);
-	for (dCIL::dListNode* node = m_begin; node != lastNode; node = node->GetNext()) {
+	for (dCIL::dListNode* node = m_leader; node != lastNode; node = node->GetNext()) {
 		dTreeAdressStmt& stmt = node->GetInfo();
 		if (stmt.m_instruction == dTreeAdressStmt::m_assigment) {
 			dCIL::dListNode* next = NULL;
@@ -171,7 +100,7 @@ bool dFlowControlBlock::RemoveSubExpressions_1(dCIL& program)
 					ret = true;
 					if (stmt1.m_arg0[0] == 't') {
 						program.Remove(node1);
-Trace();
+//Trace();
 					}
 				} 
 			}
@@ -182,19 +111,11 @@ Trace();
 
 bool dFlowControlBlock::RemoveSubExpressions_2(dCIL& program)
 {
-	int b[10];
-	int a[10];
-	for (int i = 0; i < 10; i = i + 1) {
-		b[i] = a[i];
-	}	
-
-
-
 	bool ret = false;
 	const dCIL::dListNode* const lastNode = m_end->GetNext();
 	_ASSERTE (lastNode);
 	dCIL::dListNode* next = NULL;
-	for (dCIL::dListNode* node = m_begin; node != lastNode; node = next) {
+	for (dCIL::dListNode* node = m_leader; node != lastNode; node = next) {
 		dTreeAdressStmt& stmt = node->GetInfo();
 		next = node->GetNext();
 		if (stmt.m_instruction == dTreeAdressStmt::m_assigment) {
@@ -276,11 +197,11 @@ bool dFlowControlBlock::RemoveSubExpressions_2(dCIL& program)
 			}
 
 			if (!alive) {
-				if (m_begin == node) {
-					m_begin = node->GetNext();
+				if (m_leader == node) {
+					m_leader = node->GetNext();
 				}
 				program.Remove(node);
-Trace();
+//Trace();
 			}
 		}
 	}

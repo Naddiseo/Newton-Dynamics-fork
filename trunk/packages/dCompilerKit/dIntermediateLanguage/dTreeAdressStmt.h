@@ -33,16 +33,6 @@ class dTreeAdressStmt
 		m_operatorsCount,
 	};
 
-//	enum dConditinal
-//	{
-//		m_equalTest,
-//		m_differentTest,
-//		m_lessTest,
-//		m_greatherTest,
-//		m_lessEqualTest,
-//		m_greatherEqualTest,
-//	};
-
 	enum dInstruction
 	{
 		m_nop,

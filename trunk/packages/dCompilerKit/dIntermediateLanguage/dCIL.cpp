@@ -57,7 +57,7 @@ dCIL::dListNode* dCIL::NewStatement()
 	return Append();
 }
 
-
+/*
 void dCIL::GetFlowControlBlockList (dFlowControlBlock* const root, dList<dFlowControlBlock*>& list)
 {
 	int stack = 1;
@@ -73,8 +73,8 @@ void dCIL::GetFlowControlBlockList (dFlowControlBlock* const root, dList<dFlowCo
 			block->m_mark = mark; 
 		}
 
-		if (block->m_branchBlock && (block->m_branchBlock->m_mark < mark)) {
-			pool[stack] = block->m_branchBlock;
+		if (block->m_branchTarget && (block->m_branchTarget->m_mark < mark)) {
+			pool[stack] = block->m_branchTarget;
 			stack ++;
 		}
 		if (block->m_nextBlock && (block->m_nextBlock->m_mark < mark)) {
@@ -82,33 +82,8 @@ void dCIL::GetFlowControlBlockList (dFlowControlBlock* const root, dList<dFlowCo
 			stack ++;
 		}
 	}
-
 }
-
-void dCIL::Optimize(dListNode* const function)
-{
-	dFlowControlBlock* const flowDiagramRoot = new dFlowControlBlock(function);
-
-	dList<dFlowControlBlock*> flowBlockList;
-	GetFlowControlBlockList (flowDiagramRoot, flowBlockList);
-
-	// eliminate local common sub expression
-DTRACE(("\n"));
-	for (dList<dFlowControlBlock*>::dListNode* node = flowBlockList.GetFirst(); node; node = node->GetNext()) {
-		dFlowControlBlock* const flowBlock = node->GetInfo();
-
-		flowBlock->ApplyLocalOptimizations(*this);
-//		flowBlock->Trace();
-	}
-		
-
-	for (dList<dFlowControlBlock*>::dListNode* node = flowBlockList.GetFirst(); node; node = node->GetNext()) {
-		dFlowControlBlock* const flowBlock = node->GetInfo();
-		delete flowBlock;
-	}
-
-	Trace();
-}
+*/
 
 
 void dCIL::Trace()
@@ -118,4 +93,61 @@ void dCIL::Trace()
 		dTRACE_INTRUCTION(&stmt);
 	}
 	DTRACE(("\n"));
+}
+
+
+
+void dCIL::Optimize(dListNode* const function)
+{
+	dTree<dFlowControlBlock*, dCIL::dListNode*> blocksMap;
+	dFlowControlBlock* const flowDiagramRoot = new dFlowControlBlock(function);
+	blocksMap.Insert(flowDiagramRoot, flowDiagramRoot->m_leader);
+
+	dFlowControlBlock* last = flowDiagramRoot;
+	for (dCIL::dListNode* node = function->GetNext(); node; node = node->GetNext()) {
+		const dTreeAdressStmt& stmt = node->GetInfo();
+		if (stmt.m_instruction == dTreeAdressStmt::m_target) {
+			last->m_end = node->GetPrev();
+			last->m_nextBlock = new dFlowControlBlock(node);
+			blocksMap.Insert(last->m_nextBlock, last->m_nextBlock->m_leader);
+			last = last->m_nextBlock;
+		} else if (stmt.m_instruction == dTreeAdressStmt::m_if) {
+			dCIL::dListNode* const next = node->GetNext();
+			const dTreeAdressStmt& stmt = next->GetInfo();
+			if (stmt.m_instruction != dTreeAdressStmt::m_target) {
+				last->m_end = next->GetPrev();
+				last->m_nextBlock = new dFlowControlBlock(next);
+				blocksMap.Insert(last->m_nextBlock, last->m_nextBlock->m_leader);
+				last = last->m_nextBlock;
+			}
+		}
+	}
+	last->m_end =  GetLast();
+
+	for (dFlowControlBlock* block = flowDiagramRoot; block; block = block->m_nextBlock) {
+		_ASSERTE (block->m_end);
+		const dTreeAdressStmt& stmt = block->m_end->GetInfo();
+		if ((stmt.m_instruction == dTreeAdressStmt::m_if) || (stmt.m_instruction == dTreeAdressStmt::m_goto)) {
+			_ASSERTE (blocksMap.Find(stmt.m_jmpTarget));
+			dFlowControlBlock* const targetBlock = blocksMap.Find(stmt.m_jmpTarget)->GetInfo();
+			block->m_branchTarget = targetBlock;
+		}
+	}
+
+
+	// eliminate local common sub expression
+	DTRACE(("\n"));
+	for (dFlowControlBlock* block = flowDiagramRoot; block; block = block->m_nextBlock) {
+		block->ApplyLocalOptimizations(*this);
+//		block->Trace();
+	}
+
+
+	dFlowControlBlock* next;
+	for (dFlowControlBlock* block = flowDiagramRoot; block; block = next) {
+		next = block->m_nextBlock;
+		delete block;
+	}
+
+	Trace();
 }

@@ -37,10 +37,10 @@ class dFlowControlBlock
 
 
 	int m_mark;
-	dCIL::dListNode* m_begin;
+	dCIL::dListNode* m_leader;
 	dCIL::dListNode* m_end;
 	dFlowControlBlock* m_nextBlock;
-	dFlowControlBlock* m_branchBlock;
+	dFlowControlBlock* m_branchTarget;
 
 	friend dCIL;
 };

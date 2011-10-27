@@ -33,7 +33,7 @@ class dCIL: public dList<dTreeAdressStmt>
 	void Optimize(dListNode* const function);
 
 	private:
-	void GetFlowControlBlockList (dFlowControlBlock* const root, dList<dFlowControlBlock*>& list);
+//	void GetFlowControlBlockList (dFlowControlBlock* const root, dList<dFlowControlBlock*>& list);
 
 	int m_tempIndex;
 	int m_labelIndex;
