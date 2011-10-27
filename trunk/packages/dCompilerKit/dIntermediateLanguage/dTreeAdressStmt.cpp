@@ -78,14 +78,53 @@ void dTreeAdressStmt::TraceAssigment () const
 			DTRACE ((" >= "));
 			break;
 		}
-
-
 		default:;
 			_ASSERTE (0);
 
 	}
-
 	DTRACE (("%s\n", m_arg2.c_str()));
+}
+
+void dTreeAdressStmt::TraceConditional () const
+{
+	switch (m_operator)
+	{
+		case m_equal:
+		{
+			DTRACE (("\tif (%s == %s) goto %s\n", m_arg0.c_str(), m_arg1.c_str(), m_arg2.c_str()));
+			break;
+		}
+
+		case m_different:
+		{
+			DTRACE (("\tif (%s != %s) goto %s\n", m_arg0.c_str(), m_arg1.c_str(), m_arg2.c_str()));
+			break;
+		}
+
+		case m_less:
+		{
+			DTRACE (("\tif (%s < %s) goto %s\n", m_arg0.c_str(), m_arg1.c_str(), m_arg2.c_str()));
+			break;
+		}
+
+		case m_greather:
+		{
+			DTRACE (("\tif (%s > %s) goto %s\n", m_arg0.c_str(), m_arg1.c_str(), m_arg2.c_str()));
+			break;
+		}
+
+		case m_lessEqual:
+		{
+			DTRACE (("\tif (%s <= %s) goto %s\n", m_arg0.c_str(), m_arg1.c_str(), m_arg2.c_str()));
+			break;
+		}
+
+		case m_greatherEqual:
+		{
+			DTRACE (("\tif (%s >= %s) goto %s\n", m_arg0.c_str(), m_arg1.c_str(), m_arg2.c_str()));
+			break;
+		}
+	}
 }
 
 void dTreeAdressStmt::Trace () const
@@ -106,13 +145,7 @@ void dTreeAdressStmt::Trace () const
 
 		case m_if:
 		{
-			DTRACE (("\tif (%s) goto %s\n", m_arg0.c_str(), m_arg1.c_str()));
-			break;
-		}
-
-		case m_ifnot:
-		{
-			DTRACE (("\tifnot (%s) goto %s\n", m_arg0.c_str(), m_arg1.c_str()));
+			TraceConditional ();
 			break;
 		}
 
@@ -146,6 +179,18 @@ void dTreeAdressStmt::Trace () const
 			break;
 		}
 
+		case m_load:
+		{
+			DTRACE (("\t%s = %s[%s]\n", m_arg0.c_str(), m_arg1.c_str(), m_arg2.c_str()));
+			break;
+		}
+
+		case m_store:
+		{
+			DTRACE (("\t%s[%s] = %s\n", m_arg1.c_str(), m_arg2.c_str(), m_arg0.c_str()));
+			break;
+		}
+
 
 		case m_restoreParam:
 		{
@@ -158,6 +203,7 @@ void dTreeAdressStmt::Trace () const
 			DTRACE (("\tcall %s\n", m_arg0.c_str()));
 			break;
 		}
+		
 
 		case m_ret:
 		{
@@ -165,6 +211,10 @@ void dTreeAdressStmt::Trace () const
 			break;
 		}
 
+		case m_nop:
+		{
+			break;
+		}
 
 		default:;
 		_ASSERTE (0);

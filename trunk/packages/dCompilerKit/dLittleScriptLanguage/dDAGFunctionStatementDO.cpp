@@ -74,8 +74,10 @@ void dDAGFunctionStatementDO::CompileCIL(dCIL& cil)
 		expressionNode = cil.NewStatement();
 		dTreeAdressStmt& stmt = expressionNode->GetInfo();
 		stmt.m_instruction = dTreeAdressStmt::m_if;
+		stmt.m_operator = dTreeAdressStmt::m_different;
 		stmt.m_arg0 = m_expression->m_result;
-		stmt.m_arg1 = startLabel.m_arg0; 
+		stmt.m_arg1 = "0"; 
+		stmt.m_arg2 = startLabel.m_arg0; 
 		stmt.m_jmpTarget = startFlow;
 		dTRACE_INTRUCTION (&stmt);
 	} else {

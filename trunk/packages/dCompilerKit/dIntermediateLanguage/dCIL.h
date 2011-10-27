@@ -29,6 +29,7 @@ class dCIL: public dList<dTreeAdressStmt>
 	void ResetTemporaries();
 	dListNode* NewStatement();
 
+	void Trace();
 	void Optimize(dListNode* const function);
 
 	private:
@@ -36,6 +37,9 @@ class dCIL: public dList<dTreeAdressStmt>
 
 	int m_tempIndex;
 	int m_labelIndex;
+	dTreeAdressStmt::dOperator m_operatorComplement[dTreeAdressStmt::m_operatorsCount];
+
+	friend dFlowControlBlock;
 };
 
 

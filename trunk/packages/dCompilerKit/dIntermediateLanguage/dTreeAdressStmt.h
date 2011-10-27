@@ -24,27 +24,40 @@ class dTreeAdressStmt
 		m_add,
 		m_sub,
 		m_mul,
+		m_equal,
+		m_different,
 		m_less,
 		m_lessEqual,
 		m_greather,
 		m_greatherEqual,
-		
+		m_operatorsCount,
 	};
+
+//	enum dConditinal
+//	{
+//		m_equalTest,
+//		m_differentTest,
+//		m_lessTest,
+//		m_greatherTest,
+//		m_lessEqualTest,
+//		m_greatherEqualTest,
+//	};
 
 	enum dInstruction
 	{
 		m_nop,
+		m_call,
+		m_ret,
+		m_if, 
 		m_function,
 		m_argument,
 		m_local,
+		m_load,
+		m_store,
 		m_assigment,
-		m_if, 
-		m_ifnot, 
 		m_goto,
 		m_target,
 		m_param,
-		m_call,
-		m_ret,
 		m_restoreParam,
 	};
 	dTreeAdressStmt(void);
@@ -59,6 +72,7 @@ class dTreeAdressStmt
 
 	void Trace () const;
 	void TraceAssigment () const;
+	void TraceConditional () const;
 };
 
 

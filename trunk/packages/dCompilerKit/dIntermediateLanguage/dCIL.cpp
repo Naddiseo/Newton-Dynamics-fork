@@ -18,6 +18,12 @@ dCIL::dCIL(void)
 	,m_tempIndex (0)
 	,m_labelIndex (0)
 {
+	m_operatorComplement[dTreeAdressStmt::m_equal] = dTreeAdressStmt::m_different;
+	m_operatorComplement[dTreeAdressStmt::m_different] = dTreeAdressStmt::m_equal;
+	m_operatorComplement[dTreeAdressStmt::m_less] = dTreeAdressStmt::m_greatherEqual;
+	m_operatorComplement[dTreeAdressStmt::m_lessEqual] = dTreeAdressStmt::m_greather;
+	m_operatorComplement[dTreeAdressStmt::m_greather] = dTreeAdressStmt::m_lessEqual;
+	m_operatorComplement[dTreeAdressStmt::m_greatherEqual] = dTreeAdressStmt::m_less;
 }
 
 dCIL::~dCIL(void)
@@ -91,8 +97,7 @@ DTRACE(("\n"));
 	for (dList<dFlowControlBlock*>::dListNode* node = flowBlockList.GetFirst(); node; node = node->GetNext()) {
 		dFlowControlBlock* const flowBlock = node->GetInfo();
 
-
-		flowBlock->ApplyLocalOptimizations();
+		flowBlock->ApplyLocalOptimizations(*this);
 //		flowBlock->Trace();
 	}
 		
@@ -101,4 +106,16 @@ DTRACE(("\n"));
 		dFlowControlBlock* const flowBlock = node->GetInfo();
 		delete flowBlock;
 	}
+
+	Trace();
+}
+
+
+void dCIL::Trace()
+{
+	for (dCIL::dListNode* node = GetFirst(); node; node = node->GetNext()) {
+		const dTreeAdressStmt& stmt = node->GetInfo();
+		dTRACE_INTRUCTION(&stmt);
+	}
+	DTRACE(("\n"));
 }
