@@ -79,52 +79,6 @@ void dCIL::Trace()
 
 
 
-void dCIL::Optimize(dListNode* const function)
-{
-	dTree<dFlowControlBlock*, dCIL::dListNode*> blocksMap;
-	dFlowControlBlock* const flowDiagramRoot = new dFlowControlBlock(function);
-	blocksMap.Insert(flowDiagramRoot, flowDiagramRoot->m_leader);
-
-	dFlowControlBlock* last = flowDiagramRoot;
-	for (dCIL::dListNode* node = function->GetNext(); node; node = node->GetNext()) {
-		const dTreeAdressStmt& stmt = node->GetInfo();
-		if (stmt.m_instruction == dTreeAdressStmt::m_target) {
-			last->m_end = node->GetPrev();
-			last->m_nextBlock = new dFlowControlBlock(node);
-			blocksMap.Insert(last->m_nextBlock, last->m_nextBlock->m_leader);
-			last = last->m_nextBlock;
-		} else if (stmt.m_instruction == dTreeAdressStmt::m_if) {
-			dCIL::dListNode* const next = node->GetNext();
-			const dTreeAdressStmt& stmt = next->GetInfo();
-			if (stmt.m_instruction != dTreeAdressStmt::m_target) {
-				last->m_end = next->GetPrev();
-				last->m_nextBlock = new dFlowControlBlock(next);
-				blocksMap.Insert(last->m_nextBlock, last->m_nextBlock->m_leader);
-				last = last->m_nextBlock;
-			}
-		}
-	}
-	last->m_end =  GetLast()->GetPrev();
-
-	// create float control for inteBlock optimization
-	MakeFlowControlGraph(flowDiagramRoot, blocksMap);
-
-
-	// eliminate local common sub expression
-	DTRACE(("\n"));
-	for (dFlowControlBlock* block = flowDiagramRoot; block; block = block->m_nextBlock) {
-		block->ApplyLocalOptimizations(*this);
-block->Trace();
-	}
-
-	dFlowControlBlock* next;
-	for (dFlowControlBlock* block = flowDiagramRoot; block; block = next) {
-		next = block->m_nextBlock;
-		delete block;
-	}
-
-	Trace();
-}
 
 
 
@@ -179,4 +133,53 @@ void dCIL::MakeFlowControlGraph(dFlowControlBlock* const root, dTree<dFlowContro
 		_ASSERTE (block->m_mark == mark);
 	}
 #endif
+}
+
+
+
+void dCIL::Optimize(dListNode* const function)
+{
+	dTree<dFlowControlBlock*, dCIL::dListNode*> blocksMap;
+	dFlowControlBlock* const flowDiagramRoot = new dFlowControlBlock(function);
+	blocksMap.Insert(flowDiagramRoot, flowDiagramRoot->m_leader);
+
+	dFlowControlBlock* last = flowDiagramRoot;
+	for (dCIL::dListNode* node = function->GetNext(); node; node = node->GetNext()) {
+		const dTreeAdressStmt& stmt = node->GetInfo();
+		if (stmt.m_instruction == dTreeAdressStmt::m_target) {
+			last->m_end = node->GetPrev();
+			last->m_nextBlock = new dFlowControlBlock(node);
+			blocksMap.Insert(last->m_nextBlock, last->m_nextBlock->m_leader);
+			last = last->m_nextBlock;
+		} else if (stmt.m_instruction == dTreeAdressStmt::m_if) {
+			dCIL::dListNode* const next = node->GetNext();
+			const dTreeAdressStmt& stmt = next->GetInfo();
+			if (stmt.m_instruction != dTreeAdressStmt::m_target) {
+				last->m_end = next->GetPrev();
+				last->m_nextBlock = new dFlowControlBlock(next);
+				blocksMap.Insert(last->m_nextBlock, last->m_nextBlock->m_leader);
+				last = last->m_nextBlock;
+			}
+		}
+	}
+	last->m_end =  GetLast()->GetPrev();
+
+	// create float control for inteBlock optimization
+	MakeFlowControlGraph(flowDiagramRoot, blocksMap);
+
+	// Apply local internal block optimizations
+DTRACE(("\n"));
+	for (dFlowControlBlock* block = flowDiagramRoot; block; block = block->m_nextBlock) {
+		block->ApplyLocalOptimizations(*this);
+block->Trace();
+	}
+
+	// destroy all blocks
+	dFlowControlBlock* next;
+	for (dFlowControlBlock* block = flowDiagramRoot; block; block = next) {
+		next = block->m_nextBlock;
+		delete block;
+	}
+
+	Trace();
 }
