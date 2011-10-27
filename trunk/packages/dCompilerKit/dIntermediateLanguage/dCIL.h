@@ -37,6 +37,7 @@ class dCIL: public dList<dTreeAdressStmt>
 
 	int m_tempIndex;
 	int m_labelIndex;
+	dTreeAdressStmt::dOperator m_conditinals[dTreeAdressStmt::m_operatorsCount];
 	dTreeAdressStmt::dOperator m_operatorComplement[dTreeAdressStmt::m_operatorsCount];
 
 	friend dFlowControlBlock;

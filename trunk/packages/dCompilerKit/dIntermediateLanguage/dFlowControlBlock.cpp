@@ -49,16 +49,17 @@ void dFlowControlBlock::ApplyLocalOptimizations(dCIL& program)
 {
 static int xxx = 0;
 xxx ++;
-if(xxx != 3)
-return;
+//if(xxx != 3)
+//return;
 
-	Trace();
-	RemoveSubExpressions_1(program);
-
-Trace();
-	RemoveSubExpressions_2(program);
-
-Trace();
+//Trace();
+	bool optimized = true;
+	while (optimized) {
+		optimized = false;
+		optimized |= RemoveSubExpressions_1(program);
+		optimized |= RemoveSubExpressions_2(program);
+	}
+//Trace();
 }
 
 
@@ -87,17 +88,19 @@ bool dFlowControlBlock::RemoveSubExpressions_1(dCIL& program)
 					for (dCIL::dListNode* node2 = node1->GetNext(); node2 != lastNode; node2 = node2->GetNext()) {
 						dTreeAdressStmt& stmt2 = node2->GetInfo();
 						if (stmt2.m_arg0 == stmt1.m_arg0) {
+							ret = true;
 							stmt2.m_arg0 = stmt.m_arg0;
 						}
 						if (stmt2.m_arg1 == stmt1.m_arg0) {
+							ret = true;
 							stmt2.m_arg1 = stmt.m_arg0;
 						}
 						if (stmt2.m_arg2 == stmt1.m_arg0) {
+							ret = true;
 							stmt2.m_arg2 = stmt.m_arg0;
 						}
 					}
 
-					ret = true;
 					if (stmt1.m_arg0[0] == 't') {
 						program.Remove(node1);
 //Trace();
@@ -129,12 +132,15 @@ bool dFlowControlBlock::RemoveSubExpressions_2(dCIL& program)
 						{
 							if (stmt1.m_arg1 == stmt.m_arg0) {
 								alive = false;
+								ret = true;
 								stmt1.m_arg1 = stmt.m_arg1;
 							}
 							if (stmt1.m_arg2 == stmt.m_arg0) {
 								alive = false;
+								ret = true;
 								stmt1.m_arg2 = stmt.m_arg1;
 							}
+							
 							break;
 						}
 						case dTreeAdressStmt::m_if:
@@ -151,6 +157,7 @@ bool dFlowControlBlock::RemoveSubExpressions_2(dCIL& program)
 							if (stmt1.m_operator == dTreeAdressStmt::m_nothing) {
 								if (stmt1.m_arg1 == stmt.m_arg0) {
 									alive = false;
+									ret = true;
 									stmt1.m_operator = stmt.m_operator;
 									stmt1.m_arg1 = stmt.m_arg1;
 									stmt1.m_arg2 = stmt.m_arg2;
@@ -162,41 +169,43 @@ bool dFlowControlBlock::RemoveSubExpressions_2(dCIL& program)
 
 						case dTreeAdressStmt::m_if:
 						{
-							switch (stmt1.m_operator) 
-							{
-								case dTreeAdressStmt::m_equal:
+							if (program.m_conditinals[stmt.m_operator]) {
+								switch (stmt1.m_operator) 
 								{
-									if (stmt1.m_arg1 == "0") {
-										alive = false;
-										stmt1.m_operator = program.m_operatorComplement[stmt.m_operator];
-										stmt1.m_arg0 = stmt.m_arg1;
-										stmt1.m_arg1 = stmt.m_arg2;
+									case dTreeAdressStmt::m_equal:
+									{
+										if (stmt1.m_arg1 == "0") {
+											alive = false;
+											ret = true;
+											stmt1.m_operator = program.m_operatorComplement[stmt.m_operator];
+											stmt1.m_arg0 = stmt.m_arg1;
+											stmt1.m_arg1 = stmt.m_arg2;
+										}
+										break;
 									}
-									break;
-								}
 
-								case dTreeAdressStmt::m_different:
-								{
-									if (stmt1.m_arg1 == "0") {
-										alive = false;
-										stmt1.m_operator = stmt.m_operator;
-										stmt1.m_arg0 = stmt.m_arg1;
-										stmt1.m_arg1 = stmt.m_arg2;
+									case dTreeAdressStmt::m_different:
+									{
+										if (stmt1.m_arg1 == "0") {
+											alive = false;
+											ret = true;
+											stmt1.m_operator = stmt.m_operator;
+											stmt1.m_arg0 = stmt.m_arg1;
+											stmt1.m_arg1 = stmt.m_arg2;
+										}
+										break;
 									}
-									break;
+
+									default:
+										break;
 								}
-
-
-								default:
-									break;
 							}
 						}
-
 					}
 				}
 			}
 
-			if (!alive) {
+			if (!alive && (stmt.m_arg0[0] == 't')) {
 				if (m_leader == node) {
 					m_leader = node->GetNext();
 				}

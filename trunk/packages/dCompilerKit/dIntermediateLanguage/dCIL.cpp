@@ -18,6 +18,16 @@ dCIL::dCIL(void)
 	,m_tempIndex (0)
 	,m_labelIndex (0)
 {
+	memset (m_conditinals, 0, sizeof (m_conditinals));
+	m_conditinals[dTreeAdressStmt::m_equal] = dTreeAdressStmt::m_equal;
+	m_conditinals[dTreeAdressStmt::m_different] = dTreeAdressStmt::m_different;
+	m_conditinals[dTreeAdressStmt::m_less] = dTreeAdressStmt::m_less;
+	m_conditinals[dTreeAdressStmt::m_lessEqual] = dTreeAdressStmt::m_lessEqual;
+	m_conditinals[dTreeAdressStmt::m_greather] = dTreeAdressStmt::m_greather;
+	m_conditinals[dTreeAdressStmt::m_greatherEqual] = dTreeAdressStmt::m_greatherEqual;
+
+
+	memset (m_operatorComplement, 0, sizeof (m_operatorComplement));
 	m_operatorComplement[dTreeAdressStmt::m_equal] = dTreeAdressStmt::m_different;
 	m_operatorComplement[dTreeAdressStmt::m_different] = dTreeAdressStmt::m_equal;
 	m_operatorComplement[dTreeAdressStmt::m_less] = dTreeAdressStmt::m_greatherEqual;
@@ -57,34 +67,6 @@ dCIL::dListNode* dCIL::NewStatement()
 	return Append();
 }
 
-/*
-void dCIL::GetFlowControlBlockList (dFlowControlBlock* const root, dList<dFlowControlBlock*>& list)
-{
-	int stack = 1;
-	dFlowControlBlock* pool[256];
-
-	int mark = root->m_mark + 1;
-	pool[0] = root;
-	while (stack) {
-		stack --;
-		dFlowControlBlock* const block = pool[stack];
-		if (block->m_mark != mark) {
-			list.Append(block);
-			block->m_mark = mark; 
-		}
-
-		if (block->m_branchTarget && (block->m_branchTarget->m_mark < mark)) {
-			pool[stack] = block->m_branchTarget;
-			stack ++;
-		}
-		if (block->m_nextBlock && (block->m_nextBlock->m_mark < mark)) {
-			pool[stack] = block->m_nextBlock;
-			stack ++;
-		}
-	}
-}
-*/
-
 
 void dCIL::Trace()
 {
@@ -122,7 +104,7 @@ void dCIL::Optimize(dListNode* const function)
 			}
 		}
 	}
-	last->m_end =  GetLast();
+	last->m_end =  GetLast()->GetPrev();
 
 	for (dFlowControlBlock* block = flowDiagramRoot; block; block = block->m_nextBlock) {
 		_ASSERTE (block->m_end);
