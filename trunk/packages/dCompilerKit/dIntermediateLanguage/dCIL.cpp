@@ -106,24 +106,16 @@ void dCIL::Optimize(dListNode* const function)
 	}
 	last->m_end =  GetLast()->GetPrev();
 
-	for (dFlowControlBlock* block = flowDiagramRoot; block; block = block->m_nextBlock) {
-		_ASSERTE (block->m_end);
-		const dTreeAdressStmt& stmt = block->m_end->GetInfo();
-		if ((stmt.m_instruction == dTreeAdressStmt::m_if) || (stmt.m_instruction == dTreeAdressStmt::m_goto)) {
-			_ASSERTE (blocksMap.Find(stmt.m_jmpTarget));
-			dFlowControlBlock* const targetBlock = blocksMap.Find(stmt.m_jmpTarget)->GetInfo();
-			block->m_branchTarget = targetBlock;
-		}
-	}
+	// create float control for inteBlock optimization
+	MakeFlowControlGraph(flowDiagramRoot, blocksMap);
 
 
 	// eliminate local common sub expression
 	DTRACE(("\n"));
 	for (dFlowControlBlock* block = flowDiagramRoot; block; block = block->m_nextBlock) {
 		block->ApplyLocalOptimizations(*this);
-//		block->Trace();
+block->Trace();
 	}
-
 
 	dFlowControlBlock* next;
 	for (dFlowControlBlock* block = flowDiagramRoot; block; block = next) {
@@ -132,4 +124,59 @@ void dCIL::Optimize(dListNode* const function)
 	}
 
 	Trace();
+}
+
+
+
+void dCIL::MakeFlowControlGraph(dFlowControlBlock* const root, dTree<dFlowControlBlock*, dCIL::dListNode*>& blocksMap)
+{
+	int stack = 1;
+	dFlowControlBlock* pool[32];
+
+	int mark = root->m_mark + 1;
+
+	pool[0] = root;
+	while (stack) {
+		stack --;
+		dFlowControlBlock* const node = pool[stack];
+		if (node->m_mark < mark) {
+
+			node->m_mark = mark;
+
+			const dTreeAdressStmt& stmt = node->m_end->GetInfo();
+			if (stmt.m_instruction == dTreeAdressStmt::m_if) {
+
+				_ASSERTE (blocksMap.Find(stmt.m_jmpTarget));
+				dFlowControlBlock* const child0 = blocksMap.Find(stmt.m_jmpTarget)->GetInfo();
+				node->AddGraphEdge(child0);
+				pool[stack] = child0;
+				stack ++;
+
+				_ASSERTE (blocksMap.Find(node->m_end->GetNext()));
+				dFlowControlBlock* const child1 = blocksMap.Find(node->m_end->GetNext())->GetInfo();
+				node->AddGraphEdge(child1);
+				pool[stack] = child1;
+				stack ++;
+
+			} else if (stmt.m_instruction == dTreeAdressStmt::m_goto) {
+				_ASSERTE (blocksMap.Find(stmt.m_jmpTarget));
+				dFlowControlBlock* const child = blocksMap.Find(stmt.m_jmpTarget)->GetInfo();
+				node->AddGraphEdge(child);
+				pool[stack] = child;
+				stack ++;
+			} else if (node->m_end->GetNext()->GetNext()) {
+				_ASSERTE (blocksMap.Find(node->m_end->GetNext()));
+				dFlowControlBlock* const child = blocksMap.Find(node->m_end->GetNext())->GetInfo();
+				node->AddGraphEdge(child);
+				pool[stack] = child;
+				stack ++;
+			}
+		}
+	}
+
+#ifdef _DEBUG
+	for (dFlowControlBlock* block = root; block; block = block->m_nextBlock) {
+		_ASSERTE (block->m_mark == mark);
+	}
+#endif
 }

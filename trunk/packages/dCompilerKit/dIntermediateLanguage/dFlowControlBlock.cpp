@@ -20,14 +20,41 @@ dFlowControlBlock::dFlowControlBlock(dCIL::dListNode* const leader)
 	,m_leader(leader)
 	,m_end(NULL)
 	,m_nextBlock(NULL)
-	,m_branchTarget(NULL)
+	,m_flowParents()
+	,m_flowChilden()
 {
 }
 
 dFlowControlBlock::~dFlowControlBlock(void)
 {
-
 }
+
+
+void dFlowControlBlock::AddGraphEdge (dFlowControlBlock* const child)
+{
+	bool found = false;
+	for (dList<dFlowControlBlock*>::dListNode* node = m_flowChilden.GetFirst(); node; node = node->GetNext()) {
+		if (node->GetInfo() == child) {
+			found = true;
+		}
+	}
+
+	if (!found) {
+		m_flowChilden.Append(child);
+	}
+
+	found = false;
+	for (dList<dFlowControlBlock*>::dListNode* node = child->m_flowParents.GetFirst(); node; node = node->GetNext()) {
+		if (node->GetInfo() == this) {
+			found = true;
+		}
+	}
+
+	if (!found) {
+		child->m_flowParents.Append(this);
+	}
+}
+
 
 
 void dFlowControlBlock::Trace() const

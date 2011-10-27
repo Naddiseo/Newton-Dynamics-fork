@@ -28,6 +28,7 @@ class dFlowControlBlock
 
 	void Trace() const;
 	void ApplyLocalOptimizations(dCIL& program);
+	void AddGraphEdge (dFlowControlBlock* const child);
 
 	private:
 	void ApplyCopyProgation(dCIL& program);
@@ -35,12 +36,13 @@ class dFlowControlBlock
 	bool RemoveSubExpressions_2(dCIL& program);
 
 
-
 	int m_mark;
 	dCIL::dListNode* m_leader;
 	dCIL::dListNode* m_end;
 	dFlowControlBlock* m_nextBlock;
-	dFlowControlBlock* m_branchTarget;
+
+	dList<dFlowControlBlock*> m_flowParents;
+	dList<dFlowControlBlock*> m_flowChilden;
 
 	friend dCIL;
 };
