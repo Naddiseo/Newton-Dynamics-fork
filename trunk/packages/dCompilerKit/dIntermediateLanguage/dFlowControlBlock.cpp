@@ -74,15 +74,14 @@ void dFlowControlBlock::Trace() const
 
 void dFlowControlBlock::ApplyLocalOptimizations(dCIL& program)
 {
-static int xxx = 0;
-xxx ++;
+//static int xxx = 0;
+//xxx ++;
 //if(xxx != 3)
 //return;
 
 //Trace();
 	bool optimized = true;
 	while (optimized) {
-Trace();
 		optimized = false;
 		optimized |= RemoveSubExpressions_1(program);
 		optimized |= RemoveSubExpressions_2(program);
