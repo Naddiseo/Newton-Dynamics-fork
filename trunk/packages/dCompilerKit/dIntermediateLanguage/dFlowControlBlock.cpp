@@ -82,6 +82,7 @@ xxx ++;
 //Trace();
 	bool optimized = true;
 	while (optimized) {
+Trace();
 		optimized = false;
 		optimized |= RemoveSubExpressions_1(program);
 		optimized |= RemoveSubExpressions_2(program);
@@ -231,13 +232,31 @@ bool dFlowControlBlock::RemoveSubExpressions_2(dCIL& program)
 					}
 				}
 			}
-
 			if (!alive && (stmt.m_arg0[0] == 't')) {
 				if (m_leader == node) {
 					m_leader = node->GetNext();
 				}
 				program.Remove(node);
-//Trace();
+			}
+		} else if (stmt.m_instruction == dTreeAdressStmt::m_load) {
+			bool alive = true;
+			for (dCIL::dListNode* node1 = node->GetNext(); alive && (node1 != lastNode); node1 = node1->GetNext()) {
+				dTreeAdressStmt& stmt1 = node1->GetInfo();
+				alive |= stmt1.m_instruction != dTreeAdressStmt::m_store;  
+				if (alive && (stmt1.m_instruction == dTreeAdressStmt::m_assigment) && 
+							 (stmt1.m_operator == dTreeAdressStmt::m_nothing) && (stmt1.m_arg1 == stmt.m_arg0)) {
+					alive = false;
+					ret = true;
+					stmt1.m_instruction = dTreeAdressStmt::m_load;
+					stmt1.m_arg1 = stmt.m_arg1;
+					stmt1.m_arg2 = stmt.m_arg2;
+					if (stmt.m_arg0[0] == 't') {
+						if (m_leader == node) {
+							m_leader = node->GetNext();
+						}
+						program.Remove(node);
+					}
+				}
 			}
 		}
 	}
