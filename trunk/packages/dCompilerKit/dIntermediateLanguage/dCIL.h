@@ -31,6 +31,7 @@ class dCIL: public dList<dTreeAdressStmt>
 
 	void Trace();
 	void Optimize(dListNode* const function);
+	void RemoveRedundantJumps(dListNode* const function);
 
 	private:
 	void MakeFlowControlGraph(dFlowControlBlock* const root, dTree<dFlowControlBlock*, dCIL::dListNode*>& blocksMap);

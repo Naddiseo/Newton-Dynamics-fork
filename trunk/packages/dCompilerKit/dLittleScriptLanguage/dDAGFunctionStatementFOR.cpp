@@ -93,7 +93,7 @@ void dDAGFunctionStatementFOR::CompileCIL(dCIL& cil)
 
 	dCIL::dListNode* const startFlow = cil.NewStatement();
 	dTreeAdressStmt& startLabel = startFlow->GetInfo();
-	startLabel.m_instruction = dTreeAdressStmt::m_target;
+	startLabel.m_instruction = dTreeAdressStmt::m_label;
 	startLabel.m_arg0 = cil.NewLabel();
 	dTRACE_INTRUCTION (&startLabel);
 
@@ -109,7 +109,7 @@ void dDAGFunctionStatementFOR::CompileCIL(dCIL& cil)
 	endStmt.m_jmpTarget = testFlow;
 
 	dTreeAdressStmt& test = testFlow->GetInfo();
-	test.m_instruction = dTreeAdressStmt::m_target;
+	test.m_instruction = dTreeAdressStmt::m_label;
 	test.m_arg0 = endStmt.m_arg0;
 	dTRACE_INTRUCTION (&test);
 

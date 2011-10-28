@@ -60,7 +60,7 @@ void dDAGFunctionStatementFlow::BackPatch (dCIL& cil)
 	if (flowBreak) {
 		dCIL::dListNode* const target = cil.NewStatement();
 		dTreeAdressStmt& jmpTarget = target->GetInfo();
-		jmpTarget.m_instruction = dTreeAdressStmt::m_target;
+		jmpTarget.m_instruction = dTreeAdressStmt::m_label;
 		jmpTarget.m_arg0 = m_currentExitLabel;
 		dTRACE_INTRUCTION (&jmpTarget);
 

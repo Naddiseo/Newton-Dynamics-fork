@@ -134,7 +134,7 @@ void dDAGFunctionNode::CompileCIL(dCIL& cil)
 	if (returnStmt) {
 		dCIL::dListNode* const retLabelNode = cil.NewStatement();
 		dTreeAdressStmt& retLabel = retLabelNode->GetInfo();
-		retLabel.m_instruction = dTreeAdressStmt::m_target;
+		retLabel.m_instruction = dTreeAdressStmt::m_label;
 		retLabel.m_arg0 = D_RETURN_LABEL;
 		dTRACE_INTRUCTION (&retLabel);
 

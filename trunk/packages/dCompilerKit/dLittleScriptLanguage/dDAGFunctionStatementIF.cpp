@@ -74,7 +74,7 @@ void dDAGFunctionStatementIF::CompileCIL(dCIL& cil)
 		stmt.m_jmpTarget = cil.NewStatement();
 		dTreeAdressStmt& jmpTarget = stmt.m_jmpTarget->GetInfo();
 
-		jmpTarget.m_instruction = dTreeAdressStmt::m_target;
+		jmpTarget.m_instruction = dTreeAdressStmt::m_label;
 		jmpTarget.m_arg0 = stmt.m_arg2;
 		dTRACE_INTRUCTION (&jmpTarget);
 
@@ -92,7 +92,7 @@ void dDAGFunctionStatementIF::CompileCIL(dCIL& cil)
 		stmt.m_jmpTarget = cil.NewStatement();
 		dTreeAdressStmt& jmpTarget = stmt.m_jmpTarget->GetInfo();
 
-		jmpTarget.m_instruction = dTreeAdressStmt::m_target;
+		jmpTarget.m_instruction = dTreeAdressStmt::m_label;
 		jmpTarget.m_arg0 = stmt.m_arg2;
 		dTRACE_INTRUCTION (&jmpTarget);
 
@@ -102,7 +102,7 @@ void dDAGFunctionStatementIF::CompileCIL(dCIL& cil)
 		gotoStmt.m_jmpTarget = cil.NewStatement();
 		dTreeAdressStmt& gotoTarget = gotoStmt.m_jmpTarget->GetInfo();
 
-		gotoTarget.m_instruction = dTreeAdressStmt::m_target;
+		gotoTarget.m_instruction = dTreeAdressStmt::m_label;
 		gotoTarget.m_arg0 = gotoStmt.m_arg0;
 		dTRACE_INTRUCTION (&gotoTarget);
 	

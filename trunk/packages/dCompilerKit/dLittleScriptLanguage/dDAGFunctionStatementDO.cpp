@@ -60,7 +60,7 @@ void dDAGFunctionStatementDO::CompileCIL(dCIL& cil)
 
 	dCIL::dListNode* const startFlow = cil.NewStatement();
 	dTreeAdressStmt& startLabel = startFlow->GetInfo();
-	startLabel.m_instruction = dTreeAdressStmt::m_target;
+	startLabel.m_instruction = dTreeAdressStmt::m_label;
 	startLabel.m_arg0 = cil.NewLabel();
 	dTRACE_INTRUCTION (&startLabel);
 

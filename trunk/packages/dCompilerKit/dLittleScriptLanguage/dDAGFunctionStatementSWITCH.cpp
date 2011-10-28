@@ -51,7 +51,7 @@ void dDAGFunctionStatementSWITCH::CompileCIL(dCIL& cil)
 	_ASSERTE (0);
 /*
 	dTreeAdressStmt& startLabel = cil.NewStatement()->GetInfo();
-	startLabel.m_instruction = dTreeAdressStmt::m_target;
+	startLabel.m_instruction = dTreeAdressStmt::m_label;
 	startLabel.m_arg0 = cil.NewLabel();
 	dTRACE_INTRUCTION (&startLabel);
 
@@ -73,7 +73,7 @@ void dDAGFunctionStatementSWITCH::CompileCIL(dCIL& cil)
 
 	stmt.m_jmpTarget = cil.NewStatement();
 	dTreeAdressStmt& jmpTarget = stmt.m_jmpTarget->GetInfo();
-	jmpTarget.m_instruction = dTreeAdressStmt::m_target;
+	jmpTarget.m_instruction = dTreeAdressStmt::m_label;
 	jmpTarget.m_arg0 = stmt.m_arg1;
 	dTRACE_INTRUCTION (&jmpTarget);
 */

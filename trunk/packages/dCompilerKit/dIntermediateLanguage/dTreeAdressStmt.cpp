@@ -155,7 +155,7 @@ void dTreeAdressStmt::Trace () const
 			break;
 		}
 
-		case m_target:
+		case m_label:
 		{
 			DTRACE (("%s:\n", m_arg0.c_str()));
 			break;

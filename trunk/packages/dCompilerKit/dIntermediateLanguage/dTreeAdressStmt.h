@@ -46,7 +46,7 @@ class dTreeAdressStmt
 		m_store,
 		m_assigment,
 		m_goto,
-		m_target,
+		m_label,
 		m_param,
 		m_restoreParam,
 	};
