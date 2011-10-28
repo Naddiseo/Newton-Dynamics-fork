@@ -34,6 +34,8 @@ class dCIL: public dList<dTreeAdressStmt>
 	void RemoveRedundantJumps(dListNode* const function);
 
 	private:
+	void PackTmpVariables(dFlowControlBlock* const root);
+	void ApplyGlobalOptimization (dFlowControlBlock* const root);
 	void MakeFlowControlGraph(dFlowControlBlock* const root, dTree<dFlowControlBlock*, dCIL::dListNode*>& blocksMap);
 
 

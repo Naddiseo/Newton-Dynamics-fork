@@ -137,55 +137,6 @@ void dCIL::MakeFlowControlGraph(dFlowControlBlock* const root, dTree<dFlowContro
 
 
 
-void dCIL::Optimize(dListNode* const function)
-{
-	// eliminate redundant jumps
-	RemoveRedundantJumps(function);
-
-	dTree<dFlowControlBlock*, dCIL::dListNode*> blocksMap;
-	dFlowControlBlock* const flowDiagramRoot = new dFlowControlBlock(function);
-	blocksMap.Insert(flowDiagramRoot, flowDiagramRoot->m_leader);
-
-	dFlowControlBlock* last = flowDiagramRoot;
-	for (dCIL::dListNode* node = function->GetNext(); node; node = node->GetNext()) {
-		const dTreeAdressStmt& stmt = node->GetInfo();
-		if (stmt.m_instruction == dTreeAdressStmt::m_label) {
-			last->m_end = node->GetPrev();
-			last->m_nextBlock = new dFlowControlBlock(node);
-			blocksMap.Insert(last->m_nextBlock, last->m_nextBlock->m_leader);
-			last = last->m_nextBlock;
-		} else if (stmt.m_instruction == dTreeAdressStmt::m_if) {
-			dCIL::dListNode* const next = node->GetNext();
-			const dTreeAdressStmt& stmt = next->GetInfo();
-			if (stmt.m_instruction != dTreeAdressStmt::m_label) {
-				last->m_end = next->GetPrev();
-				last->m_nextBlock = new dFlowControlBlock(next);
-				blocksMap.Insert(last->m_nextBlock, last->m_nextBlock->m_leader);
-				last = last->m_nextBlock;
-			}
-		}
-	}
-	last->m_end =  GetLast()->GetPrev();
-
-	// create float control for inteBlock optimization
-	MakeFlowControlGraph(flowDiagramRoot, blocksMap);
-
-	// Apply local internal block optimizations
-DTRACE(("\n"));
-	for (dFlowControlBlock* block = flowDiagramRoot; block; block = block->m_nextBlock) {
-		block->ApplyLocalOptimizations(*this);
-block->Trace();
-	}
-
-	// destroy all blocks
-	dFlowControlBlock* next;
-	for (dFlowControlBlock* block = flowDiagramRoot; block; block = next) {
-		next = block->m_nextBlock;
-		delete block;
-	}
-
-	Trace();
-}
 
 
 void dCIL::RemoveRedundantJumps(dListNode* const function)
@@ -323,4 +274,129 @@ void dCIL::RemoveRedundantJumps(dListNode* const function)
 	}
 
 	Trace();
+}
+
+
+
+void dCIL::Optimize(dListNode* const function)
+{
+	// eliminate redundant jumps
+	RemoveRedundantJumps(function);
+
+	// build leading block map table
+	dTree<dFlowControlBlock*, dCIL::dListNode*> blocksMap;
+	dFlowControlBlock* const flowDiagramRoot = new dFlowControlBlock(function);
+	blocksMap.Insert(flowDiagramRoot, flowDiagramRoot->m_leader);
+
+	dFlowControlBlock* last = flowDiagramRoot;
+	for (dCIL::dListNode* node = function->GetNext(); node; node = node->GetNext()) {
+		const dTreeAdressStmt& stmt = node->GetInfo();
+		if (stmt.m_instruction == dTreeAdressStmt::m_label) {
+			last->m_end = node->GetPrev();
+			last->m_nextBlock = new dFlowControlBlock(node);
+			blocksMap.Insert(last->m_nextBlock, last->m_nextBlock->m_leader);
+			last = last->m_nextBlock;
+		} else if (stmt.m_instruction == dTreeAdressStmt::m_if) {
+			dCIL::dListNode* const next = node->GetNext();
+			const dTreeAdressStmt& stmt = next->GetInfo();
+			if (stmt.m_instruction != dTreeAdressStmt::m_label) {
+				last->m_end = next->GetPrev();
+				last->m_nextBlock = new dFlowControlBlock(next);
+				blocksMap.Insert(last->m_nextBlock, last->m_nextBlock->m_leader);
+				last = last->m_nextBlock;
+			}
+		}
+	}
+	last->m_end =  GetLast()->GetPrev();
+
+	// create float control for inteBlock optimization
+	MakeFlowControlGraph(flowDiagramRoot, blocksMap);
+
+	// Apply local internal blocks optimizations
+	DTRACE(("\n"));
+	for (dFlowControlBlock* block = flowDiagramRoot; block; block = block->m_nextBlock) {
+		block->ApplyLocalOptimizations(*this);
+		block->Trace();
+	}
+
+	// apply global optimization
+	ApplyGlobalOptimization (flowDiagramRoot);
+
+	// destroy all flow control blocks
+	dFlowControlBlock* next;
+	for (dFlowControlBlock* block = flowDiagramRoot; block; block = next) {
+		next = block->m_nextBlock;
+		delete block;
+	}
+	Trace();
+}
+
+
+void dCIL::ApplyGlobalOptimization (dFlowControlBlock* const root)
+{
+	PackTmpVariables(root);
+}
+
+
+void dCIL::PackTmpVariables(dFlowControlBlock* const root)
+{
+	int id = 0;
+	dTree<int, int> tmpMap;
+	for (dCIL::dListNode* node = root->m_leader; node; node = node->GetNext()) {	
+		dTreeAdressStmt& stmt = node->GetInfo();		
+		if (stmt.m_arg0[0] == 't') {
+			int index = atoi (&stmt.m_arg0[1]);
+			if (!tmpMap.Find(index)) {
+				tmpMap.Insert(id, index);
+				id ++;
+			}
+		}
+		if (stmt.m_arg1[0] == 't') {
+			int index = atoi (&stmt.m_arg1[1]);
+			if (!tmpMap.Find(index)) {
+				tmpMap.Insert(id, index);
+				id ++;
+			}
+		}
+		if (stmt.m_arg2[0] == 't') {
+			int index = atoi (&stmt.m_arg2[1]);
+			if (!tmpMap.Find(index)) {
+				tmpMap.Insert(id, index);
+				id ++;
+			}
+		}
+	}
+
+	for (dCIL::dListNode* node = root->m_leader; node; node = node->GetNext()) {	
+		dTreeAdressStmt& stmt = node->GetInfo();		
+		if (stmt.m_arg0[0] == 't') {
+			int index = atoi (&stmt.m_arg0[1]);
+			dTree<int, int>::dTreeNode* const node = tmpMap.Find(index);
+			_ASSERTE (node);
+			char text[128];
+			sprintf (text, "t%d", node->GetInfo());
+			stmt.m_arg0 = text;
+		}
+		if (stmt.m_arg1[0] == 't') {
+			int index = atoi (&stmt.m_arg1[1]);
+			dTree<int, int>::dTreeNode* const node = tmpMap.Find(index);
+			_ASSERTE (node);
+			char text[128];
+			sprintf (text, "t%d", node->GetInfo());
+			stmt.m_arg1 = text;
+		}
+		if (stmt.m_arg2[0] == 't') {
+			int index = atoi (&stmt.m_arg2[1]);
+			dTree<int, int>::dTreeNode* const node = tmpMap.Find(index);
+			_ASSERTE (node);
+			char text[128];
+			sprintf (text, "t%d", node->GetInfo());
+			stmt.m_arg2 = text;
+		}
+	}
+
+//for (dFlowControlBlock* block = root; block; block = block->m_nextBlock) {
+//block->Trace();
+//}
+
 }
