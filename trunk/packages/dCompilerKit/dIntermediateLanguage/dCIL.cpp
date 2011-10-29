@@ -15,6 +15,7 @@
 
 dCIL::dCIL(void)
 	:dList()
+	,m_mark(1)
 	,m_tempIndex (0)
 	,m_labelIndex (0)
 {
@@ -87,15 +88,15 @@ void dCIL::MakeFlowControlGraph(dFlowControlBlock* const root, dTree<dFlowContro
 	int stack = 1;
 	dFlowControlBlock* pool[32];
 
-	int mark = root->m_mark + 1;
+	m_mark ++;
 
 	pool[0] = root;
 	while (stack) {
 		stack --;
 		dFlowControlBlock* const node = pool[stack];
-		if (node->m_mark < mark) {
+		if (node->m_mark < m_mark) {
 
-			node->m_mark = mark;
+			node->m_mark = m_mark;
 
 			const dTreeAdressStmt& stmt = node->m_end->GetInfo();
 			if (stmt.m_instruction == dTreeAdressStmt::m_if) {
@@ -130,7 +131,7 @@ void dCIL::MakeFlowControlGraph(dFlowControlBlock* const root, dTree<dFlowContro
 
 #ifdef _DEBUG
 	for (dFlowControlBlock* block = root; block; block = block->m_nextBlock) {
-		_ASSERTE (block->m_mark == mark);
+		_ASSERTE (block->m_mark == m_mark);
 	}
 #endif
 }
@@ -302,6 +303,14 @@ void dCIL::Optimize(dListNode* const function)
 			if (stmt.m_instruction != dTreeAdressStmt::m_label) {
 				last->m_end = next->GetPrev();
 				last->m_nextBlock = new dFlowControlBlock(next);
+				blocksMap.Insert(last->m_nextBlock, last->m_nextBlock->m_leader);
+				last = last->m_nextBlock;
+			}
+		} else {
+			const dTreeAdressStmt& prevInst = node->GetPrev()->GetInfo();
+			if ((prevInst.m_instruction == dTreeAdressStmt::m_if) && !blocksMap.Find(node)) {
+				last->m_end = node->GetPrev();
+				last->m_nextBlock = new dFlowControlBlock(node);
 				blocksMap.Insert(last->m_nextBlock, last->m_nextBlock->m_leader);
 				last = last->m_nextBlock;
 			}

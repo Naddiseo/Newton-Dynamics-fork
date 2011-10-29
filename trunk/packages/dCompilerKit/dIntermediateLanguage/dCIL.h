@@ -38,7 +38,7 @@ class dCIL: public dList<dTreeAdressStmt>
 	void ApplyGlobalOptimization (dFlowControlBlock* const root);
 	void MakeFlowControlGraph(dFlowControlBlock* const root, dTree<dFlowControlBlock*, dCIL::dListNode*>& blocksMap);
 
-
+	int m_mark;
 	int m_tempIndex;
 	int m_labelIndex;
 	dTreeAdressStmt::dOperator m_conditinals[dTreeAdressStmt::m_operatorsCount];
