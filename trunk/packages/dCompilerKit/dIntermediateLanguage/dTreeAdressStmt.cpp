@@ -207,7 +207,7 @@ void dTreeAdressStmt::Trace () const
 
 		case m_ret:
 		{
-			DTRACE (("\tret\n"));
+			DTRACE (("\tret %s\n", m_arg0.c_str()));
 			break;
 		}
 

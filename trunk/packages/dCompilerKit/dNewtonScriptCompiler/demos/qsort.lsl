@@ -37,31 +37,32 @@ class qsort
 */
 
 	// very primitive qsort 
-	private void sort (int[] a, int m, int n)
-//	private void sort (int[] a__, int m, int n, int u1, int u2, int u3, int i, int j, int a, int k, int[] M, int s, int x )
+//	private void sort (int[] a, int m, int n)
+	private void sort (int a, int b, int c)
 	{
-	
 /*	
-i = m - 1;
-j = n;
-a = u1;
+int d = 0;
+int e = a;
 do {
-	i = i + 1;
-	j = j - 1;
-	if (i) 
-		a = u2;
-		i = u3;			
-} while (j);
+d = d + b;
+e = e - 1;
+} while (e > 0);
+return d;	
 */
 
-/*
-for (int i = 0; i < n; i = i + 1)
-{
-  x = m[i];
-  s = s + x;
-}
-*/
-	
+//for (a = 0; a < 10; a = a + 1)
+//{
+//	c = c + b;
+//	a = b * 2;
+//}
+//return c;
+
+if (a) return a[2] + b;
+if (b) return a + 2;
+return a + 3;
+
+
+/*	
 //		if (n <= m) {
 //			return ;
 //		}
@@ -95,6 +96,8 @@ for (int i = 0; i < n; i = i + 1)
 		a[n] = x;
 //		sort (a, m, j);
 //		sort (a, i + 1, n);
+*/
 	}
+	
 }
 

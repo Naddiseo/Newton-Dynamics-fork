@@ -11,6 +11,8 @@
 
 #include "dLSCstdafx.h"
 #include "dDAG.h"
+#include "dDAGFunctionNode.h"
+#include "dDAGScopeBlockNode.h"
 #include "dDAGFunctionStatementReturn.h"
 
 dInitRtti(dDAGFunctionStatementReturn);
@@ -46,11 +48,20 @@ void dDAGFunctionStatementReturn::CompileCIL(dCIL& cil)
 {
 	if (m_expression) {
 		m_expression->CompileCIL(cil);
+
+		dDAGFunctionNode* const funtion = GetFunction();
+
+		funtion->m_returnRegister = D_RETURN_REGISTER;
+
+		dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
+		stmt.m_instruction = dTreeAdressStmt::m_assigment;
+		stmt.m_arg0 = D_RETURN_REGISTER;
+		stmt.m_arg1 = m_expression->m_result;
+		dTRACE_INTRUCTION (&stmt);
 	}
 
 	dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
 	stmt.m_instruction = dTreeAdressStmt::m_goto;
 	stmt.m_arg0 = D_RETURN_LABEL;
-
 	dTRACE_INTRUCTION (&stmt);
 }

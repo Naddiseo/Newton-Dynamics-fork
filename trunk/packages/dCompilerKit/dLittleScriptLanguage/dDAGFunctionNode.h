@@ -38,6 +38,7 @@ class dDAGFunctionNode: public dDAG
 	bool m_isConst;
 	bool m_isPrivate;
 	bool m_isConstructor;
+	string m_returnRegister;
 	dDAGTypeNode* m_returnType;
 	dDAGScopeBlockNode* m_body;
 	dDAGFunctionModifier* m_modifier;

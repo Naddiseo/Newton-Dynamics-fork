@@ -25,6 +25,7 @@ dDAGFunctionNode::dDAGFunctionNode(dList<dDAG*>& allNodes, dDAGTypeNode* const t
 	,m_isConst (isConst[0] ? false : true)
 	,m_isPrivate(false)
 	,m_isConstructor(false)
+	,m_returnRegister()
 	,m_returnType (type)
 	,m_body(NULL)
 	,m_modifier(NULL)
@@ -149,6 +150,7 @@ void dDAGFunctionNode::CompileCIL(dCIL& cil)
 	dCIL::dListNode* const retNode = cil.NewStatement();
 	dTreeAdressStmt& ret = retNode->GetInfo();
 	ret.m_instruction = dTreeAdressStmt::m_ret;
+	ret.m_arg0 = m_returnRegister;
 	dTRACE_INTRUCTION (&ret);
 
 	cil.NewStatement();
