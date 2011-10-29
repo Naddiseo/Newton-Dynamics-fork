@@ -363,11 +363,24 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::ClipContacts (dgInt32 count, 
 				contactOut[i].m_isEdgeContact = 1;
 				dgFloat32 closestEdgeDist = dgFloat32 (1.0e20f);
 				for (dgInt32 j1 = 0; j1 < m_count; j1 ++) {
-					//dgFloat32 dist2;
 					dgVector edge (m_localPoly[j1] - m_localPoly[j0]);
 					dgVector dp (point - m_localPoly[j0]);
-					dgVector p (dp - edge.Scale ((dp % edge) / (edge % edge)));
-					dgFloat32 dist2 = p % p;
+
+					dgFloat32 dist2 = dgFloat32 (1.0e10f);
+					dgFloat32 num = dp % edge;
+					dgFloat32 den = edge % edge;
+					if (num < 0.0f) {
+						dist2 = dp % dp;
+					} else if (num > den) {
+						dgVector pp (point - m_localPoly[j1]);
+						dist2 = pp % pp;
+					} else {
+						dgVector pp (dp - edge.Scale (num / den));
+						dist2 = pp % pp;
+					}
+
+					//dgVector p (dp - edge.Scale ((dp % edge) / (edge % edge)));
+					//dgFloat32 dist2 = p % p;
 					if (dist2 < closestEdgeDist) {
 						closestEdgeDist = dist2;
 						closestEdgeIndex = j0;
@@ -375,7 +388,8 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::ClipContacts (dgInt32 count, 
 					j0 = j1;
 				}
 				_ASSERTE (m_adjacentNormalIndex);
-				if ((closestEdgeDist > (dgFloat32 (0.25f) * dgFloat32 (0.25f))) || (m_adjacentNormalIndex[closestEdgeIndex] == -1)) {
+				//if ((closestEdgeDist > (dgFloat32 (0.25f) * dgFloat32 (0.25f))) || (m_adjacentNormalIndex[closestEdgeIndex] == -1)) {
+				if (m_adjacentNormalIndex[closestEdgeIndex] == -1) {
 					contactOut[i].m_normal = normal;
 				} else {
 					dgVector aNormal (globalMatrix.RotateVector(dgVector (&m_vertex[m_adjacentNormalIndex[closestEdgeIndex] * m_stride])));
@@ -978,8 +992,8 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 				contact.m_penetration = dgFloat32 (0.0f);
 				contact.m_point = (closestPoint + supportPoint).Scale (dgFloat32 (0.5f));
 			} else {
+/*
 				dgVector dp (closestPoint - p);
-
 				dgFloat32 a = veloc % veloc;
 				dgFloat32 b = - dgFloat32 (2.0f) * (dp % veloc);
 				dgFloat32 c = dp % dp - radius * radius;
@@ -996,6 +1010,16 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 						contact.m_normal = dp.Scale (dgRsqrt (dp % dp));
 					}
 				}
+*/
+				_ASSERTE ((veloc % veloc) > 0.0f);
+				timestep = dgSqrt (radius * radius / (veloc % veloc));
+				_ASSERTE (timestep < 1.0f);
+				dgVector dp (closestPoint - p);
+
+				_ASSERTE (timestep > dgFloat32 (0.0f));
+				contact.m_penetration = dgFloat32 (0.0f);
+				contact.m_point = (closestPoint + p + veloc.Scale (timestep)).Scale (dgFloat32 (0.5f));
+				contact.m_normal = dp.Scale (-dgRsqrt (dp % dp));
 			}
 		}
 	}
