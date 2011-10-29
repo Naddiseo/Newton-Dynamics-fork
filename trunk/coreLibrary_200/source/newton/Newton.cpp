@@ -4111,14 +4111,8 @@ int NewtonCollisionCollideContinue(const NewtonWorld* const newtonWorld, int max
 		const NewtonCollision* const collisionB, const dFloat* const matrixB, const dFloat* const velocB, const dFloat* const omegaB, 
 		dFloat* const timeOfImpact, dFloat* const contacts, dFloat* const normals, dFloat* const penetration, int threadIndex)
 {
-//	Newton* world;
-//	world = (Newton *)newtonWorld;
-//	return world->Collide ((dgCollision*)collisionA, *((dgMatrix*) matrixA), 
-//		(dgCollision*)collisionB, *((dgMatrix*) matrixB), 
-//		(dgTriplex*) contacts, (dgTriplex*) normals, penetration, maxSize);
-//	_ASSERTE (0);
-	Newton* world;
-	world = (Newton *)newtonWorld;
+
+	Newton* const world = (Newton *)newtonWorld;
 
 	*timeOfImpact = timestep;
 
