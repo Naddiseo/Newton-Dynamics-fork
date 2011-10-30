@@ -670,7 +670,6 @@ void dgMeshEffect::SphericalMapping (dgInt32 material)
 
 void dgMeshEffect::CylindricalMapping (dgInt32 cylinderMaterial, dgInt32 capMaterial)
 {
-_ASSERTE (0);
 /*
 	dgVector origin (GetOrigin());
 
@@ -762,6 +761,89 @@ _ASSERTE (0);
 
 	ApplyAttributeArray (&attribArray[0]);
 */
+
+	dgBigVector origin (GetOrigin());
+	dgStack<dgBigVector>cylinder (m_pointCount);
+
+	dgBigVector pMin (dgFloat64 (1.0e10f), dgFloat64 (1.0e10f), dgFloat64 (1.0e10f), dgFloat64 (0.0f));
+	dgBigVector pMax (dgFloat64 (-1.0e10f), dgFloat64 (-1.0e10f), dgFloat64 (-1.0e10f), dgFloat64 (0.0f));
+	for (dgInt32 i = 0; i < m_pointCount; i ++) {
+		dgBigVector tmp (m_points[i] - origin);
+		pMin.m_x = GetMin (pMin.m_x, tmp.m_x);
+		pMax.m_x = GetMax (pMax.m_x, tmp.m_x);
+		pMin.m_y = GetMin (pMin.m_y, tmp.m_y);
+		pMax.m_y = GetMax (pMax.m_y, tmp.m_y);
+		pMin.m_z = GetMin (pMin.m_z, tmp.m_z);
+		pMax.m_z = GetMax (pMax.m_z, tmp.m_z);
+	}
+
+	dgBigVector scale (dgFloat64 (1.0f)/ (pMax.m_x - pMin.m_x), dgFloat64 (1.0f)/ (pMax.m_x - pMin.m_x), dgFloat64 (1.0f)/ (pMax.m_x - pMin.m_x), dgFloat64 (0.0f));
+	for (dgInt32 i = 0; i < m_pointCount; i ++) {
+		dgBigVector point (m_points[i] - origin);
+		dgFloat64 u = (point.m_x - pMin.m_x) * scale.m_x;
+
+		point = point.Scale (1.0f / dgSqrt (point % point));
+		dgFloat64 v = dgAtan2 (point.m_y, point.m_z);
+
+		//u = (dgFloat64 (3.1416f/2.0f) - u) / dgFloat64 (3.1416f);
+		v = (dgFloat64 (3.1416f) - v) / dgFloat64 (2.0f * 3.1416f);
+		cylinder[i].m_x = v;
+		cylinder[i].m_y = u;
+	}
+
+
+	dgStack<dgVertexAtribute>attribArray (GetCount());
+	EnumerateAttributeArray (&attribArray[0]);
+
+	dgPolyhedra::Iterator iter (*this);	
+	for(iter.Begin(); iter; iter ++){
+		dgEdge* const edge = &(*iter);
+		dgVertexAtribute& attrib = attribArray[dgInt32 (edge->m_userData)];
+		attrib.m_u0 = cylinder[edge->m_incidentVertex].m_x;
+		attrib.m_v0 = cylinder[edge->m_incidentVertex].m_y;
+		attrib.m_u1 = cylinder[edge->m_incidentVertex].m_x;
+		attrib.m_v1 = cylinder[edge->m_incidentVertex].m_y;
+		attrib.m_material = cylinderMaterial;
+	}
+
+	FixCylindricalMapping (&attribArray[0]);
+
+	// apply cap mapping
+	dgInt32 mark = IncLRU();
+	for(iter.Begin(); iter; iter ++){
+		dgEdge* const edge = &(*iter);
+		if (edge->m_mark < mark){
+			const dgVector& p0 = m_points[edge->m_incidentVertex];
+			const dgVector& p1 = m_points[edge->m_next->m_incidentVertex];
+			const dgVector& p2 = m_points[edge->m_prev->m_incidentVertex];
+
+			edge->m_mark = mark;
+			edge->m_next->m_mark = mark;
+			edge->m_prev->m_mark = mark;
+
+			dgVector e0 (p1 - p0);
+			dgVector e1 (p2 - p0);
+			dgVector n (e0 * e1);
+			if ((n.m_x * n.m_x) > (dgFloat32 (0.99f) * (n % n))) {
+				dgEdge* ptr = edge;
+				do {
+					dgVertexAtribute& attrib = attribArray[dgInt32 (ptr->m_userData)];
+					dgVector p (m_points[ptr->m_incidentVertex] - origin);
+					dgFloat64 u = (p.m_y - pMin.m_y) * scale.m_y;
+					dgFloat64 v = (p.m_z - pMin.m_z) * scale.m_z;
+					attrib.m_u0 = u;
+					attrib.m_v0 = v;
+					attrib.m_u1 = u;
+					attrib.m_v1 = v;
+					attrib.m_material = capMaterial;
+
+					ptr = ptr->m_next;
+				}while (ptr !=  edge);
+			}
+		}
+	}
+
+	ApplyAttributeArray (&attribArray[0]);
 }
 
 void dgMeshEffect::BoxMapping (dgInt32 front, dgInt32 side, dgInt32 top)
