@@ -40,6 +40,7 @@ class AdjacentdFaces
 	dgInt32 m_count;
 	dgInt32 *m_index;
 	dgPlane m_normal;
+	dgInt64 m_edgeMap[256];
 };
 
 class dgPolygonSoupDatabaseBuilder 
