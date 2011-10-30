@@ -31,6 +31,7 @@
 #include "dgPolyhedra.h"
 #include "dgPolygonSoupBuilder.h"
 
+#define DG_POINTS_RUN (512 * 1024)
 
 //class dgPolySoupFilterAllocator: public dgMemoryAllocator
 class dgPolySoupFilterAllocator: public dgPolyhedra
@@ -79,6 +80,7 @@ class dgPolySoupFilterAllocator: public dgPolyhedra
 dgPolygonSoupDatabaseBuilder::dgPolygonSoupDatabaseBuilder (dgMemoryAllocator* const allocator)
 	:m_faceVertexCount(allocator), m_vertexIndex(allocator), m_normalIndex(allocator), m_vertexPoints(allocator), m_normalPoints(allocator)
 {
+	m_run = DG_POINTS_RUN;
 	m_faceCount = 0;
 	m_indexCount = 0;
 	m_vertexCount = 0;
@@ -94,6 +96,7 @@ dgPolygonSoupDatabaseBuilder::~dgPolygonSoupDatabaseBuilder ()
 
 void dgPolygonSoupDatabaseBuilder::Begin()
 {
+	m_run = DG_POINTS_RUN;
 	m_faceCount = 0;
 	m_indexCount = 0;
 	m_vertexCount = 0;
@@ -106,6 +109,7 @@ void dgPolygonSoupDatabaseBuilder::AddMesh (const dgFloat32* const vertex, dgInt
 {
 	dgInt32 faces[256];
 	dgInt32 pool[2048];
+
 
 	m_vertexPoints[m_vertexCount + vertexCount].m_x = dgFloat64 (0.0f);
 	dgBigVector* const vertexPool = &m_vertexPoints[m_vertexCount];
@@ -132,7 +136,37 @@ void dgPolygonSoupDatabaseBuilder::AddMesh (const dgFloat32* const vertex, dgInt
 			k ++;
 		}
 
-		dgInt32 convexFaces = AddConvexFace (count, pool, faces);
+		dgInt32 convexFaces = 0;
+		if (count == 3) {
+			convexFaces = 1;
+			dgBigVector p0 (m_vertexPoints[pool[2]]);
+			for (dgInt32 i = 0; i < 3; i ++) {
+				dgBigVector p1 (m_vertexPoints[pool[i]]);
+				dgBigVector edge (p1 - p0);
+				dgFloat64 mag2 = edge % edge;
+				if (mag2 < dgFloat32 (1.0e-6f)) {
+					convexFaces = 0;
+				}
+				p0 = p1;
+			}
+
+			if (convexFaces) {
+				dgBigVector edge0 (m_vertexPoints[pool[2]] - m_vertexPoints[pool[0]]);
+				dgBigVector edge1 (m_vertexPoints[pool[1]] - m_vertexPoints[pool[0]]);
+				dgBigVector normal (edge0 * edge1);
+				dgFloat64 mag2 = normal % normal;
+				if (mag2 < dgFloat32 (1.0e-8f)) {
+					convexFaces = 0;
+				}
+			}
+
+			if (convexFaces) {
+				faces[0] = 3;
+			}
+
+		} else {
+			convexFaces = AddConvexFace (count, pool, faces);
+		}
 
 		dgInt32 index = 0;
 		for (dgInt32 k = 0; k < convexFaces; k ++) {
@@ -149,8 +183,33 @@ void dgPolygonSoupDatabaseBuilder::AddMesh (const dgFloat32* const vertex, dgInt
 		}
 	}
 	m_vertexCount += vertexCount;
+	m_run -= vertexCount;
+	if (m_run <= 0) {
+		PackArray();
+	}
 }
 
+void dgPolygonSoupDatabaseBuilder::PackArray()
+{
+	dgStack<dgInt32> indexMapPool (m_vertexCount);
+	dgInt32* const indexMap = &indexMapPool[0];
+	m_vertexCount = dgVertexListToIndexList (&m_vertexPoints[0].m_x, sizeof (dgBigVector), 3, m_vertexCount, &indexMap[0], dgFloat32 (1.0e-6f));
+
+	dgInt32 k = 0;
+	for (dgInt32 i = 0; i < m_faceCount; i ++) {
+		k ++;
+
+		dgInt32 count = m_faceVertexCount[i];
+		for (dgInt32 j = 1; j < count; j ++) {
+			dgInt32 index = m_vertexIndex[k];
+			index = indexMap[index];
+			m_vertexIndex[k] = index;
+			k ++;
+		}
+	}
+
+	m_run = DG_POINTS_RUN;
+}
 
 void dgPolygonSoupDatabaseBuilder::SingleFaceFixup()
 {
@@ -559,6 +618,28 @@ void dgPolygonSoupDatabaseBuilder::Optimize(bool optimize)
 
 dgInt32 dgPolygonSoupDatabaseBuilder::FilterFace (dgInt32 count, dgInt32* const pool)
 {
+	if (count == 3) {
+		dgBigVector p0 (m_vertexPoints[pool[2]]);
+		for (dgInt32 i = 0; i < 3; i ++) {
+			dgBigVector p1 (m_vertexPoints[pool[i]]);
+			dgBigVector edge (p1 - p0);
+			dgFloat64 mag2 = edge % edge;
+			if (mag2 < dgFloat32 (1.0e-6f)) {
+				count = 0;
+			}
+			p0 = p1;
+		}
+
+		if (count == 3) {
+			dgBigVector edge0 (m_vertexPoints[pool[2]] - m_vertexPoints[pool[0]]);
+			dgBigVector edge1 (m_vertexPoints[pool[1]] - m_vertexPoints[pool[0]]);
+			dgBigVector normal (edge0 * edge1);
+			dgFloat64 mag2 = normal % normal;
+			if (mag2 < dgFloat32 (1.0e-8f)) {
+				count = 0;
+			}
+		}
+	} else {
 	dgPolySoupFilterAllocator polyhedra(m_allocator);
 
 	count = polyhedra.AddFilterFace (dgUnsigned32 (count), pool);
@@ -705,6 +786,7 @@ dgInt32 dgPolygonSoupDatabaseBuilder::FilterFace (dgInt32 count, dgInt32* const 
 		}
 	}
 #endif
+	}
 
 	return (count >= 3) ? count : 0;
 }

@@ -1406,59 +1406,37 @@ void dgAABBPolygonSoup::Deserialize (dgDeserialize callback, void* const userDat
 
 dgIntersectStatus dgAABBPolygonSoup::CalculateThisFaceEdgeNormals (void *context, const dgFloat32* const polygon, dgInt32 strideInBytes, const dgInt32* const indexArray, dgInt32 indexCount)
 {
-//	dgInt32 i0;
-//	dgInt32 count; 
-//	dgInt32 index; 
-//	dgInt32 stride;
-//	dgIntersectStatus continueSearch;
 	AdjacentdFaces& adjacentFaces = *((AdjacentdFaces*)context);
 
-	dgIntersectStatus continueSearch = t_StopSearh;
 	dgInt32 count = adjacentFaces.m_count;
 	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat32));
 
-//if (count == 3 && adjacentFaces.m_index[0] == 32 && adjacentFaces.m_index[1] == 33 && adjacentFaces.m_index[2] == 71)
-//count *= 1;
-
-	dgInt32 index = count - 1; 
-	dgInt32 i0 = adjacentFaces.m_index[count - 1];
-	for (dgInt32 i = 0; i < count; i ++) {
-		dgInt32 i1 = adjacentFaces.m_index[i];
-		if (adjacentFaces.m_index[index + count + 1] == -1) {
-			//dgInt32 j0;
-			//dgInt32 j1;
-
-			continueSearch = t_ContinueSearh;
 			dgInt32 j0 = indexArray[indexCount - 1];
 			for (dgInt32 j = 0; j < indexCount; j ++) {
 				dgInt32 j1 = indexArray[j];
-				if ((i0 == j1) && (i1 == j0)) {
-					dgFloat32 maxDist;
-
-					maxDist = dgFloat32 (0.0f);
+		dgInt64 key = (dgInt64 (j0) << 32) + j1;
+		for (dgInt32 i = 0; i < count; i ++) {
+			if (adjacentFaces.m_edgeMap[i] == key) {
+					dgFloat32 maxDist = dgFloat32 (0.0f);
 					for (dgInt32 k = 0; k < indexCount; k ++) {
-						dgFloat32 dist;
 						dgVector r (&polygon[indexArray[k] * stride]);
-						dist = adjacentFaces.m_normal.Evalue(r);
+						dgFloat32 dist = adjacentFaces.m_normal.Evalue(r);
 						if (dgAbsf (dist) > dgAbsf (maxDist)) {
 							maxDist = dist;
 						}
 					}
 					if (maxDist < dgFloat32 (-1.0e-4f)) {
-						adjacentFaces.m_index[index + count + 1] = indexArray[indexCount];
+					adjacentFaces.m_index[i + count + 1] = indexArray[indexCount];
 					}
 					break;
 				}
+		}
+
 				j0 = j1;
 			}
-		}
-		index = i;
-		i0 = i1;
-	}
 
-	return continueSearch;
+	return t_ContinueSearh;
 }
-
 
 
 dgIntersectStatus dgAABBPolygonSoup::CalculateAllFaceEdgeNormals (void *context, const dgFloat32* const polygon, dgInt32 strideInBytes, const dgInt32* const indexArray, dgInt32 indexCount)
@@ -1467,10 +1445,22 @@ dgIntersectStatus dgAABBPolygonSoup::CalculateAllFaceEdgeNormals (void *context,
 
 	dgInt32 stride = dgInt32 (strideInBytes / sizeof (dgFloat32));
 
+	AdjacentdFaces adjacentFaces;
+	adjacentFaces.m_count = indexCount;
+	adjacentFaces.m_index = (dgInt32*) indexArray;
+	dgVector n (&polygon[indexArray[indexCount] * stride]);
+	dgVector p (&polygon[indexArray[0] * stride]);
+	adjacentFaces.m_normal = dgPlane (n, - (n % p));
+
+	_ASSERTE (indexCount < sizeof (adjacentFaces.m_edgeMap) / sizeof (adjacentFaces.m_edgeMap[0]));
+
+	dgInt32 edgeIndex = indexCount - 1;
+	dgInt32 i0 = indexArray[indexCount - 1];
 	dgVector p0 ( dgFloat32 (1.0e15f),  dgFloat32 (1.0e15f),  dgFloat32 (1.0e15f), dgFloat32 (0.0f)); 
 	dgVector p1 (-dgFloat32 (1.0e15f), -dgFloat32 (1.0e15f), -dgFloat32 (1.0e15f), dgFloat32 (0.0f)); 
 	for (dgInt32 i = 0; i < indexCount; i ++) {
-		dgInt32 index = indexArray[i] * stride;
+		dgInt32 i1 = indexArray[i];
+		dgInt32 index = i1 * stride;
 		dgVector p (&polygon[index]);
 
 		p0.m_x = GetMin (p.m_x, p0.m_x); 
@@ -1480,6 +1470,10 @@ dgIntersectStatus dgAABBPolygonSoup::CalculateAllFaceEdgeNormals (void *context,
 		p1.m_x = GetMax (p.m_x, p1.m_x); 
 		p1.m_y = GetMax (p.m_y, p1.m_y); 
 		p1.m_z = GetMax (p.m_z, p1.m_z); 
+
+		adjacentFaces.m_edgeMap[edgeIndex] = (dgInt64 (i1) << 32) + i0;
+		edgeIndex = i;
+		i0 = i1;
 	}
 
 	p0.m_x -= dgFloat32 (0.5f);
@@ -1489,12 +1483,6 @@ dgIntersectStatus dgAABBPolygonSoup::CalculateAllFaceEdgeNormals (void *context,
 	p1.m_y += dgFloat32 (0.5f);
 	p1.m_z += dgFloat32 (0.5f);
 
-	AdjacentdFaces adjacentFaces;
-	adjacentFaces.m_count = indexCount;
-	adjacentFaces.m_index = (dgInt32*) indexArray;
-	dgVector n (&polygon[indexArray[indexCount] * stride]);
-	dgVector p (&polygon[indexArray[0] * stride]);
-	adjacentFaces.m_normal = dgPlane (n, - (n % p));
 	me->ForAllSectors (p0, p1, CalculateThisFaceEdgeNormals, &adjacentFaces);
 
 	return t_ContinueSearh;
