@@ -30,7 +30,7 @@ dTreeAdressStmt::~dTreeAdressStmt(void)
 void dTreeAdressStmt::TraceAssigment () const
 {
 
-	DTRACE (("\t%s = %s", m_arg0.c_str(), m_arg1.c_str()));
+	DTRACE (("\t%s = %s", m_arg0.m_label.c_str(), m_arg1.m_label.c_str()));
 	switch (m_operator)
 	{
 		case m_nothing:
@@ -82,7 +82,7 @@ void dTreeAdressStmt::TraceAssigment () const
 			_ASSERTE (0);
 
 	}
-	DTRACE (("%s\n", m_arg2.c_str()));
+	DTRACE (("%s\n", m_arg2.m_label.c_str()));
 }
 
 void dTreeAdressStmt::TraceConditional () const
@@ -91,37 +91,37 @@ void dTreeAdressStmt::TraceConditional () const
 	{
 		case m_equal:
 		{
-			DTRACE (("\tif (%s == %s) goto %s\n", m_arg0.c_str(), m_arg1.c_str(), m_arg2.c_str()));
+			DTRACE (("\tif (%s == %s) goto %s\n", m_arg0.m_label.c_str(), m_arg1.m_label.c_str(), m_arg2.m_label.c_str()));
 			break;
 		}
 
 		case m_different:
 		{
-			DTRACE (("\tif (%s != %s) goto %s\n", m_arg0.c_str(), m_arg1.c_str(), m_arg2.c_str()));
+			DTRACE (("\tif (%s != %s) goto %s\n", m_arg0.m_label.c_str(), m_arg1.m_label.c_str(), m_arg2.m_label.c_str()));
 			break;
 		}
 
 		case m_less:
 		{
-			DTRACE (("\tif (%s < %s) goto %s\n", m_arg0.c_str(), m_arg1.c_str(), m_arg2.c_str()));
+			DTRACE (("\tif (%s < %s) goto %s\n", m_arg0.m_label.c_str(), m_arg1.m_label.c_str(), m_arg2.m_label.c_str()));
 			break;
 		}
 
 		case m_greather:
 		{
-			DTRACE (("\tif (%s > %s) goto %s\n", m_arg0.c_str(), m_arg1.c_str(), m_arg2.c_str()));
+			DTRACE (("\tif (%s > %s) goto %s\n", m_arg0.m_label.c_str(), m_arg1.m_label.c_str(), m_arg2.m_label.c_str()));
 			break;
 		}
 
 		case m_lessEqual:
 		{
-			DTRACE (("\tif (%s <= %s) goto %s\n", m_arg0.c_str(), m_arg1.c_str(), m_arg2.c_str()));
+			DTRACE (("\tif (%s <= %s) goto %s\n", m_arg0.m_label.c_str(), m_arg1.m_label.c_str(), m_arg2.m_label.c_str()));
 			break;
 		}
 
 		case m_greatherEqual:
 		{
-			DTRACE (("\tif (%s >= %s) goto %s\n", m_arg0.c_str(), m_arg1.c_str(), m_arg2.c_str()));
+			DTRACE (("\tif (%s >= %s) goto %s\n", m_arg0.m_label.c_str(), m_arg1.m_label.c_str(), m_arg2.m_label.c_str()));
 			break;
 		}
 	}
@@ -133,7 +133,7 @@ void dTreeAdressStmt::Trace () const
 	{
 		case m_function:
 		{
-			DTRACE (("function %s\n", m_arg0.c_str()));
+			DTRACE (("function %s\n", m_arg0.m_label.c_str()));
 			break;
 		}
 
@@ -151,63 +151,63 @@ void dTreeAdressStmt::Trace () const
 
 		case m_goto:
 		{
-			DTRACE (("\tgoto %s\n", m_arg0.c_str()));
+			DTRACE (("\tgoto %s\n", m_arg0.m_label.c_str()));
 			break;
 		}
 
 		case m_label:
 		{
-			DTRACE (("%s:\n", m_arg0.c_str()));
+			DTRACE (("%s:\n", m_arg0.m_label.c_str()));
 			break;
 		}
 
 		case m_param:
 		{
-			DTRACE (("\tparam %s\n", m_arg0.c_str()));
+			DTRACE (("\tparam %s\n", m_arg0.m_label.c_str()));
 			break;
 		}
 
 		case m_argument:
 		{
-			DTRACE (("\targument %s\n", m_arg0.c_str()));
+			DTRACE (("\targument %s\n", m_arg0.m_label.c_str()));
 			break;
 		}
 
 		case m_local:
 		{
-			DTRACE (("\tlocal %s\n", m_arg0.c_str()));
+			DTRACE (("\tlocal %s\n", m_arg0.m_label.c_str()));
 			break;
 		}
 
 		case m_load:
 		{
-			DTRACE (("\t%s = %s[%s]\n", m_arg0.c_str(), m_arg1.c_str(), m_arg2.c_str()));
+			DTRACE (("\t%s = %s[%s]\n", m_arg0.m_label.c_str(), m_arg1.m_label.c_str(), m_arg2.m_label.c_str()));
 			break;
 		}
 
 		case m_store:
 		{
-			DTRACE (("\t%s[%s] = %s\n", m_arg1.c_str(), m_arg2.c_str(), m_arg0.c_str()));
+			DTRACE (("\t%s[%s] = %s\n", m_arg1.m_label.c_str(), m_arg2.m_label.c_str(), m_arg0.m_label.c_str()));
 			break;
 		}
 
 
 		case m_restoreParam:
 		{
-			DTRACE (("\trestoreParam %s\n", m_arg0.c_str()));
+			DTRACE (("\trestoreParam %s\n", m_arg0.m_label.c_str()));
 			break;
 		}
 
 		case m_call:
 		{
-			DTRACE (("\tcall %s\n", m_arg0.c_str()));
+			DTRACE (("\tcall %s\n", m_arg0.m_label.c_str()));
 			break;
 		}
 		
 
 		case m_ret:
 		{
-			DTRACE (("\tret %s\n", m_arg0.c_str()));
+			DTRACE (("\tret %s\n", m_arg0.m_label.c_str()));
 			break;
 		}
 

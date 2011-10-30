@@ -49,13 +49,13 @@ void dDAGFunctionStatementAssigment::CompileCIL(dCIL& cil)
 	dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
 	if (m_leftVariable->m_dimExpressions.GetCount()) {
 		stmt.m_instruction = dTreeAdressStmt::m_store;
-		stmt.m_arg0 = m_expression->m_result;
-		stmt.m_arg1 = m_leftVariable->m_name;
-		stmt.m_arg2 = m_leftVariable->m_result;
+		stmt.m_arg0.m_label = m_expression->m_result;
+		stmt.m_arg1.m_label = m_leftVariable->m_name;
+		stmt.m_arg2.m_label = m_leftVariable->m_result;
 	} else {
 		stmt.m_instruction = dTreeAdressStmt::m_assigment;
-		stmt.m_arg0 = m_leftVariable->m_result;
-		stmt.m_arg1 = m_expression->m_result;
+		stmt.m_arg0.m_label = m_leftVariable->m_result;
+		stmt.m_arg1.m_label = m_expression->m_result;
 	}
 	dTRACE_INTRUCTION (&stmt);
 	

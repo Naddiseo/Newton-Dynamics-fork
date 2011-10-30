@@ -171,12 +171,12 @@ void dCIL::RemoveRedundantJumps(dListNode* const function)
 					if (stmt1.m_instruction == dTreeAdressStmt::m_goto) {
 						if (stmt1.m_jmpTarget == labelNode)	{
 							stmt1.m_jmpTarget = node;
-							stmt1.m_arg0 = stmt.m_arg0;
+							stmt1.m_arg0.m_label = stmt.m_arg0.m_label;
 						}
 					} else if (stmt1.m_instruction == dTreeAdressStmt::m_if) { 
 						if (stmt1.m_jmpTarget == labelNode)	{
 							stmt1.m_jmpTarget = node;	
-							stmt1.m_arg2 = stmt.m_arg0;
+							stmt1.m_arg2.m_label = stmt.m_arg0.m_label;
 						}
 					}
 				}
@@ -197,7 +197,7 @@ void dCIL::RemoveRedundantJumps(dListNode* const function)
 			dListNode* const nextGotoNode = targetNode->GetNext();
 			if ((stmt1.m_instruction == dTreeAdressStmt::m_label) && (nextGotoNode->GetInfo().m_instruction == dTreeAdressStmt::m_goto)) {
 				const dTreeAdressStmt& stmt2 = nextGotoNode->GetInfo();
-				stmt.m_arg0 = stmt2.m_arg0;
+				stmt.m_arg0.m_label = stmt2.m_arg0.m_label;
 				stmt.m_jmpTarget = stmt2.m_jmpTarget;
 			}
 		}
@@ -216,7 +216,7 @@ void dCIL::RemoveRedundantJumps(dListNode* const function)
 					dTreeAdressStmt& gotoStmt = gotoNode->GetInfo();
 					stmt.m_operator = m_operatorComplement[stmt.m_operator];
 					stmt.m_jmpTarget = gotoStmt.m_jmpTarget;
-					stmt.m_arg2 = gotoStmt.m_arg0;
+					stmt.m_arg2.m_label = gotoStmt.m_arg0.m_label;
 					Remove(gotoNode);
 				}
 			}
@@ -353,22 +353,22 @@ void dCIL::PackTmpVariables(dFlowControlBlock* const root)
 	dTree<int, int> tmpMap;
 	for (dCIL::dListNode* node = root->m_leader; node; node = node->GetNext()) {	
 		dTreeAdressStmt& stmt = node->GetInfo();		
-		if (stmt.m_arg0[0] == 't') {
-			int index = atoi (&stmt.m_arg0[1]);
+		if (stmt.m_arg0.m_label[0] == 't') {
+			int index = atoi (&stmt.m_arg0.m_label[1]);
 			if (!tmpMap.Find(index)) {
 				tmpMap.Insert(id, index);
 				id ++;
 			}
 		}
-		if (stmt.m_arg1[0] == 't') {
-			int index = atoi (&stmt.m_arg1[1]);
+		if (stmt.m_arg1.m_label[0] == 't') {
+			int index = atoi (&stmt.m_arg1.m_label[1]);
 			if (!tmpMap.Find(index)) {
 				tmpMap.Insert(id, index);
 				id ++;
 			}
 		}
-		if (stmt.m_arg2[0] == 't') {
-			int index = atoi (&stmt.m_arg2[1]);
+		if (stmt.m_arg2.m_label[0] == 't') {
+			int index = atoi (&stmt.m_arg2.m_label[1]);
 			if (!tmpMap.Find(index)) {
 				tmpMap.Insert(id, index);
 				id ++;
@@ -378,29 +378,29 @@ void dCIL::PackTmpVariables(dFlowControlBlock* const root)
 
 	for (dCIL::dListNode* node = root->m_leader; node; node = node->GetNext()) {	
 		dTreeAdressStmt& stmt = node->GetInfo();		
-		if (stmt.m_arg0[0] == 't') {
-			int index = atoi (&stmt.m_arg0[1]);
+		if (stmt.m_arg0.m_label[0] == 't') {
+			int index = atoi (&stmt.m_arg0.m_label[1]);
 			dTree<int, int>::dTreeNode* const node = tmpMap.Find(index);
 			_ASSERTE (node);
 			char text[128];
 			sprintf (text, "t%d", node->GetInfo());
-			stmt.m_arg0 = text;
+			stmt.m_arg0.m_label = text;
 		}
-		if (stmt.m_arg1[0] == 't') {
-			int index = atoi (&stmt.m_arg1[1]);
+		if (stmt.m_arg1.m_label[0] == 't') {
+			int index = atoi (&stmt.m_arg1.m_label[1]);
 			dTree<int, int>::dTreeNode* const node = tmpMap.Find(index);
 			_ASSERTE (node);
 			char text[128];
 			sprintf (text, "t%d", node->GetInfo());
-			stmt.m_arg1 = text;
+			stmt.m_arg1.m_label = text;
 		}
-		if (stmt.m_arg2[0] == 't') {
-			int index = atoi (&stmt.m_arg2[1]);
+		if (stmt.m_arg2.m_label[0] == 't') {
+			int index = atoi (&stmt.m_arg2.m_label[1]);
 			dTree<int, int>::dTreeNode* const node = tmpMap.Find(index);
 			_ASSERTE (node);
 			char text[128];
 			sprintf (text, "t%d", node->GetInfo());
-			stmt.m_arg2 = text;
+			stmt.m_arg2.m_label = text;
 		}
 	}
 

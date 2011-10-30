@@ -61,7 +61,7 @@ void dDAGFunctionStatementFlow::BackPatch (dCIL& cil)
 		dCIL::dListNode* const target = cil.NewStatement();
 		dTreeAdressStmt& jmpTarget = target->GetInfo();
 		jmpTarget.m_instruction = dTreeAdressStmt::m_label;
-		jmpTarget.m_arg0 = m_currentExitLabel;
+		jmpTarget.m_arg0.m_label = m_currentExitLabel;
 		dTRACE_INTRUCTION (&jmpTarget);
 
 		for (dCIL::dListNode* node = m_backPatchStart->GetNext(); node; node = node->GetNext()) {

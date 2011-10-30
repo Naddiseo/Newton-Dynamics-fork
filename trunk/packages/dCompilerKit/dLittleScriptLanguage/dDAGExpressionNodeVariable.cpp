@@ -74,10 +74,10 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 		dCIL::dListNode* const dimInstruction = cil.NewStatement();
 		dTreeAdressStmt& addressIndex = dimInstruction->GetInfo();
 		addressIndex.m_instruction = dTreeAdressStmt::m_assigment;
-		addressIndex.m_arg0 = cil.NewTemp();
-		addressIndex.m_arg1 = dim->m_result; 
+		addressIndex.m_arg0.m_label = cil.NewTemp();
+		addressIndex.m_arg1.m_label = dim->m_result; 
 
-		string result = addressIndex.m_arg0;
+		string result = addressIndex.m_arg0.m_label;
 		dTRACE_INTRUCTION (&addressIndex);
 
 		for (dList<dDAGDimensionNode*>::dListNode* node = m_dimExpressions.GetFirst()->GetNext(); node; node = node->GetNext()) {
@@ -87,20 +87,20 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 			dTreeAdressStmt& stmtMul = cil.NewStatement()->GetInfo();
 			stmtMul.m_instruction = dTreeAdressStmt::m_assigment;
 			stmtMul.m_operator = dTreeAdressStmt::m_mul;
-			stmtMul.m_arg0 = cil.NewTemp();
-			stmtMul.m_arg1 = result;
-			stmtMul.m_arg2 = dim->m_arraySize;
+			stmtMul.m_arg0.m_label = cil.NewTemp();
+			stmtMul.m_arg1.m_label = result;
+			stmtMul.m_arg2.m_label = dim->m_arraySize;
 
 			dTRACE_INTRUCTION (&stmtMul);
 
 			dTreeAdressStmt& stmtAdd = cil.NewStatement()->GetInfo();
 			stmtAdd.m_instruction = dTreeAdressStmt::m_assigment;
 			stmtAdd.m_operator = dTreeAdressStmt::m_add;
-			stmtAdd.m_arg0 = cil.NewTemp();
-			stmtAdd.m_arg1 = stmtMul.m_arg0;
-			stmtAdd.m_arg2 = dim->m_result;
+			stmtAdd.m_arg0.m_label = cil.NewTemp();
+			stmtAdd.m_arg1.m_label = stmtMul.m_arg0.m_label;
+			stmtAdd.m_arg2.m_label = dim->m_result;
 
-			result = stmtAdd.m_arg0;
+			result = stmtAdd.m_arg0.m_label;
 
 			dTRACE_INTRUCTION (&stmtAdd);
 		}
@@ -108,12 +108,12 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 		dTreeAdressStmt& dimSize = cil.NewStatement()->GetInfo();
 		dimSize.m_instruction = dTreeAdressStmt::m_assigment;
 		dimSize.m_operator = dTreeAdressStmt::m_mul;
-		dimSize.m_arg0 = cil.NewTemp();
-		dimSize.m_arg1 = result; 
-		dimSize.m_arg2 = "4"; 
+		dimSize.m_arg0.m_label = cil.NewTemp();
+		dimSize.m_arg1.m_label = result; 
+		dimSize.m_arg2.m_label = "4"; 
 		dTRACE_INTRUCTION (&dimSize);
 
-		result = dimSize.m_arg0;
+		result = dimSize.m_arg0.m_label;
 
 		_ASSERTE (m_parent);
 		if (m_parent->GetTypeId() == dDAGFunctionStatementAssigment::GetRttiType()) {
@@ -124,31 +124,31 @@ void dDAGExpressionNodeVariable::CompileCIL(dCIL& cil)
 			} else {
 				// emit an indirect addressing mode
 				dTreeAdressStmt& tmp = cil.NewStatement()->GetInfo();
-//				m_result = m_name + '[' + addressIndex.m_arg0 + ']';
+//				m_result = m_name + '[' + addressIndex.m_arg0.m_label + ']';
 //				tmp.m_instruction = dTreeAdressStmt::m_assigment;
-//				tmp.m_arg0 = cil.NewTemp();
-//				tmp.m_arg1 = m_name + '[' + result + ']';
+//				tmp.m_arg0.m_label = cil.NewTemp();
+//				tmp.m_arg1.m_label = m_name + '[' + result + ']';
 				tmp.m_instruction = dTreeAdressStmt::m_load;
-				tmp.m_arg0 = cil.NewTemp();
-				tmp.m_arg1 = m_name;
-				tmp.m_arg2 = result;
+				tmp.m_arg0.m_label = cil.NewTemp();
+				tmp.m_arg1.m_label = m_name;
+				tmp.m_arg2.m_label = result;
 				dTRACE_INTRUCTION (&tmp);
-				m_result = tmp.m_arg0; 
+				m_result = tmp.m_arg0.m_label; 
 			}
 			
 		} else {
 			// emit an indirect addressing mode
 			dTreeAdressStmt& tmp = cil.NewStatement()->GetInfo();
-//			m_result = m_name + '[' + addressIndex.m_arg0 + ']';
+//			m_result = m_name + '[' + addressIndex.m_arg0.m_label + ']';
 //			tmp.m_instruction = dTreeAdressStmt::m_assigment;
-//			tmp.m_arg0 = cil.NewTemp();;
-//			tmp.m_arg1 = m_name + '[' + result + ']';
+//			tmp.m_arg0.m_label = cil.NewTemp();;
+//			tmp.m_arg1.m_label = m_name + '[' + result + ']';
 			tmp.m_instruction = dTreeAdressStmt::m_load;
-			tmp.m_arg0 = cil.NewTemp();
-			tmp.m_arg1 = m_name;
-			tmp.m_arg2 = result;
+			tmp.m_arg0.m_label = cil.NewTemp();
+			tmp.m_arg1.m_label = m_name;
+			tmp.m_arg2.m_label = result;
 			dTRACE_INTRUCTION (&tmp);
-			m_result = tmp.m_arg0; 
+			m_result = tmp.m_arg0.m_label; 
 		}
 	} else {
 		m_result = m_name;

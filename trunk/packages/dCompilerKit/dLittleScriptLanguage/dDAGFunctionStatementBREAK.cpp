@@ -39,7 +39,7 @@ void dDAGFunctionStatementBREAK::CompileCIL(dCIL& cil)
 			dDAGFunctionStatementFlow* const flowControl = (dDAGFunctionStatementFlow*) node;
 			dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
 			stmt.m_instruction = dTreeAdressStmt::m_goto;
-			stmt.m_arg0 = flowControl->m_currentExitLabel;
+			stmt.m_arg0.m_label = flowControl->m_currentExitLabel;
 			dTRACE_INTRUCTION (&stmt);
 			return ;
 		} 

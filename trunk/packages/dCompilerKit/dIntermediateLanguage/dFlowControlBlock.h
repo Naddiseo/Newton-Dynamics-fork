@@ -31,9 +31,11 @@ class dFlowControlBlock
 	void AddGraphEdge (dFlowControlBlock* const child);
 
 	private:
-	void ApplyCopyProgation(dCIL& program);
-	bool RemoveSubExpressions_1(dCIL& program);
-	bool RemoveSubExpressions_2(dCIL& program);
+	bool ApplyCopyPropagation(dCIL& program);
+	bool ApplyConstantFolding(dCIL& program);
+	bool ApplySubExpressionsElimination(dCIL& program);
+
+	
 
 
 	int m_mark;

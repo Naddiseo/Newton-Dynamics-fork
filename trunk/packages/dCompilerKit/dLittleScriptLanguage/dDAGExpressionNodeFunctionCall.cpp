@@ -59,13 +59,13 @@ void dDAGExpressionNodeFunctionCall::CompileCIL(dCIL& cil)
 		exp->CompileCIL(cil);
 		dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
 		stmt.m_instruction = dTreeAdressStmt::m_param;
-		stmt.m_arg0 = exp->m_result;
+		stmt.m_arg0.m_label = exp->m_result;
 		dTRACE_INTRUCTION (&stmt);
 	}
 
 	dTreeAdressStmt& call = cil.NewStatement()->GetInfo();
 	call.m_instruction = dTreeAdressStmt::m_call;
-	call.m_arg0 = m_name;
+	call.m_arg0.m_label = m_name;
 	dTRACE_INTRUCTION (&call);
 
 	if (m_argumentList.GetCount()) {
@@ -73,7 +73,7 @@ void dDAGExpressionNodeFunctionCall::CompileCIL(dCIL& cil)
 		char text[256];
 		sprintf (text, "%d", m_argumentList.GetCount());
 		param.m_instruction = dTreeAdressStmt::m_restoreParam;
-		param.m_arg0 = text;
+		param.m_arg0.m_label = text;
 		dTRACE_INTRUCTION (&param);
 	}
 

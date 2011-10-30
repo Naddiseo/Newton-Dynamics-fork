@@ -18,6 +18,26 @@
 class dTreeAdressStmt
 {
 	public:
+	enum dArgType
+	{
+		m_intVar,
+		m_floatVar,
+		m_intConst,
+		m_floatConst,
+	};
+
+	struct dArg
+	{
+		dArg ()
+			:m_type (m_intVar)
+			,m_label()
+		{
+		}
+		dArgType m_type;
+		string m_label;
+	};
+
+
 	enum dOperator
 	{
 		m_nothing,
@@ -55,9 +75,9 @@ class dTreeAdressStmt
 
 	dInstruction m_instruction;
 	dOperator m_operator;
-	string m_arg0;
-	string m_arg1;
-	string m_arg2;
+	dArg m_arg0;
+	dArg m_arg1;
+	dArg m_arg2;
 	dList<dTreeAdressStmt>::dListNode* m_jmpTarget;
 
 	void Trace () const;

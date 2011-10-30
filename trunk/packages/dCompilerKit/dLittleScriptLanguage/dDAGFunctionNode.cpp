@@ -108,14 +108,14 @@ void dDAGFunctionNode::CompileCIL(dCIL& cil)
 	dCIL::dListNode* const functionNode = cil.NewStatement();
 	dTreeAdressStmt& function = functionNode->GetInfo();
 	function.m_instruction = dTreeAdressStmt::m_function;
-	function.m_arg0 = m_name;
+	function.m_arg0.m_label = m_name;
 	dTRACE_INTRUCTION (&function);
 	for (dList<dDAGParameterNode*>::dListNode* argNode = m_parameters.GetFirst(); argNode; argNode = argNode->GetNext()) {
 		dDAGParameterNode* const arg = argNode->GetInfo();
 
 		dTreeAdressStmt& fntArg = cil.NewStatement()->GetInfo();
 		fntArg.m_instruction = dTreeAdressStmt::m_argument;
-		fntArg.m_arg0 = arg->m_name;
+		fntArg.m_arg0.m_label = arg->m_name;
 		dTRACE_INTRUCTION (&fntArg);
 	}
 
@@ -126,7 +126,7 @@ void dDAGFunctionNode::CompileCIL(dCIL& cil)
 	bool returnStmt = false;
 	for (dCIL::dListNode* node = functionNode; node; node = node->GetNext()) {
 		dTreeAdressStmt& stmt = node->GetInfo();
-		if ((stmt.m_instruction == dTreeAdressStmt::m_goto) && (stmt.m_arg0 == D_RETURN_LABEL))  {
+		if ((stmt.m_instruction == dTreeAdressStmt::m_goto) && (stmt.m_arg0.m_label == D_RETURN_LABEL))  {
 			returnStmt = true;
 			break;
 		}
@@ -136,12 +136,12 @@ void dDAGFunctionNode::CompileCIL(dCIL& cil)
 		dCIL::dListNode* const retLabelNode = cil.NewStatement();
 		dTreeAdressStmt& retLabel = retLabelNode->GetInfo();
 		retLabel.m_instruction = dTreeAdressStmt::m_label;
-		retLabel.m_arg0 = D_RETURN_LABEL;
+		retLabel.m_arg0.m_label = D_RETURN_LABEL;
 		dTRACE_INTRUCTION (&retLabel);
 
 		for (dCIL::dListNode* node = functionNode; node; node = node->GetNext()) {
 			dTreeAdressStmt& stmt = node->GetInfo();
-			if ((stmt.m_instruction == dTreeAdressStmt::m_goto) && (stmt.m_arg0 == D_RETURN_LABEL))  {
+			if ((stmt.m_instruction == dTreeAdressStmt::m_goto) && (stmt.m_arg0.m_label == D_RETURN_LABEL))  {
 				stmt.m_jmpTarget = retLabelNode;
 			}
 		}
@@ -150,7 +150,7 @@ void dDAGFunctionNode::CompileCIL(dCIL& cil)
 	dCIL::dListNode* const retNode = cil.NewStatement();
 	dTreeAdressStmt& ret = retNode->GetInfo();
 	ret.m_instruction = dTreeAdressStmt::m_ret;
-	ret.m_arg0 = m_returnRegister;
+	ret.m_arg0.m_label = m_returnRegister;
 	dTRACE_INTRUCTION (&ret);
 
 	cil.NewStatement();

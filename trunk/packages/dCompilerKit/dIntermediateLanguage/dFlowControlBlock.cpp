@@ -83,20 +83,17 @@ void dFlowControlBlock::ApplyLocalOptimizations(dCIL& program)
 	bool optimized = true;
 	while (optimized) {
 		optimized = false;
-		optimized |= RemoveSubExpressions_1(program);
-		optimized |= RemoveSubExpressions_2(program);
+		optimized |= ApplySubExpressionsElimination(program);
+		optimized |= ApplyCopyPropagation(program);
+		optimized |= ApplyConstantFolding(program);
 	}
 //Trace();
 }
 
 
-void dFlowControlBlock::ApplyCopyProgation(dCIL& program)
-{
-
-}
 
 
-bool dFlowControlBlock::RemoveSubExpressions_1(dCIL& program)
+bool dFlowControlBlock::ApplySubExpressionsElimination(dCIL& program)
 {
 	bool ret = false;
 	const dCIL::dListNode* const lastNode = m_end->GetNext();
@@ -108,27 +105,27 @@ bool dFlowControlBlock::RemoveSubExpressions_1(dCIL& program)
 			for (dCIL::dListNode* node1 = node->GetNext(); node1 != lastNode; node1 = next) {
 				dTreeAdressStmt& stmt1 = node1->GetInfo();
 				next = node1->GetNext();
-				if (stmt.m_arg0 == stmt1.m_arg0) {
+				if (stmt.m_arg0.m_label == stmt1.m_arg0.m_label) {
 					break;
 				}
-				if ((stmt.m_instruction == stmt1.m_instruction) && (stmt.m_operator == stmt1.m_operator) &&	(stmt.m_arg1 == stmt1.m_arg1) && (stmt.m_arg2 == stmt1.m_arg2)) {
+				if ((stmt.m_instruction == stmt1.m_instruction) && (stmt.m_operator == stmt1.m_operator) &&	(stmt.m_arg1.m_label == stmt1.m_arg1.m_label) && (stmt.m_arg2.m_label == stmt1.m_arg2.m_label)) {
 					for (dCIL::dListNode* node2 = node1->GetNext(); node2 != lastNode; node2 = node2->GetNext()) {
 						dTreeAdressStmt& stmt2 = node2->GetInfo();
-						if (stmt2.m_arg0 == stmt1.m_arg0) {
+						if (stmt2.m_arg0.m_label == stmt1.m_arg0.m_label) {
 							ret = true;
-							stmt2.m_arg0 = stmt.m_arg0;
+							stmt2.m_arg0.m_label = stmt.m_arg0.m_label;
 						}
-						if (stmt2.m_arg1 == stmt1.m_arg0) {
+						if (stmt2.m_arg1.m_label == stmt1.m_arg0.m_label) {
 							ret = true;
-							stmt2.m_arg1 = stmt.m_arg0;
+							stmt2.m_arg1.m_label = stmt.m_arg0.m_label;
 						}
-						if (stmt2.m_arg2 == stmt1.m_arg0) {
+						if (stmt2.m_arg2.m_label == stmt1.m_arg0.m_label) {
 							ret = true;
-							stmt2.m_arg2 = stmt.m_arg0;
+							stmt2.m_arg2.m_label = stmt.m_arg0.m_label;
 						}
 					}
 
-					if (stmt1.m_arg0[0] == 't') {
+					if (stmt1.m_arg0.m_label[0] == 't') {
 						program.Remove(node1);
 //Trace();
 					}
@@ -139,9 +136,10 @@ bool dFlowControlBlock::RemoveSubExpressions_1(dCIL& program)
 	return ret;
 }
 
-bool dFlowControlBlock::RemoveSubExpressions_2(dCIL& program)
+bool dFlowControlBlock::ApplyCopyPropagation(dCIL& program)
 {
 	bool ret = false;
+
 	const dCIL::dListNode* const lastNode = m_end->GetNext();
 	_ASSERTE (lastNode);
 	dCIL::dListNode* next = NULL;
@@ -157,15 +155,15 @@ bool dFlowControlBlock::RemoveSubExpressions_2(dCIL& program)
 					{
 						case dTreeAdressStmt::m_assigment:
 						{
-							if (stmt1.m_arg1 == stmt.m_arg0) {
+							if (stmt1.m_arg1.m_label == stmt.m_arg0.m_label) {
 								alive = false;
 								ret = true;
-								stmt1.m_arg1 = stmt.m_arg1;
+								stmt1.m_arg1.m_label = stmt.m_arg1.m_label;
 							}
-							if (stmt1.m_arg2 == stmt.m_arg0) {
+							if (stmt1.m_arg2.m_label == stmt.m_arg0.m_label) {
 								alive = false;
 								ret = true;
-								stmt1.m_arg2 = stmt.m_arg1;
+								stmt1.m_arg2.m_label = stmt.m_arg1.m_label;
 							}
 							
 							break;
@@ -182,12 +180,12 @@ bool dFlowControlBlock::RemoveSubExpressions_2(dCIL& program)
 						case dTreeAdressStmt::m_assigment:
 						{
 							if (stmt1.m_operator == dTreeAdressStmt::m_nothing) {
-								if (stmt1.m_arg1 == stmt.m_arg0) {
+								if (stmt1.m_arg1.m_label == stmt.m_arg0.m_label) {
 									alive = false;
 									ret = true;
 									stmt1.m_operator = stmt.m_operator;
-									stmt1.m_arg1 = stmt.m_arg1;
-									stmt1.m_arg2 = stmt.m_arg2;
+									stmt1.m_arg1.m_label = stmt.m_arg1.m_label;
+									stmt1.m_arg2.m_label = stmt.m_arg2.m_label;
 								}
 							}
 							break;
@@ -201,24 +199,24 @@ bool dFlowControlBlock::RemoveSubExpressions_2(dCIL& program)
 								{
 									case dTreeAdressStmt::m_equal:
 									{
-										if (stmt1.m_arg1 == "0") {
+										if (stmt1.m_arg1.m_label == "0") {
 											alive = false;
 											ret = true;
 											stmt1.m_operator = program.m_operatorComplement[stmt.m_operator];
-											stmt1.m_arg0 = stmt.m_arg1;
-											stmt1.m_arg1 = stmt.m_arg2;
+											stmt1.m_arg0.m_label = stmt.m_arg1.m_label;
+											stmt1.m_arg1.m_label = stmt.m_arg2.m_label;
 										}
 										break;
 									}
 
 									case dTreeAdressStmt::m_different:
 									{
-										if (stmt1.m_arg1 == "0") {
+										if (stmt1.m_arg1.m_label == "0") {
 											alive = false;
 											ret = true;
 											stmt1.m_operator = stmt.m_operator;
-											stmt1.m_arg0 = stmt.m_arg1;
-											stmt1.m_arg1 = stmt.m_arg2;
+											stmt1.m_arg0.m_label = stmt.m_arg1.m_label;
+											stmt1.m_arg1.m_label = stmt.m_arg2.m_label;
 										}
 										break;
 									}
@@ -231,7 +229,7 @@ bool dFlowControlBlock::RemoveSubExpressions_2(dCIL& program)
 					}
 				}
 			}
-			if (!alive && (stmt.m_arg0[0] == 't')) {
+			if (!alive && (stmt.m_arg0.m_label[0] == 't')) {
 				if (m_leader == node) {
 					m_leader = node->GetNext();
 				}
@@ -243,13 +241,13 @@ bool dFlowControlBlock::RemoveSubExpressions_2(dCIL& program)
 				dTreeAdressStmt& stmt1 = node1->GetInfo();
 				alive |= stmt1.m_instruction != dTreeAdressStmt::m_store;  
 				if (alive && (stmt1.m_instruction == dTreeAdressStmt::m_assigment) && 
-							 (stmt1.m_operator == dTreeAdressStmt::m_nothing) && (stmt1.m_arg1 == stmt.m_arg0)) {
+							 (stmt1.m_operator == dTreeAdressStmt::m_nothing) && (stmt1.m_arg1.m_label == stmt.m_arg0.m_label)) {
 					alive = false;
 					ret = true;
 					stmt1.m_instruction = dTreeAdressStmt::m_load;
-					stmt1.m_arg1 = stmt.m_arg1;
-					stmt1.m_arg2 = stmt.m_arg2;
-					if (stmt.m_arg0[0] == 't') {
+					stmt1.m_arg1.m_label = stmt.m_arg1.m_label;
+					stmt1.m_arg2.m_label = stmt.m_arg2.m_label;
+					if (stmt.m_arg0.m_label[0] == 't') {
 						if (m_leader == node) {
 							m_leader = node->GetNext();
 						}
@@ -262,3 +260,22 @@ bool dFlowControlBlock::RemoveSubExpressions_2(dCIL& program)
 	return ret;
 }
 
+bool dFlowControlBlock::ApplyConstantFolding(dCIL& program)
+{
+
+	bool ret = false;
+	const dCIL::dListNode* const lastNode = m_end->GetNext();
+	_ASSERTE (lastNode);
+	for (dCIL::dListNode* node = m_leader; node != lastNode; node = node->GetNext()) {
+		dTreeAdressStmt& stmt = node->GetInfo();
+		if ((stmt.m_instruction == dTreeAdressStmt::m_assigment) && (stmt.m_operator != dTreeAdressStmt::m_nothing)) {
+			if (((stmt.m_arg1.m_type == dTreeAdressStmt::m_intVar) ||  (stmt.m_arg1.m_type == dTreeAdressStmt::m_floatVar)) &&
+				((stmt.m_arg2.m_type == dTreeAdressStmt::m_intVar) ||  (stmt.m_arg2.m_type == dTreeAdressStmt::m_floatVar))) {
+					ret = true;
+					_ASSERTE (0);
+			}
+		}
+	}
+
+	return false;
+}

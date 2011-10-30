@@ -73,7 +73,7 @@ void dDAGParameterNode::CompileCIL(dCIL& cil)
 
 	dTreeAdressStmt& local = cil.NewStatement()->GetInfo();
 	local.m_instruction = dTreeAdressStmt::m_local;
-	local.m_arg0 = m_name;
+	local.m_arg0.m_label = m_name;
 	dTRACE_INTRUCTION (&local);
 
 	if (m_initializationExp) {
@@ -81,8 +81,8 @@ void dDAGParameterNode::CompileCIL(dCIL& cil)
 
 		dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
 		stmt.m_instruction = dTreeAdressStmt::m_assigment;
-		stmt.m_arg0 = m_name;
-		stmt.m_arg1 = m_initializationExp->m_result;
+		stmt.m_arg0.m_label = m_name;
+		stmt.m_arg1.m_label = m_initializationExp->m_result;
 		dTRACE_INTRUCTION (&stmt);
 	}
 */
@@ -105,14 +105,14 @@ void dDAGParameterNode::CompileCIL(dCIL& cil)
 
 	dTreeAdressStmt& local = cil.NewStatement()->GetInfo();
 	local.m_instruction = dTreeAdressStmt::m_local;
-	local.m_arg0 = m_name;
+	local.m_arg0.m_label = m_name;
 	dTRACE_INTRUCTION (&local);
 
 	if (initName) {
 		dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
 		stmt.m_instruction = dTreeAdressStmt::m_assigment;
-		stmt.m_arg0 = m_name;
-		stmt.m_arg1 = initName;
+		stmt.m_arg0.m_label = m_name;
+		stmt.m_arg1.m_label = initName;
 		dTRACE_INTRUCTION (&stmt);
 	}
 }

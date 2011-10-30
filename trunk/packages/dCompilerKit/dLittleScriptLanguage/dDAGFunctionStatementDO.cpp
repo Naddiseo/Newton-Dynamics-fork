@@ -61,7 +61,7 @@ void dDAGFunctionStatementDO::CompileCIL(dCIL& cil)
 	dCIL::dListNode* const startFlow = cil.NewStatement();
 	dTreeAdressStmt& startLabel = startFlow->GetInfo();
 	startLabel.m_instruction = dTreeAdressStmt::m_label;
-	startLabel.m_arg0 = cil.NewLabel();
+	startLabel.m_arg0.m_label = cil.NewLabel();
 	dTRACE_INTRUCTION (&startLabel);
 
 	if (m_stmt) {
@@ -75,15 +75,15 @@ void dDAGFunctionStatementDO::CompileCIL(dCIL& cil)
 		dTreeAdressStmt& stmt = expressionNode->GetInfo();
 		stmt.m_instruction = dTreeAdressStmt::m_if;
 		stmt.m_operator = dTreeAdressStmt::m_different;
-		stmt.m_arg0 = m_expression->m_result;
-		stmt.m_arg1 = "0"; 
-		stmt.m_arg2 = startLabel.m_arg0; 
+		stmt.m_arg0.m_label = m_expression->m_result;
+		stmt.m_arg1.m_label = "0"; 
+		stmt.m_arg2.m_label = startLabel.m_arg0.m_label; 
 		stmt.m_jmpTarget = startFlow;
 		dTRACE_INTRUCTION (&stmt);
 	} else {
 		dTreeAdressStmt& stmt = cil.NewStatement()->GetInfo();
 		stmt.m_instruction = dTreeAdressStmt::m_goto;
-		stmt.m_arg0 = startLabel.m_arg0; 
+		stmt.m_arg0.m_label = startLabel.m_arg0.m_label; 
 		stmt.m_jmpTarget = startFlow;
 		dTRACE_INTRUCTION (&stmt);
 	}
