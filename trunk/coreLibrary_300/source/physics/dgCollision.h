@@ -258,9 +258,8 @@ class dgCollision//: public dgRef
 	virtual void SetCollisionBBox (const dgVector& p0, const dgVector& p1) = 0;
 	virtual void CalcAABB (const dgMatrix& matrix, dgVector& p0, dgVector& p1) const = 0;
 	virtual void CalcAABBSimd (const dgMatrix& matrix, dgVector& p0, dgVector& p1) const = 0;
-
 	virtual bool OOBBTest (const dgMatrix& matrix, const dgCollisionConvex* const shape, void* const cacheOrder) const = 0; 
-
+	virtual bool IsEdgeIntersection() const ;
 
 	virtual void DebugCollision (const dgMatrix& matrix, OnDebugCollisionMeshCallback callback, void* const userData) const = 0;
 	virtual dgFloat32 RayCast (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const = 0;
@@ -405,6 +404,11 @@ inline dgFloat32 dgCollision::GetBreakImpulse() const
 inline dgMemoryAllocator* dgCollision::GetAllocator() const
 {
 	return m_allocator;
+}
+
+inline bool dgCollision::IsEdgeIntersection() const
+{
+	return false;
 }
 
 #endif 

@@ -2506,6 +2506,11 @@ dgInt32 dgContactSolver::CalculateContacts(dgMinkFace* const face, dgInt32 conta
 					count = CalculateContactAlternateMethod(face, contacID, contactOut, maxContacts);
 				}
 			}
+
+			dgInt32 edgeContactFlag = (m_floatingcollision->IsEdgeIntersection() | m_referenceCollision->IsEdgeIntersection()) ? 1 : 0;
+			for (dgInt32 i = 0; i < count; i ++) {
+				contactOut[i].m_isEdgeContact = edgeContactFlag;
+			}
 		}
 	}
 	return count;

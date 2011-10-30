@@ -140,7 +140,7 @@ class dgCollisionMesh: public dgCollision
 		virtual dgFloat32 GetBoxMinRadius () const; 
 		virtual dgFloat32 GetBoxMaxRadius () const;
 		virtual void CalculateInertia (dgVector& inertia, dgVector& origin) const;
-
+		virtual bool IsEdgeIntersection() const;
 
 		void BeamClipping (const dgCollisionConvex* const hull, const dgMatrix& matrix, dgFloat32 size);
 		void BeamClippingSimd (const dgCollisionConvex* const hull, const dgMatrix& matrix, dgFloat32 size);
@@ -150,9 +150,9 @@ class dgCollisionMesh: public dgCollision
 		dgInt32 QuickTestContinueSimd (const dgCollisionConvex* const hull, const dgMatrix& matrix);
 		dgInt32 ClipContacts (dgInt32 count, dgContactPoint* const contactOut, const dgMatrix& globalMatrix) const;
 
-		dgVector ClosestDistanceToTriangle (const dgVector& point, const dgVector& p0, const dgVector& p1, const dgVector& p2) const;
-		bool PointToPolygonDistance (const dgVector& point, dgFloat32 radius, dgVector& out);
-		bool DistanceToOrigen (const dgMatrix& matrix, const dgVector& scale, dgFloat32 radius, dgVector& out);
+		dgVector ClosestDistanceToTriangle (const dgVector& point, const dgVector& p0, const dgVector& p1, const dgVector& p2, bool& isEdge) const;
+		bool PointToPolygonDistance (const dgVector& point, dgFloat32 radius, dgVector& out, bool& isEdge);
+		bool DistanceToOrigen (const dgMatrix& matrix, const dgVector& scale, dgFloat32 radius, dgVector& out, bool& isEdge);
 		dgFloat32 MovingPointToPolygonContact (const dgVector& p, const dgVector& veloc, dgFloat32 radius, dgContactPoint& contact);
 		
 		void CalculateNormal();
@@ -169,6 +169,7 @@ class dgCollisionMesh: public dgCollision
 		dgInt32* m_index;
 		dgInt32* m_adjacentNormalIndex;
 		dgFloat32* m_vertex;
+		mutable dgInt32 m_isEdgeIntersection;
 
 	}DG_GCC_VECTOR_ALIGMENT;
 

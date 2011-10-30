@@ -671,9 +671,12 @@ dgInt32 dgContactSolver::CalculateContactsSimd(dgMinkFace* const face, dgInt32 c
 					count = CalculateContactAlternateMethod(face, contacID, contactOut, maxContacts);
 				}
 			}
-			//_ASSERTE (count);
-		}
 
+			dgInt32 edgeContactFlag = (m_floatingcollision->IsEdgeIntersection() | m_referenceCollision->IsEdgeIntersection()) ? 1 : 0;
+			for (dgInt32 i = 0; i < count; i ++) {
+				contactOut[i].m_isEdgeContact = edgeContactFlag;
+			}
+		}
 	}
 
 	return count;

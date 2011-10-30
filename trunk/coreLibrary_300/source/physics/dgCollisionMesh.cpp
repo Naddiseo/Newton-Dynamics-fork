@@ -43,6 +43,7 @@ dgCollisionMesh::dgCollisionConvexPolygon::dgCollisionConvexPolygon (dgMemoryAll
 	m_vertex = NULL;
 	m_stride = 0;
 	m_paddedCount = 0;
+	m_isEdgeIntersection = false;
 
 	m_rtti |= dgCollisionConvexPolygon_RTTI;
 	memset (m_localPoly, 0, sizeof (m_localPoly));
@@ -353,6 +354,7 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::ClipContacts (dgInt32 count, 
 	dgVector normal (globalMatrix.RotateVector(m_normal));
 	if (m_normalIndex) {
 		for (dgInt32 i = 0; i < count; i ++) {
+			if (contactOut[i].m_isEdgeContact) {
 			dgFloat32 dist = contactOut[i].m_normal % normal;
 			contactOut[i].m_isEdgeContact = 0;
 			if (dist <= dgFloat32 (0.9998f)) {
@@ -388,29 +390,37 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::ClipContacts (dgInt32 count, 
 					j0 = j1;
 				}
 				_ASSERTE (m_adjacentNormalIndex);
-				//if ((closestEdgeDist > (dgFloat32 (0.25f) * dgFloat32 (0.25f))) || (m_adjacentNormalIndex[closestEdgeIndex] == -1)) {
 				if (m_adjacentNormalIndex[closestEdgeIndex] == -1) {
 					contactOut[i].m_normal = normal;
 				} else {
 					dgVector aNormal (globalMatrix.RotateVector(dgVector (&m_vertex[m_adjacentNormalIndex[closestEdgeIndex] * m_stride])));
-					dgVector side (normal * aNormal);
-					dgFloat32 dist = side % side;
-					if (dist < dgFloat32 (0.05f * 0.05f)) {
+
+						_ASSERTE ((normal % normal) > 0.9999f);
+						_ASSERTE ((aNormal % aNormal) > 0.9999f);
+						dgFloat32 dot = normal % aNormal;
+						//dgFloat32 n2 = normal % normal;
+						//dgFloat32 na2 = aNormal % aNormal;
+						if ((dot * dot) > dgFloat32 (0.999f)) {
 						normal += aNormal;
 						contactOut[i].m_normal = normal.Scale (dgRsqrt (normal % normal));
+							contactOut[i].m_isEdgeContact = 0;
 					} else {
-						dgVector plane (aNormal * side);
-						dist = contactOut[i].m_normal % plane;
-						if (dist < dgFloat32 (0.0f)) {
+							dgVector planeNormal (normal * aNormal);
+							dgVector projectNormal (contactOut[i].m_normal - planeNormal.Scale ((planeNormal % contactOut[i].m_normal) /(planeNormal % planeNormal)));
+							dgVector dirPlane (projectNormal * aNormal);
+							dgFloat32 dir (dirPlane % planeNormal);
+							if (dir < dgFloat32 (0.0f)) {
 							contactOut[i].m_normal = aNormal;
+								contactOut[i].m_isEdgeContact = 0;
+							}
 						}
 					}
 				}
 			}
 		}
 	} else {
-
 		for (dgInt32 i = 0; i < count; i ++) {
+			if (contactOut[i].m_isEdgeContact) {
 			dgFloat32 dist = contactOut[i].m_normal % normal;
 			contactOut[i].m_isEdgeContact = (dist < dgFloat32 (0.999f));	
 			if (dist < dgFloat32 (0.1f)) {
@@ -418,6 +428,7 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::ClipContacts (dgInt32 count, 
 				count --;
 				i --;
 			}
+		}
 		}
 
 	}
@@ -612,6 +623,7 @@ void dgCollisionMesh::dgCollisionConvexPolygon::BeamClippingSimd (const dgCollis
 
 		i1 += 3;
 	}
+
 	m_paddedCount = i1;
 }
 
@@ -788,14 +800,13 @@ void dgCollisionMesh::dgCollisionConvexPolygon::BeamClipping (const dgCollisionC
 
 
 
-dgVector dgCollisionMesh::dgCollisionConvexPolygon::ClosestDistanceToTriangle (const dgVector& point, const dgVector& p0, const dgVector& p1, const dgVector& p2) const
+dgVector dgCollisionMesh::dgCollisionConvexPolygon::ClosestDistanceToTriangle (const dgVector& point, const dgVector& p0, const dgVector& p1, const dgVector& p2, bool& isEdge) const
 {
-
-	//	const dgVector p (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 	const dgVector p10 (p1 - p0);
 	const dgVector p20 (p2 - p0);
 	const dgVector p_p0 (point - p0);
 
+	isEdge = true;
 	dgFloat32 alpha1 = p10 % p_p0;
 	dgFloat32 alpha2 = p20 % p_p0;
 	if ((alpha1 <= dgFloat32 (0.0f)) && (alpha2 <= dgFloat32 (0.0f))) {
@@ -843,6 +854,7 @@ dgVector dgCollisionMesh::dgCollisionConvexPolygon::ClosestDistanceToTriangle (c
 		return p1 + (p2 - p1).Scale (t);
 	}
 
+	isEdge = false;
 	dgFloat32 den = float(1.0f) / (va + vb + vc);
 	dgFloat32 t = vb * den;
 	dgFloat32 s = vc * den;
@@ -853,17 +865,20 @@ dgVector dgCollisionMesh::dgCollisionConvexPolygon::ClosestDistanceToTriangle (c
 	return p0 + p10.Scale (t) + p20.Scale (s);
 }
 
-bool dgCollisionMesh::dgCollisionConvexPolygon::PointToPolygonDistance (const dgVector& p, dgFloat32 radius, dgVector& out)
+bool dgCollisionMesh::dgCollisionConvexPolygon::PointToPolygonDistance (const dgVector& p, dgFloat32 radius, dgVector& out, bool& isEdge)
 {
 	dgFloat32 minDist = dgFloat32 (1.0e20f);
 	m_localPoly[0] = dgVector (&m_vertex[m_index[0] * m_stride]);
 	m_localPoly[1] = dgVector (&m_vertex[m_index[1] * m_stride]);
 //	m_localPoly[2] = dgVector (&m_vertex[m_index[2] * m_stride]);
 
+	isEdge = true;
 	dgVector closestPoint (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 	for (dgInt32 i2 = 2; i2 < m_count; i2 ++) {
 		m_localPoly[i2] = dgVector (&m_vertex[m_index[i2] * m_stride]);
-		const dgVector q (ClosestDistanceToTriangle (p, m_localPoly[0], m_localPoly[i2 - 1], m_localPoly[i2]));
+		bool tmpIsEdge; 
+		const dgVector q (ClosestDistanceToTriangle (p, m_localPoly[0], m_localPoly[i2 - 1], m_localPoly[i2], tmpIsEdge));
+		isEdge &= tmpIsEdge;
 		const dgVector error (q - p);
 		dgFloat32 dist = error % error;
 		if (dist < minDist) {
@@ -881,17 +896,20 @@ bool dgCollisionMesh::dgCollisionConvexPolygon::PointToPolygonDistance (const dg
 	return true;
 }
 
-bool dgCollisionMesh::dgCollisionConvexPolygon::DistanceToOrigen (const dgMatrix& matrix, const dgVector& scale, dgFloat32 radius, dgVector& out)
+bool dgCollisionMesh::dgCollisionConvexPolygon::DistanceToOrigen (const dgMatrix& matrix, const dgVector& scale, dgFloat32 radius, dgVector& out, bool& isEdge)
 {
 	dgFloat32 minDist = dgFloat32 (1.0e20f);
 	m_localPoly[0] = scale.CompProduct (matrix.TransformVector(dgVector (&m_vertex[m_index[0] * m_stride])));
 	m_localPoly[1] = scale.CompProduct (matrix.TransformVector(dgVector (&m_vertex[m_index[1] * m_stride])));
 
+	isEdge = true;
 	dgVector origin (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 	dgVector closestPoint (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 	for (dgInt32 i2 = 2; i2 < m_count; i2 ++) {
 		m_localPoly[i2] = scale.CompProduct (matrix.TransformVector(dgVector (&m_vertex[m_index[i2] * m_stride])));
-		const dgVector q (ClosestDistanceToTriangle (origin, m_localPoly[0], m_localPoly[i2 - 1], m_localPoly[i2]));
+		bool tmpIsEdge; 
+		const dgVector q (ClosestDistanceToTriangle (origin, m_localPoly[0], m_localPoly[i2 - 1], m_localPoly[i2], tmpIsEdge));
+		isEdge &= tmpIsEdge;
 		const dgVector error (q - origin);
 		dgFloat32 dist = error % error;
 		if (dist < minDist) {
@@ -926,12 +944,15 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 	m_localPoly[2] = dgVector (&m_vertex[m_index[2] * m_stride]);
 	CalculateNormal();
 
+	bool isEdge = true;
 	dgFloat32 timestep = dgFloat32 (-1.0f);
 	dgVector closestPoint (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
 	dgFloat32 minDist = dgFloat32 (1.0e20f);
 	for (dgInt32 j = 2; j < m_count; j ++) {
+		bool tmpIsEdge;
 		m_localPoly[j] = dgVector (&m_vertex[m_index[j] * m_stride]);
-		const dgVector q (ClosestDistanceToTriangle (p, m_localPoly[0], m_localPoly[j - 1], m_localPoly[j]));
+		const dgVector q (ClosestDistanceToTriangle (p, m_localPoly[0], m_localPoly[j - 1], m_localPoly[j], tmpIsEdge));
+		isEdge &= tmpIsEdge;
 		const dgVector error (q - p);
 		dgFloat32 dist = error % error;
 		if (dist < minDist) {
@@ -941,15 +962,12 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 	}
 
 	if (minDist <= (radius * radius)) {
-		dgFloat32 dist2;
 		dgVector dp (p - closestPoint);
-		dist2 = dp % dp;
+		dgFloat32 dist2 = dp % dp;
 		if (dist2 > dgFloat32 (0.0f)) {
-			dgFloat32 side;
-			dgFloat32 dist2Inv;
 			_ASSERTE (dist2 > dgFloat32 (0.0f));
-			dist2Inv = dgRsqrt (dist2);
-			side =  dist2 * dist2Inv - radius;
+			dgFloat32 dist2Inv = dgRsqrt (dist2);
+			dgFloat32 side =  dist2 * dist2Inv - radius;
 			if (side < (-DG_RESTING_CONTACT_PENETRATION)) {
 				dgVector normal (dp.Scale (dist2Inv));
 
@@ -962,6 +980,7 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 				contact.m_point = p - normal.Scale (radius + side * dgFloat32 (0.5f));
 				contact.m_normal = normal;
 				contact.m_penetration = side;
+				contact.m_isEdgeContact = 0;
 			}
 		}
 	}
@@ -970,62 +989,33 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 		dgFloat32 projVeloc = veloc % m_normal;
 		if (projVeloc < dgFloat32 (-1.0e-1f)) {
 			dgVector supportPoint (p - m_normal.Scale (radius));
-
 			dgFloat32 timeToImpact = -(m_normal % (supportPoint - m_localPoly[0])) / (m_normal % veloc); 
-			dgVector point (supportPoint + veloc.Scale (timeToImpact));
-			dgVector closestPoint (point);
-			dgFloat32 minDist = dgFloat32 (1.0e20f);
-			for (int i = 2; i < m_count; i ++) {
-				//dgInt32 i2 = m_index[i] * m_stride;
-				const dgVector q (ClosestDistanceToTriangle (point, m_localPoly[0], m_localPoly[i - 1], m_localPoly[i]));
-				const dgVector error (q - point);
-				dgFloat32 dist = error % error;
-				if (dist < minDist) {
-					minDist = dist;
-					closestPoint = q;
-				}
-			}
 
-			if (minDist < dgFloat32 (1.0e-3f) ) {
+			_ASSERTE ((veloc % veloc) > 0.0f);
 				timestep = GetMax (timeToImpact, dgFloat32 (0.0f));
+			if (!isEdge) {
 				contact.m_normal = m_normal;
 				contact.m_penetration = dgFloat32 (0.0f);
 				contact.m_point = (closestPoint + supportPoint).Scale (dgFloat32 (0.5f));
+				contact.m_isEdgeContact = 0;
 			} else {
-/*
-				dgVector dp (closestPoint - p);
-				dgFloat32 a = veloc % veloc;
-				dgFloat32 b = - dgFloat32 (2.0f) * (dp % veloc);
-				dgFloat32 c = dp % dp - radius * radius;
-
-				dgFloat32 desc = b * b - dgFloat32 (4.0f) * a * c;
-				if (desc >= dgFloat32 (0.0f)) {
-					desc = dgSqrt (desc);
-					dgFloat32 t = dgFloat32 (0.5f) * GetMin ((b + desc), (b - desc)) / a;
-					if (t >= 0.0f) {
-						timestep = t;
-						_ASSERTE (timestep > dgFloat32 (0.0f));
-						contact.m_penetration = dgFloat32 (0.0f);
-						contact.m_point = closestPoint + veloc.Scale (timestep * dgFloat32 (0.5f));
-						contact.m_normal = dp.Scale (dgRsqrt (dp % dp));
-					}
-				}
-*/
-				_ASSERTE ((veloc % veloc) > 0.0f);
-				timestep = dgSqrt (radius * radius / (veloc % veloc));
 				_ASSERTE (timestep < 1.0f);
 				dgVector dp (closestPoint - p);
-
-				_ASSERTE (timestep > dgFloat32 (0.0f));
 				contact.m_penetration = dgFloat32 (0.0f);
 				contact.m_point = (closestPoint + p + veloc.Scale (timestep)).Scale (dgFloat32 (0.5f));
 				contact.m_normal = dp.Scale (-dgRsqrt (dp % dp));
+				contact.m_isEdgeContact = ((contact.m_normal % m_normal) < dgFloat32 (0.9998f)) ? 1 : 0;
 			}
 		}
 	}
 	return timestep;
 }
 
+
+bool dgCollisionMesh::dgCollisionConvexPolygon::IsEdgeIntersection() const
+{
+	return m_isEdgeIntersection ? true : false;
+}
 
 dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersectionSimd (const dgVector& normalIn, const dgVector& origin, dgVector* const contactsOut) const
 {
@@ -1039,11 +1029,13 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersectionSim
 	}
 
 	if (projectFactor > dgFloat32 (0.9999f)) {
+		m_isEdgeIntersection = 0;
 		for (dgInt32 i = 0; i < m_count; i ++) {
 			contactsOut[count] = m_localPoly[i];
 			count ++;
 		}
 	} else if (projectFactor > dgFloat32 (0.1736f)) {
+		m_isEdgeIntersection = 1;
 		maxDist = dgFloat32 (0.0f);
 		dgPlane plane (normal, - (normal % origin));
 
@@ -1183,6 +1175,7 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersection (c
 	}
 
 	if (projectFactor > dgFloat32 (0.9999f)) {
+		m_isEdgeIntersection = 0;
 		for (dgInt32 i = 0; i < m_count; i ++) {
 			contactsOut[count] = m_localPoly[i];
 			count ++;
@@ -1198,6 +1191,7 @@ dgInt32 dgCollisionMesh::dgCollisionConvexPolygon::CalculatePlaneIntersection (c
 		#endif
 
 	} else if (projectFactor > dgFloat32 (0.1736f)) {
+		m_isEdgeIntersection = 1;
 		maxDist = dgFloat32 (0.0f);
 		dgPlane plane (normal, - (normal % origin));
 		
