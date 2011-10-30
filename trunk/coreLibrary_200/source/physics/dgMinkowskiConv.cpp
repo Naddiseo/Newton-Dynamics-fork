@@ -1151,9 +1151,6 @@ class dgContactSolver
 		return count;
 	}
 
-
-
-
 	dgInt32 CalculateContactsSimd(dgMinkFace* const face, dgInt32 contacID, dgContactPoint* const contactOut, dgInt32 maxContacts)
 	{
 #ifdef DG_BUILD_SIMD_CODE
@@ -1285,9 +1282,12 @@ class dgContactSolver
 						count = CalculateContactAlternateMethod(face, contacID, contactOut, maxContacts);
 					}
 				}
-				//_ASSERTE (count);
+
+				dgInt32 edgeContactFlag = (m_floatingcollision->IsEdgeIntersection() | m_referenceCollision->IsEdgeIntersection()) ? 1 : 0;
+				for (dgInt32 i = 0; i < count; i ++) {
+					contactOut[i].m_isEdgeContact = edgeContactFlag;
+				}
 			}
-			
 		}
 		
 		return count;
@@ -1350,10 +1350,7 @@ class dgContactSolver
 					contactOut[0].m_penetration = dist;
 				} else if (count2 == 1) {
 					const dgMatrix& matrix1 = m_proxy->m_referenceMatrix;
-					//const dgMatrix& matrix2 = m_proxy->m_floatingMatrix;
-
 					count = 1;
-//					contactOut[0].m_point = matrix2.TransformVector (shape2[0]);
 					contactOut[0].m_point =  matrix1.TransformVector (m_matrix.TransformVector(shape2[0]));
 					contactOut[0].m_normal = matrix1.RotateVector (clipPlane);
 					contactOut[0].m_userId = contacID;
@@ -1423,6 +1420,11 @@ class dgContactSolver
 					if (!count) {
 						count = CalculateContactAlternateMethod(face, contacID, contactOut, maxContacts);
 					}
+				}
+
+				dgInt32 edgeContactFlag = (m_floatingcollision->IsEdgeIntersection() | m_referenceCollision->IsEdgeIntersection()) ? 1 : 0;
+				for (dgInt32 i = 0; i < count; i ++) {
+					contactOut[i].m_isEdgeContact = edgeContactFlag;
 				}
 			}
 		}
@@ -6368,12 +6370,9 @@ return 0;
 
 dgInt32 dgWorld::FilterPolygonEdgeContacts (dgInt32 count, dgContactPoint* const contact) const
 {
-	dgInt32 j;
-	dgInt32 faceCount;
-
 	if (count > 1) {
-		faceCount = 0;
-		j = count - 1;
+		dgInt32 faceCount = 0;
+		dgInt32 j = count - 1;
 		while (faceCount <= j) {
 			while ((faceCount <= j) && !contact[faceCount].m_isEdgeContact) {
 				faceCount ++;
@@ -7048,11 +7047,10 @@ dgInt32 dgWorld::CalculatePolySoupToSphereContactsDescrete (dgCollisionParamProx
 			polygon->m_adjacentNormalIndex = NULL;
 		}
 
-
-		if (polygon->PointToPolygonDistance (center, radius, point)) {
-			dgFloat32 dist2;	
+		bool isEdge = false;
+		if (polygon->PointToPolygonDistance (center, radius, point, isEdge)) {
 			dgVector dp (center - point);
-			dist2 = dp % dp;
+			dgFloat32 dist2 = dp % dp;
 			if (dist2 > dgFloat32 (0.0f)) {
 				dgFloat32 side;
 				dgFloat32 dist2Inv;	
@@ -7066,6 +7064,7 @@ dgInt32 dgWorld::CalculatePolySoupToSphereContactsDescrete (dgCollisionParamProx
 					contactOut[count].m_point = soupMatrix.TransformVector (center - normal.Scale (radius + side * dgFloat32 (0.5f)));  
 					contactOut[count].m_normal = soupMatrix.RotateVector (normal);
 					contactOut[count].m_userId = idArray[i];
+					contactOut[count].m_isEdgeContact = isEdge ? 1 : 0;
 
 					side = (dgAbsf (side) - DG_IMPULSIVE_CONTACT_PENETRATION);
 					if (side < dgFloat32 (0.0f)) {
@@ -7074,6 +7073,7 @@ dgInt32 dgWorld::CalculatePolySoupToSphereContactsDescrete (dgCollisionParamProx
 					contactOut[count].m_penetration = side;
 
 					dgVector prevNormal (contactOut[count].m_normal);
+					// pass
 					count1 = polygon->ClipContacts (1, &contactOut[count], soupMatrix);
 					if ((prevNormal % contactOut[count].m_normal) < dgFloat32 (0.9999f)) {
 						contactOut[count].m_point = soupMatrix.TransformVector (center) - contactOut[count].m_normal.Scale (radius + side * dgFloat32 (0.5f));  
@@ -7165,9 +7165,9 @@ dgInt32 dgWorld::CalculatePolySoupToElipseContactsDescrete (dgCollisionParamProx
 			polygon->m_adjacentNormalIndex = NULL;
 		}
 
-		if (polygon->DistanceToOrigen (matrix, invScale, radius, point)) {
-			dgFloat32 dist2;
-			dist2 = point % point;
+		bool isEdge = false;
+		if (polygon->DistanceToOrigen (matrix, invScale, radius, point, isEdge)) {
+			dgFloat32 dist2 = point % point;
 			if (dist2 > dgFloat32 (0.0f)) {
 				dgFloat32 side;
 				dgFloat32 contactDist;
@@ -7187,6 +7187,7 @@ dgInt32 dgWorld::CalculatePolySoupToElipseContactsDescrete (dgCollisionParamProx
 					contactOut[count].m_point = sphMatrix.TransformVector (midPoint.Scale (dgFloat32 (0.5f)));  
 					contactOut[count].m_normal = sphMatrix.RotateVector (normal);
 					contactOut[count].m_userId = idArray[i];
+					contactOut[count].m_isEdgeContact = isEdge ? 1 : 0;
 
 					side = (dgAbsf (side) - DG_IMPULSIVE_CONTACT_PENETRATION);
 					if (side < dgFloat32 (0.0f)) {
@@ -7195,10 +7196,9 @@ dgInt32 dgWorld::CalculatePolySoupToElipseContactsDescrete (dgCollisionParamProx
 					contactOut[count].m_penetration = side;
 
 					dgVector prevNormal (contactOut[count].m_normal);
+					// pass
 					count1 = polygon->ClipContacts (1, &contactOut[count], soupMatrix);
 					if ((prevNormal % contactOut[count].m_normal) < dgFloat32 (0.9999f)) {
-						//_ASSERTE (0);
-//						contactOut[count].m_point = soupMatrix.RotateVector(polygon->m_normal);  
 						contactOut[count].m_normal = soupMatrix.RotateVector(polygon->m_normal);  
 					}
 
@@ -7276,10 +7276,8 @@ dgInt32 dgWorld::CalculatePolySoupToSphereContactsContinue (dgCollisionParamProx
 
 	indexCount = 0;
 	minTime = proxy.m_timestep + dgFloat32 (1.0e-5f);
-//	for (dgInt32 i = 0; i < data.m_faceCount; i ++) {
 	for (dgInt32 i = 0; (i < data.m_faceCount) && (countleft > 0); i ++) {
-		dgFloat32 timestep;
-		dgContactPoint contact;
+
 		polygon->m_count = data.m_faceIndexCount[i];
 		polygon->m_index = &indexArray[indexCount];
 
@@ -7291,19 +7289,20 @@ dgInt32 dgWorld::CalculatePolySoupToSphereContactsContinue (dgCollisionParamProx
 			polygon->m_adjacentNormalIndex = NULL;
 		}
 
-		timestep = polygon->MovingPointToPolygonContact (center, veloc, radius, contact);
+		dgContactPoint contact;
+		dgFloat32 timestep = polygon->MovingPointToPolygonContact (center, veloc, radius, contact);
 		if (timestep >= dgFloat32 (0.0f)) {
 			if (timestep <= minTime) {
 				minTime = timestep + dgFloat32 (1.0e-5f);
 
 				_ASSERTE (dgAbsf (contact.m_normal % contact.m_normal - 1.0f) < dgFloat32 (1.0e-5f));
-				//contactOut[count].m_point = soupMatrix.TransformVector (contact.m_point);  
 				contactOut[count].m_point = soupMatrix.TransformVector (center - contact.m_normal.Scale (radius));
 				contactOut[count].m_normal = soupMatrix.RotateVector (contact.m_normal);
 				contactOut[count].m_userId = idArray[i];
 				contactOut[count].m_penetration = contact.m_penetration;
+				contactOut[count].m_isEdgeContact = contact.m_isEdgeContact;
 				contactOut[count].m_point.m_w = timestep;
-
+				// pass
 				count1 = polygon->ClipContacts (1, &contactOut[count], soupMatrix);
 
 				count += count1;

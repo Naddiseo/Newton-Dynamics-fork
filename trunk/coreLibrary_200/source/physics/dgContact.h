@@ -99,12 +99,10 @@ class dgContactPoint
 	dgBody* m_body0;
 	dgBody* m_body1;
 	dgCollision* m_collision0;
-	union {
-		dgCollision* m_collision1;
-		dgInt32 m_isEdgeContact;
-	};
+	dgCollision* m_collision1;
 	dgInt64 m_userId;
 	dgFloat32 m_penetration;
+	dgInt32 m_isEdgeContact;
 }DG_GCC_VECTOR_ALIGMENT;
 
 DG_MSC_VECTOR_ALIGMENT
