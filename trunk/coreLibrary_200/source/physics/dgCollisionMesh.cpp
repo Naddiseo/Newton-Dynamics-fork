@@ -814,6 +814,10 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 	m_localPoly[2] = dgVector (&m_vertex[m_index[2] * m_stride]);
 	CalculateNormal();
 
+	if ((m_normal % veloc) >= dgFloat32 (0.0f)) {
+		return dgFloat32 (-1.0f);
+	}
+
 	bool isEdge = true;
 	dgFloat32 timestep = dgFloat32 (-1.0f);
 	dgVector closestPoint (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
@@ -855,26 +859,66 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 		}
 	}
 
+
+	// this method from Paul Nettle for moving sphere against polygon, 
+	// it is faster and seems to be better than my own method general Minskonsky volume, so I will spacial case the shape for performance 
+	// I am still having round off error I will give another try and see what is wrong
 	if (timestep < 0.0f) {
 		dgFloat32 projVeloc = veloc % m_normal;
 		if (projVeloc < dgFloat32 (-1.0e-1f)) {
 			dgVector supportPoint (p - m_normal.Scale (radius));
-			dgFloat32 timeToImpact = -(m_normal % (supportPoint - m_localPoly[0])) / (m_normal % veloc); 
 
-			_ASSERTE ((veloc % veloc) > 0.0f);
-			timestep = GetMax (timeToImpact, dgFloat32 (0.0f));
-			if (!isEdge) {
+			dgFloat32 timeToImpact = -(m_normal % (supportPoint - m_localPoly[0])) / (m_normal % veloc); 
+			dgVector point (supportPoint + veloc.Scale (timeToImpact));
+			dgVector closestPoint (point);
+			dgFloat32 minDist = dgFloat32 (1.0e20f);
+			bool isEdge = true;
+			for (int i = 2; i < m_count; i ++) {
+				bool tmpIsEdge;
+				const dgVector q (ClosestDistanceToTriangle (point, m_localPoly[0], m_localPoly[i - 1], m_localPoly[i], tmpIsEdge));
+				isEdge &= tmpIsEdge;
+				const dgVector error (q - point);
+				dgFloat32 dist = error % error;
+				if (dist < minDist) {
+					minDist = dist;
+					closestPoint = q;
+				}
+			}
+
+			if (minDist < dgFloat32 (1.0e-3f) ) {
+				_ASSERTE (!isEdge);
+				timestep = GetMax (timeToImpact, dgFloat32 (0.0f));
 				contact.m_normal = m_normal;
 				contact.m_penetration = dgFloat32 (0.0f);
-				contact.m_point = (closestPoint + supportPoint).Scale (dgFloat32 (0.5f));
 				contact.m_isEdgeContact = 0;
+				contact.m_point = (closestPoint + supportPoint).Scale (dgFloat32 (0.5f));
 			} else {
-				_ASSERTE (timestep < 1.0f);
+				_ASSERTE (isEdge);
 				dgVector dp (closestPoint - p);
-				contact.m_penetration = dgFloat32 (0.0f);
-				contact.m_point = (closestPoint + p + veloc.Scale (timestep)).Scale (dgFloat32 (0.5f));
-				contact.m_normal = dp.Scale (-dgRsqrt (dp % dp));
-				contact.m_isEdgeContact = ((contact.m_normal % m_normal) < dgFloat32 (0.9998f)) ? 1 : 0;
+
+				dgFloat32 a = veloc % veloc;
+				dgFloat32 b = - dgFloat32 (2.0f) * (dp % veloc);
+				dgFloat32 c = dp % dp - radius * radius;
+
+				dgFloat32 desc = b * b - dgFloat32 (4.0f) * a * c;
+				if (desc >= dgFloat32 (0.0f)) {
+					desc = dgSqrt (desc);
+					// has I finally found the bug, I assume the first root is the solution by that migh not the true
+					//dgFloat32 t0 = dgFloat32 (0.5f) * GetMin ((b + desc), (b - desc)) / a;
+					dgFloat32 den = - dgFloat32 (0.5f)/ a;
+					dgFloat32 t0 = den * (b - desc);
+					dgFloat32 t1 = den * (b + desc);
+					dgFloat32 t = GetMin (t0, t1);
+					if (t >= 0.0f) {
+						timestep = t;
+						_ASSERTE (timestep > dgFloat32 (0.0f));
+						contact.m_penetration = dgFloat32 (0.0f);
+						contact.m_isEdgeContact = 1;
+						contact.m_point = closestPoint + veloc.Scale (timestep);
+						dgVector n (p - contact.m_point);
+						contact.m_normal = n.Scale (dgRsqrt (n % n));
+					}
+				}
 			}
 		}
 	}

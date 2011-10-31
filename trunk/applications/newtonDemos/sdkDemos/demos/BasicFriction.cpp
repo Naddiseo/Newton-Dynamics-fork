@@ -40,15 +40,16 @@ static void UserContactFriction (const NewtonJoint* contactJoint, dFloat timeste
 
 	DemoEntity* const entity = (DemoEntity*) NewtonBodyGetUserData (body);
 	dVariable* const friction = entity->FindVariable (frictionCRC);
-	_ASSERTE (friction);
-	dFloat frictionValue = friction->GetFloat();
-	for (void* contact = NewtonContactJointGetFirstContact (contactJoint); contact; contact = NewtonContactJointGetNextContact (contactJoint, contact)) {
-		NewtonMaterial* const material = NewtonContactGetMaterial (contact);
-		NewtonMaterialSetContactFrictionCoef (material, frictionValue + 0.1f, frictionValue, 0);
-		NewtonMaterialSetContactFrictionCoef (material, frictionValue + 0.1f, frictionValue, 1);
+	if (friction) {
+		dFloat frictionValue = friction->GetFloat();
+		for (void* contact = NewtonContactJointGetFirstContact (contactJoint); contact; contact = NewtonContactJointGetNextContact (contactJoint, contact)) {
+			NewtonMaterial* const material = NewtonContactGetMaterial (contact);
+			NewtonMaterialSetContactFrictionCoef (material, frictionValue + 0.1f, frictionValue, 0);
+			NewtonMaterialSetContactFrictionCoef (material, frictionValue + 0.1f, frictionValue, 1);
 
-//		NewtonMaterialSetContactFrictionCoef (material, 0.0f, 0.0f, 0);
-//		NewtonMaterialSetContactFrictionCoef (material, 0.0f, 0.0f, 1);
+	//		NewtonMaterialSetContactFrictionCoef (material, 0.0f, 0.0f, 0);
+	//		NewtonMaterialSetContactFrictionCoef (material, 0.0f, 0.0f, 1);
+		}
 	}
 }
 
