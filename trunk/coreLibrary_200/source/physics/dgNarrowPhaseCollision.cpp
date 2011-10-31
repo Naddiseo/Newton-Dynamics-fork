@@ -1954,6 +1954,9 @@ dgInt32 dgWorld::CollideContinue (dgCollision* const collisionA, const dgMatrix&
 	dgBody collideBodyB;
 	dgContactPoint contacts[DG_MAX_CONTATCS];
 
+//dgTrace (("%x -> p(%f, %f, %f) v(%f, %f, %f)\n", collisionB, matrixA.m_posit.m_x, matrixA.m_posit.m_y, matrixA.m_posit.m_z, velocA.m_x, velocA.m_y, velocA.m_z));
+
+
 	dgInt32 count = 0;
 	retTimeStep = dgFloat32 (1.0e10f);
 	maxSize = GetMin (DG_MAX_CONTATCS, maxSize);

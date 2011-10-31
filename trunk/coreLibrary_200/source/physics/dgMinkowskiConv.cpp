@@ -7319,6 +7319,9 @@ dgInt32 dgWorld::CalculatePolySoupToSphereContactsContinue (dgCollisionParamProx
 		indexCount += data.m_faceIndexCount[i];
 		
 	}
+//if (minTime > 1.0)
+//minTime *=1;
+
 	proxy.m_timestep = minTime;
 
 	if (count > 1) {

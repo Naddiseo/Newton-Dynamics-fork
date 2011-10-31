@@ -885,8 +885,8 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 				}
 			}
 
-			if (minDist < dgFloat32 (1.0e-3f) ) {
-				_ASSERTE (!isEdge);
+			if (!isEdge) {
+				_ASSERTE (minDist < dgFloat32 (1.0e-3f));
 				timestep = GetMax (timeToImpact, dgFloat32 (0.0f));
 				contact.m_normal = m_normal;
 				contact.m_penetration = dgFloat32 (0.0f);
@@ -896,21 +896,27 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 				_ASSERTE (isEdge);
 				dgVector dp (closestPoint - p);
 
-				dgFloat32 a = veloc % veloc;
-				dgFloat32 b = - dgFloat32 (2.0f) * (dp % veloc);
+				// has I finally found the bug, when V is very large, then 
+				// V % v introduces a very large round of error that completely invalidates the meaning of (b * b - 4 * a * c)
+				// so the solution is to use a normalize value for v, and the final t is the scale by teh invese magnitiude of veloc
+				dgFloat32 scale = dgFloat32 (1.0f) / dgSqrt (veloc % veloc);
+                dgVector vdir = veloc.Scale (scale);
+
+				//dgFloat32 a = veloc % veloc;
+				//dgFloat32 b = - dgFloat32 (2.0f) * (dp % veloc);
+				dgFloat32 a = dgFloat32 (1.0f);
+				dgFloat32 b = - dgFloat32 (2.0f) * (dp % vdir);
 				dgFloat32 c = dp % dp - radius * radius;
 
 				dgFloat32 desc = b * b - dgFloat32 (4.0f) * a * c;
 				if (desc >= dgFloat32 (0.0f)) {
 					desc = dgSqrt (desc);
-					// has I finally found the bug, I assume the first root is the solution by that migh not the true
-					//dgFloat32 t0 = dgFloat32 (0.5f) * GetMin ((b + desc), (b - desc)) / a;
-					dgFloat32 den = - dgFloat32 (0.5f)/ a;
-					dgFloat32 t0 = den * (b - desc);
-					dgFloat32 t1 = den * (b + desc);
+					dgFloat32 den = dgFloat32 (0.5f) / a;
+					dgFloat32 t0 = den * (-b - desc);
+					dgFloat32 t1 = den * (-b + desc);
 					dgFloat32 t = GetMin (t0, t1);
 					if (t >= 0.0f) {
-						timestep = t;
+						timestep = t * scale;
 						_ASSERTE (timestep > dgFloat32 (0.0f));
 						contact.m_penetration = dgFloat32 (0.0f);
 						contact.m_isEdgeContact = 1;
