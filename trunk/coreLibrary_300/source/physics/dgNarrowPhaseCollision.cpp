@@ -3554,17 +3554,12 @@ dgInt32 dgWorld::CalculatePolySoupToSphereContactsContinue (dgCollisionParamProx
 	proxy.m_timestep = minTime;
 
 	if (count > 1) {
-		if (data.m_faceCount > 1) {
-			dgFloat32 dt;
-			dt = dgFloat32 (0.01f) * dgRsqrt (veloc % veloc);
-			for (dgInt32 i = 0; i < count; i ++) {
-				dgFloat32 err;
-				err = contactOut[i].m_point.m_w - minTime;
-				if (dgAbsf (err) > dt) {
-					contactOut[i] = contactOut[count - 1];
-					i --;
-					count --;
-				}
+		for (dgInt32 j = 0; j < count; j ++) {
+			dgFloat32 error = dgAbsf (contactOut[j].m_point.m_w - minTime);
+			if (error > dgFloat32 (1.0e-4f)) {
+				contactOut[j] = contactOut[count - 1];
+				count --;
+				j --;
 			}
 		}
 		count = FilterPolygonEdgeContacts (count, contactOut);
