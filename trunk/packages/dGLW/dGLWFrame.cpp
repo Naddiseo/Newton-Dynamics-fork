@@ -27,17 +27,27 @@ dGLWFrame::dGLWFrame(dGLW* const glw, const string& title)
 	:dGLWDocker (glw, NULL, m_frame) 
 	,m_title(title)
 {
-	
+	SetWindowText (m_nativeHandle, m_title.c_str());
 }
 
 dGLWFrame::dGLWFrame(dGLWWidget* const parent, const string& title)
 	:dGLWDocker (parent->GetGLW(), parent, m_frame)
 	,m_title(title)
 {
-
+	SetWindowText (m_nativeHandle, m_title.c_str());
 }
 
 
 dGLWFrame::~dGLWFrame(void)
 {
+}
+
+
+void dGLWFrame::OnPaint(const dGLWDrawContext& gdc)
+{
+	dGLWDocker::OnPaint(gdc);
+//	dGLW_UNUSED_ARGUMENT(gdc);
+//	gdc.SetBrushColor (m_bkColor);
+//	gdc.ClearRectangle (0, 0, m_client.m_width, m_client.m_height);
+//	gdc.DrawLine( 100, 100, 200, 200);
 }

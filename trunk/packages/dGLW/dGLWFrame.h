@@ -31,6 +31,9 @@ class dGLWFrame: public dGLWDocker
 	dGLWFrame(dGLWWidget* const parent, const string& title);
 	virtual ~dGLWFrame(void);
 
+	protected:
+	virtual void OnPaint(const dGLWDrawContext& gdc);
+
 	string m_title;
 };
 

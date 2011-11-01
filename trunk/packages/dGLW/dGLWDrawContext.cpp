@@ -19,40 +19,42 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __dGLW_H_
-#define __dGLW_H_
 
-class dGLWWidget;
+#include "dGLWstdafx.h"
+#include "dGLWWidget.h"
+#include "dGLWDrawContext.h"
 
 
-class dGLW
+
+#define GLW_CLASS_INFO_NAME "dGLWDrawContext"
+
+
+dGLWDrawContext::dGLWDrawContext(void)
 {
-	public:
-	dGLW(void);
-	virtual ~dGLW(void);
+}
 
-	void Run();
+dGLWDrawContext::~dGLWDrawContext(void)
+{
+}
 
-	private:
-	void AddRootWidget(dGLWWidget* const widget);
-	void RemoveRootWidget(dGLWWidget* const widget);
-
-	int m_screenWidth;
-	int m_screenHigh;
-	dList<dGLWWidget*> m_rootWidgets;
-
-	
-
-#ifdef _GLW_WIN32
-	void RegisterClass();
-	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-	HINSTANCE m_instance;
-	WNDCLASSEX m_winClass;
-#endif
-
-	friend dGLWWidget; 
-};
+void dGLWDrawContext::SetBrushColor (const dGLWColor& color) const
+{
+	SelectObject(m_hdc, GetStockObject(DC_BRUSH));
+	SetDCBrushColor(m_hdc, RGB(color.m_red, color.m_green, color.m_blue));
+}
 
 
-#endif
+void dGLWDrawContext::DrawLine (int x0, int y0, int x1, int y1) const
+{
+//	Graphics graphics(m_hdc);
+//	Pen pen(Color(255, 0, 0, 255));
+//	graphics.DrawLine(&pen, x0, y0, x1, y1);
+
+	MoveToEx(m_hdc, x0, y0, NULL);
+	LineTo(m_hdc, x1, y1);
+}
+
+void dGLWDrawContext::ClearRectangle (int x0, int y0, int x1, int y1) const
+{
+	Rectangle(m_hdc, x0, y0, x1, y1);
+}

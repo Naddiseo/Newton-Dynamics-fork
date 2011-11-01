@@ -172,6 +172,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\dGLW\dGLWDrawContext.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\dGLW\dGLWDrawContext.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\dGLW\dGLWFrame.cpp"
 			>
 		</File>

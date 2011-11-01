@@ -23,7 +23,7 @@
 #include "dGLWstdafx.h"
 #include "dGLWWidget.h"
 #include "dGLW.h"
-
+#include "dGLWDrawContext.h"
 
 
 #define GLW_CLASS_INFO_NAME "dGLW"
@@ -98,6 +98,35 @@ void dGLW::RegisterClass()
 
 
 
+
+
+void dGLW::Run()
+{
+
+//	hAccelTable = LoadAccelerators(hInstance, (LPCTSTR)IDC_NEWTONDEMOS);
+
+	// Main message loop:
+
+	MSG msg;
+	msg.message = WM_NULL;
+	PeekMessage( &msg, NULL, 0U, 0U, PM_NOREMOVE );
+	while( WM_QUIT != msg.message) {
+		// Use PeekMessage() so we can use idle time to render the scene. 
+		bool hasMessage = (PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE ) != FALSE);
+		if(hasMessage)	{
+//			if (hAccelTable == NULL || (TranslateAccelerator(msg.hwnd, hAccelTable, &msg) == 0)) {
+			TranslateMessage( &msg );
+			DispatchMessage( &msg );
+		} else {
+//			sceneManager.Render();
+		}
+		Sleep (0);
+	}
+}
+
+
+
+
 LRESULT CALLBACK dGLW::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 //	int wmId, wmEvent;
@@ -109,32 +138,6 @@ LRESULT CALLBACK dGLW::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 
 	switch (message) 
 	{
-		case WM_CREATE:
-		{
-			LPCREATESTRUCT const structure =  (LPCREATESTRUCT) lParam;
-			dGLWWidget* const widget = (dGLWWidget*) structure->lpCreateParams;
-			_ASSERTE (widget);
-			_ASSERTE (widget->IsType(dGLWWidget::GetRttiType()));
-			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG)widget);
-			widget->m_nativeHandle = hWnd;
-			break;
-		}
-
-		case WM_DESTROY:
-		{
-			if (widget) {
-				dGLW* const me = widget->GetGLW();
-				SetWindowLongPtr(hWnd, GWLP_USERDATA, 0);
-				delete widget;
-
-				if (!me->m_rootWidgets.GetCount()) {
-					PostQuitMessage(0);
-				}
-			}
-			break;
-		}
-
-
 
 /*
 	case WM_COMMAND:
@@ -230,17 +233,71 @@ LRESULT CALLBACK dGLW::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 				return DefWindowProc(hWnd, message, wParam, lParam);
 			}
 		}
+*/
 
-	case WM_SIZE:
+		case WM_CREATE:
 		{
-			if (mainScene->GetGL().GetWindow()) {
-				int width = LOWORD(lParam);
-				int hight = HIWORD(lParam);
-				mainScene->GetCamera()->SetProjectionMode(width, hight);
+			LPCREATESTRUCT const structure =  (LPCREATESTRUCT) lParam;
+			dGLWWidget* const widget = (dGLWWidget*) structure->lpCreateParams;
+			_ASSERTE (widget);
+			_ASSERTE (widget->IsType(dGLWWidget::GetRttiType()));
+			SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG)widget);
+			widget->m_nativeHandle = hWnd;
+			break;
+		}
+
+		case WM_DESTROY:
+		{
+			if (widget) {
+				dGLW* const me = widget->GetGLW();
+				SetWindowLongPtr(hWnd, GWLP_USERDATA, 0);
+				delete widget;
+
+				if (!me->m_rootWidgets.GetCount()) {
+					PostQuitMessage(0);
+				}
 			}
 			break;
 		}
-*/
+
+		case WM_MOVE:
+		{
+			if (widget) {
+				widget->OnPosition(LOWORD(lParam), HIWORD(lParam));
+			}
+			break;
+
+		}
+	
+
+		case WM_SIZE:
+		{
+			if (widget) {
+				widget->OnSize(LOWORD(lParam), HIWORD(lParam));
+			}
+			break;
+		}
+
+		case WM_PAINT:
+		{
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint(hWnd, &ps);
+
+			if (widget) {
+				dGLWDrawContext drawContext;
+				drawContext.m_hdc = hdc;
+				drawContext.m_clientWidth = widget->m_client.m_width;
+				drawContext.m_clientHeight = widget->m_client.m_height;
+				widget->OnPaint(drawContext);
+			}
+
+			EndPaint(hWnd, &ps);
+			break;
+		}
+
+		case WM_ERASEBKGND:
+			return TRUE;
+			break;		
 
 
 		default:
@@ -250,28 +307,3 @@ LRESULT CALLBACK dGLW::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	return 0;
 }
 
-
-
-void dGLW::Run()
-{
-
-//	hAccelTable = LoadAccelerators(hInstance, (LPCTSTR)IDC_NEWTONDEMOS);
-
-	// Main message loop:
-
-	MSG msg;
-	msg.message = WM_NULL;
-	PeekMessage( &msg, NULL, 0U, 0U, PM_NOREMOVE );
-	while( WM_QUIT != msg.message) {
-		// Use PeekMessage() so we can use idle time to render the scene. 
-		bool hasMessage = (PeekMessage( &msg, NULL, 0U, 0U, PM_REMOVE ) != FALSE);
-		if(hasMessage)	{
-//			if (hAccelTable == NULL || (TranslateAccelerator(msg.hwnd, hAccelTable, &msg) == 0)) {
-			TranslateMessage( &msg );
-			DispatchMessage( &msg );
-		} else {
-//			sceneManager.Render();
-		}
-		Sleep (0);
-	}
-}

@@ -19,40 +19,34 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __dGLW_H_
-#define __dGLW_H_
+#ifndef __dGLWDrawContext_H_
+#define __dGLWDrawContext_H_
 
-class dGLWWidget;
+class dGLW;
 
-
-class dGLW
+class dGLWDrawContext
 {
-	public:
-	dGLW(void);
-	virtual ~dGLW(void);
 
-	void Run();
+
+	public:
+	dGLWDrawContext(void);
+	~dGLWDrawContext(void);
+
+	void SetBrushColor (const dGLWColor& color) const;
+	void ClearRectangle (int x0, int y0, int x1, int y1) const;
+	void DrawLine (int x0, int y0, int x1, int y1) const;
+
 
 	private:
-	void AddRootWidget(dGLWWidget* const widget);
-	void RemoveRootWidget(dGLWWidget* const widget);
-
-	int m_screenWidth;
-	int m_screenHigh;
-	dList<dGLWWidget*> m_rootWidgets;
-
-	
+	int m_clientWidth;
+	int m_clientHeight;
 
 #ifdef _GLW_WIN32
-	void RegisterClass();
-	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-	HINSTANCE m_instance;
-	WNDCLASSEX m_winClass;
+	HDC m_hdc;
 #endif
-
-	friend dGLWWidget; 
+	friend dGLW;
 };
+
 
 
 #endif

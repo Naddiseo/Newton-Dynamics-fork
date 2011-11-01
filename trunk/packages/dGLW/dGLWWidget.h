@@ -22,8 +22,9 @@
 #ifndef __dGLWWidget_H_
 #define __dGLWWidget_H_
 
-class dGLW;
+#include "dGLWDrawContext.h"
 
+class dGLW;
 
 class dGLWWidget
 {
@@ -34,8 +35,10 @@ class dGLWWidget
 		m_frame,
 	};
 
+
+	void Create ();
 	dGLW* GetGLW() const;
-	void Create (dFrameType type);
+	
 	void AddChild(dGLWWidget* const child);
 	void RemoveChild(dGLWWidget* const child);
 
@@ -43,11 +46,27 @@ class dGLWWidget
 	dGLWWidget(dGLW* const glw, dGLWWidget* const parent, dFrameType type);
 	virtual ~dGLWWidget(void);
 
+	void Update();
+
+	void SetBackgroundColor(const dGLWColor& color);
+	dGLWColor GetBackgroundColor() const ;
+
+
+	virtual void OnPaint(const dGLWDrawContext& gdc);
+	virtual void OnSize(int width, int height);
+	virtual void OnPosition(int x, int y);
+	
+
 
 	dGLW* m_glw;
 	dGLWWidget* m_parent;
 	dGLW_HANDLE m_nativeHandle;
 	dList<dGLWWidget*> m_children;
+
+	dGLWColor m_bkColor;
+	dFrameType m_type;
+	dGLWRect m_rect;
+	dGLWRect m_client;
 
 	friend dGLW;
 	dRttiRootClassSupportDeclare(dGLWWidget);

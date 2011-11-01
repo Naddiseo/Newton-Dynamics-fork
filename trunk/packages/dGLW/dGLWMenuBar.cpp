@@ -27,6 +27,12 @@
 dGLWMenuBar::dGLWMenuBar(dGLWWidget* const parent)
 	:dGLWHorizontalLayout (parent->GetGLW(), parent, m_child)
 {
+	dGLWColor color;
+	color.m_red = 241;
+	color.m_green = 244;
+	color.m_blue = 251;
+	color.m_alpha = 255;
+	SetBackgroundColor(color);
 }
 
 dGLWMenuBar::~dGLWMenuBar(void)

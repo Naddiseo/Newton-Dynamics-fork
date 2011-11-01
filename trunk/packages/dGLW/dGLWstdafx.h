@@ -52,6 +52,23 @@ typedef HWND dGLW_HANDLE;
 #endif
 
 
+struct dGLWColor
+{
+	unsigned char m_red; 
+	unsigned char m_green; 
+	unsigned char m_blue; 
+	unsigned char m_alpha; 
+};
+
+struct dGLWRect
+{
+	int m_x;
+	int m_y;
+	int m_width;
+	int m_height;
+};
+
+
 
 #ifndef dGLW_UNUSED_ARGUMENT
 	#define dGLW_UNUSED_ARGUMENT(x) x

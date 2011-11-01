@@ -1,6 +1,7 @@
 #include "dGLWstdafx.h"
 #include "dGLWWidget.h"
 #include "dGLW.h"
+#include "dGLWDrawContext.h"
 
 dRttiRootClassSupportImplement(dGLWWidget);
 
@@ -9,14 +10,20 @@ dGLWWidget::dGLWWidget(dGLW* const glw, dGLWWidget* const parent, dFrameType typ
 	,m_parent(parent)
 	,m_nativeHandle(0)
 	,m_children()
+	,m_type(type)
 {
+	m_bkColor.m_red = 128;
+	m_bkColor.m_green = 128;
+	m_bkColor.m_blue = 128;
+	m_bkColor.m_alpha = 255;
+
 	if (m_parent) {
 		m_parent->AddChild(this);
 	} else {
 		m_glw->AddRootWidget(this);
 	}
 
-	Create (type);
+	Create ();
 	ShowWindow (m_nativeHandle, SW_SHOWNORMAL);
 }
 
@@ -65,18 +72,31 @@ void dGLWWidget::RemoveChild(dGLWWidget* const child)
 }
 
 
-void dGLWWidget::Create (dFrameType type)
+void dGLWWidget::Create ()
 {
 	DWORD flags = 0;
-	switch (type)
+	int x = CW_USEDEFAULT;
+	int y = CW_USEDEFAULT;
+	int w = CW_USEDEFAULT;
+	int h = CW_USEDEFAULT;
+
+	switch (m_type)
 	{
 		case m_child:
+			x = 00;
+			y = 00;
+			w = 200;
+			h = 200;
+
 			flags = WS_CHILD;
+			//flags |= WS_BORDER;
+			//flags |= WS_DLGFRAME;
+			flags |= WS_VISIBLE;
 			break;
 
 		case m_frame:
 			flags = WS_CAPTION;
-			flags |= WS_OVERLAPPEDWINDOW;;
+			flags |= WS_OVERLAPPEDWINDOW;
 			break;
 
 		default:;
@@ -101,12 +121,59 @@ xxx ++;
 flags |= BS_PUSHBUTTON;
 */
 
-	int x = CW_USEDEFAULT;
-	int y = CW_USEDEFAULT;
-	int w = CW_USEDEFAULT;
-	int h = CW_USEDEFAULT;
 	dGLW_HANDLE parentHandle = m_parent ? m_parent->m_nativeHandle : NULL;
 	m_nativeHandle = CreateWindowEx(0, m_glw->m_winClass.lpszClassName, NULL, flags, x, y, w, h, parentHandle, NULL, m_glw->m_instance, this);
-//	m_nativeHandle = CreateWindowEx(0, "BUTTON", NULL, flags, x, y, w, h, parentHandle, NULL, m_glw->m_instance, this);
+
 }
 
+
+void dGLWWidget::OnPosition(int x, int y)
+{
+	RECT rect;
+	GetWindowRect(m_nativeHandle, &rect);
+	m_rect.m_x = x;
+	m_rect.m_y = y;
+	if (m_type == m_frame) {
+		m_client.m_x = x - rect.left;
+		m_client.m_y = y - rect.top;
+	} else {
+		m_client.m_x = x - (rect.left - m_parent->m_rect.m_x);
+		m_client.m_y = y - (rect.top - m_parent->m_rect.m_y);
+	}
+}
+
+void dGLWWidget::Update()
+{
+	UpdateWindow(m_nativeHandle);
+}
+
+void dGLWWidget::OnSize(int width, int height)
+{
+	RECT rect;
+	GetWindowRect(m_nativeHandle, &rect);
+	m_rect.m_width = rect.right - rect.left;
+	m_rect.m_height =  rect.bottom -  rect.top;
+
+	m_client.m_width = width;
+	m_client.m_height = height;
+}
+
+void dGLWWidget::SetBackgroundColor(const dGLWColor& color)
+{
+	m_bkColor = color;
+	Update();
+}
+
+dGLWColor dGLWWidget::GetBackgroundColor() const 
+{	
+	return m_bkColor;
+}
+
+
+
+void dGLWWidget::OnPaint(const dGLWDrawContext& gdc)
+{
+	gdc.SetBrushColor (m_bkColor);
+	gdc.ClearRectangle (0, 0, m_client.m_width, m_client.m_height);
+//	gdc.DrawLine( 100, 100, 200, 200);
+}
