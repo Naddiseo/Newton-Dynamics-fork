@@ -40,8 +40,8 @@ class Demo: public dGLWFrame
 		:dGLWFrame (&glw, "GLW demo")
 	{
 		m_menu = new dGLWMenuBar (this);
-		dGLWMenuItem* item0 = m_menu->CreateItem("xxx0");
-		dGLWMenuItem* item1 = m_menu->CreateItem("xxx1");
+//		dGLWMenuItem* item0 = m_menu->CreateItem("xxx0");
+//		dGLWMenuItem* item1 = m_menu->CreateItem("xxx1");
 	}
 
 

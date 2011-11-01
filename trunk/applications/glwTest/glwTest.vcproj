@@ -115,11 +115,11 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="../../../../packages/dGLW;../../../../packages/dContainers"
+				AdditionalIncludeDirectories="../../packages/dGLW;../../packages/dContainers"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_GLW_WIN32;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				WarningLevel="4"
 				DebugInformationFormat="3"
 			/>
