@@ -1464,7 +1464,7 @@ dgIntersectStatus dgAABBPolygonSoup::CalculateThisFaceEdgeNormals (void *context
 						maxDist = dist;
 					}
 				}
-				if (maxDist < dgFloat32 (-1.0e-4f)) {
+				if (maxDist < dgFloat32 (1.0e-4f)) {
 					adjacentFaces.m_index[i + count + 1] = indexArray[indexCount];
 				}
 				break;

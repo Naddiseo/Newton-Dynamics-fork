@@ -862,12 +862,15 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 	// it is faster and seems to be better than my own method general Minskonsky volume, so I will spacial case the shape for performance 
 	// I am still having round off error I will give another try and see what is wrong
 	if (timestep < 0.0f) {
-		dgFloat32 projVeloc = veloc % m_normal;
+		dgFloat32 scale = dgFloat32 (1.0f) / dgSqrt (veloc % veloc);
+		dgVector vdir = veloc.Scale (scale);
+
+		dgFloat32 projVeloc = vdir % m_normal;
 		if (projVeloc < dgFloat32 (-1.0e-1f)) {
 			dgVector supportPoint (p - m_normal.Scale (radius));
 
-			dgFloat32 timeToImpact = -(m_normal % (supportPoint - m_localPoly[0])) / (m_normal % veloc); 
-			dgVector point (supportPoint + veloc.Scale (timeToImpact));
+			dgFloat32 timeToImpact = -(m_normal % (supportPoint - m_localPoly[0])) / (m_normal % vdir); 
+			dgVector point (supportPoint + vdir.Scale (timeToImpact));
 			dgVector closestPoint (point);
 			dgFloat32 minDist = dgFloat32 (1.0e20f);
 			bool isEdge = true;
@@ -889,7 +892,6 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 				contact.m_normal = m_normal;
 				contact.m_penetration = dgFloat32 (0.0f);
 				contact.m_isEdgeContact = 0;
-				//contact.m_point = (closestPoint + supportPoint).Scale (dgFloat32 (0.5f));
 				contact.m_point = p - m_normal.Scale (radius);
 				contact.m_point = closestPoint;
 			} else {
@@ -897,10 +899,8 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 				dgVector dp (closestPoint - p);
 
 				// has I finally found the bug, when V is very large, then 
-				// V % v introduces a very large round of error that completely invalidates the meaning of (b * b - 4 * a * c)
-				// so the solution is to use a normalize value for v, and the final t is the scale by teh invese magnitiude of veloc
-				dgFloat32 scale = dgFloat32 (1.0f) / dgSqrt (veloc % veloc);
-                dgVector vdir = veloc.Scale (scale);
+				// v % v introduces a very large round of error that completely invalidates the meaning of (b * b - 4 * a * c)
+				// so the solution is to use a normalize value for v, and the final t is the scale by the inverse magnitude of veloc
 
 				//dgFloat32 a = veloc % veloc;
 				//dgFloat32 b = - dgFloat32 (2.0f) * (dp % veloc);
@@ -916,8 +916,7 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 					dgFloat32 t1 = den * (-b + desc);
 					dgFloat32 t = GetMin (t0, t1);
 					if (t >= 0.0f) {
-						timestep = t * scale;
-						_ASSERTE (timestep > dgFloat32 (0.0f));
+						timestep = t;
 						contact.m_penetration = dgFloat32 (0.0f);
 						contact.m_isEdgeContact = isEdge ? 1 : 0;
 						contact.m_point = closestPoint;
@@ -927,6 +926,7 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 				}
 			}
 		}
+		timestep *= scale;
 	}
 	return timestep;
 }
