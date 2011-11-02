@@ -321,7 +321,6 @@ dgInt32 dgConvexHull3d::InitVertexArray(dgHullVertex* const points, const dgFloa
 	count = indexCount + 1;
 	if (count < 4) {
 		m_count = 0;
-		_ASSERTE (0);
 		return count;
 	}
 

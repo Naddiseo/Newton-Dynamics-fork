@@ -162,8 +162,11 @@ void ClosestDistance (DemoEntityManager* const scene)
 		NewtonMesh* nextPart = NULL;
 		for (NewtonMesh* part = NewtonMeshCreateFirstSingleSegment (newtonMesh); part; part = nextPart) {
 			nextPart = NewtonMeshCreateNextSingleSegment (newtonMesh, part);
-			parts[count] = NewtonCreateConvexHullFromMesh (world, part, 0.0f, 0);
-			count ++;
+			NewtonCollision* const convex = NewtonCreateConvexHullFromMesh (world, part, 0.0f, 0);
+			if (convex) {
+				parts[count] = convex;
+				count ++;
+			}
 			NewtonMeshDestroy(part);
 		} 
 		NewtonCollision* const castShape = NewtonCreateCompoundCollision(world, count, parts, 0);
