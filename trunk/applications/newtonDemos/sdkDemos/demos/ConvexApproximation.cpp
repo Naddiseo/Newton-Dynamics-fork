@@ -182,10 +182,8 @@ static void LoadCompoundModel (const char* const name, DemoEntityManager* const 
 
 	NewtonMesh* const convexDocomposition = NewtonMeshApproximateConvexDecomposition (mesh->GetMesh());
 
-mesh->ReplaceMesh (convexDocomposition);
-compoundTestMesh.Serialize("../../../media/xxx1.ngd");
-
-
+//mesh->ReplaceMesh (convexDocomposition);
+//compoundTestMesh.Serialize("../../../media/xxx1.ngd");
 		
 
 	NewtonMeshDestroy (convexDocomposition);
@@ -207,7 +205,7 @@ void SimpleConvexAproximation (DemoEntityManager* const scene)
 //	CreateLevelMesh (scene, "sponza.ngd", false);
 
 	// create a shattered mesh array
-  TestConvexApproximation (scene);
+//  TestConvexApproximation (scene);
 
 
 //	int defaultMaterialID = NewtonMaterialGetDefaultGroupID (scene->GetNewton());
@@ -216,7 +214,7 @@ void SimpleConvexAproximation (DemoEntityManager* const scene)
 //	int count = 5;
 //	LoadCompoundModel ("box_1.ngd", scene, location);
 //	LoadCompoundModel ("box_2.ngd", scene, location);
-	LoadCompoundModel ("box_3.ngd", scene, location);
+//	LoadCompoundModel ("box_3.ngd", scene, location);
 //	LoadCompoundModel ("xxx_.ngd", scene, location);
 //	LoadCompoundModel ("xxx.ngd", scene, location);
 //	LoadCompoundModel ("lshape.ngd", scene, location);
