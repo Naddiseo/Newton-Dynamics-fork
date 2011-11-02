@@ -283,12 +283,14 @@ dgCollisionCompound::dgCollisionCompound(dgWorld* world)
 	m_world = world;
 	m_root = NULL;
 	m_count = 0;
+	m_criticalSection = 0;
 }
 
 
 dgCollisionCompound::dgCollisionCompound(dgInt32 count, dgCollisionConvex* const shapeArray[], dgWorld* world)
 	:dgCollision (world->GetAllocator(), 0, dgGetIdentityMatrix(), m_compoundCollision) 
 {
+	m_criticalSection = 0;
 	m_world = world;
 	m_root = NULL;
 	if (count) {
@@ -307,6 +309,7 @@ dgCollisionCompound::dgCollisionCompound (const dgCollisionCompound& source)
 
 	m_root = NULL;
 	m_world = source.m_world;
+	m_criticalSection = 0;
 
 	parent[0] = &m_root;
 	pool[0] = source.m_root;
@@ -357,6 +360,7 @@ dgCollisionCompound::dgCollisionCompound (dgWorld* const world, dgDeserialize de
 
 	count = data[0];
 	m_world = world;
+	m_criticalSection = 0;
 
 	dgStack<dgCollisionConvex*> array(data[0]);
 	for (dgInt32 i = 0; i < count; i ++) {
@@ -462,6 +466,7 @@ void dgCollisionCompound::Init (dgInt32 count, dgCollisionConvex* const shapeArr
 	m_count = count;
 	m_rtti |= dgCollisionCompound_RTTI;
 	m_preCollisionFilter = NULL;
+	m_criticalSection = 0;
 
 	m_array = (dgCollisionConvex**) m_allocator->Malloc (m_count * dgInt32 (sizeof (dgCollisionConvex*)));
 	for (dgInt32 i = 0; i < m_count; i ++) {
@@ -1467,18 +1472,17 @@ dgInt32 dgCollisionCompound::CalculateContacts (dgCollidingPairCollector::dgPair
 			contactCount = CalculateContactsBruteForce (pair, proxy, useSimd);
 		}
 	}
+	pair->m_contactCount = dgInt16 (contactCount);
 	return contactCount;
 }
 
 
 dgInt32 dgCollisionCompound::CalculateContactsToSingle (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxy, dgInt32 useSimd) const
 {
-	_ASSERTE (0);
-	return 0;
-/*
 	dgVector p0;
 	dgVector p1;
-	dgContactPoint* const contacts = pair->m_contactBuffer;
+//	dgContactPoint* const contacts = pair->m_contactBuffer;
+	dgContactPoint* const contacts = proxy.m_contacts;
 	const dgNodeBase* stackPool[DG_COMPOUND_STACK_DEPTH];
 	
 	dgBody* const otherBody = pair->m_body1;
@@ -1533,9 +1537,6 @@ dgInt32 dgCollisionCompound::CalculateContactsToSingle (dgCollidingPairCollector
 
 					proxy.m_referenceMatrix = me->m_shape->m_offset * myMatrix;
 
-//					proxy.m_floatingCollision = otherBody->m_collision;
-//					proxy.m_floatingMatrix = otherBody->m_collisionWorldMatrix;
-
 					proxy.m_maxContacts = DG_MAX_CONTATCS - contactCount;
 					proxy.m_contacts = &contacts[contactCount];
 
@@ -1563,8 +1564,8 @@ dgInt32 dgCollisionCompound::CalculateContactsToSingle (dgCollidingPairCollector
 		}
 	}
 
+	proxy.m_contacts = contacts;
 	return contactCount;
-*/
 }
 
 
@@ -1718,10 +1719,8 @@ dgInt32 dgCollisionCompound::CalculateContactsToCompound (dgCollidingPairCollect
 
 dgInt32 dgCollisionCompound::CalculateContactsToCollisionTree (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxy, dgInt32 useSimd) const
 {
-	_ASSERTE (0);
-	return 0;
-/*
-	dgContactPoint* const contacts = pair->m_contactBuffer;
+//	dgContactPoint* const contacts = pair->m_contactBuffer;
+	dgContactPoint* const contacts = proxy.m_contacts;
 	dgTree<const dgNodeBase*, const dgNodeBase*> filter(m_allocator);
 
 	struct NodePairs
@@ -1760,14 +1759,13 @@ dgInt32 dgCollisionCompound::CalculateContactsToCollisionTree (dgCollidingPairCo
 	nodeProxi.m_right = NULL;
 
 	while (stack) {
-		dgInt32 treeNodeIsLeaf;
 		dgVector p0;
 		dgVector p1;
 
 		stack --;
 		dgNodeBase* const me = stackPool[stack].m_myNode;
 		const void* const other = stackPool[stack].m_treeNode;
-		treeNodeIsLeaf = stackPool[stack].m_treeNodeIsLeaf;
+		dgInt32 treeNodeIsLeaf = stackPool[stack].m_treeNodeIsLeaf;
 
 		_ASSERTE (me && other);
 
@@ -1781,9 +1779,11 @@ dgInt32 dgCollisionCompound::CalculateContactsToCollisionTree (dgCollidingPairCo
 		if (me->BoxTest (data, &nodeProxi)) {
 			if ((me->m_type == m_leaf) && treeNodeIsLeaf) {
 				if (!filter.Find(me)) {
-					m_world->dgGetUserLock();
+					//m_world->dgGetUserLock();
+					m_world->GetIndirectLock(&m_criticalSection);
 					filter.Insert(me, me);
-					m_world->dgReleasedUserLock();
+					m_world->GetIndirectLock(&m_criticalSection);
+					//m_world->dgReleasedUserLock();
 
 //					dgShapeCell* const myCell = (dgShapeCell*)me;
 //					m_world->dgGetIndirectLock(&myCell->m_criticalSection);
@@ -1945,13 +1945,15 @@ dgInt32 dgCollisionCompound::CalculateContactsToCollisionTree (dgCollidingPairCo
 	}
 	
 	if (filter.GetCount()) {
-		m_world->dgGetUserLock();
+		//m_world->dgGetUserLock();
+		m_world->GetIndirectLock(&m_criticalSection);
 		filter.RemoveAll();
-		m_world->dgReleasedUserLock();
+		//m_world->dgReleasedUserLock();
+		m_world->GetIndirectLock(&m_criticalSection);
 	}
-	
+
+	proxy.m_contacts = contacts;	
 	return contactCount;
-*/
 }
 
 

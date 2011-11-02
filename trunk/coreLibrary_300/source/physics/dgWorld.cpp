@@ -248,7 +248,8 @@ dgWorld::dgWorld(dgMemoryAllocator* const allocator)
 	m_genericLRUMark = 0;
 	m_singleIslandMultithreading = 1;
 
-	m_solverMode = 0;
+	//m_solverMode = 0;
+	m_solverMode = 1;
 	m_frictionMode = 0;
 	m_dynamicsLru = 0;
 	m_broadPhaseLru = 0;
@@ -642,6 +643,8 @@ void dgWorld::Update (dgFloat32 timestep)
 		dgControlFP (_PC_53, _MCW_PC);
 	#endif
 #endif
+
+
 
 	if (m_cpu == dgSimdPresent) {
 #ifdef DG_BUILD_SIMD_CODE

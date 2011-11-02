@@ -157,6 +157,7 @@ class dgCollisionCompound: public dgCollision
 	void PushNodes (dgNodeBase* const root, dgNodeBase** const proxiArray, dgInt32& index) const;
 	dgFloat32 CalculateSurfaceArea (dgNodeBase* const node0, dgNodeBase* const node1, dgVector& minBox, dgVector& maxBox) const;
 
+	
 	dgInt32 m_count;
 	dgFloat32 m_boxMinRadius;
 	dgFloat32 m_boxMaxRadius;
@@ -164,6 +165,7 @@ class dgCollisionCompound: public dgCollision
 	dgNodeBase* m_root;
 	dgCollisionConvex** m_array;
 	OnCompoundCollisionPrefilter* m_preCollisionFilter;
+	mutable dgInt32 m_criticalSection;
 	friend class dgBody;
 	friend class dgWorld;
 };
