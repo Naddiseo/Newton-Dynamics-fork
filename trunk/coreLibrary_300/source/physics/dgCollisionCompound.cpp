@@ -1571,10 +1571,7 @@ dgInt32 dgCollisionCompound::CalculateContactsToSingle (dgCollidingPairCollector
 
 dgInt32 dgCollisionCompound::CalculateContactsToCompound (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxy, dgInt32 useSimd) const
 {
-	_ASSERTE (0);
-	return 0;
-/*
-	dgContactPoint* const contacts = pair->m_contactBuffer;
+	dgContactPoint* const contacts = proxy.m_contacts;
 	const dgNodeBase* stackPool[4 * DG_COMPOUND_STACK_DEPTH][2];
 
 	dgInt32 contactCount = 0;
@@ -1712,8 +1709,8 @@ dgInt32 dgCollisionCompound::CalculateContactsToCompound (dgCollidingPairCollect
 		}
 	}
 
+	proxy.m_contacts = contacts;
 	return contactCount;
-*/
 }
 
 
@@ -1959,11 +1956,8 @@ dgInt32 dgCollisionCompound::CalculateContactsToCollisionTree (dgCollidingPairCo
 
 dgInt32 dgCollisionCompound::CalculateContactsToHeightField (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxy, dgInt32 useSimd) const
 {
-	_ASSERTE (0);
-	return 0;
-/*
 	dgNodeBase nodeProxi;
-	dgContactPoint* const contacts = pair->m_contactBuffer;
+	dgContactPoint* const contacts = proxy.m_contacts;
 	const dgNodeBase* stackPool[DG_COMPOUND_STACK_DEPTH];
 
 	dgInt32 contactCount = 0;
@@ -2037,17 +2031,14 @@ dgInt32 dgCollisionCompound::CalculateContactsToHeightField (dgCollidingPairColl
 		}
 	}
 
+	proxy.m_contacts = contacts;	
 	return contactCount;
-*/
 }
 
 
 dgInt32 dgCollisionCompound::CalculateContactsBruteForce (dgCollidingPairCollector::dgPair* const pair, dgCollisionParamProxy& proxy, dgInt32 useSimd) const
 {
-	_ASSERTE (0);
-	return 0;
-/*
-	dgContactPoint* const contacts = pair->m_contactBuffer;
+	dgContactPoint* const contacts = proxy.m_contacts;
 	const dgNodeBase* stackPool[DG_COMPOUND_STACK_DEPTH];
 
 	dgInt32 contactCount = 0;
@@ -2112,8 +2103,8 @@ dgInt32 dgCollisionCompound::CalculateContactsBruteForce (dgCollidingPairCollect
 		}
 	}
 
+	proxy.m_contacts = contacts;	
 	return contactCount;
-*/
 }
 
 
