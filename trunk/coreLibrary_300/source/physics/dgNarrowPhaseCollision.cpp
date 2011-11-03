@@ -3925,13 +3925,13 @@ dgInt32 dgWorld::CalculateConvexToNonConvexContacts (dgCollisionParamProxy& prox
 		if (doContinueCollision) {
 			switch (collision->GetCollisionPrimityType()) 
 			{
-			case m_sphereCollision:
+				case m_sphereCollision:
 				{
 					count = CalculatePolySoupToSphereContactsContinue (proxy);
 					break;
 				}
 
-			default: 
+				default: 
 				{
 					//if (!proxy.m_unconditionalCast &&  (xxx == 5)) {
 					//xxx *= 1;
@@ -3953,19 +3953,19 @@ dgInt32 dgWorld::CalculateConvexToNonConvexContacts (dgCollisionParamProxy& prox
 
 			switch (collision->GetCollisionPrimityType()) 
 			{
-			case m_sphereCollision:
+				case m_sphereCollision:
 				{
 					count = CalculatePolySoupToSphereContactsDescrete (proxy);
 					break;
 				}
 
-			case m_ellipseCollision:
+				case m_ellipseCollision:
 				{
 					count = CalculatePolySoupToElipseContactsDescrete (proxy);
 					break;
 				}
 
-			default: 
+				default: 
 				{
 					count = CalculatePolySoupToHullContactsDescrete (proxy);
 				}

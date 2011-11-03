@@ -22,6 +22,8 @@
 #include "dgPhysicsStdafx.h"
 #include "dgBody.h"
 
+#include "dgConstraint.h"
+#include "dgWorldDynamicUpdate.h"
 #include "dgBilateralConstraint.h"
 
 
@@ -525,11 +527,9 @@ void dgBilateralConstraint::JointAccelerationsSimd(dgJointAccelerationDecriptor*
 
 void dgBilateralConstraint::JointAccelerations(dgJointAccelerationDecriptor* const params)
 {
-_ASSERTE (0);
-/*
-	dgFloat32 dt;
+	dgJacobianMatrixElement* const jacobianMatrixElements = params->m_rowMatrix;
 
-	const dgJacobianPair* const Jt = params.m_Jt;
+//	const dgJacobianPair* const Jt = params.m_Jt;
 	const dgVector& bodyVeloc0 = m_body0->m_veloc;
 	const dgVector& bodyOmega0 = m_body0->m_omega;
 	const dgVector& bodyVeloc1 = m_body1->m_veloc;
@@ -539,26 +539,29 @@ _ASSERTE (0);
 	dgFloat32 kd = DG_VEL_DAMP * dgFloat32 (4.0f);
 	dgFloat32 ks = DG_POS_DAMP * dgFloat32 (0.25f);
 
-	dt = params.m_timeStep;
-	for (dgInt32 k = 0; k < params.m_rowsCount; k ++) {
+	dgFloat32 dt = params->m_timeStep;
+	for (dgInt32 k = 0; k < params->m_rowsCount; k ++) {
 		if (m_rowIsMotor[k]) {
-			params.m_coordenateAccel[k] = m_motorAcceleration[k] + params.m_externAccelaration[k];
+			//params.m_coordenateAccel[k] = m_motorAcceleration[k] + params.m_externAccelaration[k];
+			jacobianMatrixElements[k].m_coordenateAccel = m_motorAcceleration[k] + jacobianMatrixElements[k].m_deltaAccel;
 		} else {
-			dgFloat32 num;
-			dgFloat32 den;
-			dgFloat32 ksd;
-			dgFloat32 vRel;
-			dgFloat32 aRel;
-			dgFloat32 aRelErr;
-			dgFloat32 relPosit;
+//			dgFloat32 num;
+//			dgFloat32 den;
+//			dgFloat32 ksd;
+//			dgFloat32 vRel;
+//			dgFloat32 aRel;
+//			dgFloat32 aRelErr;
+//			dgFloat32 relPosit;
 
-			dgVector relVeloc (Jt[k].m_jacobian_IM0.m_linear.CompProduct(bodyVeloc0));
-			relVeloc += Jt[k].m_jacobian_IM0.m_angular.CompProduct(bodyOmega0);
-			relVeloc += Jt[k].m_jacobian_IM1.m_linear.CompProduct(bodyVeloc1);
-			relVeloc += Jt[k].m_jacobian_IM1.m_angular.CompProduct(bodyOmega1);
+			const dgJacobianPair& Jt = jacobianMatrixElements[k].m_Jt;
+			dgVector relVeloc (Jt.m_jacobian_IM0.m_linear.CompProduct(bodyVeloc0));
+			relVeloc += Jt.m_jacobian_IM0.m_angular.CompProduct(bodyOmega0);
+			relVeloc += Jt.m_jacobian_IM1.m_linear.CompProduct(bodyVeloc1);
+			relVeloc += Jt.m_jacobian_IM1.m_angular.CompProduct(bodyOmega1);
 
-			vRel = relVeloc.m_x + relVeloc.m_y + relVeloc.m_z;
-			aRel = params.m_externAccelaration[k];
+			dgFloat32 vRel = relVeloc.m_x + relVeloc.m_y + relVeloc.m_z;
+			//aRel = params.m_externAccelaration[k];
+			dgFloat32 aRel = jacobianMatrixElements[k].m_deltaAccel;
 			//at =  [- ks (x2 - x1) - kd * (v2 - v1) - dt * ks * (v2 - v1)] / [1 + dt * kd + dt * dt * ks] 
 			//		alphaError = num / den;
 
@@ -571,24 +574,20 @@ _ASSERTE (0);
 			//		dgFloat32 den = dgFloat32 (1.0f) + dt * kd + dt * ksd;
 			//		accelError = num / den;
 
-			ksd = dt * ks;
-//			relPosit = params.m_penetration[k];
-			relPosit = params.m_penetration[k] - vRel * dt * params.m_firstPassCoefFlag;
-
-//			if (relPosit > dgFloat32 (1.0f) ) {
-//				relPosit = dgFloat32 (1.0f);
-//			} else if (params.m_penetration[k] < dgFloat32 (-1.0f) ) {
-//				relPosit = dgFloat32 (-1.0f);
-//			}
-			params.m_penetration[k] = relPosit;
+			dgFloat32 ksd = dt * ks;
+			//dgFloat32 relPosit = params.m_penetration[k] - vRel * dt * params.m_firstPassCoefFlag;
+			dgFloat32 relPosit = jacobianMatrixElements[k].m_penetration - vRel * dt * params->m_firstPassCoefFlag;
+			//params.m_penetration[k] = relPosit;
+			jacobianMatrixElements[k].m_penetration = relPosit;
 
 
-			num = ks * relPosit - kd * vRel - ksd * vRel;
-			den = dgFloat32 (1.0f) + dt * kd + dt * ksd;
-			aRelErr = num / den;
+			dgFloat32 num = ks * relPosit - kd * vRel - ksd * vRel;
+			dgFloat32 den = dgFloat32 (1.0f) + dt * kd + dt * ksd;
+			dgFloat32 aRelErr = num / den;
 
 			//centripetal acceleration is stored restitution member
-			params.m_coordenateAccel[k] = aRelErr + params.m_restitution[k] + aRel;
+			//params.m_coordenateAccel[k] = aRelErr + params.m_restitution[k] + aRel;
+			jacobianMatrixElements[k].m_coordenateAccel = aRelErr + jacobianMatrixElements[k].m_restitution + aRel;
 
 #else
 			dgFloat32 vRel;
@@ -619,7 +618,6 @@ _ASSERTE (0);
 #endif
 		}
 	}
-*/
 }
 
 void dgBilateralConstraint::JointVelocityCorrection(dgJointAccelerationDecriptor* const params)

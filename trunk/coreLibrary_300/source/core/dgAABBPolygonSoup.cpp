@@ -759,7 +759,7 @@ class dgAABBTree
 
 	DG_INLINE dgInt32 BoxIntersect (const dgTriplex* const vertexArray, const dgVector& min, const dgVector& max) const
 	{
-		dgVector boxP0 (vertexArray[m_minIndex].m_x, vertexArray[m_minIndex].m_x, vertexArray[m_minIndex].m_x, dgFloat32 (0.0f));
+		dgVector boxP0 (vertexArray[m_minIndex].m_x, vertexArray[m_minIndex].m_y, vertexArray[m_minIndex].m_z, dgFloat32 (0.0f));
 		dgVector boxP1 (vertexArray[m_maxIndex].m_x, vertexArray[m_maxIndex].m_y, vertexArray[m_maxIndex].m_z, dgFloat32 (0.0f));
 		return dgOverlapTest (boxP0, boxP1, min, max) - 1;
 	}
@@ -875,7 +875,6 @@ class dgAABBTree
 
 		stack = 1;
 		stackPool[0] = this;
-//		const dgAABBTree* const root = this;
 		while (stack) {
 			stack	--;
 			const dgAABBTree* const me = stackPool[stack];
