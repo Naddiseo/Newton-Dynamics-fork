@@ -3419,7 +3419,7 @@ dgInt32 dgWorld::CalculatePolySoupToElipseContactsDescrete (dgCollisionParamProx
 	return count;
 }
 
-
+/*
 dgInt32 dgWorld::CalculatePolySoupToSphereContactsContinue (dgCollisionParamProxy& proxy) const
 {
 	dgInt32 count;
@@ -3534,6 +3534,112 @@ dgInt32 dgWorld::CalculatePolySoupToSphereContactsContinue (dgCollisionParamProx
 		}
 		count = FilterPolygonEdgeContacts (count, contactOut);
 	}
+	return count;
+}
+*/
+
+dgInt32 dgWorld::CalculatePolySoupToSphereContactsContinue (dgCollisionParamProxy& proxy) const
+{
+	dgInt32 count = 0;
+
+	_ASSERTE (proxy.m_referenceCollision->IsType (dgCollision::dgCollisionSphere_RTTI));
+	_ASSERTE (proxy.m_floatingCollision->IsType (dgCollision::dgCollisionMesh_RTTI));
+
+	dgBody* const spheBody = proxy.m_referenceBody;
+//	dgBody* const soupBody = proxy.m_floatingBody;
+	dgCollisionSphere* const sphere = (dgCollisionSphere*) proxy.m_referenceCollision;
+	dgCollisionMesh* const polysoup = (dgCollisionMesh *) proxy.m_floatingCollision;
+
+	const dgMatrix& sphMatrix = proxy.m_referenceMatrix;
+	const dgMatrix& soupMatrix = proxy.m_floatingMatrix;
+
+	dgFloat32 radius = sphere->m_radius + proxy.m_penetrationPadding;
+	dgVector center (soupMatrix.UntransformVector (sphMatrix.m_posit));
+	dgVector veloc (soupMatrix.UnrotateVector (spheBody->m_veloc));
+
+	const dgPolygonMeshDesc& data = *proxy.m_polyMeshData;
+	dgInt32 thread = data.m_threadNumber;
+
+	dgInt32* const idArray = (dgInt32*)data.m_userAttribute; 
+	dgInt32* const indexArray = (dgInt32*)data.m_faceVertexIndex;
+
+	_ASSERTE (idArray);
+	dgCollisionMesh::dgCollisionConvexPolygon* const polygon = polysoup->m_polygon[thread];
+	polygon->m_vertex = data.m_vertex;
+	polygon->m_stride = dgInt32 (data.m_vertexStrideInBytes / sizeof (dgFloat32));
+
+	dgContactPoint* const contactOut = proxy.m_contacts;
+	dgInt32 reduceContactCountLimit = 0;
+	dgInt32 countleft = proxy.m_maxContacts;
+
+	_ASSERTE (data.m_faceCount);
+	//strideInBytes = data.m_vertexStrideInBytes;
+
+	dgInt32 indexCount = 0;
+	dgFloat32 minTime = proxy.m_timestep + dgFloat32 (1.0e-5f);
+	for (dgInt32 i = 0; (i < data.m_faceCount) && (countleft > 0); i ++) {
+
+		polygon->m_count = data.m_faceIndexCount[i];
+		polygon->m_index = &indexArray[indexCount];
+
+		if (data.m_faceNormalIndex) {
+			polygon->m_normalIndex = data.m_faceNormalIndex[i];
+			polygon->m_adjacentNormalIndex = (dgInt32*) &data.m_faceAdjencentEdgeNormal[indexCount];
+		} else {
+			polygon->m_normalIndex = 0;
+			polygon->m_adjacentNormalIndex = NULL;
+		}
+
+		dgContactPoint contact;
+		dgFloat32 timestep = polygon->MovingPointToPolygonContact (center, veloc, radius, contact);
+		if (timestep >= dgFloat32 (0.0f)) {
+			if (timestep <= minTime) {
+				minTime = timestep + dgFloat32 (1.0e-5f);
+
+				_ASSERTE (dgAbsf (contact.m_normal % contact.m_normal - 1.0f) < dgFloat32 (1.0e-5f));
+				contactOut[count].m_point = soupMatrix.TransformVector (center - contact.m_normal.Scale (radius));
+				contactOut[count].m_normal = soupMatrix.RotateVector (contact.m_normal);
+				contactOut[count].m_userId = idArray[i];
+				contactOut[count].m_penetration = contact.m_penetration;
+				contactOut[count].m_isEdgeContact = contact.m_isEdgeContact;
+				contactOut[count].m_point.m_w = timestep;
+				// pass 
+				//dgInt32 count1 = polygon->ClipContacts (1, &contactOut[count], soupMatrix);
+				dgInt32 count1 = 1;
+				count += count1;
+				countleft -= count1;
+				reduceContactCountLimit += count;
+				if ((reduceContactCountLimit > 24) || (countleft <= 0)) {
+					count = ReduceContacts (count, contactOut, proxy.m_maxContacts >> 2, dgFloat32 (1.0e-2f));
+					countleft = proxy.m_maxContacts - count;
+					reduceContactCountLimit = 0;
+				}
+			}
+		}
+		//indexArray += data.m_faceIndexCount[i];
+		indexCount += data.m_faceIndexCount[i];
+	}
+
+	if (count >= 1) {
+		minTime = contactOut[0].m_point.m_w;
+		for (dgInt32 j = 1; j < count; j ++) {
+			minTime = GetMin(minTime, contactOut[j].m_point.m_w);
+		}
+
+		minTime += dgFloat32 (1.0e-5f);
+		for (dgInt32 j = 0; j < count; j ++) {
+			if (contactOut[j].m_point.m_w > minTime) {
+				contactOut[j] = contactOut[count - 1];
+				count --;
+				j --;
+			}
+		}
+		if (count > 1) {
+			count = FilterPolygonEdgeContacts (count, contactOut);
+		}
+	}
+
+	proxy.m_timestep = minTime;
 	return count;
 }
 

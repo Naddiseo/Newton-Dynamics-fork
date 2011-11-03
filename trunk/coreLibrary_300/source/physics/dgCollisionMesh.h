@@ -154,6 +154,7 @@ class dgCollisionMesh: public dgCollision
 		bool PointToPolygonDistance (const dgVector& point, dgFloat32 radius, dgVector& out, bool& isEdge);
 		bool DistanceToOrigen (const dgMatrix& matrix, const dgVector& scale, dgFloat32 radius, dgVector& out, bool& isEdge);
 		dgFloat32 MovingPointToPolygonContact (const dgVector& p, const dgVector& veloc, dgFloat32 radius, dgContactPoint& contact);
+		dgFloat32 MovingSphereToEdgeContact (const dgVector& center, const dgVector& veloc, dgFloat32 radius, const dgVector& v0, const dgVector& v1, dgVector& contactOutOnLine) const; 
 		
 		void CalculateNormal();
 		void CalculateNormalSimd();

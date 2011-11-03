@@ -935,6 +935,81 @@ bool dgCollisionMesh::dgCollisionConvexPolygon::DistanceToOrigen (const dgMatrix
 	return true;
 }
 
+
+
+// given an edge of a polygon and a moving sphere, find the first contact the sphere 
+//  makes with the edge, if any.  note that hit_time must be primed with a  value of 1
+//  before calling this function the first time.  it will then maintain the closest 
+//  collision in subsequent calls.
+//
+// xs0:			start point (center) of sphere
+// vs: 			path of sphere during frame
+// rad:			radius of sphere
+// v0:			vertex #1 of the edge
+// v1:			vertex #2 of the edge
+// hit_time:	(OUT) time at which sphere collides with polygon edge
+// hit_point:	(OUT) point on edge that is hit
+//
+// returns - whether the edge (or it's vertex) was hit
+dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingSphereToEdgeContact (const dgVector& center, const dgVector& veloc, dgFloat32 radius, const dgVector& v0, const dgVector& v1, dgVector& contactOutOnLine) const
+{
+	dgVector ve (v1 - v0);
+	dgVector delta (center - v0);
+	dgFloat32 delta_dot_ve = delta % ve;
+	dgFloat32 delta_dot_vs = delta % veloc;
+	dgFloat32 delta_sqr = delta % delta;
+	dgFloat32 ve_dot_vs = ve % veloc;
+	dgFloat32 ve_sqr = ve % ve;
+	dgFloat32 vs_sqr = veloc % veloc;
+
+//	dgFloat32 temp;
+
+	// position of the collision along the edge is given by: xe = v0 + ve*s, where s is
+	//  in the range [0,1].  position of sphere along its path is given by: 
+	//  xs = xs + vs*t, where t is in the range [0,1].  t is time, but s is arbitrary.
+	//
+	// solve simultaneous equations
+	// (1) distance between edge and sphere center must be sphere radius
+	// (2) line between sphere center and edge must be perpendicular to edge
+	//
+	// (1) (xe - xs)*(xe - xs) = rad*rad
+	// (2) (xe - xs) * ve = 0
+	//
+
+	dgFloat32 t = dgFloat32 (-1.0f);
+	dgFloat32 A = ve_dot_vs * ve_dot_vs - ve_sqr * vs_sqr;
+	if (dgAbsf (A) > dgFloat32(1.0e-3f)) {
+		dgFloat32 B = dgFloat32 (2.0f) * (delta_dot_ve * ve_dot_vs - delta_dot_vs * ve_sqr);
+		dgFloat32 C = delta_dot_ve * delta_dot_ve + radius * radius* ve_sqr - delta_sqr * ve_sqr;
+
+		dgFloat32 discriminant = B * B - dgFloat32 (4.0f) * A * C;
+		if ( discriminant > dgFloat32 (0.0f) ) {
+			discriminant = dgSqrt(discriminant);
+			dgFloat32 t1 = dgFloat32 (0.5f) * (-B + discriminant) / A;
+			dgFloat32 t2 = dgFloat32 (0.5f) * (-B - discriminant) / A;
+
+			// sort root1 and root2, use the earliest intersection.  the larger root 
+			//  corresponds to the final contact of the sphere with the edge on its 
+			//  way out.
+			t1 = GetMin(t1, t2);
+
+			// find sphere and edge positions
+			dgVector temp_sphere_hit (center + veloc.Scale (t1));
+			if (t1 >= dgFloat32 (0.0f)) {
+				dgFloat32 edge_param = ((temp_sphere_hit - v0) % ve) / ve_sqr;
+				if ((edge_param >= dgFloat32 (0.0f)) && (edge_param <= dgFloat32 (1.0f))) {
+					t = t1;
+					contactOutOnLine = v0 + ve.Scale(edge_param);
+				}
+			}
+		}
+	}
+
+	return t;
+}
+
+
+
 dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact (const dgVector& p, const dgVector& veloc, dgFloat32 radius, dgContactPoint& contact)
 {
 	m_localPoly[0] = dgVector (&m_vertex[m_index[0] * m_stride]);
@@ -995,10 +1070,8 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 		dgFloat32 scale = dgFloat32 (1.0f) / dgSqrt (veloc % veloc);
 		dgVector vdir = veloc.Scale (scale);
 
-		dgFloat32 projVeloc = vdir % m_normal;
-		if (projVeloc < dgFloat32 (-1.0e-1f)) {
+		_ASSERTE (dgAbsf(m_normal % vdir) > dgFloat32 (0.0f));
 			dgVector supportPoint (p - m_normal.Scale (radius));
-
 			dgFloat32 timeToImpact = -(m_normal % (supportPoint - m_localPoly[0])) / (m_normal % vdir); 
 			dgVector point (supportPoint + vdir.Scale (timeToImpact));
 			dgVector closestPoint (point);
@@ -1025,8 +1098,11 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 				contact.m_point = p - m_normal.Scale (radius);
 				contact.m_point = closestPoint;
 			} else {
+
+/*
 				_ASSERTE (isEdge);
 				dgVector dp (closestPoint - p);
+			// this does not really work ( goidnm back to my old method
 
 				// has I finally found the bug, when V is very large, then 
 				// v % v introduces a very large round of error that completely invalidates the meaning of (b * b - 4 * a * c)
@@ -1054,8 +1130,33 @@ dgFloat32 dgCollisionMesh::dgCollisionConvexPolygon::MovingPointToPolygonContact
 						contact.m_normal = n.Scale (dgRsqrt (n % n));
 					}
 				}
+*/
+
+			
+			bool edgefound = false;
+			dgFloat32 mint = dgFloat32 (1.0e10f);
+			dgInt32 i0 = m_count - 1;
+			for (dgInt32 i1 = 0; i1 < m_count; i1 ++) {
+				dgVector tmp;
+				dgFloat32 t = MovingSphereToEdgeContact (p, vdir, radius, m_localPoly[i0], m_localPoly[i1], tmp);
+				if ((t > dgFloat32 (0.0f)) && (t < mint)) {
+					mint = t;
+					edgefound = true;
+					closestPoint = tmp;
+				}
+				i0 = i1;
+			}
+
+			if (edgefound) {
+				timestep = mint;
+				contact.m_penetration = dgFloat32 (0.0f);
+				contact.m_isEdgeContact = 1;
+				contact.m_point = closestPoint;
+				dgVector n (p - (closestPoint - vdir.Scale (mint)));
+				contact.m_normal = n.Scale (dgRsqrt (n % n));
 			}
 		}
+
 		timestep *= scale;
 	}
 	return timestep;
