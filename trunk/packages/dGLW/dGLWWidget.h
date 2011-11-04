@@ -35,26 +35,30 @@ class dGLWWidget
 		m_frame,
 	};
 
-
-	void Create ();
 	dGLW* GetGLW() const;
-	
-	void AddChild(dGLWWidget* const child);
-	void RemoveChild(dGLWWidget* const child);
+
+	dGLWRect GetClientRect() const;
+	dFrameType GetWidndowType() const;
+	dGLWColor GetBackgroundColor() const;
+	void SetBackgroundColor(const dGLWColor& color);
+
+	virtual void Update();
+	virtual void SetSize(int width, int height);
+	virtual void PredictNewSize(int& width, int& height) const;
+
+	virtual void OnPaint(const dGLWDrawContext& gdc);
+	virtual void OnSize(int width, int height);
+	virtual void OnPosition(int x, int y);
+
 
 	protected:
 	dGLWWidget(dGLW* const glw, dGLWWidget* const parent, dFrameType type);
 	virtual ~dGLWWidget(void);
 
-	void Update();
+	void Create ();
+	void AddChild(dGLWWidget* const child);
+	void RemoveChild(dGLWWidget* const child);
 
-	void SetBackgroundColor(const dGLWColor& color);
-	dGLWColor GetBackgroundColor() const ;
-
-
-	virtual void OnPaint(const dGLWDrawContext& gdc);
-	virtual void OnSize(int width, int height);
-	virtual void OnPosition(int x, int y);
 	
 
 

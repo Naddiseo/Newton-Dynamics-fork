@@ -33,12 +33,29 @@ dGLWMenuBar::dGLWMenuBar(dGLWWidget* const parent)
 	color.m_blue = 251;
 	color.m_alpha = 255;
 	SetBackgroundColor(color);
+
+	int width;
+	int height;
+	PredictNewSize(width, height);
+	SetSize(width, height);
 }
 
 dGLWMenuBar::~dGLWMenuBar(void)
 {
 }
 
+void dGLWMenuBar::PredictNewSize(int& width, int& height) const
+{
+	dGLWRect rect (m_parent->GetClientRect());
+
+	width = rect.m_width;
+	height = 200;
+}
+
+void dGLWMenuBar::OnSize(int width, int height)
+{
+	dGLWHorizontalLayout::OnSize(width, height);
+}
 
 dGLWMenuItem* dGLWMenuBar::CreateItem(const string& title)
 {

@@ -33,6 +33,8 @@ class dGLWMenuBar: public dGLWHorizontalLayout
 	virtual ~dGLWMenuBar(void);
 
 	dGLWMenuItem* CreateItem(const string& title);
+	virtual void PredictNewSize(int& width, int& height) const;
+	virtual void OnSize(int width, int height);
 };
 
 #endif

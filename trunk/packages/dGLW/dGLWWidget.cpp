@@ -164,12 +164,34 @@ void dGLWWidget::SetBackgroundColor(const dGLWColor& color)
 	Update();
 }
 
+dGLWWidget::dFrameType dGLWWidget::GetWidndowType() const
+{
+	return m_type;
+}
+
 dGLWColor dGLWWidget::GetBackgroundColor() const 
 {	
 	return m_bkColor;
 }
 
+void dGLWWidget::PredictNewSize(int& width, int& height) const
+{
+	width = m_rect.m_width;
+	height = m_rect.m_height;
+}
 
+dGLWRect dGLWWidget::GetClientRect() const
+{
+	return m_client;
+}
+
+void dGLWWidget::SetSize(int width, int height)
+{
+//	unsigned size = (width << 16) + height & 0xffff;
+//	SendMessage (m_nativeHandle, WM_SIZE, 0, size);
+
+	SetWindowPos(m_nativeHandle, HWND_TOP, m_rect.m_x, m_rect.m_y, width, height, 0);
+}
 
 void dGLWWidget::OnPaint(const dGLWDrawContext& gdc)
 {

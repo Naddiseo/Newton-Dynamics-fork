@@ -30,6 +30,8 @@ class dGLWLayout: public dGLWWidget
 	dGLWLayout(dGLW* const glw, dGLWWidget* const parent, dFrameType type);
 
 	protected:
+
+
 	virtual ~dGLWLayout(void);
 };
 
