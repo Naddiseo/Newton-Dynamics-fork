@@ -12,6 +12,12 @@ dGLWWidget::dGLWWidget(dGLW* const glw, dGLWWidget* const parent, dFrameType typ
 	,m_children()
 	,m_type(type)
 {
+	m_rect.m_x = 0;
+	m_rect.m_y = 0;
+	m_rect.m_width = 1;
+	m_rect.m_height = 1;
+	m_client = m_rect;
+
 	m_bkColor.m_red = 128;
 	m_bkColor.m_green = 128;
 	m_bkColor.m_blue = 128;
@@ -134,8 +140,10 @@ void dGLWWidget::OnPosition(int x, int y)
 	m_rect.m_x = x;
 	m_rect.m_y = y;
 	if (m_type == m_frame) {
-		m_client.m_x = x - rect.left;
-		m_client.m_y = y - rect.top;
+//		m_client.m_x = x - rect.left;
+//		m_client.m_y = y - rect.top;
+		m_client.m_x = 0;
+		m_client.m_y = 0;
 	} else {
 		m_client.m_x = x - (rect.left - m_parent->m_rect.m_x);
 		m_client.m_y = y - (rect.top - m_parent->m_rect.m_y);
@@ -145,6 +153,11 @@ void dGLWWidget::OnPosition(int x, int y)
 void dGLWWidget::Update()
 {
 	UpdateWindow(m_nativeHandle);
+}
+
+void dGLWWidget::SetSize(int width, int height)
+{
+	SetWindowPos(m_nativeHandle, HWND_TOP, m_rect.m_x, m_rect.m_y, width, height, 0);
 }
 
 void dGLWWidget::OnSize(int width, int height)
@@ -185,17 +198,27 @@ dGLWRect dGLWWidget::GetClientRect() const
 	return m_client;
 }
 
-void dGLWWidget::SetSize(int width, int height)
+dGLWRect dGLWWidget::GetRect() const
+{
+	return m_rect;
+}
+
+/*
+void dGLWWidget::OnSize(int width, int height)
 {
 //	unsigned size = (width << 16) + height & 0xffff;
 //	SendMessage (m_nativeHandle, WM_SIZE, 0, size);
 
 	SetWindowPos(m_nativeHandle, HWND_TOP, m_rect.m_x, m_rect.m_y, width, height, 0);
+	Update();
 }
+*/
 
 void dGLWWidget::OnPaint(const dGLWDrawContext& gdc)
 {
 	gdc.SetBrushColor (m_bkColor);
-	gdc.ClearRectangle (0, 0, m_client.m_width, m_client.m_height);
+//	gdc.ClearRectangle (m_client.m_x, m_client.m_height, m_client.m_y + m_client.m_width, m_client.m_height + m_client.m_height);
+//	gdc.ClearRectangle (m_client.m_x, m_client.m_height, m_client.m_x + m_client.m_width, m_client.m_y + m_client.m_height);
+	gdc.ClearRectangle (m_client.m_x, m_client.m_y, m_client.m_x + m_client.m_width, m_client.m_y + m_client.m_height);
 //	gdc.DrawLine( 100, 100, 200, 200);
 }

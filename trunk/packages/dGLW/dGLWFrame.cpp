@@ -28,6 +28,7 @@ dGLWFrame::dGLWFrame(dGLW* const glw, const string& title)
 	,m_title(title)
 {
 	SetWindowText (m_nativeHandle, m_title.c_str());
+	SetSize(m_rect.m_width, m_rect.m_height);
 }
 
 dGLWFrame::dGLWFrame(dGLWWidget* const parent, const string& title)
@@ -44,14 +45,16 @@ dGLWFrame::~dGLWFrame(void)
 
 void dGLWFrame::OnSize(int width, int height)
 {
-	dGLWDocker::OnSize(width, height);
 	for (dList<dGLWWidget*>::dListNode* node = m_children.GetFirst(); node; node = node->GetNext()) {
 		dGLWWidget* const widget = node->GetInfo();
 		if (widget->GetWidndowType() == m_child) {
-			widget->PredictNewSize(width, height);
-			widget->SetSize(width, height);
+			int childWidth;
+			int childHeight;
+			widget->PredictNewSize(childWidth, childHeight);
+			widget->SetSize(childWidth, childHeight);
 		}
 	}
+	dGLWDocker::OnSize(width, height);
 }
 
 void dGLWFrame::OnPaint(const dGLWDrawContext& gdc)

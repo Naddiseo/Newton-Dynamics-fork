@@ -31,6 +31,8 @@ class dGLWDocker: public dGLWWidget
 
 	protected:
 	virtual ~dGLWDocker(void);
+
+	virtual void OnSize(int width, int height);
 };
 
 #endif

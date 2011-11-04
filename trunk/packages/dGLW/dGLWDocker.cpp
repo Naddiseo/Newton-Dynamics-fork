@@ -22,13 +22,36 @@
 
 #include "dGLWstdafx.h"
 #include "dGLWDocker.h"
+#include "dGLWMenuBar.h"
 
 dGLWDocker::dGLWDocker(dGLW* const glw, dGLWWidget* const parent, dFrameType type)
 	:dGLWWidget (glw, parent, type)
 {
+	SetSize(m_rect.m_width, m_rect.m_height);
 }
 
 dGLWDocker::~dGLWDocker(void)
 {
-
 }
+
+
+void dGLWDocker::OnSize(int width, int height)
+{
+	dGLWWidget::OnSize(width, height);
+
+	dGLWMenuBar* menu = NULL;
+	for (dList<dGLWWidget*>::dListNode* node = m_children.GetFirst(); node; node = node->GetNext()) {
+		dGLWWidget* const widget = node->GetInfo();
+		if (widget->IsType(dGLWMenuBar::GetRttiType())) {
+			menu = (dGLWMenuBar*) widget;
+		}
+	}
+
+	OnPosition(m_rect.m_x, m_rect.m_y);
+	if (menu) {
+		dGLWRect rect (menu->GetRect());
+		m_client.m_y += rect.m_height;
+		m_client.m_height -= rect.m_height;
+	}
+}
+

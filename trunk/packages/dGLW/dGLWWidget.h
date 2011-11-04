@@ -37,6 +37,7 @@ class dGLWWidget
 
 	dGLW* GetGLW() const;
 
+	dGLWRect GetRect() const;
 	dGLWRect GetClientRect() const;
 	dFrameType GetWidndowType() const;
 	dGLWColor GetBackgroundColor() const;

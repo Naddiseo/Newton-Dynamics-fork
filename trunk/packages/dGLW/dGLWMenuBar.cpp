@@ -38,6 +38,10 @@ dGLWMenuBar::dGLWMenuBar(dGLWWidget* const parent)
 	int height;
 	PredictNewSize(width, height);
 	SetSize(width, height);
+	OnSize(width, height);
+
+	m_parent->PredictNewSize(width, height);
+	m_parent->OnSize(width, height);
 }
 
 dGLWMenuBar::~dGLWMenuBar(void)
