@@ -95,7 +95,7 @@ void dGLWWidget::Create ()
 			h = 200;
 
 			flags = WS_CHILD;
-			//flags |= WS_BORDER;
+			flags |= WS_BORDER;
 			//flags |= WS_DLGFRAME;
 			flags |= WS_VISIBLE;
 			break;
@@ -214,7 +214,7 @@ void dGLWWidget::OnSize(int width, int height)
 }
 */
 
-void dGLWWidget::OnPaint(const dGLWDrawContext& gdc)
+void dGLWWidget::OnPaint(dGLWDrawContext& gdc)
 {
 	gdc.SetBrushColor (m_bkColor);
 //	gdc.ClearRectangle (m_client.m_x, m_client.m_height, m_client.m_y + m_client.m_width, m_client.m_height + m_client.m_height);

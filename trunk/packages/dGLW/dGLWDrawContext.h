@@ -26,15 +26,19 @@ class dGLW;
 
 class dGLWDrawContext
 {
-
-
 	public:
 	dGLWDrawContext(void);
 	~dGLWDrawContext(void);
 
-	void SetBrushColor (const dGLWColor& color) const;
-	void ClearRectangle (int x0, int y0, int x1, int y1) const;
-	void DrawLine (int x0, int y0, int x1, int y1) const;
+
+	int GetFontHeight() const;
+
+	void SetFontColor(const dGLWColor& color); 
+	void SetPenColor(const dGLWColor& color); 
+	void SetBrushColor (const dGLWColor& color);
+	void ClearRectangle (int x0, int y0, int x1, int y1);
+	void DrawLine (int x0, int y0, int x1, int y1);
+	void Print (int x, int y, const char* text, ...);
 
 
 	private:
@@ -43,6 +47,7 @@ class dGLWDrawContext
 
 #ifdef _GLW_WIN32
 	HDC m_hdc;
+	HPEN hPen;
 #endif
 	friend dGLW;
 };

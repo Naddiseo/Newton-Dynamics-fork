@@ -30,21 +30,39 @@
 
 
 dGLWDrawContext::dGLWDrawContext(void)
+	:m_hdc(0)
+	,hPen(0)
 {
+	hPen = CreatePen(PS_DOT, 1, RGB(0,0,0));
+
+	dGLWColor color;
+	color.m_red = 0;
+	color.m_green = 0;
+	color.m_blue = 0;
+	SetFontColor (color);
 }
 
 dGLWDrawContext::~dGLWDrawContext(void)
 {
+	DeleteObject(hPen);
 }
 
-void dGLWDrawContext::SetBrushColor (const dGLWColor& color) const
+void dGLWDrawContext::SetBrushColor (const dGLWColor& color)
 {
 	SelectObject(m_hdc, GetStockObject(DC_BRUSH));
 	SetDCBrushColor(m_hdc, RGB(color.m_red, color.m_green, color.m_blue));
 }
 
+void dGLWDrawContext::SetPenColor(const dGLWColor& color)
+{
+	if(hPen) {
+		DeleteObject(hPen);
+	}
+	hPen = CreatePen(PS_DOT, 1, RGB(color.m_red, color.m_green, color.m_blue));
+}
 
-void dGLWDrawContext::DrawLine (int x0, int y0, int x1, int y1) const
+
+void dGLWDrawContext::DrawLine (int x0, int y0, int x1, int y1)
 {
 //	Graphics graphics(m_hdc);
 //	Pen pen(Color(255, 0, 0, 255));
@@ -54,7 +72,45 @@ void dGLWDrawContext::DrawLine (int x0, int y0, int x1, int y1) const
 	LineTo(m_hdc, x1, y1);
 }
 
-void dGLWDrawContext::ClearRectangle (int x0, int y0, int x1, int y1) const
+void dGLWDrawContext::ClearRectangle (int x0, int y0, int x1, int y1)
 {
 	Rectangle(m_hdc, x0, y0, x1, y1);
+}
+
+int dGLWDrawContext::GetFontHeight() const
+{
+	TEXTMETRIC m;
+	GetTextMetrics(m_hdc,&m);
+	return m.tmHeight;
+}
+
+
+void dGLWDrawContext::SetFontColor(const dGLWColor& color)
+{
+	SetTextColor(m_hdc, RGB(color.m_red, color.m_green, color.m_blue));
+}
+
+
+void dGLWDrawContext::Print (int x, int y, const char* const text, ...)
+{
+	va_list v_args;
+	char tmp[2048];
+
+	tmp[0] = 0;
+	va_start (v_args, text);     
+	vsprintf(tmp, text, v_args);
+	va_end (v_args);            
+
+	SetBkMode(m_hdc, TRANSPARENT);
+
+	HFONT hFont = (HFONT)GetStockObject(SYSTEM_FONT); 
+//	HFONT hFont = (HFONT)GetStockObject(ANSI_VAR_FONT); 	
+
+	// Select the variable stock font into the specified device context. 
+	HFONT hOldFont = (HFONT)SelectObject(m_hdc, hFont);
+	// Display the text string.  
+	TextOut(m_hdc, x, y, tmp, strlen (tmp)); 
+
+	// Restore the original font.        
+	SelectObject(m_hdc, hOldFont); 
 }

@@ -45,6 +45,8 @@ dGLWFrame::~dGLWFrame(void)
 
 void dGLWFrame::OnSize(int width, int height)
 {
+	dGLWDocker::OnSize(width, height);
+
 	for (dList<dGLWWidget*>::dListNode* node = m_children.GetFirst(); node; node = node->GetNext()) {
 		dGLWWidget* const widget = node->GetInfo();
 		if (widget->GetWidndowType() == m_child) {
@@ -57,7 +59,7 @@ void dGLWFrame::OnSize(int width, int height)
 	dGLWDocker::OnSize(width, height);
 }
 
-void dGLWFrame::OnPaint(const dGLWDrawContext& gdc)
+void dGLWFrame::OnPaint(dGLWDrawContext& gdc)
 {
 	dGLWDocker::OnPaint(gdc);
 //	dGLW_UNUSED_ARGUMENT(gdc);

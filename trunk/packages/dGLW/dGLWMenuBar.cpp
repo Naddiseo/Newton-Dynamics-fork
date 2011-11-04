@@ -26,6 +26,7 @@
 
 dGLWMenuBar::dGLWMenuBar(dGLWWidget* const parent)
 	:dGLWHorizontalLayout (parent->GetGLW(), parent, m_child)
+	,m_height(30)
 {
 	dGLWColor color;
 	color.m_red = 241;
@@ -33,6 +34,17 @@ dGLWMenuBar::dGLWMenuBar(dGLWWidget* const parent)
 	color.m_blue = 251;
 	color.m_alpha = 255;
 	SetBackgroundColor(color);
+
+
+/*
+	BOOL GetTextMetrics(
+		__in   HDC hdc,
+		__out  LPTEXTMETRIC lptm
+		);
+
+*/
+
+	Update();
 
 	int width;
 	int height;
@@ -53,7 +65,14 @@ void dGLWMenuBar::PredictNewSize(int& width, int& height) const
 	dGLWRect rect (m_parent->GetClientRect());
 
 	width = rect.m_width;
-	height = 200;
+	height = m_height;
+}
+
+void dGLWMenuBar::SetSize(int width, int height)
+{
+	m_rect.m_x = 0;
+	m_rect.m_y = 0;
+	dGLWHorizontalLayout::SetSize(width, height);
 }
 
 void dGLWMenuBar::OnSize(int width, int height)
@@ -65,3 +84,20 @@ dGLWMenuItem* dGLWMenuBar::CreateItem(const string& title)
 {
 	return new dGLWMenuItem (this, title) ;
 }
+
+
+void dGLWMenuBar::OnPaint(dGLWDrawContext& gdc)
+{	
+
+	dGLWHorizontalLayout::OnPaint(gdc);
+
+	m_height = gdc.GetFontHeight() + 8;
+//	dGLWColor color;
+//	color.m_red = 0;
+//	color.m_green = 0;
+//	color.m_blue = 0;
+//	color.m_alpha = 0;
+//	gdc.SetFontColor(color, m_bkColor);
+	gdc.Print (10, 4, "File");
+}
+

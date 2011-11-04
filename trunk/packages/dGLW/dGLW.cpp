@@ -139,8 +139,8 @@ LRESULT CALLBACK dGLW::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	switch (message) 
 	{
 
+		case WM_COMMAND:
 /*
-	case WM_COMMAND:
 		wmId    = LOWORD(wParam); 
 		wmEvent = HIWORD(wParam); 
 		// Parse the menu selections:
@@ -203,19 +203,11 @@ LRESULT CALLBACK dGLW::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 				return DefWindowProc(hWnd, message, wParam, lParam);
 			}
 		}
+*/
 		break;
 
-	case WM_PAINT:
-		hdc = BeginPaint(hWnd, &ps);
-		// TODO: Add any drawing code here...
-		EndPaint(hWnd, &ps);
-		break;
-
-	case WM_ERASEBKGND:
-		return TRUE;
-		break;		
-
-	case WM_KEYDOWN:
+/*
+		case WM_KEYDOWN:
 		{
 			switch (wParam)
 			{
@@ -228,11 +220,6 @@ LRESULT CALLBACK dGLW::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 				PostQuitMessage(0);
 				break;
 
-			default:
-				// Insert code here to process other non character keystrokes
-				return DefWindowProc(hWnd, message, wParam, lParam);
-			}
-		}
 */
 
 		case WM_CREATE:
@@ -299,6 +286,9 @@ LRESULT CALLBACK dGLW::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 			return TRUE;
 			break;		
 
+//		case WM_SYSCOMMAND:
+//			return DefWindowProc(hWnd, message, wParam, lParam);
+//			break;
 
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);

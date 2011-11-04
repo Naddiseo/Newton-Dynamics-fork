@@ -33,7 +33,7 @@ class dGLWFrame: public dGLWDocker
 
 	protected:
 	virtual void OnSize(int width, int height);
-	virtual void OnPaint(const dGLWDrawContext& gdc);
+	virtual void OnPaint(dGLWDrawContext& gdc);
 
 	string m_title;
 };

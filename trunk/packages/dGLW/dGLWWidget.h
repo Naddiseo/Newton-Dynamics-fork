@@ -47,7 +47,7 @@ class dGLWWidget
 	virtual void SetSize(int width, int height);
 	virtual void PredictNewSize(int& width, int& height) const;
 
-	virtual void OnPaint(const dGLWDrawContext& gdc);
+	virtual void OnPaint(dGLWDrawContext& gdc);
 	virtual void OnSize(int width, int height);
 	virtual void OnPosition(int x, int y);
 
