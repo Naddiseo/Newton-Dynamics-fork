@@ -3626,7 +3626,7 @@ dgInt32 dgWorld::CalculatePolySoupToSphereContactsContinue (dgCollisionParamProx
 			minTime = GetMin(minTime, contactOut[j].m_point.m_w);
 		}
 
-		minTime += dgFloat32 (1.0e-5f);
+		minTime *= dgFloat32 (1.000001f);
 		for (dgInt32 j = 0; j < count; j ++) {
 			if (contactOut[j].m_point.m_w > minTime) {
 				contactOut[j] = contactOut[count - 1];

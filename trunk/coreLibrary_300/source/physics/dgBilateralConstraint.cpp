@@ -543,7 +543,7 @@ void dgBilateralConstraint::JointAccelerations(dgJointAccelerationDecriptor* con
 	for (dgInt32 k = 0; k < params->m_rowsCount; k ++) {
 		if (m_rowIsMotor[k]) {
 			//params.m_coordenateAccel[k] = m_motorAcceleration[k] + params.m_externAccelaration[k];
-			jacobianMatrixElements[k].m_coordenateAccel = m_motorAcceleration[k] + jacobianMatrixElements[k].m_deltaAccel;
+   			jacobianMatrixElements[k].m_coordenateAccel = m_motorAcceleration[k] + jacobianMatrixElements[k].m_deltaAccel;
 		} else {
 //			dgFloat32 num;
 //			dgFloat32 den;
