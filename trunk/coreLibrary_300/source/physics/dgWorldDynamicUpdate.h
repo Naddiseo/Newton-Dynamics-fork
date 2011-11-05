@@ -42,6 +42,10 @@
 	#define DG_BASE_ITERATION_COUNT		3
 #endif
 
+// in my twist to RK4 I am no sure if the final derivative have to be weighted, it seems a mistake, I need to investigate more
+// uncomment this out for more stable behavior but no exactly correct solution on the iterative solver
+//#define DG_WIGHT_FINAL_RK4_DERIVATIVES
+
 
 class dgIslandCallbackStruct
 {

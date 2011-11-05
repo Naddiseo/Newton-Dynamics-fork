@@ -609,8 +609,10 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeParallel (dgParallelSolverSync
 		_ASSERTE (index);
 		dgBody* const body = bodyArray[index].m_body;
 
+#ifdef DG_WIGHT_FINAL_RK4_DERIVATIVES
 		body->m_veloc = internalVeloc[index].m_linear.Scale(invStep);
 		body->m_omega = internalVeloc[index].m_angular.Scale(invStep);
+#endif
 
 		dgVector accel = (body->m_veloc - body->m_netForce).Scale (invTimestepSrc);
 		dgVector alpha = (body->m_omega - body->m_netTorque).Scale (invTimestepSrc);

@@ -37,6 +37,11 @@
 
 #define DG_PARALLEL_JOINT_COUNT				64
 
+
+// in my twist to RK4 I am no sure if the final derivative have to be weighted, it seems a mistake, I need to investigate more
+// uncomment this out for more stable behavior but no exactly correct solution on the iterative solver
+//#define DG_WIGHT_FINAL_RK4_DERIVATIVES
+
 #ifdef TARGET_OS_IPHONE
 #define DG_BASE_ITERATION_COUNT			2
 #else
@@ -6012,19 +6017,17 @@ void dgJacobianMemory::CalculateForcesGameModeSimd(dgInt32 iterations,
   {
     dgBody* const body = bodyArray[i].m_body;
 
+#ifdef DG_WIGHT_FINAL_RK4_DERIVATIVES
     //body->m_veloc = internalVeloc[i].m_linear.Scale(invStep);
     //body->m_omega = internalVeloc[i].m_angular.Scale(invStep);
-    (simd_type&) body->m_veloc =
-        simd_mul_v ((simd_type&) internalVeloc[i].m_linear, invStepSimd);
-    (simd_type&) body->m_omega =
-        simd_mul_v ((simd_type&) internalVeloc[i].m_angular, invStepSimd);
+  (simd_type&) body->m_veloc = simd_mul_v ((simd_type&) internalVeloc[i].m_linear, invStepSimd);
+  (simd_type&) body->m_omega = simd_mul_v ((simd_type&) internalVeloc[i].m_angular, invStepSimd);
+#endif
 
     //dgVector accel = (body->m_veloc - body->m_netForce).Scale (m_invTimeStep);
     //dgVector alpha = (body->m_omega - body->m_netTorque).Scale (m_invTimeStep);
-    simd_type accel =
-        simd_mul_v (simd_sub_v ((simd_type&) body->m_veloc, (simd_type&) body->m_netForce), invTimeStepSimd);
-    simd_type alpha =
-        simd_mul_v (simd_sub_v ((simd_type&) body->m_omega, (simd_type&) body->m_netTorque), invTimeStepSimd);
+    simd_type accel = simd_mul_v (simd_sub_v ((simd_type&) body->m_veloc, (simd_type&) body->m_netForce), invTimeStepSimd);
+    simd_type alpha = simd_mul_v (simd_sub_v ((simd_type&) body->m_omega, (simd_type&) body->m_netTorque), invTimeStepSimd);
 
     //if ((accel % accel) < maxAccNorm2) {
     //	accel = zero;
@@ -6320,8 +6323,10 @@ void dgJacobianMemory::CalculateForcesGameMode(dgInt32 iterations,
   {
     dgBody* const body = bodyArray[i].m_body;
 
+#ifdef DG_WIGHT_FINAL_RK4_DERIVATIVES
     body->m_veloc = internalVeloc[i].m_linear.Scale(invStep);
     body->m_omega = internalVeloc[i].m_angular.Scale(invStep);
+#endif
 
     dgVector accel = (body->m_veloc - body->m_netForce).Scale(m_invTimeStep);
     dgVector alpha = (body->m_omega - body->m_netTorque).Scale(m_invTimeStep);
@@ -7243,12 +7248,12 @@ void dgParallelSolverUpdateForce::ThreadExecute()
       simd_type alpha;
       body = m_bodyArray[i].m_body;
 
+#ifdef DG_WIGHT_FINAL_RK4_DERIVATIVES
       //body->m_veloc = internalVeloc[i].m_linear.Scale(invStep);
       //body->m_omega = internalVeloc[i].m_angular.Scale(invStep);
-      (simd_type&) body->m_veloc =
-          simd_mul_v ((simd_type&) m_internalVeloc[i].m_linear, invStepSimd);
-      (simd_type&) body->m_omega =
-          simd_mul_v ((simd_type&) m_internalVeloc[i].m_angular, invStepSimd);
+      (simd_type&) body->m_veloc = simd_mul_v ((simd_type&) m_internalVeloc[i].m_linear, invStepSimd);
+      (simd_type&) body->m_omega = simd_mul_v ((simd_type&) m_internalVeloc[i].m_angular, invStepSimd);
+#endif
 
       //dgVector accel = (body->m_veloc - body->m_netForce).Scale (m_invTimeStep);
       //dgVector alpha = (body->m_omega - body->m_netTorque).Scale (m_invTimeStep);

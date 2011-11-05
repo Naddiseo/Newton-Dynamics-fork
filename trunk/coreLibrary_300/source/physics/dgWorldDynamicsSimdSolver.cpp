@@ -700,8 +700,10 @@ void dgWorldDynamicUpdate::CalculateForcesGameModeSimd (const dgIsland* const is
 	for (dgInt32 i = 1; i < bodyCount; i ++) {
 		dgBody* const body = bodyArray[i].m_body;
 
+#ifdef DG_WIGHT_FINAL_RK4_DERIVATIVES
 		(simd_128&)body->m_veloc = (simd_128&) internalVeloc[i].m_linear * invStepSimd;
 		(simd_128&)body->m_omega = (simd_128&) internalVeloc[i].m_angular * invStepSimd;
+#endif
 
 		simd_128 accel (((simd_128&) body->m_veloc - (simd_128&) body->m_netForce) * invTimeStepSimd);
 		simd_128 alpha (((simd_128&) body->m_omega - (simd_128&) body->m_netTorque) * invTimeStepSimd);

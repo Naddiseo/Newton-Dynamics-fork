@@ -30,8 +30,8 @@ void BasicBoxStacks (DemoEntityManager* const scene)
 	char fileName[2048];
 	//GetWorkingFileName ("boxStacks_1.ngd", fileName);
 	//GetWorkingFileName ("boxStacks_3.ngd", fileName);
-	GetWorkingFileName ("boxStacks.ngd", fileName);
-	//GetWorkingFileName ("pyramid40x40.ngd", fileName);
+	//GetWorkingFileName ("boxStacks.ngd", fileName);
+	GetWorkingFileName ("pyramid40x40.ngd", fileName);
 	scene->LoadScene (fileName);
 
 	// place camera into position

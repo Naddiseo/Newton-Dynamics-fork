@@ -956,8 +956,10 @@ void dgWorldDynamicUpdate::CalculateForcesGameMode (const dgIsland* const island
 	for (dgInt32 i = 1; i < bodyCount; i ++) {
 		dgBody* const body = bodyArray[i].m_body;
 
+#ifdef DG_WIGHT_FINAL_RK4_DERIVATIVES
 		body->m_veloc = internalVeloc[i].m_linear.Scale(invStep);
 		body->m_omega = internalVeloc[i].m_angular.Scale(invStep);
+#endif
 
 		dgVector accel = (body->m_veloc - body->m_netForce).Scale (invTimestepSrc);
 		dgVector alpha = (body->m_omega - body->m_netTorque).Scale (invTimestepSrc);
