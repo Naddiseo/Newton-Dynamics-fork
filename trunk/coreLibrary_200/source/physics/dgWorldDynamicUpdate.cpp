@@ -176,8 +176,7 @@ void dgWorldDynamicUpdate::UpdateDynamics(dgWorld* const world,
 
     if (dgInt32(body->m_dynamicsLru) < lru)
     {
-      if (!(body->m_freeze | body->m_spawnnedFromCallback | body->m_sleeping
-          | !body->m_isInWorld))
+      if (!(body->m_freeze | body->m_spawnnedFromCallback | body->m_sleeping | !body->m_isInWorld))
       {
         SpanningTree(body);
       }
@@ -1239,8 +1238,6 @@ void dgWorldDynamicUpdate::IntegrateArray(const dgBodyInfo* bodyArray,
       }
     }
 
-//static int xxx;
-//xxx ++;
     if (isAutoSleep)
     {
       if (stackSleeping)
@@ -4267,15 +4264,13 @@ void dgJacobianMemory::CalculateForcesSimulationMode(dgFloat32 maxAccNorm) const
     {
       index = first + k;
       j = normalForceIndex[index];
-      _ASSERTE(
-          ((j < 0) && (force[j] == dgFloat32 (1.0f))) || ((j >= 0) && (force[j] >= dgFloat32 (0.0f))));
+      _ASSERTE(((j < 0) && (force[j] == dgFloat32 (1.0f))) || ((j >= 0) && (force[j] >= dgFloat32 (0.0f))));
       val = force[j];
       lowerForceBound[index] *= val;
       upperForceBound[index] *= val;
 
       val = force[index];
-      force[index] = ClampValue(val, lowerForceBound[index],
-          upperForceBound[index]);
+      force[index] = ClampValue(val, lowerForceBound[index], upperForceBound[index]);
     }
   }
 
@@ -4349,16 +4344,11 @@ void dgJacobianMemory::CalculateForcesSimulationMode(dgFloat32 maxAccNorm) const
     for (dgInt32 j = 0; j < count; j++)
     {
       index = j + first;
-      dgVector tmpAccel(
-          JMinv[index].m_jacobian_IM0.m_linear.CompProduct(y0.m_linear));
-      tmpAccel += JMinv[index].m_jacobian_IM0.m_angular.CompProduct(
-          y0.m_angular);
+      dgVector tmpAccel(JMinv[index].m_jacobian_IM0.m_linear.CompProduct(y0.m_linear));
+      tmpAccel += JMinv[index].m_jacobian_IM0.m_angular.CompProduct(y0.m_angular);
       tmpAccel += JMinv[index].m_jacobian_IM1.m_linear.CompProduct(y1.m_linear);
-      tmpAccel += JMinv[index].m_jacobian_IM1.m_angular.CompProduct(
-          y1.m_angular);
-      accel[index] = coordenateAccel[index]
-          - (tmpAccel.m_x + tmpAccel.m_y + tmpAccel.m_z
-              + force[index] * diagDamp[index]);
+      tmpAccel += JMinv[index].m_jacobian_IM1.m_angular.CompProduct(y1.m_angular);
+      accel[index] = coordenateAccel[index] - (tmpAccel.m_x + tmpAccel.m_y + tmpAccel.m_z + force[index] * diagDamp[index]);
     }
 
     activeCount = 0;
@@ -4367,8 +4357,7 @@ void dgJacobianMemory::CalculateForcesSimulationMode(dgFloat32 maxAccNorm) const
       dgFloat32 val;
       index = j + first;
       val = lowerForceBound[index] - force[index];
-      if ((dgAbsf(val) < dgFloat32(1.0e-5f))
-          && (accel[index] < dgFloat32(0.0f)))
+      if ((dgAbsf(val) < dgFloat32(1.0e-5f)) && (accel[index] < dgFloat32(0.0f)))
       {
         force[index] = lowerForceBound[index];
         isClamped[j] = true;
@@ -4376,8 +4365,7 @@ void dgJacobianMemory::CalculateForcesSimulationMode(dgFloat32 maxAccNorm) const
       else
       {
         val = upperForceBound[index] - force[index];
-        if ((dgAbsf(val) < dgFloat32(1.0e-5f))
-            && (accel[index] > dgFloat32(0.0f)))
+        if ((dgAbsf(val) < dgFloat32(1.0e-5f)) && (accel[index] > dgFloat32(0.0f)))
         {
           force[index] = upperForceBound[index];
           isClamped[j] = true;
@@ -4493,16 +4481,11 @@ void dgJacobianMemory::CalculateForcesSimulationMode(dgFloat32 maxAccNorm) const
       for (j = 0; j < count; j++)
       {
         index = j + first;
-        dgVector tmpAccel(
-            JMinv[index].m_jacobian_IM0.m_linear.CompProduct(y0.m_linear));
-        tmpAccel += JMinv[index].m_jacobian_IM0.m_angular.CompProduct(
-            y0.m_angular);
-        tmpAccel += JMinv[index].m_jacobian_IM1.m_linear.CompProduct(
-            y1.m_linear);
-        tmpAccel += JMinv[index].m_jacobian_IM1.m_angular.CompProduct(
-            y1.m_angular);
-        deltaAccel[index] = tmpAccel.m_x + tmpAccel.m_y + tmpAccel.m_z
-            + deltaForce[index] * diagDamp[index];
+        dgVector tmpAccel(JMinv[index].m_jacobian_IM0.m_linear.CompProduct(y0.m_linear));
+        tmpAccel += JMinv[index].m_jacobian_IM0.m_angular.CompProduct(y0.m_angular);
+        tmpAccel += JMinv[index].m_jacobian_IM1.m_linear.CompProduct(y1.m_linear);
+        tmpAccel += JMinv[index].m_jacobian_IM1.m_angular.CompProduct(y1.m_angular);
+        deltaAccel[index] = tmpAccel.m_x + tmpAccel.m_y + tmpAccel.m_z + deltaForce[index] * diagDamp[index];
         akDen += deltaAccel[index] * deltaForce[index];
       }
     }
@@ -4534,9 +4517,7 @@ void dgJacobianMemory::CalculateForcesSimulationMode(dgFloat32 maxAccNorm) const
             //if (val < bilateralForceBounds[index].m_low) {
             if (val < lowerForceBound[index])
             {
-              ak = GetMax(
-                  (lowerForceBound[index] - force[index]) / deltaForce[index],
-                  dgFloat32(0.0f));
+              ak = GetMax((lowerForceBound[index] - force[index]) / deltaForce[index], dgFloat32(0.0f));
               _ASSERTE(ak >= dgFloat32 (0.0f));
               clampedForceIndex = j;
               clampedForceJoint = i;
@@ -4549,9 +4530,7 @@ void dgJacobianMemory::CalculateForcesSimulationMode(dgFloat32 maxAccNorm) const
             //if (val > bilateralForceBounds[index].m_upper) {
             if (val > upperForceBound[index])
             {
-              ak = GetMax(
-                  (upperForceBound[index] - force[index]) / deltaForce[index],
-                  dgFloat32(0.0f));
+              ak = GetMax((upperForceBound[index] - force[index]) / deltaForce[index], dgFloat32(0.0f));
               _ASSERTE(ak >= dgFloat32 (0.0f));
               clampedForceIndex = j;
               clampedForceJoint = i;
@@ -4657,10 +4636,8 @@ void dgJacobianMemory::CalculateForcesSimulationMode(dgFloat32 maxAccNorm) const
         for (j = 0; j < count; j++)
         {
           index = first + j;
-          _ASSERTE(
-              (i != clampedForceJoint) || !((dgAbsf (lowerForceBound[index] - force[index]) < dgFloat32 (1.0e-5f)) && (accel[index] < dgFloat32 (0.0f))));
-          _ASSERTE(
-              (i != clampedForceJoint) || !((dgAbsf (upperForceBound[index] - force[index]) < dgFloat32 (1.0e-5f)) && (accel[index] > dgFloat32 (0.0f))));
+          _ASSERTE((i != clampedForceJoint) || !((dgAbsf (lowerForceBound[index] - force[index]) < dgFloat32 (1.0e-5f)) && (accel[index] < dgFloat32 (0.0f))));
+          _ASSERTE((i != clampedForceJoint) || !((dgAbsf (upperForceBound[index] - force[index]) < dgFloat32 (1.0e-5f)) && (accel[index] > dgFloat32 (0.0f))));
           deltaForce[index] = accel[index] * invDJMinvJt[index];
           akNum += deltaForce[index] * accel[index];
           accNorm = GetMax(dgAbsf(accel[index]), accNorm);
@@ -6008,7 +5985,9 @@ void dgJacobianMemory::CalculateForcesGameModeSimd(dgInt32 iterations,
 
 //	simd_type invStepSimd;
 //	signMask = simd_set1 (invStep);
+#ifdef DG_WIGHT_FINAL_RK4_DERIVATIVES
   simd_type invStepSimd = simd_set1 (invStep);
+#endif
   simd_type invTimeStepSimd = simd_set1 (m_invTimeStep);
   simd_type accelerationTolerance = simd_set1 (maxAccNorm);
   accelerationTolerance =
