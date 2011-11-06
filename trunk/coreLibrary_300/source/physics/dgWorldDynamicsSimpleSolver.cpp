@@ -421,8 +421,7 @@ void dgWorldDynamicUpdate::CalculateReactionsForces(const dgIsland* const island
 	if (world->m_solverMode) {
 		CalculateForcesGameMode (island, rowStart, threadIndex, timestep, maxAccNorm);
 	} else {
-		_ASSERTE (0);
-//		CalculateForcesSimulationMode (tolerance);
+		CalculateForcesSimulationMode (island, rowStart, threadIndex, timestep, maxAccNorm);
 	}
 }
 
@@ -757,22 +756,6 @@ void dgWorldDynamicUpdate::CalculateSimpleBodyReactionsForces (const dgIsland* c
 
 void dgWorldDynamicUpdate::CalculateForcesGameMode (const dgIsland* const island, dgInt32 rowStart, dgInt32 threadIndex, dgFloat32 timestepSrc, dgFloat32 maxAccNorm) const
 {
-//	dgFloat32* const force = &m_solverMemory.m_force[rowStart];
-//	const dgJacobianPair* const Jt = &m_solverMemory.m_Jt[rowStart];
-//	const dgJacobianPair* const JMinv = &m_solverMemory.m_JMinv[rowStart];
-//	dgFloat32* const penetration = &m_solverMemory.m_penetration[rowStart];
-//	const dgFloat32* const diagDamp = &m_solverMemory.m_diagDamp[rowStart];
-//	const dgFloat32* const invDJMinvJt = &m_solverMemory.m_invDJMinvJt[rowStart];
-//	const dgFloat32* const restitution = &m_solverMemory.m_restitution[rowStart];
-//	const dgFloat32* const externAccel = &m_solverMemory.m_deltaAccel[rowStart];
-//	const dgInt32* const accelIsMortor = &m_solverMemory.m_accelIsMotor[rowStart];
-//	const dgFloat32* const penetrationStiffness = &m_solverMemory.m_penetrationStiffness[rowStart];
-//	const dgFloat32* const lowerFrictionCoef = &m_solverMemory.m_lowerBoundFrictionCoefficent[rowStart];
-//	const dgFloat32* const upperFrictionCoef = &m_solverMemory.m_upperBoundFrictionCoefficent[rowStart];
-//	dgFloat32* const coordenateAccel = &m_solverMemory.m_coordenateAccel[rowStart];
-//	dgFloat32** const jointForceFeeback = &m_solverMemory.m_jointFeebackForce[rowStart];
-//	const dgInt32* const normalForceIndex = &m_solverMemory.m_normalForceIndex[rowStart];
-
 	dgJacobian* const internalVeloc = &m_solverMemory.m_internalVeloc[island->m_bodyStart];
 	dgJacobian* const internalForces = &m_solverMemory.m_internalForces[island->m_bodyStart];
 	dgVector zero(dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
@@ -988,3 +971,669 @@ void dgWorldDynamicUpdate::CalculateForcesGameMode (const dgIsland* const island
 	}
 }
 
+
+dgFloat32 dgWorldDynamicUpdate::CalculateJointForces (const dgIsland* const island, dgInt32 rowStart, dgInt32 joint, dgFloat32* const forceStep, dgFloat32 maxAccNorm) const
+{
+	dgFloat32 deltaAccel[DG_CONSTRAINT_MAX_ROWS];
+	dgFloat32 deltaForce[DG_CONSTRAINT_MAX_ROWS];
+	dgFloat32 activeRow[DG_CONSTRAINT_MAX_ROWS];
+	dgFloat32 lowBound[DG_CONSTRAINT_MAX_ROWS];
+	dgFloat32 highBound[DG_CONSTRAINT_MAX_ROWS];
+
+	dgWorld* const world = (dgWorld*) this;
+	dgJointInfo* const constraintArrayPtr = (dgJointInfo*) &world->m_jointsMemory[0];
+	dgJointInfo* const constraintArray = &constraintArrayPtr[island->m_jointStart];
+
+	const dgJointInfo* const jointInfo = &constraintArray[joint];
+	dgInt32 first = jointInfo->m_autoPairstart;
+	dgInt32 count = jointInfo->m_autoPaircount;
+
+	dgInt32 maxPasses = count;
+	dgFloat32 akNum = dgFloat32 (0.0f);
+	dgFloat32 accNorm = dgFloat32(0.0f);
+
+	dgJacobianMatrixElement* const matrixRow = &m_solverMemory.m_memory[rowStart];
+	for (dgInt32 j = 0; j < count; j ++) {
+		dgJacobianMatrixElement* const row = &matrixRow[first + j];
+		dgInt32 k = row->m_normalForceIndex;
+
+		//_ASSERTE (((k <0) && (force[k] == dgFloat32 (1.0f))) || ((k >= 0) && (force[k] >= dgFloat32 (0.0f))));
+		_ASSERTE (((k <0) && (matrixRow[k].m_force == dgFloat32 (1.0f))) || ((k >= 0) && (matrixRow[k].m_force >= dgFloat32 (0.0f))));
+		dgFloat32 val = matrixRow[k].m_force;
+		lowBound[j] = val * row->m_lowerBoundFrictionCoefficent;
+		highBound[j] = val * row->m_upperBoundFrictionCoefficent;
+
+		activeRow[j] = dgFloat32 (1.0f);
+		forceStep[j] = row->m_force;
+		if (row->m_force < lowBound[j]) {
+			maxPasses --;
+			row->m_force = lowBound[j];
+			activeRow[j] = dgFloat32 (0.0f);
+		} else if (row->m_force > highBound[j]) {
+			maxPasses --;
+			row->m_force = highBound[j];
+			activeRow[j] = dgFloat32 (0.0f);
+		}
+
+		deltaForce[j] = row->m_accel * row->m_invDJMinvJt * activeRow[j];
+		akNum += row->m_accel * deltaForce[j];
+		accNorm = GetMax (dgAbsf (row->m_accel * activeRow[j]), accNorm);
+	}
+
+	dgFloat32 retAccel = accNorm;
+	dgFloat32 clampedForceIndexValue = dgFloat32(0.0f);
+	dgVector zero (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+	for (dgInt32 i = 0; (i < maxPasses) && (accNorm >  maxAccNorm); i ++) {
+		dgJacobian y0;
+		dgJacobian y1;
+		y0.m_linear = zero;
+		y0.m_angular = zero;
+		y1.m_linear = zero;
+		y1.m_angular = zero;
+
+		for (dgInt32 j = 0; j < count; j ++) {
+			dgJacobianMatrixElement* const row = &matrixRow[first + j];
+			dgFloat32 val = deltaForce[j]; 
+			y0.m_linear += row->m_Jt.m_jacobian_IM0.m_linear.Scale (val);
+			y0.m_angular += row->m_Jt.m_jacobian_IM0.m_angular.Scale (val);
+			y1.m_linear += row->m_Jt.m_jacobian_IM1.m_linear.Scale (val);
+			y1.m_angular += row->m_Jt.m_jacobian_IM1.m_angular.Scale (val);
+
+		}
+
+		dgFloat32 akDen = dgFloat32 (0.0f);
+		for (dgInt32 j = 0; j < count; j ++) {
+			dgJacobianMatrixElement* const row = &matrixRow[first + j];
+			dgVector acc (row->m_JMinv.m_jacobian_IM0.m_linear.CompProduct(y0.m_linear));
+			acc += row->m_JMinv.m_jacobian_IM0.m_angular.CompProduct(y0.m_angular);
+			acc += row->m_JMinv.m_jacobian_IM1.m_linear.CompProduct(y1.m_linear);
+			acc += row->m_JMinv.m_jacobian_IM1.m_angular.CompProduct(y1.m_angular);
+
+			deltaAccel[j] = acc.m_x + acc.m_y + acc.m_z + deltaForce[j] * row->m_diagDamp;
+			akDen += deltaAccel[j] * deltaForce[j];
+		}
+		_ASSERTE (akDen > dgFloat32 (0.0f));
+		akDen = GetMax (akDen, dgFloat32(1.0e-16f));
+		_ASSERTE (dgAbsf (akDen) >= dgFloat32(1.0e-16f));
+		dgFloat32 ak = akNum / akDen;
+
+		dgInt32 clampedForceIndex = -1;
+		for (dgInt32 j = 0; j < count; j ++) {
+			if (activeRow[j]) {
+				dgJacobianMatrixElement* const row = &matrixRow[first + j];
+				if (deltaForce[j] < dgFloat32 (-1.0e-16f)) {
+					dgFloat32 val = row->m_force + ak * deltaForce[j];
+					if (val < lowBound[j]) {
+						ak = GetMax ((lowBound[j] - row->m_force) / deltaForce[j], dgFloat32 (0.0f));
+						clampedForceIndex = j;
+						clampedForceIndexValue = lowBound[j];
+						if (ak < dgFloat32 (1.0e-8f)) {
+							ak = dgFloat32 (0.0f);
+							break;
+						}
+					}
+				} else if (deltaForce[j] > dgFloat32 (1.0e-16f)) {
+					dgFloat32 val = row->m_force + ak * deltaForce[j];
+					if (val > highBound[j]) {
+						ak = GetMax ((highBound[j] - row->m_force) / deltaForce[j], dgFloat32 (0.0f));
+						clampedForceIndex = j;
+						clampedForceIndexValue = highBound[j];
+						if (ak < dgFloat32 (1.0e-8f)) {
+							ak = dgFloat32 (0.0f);
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		if (ak == dgFloat32 (0.0f) && (clampedForceIndex != -1)) {
+			_ASSERTE (clampedForceIndex !=-1);
+			akNum = dgFloat32 (0.0f);
+			accNorm = dgFloat32(0.0f);
+
+			activeRow[clampedForceIndex] = dgFloat32 (0.0f);
+			deltaForce[clampedForceIndex] = dgFloat32 (0.0f);
+			matrixRow[clampedForceIndex].m_force = clampedForceIndexValue;
+			for (dgInt32 j = 0; j < count; j ++) {
+				if (activeRow[j]) {
+					dgJacobianMatrixElement* const row = &matrixRow[first + j];
+					dgFloat32 val = lowBound[j] - row->m_force;
+					if ((dgAbsf (val) < dgFloat32 (1.0e-5f)) && (row->m_accel < dgFloat32 (0.0f))) {
+						row->m_force = lowBound[j];
+						activeRow[j] = dgFloat32 (0.0f);
+						deltaForce[j] = dgFloat32 (0.0f); 
+
+					} else {
+						val = highBound[j] - row->m_force;
+						if ((dgAbsf (val) < dgFloat32 (1.0e-5f)) && (row->m_accel > dgFloat32 (0.0f))) {
+							row->m_force = highBound[j];
+							activeRow[j] = dgFloat32 (0.0f);
+							deltaForce[j] = dgFloat32 (0.0f); 
+						} else {
+							_ASSERTE (activeRow[j] > dgFloat32 (0.0f));
+							deltaForce[j] = row->m_accel * row->m_invDJMinvJt;
+							akNum += row->m_accel * deltaForce[j];
+							accNorm = GetMax (dgAbsf (row->m_accel), accNorm);
+						}
+					}
+				}
+			}
+
+			_ASSERTE (activeRow[clampedForceIndex] == dgFloat32 (0.0f));
+			i = -1;
+			maxPasses = GetMax (maxPasses - 1, 1); 
+
+		} else if (clampedForceIndex >= 0) {
+			akNum = dgFloat32(0.0f);
+			accNorm = dgFloat32(0.0f);
+			activeRow[clampedForceIndex] = dgFloat32 (0.0f);
+			for (dgInt32 j = 0; j < count; j ++) {
+				dgJacobianMatrixElement* const row = &matrixRow[first + j];
+				row->m_force += ak * deltaForce[j];
+				row->m_accel -= ak * deltaAccel[j];
+				accNorm = GetMax (dgAbsf (row->m_accel * activeRow[j]), accNorm);
+				_ASSERTE (dgCheckFloat(row->m_force));
+				_ASSERTE (dgCheckFloat(row->m_accel));
+
+				deltaForce[j] = row->m_accel * row->m_invDJMinvJt * activeRow[j];
+				akNum += deltaForce[j] * row->m_accel;
+			}
+			//force[clampedForceIndex + first] = clampedForceIndexValue;
+			matrixRow[clampedForceIndex + first].m_force = clampedForceIndexValue;
+
+			i = -1;
+			maxPasses = GetMax (maxPasses - 1, 1); 
+
+		} else {
+			accNorm = dgFloat32(0.0f);
+			for (dgInt32 j = 0; j < count; j ++) {
+				dgJacobianMatrixElement* const row = &matrixRow[first + j];
+				row->m_force += ak * deltaForce[j];
+				row->m_accel -= ak * deltaAccel[j];
+				accNorm = GetMax (dgAbsf (row->m_accel * activeRow[j]), accNorm);
+				_ASSERTE (dgCheckFloat(row->m_force));
+				_ASSERTE (dgCheckFloat(row->m_accel));
+			}
+
+			if (accNorm > maxAccNorm) {
+				akDen = akNum;
+				akNum = dgFloat32(0.0f);
+				for (dgInt32 j = 0; j < count; j ++) {
+					dgJacobianMatrixElement* const row = &matrixRow[first + j];
+					deltaAccel[j] = row->m_accel * row->m_invDJMinvJt * activeRow[j];
+					akNum += row->m_accel * deltaAccel[j];
+				}
+
+				_ASSERTE (akDen > dgFloat32(0.0f));
+				akDen = GetMax (akDen, dgFloat32 (1.0e-17f));
+				ak = dgFloat32 (akNum / akDen);
+				for (dgInt32 j = 0; j < count; j ++) {
+					deltaForce[j] = deltaAccel[j] + ak * deltaForce[j];
+				}
+			}
+		}
+	}
+
+	for (dgInt32 j = 0; j < count; j ++) {
+		dgJacobianMatrixElement* const row = &matrixRow[first + j];
+		forceStep[j] = row->m_force - forceStep[j];
+	}
+	return retAccel;
+}
+
+
+void dgWorldDynamicUpdate::CalculateForcesSimulationMode (const dgIsland* const island, dgInt32 rowStart, dgInt32 threadIndex, dgFloat32 timestep, dgFloat32 maxAccNorm) const
+{
+	dgFloat32 forceStep[DG_CONSTRAINT_MAX_ROWS];	
+
+	dgWorld* const world = (dgWorld*) this;
+	dgJacobian* const internalForces = &m_solverMemory.m_internalForces[island->m_bodyStart];
+
+	dgInt32 bodyCount = island->m_bodyCount;
+	dgInt32 jointCount = island->m_jointCount;
+
+	// initialize the intermediate force accumulation to zero 
+	dgVector zero(dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+	for (dgInt32 i = 0; i < bodyCount; i ++) {
+		internalForces[i].m_linear = zero;
+		internalForces[i].m_angular = zero;
+	}
+
+	dgJacobianMatrixElement* const matrixRow = &m_solverMemory.m_memory[rowStart];
+	dgJointInfo* const constraintArrayPtr = (dgJointInfo*) &world->m_jointsMemory[0];
+	dgJointInfo* const constraintArray = &constraintArrayPtr[island->m_jointStart];
+	for (dgInt32 i = 0; i < jointCount; i ++) {
+		dgJacobian y0;
+		dgJacobian y1;
+		y0.m_linear = zero;
+		y0.m_angular = zero;
+		y1.m_linear = zero;
+		y1.m_angular = zero;
+
+		dgInt32 first = constraintArray[i].m_autoPairstart;
+		dgInt32 count = constraintArray[i].m_autoPairActiveCount;
+		for (dgInt32 j = 0; j < count; j ++) {
+			dgJacobianMatrixElement* const row = &matrixRow[j + first];
+			dgFloat32 val = row->m_force; 
+			_ASSERTE (dgCheckFloat(val));
+			y0.m_linear += row->m_Jt.m_jacobian_IM0.m_linear.Scale (val);
+			y0.m_angular += row->m_Jt.m_jacobian_IM0.m_angular.Scale (val);
+			y1.m_linear += row->m_Jt.m_jacobian_IM1.m_linear.Scale (val);
+			y1.m_angular += row->m_Jt.m_jacobian_IM1.m_angular.Scale (val);
+		}
+
+		dgInt32 m0 = constraintArray[i].m_m0;
+		dgInt32 m1 = constraintArray[i].m_m1;
+		internalForces[m0].m_linear += y0.m_linear;
+		internalForces[m0].m_angular += y0.m_angular;
+		internalForces[m1].m_linear += y1.m_linear;
+		internalForces[m1].m_angular += y1.m_angular;
+	}
+
+	for (dgInt32 i = 0; i < DG_CONSTRAINT_MAX_ROWS; i ++) {
+		forceStep[i] = dgFloat32 (0.0f);
+	}
+
+
+	dgInt32 maxPasses = 4;
+	dgInt32 prevJoint = 0;
+	dgFloat32 accNorm = maxAccNorm * dgFloat32 (2.0f);
+	for (dgInt32 passes = 0; (passes < maxPasses) && (accNorm > maxAccNorm); passes ++) {
+		accNorm = dgFloat32 (0.0f);
+		for (dgInt32 currJoint = 0; currJoint < jointCount; currJoint ++) {
+			dgJacobian y0;
+			dgJacobian y1;
+			y0.m_linear = zero;
+			y0.m_angular = zero;
+			y1.m_linear = zero;
+			y1.m_angular = zero;
+
+			dgInt32 first = constraintArray[prevJoint].m_autoPairstart;
+			dgInt32 rowsCount = constraintArray[prevJoint].m_autoPaircount;
+			for (dgInt32 i = 0; i < rowsCount; i ++) {
+				dgFloat32 deltaForce = forceStep[i]; 
+				dgJacobianMatrixElement* const row = &matrixRow[i + first];
+
+				y0.m_linear += row->m_Jt.m_jacobian_IM0.m_linear.Scale (deltaForce);
+				y0.m_angular += row->m_Jt.m_jacobian_IM0.m_angular.Scale (deltaForce);
+				y1.m_linear += row->m_Jt.m_jacobian_IM1.m_linear.Scale (deltaForce);
+				y1.m_angular += row->m_Jt.m_jacobian_IM1.m_angular.Scale (deltaForce);
+			}
+			dgInt32 m0 = constraintArray[prevJoint].m_m0;
+			dgInt32 m1 = constraintArray[prevJoint].m_m1;
+			internalForces[m0].m_linear += y0.m_linear;
+			internalForces[m0].m_angular += y0.m_angular;
+			internalForces[m1].m_linear += y1.m_linear;
+			internalForces[m1].m_angular += y1.m_angular;
+
+			first = constraintArray[currJoint].m_autoPairstart;
+			rowsCount = constraintArray[currJoint].m_autoPaircount;
+			m0 = constraintArray[currJoint].m_m0;
+			m1 = constraintArray[currJoint].m_m1;
+			y0 = internalForces[m0];
+			y1 = internalForces[m1];
+
+			for (dgInt32 i = 0; i < rowsCount; i ++) {
+				dgJacobianMatrixElement* const row = &matrixRow[i + first];
+				dgVector acc (row->m_JMinv.m_jacobian_IM0.m_linear.CompProduct(y0.m_linear));
+				acc += row->m_JMinv.m_jacobian_IM0.m_angular.CompProduct (y0.m_angular);
+				acc += row->m_JMinv.m_jacobian_IM1.m_linear.CompProduct (y1.m_linear);
+				acc += row->m_JMinv.m_jacobian_IM1.m_angular.CompProduct (y1.m_angular);
+				row->m_accel = row->m_coordenateAccel - acc.m_x - acc.m_y - acc.m_z - row->m_force * row->m_diagDamp;
+			}
+
+			dgFloat32 jointAccel = CalculateJointForces (island, rowStart, currJoint, forceStep, maxAccNorm);
+			accNorm = GetMax(accNorm, jointAccel);
+			prevJoint = currJoint;
+		}
+	}
+
+	for (dgInt32 i = 0; i < jointCount; i ++) {
+		dgInt32 first = constraintArray[i].m_autoPairstart;
+		dgInt32 count = constraintArray[i].m_autoPaircount;
+		constraintArray[i].m_autoPaircount = count;
+		for (dgInt32 k = 0; k < count; k ++) {
+			dgJacobianMatrixElement* const row = &matrixRow[k + first];
+			dgInt32 j = row->m_normalForceIndex;
+			//_ASSERTE (((j < 0) && (force[j] == dgFloat32 (1.0f))) || ((j >= 0) && (force[j] >= dgFloat32 (0.0f))));
+			_ASSERTE (((j <0) && (matrixRow[j].m_force == dgFloat32 (1.0f))) || ((j >= 0) && (matrixRow[j].m_force >= dgFloat32 (0.0f))));
+			dgFloat32 val = matrixRow[j].m_force;
+			row->m_lowerBoundFrictionCoefficent *= val;
+			row->m_upperBoundFrictionCoefficent *= val;
+			row->m_force = ClampValue(row->m_force, row->m_lowerBoundFrictionCoefficent, row->m_upperBoundFrictionCoefficent);
+		}
+	}
+
+	for (dgInt32 i = 0; i < bodyCount; i ++) {
+		internalForces[i].m_linear[0] = dgFloat32(0.0f);
+		internalForces[i].m_linear[1] = dgFloat32(0.0f);
+		internalForces[i].m_linear[2] = dgFloat32(0.0f);
+		internalForces[i].m_linear[3] = dgFloat32(0.0f);
+		internalForces[i].m_angular[0] = dgFloat32(0.0f);
+		internalForces[i].m_angular[1] = dgFloat32(0.0f);
+		internalForces[i].m_angular[2] = dgFloat32(0.0f);
+		internalForces[i].m_angular[3] = dgFloat32(0.0f);
+	}
+
+	for (dgInt32 i = 0; i < jointCount; i ++) {
+		dgJacobian y0;
+		dgJacobian y1;
+		y0.m_linear = zero;
+		y0.m_angular = zero;
+		y1.m_linear = zero;
+		y1.m_angular = zero;
+		dgInt32 first = constraintArray[i].m_autoPairstart;
+		dgInt32 count = constraintArray[i].m_autoPairActiveCount;
+		for (dgInt32 j = 0; j < count; j ++) {
+			dgJacobianMatrixElement* const row = &matrixRow[j + first];
+			dgFloat32 val = row->m_force; 
+			y0.m_linear += row->m_Jt.m_jacobian_IM0.m_linear.Scale (val);
+			y0.m_angular += row->m_Jt.m_jacobian_IM0.m_angular.Scale (val);
+			y1.m_linear += row->m_Jt.m_jacobian_IM1.m_linear.Scale (val);
+			y1.m_angular += row->m_Jt.m_jacobian_IM1.m_angular.Scale (val);
+
+		}
+		dgInt32 m0 = constraintArray[i].m_m0;
+		dgInt32 m1 = constraintArray[i].m_m1;
+		internalForces[m0].m_linear += y0.m_linear;
+		internalForces[m0].m_angular += y0.m_angular;
+		internalForces[m1].m_linear += y1.m_linear;
+		internalForces[m1].m_angular += y1.m_angular;
+	}
+
+
+	dgInt32 forceRows = 0;
+	dgFloat32 akNum = dgFloat32 (0.0f);
+	accNorm = dgFloat32(0.0f);
+	for (dgInt32 i = 0; i < jointCount; i ++) {
+		bool isClamped[DG_CONSTRAINT_MAX_ROWS];
+		dgInt32 first = constraintArray[i].m_autoPairstart;
+		dgInt32 count = constraintArray[i].m_autoPairActiveCount;
+		dgInt32 m0 = constraintArray[i].m_m0;
+		dgInt32 m1 = constraintArray[i].m_m1;
+		const dgJacobian& y0 = internalForces[m0];
+		const dgJacobian& y1 = internalForces[m1];
+
+		for (dgInt32 j = 0; j < count; j ++) {
+			dgJacobianMatrixElement* const row = &matrixRow[j + first];
+			dgVector tmpAccel (row->m_JMinv.m_jacobian_IM0.m_linear.CompProduct(y0.m_linear));
+			tmpAccel += row->m_JMinv.m_jacobian_IM0.m_angular.CompProduct (y0.m_angular);
+			tmpAccel += row->m_JMinv.m_jacobian_IM1.m_linear.CompProduct (y1.m_linear);
+			tmpAccel += row->m_JMinv.m_jacobian_IM1.m_angular.CompProduct (y1.m_angular);
+			row->m_accel = row->m_coordenateAccel - tmpAccel.m_x - tmpAccel.m_y - tmpAccel.m_z - row->m_force * row->m_diagDamp;
+		}
+
+		dgInt32 activeCount = 0;
+		for (dgInt32 j = 0; j < count; j ++) {
+			dgJacobianMatrixElement* const row = &matrixRow[j + first];
+			dgFloat32 val = row->m_lowerBoundFrictionCoefficent - row->m_force;
+			if ((dgAbsf (val) < dgFloat32 (1.0e-5f)) && (row->m_accel < dgFloat32 (0.0f))) {
+				row->m_force = row->m_lowerBoundFrictionCoefficent;
+				isClamped[j] = true;
+			} else {
+				val = row->m_upperBoundFrictionCoefficent - row->m_force;
+				if ((dgAbsf (val) < dgFloat32 (1.0e-5f)) && (row->m_accel > dgFloat32 (0.0f))) {
+					row->m_force = row->m_upperBoundFrictionCoefficent;
+					isClamped[j] = true;
+				} else {
+					forceRows ++;
+					activeCount ++;
+					row->m_deltaForce = row->m_accel * row->m_invDJMinvJt;
+					akNum += row->m_accel * row->m_deltaForce;
+					accNorm = GetMax (dgAbsf (row->m_accel), accNorm);
+					isClamped[j] = false;
+				}
+			}
+		}
+
+		if (activeCount < count) {
+			dgInt32 i0 = 0;
+			dgInt32 i1 = count - 1;
+			constraintArray[i].m_autoPairActiveCount = activeCount;
+			do { 
+				while ((i0 <= i1) && !isClamped[i0]) i0 ++;
+				while ((i0 <= i1) && isClamped[i1]) i1 --;
+				if (i0 < i1) {
+					//SwapRows (first + i0, first + i1);
+					Swap (matrixRow[first + i0], matrixRow[first + i1]);
+					i0 ++;
+					i1 --;
+				}
+			} while (i0 < i1); 
+		}
+	}
+
+
+	maxPasses = forceRows;
+	dgInt32 totalPassesCount = 0;
+	for (dgInt32 passes = 0; (passes < maxPasses) && (accNorm > maxAccNorm); passes ++) {
+		for (dgInt32 i = 0; i < bodyCount; i ++) {
+			internalForces[i].m_linear[0] = dgFloat32(0.0f);
+			internalForces[i].m_linear[1] = dgFloat32(0.0f);
+			internalForces[i].m_linear[2] = dgFloat32(0.0f);
+			internalForces[i].m_linear[3] = dgFloat32(0.0f);
+			internalForces[i].m_angular[0] = dgFloat32(0.0f);
+			internalForces[i].m_angular[1] = dgFloat32(0.0f);
+			internalForces[i].m_angular[2] = dgFloat32(0.0f);
+			internalForces[i].m_angular[3] = dgFloat32(0.0f);
+		}
+
+		for (dgInt32 i = 0; i < jointCount; i ++) {
+			dgJacobian y0;
+			dgJacobian y1;
+
+			y0.m_linear = zero;
+			y0.m_angular = zero;
+			y1.m_linear = zero;
+			y1.m_angular = zero;
+			dgInt32 first = constraintArray[i].m_autoPairstart;
+			dgInt32 count = constraintArray[i].m_autoPairActiveCount;
+
+			for (dgInt32 j = 0; j < count; j ++) {
+				dgJacobianMatrixElement* const row = &matrixRow[j + first];
+				dgFloat32 val = row->m_deltaForce;
+				y0.m_linear += row->m_Jt.m_jacobian_IM0.m_linear.Scale (val);
+				y0.m_angular += row->m_Jt.m_jacobian_IM0.m_angular.Scale (val);
+				y1.m_linear += row->m_Jt.m_jacobian_IM1.m_linear.Scale (val);
+				y1.m_angular += row->m_Jt.m_jacobian_IM1.m_angular.Scale (val);
+			}
+			dgInt32 m0 = constraintArray[i].m_m0;
+			dgInt32 m1 = constraintArray[i].m_m1;
+			internalForces[m0].m_linear += y0.m_linear;
+			internalForces[m0].m_angular += y0.m_angular;
+			internalForces[m1].m_linear += y1.m_linear;
+			internalForces[m1].m_angular += y1.m_angular;
+		}
+
+
+		dgFloat32 akDen = dgFloat32 (0.0f);
+		for (dgInt32 i = 0; i < jointCount; i ++) {
+			dgInt32 first = constraintArray[i].m_autoPairstart;
+			dgInt32 count = constraintArray[i].m_autoPairActiveCount;
+			dgInt32 m0 = constraintArray[i].m_m0;
+			dgInt32 m1 = constraintArray[i].m_m1;
+			const dgJacobian& y0 = internalForces[m0];
+			const dgJacobian& y1 = internalForces[m1];
+			for (dgInt32 j = 0; j < count; j ++) {
+				dgJacobianMatrixElement* const row = &matrixRow[j + first];
+				dgVector tmpAccel (row->m_JMinv.m_jacobian_IM0.m_linear.CompProduct(y0.m_linear));
+				tmpAccel += row->m_JMinv.m_jacobian_IM0.m_angular.CompProduct (y0.m_angular);
+				tmpAccel += row->m_JMinv.m_jacobian_IM1.m_linear.CompProduct (y1.m_linear);
+				tmpAccel += row->m_JMinv.m_jacobian_IM1.m_angular.CompProduct (y1.m_angular);
+
+				row->m_deltaAccel = tmpAccel.m_x + tmpAccel.m_y + tmpAccel.m_z + row->m_deltaForce * row->m_diagDamp;
+				akDen += row->m_deltaAccel * row->m_deltaForce;
+			}
+		}
+
+		_ASSERTE (akDen > dgFloat32 (0.0f));
+		akDen = GetMax (akDen, dgFloat32(1.0e-16f));
+		_ASSERTE (dgAbsf (akDen) >= dgFloat32(1.0e-16f));
+		dgFloat32 ak = akNum / akDen;
+		dgInt32 clampedForceIndex = -1;
+		dgInt32 clampedForceJoint = -1;
+		dgFloat32 clampedForceIndexValue = dgFloat32 (0.0f);
+
+		for (dgInt32 i = 0; i < jointCount; i ++) {
+			if (ak > dgFloat32 (1.0e-8f)) {
+				dgInt32 first = constraintArray[i].m_autoPairstart;
+				dgInt32 count = constraintArray[i].m_autoPairActiveCount;
+				for (dgInt32 j = 0; j < count; j ++) {
+					dgJacobianMatrixElement* const row = &matrixRow[j + first];
+					dgFloat32 val = row->m_force + ak * row->m_deltaForce;
+					if (row->m_deltaForce < dgFloat32 (-1.0e-16f)) {
+						if (val < row->m_lowerBoundFrictionCoefficent) {
+							ak = GetMax ((row->m_lowerBoundFrictionCoefficent - row->m_force) / row->m_deltaForce, dgFloat32 (0.0f));
+							_ASSERTE (ak >= dgFloat32 (0.0f));
+							clampedForceIndex = j;
+							clampedForceJoint = i;
+							clampedForceIndexValue = row->m_lowerBoundFrictionCoefficent;
+						}
+					} else if (row->m_deltaForce > dgFloat32 (1.0e-16f)) {
+						if (val > row->m_upperBoundFrictionCoefficent) {
+							ak = GetMax ((row->m_upperBoundFrictionCoefficent - row->m_force) / row->m_deltaForce, dgFloat32 (0.0f));
+							_ASSERTE (ak >= dgFloat32 (0.0f));
+							clampedForceIndex = j;
+							clampedForceJoint = i;
+							clampedForceIndexValue = row->m_upperBoundFrictionCoefficent;
+						}
+					}
+				}
+			}
+		}
+
+		if (clampedForceIndex >= 0) {
+			bool isClamped[DG_CONSTRAINT_MAX_ROWS];
+			for (dgInt32 i = 0; i < jointCount; i ++) {
+				dgInt32 first = constraintArray[i].m_autoPairstart;
+				dgInt32 count = constraintArray[i].m_autoPairActiveCount;
+				for (dgInt32 j = 0; j < count; j ++) {
+					dgJacobianMatrixElement* const row = &matrixRow[j + first];
+					row->m_force += ak * row->m_deltaForce;
+					row->m_accel -= ak * row->m_deltaAccel;
+				}
+			}
+
+			dgInt32 first = constraintArray[clampedForceJoint].m_autoPairstart;
+			dgInt32 count = constraintArray[clampedForceJoint].m_autoPairActiveCount;
+			count --;
+			//force[first + clampedForceIndex] = clampedForceIndexValue;
+			matrixRow[first + clampedForceIndex].m_force = clampedForceIndexValue;
+			if (clampedForceIndex != count) {
+				//SwapRows (first + clampedForceIndex, first + count);
+				Swap (matrixRow[first + clampedForceIndex], matrixRow[first + count]);
+			}
+
+			dgInt32 activeCount = count;
+			for (dgInt32 i = 0; i < count; i ++) {
+				//dgInt32 index;
+				//dgFloat32 val;
+				//index = first + i;
+				dgJacobianMatrixElement* const row = &matrixRow[first + i];
+				isClamped[i] = false;
+				dgFloat32 val = row->m_lowerBoundFrictionCoefficent - row->m_force;
+				if ((val > dgFloat32 (-1.0e-5f)) && (row->m_accel < dgFloat32 (0.0f))) {
+					activeCount --;
+					isClamped[i] = true;
+				} else {
+					val = row->m_upperBoundFrictionCoefficent - row->m_force;
+					if ((val < dgFloat32 (1.0e-5f)) && (row->m_accel > dgFloat32 (0.0f))) {
+						activeCount --;
+						isClamped[i] = true;
+					}
+				}
+			}
+
+			if (activeCount < count) {
+				dgInt32 i0 = 0;
+				dgInt32 i1 = count - 1;
+				do { 
+					while ((i0 <= i1) && !isClamped[i0]) i0 ++;
+					while ((i0 <= i1) && isClamped[i1]) i1 --;
+					if (i0 < i1) {
+						//SwapRows (first + i0, first + i1);
+						Swap (matrixRow[first + i0], matrixRow[first + i1]);
+						i0 ++;
+						i1 --;
+					}
+				} while (i0 < i1); 
+			}
+			constraintArray[clampedForceJoint].m_autoPairActiveCount = activeCount;
+
+			forceRows = 0;
+			akNum = dgFloat32 (0.0f);
+			accNorm = dgFloat32(0.0f);
+			for (dgInt32 i = 0; i < jointCount; i ++) {
+				dgInt32 first = constraintArray[i].m_autoPairstart;
+				dgInt32 count = constraintArray[i].m_autoPairActiveCount;
+				forceRows += count;
+
+				for (dgInt32 j = 0; j < count; j ++) {
+					//index = first + j;
+					dgJacobianMatrixElement* const row = &matrixRow[first + j];
+					_ASSERTE ((i != clampedForceJoint) || !((dgAbsf (row->m_lowerBoundFrictionCoefficent - row->m_force) < dgFloat32 (1.0e-5f)) && (row->m_accel < dgFloat32 (0.0f))));
+					_ASSERTE ((i != clampedForceJoint) || !((dgAbsf (row->m_upperBoundFrictionCoefficent - row->m_force) < dgFloat32 (1.0e-5f)) && (row->m_accel > dgFloat32 (0.0f))));
+					row->m_deltaForce = row->m_accel * row->m_invDJMinvJt;
+					akNum += row->m_deltaForce * row->m_accel;
+					accNorm = GetMax (dgAbsf (row->m_accel), accNorm);
+					_ASSERTE (dgCheckFloat(row->m_deltaForce));
+				}
+			}
+
+			_ASSERTE (akNum >= dgFloat32 (0.0f));
+			passes = -1;
+			maxPasses = forceRows;
+
+		} else {
+
+			accNorm = dgFloat32(0.0f);
+			for (dgInt32 i = 0; i < jointCount; i ++) {
+				dgInt32 first = constraintArray[i].m_autoPairstart;
+				dgInt32 count = constraintArray[i].m_autoPairActiveCount;
+				for (dgInt32 j = 0; j < count; j ++) {
+					//index = j + first;
+					dgJacobianMatrixElement* const row = &matrixRow[first + j];
+					row->m_force += ak * row->m_deltaForce;
+					row->m_accel -= ak * row->m_deltaAccel;
+					accNorm = GetMax (dgAbsf (row->m_accel), accNorm);
+				}
+			}
+
+			if (accNorm > maxAccNorm) {
+				akDen = akNum;
+				akNum = dgFloat32(0.0f);
+				for (dgInt32 i = 0; i < jointCount; i ++) {
+					dgInt32 first = constraintArray[i].m_autoPairstart;
+					dgInt32 count = constraintArray[i].m_autoPairActiveCount;
+					for (dgInt32 j = 0; j < count; j ++) {
+						//index = j + first;
+						dgJacobianMatrixElement* const row = &matrixRow[first + j];
+						row->m_deltaAccel = row->m_accel * row->m_invDJMinvJt;
+						akNum += row->m_accel * row->m_deltaAccel;
+					}
+				}
+
+				_ASSERTE (akNum >= dgFloat32 (0.0f));
+				_ASSERTE (akDen > dgFloat32(0.0f));
+				akDen = GetMax (akDen, dgFloat32 (1.0e-17f));
+				ak = dgFloat32 (akNum / akDen);
+				for (dgInt32 i = 0; i < jointCount; i ++) {
+					dgInt32 first = constraintArray[i].m_autoPairstart;
+					dgInt32 count = constraintArray[i].m_autoPairActiveCount;
+					for (dgInt32 j = 0; j < count; j ++) {
+						//index = j + first;
+						dgJacobianMatrixElement* const row = &matrixRow[first + j];
+						row->m_deltaForce = row->m_deltaAccel + ak * row->m_deltaForce;
+					}
+				}
+			}
+		}
+
+		totalPassesCount ++;
+	}
+
+
+	//ApplyExternalForcesAndAcceleration (maxAccNorm);
+	ApplyExternalForcesAndAcceleration (island, rowStart, threadIndex, timestep, maxAccNorm);
+}

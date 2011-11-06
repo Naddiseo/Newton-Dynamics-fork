@@ -248,8 +248,8 @@ dgWorld::dgWorld(dgMemoryAllocator* const allocator)
 	m_genericLRUMark = 0;
 	m_singleIslandMultithreading = 1;
 
-	//m_solverMode = 0;
-	m_solverMode = 1;
+	m_solverMode = 0;
+	//m_solverMode = 1;
 	m_frictionMode = 0;
 	m_dynamicsLru = 0;
 	m_broadPhaseLru = 0;

@@ -633,7 +633,7 @@ dgInt32 dgWorldDynamicUpdate::GetJacobianDerivatives (const dgIsland* const isla
 			jointInfo->m_m0 = m0;
 			jointInfo->m_m1 = m1;
 
-			dgInt32 fistForceOffset = -rowBase;
+			dgInt32 firstForceOffset = -rowBase;
 			for (dgInt32 i = 0; i < dof; i ++) {
 
 				dgJacobianMatrixElement* const row = &matrixRow[rowCount];
@@ -654,8 +654,8 @@ dgInt32 dgWorldDynamicUpdate::GetJacobianDerivatives (const dgIsland* const isla
 				row->m_jointFeebackForce = constraintParams.m_forceBounds[i].m_jointForce;
 
 				dgInt32 index = constraintParams.m_forceBounds[i].m_normalIndex ;
-				//normalForceIndex[rowCount] = constraintParams.m_forceBounds[i].m_normalIndex + ((constraintParams.m_forceBounds[i].m_normalIndex >=0) ? (rowCount - i) : fistForceOffset);
-				row->m_normalForceIndex = index + ((index >=0) ? (rowCount - i) : fistForceOffset);
+				//normalForceIndex[rowCount] = constraintParams.m_forceBounds[i].m_normalIndex + ((constraintParams.m_forceBounds[i].m_normalIndex >=0) ? (rowCount - i) : firstForceOffset);
+				row->m_normalForceIndex = index + ((index >=0) ? (rowCount - i) : firstForceOffset);
 				rowCount ++;
 			}
 

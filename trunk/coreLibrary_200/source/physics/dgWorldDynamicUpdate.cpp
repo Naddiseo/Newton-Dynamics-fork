@@ -4238,8 +4238,7 @@ void dgJacobianMemory::CalculateForcesSimulationMode(dgFloat32 maxAccNorm) const
         acc += JMinv[index].m_jacobian_IM1.m_linear.CompProduct(y1.m_linear);
         acc += JMinv[index].m_jacobian_IM1.m_angular.CompProduct(y1.m_angular);
 
-        accel[i] = coordenateAccel[index] - acc.m_x - acc.m_y - acc.m_z
-            - force[index] * diagDamp[index];
+        accel[i] = coordenateAccel[index] - acc.m_x - acc.m_y - acc.m_z - force[index] * diagDamp[index];
         index++;
       }
 
