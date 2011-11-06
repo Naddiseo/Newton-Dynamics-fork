@@ -1708,7 +1708,6 @@ dgInt32 dgCollisionCompound::CalculateContactsToCompound (dgCollidingPairCollect
 			}
 		}
 	}
-
 	proxy.m_contacts = contacts;
 	return contactCount;
 }

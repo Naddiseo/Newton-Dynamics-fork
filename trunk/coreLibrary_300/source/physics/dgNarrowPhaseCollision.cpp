@@ -1432,7 +1432,7 @@ void dgWorld::CompoundContactsSimd (dgCollidingPairCollector::dgPair* const pair
 	compound->CalculateContacts (pair, proxy, 1);
 	if (pair->m_contactCount) {
 		// prune close contacts
-		pair->m_contactCount = dgInt16 (PruneContacts (pair->m_contactCount, proxy.m_contacts, pair->m_contactCount));
+		pair->m_contactCount = dgInt16 (PruneContacts (pair->m_contactCount, proxy.m_contacts));
 	}
 }
 
@@ -1464,7 +1464,7 @@ void dgWorld::CompoundContacts (dgCollidingPairCollector::dgPair* const pair, dg
 	compound->CalculateContacts (pair, proxy, 0);
 	if (pair->m_contactCount) {
 		// prune close contacts
-		pair->m_contactCount = dgInt16 (PruneContacts (pair->m_contactCount, proxy.m_contacts, pair->m_contactCount));
+		pair->m_contactCount = dgInt16 (PruneContacts (pair->m_contactCount, proxy.m_contacts));
 	}
 }
 
@@ -1693,7 +1693,7 @@ void dgWorld::SceneContacts (dgCollidingPairCollector::dgPair* const pair, dgCol
 		scene->CollidePair (pair, proxy);
 		if (pair->m_contactCount) {
 			// prune close contacts
-			pair->m_contactCount = dgInt16 (PruneContacts (pair->m_contactCount, proxy.m_contacts, pair->m_contactCount));
+			pair->m_contactCount = dgInt16 (PruneContacts (pair->m_contactCount, proxy.m_contacts));
 		}
 	} else {
 		_ASSERTE (0);
@@ -1743,7 +1743,7 @@ void dgWorld::SceneContactsSimd (dgCollidingPairCollector::dgPair* const pair, d
 		scene->CollidePairSimd (pair, proxy);
 		if (pair->m_contactCount) {
 			// prune close contacts
-			pair->m_contactCount = dgInt16 (PruneContacts (pair->m_contactCount, proxy.m_contacts, pair->m_contactCount));
+			pair->m_contactCount = dgInt16 (PruneContacts (pair->m_contactCount, proxy.m_contacts));
 		}
 	} else {
 		_ASSERTE (0);
