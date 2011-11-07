@@ -7346,7 +7346,7 @@ void NewtonUserJointSetSolver (const NewtonJoint* const joint, int solver, int m
 {
 	TRACE_FUNTION(__FUNCTION__);
 	NewtonUserJoint* const userJoint = (NewtonUserJoint*) joint;
-	_ASSERTE (0);
+	userJoint->SetMaxContactsForExactSolver (solver ? true : false, maxContactJoints);
 }
 
 // Name: NewtonUserJointSetFeedbackCollectorCallback

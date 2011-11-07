@@ -73,8 +73,9 @@ class dgIsland
 	dgInt32 m_jointCount;
 	dgInt32 m_jointStart;
 	dgInt32 m_rowsCount;
-	dgInt32 m_hasUnilateralJoints : 1;
-	dgInt32 m_isContinueCollision : 1;
+	dgUnsigned32 m_hasUnilateralJoints : 1;
+	dgUnsigned32 m_isContinueCollision : 1;
+	dgUnsigned32 m_hasExactSolverJoints : 1;
 };
 
 
@@ -205,7 +206,7 @@ class dgWorldDynamicUpdate
 
 	private:
 	void SpanningTree (dgBody* const body);
-	void BuildIsland (dgQueue<dgBody*>& queue, dgInt32 jountCount, dgInt32 rowsCount, dgInt32 hasUnilateralJoints, dgInt32 isContinueCollisionIsland);
+	void BuildIsland (dgQueue<dgBody*>& queue, dgInt32 jountCount, dgInt32 rowsCount, dgInt32 hasUnilateralJoints, dgInt32 isContinueCollisionIsland, dgInt32 forceExactSolver);
 
 	static dgInt32 CompareIslands (const dgIsland* const islandA, const dgIsland* const islandB, void* notUsed);
 	static void CalculateIslandReactionForces (void* const context, dgInt32 threadID);

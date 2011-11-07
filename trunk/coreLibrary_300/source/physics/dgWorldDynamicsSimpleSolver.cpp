@@ -418,7 +418,7 @@ void dgWorldDynamicUpdate::CalculateReactionsForces(const dgIsland* const island
 	}
 
 	dgWorld* const world = (dgWorld*) this;
-	if (world->m_solverMode) {
+	if (world->m_solverMode && !island->m_hasExactSolverJoints) {
 		CalculateForcesGameMode (island, rowStart, threadIndex, timestep, maxAccNorm);
 	} else {
 		CalculateForcesSimulationMode (island, rowStart, threadIndex, timestep, maxAccNorm);

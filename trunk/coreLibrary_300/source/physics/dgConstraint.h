@@ -221,6 +221,7 @@ class dgConstraint
 	dgUnsigned32 m_constId			:  6;		
 	dgUnsigned32 m_enableCollision	:  1;
 	dgUnsigned32 m_isUnilateral		:  1;
+	dgUnsigned32 m_useExactSolver	:  1;
 
 	friend class dgWorld;
 	friend class dgJacobianMemory;
@@ -246,6 +247,7 @@ inline dgConstraint::dgConstraint()
 	m_dynamicsLru = 0;
 	m_isUnilateral = false;
 	m_enableCollision = false;
+	m_useExactSolver = false;
 	m_constId = dgUnknownConstraintId;
 	m_updaFeedbackCallback = NULL;
 }
