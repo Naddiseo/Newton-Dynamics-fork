@@ -7145,8 +7145,7 @@ NewtonJoint* NewtonConstraintCreateUserJoint(const NewtonWorld* const newtonWorl
 // See also: NewtonUserJointAddAngularRow,  
 void NewtonUserJointAddLinearRow(const NewtonJoint* const joint, const dFloat* const pivot0, const dFloat* const pivot1, const dFloat* const dir)
 {
-	NewtonUserJoint* userJoint;
-	userJoint = (NewtonUserJoint*) joint;
+	NewtonUserJoint* const userJoint = (NewtonUserJoint*) joint;
 
 	TRACE_FUNTION(__FUNCTION__);
 	dgVector direction (dir[0], dir[1], dir[2], dgFloat32 (0.0f)); 
@@ -7182,10 +7181,8 @@ void NewtonUserJointAddLinearRow(const NewtonJoint* const joint, const dFloat* c
 // See also: NewtonUserJointAddLinearRow, NewtonUserJointAddIndependentAngularRow  
 void NewtonUserJointAddAngularRow(const NewtonJoint* const joint, dFloat relativeAngleError, const dFloat* const pin)
 {
-	NewtonUserJoint* userJoint;
-
 	TRACE_FUNTION(__FUNCTION__);
-	userJoint = (NewtonUserJoint*) joint;
+	NewtonUserJoint* const userJoint = (NewtonUserJoint*) joint;
 	dgVector direction (pin[0], pin[1], pin[2], dgFloat32 (0.0f));
 	direction = direction.Scale (dgRsqrt (direction % direction));
 	_ASSERTE (dgAbsf (direction % direction - dgFloat32 (1.0f)) < dgFloat32 (1.0e-3f));
@@ -7212,10 +7209,8 @@ void NewtonUserJointAddAngularRow(const NewtonJoint* const joint, dFloat relativ
 // See also: NewtonUserJointAddLinearRow, NewtonUserJointAddAngularRow  
 void NewtonUserJointAddGeneralRow(const NewtonJoint* const joint, const dFloat* const jacobian0, const dFloat* const jacobian1)
 {
-	NewtonUserJoint* userJoint;
-
 	TRACE_FUNTION(__FUNCTION__);
-	userJoint = (NewtonUserJoint*) joint;
+	NewtonUserJoint* const userJoint = (NewtonUserJoint*) joint;
 	userJoint->AddGeneralRowJacobian (jacobian0, jacobian1);
 }
 
@@ -7234,10 +7229,8 @@ void NewtonUserJointAddGeneralRow(const NewtonJoint* const joint, const dFloat* 
 // See also: NewtonUserJointSetRowMinimumFriction, NewtonUserJointAddLinearRow, NewtonUserJointAddAngularRow  
 void NewtonUserJointSetRowMaximumFriction(const NewtonJoint* const joint, dFloat friction)
 {
-	NewtonUserJoint* userJoint;
-	userJoint = (NewtonUserJoint*) joint;
-	
 	TRACE_FUNTION(__FUNCTION__);
+	NewtonUserJoint* const userJoint = (NewtonUserJoint*) joint;
 	userJoint->SetHighFriction (friction);
 }
 
@@ -7255,9 +7248,8 @@ void NewtonUserJointSetRowMaximumFriction(const NewtonJoint* const joint, dFloat
 // See also: NewtonUserJointSetRowMaximumFriction, NewtonUserJointAddLinearRow, NewtonUserJointAddAngularRow  
 void NewtonUserJointSetRowMinimumFriction(const NewtonJoint* const joint, dFloat friction)
 {
-	NewtonUserJoint* userJoint;
-	userJoint = (NewtonUserJoint*) joint;
-	
+	TRACE_FUNTION(__FUNCTION__);
+	NewtonUserJoint* const userJoint = (NewtonUserJoint*) joint;
 	userJoint->SetLowerFriction (friction);
 }
 
@@ -7275,10 +7267,8 @@ void NewtonUserJointSetRowMinimumFriction(const NewtonJoint* const joint, dFloat
 // See also: NewtonUserJointAddLinearRow, NewtonUserJointAddAngularRow   
 void NewtonUserJointSetRowAcceleration(const NewtonJoint* const joint, dFloat acceleration)
 {
-	NewtonUserJoint* userJoint;
-	userJoint = (NewtonUserJoint*) joint;
-	
 	TRACE_FUNTION(__FUNCTION__);
+	NewtonUserJoint* const userJoint = (NewtonUserJoint*) joint;
 	userJoint->SetAcceleration (acceleration);
 }
 
@@ -7302,10 +7292,8 @@ void NewtonUserJointSetRowAcceleration(const NewtonJoint* const joint, dFloat ac
 // See also: NewtonUserJointSetRowAcceleration, NewtonUserJointSetRowStiffness  
 void NewtonUserJointSetRowSpringDamperAcceleration(const NewtonJoint* const joint, dFloat springK, dFloat springD)
 {
-	NewtonUserJoint* userJoint;
-	userJoint = (NewtonUserJoint*) joint;
-
 	TRACE_FUNTION(__FUNCTION__);
+	NewtonUserJoint* const userJoint = (NewtonUserJoint*) joint;
 	userJoint->SetSpringDamperAcceleration (springK, springD);
 }
 
@@ -7324,10 +7312,8 @@ void NewtonUserJointSetRowSpringDamperAcceleration(const NewtonJoint* const join
 // See also: NewtonUserJointAddLinearRow, NewtonUserJointAddAngularRow, NewtonUserJointSetRowSpringDamperAcceleration  
 void NewtonUserJointSetRowStiffness(const NewtonJoint* const joint, dFloat stiffness)
 {
-	NewtonUserJoint* userJoint;
-	userJoint = (NewtonUserJoint*) joint;
-	
 	TRACE_FUNTION(__FUNCTION__);
+	NewtonUserJoint* const userJoint = (NewtonUserJoint*) joint;
 	userJoint->SetRowStiffness (stiffness);
 }
 
@@ -7344,13 +7330,24 @@ void NewtonUserJointSetRowStiffness(const NewtonJoint* const joint, dFloat stiff
 // after the force in some of the row exceed  certain high value. 
 dFloat NewtonUserJointGetRowForce(const NewtonJoint* const joint, int row)
 {
-	NewtonUserJoint* userJoint;
-	userJoint = (NewtonUserJoint*) joint;
-
 	TRACE_FUNTION(__FUNCTION__);
+	NewtonUserJoint* const userJoint = (NewtonUserJoint*) joint;
 	return userJoint->GetRowForce (row);
 }
 
+// Name: NewtonUserJointSetSolver
+// Set the type of solve to use with this joint when thee solver mode is set to iterative
+//
+// Parameters:
+// *const NewtonJoint* *joint - pointer to the joint.
+// *int* solver - solve mode, 1 selcet exact solver, 0 selct iterative solver
+// *int* maxContactJoints - select teh maxsimun numbet of contact joint that will select the exact solver
+void NewtonUserJointSetSolver (const NewtonJoint* const joint, int solver, int maxContactJoints)
+{
+	TRACE_FUNTION(__FUNCTION__);
+	NewtonUserJoint* const userJoint = (NewtonUserJoint*) joint;
+	_ASSERTE (0);
+}
 
 // Name: NewtonUserJointSetFeedbackCollectorCallback
 // Set a constrain callback to collect the force calculated by the solver to enforce this constraint
@@ -7362,10 +7359,8 @@ dFloat NewtonUserJointGetRowForce(const NewtonJoint* const joint, int row)
 // See also: NewtonUserJointGetRowForce  
 void NewtonUserJointSetFeedbackCollectorCallback(const NewtonJoint* const joint, NewtonUserBilateralCallBack getFeedback)
 {
-	NewtonUserJoint* userJoint;
-	userJoint = (NewtonUserJoint*) joint;
-
 	TRACE_FUNTION(__FUNCTION__);
+	NewtonUserJoint* const userJoint = (NewtonUserJoint*) joint;
 	return userJoint->SetUpdateFeedbackFunction (getFeedback);
 }
 

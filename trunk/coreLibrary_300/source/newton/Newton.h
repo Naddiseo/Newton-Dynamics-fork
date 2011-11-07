@@ -921,6 +921,8 @@ extern "C" {
 	NEWTON_API void NewtonUserJointSetRowSpringDamperAcceleration (const NewtonJoint* const joint, dFloat springK, dFloat springD);
 	NEWTON_API void NewtonUserJointSetRowStiffness (const NewtonJoint* const joint, dFloat stiffness);
 	NEWTON_API dFloat NewtonUserJointGetRowForce (const NewtonJoint* const joint, int row);
+
+	NEWTON_API void NewtonUserJointSetSolver (const NewtonJoint* const joint, int solver, int maxContactJoints);
 	
 
 	// **********************************************************************************************
