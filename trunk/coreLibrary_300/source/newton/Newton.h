@@ -201,7 +201,7 @@ extern "C" {
 	struct NewtonCollisionInfoRecord
 	{
 		dFloat m_offsetMatrix[4][4];
-		int m_collisionType___;				// tag id to identify the collision primitive
+		int m_collisionType;				// tag id to identify the collision primitive
 		int m_referenceCount;				// the current reference count for this collision		
 		int m_collisionUserID;				
 		
