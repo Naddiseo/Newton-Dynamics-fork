@@ -244,10 +244,12 @@ class dgWorld:
 	dgCollision* CreateChamferCylinder (dgFloat32 radius, dgFloat32 height, dgInt32 shapeID, const dgMatrix& offsetMatrix = dgGetIdentityMatrix());
 	dgCollision* CreateConvexModifier (dgCollision* convexCollision);
 	dgCollision* CreateCollisionCompound (dgInt32 count, dgCollision* const array[]);
+
 //	dgCollision* CreateCollisionCompoundBreakable (dgInt32 count, dgMeshEffect* const solidArray[], dgMeshEffect* const splitePlanes[],
 //													  dgMatrix* const matrixArray, dgInt32* const idArray, dgFloat32* const mass, dgInt32 debriID, 
 //													  dgCollisionCompoundBreakableCallback callback, void* buildUsedData);
 
+	dgCollision* CreateSoftMesh (dgMeshEffect* const mesh, dgInt32 shapeID);
 	dgCollision* CreateCollisionCompoundBreakable (dgInt32 count, const dgMeshEffect* const solidArray[], const dgInt32* const idArray, 
 												   const dgFloat32* const densities, const dgInt32* const internalFaceMaterial, dgInt32 debriID, dgFloat32 gap);
 

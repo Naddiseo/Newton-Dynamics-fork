@@ -534,7 +534,7 @@ extern "C" {
 	// particle system interface (soft bodies, individual, pressure bodies and cloth)   
 	//
 	// **********************************************************************************************
-	NEWTON_API NewtonCollision* NewtonSoftMesh (NewtonMesh* const mesh);
+	NEWTON_API NewtonCollision* NewtonCreateSoftMesh (const NewtonWorld* const newtonWorld, NewtonMesh* const mesh, int shapeID);
 //	NEWTON_API void NewtonSoftBodySetMassCount (const NewtonCollision* convexCollision, int count);
 //	NEWTON_API void NewtonSoftBodySetSpringCount (const NewtonCollision* convexCollision, int count);
 //	NEWTON_API void NewtonSoftBodySetMass (const NewtonCollision* convexCollision, int index, dFloat mass, dFloat* position);

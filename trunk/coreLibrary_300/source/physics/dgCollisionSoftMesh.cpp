@@ -28,21 +28,8 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-#if 0
-dgCollisionSoftMesh::dgCollisionSoftMesh(dgMemoryAllocator* allocator, const dgVector& boxP0, const dgVector& boxP1, const dgUserMeshCreation& data)
-	:dgCollisionMesh (allocator, m_userMeshCollision)
-{
-	m_rtti |= dgCollisionSoftMesh_RTTI;
 
-	m_userData = data.m_userData;
-	m_getInfo = data.m_getInfo;
-	m_faceInAabb = data.m_faceInAabb;
-	m_rayHitCallBack = data.m_rayHitCallBack;
-	m_collideCallback = data.m_collideCallback;
-	m_destroyCallback = data.m_destroyCallback;
 
-	SetCollisionBBox(boxP0, boxP1);
-}
 
 dgCollisionSoftMesh::dgCollisionSoftMesh (dgWorld* const world, dgDeserialize deserialization, void* const userData)
 	:dgCollisionMesh (world, deserialization, userData)
@@ -62,9 +49,9 @@ _ASSERTE (0);
 
 dgCollisionSoftMesh::~dgCollisionSoftMesh(void)
 {
-	if (m_destroyCallback) {
-		m_destroyCallback (m_userData);
-	}
+//	if (m_destroyCallback) {
+//		m_destroyCallback (m_userData);
+//	}
 }
 
 void dgCollisionSoftMesh::Serialize(dgSerialize callback, void* const userData) const
@@ -79,6 +66,8 @@ void dgCollisionSoftMesh::Serialize(dgSerialize callback, void* const userData) 
 
 void dgCollisionSoftMesh::GetVertexListIndexList (const dgVector& p0, const dgVector& p1, dgGetVertexListIndexList &data) const
 {
+	_ASSERTE (0);
+/*
 	if (m_faceInAabb) {
 		return m_faceInAabb (m_userData, &p0[0], &p1[0], (const dgFloat32**) &data.m_veterxArray, &data.m_vertexCount, &data.m_vertexStrideInBytes,
 							 data.m_indexList, data.m_maxIndexCount, data.m_userDataList);
@@ -86,21 +75,27 @@ void dgCollisionSoftMesh::GetVertexListIndexList (const dgVector& p0, const dgVe
 	} else {
 		data.m_triangleCount = 0;
 	}
+*/
 }
 
 void dgCollisionSoftMesh::GetCollisionInfo(dgCollisionInfo* info) const
 {
+	_ASSERTE (0);
+/*
 	dgCollision::GetCollisionInfo(info);
 	info->m_offsetMatrix = GetOffsetMatrix();
 	if (m_getInfo) {
 		m_getInfo (m_userData, info);
 	}
+*/
 }
 
 
 dgFloat32 dgCollisionSoftMesh::RayCastSimd (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
 {
-	return RayCast (localP0, localP1, contactOut, preFilter, body, userData);
+_ASSERTE (0);
+return 0;
+//	return RayCast (localP0, localP1, contactOut, preFilter, body, userData);
 }
 
 
@@ -112,6 +107,9 @@ dgFloat32 dgCollisionSoftMesh::RayCast (
 	const dgBody* const body,
 	void* const userData) const
 {
+_ASSERTE (0);
+return 0;
+/*
 	dgFloat32 t;
 	dgFloat32 param;
 	if (PREFILTER_RAYCAST (preFilter, body, this, userData)) {
@@ -137,29 +135,33 @@ dgFloat32 dgCollisionSoftMesh::RayCast (
 		} 
 	}
 	return param;
-
+*/
 }
 
 
 void dgCollisionSoftMesh::GetCollidingFacesSimd (dgPolygonMeshDesc* const data) const
 {
-	GetCollidingFaces (data);
+	_ASSERTE (0);
+//	GetCollidingFaces (data);
 }
 
 void dgCollisionSoftMesh::GetCollidingFaces (dgPolygonMeshDesc* const data) const
 {
+	_ASSERTE (0);
+/*
 	data->m_faceCount = 0;
-
 	if (m_collideCallback) {
 		data->m_me = this;
 		data->m_userData = m_userData;
 		m_collideCallback (*data);
 	}
+*/
 }
 
 
 void dgCollisionSoftMesh::DebugCollision (const dgMatrix& matrixPtr, OnDebugCollisionMeshCallback callback, void* const userData) const
 {
+	_ASSERTE (0);
 /*
 	dgCollisionSoftMeshShowPolyContext context;
 
@@ -172,4 +174,19 @@ void dgCollisionSoftMesh::DebugCollision (const dgMatrix& matrixPtr, OnDebugColl
 	ForAllSectors (p0, p1, ShowDebugPolygon, &context);
 */
 }
-#endif
+
+
+
+//dgCollisionSoftMesh::dgCollisionSoftMesh(dgMemoryAllocator* allocator, const dgVector& boxP0, const dgVector& boxP1, const dgUserMeshCreation& data)
+dgCollisionSoftMesh::dgCollisionSoftMesh(dgMemoryAllocator* allocator, dgMeshEffect* const mesh)
+	:dgCollisionMesh (allocator, m_softMesh)
+{
+	//	m_rtti |= dgCollisionSoftMesh_RTTI;
+	//	m_userData = data.m_userData;
+	//	m_getInfo = data.m_getInfo;
+	//	m_faceInAabb = data.m_faceInAabb;
+	//	m_rayHitCallBack = data.m_rayHitCallBack;
+	//	m_collideCallback = data.m_collideCallback;
+	//	m_destroyCallback = data.m_destroyCallback;
+	//	SetCollisionBBox(boxP0, boxP1);
+}

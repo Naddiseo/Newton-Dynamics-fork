@@ -57,7 +57,7 @@ class dgCollisionSoftMesh: public dgCollisionMesh
 {
 public:
 	//dgCollisionSoftMesh(dgMemoryAllocator* allocator, const dgVector& boxP0, const dgVector& boxP1, const dgUserMeshCreation& data);
-	dgCollisionSoftMesh(dgMemoryAllocator* allocator);
+	dgCollisionSoftMesh(dgMemoryAllocator* allocator, dgMeshEffect* const mesh);
 	dgCollisionSoftMesh (dgWorld* const world, dgDeserialize deserialization, void* const userData);
 	virtual ~dgCollisionSoftMesh(void);
 
