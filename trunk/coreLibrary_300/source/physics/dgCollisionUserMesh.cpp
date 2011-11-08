@@ -26,7 +26,7 @@
 
 
 dgCollisionUserMesh::dgCollisionUserMesh(dgMemoryAllocator* allocator, const dgVector& boxP0, const dgVector& boxP1, const dgUserMeshCreation& data)
-	:dgCollisionMesh (allocator, m_userMeshCollision)
+	:dgCollisionMesh (allocator, m_userMesh)
 {
 	m_rtti |= dgCollisionUserMesh_RTTI;
 

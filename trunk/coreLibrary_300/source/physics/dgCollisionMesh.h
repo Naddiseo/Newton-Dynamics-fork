@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#if !defined(__DGCOLLISIONPOLYGONALSOUP_H__)
-#define __DGCOLLISIONPOLYGONALSOUP_H__
+#ifndef __DGCOLLISION_MESH_H__
+#define __DGCOLLISION_MESH_H__
 
 
 #include "dgCollision.h"
@@ -191,9 +191,7 @@ class dgCollisionMesh: public dgCollision
 
 	virtual void GetCollidingFaces (dgPolygonMeshDesc* const data) const = 0;
 	virtual void GetCollidingFacesSimd (dgPolygonMeshDesc* const data) const = 0;
-
 	dgCollisionMeshCollisionCallback GetDebugCollisionCallback() const { return m_debugCallback;} 
-//	dgCollisionMeshUserRayCastCallback GetDebugRayCastCallback() const { return m_userRayCastCallback;} 
 
 	protected:
 	virtual void SetCollisionBBox (const dgVector& p0, const dgVector& p1);
@@ -229,7 +227,6 @@ class dgCollisionMesh: public dgCollision
 
 	dgMemoryAllocator* m_allocator; 
 	dgCollisionMeshCollisionCallback m_debugCallback;
-//	dgCollisionMeshUserRayCastCallback m_userRayCastCallback;
 	dgCollisionConvexPolygon* m_polygon[DG_MAX_THREADS_HIVE_COUNT];	
 
 	friend class dgWorld;

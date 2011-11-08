@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __DGCOLLIION_HEIGHT_FIELD__
-#define __DGCOLLIION_HEIGHT_FIELD__
+#ifndef __DGCOLLISION_HEIGHT_FIELD__
+#define __DGCOLLISION_HEIGHT_FIELD__
 
 #include "dgCollision.h"
 #include "dgCollisionMesh.h"
@@ -72,7 +72,6 @@ class dgCollisionHeightField: public dgCollisionMesh
 	dgUnsigned16* m_elevationMap;
 	dgFloat32 m_verticalScale;
 	dgFloat32 m_horizontalScale;
-//	dgFloat32 m_verticalScaleInv;
 	dgFloat32 m_horizontalScaleInv;
 	dgCollisionHeightFieldRayCastCallback m_userRayCastCallback;
 

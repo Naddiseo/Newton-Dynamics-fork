@@ -94,8 +94,12 @@ extern "C" {
 	#define SERIALIZE_ID_NULL					10
 	#define SERIALIZE_ID_HEIGHTFIELD			11
 	#define SERIALIZE_ID_USERMESH				12
-	#define SERIALIZE_ID_SCENE					13
-	#define SERIALIZE_ID_COMPOUND_BREAKABLE		14
+	#define SERIALIZE_ID_SOFTMESH				13
+	#define SERIALIZE_ID_SCENE					14
+	#define SERIALIZE_ID_COMPOUND_BREAKABLE		15
+	
+	
+
 
 	typedef struct NewtonBoxParam NewtonBoxParam;
 	typedef struct NewtonConeParam NewtonConeParam;
@@ -197,7 +201,7 @@ extern "C" {
 	struct NewtonCollisionInfoRecord
 	{
 		dFloat m_offsetMatrix[4][4];
-		int m_collisionType;				// tag id to identify the collision primitive
+		int m_collisionType___;				// tag id to identify the collision primitive
 		int m_referenceCount;				// the current reference count for this collision		
 		int m_collisionUserID;				
 		
@@ -527,16 +531,14 @@ extern "C" {
 	
 	// **********************************************************************************************
 	//
-	// mass/spring/damper collision shape
+	// particle system interface (soft bodies, individual, pressure bodies and cloth)   
 	//
 	// **********************************************************************************************
-//	NEWTON_API NewtonCollision* NewtonCreateSoftShape (const NewtonWorld* const newtonWorld);
+	NEWTON_API NewtonCollision* NewtonSoftMesh (NewtonMesh* const mesh);
 //	NEWTON_API void NewtonSoftBodySetMassCount (const NewtonCollision* convexCollision, int count);
 //	NEWTON_API void NewtonSoftBodySetSpringCount (const NewtonCollision* convexCollision, int count);
-
 //	NEWTON_API void NewtonSoftBodySetMass (const NewtonCollision* convexCollision, int index, dFloat mass, dFloat* position);
-//	NEWTON_API int NewtonSoftBodySetSpring (const NewtonCollision* convexCollision, int index, int mass0, int mass1, dFloat stiffness, dFloat damper);
-//	NEWTON_API int NewtonSoftBodyGetMassArray (const NewtonCollision* convexCollision, dFloat* masses, dFloat** positions);	
+
 
 
 	// **********************************************************************************************

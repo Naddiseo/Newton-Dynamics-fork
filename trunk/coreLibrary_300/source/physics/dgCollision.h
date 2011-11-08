@@ -69,11 +69,13 @@ enum dgCollisionID
 	m_boundingBoxHierachy,
 	m_nullCollision,
 	m_heightField,
-	m_userMeshCollision,
+	m_softMesh,
+	m_userMesh,
 	m_sceneCollision,
 	m_compoundBreakable,
 
-	
+
+	// these are for internal use only	
 	m_polygonCollision,
 	m_ellipseCollision,
 	m_convexConvexIntance,
@@ -212,26 +214,27 @@ class dgCollision//: public dgRef
 	public:
 
 	enum RTTI {
-		dgCollisionNull_RTTI			= 1<<0,
-		dgCollisionBox_RTTI				= 1<<1,
-		dgCollisionCone_RTTI			= 1<<2,
-		dgCollisionSphere_RTTI			= 1<<3,
-		dgCollisionEllipse_RTTI			= 1<<4,
-		dgCollisionCapsule_RTTI			= 1<<5,
-		dgCollisionCylinder_RTTI		= 1<<6,
-		dgCollisionConvexHull_RTTI		= 1<<7,
-		dgCollisionChamferCylinder_RTTI = 1<<8,
-		dgCollisionConvexModifier_RTTI	= 1<<9,
-		dgCollisionConvexPolygon_RTTI	= 1<<10,
-		dgConvexCollision_RTTI			= 1<<11,
-		dgCollisionCompound_RTTI		= 1<<12,
+		dgCollisionNull_RTTI				= 1<<0,
+		dgCollisionBox_RTTI					= 1<<1,
+		dgCollisionCone_RTTI				= 1<<2,
+		dgCollisionSphere_RTTI				= 1<<3,
+		dgCollisionEllipse_RTTI				= 1<<4,
+		dgCollisionCapsule_RTTI				= 1<<5,
+		dgCollisionCylinder_RTTI			= 1<<6,
+		dgCollisionConvexHull_RTTI			= 1<<7,
+		dgCollisionChamferCylinder_RTTI 	= 1<<8,
+		dgCollisionConvexModifier_RTTI		= 1<<9,
+		dgCollisionConvexPolygon_RTTI		= 1<<10,
+		dgConvexCollision_RTTI				= 1<<11,
+		dgCollisionCompound_RTTI			= 1<<12,
 		
-		dgCollisionBVH_RTTI				= 1<<13,
-		dgCollisionMesh_RTTI			= 1<<14,
-		dgCollisionUserMesh_RTTI		= 1<<15,
-		dgCollisionHeightField_RTTI		= 1<<16,
-		dgCollisionScene_RTTI			= 1<<17,
-		dgCollisionCompoundBreakable_RTTI = 1<<18,
+		dgCollisionBVH_RTTI					= 1<<13,
+		dgCollisionMesh_RTTI				= 1<<14,
+		dgCollisionSoftMesh_RTTI			= 1<<15,
+		dgCollisionUserMesh_RTTI			= 1<<16,
+		dgCollisionHeightField_RTTI			= 1<<17,
+		dgCollisionScene_RTTI				= 1<<18,
+		dgCollisionCompoundBreakable_RTTI	= 1<<19,
 	};
 	
 	DG_CLASS_ALLOCATOR(allocator)

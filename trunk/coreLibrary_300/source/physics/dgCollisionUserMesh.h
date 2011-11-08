@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __DGCOLLIIO_USERMESH__
-#define __DGCOLLIIO_USERMESH__
+#ifndef __DGCOLLISION_USERMESH__
+#define __DGCOLLISION_USERMESH__
 
 #include "dgCollision.h"
 #include "dgCollisionMesh.h"

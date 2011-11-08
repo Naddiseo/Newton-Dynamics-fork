@@ -994,6 +994,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\source\physics\dgCollisionSoftMesh.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\source\physics\dgCollisionSoftMesh.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\source\physics\dgCollisionSphere.cpp"
 				>
 			</File>

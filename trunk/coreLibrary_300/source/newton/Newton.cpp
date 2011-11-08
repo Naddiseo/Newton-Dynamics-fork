@@ -8284,4 +8284,10 @@ void NewtonMeshGetFacePointIndices (const NewtonMesh* const mesh, const void* co
 
 
 
+NewtonCollision* NewtonSoftMesh (NewtonMesh* const mesh)
+{
+	TRACE_FUNTION(__FUNCTION__);
+	_ASSERTE (0);
+	return NULL;
+}
 

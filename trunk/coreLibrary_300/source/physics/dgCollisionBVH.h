@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __DGCOLLIIONBVH__
-#define __DGCOLLIIONBVH__
+#ifndef __DGCOLLISION_BVH__
+#define __DGCOLLISION_BVH__
 
 #include "dgCollision.h"
 #include "dgCollisionMesh.h"
@@ -59,13 +59,9 @@ class dgCollisionBVH: public dgCollisionMesh, public dgAABBPolygonSoup
 
 	void SetCollisionRayCastCallback (dgCollisionBVHUserRayCastCallback rayCastCallback);
 	dgCollisionBVHUserRayCastCallback GetDebugRayCastCallback() const { return m_userRayCastCallback;} 
-
 	void GetVertexListIndexList (const dgVector& p0, const dgVector& p1, dgGetVertexListIndexList &data) const;
 
-
 	private:
-	
-
 	static dgFloat32 RayHit (void *context, const dgFloat32* const polygon, dgInt32 strideInBytes, const dgInt32* const indexArray, dgInt32 indexCount);
 	static dgFloat32 RayHitSimd (void *context, const dgFloat32* const polygon, dgInt32 strideInBytes, const dgInt32* const indexArray, dgInt32 indexCount);
 	static dgFloat32 RayHitUser (void *context, const dgFloat32* const polygon, dgInt32 strideInBytes, const dgInt32* const indexArray, dgInt32 indexCount);
