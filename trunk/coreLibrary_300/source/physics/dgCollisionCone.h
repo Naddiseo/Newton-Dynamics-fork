@@ -43,8 +43,8 @@ class dgCollisionCone: public dgCollisionConvex
 	virtual dgInt32 CalculatePlaneIntersectionSimd (const dgVector& normal, const dgVector& point, dgVector* const contactsOut) const;
 
 	virtual dgFloat32 CalculateMassProperties (dgVector& inertia, dgVector& crossInertia, dgVector& centerOfMass) const;
-//	virtual void DebugCollision (const dgBody& myBody, DebugCollisionMeshCallback callback) const;
-	virtual void DebugCollision (const dgMatrix& matrix, OnDebugCollisionMeshCallback callback, void* const userData) const;
+//	virtual void DebugCollision  (const dgBody& myBody, DebugCollisionMeshCallback callback) const;
+	virtual void DebugCollision  (const dgMatrix& matrix, OnDebugCollisionMeshCallback callback, void* const userData) const;
 	
 
 //	virtual dgVector GetLocalCG () const;

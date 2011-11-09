@@ -109,27 +109,6 @@ class dgAABBTree
 		dgConstructionTree ()
 		{
 		}
-/*
-		dgConstructionTree (dgConstructionTree* const back, dgConstructionTree* const front)
-		{
-			m_back = back;
-			m_front = front;
-			m_parent = NULL;
-			m_boxIndex = -1;
-			m_p0.m_x = GetMin (back->m_p0.m_x, front->m_p0.m_x);
-			m_p0.m_y = GetMin (back->m_p0.m_y, front->m_p0.m_y);
-			m_p0.m_z = GetMin (back->m_p0.m_z, front->m_p0.m_z);
-			m_p1.m_x = GetMax (back->m_p1.m_x, front->m_p1.m_x);
-			m_p1.m_y = GetMax (back->m_p1.m_y, front->m_p1.m_y);
-			m_p1.m_z = GetMax (back->m_p1.m_z, front->m_p1.m_z);
-			m_p0.m_w = dgFloat32 (0.0f);
-			m_p1.m_w = dgFloat32 (0.0f);
-
-			dgVector side0 (m_p1 - m_p0);
-			dgVector side1 (side0.m_y, side0.m_z, side0.m_x, dgFloat32 (0.0f));
-			m_surfaceArea = side0 % side1; 
-		}
-*/
 
 		~dgConstructionTree ()
 		{
@@ -158,8 +137,7 @@ class dgAABBTree
 		dgVector minP ( dgFloat32 (1.0e15f),  dgFloat32 (1.0e15f),  dgFloat32 (1.0e15f), dgFloat32 (0.0f)); 
 		dgVector maxP (-dgFloat32 (1.0e15f), -dgFloat32 (1.0e15f), -dgFloat32 (1.0e15f), dgFloat32 (0.0f)); 
 		for (dgInt32 i = 1; i < indexCount; i ++) {
-			dgInt32 index;
-			index = indexArray[i];
+			dgInt32 index = indexArray[i];
 			dgVector p (&vertex[index].m_x);
 
 			minP.m_x = GetMin (p.m_x, minP.m_x); 

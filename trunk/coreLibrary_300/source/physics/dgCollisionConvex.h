@@ -89,7 +89,7 @@ class dgCollisionConvex: public dgCollision
 	
 	void SetVolumeAndCG ();
 	bool SanityCheck (dgPolyhedra& hull) const;
-	virtual void DebugCollision (const dgMatrix& matrix, OnDebugCollisionMeshCallback callback, void* const userData) const;
+	virtual void DebugCollision  (const dgMatrix& matrix, OnDebugCollisionMeshCallback callback, void* const userData) const;
 	virtual dgFloat32 CalculateMassProperties (dgVector& inertia, dgVector& crossInertia, dgVector& centerOfMass) const;
 
 	bool SanityCheck(dgInt32 count, const dgVector& normal, dgVector* const contactsOut) const;

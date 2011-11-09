@@ -62,7 +62,7 @@ class dgCollisionUserMesh: public dgCollisionMesh
 	virtual dgFloat32 RayCastSimd (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const;
 	virtual void GetCollidingFaces (dgPolygonMeshDesc* const data) const;
 	virtual void GetCollidingFacesSimd (dgPolygonMeshDesc* const data) const;
-	void DebugCollision (const dgMatrix& matrixPtr, OnDebugCollisionMeshCallback callback, void* const userData) const;
+	virtual void DebugCollision (const dgMatrix& matrixPtr, OnDebugCollisionMeshCallback callback, void* const userData) const;
 
 	void* m_userData;
 	UserMeshCollisionInfo m_getInfo;

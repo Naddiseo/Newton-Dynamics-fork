@@ -30,10 +30,71 @@
 //////////////////////////////////////////////////////////////////////
 
 
+#define DG_DEFORMABLE_PADDING dgFloat32 (0.5f)
+
+class dgCollisionDeformableMesh::dgDeformableNode
+{
+	public:
+	dgDeformableNode ()
+	{
+	}
+
+	~dgDeformableNode ()
+	{
+		if (m_back) {
+			delete m_back;
+		}
+		if (m_front) {
+			delete m_front;
+		}
+	}
+
+	void CalcBox (const dgVector* const m_vertexArray, dgInt32* const faceIndices) 
+	{
+		dgVector minP (m_vertexArray[faceIndices[0]]); 
+		dgVector maxP (m_vertexArray[faceIndices[0]]); 
+		for (dgInt32 i = 1; i < 3; i ++) {
+			dgInt32 index = faceIndices[i];
+			const dgVector& p  = m_vertexArray[index];
+
+			minP.m_x = GetMin (p.m_x, minP.m_x); 
+			minP.m_y = GetMin (p.m_y, minP.m_y); 
+			minP.m_z = GetMin (p.m_z, minP.m_z); 
+
+			maxP.m_x = GetMax (p.m_x, maxP.m_x); 
+			maxP.m_y = GetMax (p.m_y, maxP.m_y); 
+			maxP.m_z = GetMax (p.m_z, maxP.m_z); 
+		}
+
+		m_p0.m_x = minP.m_x - DG_DEFORMABLE_PADDING;
+		m_p0.m_y = minP.m_y - DG_DEFORMABLE_PADDING;
+		m_p0.m_z = minP.m_z - DG_DEFORMABLE_PADDING;
+		m_p1.m_x = maxP.m_x + DG_DEFORMABLE_PADDING;
+		m_p1.m_y = maxP.m_y + DG_DEFORMABLE_PADDING;
+		m_p1.m_z = maxP.m_z + DG_DEFORMABLE_PADDING;
+
+		dgVector side0 (m_p1 - m_p0);
+		dgVector side1 (side0.m_y, side0.m_z, side0.m_x, dgFloat32 (0.0f));
+		m_surfaceArea = side0 % side1;
+	}
+
+
+	dgVector m_p0;
+	dgVector m_p1;
+	dgInt32 m_indexStart;
+	dgFloat32 m_surfaceArea;
+	dgDeformableNode* m_back;
+	dgDeformableNode* m_front;
+	dgDeformableNode* m_parent;
+};
 
 
 dgCollisionDeformableMesh::dgCollisionDeformableMesh (dgWorld* const world, dgDeserialize deserialization, void* const userData)
-	:dgCollisionBVH (world, deserialization, userData)
+	:dgCollisionConvex (world, deserialization, userData)
+	,m_nodesMemory(NULL)
+	,m_indexList(NULL)
+	,m_vertexArray(NULL)
+	,m_rootNode(NULL)
 {
 _ASSERTE (0);
 	m_rtti |= dgCollisionDeformableMesh_RTTI;
@@ -50,9 +111,17 @@ _ASSERTE (0);
 
 dgCollisionDeformableMesh::~dgCollisionDeformableMesh(void)
 {
-//	if (m_destroyCallback) {
-//		m_destroyCallback (m_userData);
-//	}
+	if (m_vertexArray) {
+		dgFree (m_vertexArray);
+	}
+
+	if (m_indexList) {
+		dgFree (m_indexList);
+	}
+
+	if (m_nodesMemory) {
+		dgFree (m_nodesMemory);
+	}
 }
 
 void dgCollisionDeformableMesh::Serialize(dgSerialize callback, void* const userData) const
@@ -64,11 +133,22 @@ void dgCollisionDeformableMesh::Serialize(dgSerialize callback, void* const user
 */
 }
 
+dgInt32 dgCollisionDeformableMesh::CalculateSignature () const
+{
+	return 0;
+}
 
+void dgCollisionDeformableMesh::SetCollisionBBox (const dgVector& p0, const dgVector& p1)
+{
+	_ASSERTE (0);
+}
+
+
+/*
 void dgCollisionDeformableMesh::GetVertexListIndexList (const dgVector& p0, const dgVector& p1, dgGetVertexListIndexList &data) const
 {
 	_ASSERTE (0);
-/*
+
 	if (m_faceInAabb) {
 		return m_faceInAabb (m_userData, &p0[0], &p1[0], (const dgFloat32**) &data.m_veterxArray, &data.m_vertexCount, &data.m_vertexStrideInBytes,
 							 data.m_indexList, data.m_maxIndexCount, data.m_userDataList);
@@ -76,9 +156,8 @@ void dgCollisionDeformableMesh::GetVertexListIndexList (const dgVector& p0, cons
 	} else {
 		data.m_triangleCount = 0;
 	}
-*/
 }
-
+*/
 void dgCollisionDeformableMesh::GetCollisionInfo(dgCollisionInfo* info) const
 {
 	_ASSERTE (0);
@@ -178,10 +257,16 @@ void dgCollisionDeformableMesh::DebugCollision (const dgMatrix& matrixPtr, OnDeb
 
 
 
+
+
 //dgCollisionDeformableMesh::dgCollisionDeformableMesh(dgMemoryAllocator* allocator, const dgVector& boxP0, const dgVector& boxP1, const dgUserMeshCreation& data)
 dgCollisionDeformableMesh::dgCollisionDeformableMesh(dgMemoryAllocator* allocator, dgMeshEffect* const mesh)
-	:dgCollisionBVH (allocator)
+	:dgCollisionConvex (allocator, 0, dgGetIdentityMatrix(), m_deformableMesh)
+	,m_nodesMemory(NULL)
+	,m_vertexArray(NULL)
+	,m_rootNode(NULL)
 {
+
 	//	m_rtti |= dgCollisionDeformableMesh_RTTI;
 	//	m_userData = data.m_userData;
 	//	m_getInfo = data.m_getInfo;
@@ -191,57 +276,42 @@ dgCollisionDeformableMesh::dgCollisionDeformableMesh(dgMemoryAllocator* allocato
 	//	m_destroyCallback = data.m_destroyCallback;
 	//	SetCollisionBBox(boxP0, boxP1);
 
-	m_collsionId = m_deformableMesh;
-
-	dgPolygonSoupDatabaseBuilder builder(allocator);
-
-
 	mesh->Triangulate();
 	int vertexCount = mesh->GetVertexCount (); 
 	int faceCount = mesh->GetTotalFaceCount (); 
 	int indexCount = mesh->GetTotalIndexCount (); 
+
+	m_rootNode = (dgDeformableNode*) dgMallocStack(sizeof (dgDeformableNode) * faceCount * 2);
+	m_nodesMemory = m_rootNode;
+
+	m_indexList = (dgInt32*) dgMallocStack (sizeof (dgInt32) * faceCount * 3);
+	m_vertexArray = (dgVector*) dgMallocStack( sizeof (dgVector) *(vertexCount + faceCount * 2));
+
+	dgInt32 stride = mesh->GetVertexStrideInByte() / sizeof (dgFloat64);  
+	dgFloat64* const vertex = mesh->GetVertexPool();  
+	for (dgInt32 i = 0; i < vertexCount; i ++) {
+		m_vertexArray[i] = dgVector (dgFloat32 (vertex[i * stride + 0]), dgFloat32 (vertex[i * stride + 1]), dgFloat32 (vertex[i * stride + 2]), dgFloat32 (0.0f));
+	}
 
 	int* const faceArray = (dgInt32*) dgMallocStack(faceCount * sizeof (dgInt32));
 	int* const materialIndexArray = (dgInt32*) dgMallocStack(faceCount * sizeof (dgInt32));
 	void** const indexArray = (void**) dgMallocStack(indexCount * sizeof (void*));
 	mesh->GetFaces (faceArray, materialIndexArray, indexArray);
 
-	builder.m_faceCount = faceCount;
-	builder.m_indexCount = indexCount + faceCount;
-	builder.m_vertexCount = vertexCount;
-	builder.m_normalCount = 1;
-	builder.m_normalIndex[faceCount] = 0;
-	builder.m_vertexIndex[indexCount + faceCount] = 0;
-	builder.m_faceVertexCount[faceCount] = 0;
-	builder.m_vertexPoints[vertexCount].m_x = dgFloat32 (0.0f);
-	builder.m_normalPoints[0] = dgBigVector (dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f));
-	
-	const dgFloat64* const vertex = mesh->GetVertexPool ();
-	dgInt32 stride = mesh->GetVertexStrideInByte() / sizeof (dgFloat64);
-	for (dgInt32 i = 0; i < vertexCount; i ++) {
-		dgBigVector p (vertex[i * stride + 0], vertex[i * stride + 1], vertex[i * stride + 2], dgFloat64 (0.0f));
-		builder.m_vertexPoints[i] = p;
-	}
-
-	dgInt32 index = 0;
-	dgInt32 index1 = 0;
 	for (dgInt32 i = 0; i < faceCount; i ++) {
-		builder.m_normalIndex[i] = 0;
-
 		dgInt32 count = faceArray[i];
 		_ASSERTE (count == 3);
-		builder.m_faceVertexCount[i] = count + 1;
-		builder.m_vertexIndex[index] = 0;
-		index ++;
 		for (dgInt32 j = 0; j < count; j ++) {
-			dgInt32 k = mesh->GetVertexIndex(indexArray[index1]);
-			builder.m_vertexIndex[index] = k;
-			index ++;
-			index1 ++;
+			dgInt32 k = mesh->GetVertexIndex(indexArray[i * 3 + j]);
+			m_indexList[i * 3 + j] = k;
 		}
+		dgDeformableNode& node = m_rootNode[i];
+		node.m_back = NULL;
+		node.m_front = NULL;
+		node.m_parent = NULL;
+		node.m_indexStart = i * 3;
+		node.CalcBox(m_vertexArray, &m_indexList[i * 3]);
 	}
-
-	Create(builder, 0);
 
 
 

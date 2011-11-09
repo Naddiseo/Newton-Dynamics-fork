@@ -79,7 +79,7 @@ class dgCollisionBVH: public dgCollisionMesh, public dgAABBPolygonSoup
 	virtual void GetCollidingFacesSimd (dgPolygonMeshDesc* const data) const;
 	virtual void GetCollisionInfo(dgCollisionInfo* info) const;
 
-	void DebugCollision (const dgMatrix& matrixPtr, OnDebugCollisionMeshCallback callback, void* const userData) const;
+	virtual void DebugCollision (const dgMatrix& matrixPtr, OnDebugCollisionMeshCallback callback, void* const userData) const;
 
 	dgPolygonSoupDatabaseBuilder* m_builder;
 	dgCollisionBVHUserRayCastCallback m_userRayCastCallback;

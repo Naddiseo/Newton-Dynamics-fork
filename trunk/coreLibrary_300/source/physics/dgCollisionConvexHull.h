@@ -43,7 +43,7 @@ class dgCollisionConvexHull: public dgCollisionConvex
 
 	virtual dgInt32 CalculateSignature () const;
 	virtual void SetCollisionBBox (const dgVector& p0, const dgVector& p1);
-	virtual void DebugCollision (const dgMatrix& matrix, OnDebugCollisionMeshCallback callback, void* const userData) const;
+	virtual void DebugCollision  (const dgMatrix& matrix, OnDebugCollisionMeshCallback callback, void* const userData) const;
 	virtual void GetCollisionInfo(dgCollisionInfo* info) const;
 	virtual void Serialize(dgSerialize callback, void* const userData) const;
 	virtual bool OOBBTest (const dgMatrix& matrix, const dgCollisionConvex* const shape, void* const cacheOrder) const; 

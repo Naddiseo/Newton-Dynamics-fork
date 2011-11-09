@@ -48,8 +48,8 @@ class dgCollisionConvexModifier: public dgCollisionConvex
 
 	virtual void CalcAABB (const dgMatrix &matrix, dgVector& p0, dgVector& p1) const;
 	virtual void CalcAABBSimd (const dgMatrix &matrix, dgVector &p0, dgVector &p1) const;
-//	virtual void DebugCollision (const dgBody& myBody, DebugCollisionMeshCallback callback) const;
-	virtual void DebugCollision (const dgMatrix& matrix, OnDebugCollisionMeshCallback callback, void* const userData) const;
+//	virtual void DebugCollision  (const dgBody& myBody, DebugCollisionMeshCallback callback) const;
+	virtual void DebugCollision  (const dgMatrix& matrix, OnDebugCollisionMeshCallback callback, void* const userData) const;
 	virtual dgFloat32 RayCast (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const;
 	virtual dgFloat32 RayCastSimd (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const;
 

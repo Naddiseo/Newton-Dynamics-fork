@@ -58,7 +58,7 @@ class dgCollisionHeightField: public dgCollisionMesh
 	virtual void GetCollidingFacesSimd (dgPolygonMeshDesc* const data) const;
 
 	virtual void GetCollisionInfo(dgCollisionInfo* info) const;
-	void DebugCollision (const dgMatrix& matrixPtr, OnDebugCollisionMeshCallback callback, void* const userData) const;
+	virtual void DebugCollision (const dgMatrix& matrixPtr, OnDebugCollisionMeshCallback callback, void* const userData) const;
 
 	void GetVertexListIndexList (const dgVector& p0, const dgVector& p1, dgGetVertexListIndexList &data) const;
 

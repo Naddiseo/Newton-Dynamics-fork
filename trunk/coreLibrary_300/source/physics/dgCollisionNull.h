@@ -43,7 +43,7 @@ class dgCollisionNull: public dgCollisionConvex
 	virtual dgVector SupportVertexSimd (const dgVector& dir) const;
 
 
-	virtual void DebugCollision (const dgMatrix& matrix, OnDebugCollisionMeshCallback callback, void* const userData) const;
+	virtual void DebugCollision  (const dgMatrix& matrix, OnDebugCollisionMeshCallback callback, void* const userData) const;
 	
 	virtual dgVector CalculateVolumeIntegral (const dgMatrix& globalMatrix, GetBuoyancyPlane bouyancyPlane, void* const context) const;
 //	virtual bool RayHit (const dgVector& localP0, const dgVector& localP1, dgFloat32 thickness, dgContactPoint& contactOut) const;
