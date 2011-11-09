@@ -60,6 +60,7 @@ class dgAABBPolygonSoup: public dgPolygonSoupDatabase
 	void* GetFrontNode(const void* const root) const;
 	void GetNodeAABB(const void* const root, dgVector& p0, dgVector& p1) const;
 
+	void CalculateAdjacendy ();
 	void Create (const dgPolygonSoupDatabaseBuilder& builder, bool optimizedBuild);
 	virtual void ForAllSectors (const dgVector& min, const dgVector& max, dgAABBIntersectCallback callback, void* const context) const;
 	virtual void ForAllSectorsSimd (const dgVector& min, const dgVector& max, dgAABBIntersectCallback callback, void* const context) const;

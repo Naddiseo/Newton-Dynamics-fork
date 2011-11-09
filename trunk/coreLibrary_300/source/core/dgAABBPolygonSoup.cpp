@@ -1517,7 +1517,13 @@ dgFloat32 dgAABBPolygonSoup::CalculateFaceMaxSize (dgTriplex* const vertex, dgIn
 	return maxSize;
 }
 
-
+void dgAABBPolygonSoup::CalculateAdjacendy ()
+{
+	dgVector p0;
+	dgVector p1;
+	GetAABB (p0, p1);
+	ForAllSectors (p0, p1, CalculateAllFaceEdgeNormals, this);
+}
 
 void dgAABBPolygonSoup::Create (const dgPolygonSoupDatabaseBuilder& builder, bool optimizedBuild)
 {
@@ -1612,10 +1618,5 @@ void dgAABBPolygonSoup::Create (const dgPolygonSoupDatabaseBuilder& builder, boo
 	}
 
 	m_vertexCount = extraVertexCount + builder.m_normalCount + builder.m_vertexCount;
-
-	dgVector p0;
-	dgVector p1;
-	GetAABB (p0, p1);
-	ForAllSectors (p0, p1, CalculateAllFaceEdgeNormals, this);
 }
 

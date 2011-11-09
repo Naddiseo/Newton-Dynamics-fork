@@ -243,7 +243,7 @@ dgCollisionDeformableMesh::dgCollisionDeformableMesh(dgMemoryAllocator* allocato
 
 	Create(builder, 0);
 
-UpdateFitness ();
+
 
 	dgFree (indexArray);
 	dgFree (materialIndexArray);
