@@ -22,7 +22,8 @@
 #include "dgPhysicsStdafx.h"
 #include "dgBody.h"
 #include "dgContact.h"
-#include "dgCollisionSoftMesh.h"
+#include "dgMeshEffect.h"
+#include "dgCollisionDeformableMesh.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -31,11 +32,11 @@
 
 
 
-dgCollisionSoftMesh::dgCollisionSoftMesh (dgWorld* const world, dgDeserialize deserialization, void* const userData)
-	:dgCollisionMesh (world, deserialization, userData)
+dgCollisionDeformableMesh::dgCollisionDeformableMesh (dgWorld* const world, dgDeserialize deserialization, void* const userData)
+	:dgCollisionBVH (world, deserialization, userData)
 {
 _ASSERTE (0);
-	m_rtti |= dgCollisionSoftMesh_RTTI;
+	m_rtti |= dgCollisionDeformableMesh_RTTI;
 	
 /*
 	dgAABBPolygonSoup::Deserialize (deserialization, userData);
@@ -47,14 +48,14 @@ _ASSERTE (0);
 */
 }
 
-dgCollisionSoftMesh::~dgCollisionSoftMesh(void)
+dgCollisionDeformableMesh::~dgCollisionDeformableMesh(void)
 {
 //	if (m_destroyCallback) {
 //		m_destroyCallback (m_userData);
 //	}
 }
 
-void dgCollisionSoftMesh::Serialize(dgSerialize callback, void* const userData) const
+void dgCollisionDeformableMesh::Serialize(dgSerialize callback, void* const userData) const
 {
 	_ASSERTE (0);
 /*
@@ -64,7 +65,7 @@ void dgCollisionSoftMesh::Serialize(dgSerialize callback, void* const userData) 
 }
 
 
-void dgCollisionSoftMesh::GetVertexListIndexList (const dgVector& p0, const dgVector& p1, dgGetVertexListIndexList &data) const
+void dgCollisionDeformableMesh::GetVertexListIndexList (const dgVector& p0, const dgVector& p1, dgGetVertexListIndexList &data) const
 {
 	_ASSERTE (0);
 /*
@@ -78,7 +79,7 @@ void dgCollisionSoftMesh::GetVertexListIndexList (const dgVector& p0, const dgVe
 */
 }
 
-void dgCollisionSoftMesh::GetCollisionInfo(dgCollisionInfo* info) const
+void dgCollisionDeformableMesh::GetCollisionInfo(dgCollisionInfo* info) const
 {
 	_ASSERTE (0);
 /*
@@ -91,7 +92,7 @@ void dgCollisionSoftMesh::GetCollisionInfo(dgCollisionInfo* info) const
 }
 
 
-dgFloat32 dgCollisionSoftMesh::RayCastSimd (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
+dgFloat32 dgCollisionDeformableMesh::RayCastSimd (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
 {
 _ASSERTE (0);
 return 0;
@@ -99,7 +100,7 @@ return 0;
 }
 
 
-dgFloat32 dgCollisionSoftMesh::RayCast (
+dgFloat32 dgCollisionDeformableMesh::RayCast (
 	const dgVector& localP0, 
 	const dgVector& localP1, 
 	dgContactPoint& contactOut,
@@ -139,13 +140,13 @@ return 0;
 }
 
 
-void dgCollisionSoftMesh::GetCollidingFacesSimd (dgPolygonMeshDesc* const data) const
+void dgCollisionDeformableMesh::GetCollidingFacesSimd (dgPolygonMeshDesc* const data) const
 {
 	_ASSERTE (0);
 //	GetCollidingFaces (data);
 }
 
-void dgCollisionSoftMesh::GetCollidingFaces (dgPolygonMeshDesc* const data) const
+void dgCollisionDeformableMesh::GetCollidingFaces (dgPolygonMeshDesc* const data) const
 {
 	_ASSERTE (0);
 /*
@@ -159,11 +160,11 @@ void dgCollisionSoftMesh::GetCollidingFaces (dgPolygonMeshDesc* const data) cons
 }
 
 
-void dgCollisionSoftMesh::DebugCollision (const dgMatrix& matrixPtr, OnDebugCollisionMeshCallback callback, void* const userData) const
+void dgCollisionDeformableMesh::DebugCollision (const dgMatrix& matrixPtr, OnDebugCollisionMeshCallback callback, void* const userData) const
 {
 	_ASSERTE (0);
 /*
-	dgCollisionSoftMeshShowPolyContext context;
+	dgCollisionDeformableMeshShowPolyContext context;
 
 	context.m_matrix = matrixPtr;
 	context.m_userData = userData;;
@@ -177,11 +178,11 @@ void dgCollisionSoftMesh::DebugCollision (const dgMatrix& matrixPtr, OnDebugColl
 
 
 
-//dgCollisionSoftMesh::dgCollisionSoftMesh(dgMemoryAllocator* allocator, const dgVector& boxP0, const dgVector& boxP1, const dgUserMeshCreation& data)
-dgCollisionSoftMesh::dgCollisionSoftMesh(dgMemoryAllocator* allocator, dgMeshEffect* const mesh)
-	:dgCollisionMesh (allocator, m_softMesh)
+//dgCollisionDeformableMesh::dgCollisionDeformableMesh(dgMemoryAllocator* allocator, const dgVector& boxP0, const dgVector& boxP1, const dgUserMeshCreation& data)
+dgCollisionDeformableMesh::dgCollisionDeformableMesh(dgMemoryAllocator* allocator, dgMeshEffect* const mesh)
+	:dgCollisionBVH (allocator)
 {
-	//	m_rtti |= dgCollisionSoftMesh_RTTI;
+	//	m_rtti |= dgCollisionDeformableMesh_RTTI;
 	//	m_userData = data.m_userData;
 	//	m_getInfo = data.m_getInfo;
 	//	m_faceInAabb = data.m_faceInAabb;
@@ -189,4 +190,62 @@ dgCollisionSoftMesh::dgCollisionSoftMesh(dgMemoryAllocator* allocator, dgMeshEff
 	//	m_collideCallback = data.m_collideCallback;
 	//	m_destroyCallback = data.m_destroyCallback;
 	//	SetCollisionBBox(boxP0, boxP1);
+
+	m_collsionId = m_deformableMesh;
+
+	dgPolygonSoupDatabaseBuilder builder(allocator);
+
+
+	mesh->Triangulate();
+	int vertexCount = mesh->GetVertexCount (); 
+	int faceCount = mesh->GetTotalFaceCount (); 
+	int indexCount = mesh->GetTotalIndexCount (); 
+
+	int* const faceArray = (dgInt32*) dgMallocStack(faceCount * sizeof (dgInt32));
+	int* const materialIndexArray = (dgInt32*) dgMallocStack(faceCount * sizeof (dgInt32));
+	void** const indexArray = (void**) dgMallocStack(indexCount * sizeof (void*));
+	mesh->GetFaces (faceArray, materialIndexArray, indexArray);
+
+	builder.m_faceCount = faceCount;
+	builder.m_indexCount = indexCount + faceCount;
+	builder.m_vertexCount = vertexCount;
+	builder.m_normalCount = 1;
+	builder.m_normalIndex[faceCount] = 0;
+	builder.m_vertexIndex[indexCount + faceCount] = 0;
+	builder.m_faceVertexCount[faceCount] = 0;
+	builder.m_vertexPoints[vertexCount].m_x = dgFloat32 (0.0f);
+	builder.m_normalPoints[0] = dgBigVector (dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f), dgFloat64 (0.0f));
+	
+	const dgFloat64* const vertex = mesh->GetVertexPool ();
+	dgInt32 stride = mesh->GetVertexStrideInByte() / sizeof (dgFloat64);
+	for (dgInt32 i = 0; i < vertexCount; i ++) {
+		dgBigVector p (vertex[i * stride + 0], vertex[i * stride + 1], vertex[i * stride + 2], dgFloat64 (0.0f));
+		builder.m_vertexPoints[i] = p;
+	}
+
+	dgInt32 index = 0;
+	dgInt32 index1 = 0;
+	for (dgInt32 i = 0; i < faceCount; i ++) {
+		builder.m_normalIndex[i] = 0;
+
+		dgInt32 count = faceArray[i];
+		_ASSERTE (count == 3);
+		builder.m_faceVertexCount[i] = count + 1;
+		builder.m_vertexIndex[index] = 0;
+		index ++;
+		for (dgInt32 j = 0; j < count; j ++) {
+			dgInt32 k = mesh->GetVertexIndex(indexArray[index1]);
+			builder.m_vertexIndex[index] = k;
+			index ++;
+			index1 ++;
+		}
+	}
+
+	Create(builder, 0);
+
+UpdateFitness ();
+
+	dgFree (indexArray);
+	dgFree (materialIndexArray);
+	dgFree (faceArray);
 }

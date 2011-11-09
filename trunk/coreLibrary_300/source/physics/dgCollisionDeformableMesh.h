@@ -20,12 +20,12 @@
 */
 
 
-#ifndef __DGCOLLISION_SOFT_MESH_H__
-#define __DGCOLLISION_SOFT_MESH_H__
+#ifndef __DGCOLLISION_DEFORMABLE_MESH_H__
+#define __DGCOLLISION_DEFORMABLE_MESH_H__
 
 
 #include "dgCollision.h"
-#include "dgCollisionMesh.h"
+#include "dgCollisionBVH.h"
 
 
 /*
@@ -53,13 +53,13 @@ class dgUserMeshCreation
 };
 */
 
-class dgCollisionSoftMesh: public dgCollisionMesh
+class dgCollisionDeformableMesh: public dgCollisionBVH
 {
 public:
-	//dgCollisionSoftMesh(dgMemoryAllocator* allocator, const dgVector& boxP0, const dgVector& boxP1, const dgUserMeshCreation& data);
-	dgCollisionSoftMesh(dgMemoryAllocator* allocator, dgMeshEffect* const mesh);
-	dgCollisionSoftMesh (dgWorld* const world, dgDeserialize deserialization, void* const userData);
-	virtual ~dgCollisionSoftMesh(void);
+	//dgCollisionDeformableMesh(dgMemoryAllocator* allocator, const dgVector& boxP0, const dgVector& boxP1, const dgUserMeshCreation& data);
+	dgCollisionDeformableMesh(dgMemoryAllocator* allocator, dgMeshEffect* const mesh);
+	dgCollisionDeformableMesh (dgWorld* const world, dgDeserialize deserialization, void* const userData);
+	virtual ~dgCollisionDeformableMesh(void);
 
 	void GetVertexListIndexList (const dgVector& p0, const dgVector& p1, dgGetVertexListIndexList &data) const;
 

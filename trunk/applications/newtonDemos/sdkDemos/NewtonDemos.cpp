@@ -20,14 +20,15 @@
 #include "DemoEntityManager.h"
 #include "DemoDialogHelpers.h"
 
-#define DEFAULT_SCENE	0						// friction test
+//#define DEFAULT_SCENE	0						// friction test
 //#define DEFAULT_SCENE	1						// closest distance
-//#define DEFAULT_SCENE	2						// Box stacks
-//#define DEFAULT_SCENE	3						// simple level mesh collision
-//#define DEFAULT_SCENE	4						// optimized level mesh collision
-//#define DEFAULT_SCENE	5						// Scene Collision
-//#define DEFAULT_SCENE	6						// Simple convex decomposition
-//#define DEFAULT_SCENE	7						// Simple convex Shatter
+#define DEFAULT_SCENE	2						// soft bodies
+//#define DEFAULT_SCENE	3						// Box stacks
+//#define DEFAULT_SCENE	4						// simple level mesh collision
+//#define DEFAULT_SCENE	5						// optimized level mesh collision
+//#define DEFAULT_SCENE	6						// Scene Collision
+//#define DEFAULT_SCENE	7						// Simple convex decomposition
+//#define DEFAULT_SCENE	8						// Simple convex Shatter
 
 
 
@@ -78,6 +79,7 @@ class SDKDemos
 //void BasicSphereSpin (DemoEntityManager* scene);
 void Friction (DemoEntityManager* const scene);
 void ClosestDistance (DemoEntityManager* const scene);
+void SoftBodies (DemoEntityManager* const scene);
 void BasicBoxStacks (DemoEntityManager* const scene);
 void SimpleMeshLevelCollision (DemoEntityManager* const scene);
 void OptimizedMeshLevelCollision (DemoEntityManager* const scene);
@@ -90,6 +92,7 @@ static SDKDemos demosSelection[] =
 {
 	{"coefficients of friction", "demonstrate the effect of various coefficient of friction", Friction},
 	{"closest distance", "demonstrate closest distance to a convex shape", ClosestDistance},
+	{"Simple Soft Body", "show simple stack of Boxes", SoftBodies},
 	{"Simple Box Stacks", "show simple stack of Boxes", BasicBoxStacks},
 	{"Unoptimized Mesh collision", "show simple level mesh", SimpleMeshLevelCollision},
 	{"Optimized Mesh collision", "show optimized level mesh", OptimizedMeshLevelCollision},

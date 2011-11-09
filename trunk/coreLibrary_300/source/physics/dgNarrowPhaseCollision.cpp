@@ -37,7 +37,7 @@
 #include "dgCollisionCylinder.h"
 #include "dgCollisionCompound.h"
 #include "dgCollisionUserMesh.h"
-#include "dgCollisionSoftMesh.h"
+#include "dgCollisionDeformableMesh.h"
 #include "dgWorldDynamicUpdate.h"
 #include "dgCollisionConvexHull.h"
 #include "dgCollisionHeightField.h"
@@ -340,9 +340,9 @@ dgCollision* dgWorld::CreateCollisionCompound (dgInt32 count, dgCollision* const
 	return new  (m_allocator) dgCollisionCompound (count, (dgCollisionConvex**) array, this);
 }
 
-dgCollision* dgWorld::CreateSoftMesh (dgMeshEffect* const mesh, dgInt32 shapeID)
+dgCollision* dgWorld::CreateDeformableMesh (dgMeshEffect* const mesh, dgInt32 shapeID)
 {
-	dgCollision* collision = new  (m_allocator) dgCollisionSoftMesh (m_allocator, mesh);
+	dgCollision* collision = new  (m_allocator) dgCollisionDeformableMesh (m_allocator, mesh);
 	collision->SetUserDataID (dgUnsigned32 (shapeID));
 	return collision;
 }

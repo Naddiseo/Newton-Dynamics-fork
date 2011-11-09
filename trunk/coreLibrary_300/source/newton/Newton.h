@@ -94,7 +94,7 @@ extern "C" {
 	#define SERIALIZE_ID_NULL					10
 	#define SERIALIZE_ID_HEIGHTFIELD			11
 	#define SERIALIZE_ID_USERMESH				12
-	#define SERIALIZE_ID_SOFTMESH				13
+	#define SERIALIZE_ID_DEFORMABLEMESH			13
 	#define SERIALIZE_ID_SCENE					14
 	#define SERIALIZE_ID_COMPOUND_BREAKABLE		15
 	
@@ -534,7 +534,7 @@ extern "C" {
 	// particle system interface (soft bodies, individual, pressure bodies and cloth)   
 	//
 	// **********************************************************************************************
-	NEWTON_API NewtonCollision* NewtonCreateSoftMesh (const NewtonWorld* const newtonWorld, NewtonMesh* const mesh, int shapeID);
+	NEWTON_API NewtonCollision* NewtonCreateDeformableMesh (const NewtonWorld* const newtonWorld, NewtonMesh* const mesh, int shapeID);
 //	NEWTON_API void NewtonSoftBodySetMassCount (const NewtonCollision* convexCollision, int count);
 //	NEWTON_API void NewtonSoftBodySetSpringCount (const NewtonCollision* convexCollision, int count);
 //	NEWTON_API void NewtonSoftBodySetMass (const NewtonCollision* convexCollision, int index, dFloat mass, dFloat* position);

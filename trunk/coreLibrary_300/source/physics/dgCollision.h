@@ -69,7 +69,7 @@ enum dgCollisionID
 	m_boundingBoxHierachy,
 	m_nullCollision,
 	m_heightField,
-	m_softMesh,
+	m_deformableMesh,
 	m_userMesh,
 	m_sceneCollision,
 	m_compoundBreakable,
@@ -230,7 +230,7 @@ class dgCollision//: public dgRef
 		
 		dgCollisionBVH_RTTI					= 1<<13,
 		dgCollisionMesh_RTTI				= 1<<14,
-		dgCollisionSoftMesh_RTTI			= 1<<15,
+		dgCollisionDeformableMesh_RTTI		= 1<<15,
 		dgCollisionUserMesh_RTTI			= 1<<16,
 		dgCollisionHeightField_RTTI			= 1<<17,
 		dgCollisionScene_RTTI				= 1<<18,

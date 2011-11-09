@@ -8284,10 +8284,10 @@ void NewtonMeshGetFacePointIndices (const NewtonMesh* const mesh, const void* co
 
 
 
-NewtonCollision* NewtonCreateSoftMesh (const NewtonWorld* const newtonWorld, NewtonMesh* const mesh, int shapeID)
+NewtonCollision* NewtonCreateDeformableMesh (const NewtonWorld* const newtonWorld, NewtonMesh* const mesh, int shapeID)
 {
 	TRACE_FUNTION(__FUNCTION__);
 	Newton* const world = (Newton *)newtonWorld;
-	return (NewtonCollision*) world->CreateSoftMesh ((dgMeshEffect*)mesh, shapeID);
+	return (NewtonCollision*) world->CreateDeformableMesh ((dgMeshEffect*)mesh, shapeID);
 }
 

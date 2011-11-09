@@ -203,13 +203,13 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 	
 
 	dgIndexArray* MaterialGeometryBegin();
-	void MaterialGeomteryEnd(dgIndexArray* handle);
-	dgInt32 GetFirstMaterial (dgIndexArray* Handle);
-	dgInt32 GetNextMaterial (dgIndexArray* handle, dgInt32 materialHandle);
-	dgInt32 GetMaterialID (dgIndexArray* handle, dgInt32 materialHandle);
-	dgInt32 GetMaterialIndexCount (dgIndexArray* handle, dgInt32 materialHandle);
-	void GetMaterialGetIndexStream (dgIndexArray* handle, dgInt32 materialHandle, dgInt32* index);
-	void GetMaterialGetIndexStreamShort (dgIndexArray* handle, dgInt32 materialHandle, dgInt16* index);
+	void MaterialGeomteryEnd(dgIndexArray* const handle);
+	dgInt32 GetFirstMaterial (dgIndexArray* const handle);
+	dgInt32 GetNextMaterial (dgIndexArray* const handle, dgInt32 materialHandle);
+	dgInt32 GetMaterialID (dgIndexArray* const handle, dgInt32 materialHandle);
+	dgInt32 GetMaterialIndexCount (dgIndexArray* const handle, dgInt32 materialHandle);
+	void GetMaterialGetIndexStream (dgIndexArray* const handle, dgInt32 materialHandle, dgInt32* index);
+	void GetMaterialGetIndexStreamShort (dgIndexArray* const handle, dgInt32 materialHandle, dgInt16* index);
 	
 	dgCollision* CreateConvexCollision(dgFloat64 tolerance, dgInt32 shapeID, const dgMatrix& matrix = dgGetIdentityMatrix()) const;
 
@@ -224,27 +224,27 @@ class dgMeshEffect: public dgPolyhedra, public dgRefCounter
 
 
 	void* GetFirstVertex ();
-	void* GetNextVertex (const void* vertex);
-	int GetVertexIndex (const void* vertex) const;
+	void* GetNextVertex (const void* const vertex);
+	int GetVertexIndex (const void* const vertex) const;
 
 	void* GetFirstPoint ();
-	void* GetNextPoint (const void* point);
-	int GetPointIndex (const void* point) const;
-	int GetVertexIndexFromPoint (const void* point) const;
+	void* GetNextPoint (const void* const point);
+	int GetPointIndex (const void* const point) const;
+	int GetVertexIndexFromPoint (const void* const point) const;
 
 
 	void* GetFirstEdge ();
-	void* GetNextEdge (const void* edge);
-	void GetEdgeIndex (const void* edge, dgInt32& v0, dgInt32& v1) const;
+	void* GetNextEdge (const void* const edge);
+	void GetEdgeIndex (const void* const edge, dgInt32& v0, dgInt32& v1) const;
 //	void GetEdgeAttributeIndex (const void* edge, dgInt32& v0, dgInt32& v1) const;
 
 	void* GetFirstFace ();
-	void* GetNextFace (const void* face);
-	int IsFaceOpen (const void* face) const;
-	int GetFaceMaterial (const void* face) const;
-	int GetFaceIndexCount (const void* face) const;
-	void GetFaceIndex (const void* face, int* indices) const;
-	void GetFaceAttributeIndex (const void* face, int* indices) const;
+	void* GetNextFace (const void* const face);
+	int IsFaceOpen (const void* const face) const;
+	int GetFaceMaterial (const void* const face) const;
+	int GetFaceIndexCount (const void* const face) const;
+	void GetFaceIndex (const void* const face, int* const indices) const;
+	void GetFaceAttributeIndex (const void* const face, int* const indices) const;
 
 	bool Sanity () const;
 
@@ -310,12 +310,12 @@ inline dgInt32 dgMeshEffect::GetPropertiesCount() const
 	return m_atribCount;
 }
 
-inline dgInt32 dgMeshEffect::GetMaterialID (dgIndexArray* handle, dgInt32 materialHandle)
+inline dgInt32 dgMeshEffect::GetMaterialID (dgIndexArray* const handle, dgInt32 materialHandle)
 {
 	return handle->m_materials[materialHandle];
 }
 
-inline dgInt32 dgMeshEffect::GetMaterialIndexCount (dgIndexArray* handle, dgInt32 materialHandle)
+inline dgInt32 dgMeshEffect::GetMaterialIndexCount (dgIndexArray* const handle, dgInt32 materialHandle)
 {
 	return handle->m_materialsIndexCount[materialHandle];
 }
