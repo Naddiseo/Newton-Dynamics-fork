@@ -477,8 +477,7 @@ void dgPolygonSoupDatabaseBuilder::OptimizeByGroupID(
     } while (ptr != edge);
     if (indexCount >= 3)
     {
-      AddMesh(&vertexPool[0].m_x, indexCount, sizeof(dgVector), 1, &indexCount,
-          indexPool, atributeData, dgGetIdentityMatrix());
+      AddMesh(&vertexPool[0].m_x, indexCount, sizeof(dgVector), 1, &indexCount, indexPool, atributeData, dgGetIdentityMatrix());
     }
   }
 }

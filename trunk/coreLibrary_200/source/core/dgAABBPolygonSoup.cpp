@@ -1065,9 +1065,7 @@ public:
         {
           dgInt32 index = dgInt32(me->m_back.GetIndex());
           dgInt32 vCount = dgInt32((me->m_back.GetCount() >> 1) - 1);
-          if ((vCount > 0)
-              && callback(context, vertexArray, sizeof(dgTriplex),
-                  &indexArray[index + 1], vCount) == t_StopSearh)
+          if ((vCount > 0) && callback(context, vertexArray, sizeof(dgTriplex), &indexArray[index + 1], vCount) == t_StopSearh)
           {
             return;
           }
@@ -1084,9 +1082,7 @@ public:
         {
           dgInt32 index = dgInt32(me->m_front.GetIndex());
           dgInt32 vCount = dgInt32((me->m_front.GetCount() >> 1) - 1);
-          if ((vCount > 0)
-              && callback(context, vertexArray, sizeof(dgTriplex),
-                  &indexArray[index + 1], vCount) == t_StopSearh)
+          if ((vCount > 0) && callback(context, vertexArray, sizeof(dgTriplex), &indexArray[index + 1], vCount) == t_StopSearh)
           {
             return;
           }
@@ -1712,8 +1708,7 @@ dgIntersectStatus dgAABBPolygonSoup::CalculateThisFaceEdgeNormals(void *context,
   return t_ContinueSearh;
 }
 
-dgIntersectStatus dgAABBPolygonSoup::CalculateAllFaceEdgeNormals(void *context,
-    const dgFloat32* const polygon, dgInt32 strideInBytes,
+dgIntersectStatus dgAABBPolygonSoup::CalculateAllFaceEdgeNormals(void *context,  const dgFloat32* const polygon, dgInt32 strideInBytes,
     const dgInt32* const indexArray, dgInt32 indexCount)
 {
   dgAABBPolygonSoup* const me = (dgAABBPolygonSoup*) context;
@@ -1727,15 +1722,12 @@ dgIntersectStatus dgAABBPolygonSoup::CalculateAllFaceEdgeNormals(void *context,
   dgVector p(&polygon[indexArray[0] * stride]);
   adjacentFaces.m_normal = dgPlane(n, -(n % p));
 
-  _ASSERTE(
-      indexCount < sizeof (adjacentFaces.m_edgeMap) / sizeof (adjacentFaces.m_edgeMap[0]));
+  _ASSERTE(indexCount < sizeof (adjacentFaces.m_edgeMap) / sizeof (adjacentFaces.m_edgeMap[0]));
 
   dgInt32 edgeIndex = indexCount - 1;
   dgInt32 i0 = indexArray[indexCount - 1];
-  dgVector p0(dgFloat32(1.0e15f), dgFloat32(1.0e15f), dgFloat32(1.0e15f),
-      dgFloat32(0.0f));
-  dgVector p1(-dgFloat32(1.0e15f), -dgFloat32(1.0e15f), -dgFloat32(1.0e15f),
-      dgFloat32(0.0f));
+  dgVector p0(dgFloat32(1.0e15f), dgFloat32(1.0e15f), dgFloat32(1.0e15f), dgFloat32(0.0f));
+  dgVector p1(-dgFloat32(1.0e15f), -dgFloat32(1.0e15f), -dgFloat32(1.0e15f), dgFloat32(0.0f));
   for (dgInt32 i = 0; i < indexCount; i++)
   {
     dgInt32 i1 = indexArray[i];
@@ -1767,18 +1759,15 @@ dgIntersectStatus dgAABBPolygonSoup::CalculateAllFaceEdgeNormals(void *context,
   return t_ContinueSearh;
 }
 
-dgFloat32 dgAABBPolygonSoup::CalculateFaceMaxSize(dgTriplex* const vertex,
-    dgInt32 indexCount, const dgInt32* const indexArray) const
+dgFloat32 dgAABBPolygonSoup::CalculateFaceMaxSize(dgTriplex* const vertex, dgInt32 indexCount, const dgInt32* const indexArray) const
 {
   dgFloat32 maxSize = dgFloat32(0.0f);
   dgInt32 index = indexArray[indexCount - 1];
-  dgVector p0(vertex[index].m_x, vertex[index].m_y, vertex[index].m_z,
-      dgFloat32(0.0f));
+  dgVector p0(vertex[index].m_x, vertex[index].m_y, vertex[index].m_z,  dgFloat32(0.0f));
   for (dgInt32 i = 0; i < indexCount; i++)
   {
     dgInt32 index = indexArray[i];
-    dgVector p1(vertex[index].m_x, vertex[index].m_y, vertex[index].m_z,
-        dgFloat32(0.0f));
+    dgVector p1(vertex[index].m_x, vertex[index].m_y, vertex[index].m_z, dgFloat32(0.0f));
 
     dgVector dir(p1 - p0);
     dir = dir.Scale(dgRsqrt (dir % dir));
@@ -1788,8 +1777,7 @@ dgFloat32 dgAABBPolygonSoup::CalculateFaceMaxSize(dgTriplex* const vertex,
     for (dgInt32 j = 0; j < indexCount; j++)
     {
       dgInt32 index = indexArray[j];
-      dgVector q(vertex[index].m_x, vertex[index].m_y, vertex[index].m_z,
-          dgFloat32(0.0f));
+      dgVector q(vertex[index].m_x, vertex[index].m_y, vertex[index].m_z, dgFloat32(0.0f));
       dgFloat32 val = dir % q;
       minVal = GetMin(minVal, val);
       maxVal = GetMax(maxVal, val);
@@ -1803,8 +1791,7 @@ dgFloat32 dgAABBPolygonSoup::CalculateFaceMaxSize(dgTriplex* const vertex,
   return maxSize;
 }
 
-void dgAABBPolygonSoup::Create(const dgPolygonSoupDatabaseBuilder& builder,
-    bool optimizedBuild)
+void dgAABBPolygonSoup::Create(const dgPolygonSoupDatabaseBuilder& builder,  bool optimizedBuild)
 {
   if (builder.m_faceCount == 0)
   {
@@ -1814,12 +1801,8 @@ void dgAABBPolygonSoup::Create(const dgPolygonSoupDatabaseBuilder& builder,
   m_strideInBytes = sizeof(dgTriplex);
   m_indexCount = builder.m_indexCount * 2 + builder.m_faceCount;
   m_indices = (dgInt32*) dgMallocStack(sizeof(dgInt32) * m_indexCount);
-  m_aabb = (dgAABBTree*) dgMallocStack(
-      sizeof(dgAABBTree) * builder.m_faceCount);
-  m_localVertex = (dgFloat32*) dgMallocStack(
-      sizeof(dgTriplex)
-          * (builder.m_vertexCount + builder.m_normalCount
-              + builder.m_faceCount * 4));
+  m_aabb = (dgAABBTree*) dgMallocStack(sizeof(dgAABBTree) * builder.m_faceCount);
+  m_localVertex = (dgFloat32*) dgMallocStack(sizeof(dgTriplex) * (builder.m_vertexCount + builder.m_normalCount + builder.m_faceCount * 4));
 
   dgAABBTree* const tree = (dgAABBTree*) m_aabb;
   dgTriplex* const tmpVertexArray = (dgTriplex*) m_localVertex;
@@ -1833,12 +1816,9 @@ void dgAABBPolygonSoup::Create(const dgPolygonSoupDatabaseBuilder& builder,
 
   for (dgInt32 i = 0; i < builder.m_normalCount; i++)
   {
-    tmpVertexArray[i + builder.m_vertexCount].m_x = dgFloat32(
-        builder.m_normalPoints[i].m_x);
-    tmpVertexArray[i + builder.m_vertexCount].m_y = dgFloat32(
-        builder.m_normalPoints[i].m_y);
-    tmpVertexArray[i + builder.m_vertexCount].m_z = dgFloat32(
-        builder.m_normalPoints[i].m_z);
+    tmpVertexArray[i + builder.m_vertexCount].m_x = dgFloat32(builder.m_normalPoints[i].m_x);
+    tmpVertexArray[i + builder.m_vertexCount].m_y = dgFloat32(builder.m_normalPoints[i].m_y);
+    tmpVertexArray[i + builder.m_vertexCount].m_z = dgFloat32(builder.m_normalPoints[i].m_z);
   }
 
   dgInt32 polygonIndex = 0;
@@ -1846,7 +1826,6 @@ void dgAABBPolygonSoup::Create(const dgPolygonSoupDatabaseBuilder& builder,
   const dgInt32* const indices = &builder.m_vertexIndex[0];
   for (dgInt32 i = 0; i < builder.m_faceCount; i++)
   {
-
     dgInt32 indexCount = builder.m_faceVertexCount[i];
     dgAABBTree& box = tree[i];
 
@@ -1854,8 +1833,7 @@ void dgAABBPolygonSoup::Create(const dgPolygonSoupDatabaseBuilder& builder,
     box.m_maxIndex = builder.m_normalCount + builder.m_vertexCount + i * 2 + 1;
 
     box.m_front = dgAABBTree::TreeNode(0, 0);
-    box.m_back = dgAABBTree::TreeNode(dgUnsigned32(indexCount * 2),
-        dgUnsigned32(indexMap - m_indices));
+    box.m_back = dgAABBTree::TreeNode(dgUnsigned32(indexCount * 2), dgUnsigned32(indexMap - m_indices));
     box.CalcExtends(&tmpVertexArray[0], indexCount, &indices[polygonIndex]);
 
     for (dgInt32 j = 0; j < indexCount; j++)
@@ -1872,15 +1850,13 @@ void dgAABBPolygonSoup::Create(const dgPolygonSoupDatabaseBuilder& builder,
       indexMap++;
     }
 
-    dgFloat32 faceSize = CalculateFaceMaxSize(&tmpVertexArray[0],
-        indexCount - 1, &indices[polygonIndex + 1]);
+    dgFloat32 faceSize = CalculateFaceMaxSize(&tmpVertexArray[0], indexCount - 1, &indices[polygonIndex + 1]);
     indexMap[0] = dgInt32(faceSize);
     indexMap++;
     polygonIndex += indexCount;
   }
 
-  dgInt32 extraVertexCount = builder.m_normalCount + builder.m_vertexCount
-      + builder.m_faceCount * 2;
+  dgInt32 extraVertexCount = builder.m_normalCount + builder.m_vertexCount + builder.m_faceCount * 2;
 //	if (optimizedBuild) {
 //		m_nodesCount = tree->BuildBottomUp (builder.m_allocator, builder.m_faceCount, tree, &tmpVertexArray[0], extraVertexCount);
 //	} else {
@@ -1888,8 +1864,7 @@ void dgAABBPolygonSoup::Create(const dgPolygonSoupDatabaseBuilder& builder,
 //	}
 
 //	m_nodesCount = tree->BuildBottomUp (builder.m_allocator, builder.m_faceCount, tree, &tmpVertexArray[0], extraVertexCount, optimizedBuild);
-  m_nodesCount = tree->BuildTopDown(builder.m_allocator, builder.m_faceCount,
-      tree, &tmpVertexArray[0], extraVertexCount, optimizedBuild);
+  m_nodesCount = tree->BuildTopDown(builder.m_allocator, builder.m_faceCount, tree, &tmpVertexArray[0], extraVertexCount, optimizedBuild);
 
   m_localVertex[tree->m_minIndex * 3 + 0] -= dgFloat32(0.1f);
   m_localVertex[tree->m_minIndex * 3 + 1] -= dgFloat32(0.1f);
@@ -1911,15 +1886,12 @@ void dgAABBPolygonSoup::Create(const dgPolygonSoupDatabaseBuilder& builder,
     dgAABBTree& box = tree[i];
 
     dgInt32 j = box.m_minIndex - builder.m_normalCount - builder.m_vertexCount;
-    box.m_minIndex = indexArray[j] + builder.m_normalCount
-        + builder.m_vertexCount;
+    box.m_minIndex = indexArray[j] + builder.m_normalCount + builder.m_vertexCount;
     j = box.m_maxIndex - builder.m_normalCount - builder.m_vertexCount;
-    box.m_maxIndex = indexArray[j] + builder.m_normalCount
-        + builder.m_vertexCount;
+    box.m_maxIndex = indexArray[j] + builder.m_normalCount + builder.m_vertexCount;
   }
 
-  m_vertexCount = extraVertexCount + builder.m_normalCount
-      + builder.m_vertexCount;
+  m_vertexCount = extraVertexCount + builder.m_normalCount + builder.m_vertexCount;
 
   dgVector p0;
   dgVector p1;
