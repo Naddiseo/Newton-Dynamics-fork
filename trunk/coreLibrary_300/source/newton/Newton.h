@@ -529,16 +529,6 @@ extern "C" {
 	NEWTON_API int NewtonAddCollisionReference (const NewtonCollision* const collision);
 
 	
-	// **********************************************************************************************
-	//
-	// particle system interface (soft bodies, individual, pressure bodies and cloth)   
-	//
-	// **********************************************************************************************
-	NEWTON_API NewtonCollision* NewtonCreateDeformableMesh (const NewtonWorld* const newtonWorld, NewtonMesh* const mesh, int shapeID);
-//	NEWTON_API void NewtonSoftBodySetMassCount (const NewtonCollision* convexCollision, int count);
-//	NEWTON_API void NewtonSoftBodySetSpringCount (const NewtonCollision* convexCollision, int count);
-//	NEWTON_API void NewtonSoftBodySetMass (const NewtonCollision* convexCollision, int index, dFloat mass, dFloat* position);
-
 
 
 	// **********************************************************************************************
@@ -812,7 +802,23 @@ extern "C" {
 	NEWTON_API void NewtonDestroyJoint(const NewtonWorld* const newtonWorld, const NewtonJoint* const joint);
 	NEWTON_API void NewtonJointSetDestructor (const NewtonJoint* const joint, NewtonConstraintDestructor destructor);
 
-	
+
+
+	// **********************************************************************************************
+	//
+	// particle system interface (soft bodies, individual, pressure bodies and cloth)   
+	//
+	// **********************************************************************************************
+	NEWTON_API NewtonCollision* NewtonCreateDeformableMesh (const NewtonWorld* const newtonWorld, NewtonMesh* const mesh, int shapeID);
+
+
+	NEWTON_API NewtonBody* NewtonCreateDeformableBody (const NewtonWorld* const newtonWorld, const NewtonCollision* const deformableMesh, const dFloat* const matrix);
+
+	//	NEWTON_API void NewtonSoftBodySetMassCount (const NewtonCollision* convexCollision, int count);
+	//	NEWTON_API void NewtonSoftBodySetSpringCount (const NewtonCollision* convexCollision, int count);
+	//	NEWTON_API void NewtonSoftBodySetMass (const NewtonCollision* convexCollision, int index, dFloat mass, dFloat* position);
+
+
 
 
 	// **********************************************************************************************

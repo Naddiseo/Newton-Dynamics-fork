@@ -41,11 +41,11 @@ class dgCollisionDeformableMesh::dgDeformableNode
 
 	~dgDeformableNode ()
 	{
-		if (m_back) {
-			delete m_back;
+		if (m_left) {
+			delete m_left;
 		}
-		if (m_front) {
-			delete m_front;
+		if (m_right) {
+			delete m_right;
 		}
 	}
 
@@ -66,35 +66,38 @@ class dgCollisionDeformableMesh::dgDeformableNode
 			maxP.m_z = GetMax (p.m_z, maxP.m_z); 
 		}
 
-		m_p0.m_x = minP.m_x - DG_DEFORMABLE_PADDING;
-		m_p0.m_y = minP.m_y - DG_DEFORMABLE_PADDING;
-		m_p0.m_z = minP.m_z - DG_DEFORMABLE_PADDING;
-		m_p1.m_x = maxP.m_x + DG_DEFORMABLE_PADDING;
-		m_p1.m_y = maxP.m_y + DG_DEFORMABLE_PADDING;
-		m_p1.m_z = maxP.m_z + DG_DEFORMABLE_PADDING;
+		m_minBox.m_x = minP.m_x - DG_DEFORMABLE_PADDING;
+		m_minBox.m_y = minP.m_y - DG_DEFORMABLE_PADDING;
+		m_minBox.m_z = minP.m_z - DG_DEFORMABLE_PADDING;
+		m_maxBox.m_x = maxP.m_x + DG_DEFORMABLE_PADDING;
+		m_maxBox.m_y = maxP.m_y + DG_DEFORMABLE_PADDING;
+		m_maxBox.m_z = maxP.m_z + DG_DEFORMABLE_PADDING;
 
-		dgVector side0 (m_p1 - m_p0);
+		dgVector side0 (m_maxBox - m_minBox);
 		dgVector side1 (side0.m_y, side0.m_z, side0.m_x, dgFloat32 (0.0f));
 		m_surfaceArea = side0 % side1;
 	}
 
 
-	dgVector m_p0;
-	dgVector m_p1;
+
+
+	dgVector m_minBox;
+	dgVector m_maxBox;
 	dgInt32 m_indexStart;
 	dgFloat32 m_surfaceArea;
-	dgDeformableNode* m_back;
-	dgDeformableNode* m_front;
+	dgDeformableNode* m_left;
+	dgDeformableNode* m_right;
 	dgDeformableNode* m_parent;
 };
 
 
 dgCollisionDeformableMesh::dgCollisionDeformableMesh (dgWorld* const world, dgDeserialize deserialization, void* const userData)
 	:dgCollisionConvex (world, deserialization, userData)
-	,m_nodesMemory(NULL)
+	,m_trianglesCount(0)
 	,m_indexList(NULL)
 	,m_vertexArray(NULL)
 	,m_rootNode(NULL)
+	,m_nodesMemory(NULL)
 {
 _ASSERTE (0);
 	m_rtti |= dgCollisionDeformableMesh_RTTI;
@@ -140,7 +143,12 @@ dgInt32 dgCollisionDeformableMesh::CalculateSignature () const
 
 void dgCollisionDeformableMesh::SetCollisionBBox (const dgVector& p0, const dgVector& p1)
 {
-	_ASSERTE (0);
+	_ASSERTE (p0.m_x <= p1.m_x);
+	_ASSERTE (p0.m_y <= p1.m_y);
+	_ASSERTE (p0.m_z <= p1.m_z);
+
+	m_boxSize = (p1 - p0).Scale (dgFloat32 (0.5f)); 
+	m_boxOrigin = (p1 + p0).Scale (dgFloat32 (0.5f)); 
 }
 
 
@@ -258,29 +266,20 @@ void dgCollisionDeformableMesh::DebugCollision (const dgMatrix& matrixPtr, OnDeb
 
 
 
-
-//dgCollisionDeformableMesh::dgCollisionDeformableMesh(dgMemoryAllocator* allocator, const dgVector& boxP0, const dgVector& boxP1, const dgUserMeshCreation& data)
 dgCollisionDeformableMesh::dgCollisionDeformableMesh(dgMemoryAllocator* allocator, dgMeshEffect* const mesh)
 	:dgCollisionConvex (allocator, 0, dgGetIdentityMatrix(), m_deformableMesh)
-	,m_nodesMemory(NULL)
+	,m_trianglesCount(0)
+	,m_indexList(NULL)
 	,m_vertexArray(NULL)
 	,m_rootNode(NULL)
+	,m_nodesMemory(NULL)
 {
-
-	//	m_rtti |= dgCollisionDeformableMesh_RTTI;
-	//	m_userData = data.m_userData;
-	//	m_getInfo = data.m_getInfo;
-	//	m_faceInAabb = data.m_faceInAabb;
-	//	m_rayHitCallBack = data.m_rayHitCallBack;
-	//	m_collideCallback = data.m_collideCallback;
-	//	m_destroyCallback = data.m_destroyCallback;
-	//	SetCollisionBBox(boxP0, boxP1);
-
 	mesh->Triangulate();
-	int vertexCount = mesh->GetVertexCount (); 
-	int faceCount = mesh->GetTotalFaceCount (); 
-	int indexCount = mesh->GetTotalIndexCount (); 
+	dgInt32 vertexCount = mesh->GetVertexCount (); 
+	dgInt32 faceCount = mesh->GetTotalFaceCount (); 
+	dgInt32 indexCount = mesh->GetTotalIndexCount (); 
 
+	m_trianglesCount = faceCount;
 	m_rootNode = (dgDeformableNode*) dgMallocStack(sizeof (dgDeformableNode) * faceCount * 2);
 	m_nodesMemory = m_rootNode;
 
@@ -306,16 +305,310 @@ dgCollisionDeformableMesh::dgCollisionDeformableMesh(dgMemoryAllocator* allocato
 			m_indexList[i * 3 + j] = k;
 		}
 		dgDeformableNode& node = m_rootNode[i];
-		node.m_back = NULL;
-		node.m_front = NULL;
+		node.m_left = NULL;
+		node.m_right = NULL;
 		node.m_parent = NULL;
 		node.m_indexStart = i * 3;
 		node.CalcBox(m_vertexArray, &m_indexList[i * 3]);
 	}
 
-
+	m_nodesCount = faceCount;
+	m_rootNode = BuildTopDown (faceCount, m_nodesMemory, NULL);
+	ImproveTotalFitness();
 
 	dgFree (indexArray);
 	dgFree (materialIndexArray);
 	dgFree (faceArray);
 }
+
+
+dgFloat32 dgCollisionDeformableMesh::CalculateSurfaceArea (const dgDeformableNode* const node0, const dgDeformableNode* const node1, dgVector& minBox, dgVector& maxBox) const
+{
+	minBox = dgVector (GetMin (node0->m_minBox.m_x, node1->m_minBox.m_x), GetMin (node0->m_minBox.m_y, node1->m_minBox.m_y), GetMin (node0->m_minBox.m_z, node1->m_minBox.m_z), dgFloat32 (0.0f));
+	maxBox = dgVector (GetMax (node0->m_maxBox.m_x, node1->m_maxBox.m_x), GetMax (node0->m_maxBox.m_y, node1->m_maxBox.m_y), GetMax (node0->m_maxBox.m_z, node1->m_maxBox.m_z), dgFloat32 (0.0f));		
+	dgVector side0 (maxBox - minBox);
+	dgVector side1 (side0.m_y, side0.m_z, side0.m_x, dgFloat32 (0.0f));
+	return side0 % side1;
+}
+
+
+dgCollisionDeformableMesh::dgDeformableNode* dgCollisionDeformableMesh::BuildTopDown (dgInt32 count, dgDeformableNode* const children, dgDeformableNode* const parent)
+{
+	dgDeformableNode* root = NULL;				
+	if (count == 1) {
+		root = children;
+		root->m_left = NULL;
+		root->m_right = NULL;
+		root->m_parent = parent;
+	} else if (count == 2) {
+		root = &m_nodesMemory[m_nodesCount];
+		m_nodesCount ++;
+		root->m_indexStart = -1;
+		root->m_parent = parent;
+		root->m_left = BuildTopDown (1, children, root);
+		root->m_right = BuildTopDown (1, &children[1], root);
+		root->m_surfaceArea = CalculateSurfaceArea (root->m_left, root->m_right, root->m_minBox, root->m_maxBox);
+	} else {
+
+		dgVector median (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+		dgVector varian (dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f));
+		for (dgInt32 i = 0; i < count; i ++) {
+			const dgDeformableNode* const node = &children[i];
+			dgVector p ((node->m_minBox + node->m_maxBox).Scale (0.5f));
+			median += p;
+			varian += p.CompProduct (p);
+		}
+
+		varian = varian.Scale (dgFloat32 (count)) - median.CompProduct(median);
+
+		dgInt32 index = 0;
+		dgFloat32 maxVarian = dgFloat32 (-1.0e10f);
+		for (dgInt32 i = 0; i < 3; i ++) {
+			if (varian[i] > maxVarian) {
+				index = i;
+				maxVarian = varian[i];
+			}
+		}
+
+		dgVector center = median.Scale (dgFloat32 (1.0f) / dgFloat32 (count));
+		dgFloat32 test = center[index];
+
+		dgInt32 i0 = 0;
+		dgInt32 i1 = count - 1;
+		do {    
+			for (; i0 <= i1; i0 ++) {
+				const dgDeformableNode* const node = &m_nodesMemory[i0];
+				dgFloat32 val = (node->m_minBox[index] + node->m_maxBox[index]) * dgFloat32 (0.5f);
+				if (val > test) {
+					break;
+				}
+			}
+
+			for (; i1 >= i0; i1 --) {
+				const dgDeformableNode* const node = &m_nodesMemory[i1];
+				//dgFloat32 val = (points[j0 * step + index] + points[j1 * step + index]) * dgFloat32 (0.5f);
+				dgFloat32 val = (node->m_minBox[index] + node->m_maxBox[index]) * dgFloat32 (0.5f);
+				if (val < test) {
+					break;
+				}
+			}
+
+			if (i0 < i1)	{
+				Swap(m_nodesMemory[i0], m_nodesMemory[i1]);
+				i0++; 
+				i1--;
+			}
+
+		} while (i0 <= i1);
+
+		if (i0 > 0){
+			i0 --;
+		}
+		if ((i0 + 1) >= count) {
+			i0 = count - 2;
+		}
+
+		dgInt32 spliteCount = i0 + 1;
+
+		root = &m_nodesMemory[m_nodesCount];
+		m_nodesCount ++;
+		root->m_indexStart = -1;
+		root->m_parent = parent;
+		root->m_left = BuildTopDown (spliteCount, children, root);
+		root->m_right = BuildTopDown (count - spliteCount, &children[spliteCount], root);
+		root->m_surfaceArea = CalculateSurfaceArea (root->m_left, root->m_right, root->m_minBox, root->m_maxBox);
+	}
+
+	return root;
+}
+
+
+void dgCollisionDeformableMesh::ImproveNodeFitness (dgDeformableNode* const node)
+{
+	_ASSERTE (node->m_left);
+	_ASSERTE (node->m_right);
+
+	if (node->m_parent)	{
+		if (node->m_parent->m_left == node) {
+			dgFloat32 cost0 = node->m_surfaceArea;
+
+			dgVector cost1P0;
+			dgVector cost1P1;		
+			dgFloat32 cost1 = CalculateSurfaceArea (node->m_right, node->m_parent->m_right, cost1P0, cost1P1);
+
+			dgVector cost2P0;
+			dgVector cost2P1;		
+			dgFloat32 cost2 = CalculateSurfaceArea (node->m_left, node->m_parent->m_right, cost2P0, cost2P1);
+
+			if ((cost1 <= cost0) && (cost1 <= cost2)) {
+				dgDeformableNode* const parent = node->m_parent;
+				node->m_minBox = parent->m_minBox;
+				node->m_maxBox = parent->m_maxBox;
+				node->m_surfaceArea = parent->m_surfaceArea; 
+				if (parent->m_parent) {
+					if (parent->m_parent->m_left == parent) {
+						parent->m_parent->m_left = node;
+					} else {
+						_ASSERTE (parent->m_parent->m_right == parent);
+						parent->m_parent->m_right = node;
+					}
+				} else {
+					m_rootNode = node;
+				}
+				node->m_parent = parent->m_parent;
+				parent->m_parent = node;
+				node->m_right->m_parent = parent;
+				parent->m_left = node->m_right;
+				node->m_right = parent;
+				parent->m_minBox = cost1P0;
+				parent->m_maxBox = cost1P1;		
+				parent->m_surfaceArea = cost1;
+
+
+			} else if ((cost2 <= cost0) && (cost2 <= cost1)) {
+				dgDeformableNode* const parent = node->m_parent;
+				node->m_minBox = parent->m_minBox;
+				node->m_maxBox = parent->m_maxBox;
+				node->m_surfaceArea = parent->m_surfaceArea; 
+
+				if (parent->m_parent) {
+					if (parent->m_parent->m_left == parent) {
+						parent->m_parent->m_left = node;
+					} else {
+						_ASSERTE (parent->m_parent->m_right == parent);
+						parent->m_parent->m_right = node;
+					}
+				} else {
+					m_rootNode = node;
+				}
+				node->m_parent = parent->m_parent;
+				parent->m_parent = node;
+				node->m_left->m_parent = parent;
+				parent->m_left = node->m_left;
+				node->m_left = parent;
+
+				parent->m_minBox = cost2P0;
+				parent->m_maxBox = cost2P1;		
+				parent->m_surfaceArea = cost2;
+			}
+		} else {
+			dgFloat32 cost0 = node->m_surfaceArea;
+
+			dgVector cost1P0;
+			dgVector cost1P1;		
+			dgFloat32 cost1 = CalculateSurfaceArea (node->m_left, node->m_parent->m_left, cost1P0, cost1P1);
+
+			dgVector cost2P0;
+			dgVector cost2P1;		
+			dgFloat32 cost2 = CalculateSurfaceArea (node->m_right, node->m_parent->m_left, cost2P0, cost2P1);
+
+
+			if ((cost1 <= cost0) && (cost1 <= cost2)) {
+				dgDeformableNode* const parent = node->m_parent;
+				node->m_minBox = parent->m_minBox;
+				node->m_maxBox = parent->m_maxBox;
+				node->m_surfaceArea = parent->m_surfaceArea; 
+				if (parent->m_parent) {
+					if (parent->m_parent->m_left == parent) {
+						parent->m_parent->m_left = node;
+					} else {
+						_ASSERTE (parent->m_parent->m_right == parent);
+						parent->m_parent->m_right = node;
+					}
+				} else {
+					m_rootNode = node;
+				}
+				node->m_parent = parent->m_parent;
+				parent->m_parent = node;
+				node->m_left->m_parent = parent;
+				parent->m_right = node->m_left;
+				node->m_left = parent;
+
+				parent->m_minBox = cost1P0;
+				parent->m_maxBox = cost1P1;		
+				parent->m_surfaceArea = cost1;
+
+			} else if ((cost2 <= cost0) && (cost2 <= cost1)) {
+				dgDeformableNode* const parent = node->m_parent;
+				node->m_minBox = parent->m_minBox;
+				node->m_maxBox = parent->m_maxBox;
+				node->m_surfaceArea = parent->m_surfaceArea; 
+				if (parent->m_parent) {
+					if (parent->m_parent->m_left == parent) {
+						parent->m_parent->m_left = node;
+					} else {
+						_ASSERTE (parent->m_parent->m_right == parent);
+						parent->m_parent->m_right = node;
+					}
+				} else {
+					m_rootNode = node;
+				}
+				node->m_parent = parent->m_parent;
+				parent->m_parent = node;
+				node->m_right->m_parent = parent;
+				parent->m_right = node->m_right;
+				node->m_right = parent;
+
+				parent->m_minBox = cost2P0;
+				parent->m_maxBox = cost2P1;		
+				parent->m_surfaceArea = cost2;
+			}
+		}
+	}
+
+	_ASSERTE (!m_rootNode->m_parent);
+
+}
+
+
+void dgCollisionDeformableMesh::ImproveTotalFitness()
+{
+	dgInt32 count = m_nodesCount - m_trianglesCount; 
+	dgInt32 maxPasses = 2 * exp_2 (count) + 1;
+
+	dgDeformableNode* const nodes = &m_nodesMemory[m_trianglesCount];
+	dgFloat64 newCost = dgFloat32 (1.0e20f);
+	dgFloat64 prevCost = newCost;
+	do {
+		prevCost = newCost;
+		for (dgInt32 i = 0; i < count; i ++) {
+			dgDeformableNode* const node = &nodes[i];
+			ImproveNodeFitness (node);
+		}
+
+		newCost	= dgFloat32 (0.0f);
+		for (dgInt32 i = 0; i < count; i ++) {
+			const dgDeformableNode* const node = &nodes[i];
+			newCost += node->m_surfaceArea;
+		}
+
+		maxPasses --;
+	} while (maxPasses && (newCost < prevCost));
+
+	SetCollisionBBox (m_rootNode->m_minBox, m_rootNode->m_maxBox);
+
+/*
+	p0[3] = dgFloat32 (0.0f);
+	p1[3] = dgFloat32 (0.0f);
+	m_boxSize = (p1 - p0).Scale (dgFloat32 (0.5f)); 
+	m_boxOrigin = (p1 + p0).Scale (dgFloat32 (0.5f)); 
+	m_boxMinRadius = GetMin(m_boxSize.m_x, m_boxSize.m_y, m_boxSize.m_z);
+	m_boxMaxRadius = dgSqrt (m_boxSize % m_boxSize);
+
+	m_size_x.m_x = m_boxSize.m_x;
+	m_size_x.m_y = m_boxSize.m_x;
+	m_size_x.m_z = m_boxSize.m_x;
+	m_size_x.m_w = dgFloat32 (0.0f); 
+
+	m_size_y.m_x = m_boxSize.m_y;
+	m_size_y.m_y = m_boxSize.m_y;
+	m_size_y.m_z = m_boxSize.m_y;
+	m_size_y.m_w = dgFloat32 (0.0f); 
+
+	m_size_z.m_x = m_boxSize.m_z;
+	m_size_z.m_y = m_boxSize.m_z;
+	m_size_z.m_z = m_boxSize.m_z;
+	m_size_z.m_w = dgFloat32 (0.0f); 
+*/
+}
+

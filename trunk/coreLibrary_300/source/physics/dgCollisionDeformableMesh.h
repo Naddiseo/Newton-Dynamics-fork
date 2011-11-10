@@ -55,23 +55,20 @@ private:
 	virtual void SetCollisionBBox (const dgVector& p0, const dgVector& p1);
 
 	
-
-/*
-	void* m_userData;
-	UserMeshCollisionInfo m_getInfo;
-	UserMeshFacesInAABB m_faceInAabb;
-	OnUserMeshRayHitCallback m_rayHitCallBack;
-	OnUserMeshCollideCallback m_collideCallback;
-	OnUserMeshDestroyCallback m_destroyCallback;
-*/
+	void ImproveTotalFitness();
+	void ImproveNodeFitness (dgDeformableNode* const node);
+	dgDeformableNode* BuildTopDown (dgInt32 count, dgDeformableNode* const children, dgDeformableNode* const parent);
+	dgFloat32 CalculateSurfaceArea (const dgDeformableNode* const node0, const dgDeformableNode* const node1, dgVector& minBox, dgVector& maxBox) const;
+	
 
 	
-	void* m_nodesMemory;
+	dgInt32 m_trianglesCount;
+	dgInt32 m_nodesCount;
 	dgInt32* m_indexList;
 	dgVector* m_vertexArray;
 	dgDeformableNode* m_rootNode;
-	
-	
+	dgDeformableNode* m_nodesMemory;
+		
 	
 };
 

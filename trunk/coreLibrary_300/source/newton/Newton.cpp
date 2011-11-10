@@ -8291,3 +8291,7 @@ NewtonCollision* NewtonCreateDeformableMesh (const NewtonWorld* const newtonWorl
 	return (NewtonCollision*) world->CreateDeformableMesh ((dgMeshEffect*)mesh, shapeID);
 }
 
+NewtonBody* NewtonCreateDeformableBody (const NewtonWorld* const newtonWorld, const NewtonCollision* const deformableMesh, const dFloat* const matrix)
+{
+	return NULL;
+}

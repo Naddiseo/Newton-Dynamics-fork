@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#if !defined(AFX_DGBODY_H__C16EDCD6_53C4_4C6F_A70A_591819F7187E__INCLUDED_)
-#define AFX_DGBODY_H__C16EDCD6_53C4_4C6F_A70A_591819F7187E__INCLUDED_
+#ifndef _DG_BODY_H_
+#define _DG_BODY_H_
 
 #include "dgPhysicsStdafx.h"
 #include "dgBodyMasterList.h"
@@ -84,53 +84,52 @@ class dgBody
 	DG_CLASS_ALLOCATOR(allocator)
 
 	dgBody();
-	~dgBody();
+	virtual ~dgBody();
 
-	void AddForce (const dgVector& force);
-	void AddTorque (const dgVector& torque);
-	void AttachCollision (dgCollision* collision);
+	virtual void AddForce (const dgVector& force);
+	virtual void AddTorque (const dgVector& torque);
+	virtual void AttachCollision (dgCollision* collision);
 
-	void SetGroupID (dgUnsigned32 id);
-	void SetMatrix(const dgMatrix& matrix);
-	void SetMatrixIgnoreSleep(const dgMatrix& matrix);
-	void SetUserData (void* const userData);
-	void SetForce (const dgVector& force);
-	void SetTorque (const dgVector& torque);
-	void SetOmega (const dgVector& omega);
-	void SetVelocity (const dgVector& velocity);
-	void SetLinearDamping (dgFloat32 linearDamp);
-	void SetAngularDamping (const dgVector& angularDamp);
-	void SetCentreOfMass (const dgVector& com);
-	void SetAparentMassMatrix (const dgVector& massMatrix);
-	void SetMassMatrix (dgFloat32 mass, dgFloat32 Ix, dgFloat32 Iy, dgFloat32 Iz);
+	virtual void SetGroupID (dgUnsigned32 id);
+	virtual void SetMatrix(const dgMatrix& matrix);
+	virtual void SetMatrixIgnoreSleep(const dgMatrix& matrix);
+	virtual void SetUserData (void* const userData);
+	virtual void SetForce (const dgVector& force);
+	virtual void SetTorque (const dgVector& torque);
+	virtual void SetOmega (const dgVector& omega);
+	virtual void SetVelocity (const dgVector& velocity);
+	virtual void SetLinearDamping (dgFloat32 linearDamp);
+	virtual void SetAngularDamping (const dgVector& angularDamp);
+	virtual void SetCentreOfMass (const dgVector& com);
+	virtual void SetAparentMassMatrix (const dgVector& massMatrix);
+	virtual void SetMassMatrix (dgFloat32 mass, dgFloat32 Ix, dgFloat32 Iy, dgFloat32 Iz);
 //	void SetGyroscopicTorqueMode (bool mode);
-	void SetCollisionWithLinkedBodies (bool state);
+	virtual void SetCollisionWithLinkedBodies (bool state);
 //	void SetFreezeTreshhold (dgFloat32 freezeAccel2, dgFloat32 freezeAlpha2, dgFloat32 freezeSpeed2, dgFloat32 freezeOmega2);
-
-
-
-	void SetContinuesCollisionMode (bool mode);
-	void SetDestructorCallback (OnBodyDestroy destructor);
-	void SetMatrixUpdateCallback (OnMatrixUpdateCallback callback);
-	OnMatrixUpdateCallback GetMatrixUpdateCallback ();
 //	void SetAutoactiveNotify (OnActivation activate);
-	void SetExtForceAndTorqueCallback (OnApplyExtForceAndTorque callback);
-	OnApplyExtForceAndTorque GetExtForceAndTorqueCallback () const;
-
-	dgConstraint* GetFirstJoint() const;
-	dgConstraint* GetNextJoint(dgConstraint* joint) const;
-
-	dgConstraint* GetFirstContact() const;
-	dgConstraint* GetNextContact(dgConstraint* joint) const;
 
 
-	void* GetUserData() const;
-	dgWorld* GetWorld() const;
-	const dgVector& GetMass() const;
-	const dgVector& GetInvMass() const;
-	const dgVector& GetAparentMass() const;
+	virtual void SetContinuesCollisionMode (bool mode);
+	virtual void SetDestructorCallback (OnBodyDestroy destructor);
+	virtual void SetMatrixUpdateCallback (OnMatrixUpdateCallback callback);
+	virtual void SetExtForceAndTorqueCallback (OnApplyExtForceAndTorque callback);
+
+	virtual OnMatrixUpdateCallback GetMatrixUpdateCallback ();
+	virtual OnApplyExtForceAndTorque GetExtForceAndTorqueCallback () const;
+
+	virtual dgConstraint* GetFirstJoint() const;
+	virtual dgConstraint* GetNextJoint(dgConstraint* joint) const;
+
+	virtual dgConstraint* GetFirstContact() const;
+	virtual dgConstraint* GetNextContact(dgConstraint* joint) const;
 
 
+	virtual void* GetUserData() const;
+	virtual dgWorld* GetWorld() const;
+	virtual const dgVector& GetMass() const;
+	virtual const dgVector& GetInvMass() const;
+	virtual const dgVector& GetAparentMass() const;
+	 
 	const dgVector& GetOmega() const;
 	const dgVector& GetVelocity() const;
 	const dgVector& GetForce() const;
@@ -148,7 +147,6 @@ class dgBody
 	dgVector GetAngularDamping () const;
 	dgVector GetCentreOfMass () const;
 	bool IsInEquelibrium () const;
-
 	void GetAABB (dgVector &p0, dgVector &p1) const;	
 
 	bool GetSleepState () const;
@@ -166,21 +164,19 @@ class dgBody
 	bool GetCollisionWithLinkedBodies () const;
 	bool GetContinuesCollisionMode () const;
 
-	void AddBuoyancyForce (dgFloat32 fluidDensity, dgFloat32 fluidLinearViscousity, dgFloat32 fluidAngularViscousity, 
+	virtual void AddBuoyancyForce (dgFloat32 fluidDensity, dgFloat32 fluidLinearViscousity, dgFloat32 fluidAngularViscousity, 
 						   const dgVector& gravityVector, GetBuoyancyPlane buoyancyPlane, void* const context);
 
+	virtual dgVector CalculateInverseDynamicForce (const dgVector& desiredVeloc, dgFloat32 timestep) const;
 
-	dgVector CalculateInverseDynamicForce (const dgVector& desiredVeloc, dgFloat32 timestep) const;
 
-
-	dgFloat32 RayCast (const dgLineBox& line, OnRayCastAction filter, OnRayPrecastAction preFilter, void* const userData, dgFloat32 minT) const;
-	dgFloat32 RayCastSimd (const dgLineBox& line, OnRayCastAction filter, OnRayPrecastAction preFilter, void* const userData, dgFloat32 minT) const;
+	virtual dgFloat32 RayCast (const dgLineBox& line, OnRayCastAction filter, OnRayPrecastAction preFilter, void* const userData, dgFloat32 minT) const;
+	virtual dgFloat32 RayCastSimd (const dgLineBox& line, OnRayCastAction filter, OnRayPrecastAction preFilter, void* const userData, dgFloat32 minT) const;
 //	dgFloat32 RayCastSimd (const dgVector& globalP0, const dgVector& globalP1, 
 //					   OnRayCastAction filter, OnRayPrecastAction preFilter, void* userData, dgFloat32 minT) const;
 
-
-	void CalcInvInertiaMatrix ();
-	void CalcInvInertiaMatrixSimd ();
+	virtual void CalcInvInertiaMatrix ();
+	virtual void CalcInvInertiaMatrixSimd ();
 	const dgMatrix& GetCollisionMatrix () const;
 
 	dgBodyMasterList::dgListNode* GetMasterList() const;
@@ -189,27 +185,22 @@ class dgBody
 
 
 	private:
-	void SetMatrixOriginAndRotation(const dgMatrix& matrix);
-	
-	void CalculateContinueVelocity (dgFloat32 timestep, dgVector& veloc, dgVector& omega) const;
-	void CalculateContinueVelocitySimd (dgFloat32 timestep,	dgVector& veloc, dgVector& omega) const;
-
-	dgVector GetTrajectory (const dgVector& veloc, const dgVector& omega) const;
-	void IntegrateVelocity (dgFloat32 timestep);
-	void UpdateMatrix (dgFloat32 timestep, dgInt32 threadIndex);
-	void UpdateCollisionMatrix (dgFloat32 timestep, dgInt32 threadIndex);
-	void UpdateCollisionMatrixSimd (dgFloat32 timestep, dgInt32 threadIndex);
-
-	void ApplyExtenalForces (dgFloat32 timestep, dgInt32 threadIndex);
-	void AddImpulse (const dgVector& pointVeloc, const dgVector& pointPosit);
-
-	void ApplyImpulseArray (dgInt32 count, dgInt32 strideInBytes, const dgFloat32* const impulseArray, const dgFloat32* const pointArray);
-
+	virtual void SetMatrixOriginAndRotation(const dgMatrix& matrix);
+	virtual void CalculateContinueVelocity (dgFloat32 timestep, dgVector& veloc, dgVector& omega) const;
+	virtual void CalculateContinueVelocitySimd (dgFloat32 timestep,	dgVector& veloc, dgVector& omega) const;
+	virtual dgVector GetTrajectory (const dgVector& veloc, const dgVector& omega) const;
+	virtual void IntegrateVelocity (dgFloat32 timestep);
+	virtual void UpdateMatrix (dgFloat32 timestep, dgInt32 threadIndex);
+	virtual void UpdateCollisionMatrix (dgFloat32 timestep, dgInt32 threadIndex);
+	virtual void UpdateCollisionMatrixSimd (dgFloat32 timestep, dgInt32 threadIndex);
+	virtual void ApplyExtenalForces (dgFloat32 timestep, dgInt32 threadIndex);
+	virtual void AddImpulse (const dgVector& pointVeloc, const dgVector& pointPosit);
+	virtual void ApplyImpulseArray (dgInt32 count, dgInt32 strideInBytes, const dgFloat32* const impulseArray, const dgFloat32* const pointArray);
 //	void AddGyroscopicTorque();
-	void AddDamingAcceleration();
-
-	dgMatrix CalculateInertiaMatrix () const;
-	dgMatrix CalculateInvInertiaMatrix () const;
+	virtual void AddDamingAcceleration();
+	
+	virtual dgMatrix CalculateInertiaMatrix () const;
+	virtual dgMatrix CalculateInvInertiaMatrix () const;
 
 	dgMatrix m_matrix;
 	dgMatrix m_collisionWorldMatrix;
