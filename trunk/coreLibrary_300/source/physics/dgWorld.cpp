@@ -455,7 +455,7 @@ dgBody* dgWorld::CreateBody(dgCollision* const collision, const dgMatrix& matrix
 	_ASSERTE ((sizeof (dgBody) & 0xf) == 0);
 	_ASSERTE ((dgUnsigned64 (body) & 0xf) == 0);
 
-	memset (body, 0, sizeof (dgBody));
+//	memset (ptr, 0, sizeof (dgBody));
 
 //	m_bodiesCount ++;
 	m_bodiesUniqueID ++;

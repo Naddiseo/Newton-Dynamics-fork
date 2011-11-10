@@ -1046,6 +1046,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\source\physics\dgDeformableBody.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\source\physics\dgDeformableBody.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\source\physics\dgMeshEffect.cpp"
 				>
 			</File>
