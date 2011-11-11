@@ -255,8 +255,6 @@ dgInt32 dgCollisionSphere::CalculatePlaneIntersectionSimd (const dgVector& norma
 
 void dgCollisionSphere::DebugCollision (const dgMatrix& matrixPtr, OnDebugCollisionMeshCallback callback, void* const userData) const
 {
-	dgInt32 i;
-	dgInt32 count;
 	dgTriplex pool[1024 * 2];
 	dgVector tmpVectex[1024 * 2];
 
@@ -267,8 +265,8 @@ void dgCollisionSphere::DebugCollision (const dgMatrix& matrixPtr, OnDebugCollis
 	dgVector p4 ( dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (1.0f), dgFloat32 (0.0f));
 	dgVector p5 ( dgFloat32 (0.0f), dgFloat32 (0.0f),-dgFloat32 (1.0f), dgFloat32 (0.0f));
 
-	i = 3;
-	count = 0;
+	dgInt32 i = 3;
+	dgInt32 count = 0;
 	TesselateTriangle (i, p4, p0, p2, count, tmpVectex);
 	TesselateTriangle (i, p4, p2, p1, count, tmpVectex);
 	TesselateTriangle (i, p4, p1, p3, count, tmpVectex);
@@ -278,14 +276,14 @@ void dgCollisionSphere::DebugCollision (const dgMatrix& matrixPtr, OnDebugCollis
 	TesselateTriangle (i, p5, p3, p1, count, tmpVectex);
 	TesselateTriangle (i, p5, p0, p3, count, tmpVectex);
 
-	for (i = 0; i < count; i ++) {
+	for (dgInt32 i = 0; i < count; i ++) {
 		tmpVectex[i] = tmpVectex[i].Scale (m_radius);
 	}
 
 //	const dgMatrix &matrix = myBody.GetCollisionMatrix();
 	dgMatrix matrix (GetOffsetMatrix() * matrixPtr);
 	matrix.TransformTriplex (&pool[0].m_x, sizeof (dgTriplex), &tmpVectex[0].m_x, sizeof (dgVector), count);
-	for (i = 0; i < count; i += 3) {
+	for (dgInt32 i = 0; i < count; i += 3) {
 		callback (userData, 3, &pool[i].m_x, 0);
 	}
 }

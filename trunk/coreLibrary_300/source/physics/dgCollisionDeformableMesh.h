@@ -60,8 +60,6 @@ private:
 	dgDeformableNode* BuildTopDown (dgInt32 count, dgDeformableNode* const children, dgDeformableNode* const parent);
 	dgFloat32 CalculateSurfaceArea (const dgDeformableNode* const node0, const dgDeformableNode* const node1, dgVector& minBox, dgVector& maxBox) const;
 	
-
-	
 	dgInt32 m_trianglesCount;
 	dgInt32 m_nodesCount;
 	dgInt32 m_vertexCount;
@@ -69,8 +67,6 @@ private:
 	dgVector* m_vertexArray;
 	dgDeformableNode* m_rootNode;
 	dgDeformableNode* m_nodesMemory;
-		
-	
 };
 
 

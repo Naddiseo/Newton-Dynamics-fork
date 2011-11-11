@@ -166,17 +166,6 @@ void dgCollisionDeformableMesh::GetVertexListIndexList (const dgVector& p0, cons
 	}
 }
 */
-void dgCollisionDeformableMesh::GetCollisionInfo(dgCollisionInfo* info) const
-{
-	_ASSERTE (0);
-/*
-	dgCollision::GetCollisionInfo(info);
-	info->m_offsetMatrix = GetOffsetMatrix();
-	if (m_getInfo) {
-		m_getInfo (m_userData, info);
-	}
-*/
-}
 
 
 dgFloat32 dgCollisionDeformableMesh::RayCastSimd (const dgVector& localP0, const dgVector& localP1, dgContactPoint& contactOut, OnRayPrecastAction preFilter, const dgBody* const body, void* const userData) const
@@ -247,21 +236,6 @@ void dgCollisionDeformableMesh::GetCollidingFaces (dgPolygonMeshDesc* const data
 }
 
 
-void dgCollisionDeformableMesh::DebugCollision (const dgMatrix& matrixPtr, OnDebugCollisionMeshCallback callback, void* const userData) const
-{
-	_ASSERTE (0);
-/*
-	dgCollisionDeformableMeshShowPolyContext context;
-
-	context.m_matrix = matrixPtr;
-	context.m_userData = userData;;
-	context.m_callback = callback;
-
-	dgVector p0 (dgFloat32 (-1.0e20f), dgFloat32 (-1.0e20f), dgFloat32 (-1.0e20f), dgFloat32 (0.0f));
-	dgVector p1 (dgFloat32 ( 1.0e20f), dgFloat32 ( 1.0e20f), dgFloat32 ( 1.0e20f), dgFloat32 (0.0f));
-	ForAllSectors (p0, p1, ShowDebugPolygon, &context);
-*/
-}
 
 
 
@@ -292,9 +266,18 @@ dgCollisionDeformableMesh::dgCollisionDeformableMesh(dgMemoryAllocator* allocato
 
 	dgInt32 stride = mesh->GetVertexStrideInByte() / sizeof (dgFloat64);  
 	dgFloat64* const vertex = mesh->GetVertexPool();  
+
+	dgMatrix offset (dgGetIdentityMatrix());
 	for (dgInt32 i = 0; i < vertexCount; i ++) {
 		m_vertexArray[i] = dgVector (dgFloat32 (vertex[i * stride + 0]), dgFloat32 (vertex[i * stride + 1]), dgFloat32 (vertex[i * stride + 2]), dgFloat32 (0.0f));
+		offset.m_posit += m_vertexArray[i];
 	}
+	offset.m_posit = offset.m_posit.Scale (dgFloat32 (1.0f) / vertexCount);
+	SetOffsetMatrix(offset);
+	for (dgInt32 i = 0; i < vertexCount; i ++) {
+		m_vertexArray[i] -= offset.m_posit;
+	}
+
 
 	int* const faceArray = (dgInt32*) dgMallocStack(faceCount * sizeof (dgInt32));
 	int* const materialIndexArray = (dgInt32*) dgMallocStack(faceCount * sizeof (dgInt32));
@@ -327,7 +310,7 @@ dgCollisionDeformableMesh::dgCollisionDeformableMesh(dgMemoryAllocator* allocato
 
 
 dgCollisionDeformableMesh::dgCollisionDeformableMesh (const dgCollisionDeformableMesh& source)
-	:dgCollisionConvex (source.GetAllocator(), 0, dgGetIdentityMatrix(), m_deformableMesh)
+	:dgCollisionConvex (source.GetAllocator(), 0, source.GetOffsetMatrix(), m_deformableMesh)
 	,m_trianglesCount(source.m_trianglesCount)
 	,m_nodesCount(source.m_trianglesCount)
 	,m_vertexCount(source.m_vertexCount)
@@ -337,7 +320,7 @@ dgCollisionDeformableMesh::dgCollisionDeformableMesh (const dgCollisionDeformabl
 	m_indexList = (dgInt32*) dgMallocStack (sizeof (dgInt32) * m_trianglesCount * 3);
 	m_vertexArray = (dgVector*) dgMallocStack (sizeof (dgVector) * m_vertexCount);
 	m_nodesMemory = (dgDeformableNode*) dgMallocStack(sizeof (dgDeformableNode) * (m_trianglesCount * 2 - 1));
-/*
+
 	memcpy (m_indexList, source.m_indexList, sizeof (dgInt32) * m_trianglesCount * 3);
 	memcpy (m_vertexArray, source.m_vertexArray, sizeof (dgVector) * m_vertexCount);
 	memcpy (m_nodesMemory, source.m_nodesMemory, sizeof (dgDeformableNode) * (m_trianglesCount * 2 - 1));
@@ -364,7 +347,6 @@ dgCollisionDeformableMesh::dgCollisionDeformableMesh (const dgCollisionDeformabl
 	}
 
 	SetCollisionBBox (m_rootNode->m_minBox, m_rootNode->m_maxBox);
-*/
 }
 
 
@@ -658,3 +640,30 @@ void dgCollisionDeformableMesh::ImproveTotalFitness()
 */
 }
 
+
+
+void dgCollisionDeformableMesh::DebugCollision (const dgMatrix& matrixPtr, OnDebugCollisionMeshCallback callback, void* const userData) const
+{
+	dgMatrix matrix (GetOffsetMatrix() * matrixPtr);
+	for (dgInt32 i = 0; i < m_trianglesCount; i ++ ) {
+		dgTriplex points[3];
+		for (dgInt32 j = 0; j < 3; j ++) {
+			dgInt32 index = m_indexList[i * 3 + j];
+			dgVector p (matrix.TransformVector(m_vertexArray[index]));
+			points[j].m_x = p.m_x;
+			points[j].m_y = p.m_y;
+			points[j].m_z = p.m_z;
+		}
+		callback (userData, 3, &points[0].m_x, 0);
+	}
+}
+
+
+void dgCollisionDeformableMesh::GetCollisionInfo(dgCollisionInfo* info) const
+{
+	dgCollisionConvex::GetCollisionInfo(info);
+
+	_ASSERTE (0);
+	info->m_collisionType = m_collsionId;
+	info->m_offsetMatrix = GetOffsetMatrix();
+}

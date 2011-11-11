@@ -39,8 +39,8 @@ static NewtonCollision* CreateSoftBodyCollisionShape (DemoEntityManager* const s
 
 
 	// now create a soft collision mesh
-//	NewtonCollision* const softCollisionMesh = NewtonCreateDeformableMesh (world, mesh, 0);
-	NewtonCollision* const softCollisionMesh = CreateConvexCollision (world, GetIdentityMatrix(), size, _SPHERE_PRIMITIVE, 0);
+	NewtonCollision* const softCollisionMesh = NewtonCreateDeformableMesh (world, mesh, 0);
+//	NewtonCollision* const softCollisionMesh = CreateConvexCollision (world, GetIdentityMatrix(), size, _SPHERE_PRIMITIVE, 0);
 
 	// destroy the auxiliary objects
 	NewtonMeshDestroy(mesh);
