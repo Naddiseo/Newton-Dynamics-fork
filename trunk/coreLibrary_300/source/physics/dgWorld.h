@@ -194,7 +194,9 @@ class dgWorld:
 	void SetBodyDestructionByExeciveForce (OnBodyDestructionByExeciveForce callback); 
 //	void ForEachBodyInAABB (const dgVector& q0, const dgVector& q1, OnLeavingWorldAction callback);
 
+	void InitBody (dgBody* const body, dgCollision* const collision, const dgMatrix& matrix);
 	dgBody* CreateBody (dgCollision* const collision, const dgMatrix& matrix);
+	dgBody* CreateDeformableBody (dgCollision* const collision, const dgMatrix& matrix);
 	void DestroyBody(dgBody* const body);
 	void DestroyAllBodies ();
 

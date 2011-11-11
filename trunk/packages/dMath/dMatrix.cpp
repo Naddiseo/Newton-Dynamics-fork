@@ -80,29 +80,18 @@ dMatrix dRollMatrix(dFloat ang)
 
 dMatrix::dMatrix (const dQuaternion &rotation, const dVector &position)
 {
-	dFloat x2;
-	dFloat y2;
-	dFloat z2;
-	dFloat w2;
-	dFloat xy;
-	dFloat xz;
-	dFloat xw;
-	dFloat yz;
-	dFloat yw;
-	dFloat zw;
-
-	w2 = dFloat (2.0f) * rotation.m_q0 * rotation.m_q0;
-	x2 = dFloat (2.0f) * rotation.m_q1 * rotation.m_q1;
-	y2 = dFloat (2.0f) * rotation.m_q2 * rotation.m_q2;
-	z2 = dFloat (2.0f) * rotation.m_q3 * rotation.m_q3;
+	dFloat w2 = dFloat (2.0f) * rotation.m_q0 * rotation.m_q0;
+	dFloat x2 = dFloat (2.0f) * rotation.m_q1 * rotation.m_q1;
+	dFloat y2 = dFloat (2.0f) * rotation.m_q2 * rotation.m_q2;
+	dFloat z2 = dFloat (2.0f) * rotation.m_q3 * rotation.m_q3;
 	_ASSERTE (dAbs (w2 + x2 + y2 + z2 - dFloat(2.0f)) < dFloat (1.e-2f));
 
-	xy = dFloat (2.0f) * rotation.m_q1 * rotation.m_q2;
-	xz = dFloat (2.0f) * rotation.m_q1 * rotation.m_q3;
-	xw = dFloat (2.0f) * rotation.m_q1 * rotation.m_q0;
-	yz = dFloat (2.0f) * rotation.m_q2 * rotation.m_q3;
-	yw = dFloat (2.0f) * rotation.m_q2 * rotation.m_q0;
-	zw = dFloat (2.0f) * rotation.m_q3 * rotation.m_q0;
+	dFloat xy = dFloat (2.0f) * rotation.m_q1 * rotation.m_q2;
+	dFloat xz = dFloat (2.0f) * rotation.m_q1 * rotation.m_q3;
+	dFloat xw = dFloat (2.0f) * rotation.m_q1 * rotation.m_q0;
+	dFloat yz = dFloat (2.0f) * rotation.m_q2 * rotation.m_q3;
+	dFloat yw = dFloat (2.0f) * rotation.m_q2 * rotation.m_q0;
+	dFloat zw = dFloat (2.0f) * rotation.m_q3 * rotation.m_q0;
 
 	m_front = dVector (dFloat(1.0f) - y2 - z2, xy + zw				 , xz - yw				  , dFloat(0.0f));
 	m_up    = dVector (xy - zw				 , dFloat(1.0f) - x2 - z2, yz + xw				  , dFloat(0.0f));
@@ -431,16 +420,6 @@ static inline void ROT(dMatrix &a, int i, int j, int k, int l, dFloat s, dFloat 
 // Jacobian method for computing the eigenvectors of a symmetric matrix
 dMatrix dMatrix::JacobiDiagonalization (dVector &eigenValues, const dMatrix& initialMatrix) const
 {
-	int i;
-	int nrot;
-	dFloat t;
-	dFloat s;
-	dFloat h;
-	dFloat g;
-	dFloat c;
-	dFloat sm;
-	dFloat tau;
-	dFloat theta;
 	dFloat thresh;
 	dFloat b[3];
 	dFloat z[3];
@@ -462,21 +441,14 @@ dMatrix dMatrix::JacobiDiagonalization (dVector &eigenValues, const dMatrix& ini
 	z[1] = 0.0f;
 	z[2] = 0.0f;
 
-	nrot = 0;
-	for (i = 0; i < 50; i++) {
-		sm = dAbs(mat[0][1]) + dAbs(mat[0][2]) + dAbs(mat[1][2]);
+	int nrot = 0;
+	for (int i = 0; i < 50; i++) {
+		dFloat sm = dAbs(mat[0][1]) + dAbs(mat[0][2]) + dAbs(mat[1][2]);
 
 		if (sm < EPSILON * 1e-5) {
 			_ASSERTE (dAbs((eigenVectors.m_front % eigenVectors.m_front) - 1.0f) <EPSILON);
 			_ASSERTE (dAbs((eigenVectors.m_up % eigenVectors.m_up) - 1.0f) < EPSILON);
 			_ASSERTE (dAbs((eigenVectors.m_right % eigenVectors.m_right) - 1.0f) < EPSILON);
-
-			// order the eigenvalue vectors	
-//			eigenVectors = eigenVectors.Inverse();
-//			dFloat tmp = (eigenVectors.m_front * eigenVectors.m_up) % eigenVectors.m_right;
-//			if (tmp < dFloat(0.0f)) {
-//				eigenVectors.m_right = eigenVectors.m_right.Scale (-1.0f);
-//			}
 			eigenValues = dVector (d[0], d[1], d[2], dFloat (0.0f));
 			return eigenVectors.Inverse();
 		}
@@ -489,23 +461,24 @@ dMatrix dMatrix::JacobiDiagonalization (dVector &eigenValues, const dMatrix& ini
 
 
 		// First row
-		g = 100.0f * dAbs(mat[0][1]);
+		dFloat g = 100.0f * dAbs(mat[0][1]);
 		if ((i > 3) && (dAbs(d[0]) + g == dAbs(d[0])) && (dAbs(d[1]) + g == dAbs(d[1]))) {
 			mat[0][1] = 0.0f;
 		} else if (dAbs(mat[0][1]) > thresh) {
-			h = d[1] - d[0];
+			dFloat t;
+			dFloat h = d[1] - d[0];
 			if (dAbs(h) + g == dAbs(h)) {
 				t = mat[0][1] / h;
 			} else {
-				theta = dFloat (0.5f) * h / mat[0][1];
+				dFloat theta = dFloat (0.5f) * h / mat[0][1];
 				t = dFloat(1.0f) / (dAbs(theta) + dSqrt(dFloat(1.0f) + theta * theta));
 				if (theta < 0.0f) {
 					t = -t;
 				}
 			}
-			c = dFloat(1.0f) / dSqrt (1.0f + t * t); 
-			s = t * c; 
-			tau = s / (dFloat(1.0f) + c); 
+			dFloat c = dFloat(1.0f) / dSqrt (1.0f + t * t); 
+			dFloat s = t * c; 
+			dFloat tau = s / (dFloat(1.0f) + c); 
 			h = t * mat[0][1];
 			z[0] -= h; 
 			z[1] += h; 
@@ -526,19 +499,20 @@ dMatrix dMatrix::JacobiDiagonalization (dVector &eigenValues, const dMatrix& ini
 		if ((i > 3) && (dAbs(d[0]) + g == dAbs(d[0])) && (dAbs(d[2]) + g == dAbs(d[2]))) {
 			mat[0][2] = 0.0f;
 		} else if (dAbs(mat[0][2]) > thresh) {
-			h = d[2] - d[0];
+			dFloat t;
+			dFloat h = d[2] - d[0];
 			if (dAbs(h) + g == dAbs(h)) {
 				t = (mat[0][2]) / h;
 			}	else {
-				theta = dFloat (0.5f) * h / mat[0][2];
+				dFloat theta = dFloat (0.5f) * h / mat[0][2];
 				t = dFloat(1.0f) / (dAbs(theta) + dSqrt(dFloat(1.0f) + theta * theta));
 				if (theta < 0.0f) {
 					t = -t;
 				}
 			}
-			c = dFloat(1.0f) / dSqrt(1 + t * t); 
-			s = t * c; 
-			tau = s / (dFloat(1.0f) + c); 
+			dFloat c = dFloat(1.0f) / dSqrt(1 + t * t); 
+			dFloat s = t * c; 
+			dFloat tau = s / (dFloat(1.0f) + c); 
 			h = t * mat[0][2];
 			z[0] -= h; 
 			z[2] += h; 
@@ -556,19 +530,20 @@ dMatrix dMatrix::JacobiDiagonalization (dVector &eigenValues, const dMatrix& ini
 		if ((i > 3) && (dAbs(d[1]) + g == dAbs(d[1])) && (dAbs(d[2]) + g == dAbs(d[2]))) {
 			mat[1][2] = 0.0f;
 		} else if (dAbs(mat[1][2]) > thresh) {
-			h = d[2] - d[1];
+			dFloat t;
+			dFloat h = d[2] - d[1];
 			if (dAbs(h) + g == dAbs(h)) {
 				t = mat[1][2] / h;
 			}	else {
-				theta = dFloat (0.5f) * h / mat[1][2];
+				dFloat theta = dFloat (0.5f) * h / mat[1][2];
 				t = dFloat(1.0f) / (dAbs(theta) + dSqrt(dFloat(1.0f) + theta * theta));
 				if (theta < 0.0f) {
 					t = -t;
 				}
 			}
-			c = dFloat(1.0f) / dSqrt(1 + t*t); 
-			s = t * c; 
-			tau = s / (dFloat(1.0f) + c); 
+			dFloat c = dFloat(1.0f) / dSqrt(1 + t*t); 
+			dFloat s = t * c; 
+			dFloat tau = s / (dFloat(1.0f) + c); 
 
 			h = t * mat[1][2];
 			z[1] -= h; 

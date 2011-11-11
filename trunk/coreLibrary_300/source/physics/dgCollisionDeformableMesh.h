@@ -32,12 +32,12 @@
 class dgCollisionDeformableMesh: public dgCollisionConvex
 {
 public:
-	//dgCollisionDeformableMesh(dgMemoryAllocator* allocator, const dgVector& boxP0, const dgVector& boxP1, const dgUserMeshCreation& data);
+	dgCollisionDeformableMesh (const dgCollisionDeformableMesh& source);
 	dgCollisionDeformableMesh(dgMemoryAllocator* allocator, dgMeshEffect* const mesh);
 	dgCollisionDeformableMesh (dgWorld* const world, dgDeserialize deserialization, void* const userData);
 	virtual ~dgCollisionDeformableMesh(void);
 
-//	void GetVertexListIndexList (const dgVector& p0, const dgVector& p1, dgGetVertexListIndexList &data) const;
+
 
 private:
 	class dgDeformableNode;
@@ -64,6 +64,7 @@ private:
 	
 	dgInt32 m_trianglesCount;
 	dgInt32 m_nodesCount;
+	dgInt32 m_vertexCount;
 	dgInt32* m_indexList;
 	dgVector* m_vertexArray;
 	dgDeformableNode* m_rootNode;

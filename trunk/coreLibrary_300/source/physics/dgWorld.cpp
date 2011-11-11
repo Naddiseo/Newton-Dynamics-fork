@@ -22,6 +22,7 @@
 #include "dgPhysicsStdafx.h"
 #include "dgWorld.h"
 
+#include "dgDeformableBody.h"
 #include "dgCollisionBox.h"
 #include "dgCollisionNull.h"
 #include "dgCollisionCone.h"
@@ -445,22 +446,12 @@ void dgWorld::DestroyAllBodies ()
 	_ASSERTE (dgBodyCollisionList::GetCount() == 0);
 }
 
-dgBody* dgWorld::CreateBody(dgCollision* const collision, const dgMatrix& matrix)
-{
-	dgBody* body;
 
+void dgWorld::InitBody (dgBody* const body, dgCollision* const collision, const dgMatrix& matrix)
+{
 	_ASSERTE (collision);
 
-	body = new (m_allocator) dgBody();
-	_ASSERTE ((sizeof (dgBody) & 0xf) == 0);
-	_ASSERTE ((dgUnsigned64 (body) & 0xf) == 0);
-
-//	memset (ptr, 0, sizeof (dgBody));
-
-//	m_bodiesCount ++;
 	m_bodiesUniqueID ++;
-
-
 	body->m_world = this;
 
 	body->m_freeze = false;
@@ -488,8 +479,29 @@ dgBody* dgWorld::CreateBody(dgCollision* const collision, const dgMatrix& matrix
 	dgBroadPhaseCollision::Add (body);
 
 	body->m_invWorldInertiaMatrix[3][3] = dgFloat32 (1.0f);
+}
+
+dgBody* dgWorld::CreateBody(dgCollision* const collision, const dgMatrix& matrix)
+{
+	dgBody* const body = new (m_allocator) dgBody();
+	_ASSERTE ((sizeof (dgBody) & 0xf) == 0);
+	_ASSERTE ((dgUnsigned64 (body) & 0xf) == 0);
+
+	InitBody (body, collision, matrix);
 	return body;
 }
+
+
+dgBody* dgWorld::CreateDeformableBody(dgCollision* const collision, const dgMatrix& matrix)
+{
+	dgBody* const body = new (m_allocator) dgDeformableBody();
+	_ASSERTE ((sizeof (dgBody) & 0xf) == 0);
+	_ASSERTE ((dgUnsigned64 (body) & 0xf) == 0);
+
+	InitBody (body, collision, matrix);
+	return body;
+}
+
 
 void dgWorld::DestroyBody(dgBody* const body)
 {
@@ -498,11 +510,6 @@ void dgWorld::DestroyBody(dgBody* const body)
 	}
 
 	dgBroadPhaseCollision::Remove (body);
-
-//	m_bodiesCount --;
-//	while (body->m_firstConstraintLink) {
-//		DestroyConstraint (body->m_firstConstraintLink->m_constraint);
-//	}
 	dgBodyMasterList::RemoveBody (body);
 
 	_ASSERTE (body->m_collision);

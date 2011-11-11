@@ -28,6 +28,7 @@
 
 class dgDeformableBody: public dgBody
 {
+	public:
 	dgDeformableBody();
 	virtual ~dgDeformableBody();
 /*

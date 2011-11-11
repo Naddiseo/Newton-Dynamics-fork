@@ -269,22 +269,26 @@ void dgCollisionDeformableMesh::DebugCollision (const dgMatrix& matrixPtr, OnDeb
 dgCollisionDeformableMesh::dgCollisionDeformableMesh(dgMemoryAllocator* allocator, dgMeshEffect* const mesh)
 	:dgCollisionConvex (allocator, 0, dgGetIdentityMatrix(), m_deformableMesh)
 	,m_trianglesCount(0)
+	,m_nodesCount(0)
+	,m_vertexCount(0)
 	,m_indexList(NULL)
 	,m_vertexArray(NULL)
 	,m_rootNode(NULL)
 	,m_nodesMemory(NULL)
 {
+	m_rtti |= dgCollisionDeformableMesh_RTTI;
 	mesh->Triangulate();
 	dgInt32 vertexCount = mesh->GetVertexCount (); 
 	dgInt32 faceCount = mesh->GetTotalFaceCount (); 
 	dgInt32 indexCount = mesh->GetTotalIndexCount (); 
 
 	m_trianglesCount = faceCount;
-	m_rootNode = (dgDeformableNode*) dgMallocStack(sizeof (dgDeformableNode) * faceCount * 2);
+	m_rootNode = (dgDeformableNode*) dgMallocStack(sizeof (dgDeformableNode) * (faceCount * 2 - 1));
 	m_nodesMemory = m_rootNode;
 
+	m_vertexCount = vertexCount + faceCount * 2;
 	m_indexList = (dgInt32*) dgMallocStack (sizeof (dgInt32) * faceCount * 3);
-	m_vertexArray = (dgVector*) dgMallocStack( sizeof (dgVector) *(vertexCount + faceCount * 2));
+	m_vertexArray = (dgVector*) dgMallocStack (sizeof (dgVector) * m_vertexCount);
 
 	dgInt32 stride = mesh->GetVertexStrideInByte() / sizeof (dgFloat64);  
 	dgFloat64* const vertex = mesh->GetVertexPool();  
@@ -319,6 +323,48 @@ dgCollisionDeformableMesh::dgCollisionDeformableMesh(dgMemoryAllocator* allocato
 	dgFree (indexArray);
 	dgFree (materialIndexArray);
 	dgFree (faceArray);
+}
+
+
+dgCollisionDeformableMesh::dgCollisionDeformableMesh (const dgCollisionDeformableMesh& source)
+	:dgCollisionConvex (source.GetAllocator(), 0, dgGetIdentityMatrix(), m_deformableMesh)
+	,m_trianglesCount(source.m_trianglesCount)
+	,m_nodesCount(source.m_trianglesCount)
+	,m_vertexCount(source.m_vertexCount)
+{
+	m_rtti = source.m_rtti;
+
+	m_indexList = (dgInt32*) dgMallocStack (sizeof (dgInt32) * m_trianglesCount * 3);
+	m_vertexArray = (dgVector*) dgMallocStack (sizeof (dgVector) * m_vertexCount);
+	m_nodesMemory = (dgDeformableNode*) dgMallocStack(sizeof (dgDeformableNode) * (m_trianglesCount * 2 - 1));
+/*
+	memcpy (m_indexList, source.m_indexList, sizeof (dgInt32) * m_trianglesCount * 3);
+	memcpy (m_vertexArray, source.m_vertexArray, sizeof (dgVector) * m_vertexCount);
+	memcpy (m_nodesMemory, source.m_nodesMemory, sizeof (dgDeformableNode) * (m_trianglesCount * 2 - 1));
+
+	dgInt32 index = source.m_rootNode - source.m_nodesMemory;
+	m_rootNode = &m_nodesMemory[index];
+
+	for (dgInt32 i = 0; i < (m_trianglesCount * 2 - 1); i ++) {
+		dgDeformableNode* const node = &m_nodesMemory[i];
+		if (node->m_parent) {
+			dgInt32 index = node->m_parent - source.m_nodesMemory;
+			node->m_parent = &m_nodesMemory[index];
+		}
+
+		if (node->m_left) {
+			dgInt32 index = node->m_left - source.m_nodesMemory;
+			node->m_left = &m_nodesMemory[index];
+		}
+
+		if (node->m_right) {
+			dgInt32 index = node->m_right - source.m_nodesMemory;
+			node->m_right = &m_nodesMemory[index];
+		}
+	}
+
+	SetCollisionBBox (m_rootNode->m_minBox, m_rootNode->m_maxBox);
+*/
 }
 
 

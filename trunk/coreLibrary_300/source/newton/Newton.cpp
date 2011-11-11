@@ -8291,7 +8291,22 @@ NewtonCollision* NewtonCreateDeformableMesh (const NewtonWorld* const newtonWorl
 	return (NewtonCollision*) world->CreateDeformableMesh ((dgMeshEffect*)mesh, shapeID);
 }
 
-NewtonBody* NewtonCreateDeformableBody (const NewtonWorld* const newtonWorld, const NewtonCollision* const deformableMesh, const dFloat* const matrix)
+NewtonBody* NewtonCreateDeformableBody (const NewtonWorld* const newtonWorld, const NewtonCollision* const deformableMesh, const dFloat* const matrixPtr)
 {
-	return NULL;
+	TRACE_FUNTION(__FUNCTION__);
+	Newton* const world = (Newton *)newtonWorld;
+	dgCollision* const collision = (dgCollision*) deformableMesh;
+
+#ifdef SAVE_COLLISION
+	SaveCollision (collisionPtr);
+#endif
+
+	dgMatrix matrix (*((dgMatrix*) matrixPtr));
+	matrix.m_front.m_w = dgFloat32 (0.0f);
+	matrix.m_up.m_w    = dgFloat32 (0.0f);
+	matrix.m_right.m_w = dgFloat32 (0.0f);
+	matrix.m_posit.m_w = dgFloat32 (1.0f);
+
+	return (NewtonBody*) world->CreateDeformableBody (collision, matrix);
+
 }

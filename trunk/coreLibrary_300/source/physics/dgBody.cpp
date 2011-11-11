@@ -24,8 +24,10 @@
 #include "dgWorld.h"
 #include "dgContact.h"
 #include "dgCollision.h"
+
 #include "dgCollisionCompound.h"
 #include "dgWorldDynamicUpdate.h"
+#include "dgCollisionDeformableMesh.h"
 #include "dgCollisionCompoundBreakable.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -40,7 +42,7 @@
 dgBody::dgBody()
 	:m_matrix (dgGetIdentityMatrix())
 	,m_collisionWorldMatrix(dgGetIdentityMatrix())
-	,m_invWorldInertiaMatrix(dgGetIdentityMatrix())
+	,m_invWorldInertiaMatrix(dgGetZeroMatrix())
 	,m_rotation(dgFloat32 (1.0f), dgFloat32 (0.0f), dgFloat32 (0.0f), dgFloat32 (0.0f))
 	,m_veloc(dgFloat32 (0.0), dgFloat32 (0.0), dgFloat32 (0.0), dgFloat32 (0.0))
 	,m_omega(dgFloat32 (0.0), dgFloat32 (0.0), dgFloat32 (0.0), dgFloat32 (0.0))
@@ -85,6 +87,7 @@ dgBody::dgBody()
 	,m_matrixUpdate(NULL)
 	,m_applyExtForces(NULL)
 {
+	m_invWorldInertiaMatrix[3][3] = dgFloat32 (1.0f);
 	_ASSERTE ((sizeof (dgBody) & 0x0f) == 0);
 }
 
@@ -181,7 +184,6 @@ void dgBody::AttachCollision (dgCollision* collision)
 {
 	_ASSERTE (collision);
 	if (collision->IsType (dgCollision::dgCollisionCompound_RTTI)) {
-
 		if (collision->IsType (dgCollision::dgCollisionCompoundBreakable_RTTI)) {
 			dgCollisionCompoundBreakable* const compound = (dgCollisionCompoundBreakable*) collision;
 			collision = new (m_world->GetAllocator()) dgCollisionCompoundBreakable (*compound);
@@ -190,7 +192,9 @@ void dgBody::AttachCollision (dgCollision* collision)
 			dgCollisionCompound *const compound = (dgCollisionCompound*) collision;
 			collision = new (m_world->GetAllocator()) dgCollisionCompound (*compound);
 		}
-
+	} else if (collision->IsType (dgCollision::dgCollisionDeformableMesh_RTTI)) {
+		dgCollisionDeformableMesh* const deformable = (dgCollisionDeformableMesh*) collision;
+		collision = new (m_world->GetAllocator()) dgCollisionDeformableMesh (*deformable);
 	} else {
 		collision->AddRef();
 	}
