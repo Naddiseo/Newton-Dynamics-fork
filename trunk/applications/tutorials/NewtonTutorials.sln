@@ -102,15 +102,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tutorial_203_RayCastConvexC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dependencies", "dependencies", "{398A6433-36A5-44DC-B34E-A491D10482E2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "..\..\coreLibrary_200\projets\windows\project_vs2008\core.vcproj", "{57AC4F2D-B115-4931-8F6E-AF8AD616B6AA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "..\..\coreLibrary\projets\windows\project_vs2008\core.vcproj", "{57AC4F2D-B115-4931-8F6E-AF8AD616B6AA}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "newton", "..\..\coreLibrary_200\projets\windows\project_vs2008\newton.vcproj", "{68D9962C-0EC7-445A-B0FD-F87B16D43901}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "newton", "..\..\coreLibrary\projets\windows\project_vs2008\newton.vcproj", "{68D9962C-0EC7-445A-B0FD-F87B16D43901}"
 	ProjectSection(ProjectDependencies) = postProject
 		{57AC4F2D-B115-4931-8F6E-AF8AD616B6AA} = {57AC4F2D-B115-4931-8F6E-AF8AD616B6AA}
 		{39737A8F-6151-4259-8E39-25530345D4B4} = {39737A8F-6151-4259-8E39-25530345D4B4}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "physics", "..\..\coreLibrary_200\projets\windows\project_vs2008\physics.vcproj", "{39737A8F-6151-4259-8E39-25530345D4B4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "physics", "..\..\coreLibrary\projets\windows\project_vs2008\physics.vcproj", "{39737A8F-6151-4259-8E39-25530345D4B4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{57AC4F2D-B115-4931-8F6E-AF8AD616B6AA} = {57AC4F2D-B115-4931-8F6E-AF8AD616B6AA}
 	EndProjectSection

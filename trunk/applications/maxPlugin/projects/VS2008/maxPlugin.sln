@@ -52,15 +52,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dScene", "..\..\..\..\packa
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tinyxml", "..\..\..\..\packages\projects\visualStudio_2008\tinyxml.vcproj", "{18E509CF-46D2-4749-B3BB-160937CF2481}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "..\..\..\..\coreLibrary_200\projets\windows\project_vs2008\core.vcproj", "{57AC4F2D-B115-4931-8F6E-AF8AD616B6AA}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "..\..\..\..\coreLibrary\projets\windows\project_vs2008\core.vcproj", "{57AC4F2D-B115-4931-8F6E-AF8AD616B6AA}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "newton", "..\..\..\..\coreLibrary_200\projets\windows\project_vs2008\newton.vcproj", "{68D9962C-0EC7-445A-B0FD-F87B16D43901}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "newton", "..\..\..\..\coreLibrary\projets\windows\project_vs2008\newton.vcproj", "{68D9962C-0EC7-445A-B0FD-F87B16D43901}"
 	ProjectSection(ProjectDependencies) = postProject
 		{57AC4F2D-B115-4931-8F6E-AF8AD616B6AA} = {57AC4F2D-B115-4931-8F6E-AF8AD616B6AA}
 		{39737A8F-6151-4259-8E39-25530345D4B4} = {39737A8F-6151-4259-8E39-25530345D4B4}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "physics", "..\..\..\..\coreLibrary_200\projets\windows\project_vs2008\physics.vcproj", "{39737A8F-6151-4259-8E39-25530345D4B4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "physics", "..\..\..\..\coreLibrary\projets\windows\project_vs2008\physics.vcproj", "{39737A8F-6151-4259-8E39-25530345D4B4}"
 	ProjectSection(ProjectDependencies) = postProject
 		{57AC4F2D-B115-4931-8F6E-AF8AD616B6AA} = {57AC4F2D-B115-4931-8F6E-AF8AD616B6AA}
 	EndProjectSection

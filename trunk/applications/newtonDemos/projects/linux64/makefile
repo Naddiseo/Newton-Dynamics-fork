@@ -49,7 +49,7 @@ QT_HEADERS_PATH = /usr/include/qt4
 
 
 SDK_INCLUDE_PATH = \
-		-I ../../../../coreLibrary_200/source/newton \
+		-I ../../../../coreLibrary/source/newton \
 		-I $(SDK_MAIN_PATH) \
 		-I $(SDK_DEMOS_PATH) \
 		-I $(SDK_XML_PATH) \
@@ -63,7 +63,7 @@ SDK_INCLUDE_PATH = \
 
 
 # sub project path
-NEWTON_CORE_MAKE = ../../../../coreLibrary_200/projets/$(PLATFORM)
+NEWTON_CORE_MAKE = ../../../../coreLibrary/projets/$(PLATFORM)
 SDK_MATH_MAKE = ../../../../packages/projects/$(PLATFORM)/dMath
 SDK_SCENE_MAKE = ../../../../packages/projects/$(PLATFORM)/dScene
 SDK_JOINTS_MAKE = ../../../../packages/projects/$(PLATFORM)/dCustomJoints

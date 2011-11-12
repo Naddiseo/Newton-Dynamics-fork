@@ -127,17 +127,17 @@
 
 /* Begin PBXFileReference section */
 		09AD1AB3131433160054D1B6 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
-		FF0AAD221313F961005D32D5 /* libnewton_d.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libnewton_d.a; path = ../../../../../coreLibrary_200/projets/mac/OS10_xcode3.2.5/build/Debug/libnewton_d.a; sourceTree = SOURCE_ROOT; };
+		FF0AAD221313F961005D32D5 /* libnewton_d.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libnewton_d.a; path = ../../../../../coreLibrary/projets/mac/OS10_xcode3.2.5/build/Debug/libnewton_d.a; sourceTree = SOURCE_ROOT; };
 		FF0AAE05131400DF005D32D5 /* libdContainers.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdContainers.a; path = ../../../../../packages/projects/mac/dContainers/build/Release/libdContainers.a; sourceTree = SOURCE_ROOT; };
 		FF0AAE0813140111005D32D5 /* libdMath.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdMath.a; path = ../../../../../packages/projects/mac/dMath/build/Release/libdMath.a; sourceTree = SOURCE_ROOT; };
 		FF0AAE0A1314012B005D32D5 /* libdScene.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdScene.a; path = ../../../../../packages/projects/mac/dScene/build/Release/libdScene.a; sourceTree = SOURCE_ROOT; };
 		FF0AAE0C1314014C005D32D5 /* libtinyxml.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtinyxml.a; path = ../../../../../packages/projects/mac/tinyxml/build/Release/libtinyxml.a; sourceTree = SOURCE_ROOT; };
-		FF0AAE0E13140169005D32D5 /* libnewton.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libnewton.a; path = ../../../../../coreLibrary_200/projets/mac/OS10_xcode3.2.5/build/Release/libnewton.a; sourceTree = SOURCE_ROOT; };
+		FF0AAE0E13140169005D32D5 /* libnewton.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libnewton.a; path = ../../../../../coreLibrary/projets/mac/OS10_xcode3.2.5/build/Release/libnewton.a; sourceTree = SOURCE_ROOT; };
 		FF8C2CE91313DC3700646B90 /* dMath.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = dMath.xcodeproj; path = ../../../../../packages/projects/mac/dMath/dMath.xcodeproj; sourceTree = SOURCE_ROOT; };
 		FF8C2CF41313DC6A00646B90 /* dContainers.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = dContainers.xcodeproj; path = ../../../../../packages/projects/mac/dContainers/dContainers.xcodeproj; sourceTree = SOURCE_ROOT; };
 		FF8C2CFF1313DC7F00646B90 /* dScene.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = dScene.xcodeproj; path = ../../../../../packages/projects/mac/dScene/dScene.xcodeproj; sourceTree = SOURCE_ROOT; };
 		FF8C2D0A1313DC9500646B90 /* tinyxml.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = tinyxml.xcodeproj; path = ../../../../../packages/projects/mac/tinyxml/tinyxml.xcodeproj; sourceTree = SOURCE_ROOT; };
-		FF8C2D151313DCAD00646B90 /* newton.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = newton.xcodeproj; path = ../../../../../coreLibrary_200/projets/mac/OS10_xcode3.2.5/newton.xcodeproj; sourceTree = SOURCE_ROOT; };
+		FF8C2D151313DCAD00646B90 /* newton.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = newton.xcodeproj; path = ../../../../../coreLibrary/projets/mac/OS10_xcode3.2.5/newton.xcodeproj; sourceTree = SOURCE_ROOT; };
 		FF8C2D321313DD5000646B90 /* libdScene_d.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdScene_d.a; path = ../../../../../packages/projects/mac/dScene/build/Debug/libdScene_d.a; sourceTree = SOURCE_ROOT; };
 		FF8C2D351313DD7D00646B90 /* libdMath_d.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdMath_d.a; path = ../../../../../packages/projects/mac/dMath/build/Debug/libdMath_d.a; sourceTree = SOURCE_ROOT; };
 		FF8C2D371313DD9600646B90 /* libtinyxml_d.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libtinyxml_d.a; path = ../../../../../packages/projects/mac/tinyxml/build/Debug/libtinyxml_d.a; sourceTree = SOURCE_ROOT; };
@@ -571,12 +571,12 @@
 					../../../../../packages/dScene,
 					../../../../../packages/dContainers,
 					../../../../../packages/thirdParty/tinyxml,
-					../../../../../coreLibrary_200/source/newton,
+					../../../../../coreLibrary/source/newton,
 				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../../../../coreLibrary_200/projets/mac/OS10_xcode3.2.5/build/Debug\"",
+					"\"$(SRCROOT)/../../../../../coreLibrary/projets/mac/OS10_xcode3.2.5/build/Debug\"",
 					"\"$(SRCROOT)/../../../../../packages/projects/mac/dScene/build/Debug\"",
 					"\"$(SRCROOT)/../../../../../packages/projects/mac/dMath/build/Debug\"",
 					"\"$(SRCROOT)/../../../../../packages/projects/mac/tinyxml/build/Debug\"",
@@ -585,7 +585,7 @@
 					"\"$(SRCROOT)/../../../../../packages/projects/mac/dMath/build/Release\"",
 					"\"$(SRCROOT)/../../../../../packages/projects/mac/dScene/build/Release\"",
 					"\"$(SRCROOT)/../../../../../packages/projects/mac/tinyxml/build/Release\"",
-					"\"$(SRCROOT)/../../../../../coreLibrary_200/projets/mac/OS10_xcode3.2.5/build/Release\"",
+					"\"$(SRCROOT)/../../../../../coreLibrary/projets/mac/OS10_xcode3.2.5/build/Release\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				ONLY_ACTIVE_ARCH = YES;
@@ -620,12 +620,12 @@
 					../../../../../packages/dScene,
 					../../../../../packages/dContainers,
 					../../../../../packages/thirdParty/tinyxml,
-					../../../../../coreLibrary_200/source/newton,
+					../../../../../coreLibrary/source/newton,
 				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/../../../../../coreLibrary_200/projets/mac/OS10_xcode3.2.5/build/Debug\"",
+					"\"$(SRCROOT)/../../../../../coreLibrary/projets/mac/OS10_xcode3.2.5/build/Debug\"",
 					"\"$(SRCROOT)/../../../../../packages/projects/mac/dScene/build/Debug\"",
 					"\"$(SRCROOT)/../../../../../packages/projects/mac/dMath/build/Debug\"",
 					"\"$(SRCROOT)/../../../../../packages/projects/mac/tinyxml/build/Debug\"",
@@ -634,7 +634,7 @@
 					"\"$(SRCROOT)/../../../../../packages/projects/mac/dMath/build/Release\"",
 					"\"$(SRCROOT)/../../../../../packages/projects/mac/dScene/build/Release\"",
 					"\"$(SRCROOT)/../../../../../packages/projects/mac/tinyxml/build/Release\"",
-					"\"$(SRCROOT)/../../../../../coreLibrary_200/projets/mac/OS10_xcode3.2.5/build/Release\"",
+					"\"$(SRCROOT)/../../../../../coreLibrary/projets/mac/OS10_xcode3.2.5/build/Release\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.4;
 				ONLY_ACTIVE_ARCH = YES;
